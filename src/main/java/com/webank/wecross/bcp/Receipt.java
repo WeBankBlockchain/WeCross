@@ -2,7 +2,7 @@ package com.webank.wecross.bcp;
 
 public class Receipt {
 	private String hash;
-	private String result[];
+	private Object result[];
 	private String proof;
 	
 	public String getHash() {
@@ -11,10 +11,10 @@ public class Receipt {
 	public void setHash(String hash) {
 		this.hash = hash;
 	}
-	public String[] getResult() {
+	public Object[] getResult() {
 		return result;
 	}
-	public void setResult(String result[]) {
+	public void setResult(Object result[]) {
 		this.result = result;
 	}
 	public String getProof() {

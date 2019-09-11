@@ -1,10 +1,7 @@
 package com.webank.wecross.bcp;
 
 public interface Stub {
-	public String getData(String table, String key);
-	public void setData(String table, String key, String value);
-	
-	public Receipt sendTransaction(Transaction transaction);
+	public Resource getResource(String path);
 	
 	public BlockHeader getBlockHeader(Integer number);
 }

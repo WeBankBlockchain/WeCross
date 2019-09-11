@@ -6,7 +6,7 @@ public class Transaction {
 	private String from;
 	private String to;
 	private String method;
-	private String args[];
+	private Object args[];
 	private String proof;
 	
 	public String getHash() {
@@ -40,10 +40,10 @@ public class Transaction {
 		this.method = method;
 	}
 	
-	public String[] getArgs() {
+	public Object[] getArgs() {
 		return args;
 	}
-	public void setArgs(String args[]) {
+	public void setArgs(Object args[]) {
 		this.args = args;
 	}
 	public String getProof() {
