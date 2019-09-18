@@ -6,7 +6,7 @@ import com.webank.wecross.bcp.Resource;
 import com.webank.wecross.bcp.Stub;
 import com.webank.wecross.bcp.Transaction;
 
-public class Bcos2Stub implements Stub{
+public class BCOS2Stub implements Stub{
 
 	@Override
 	public Resource getResource(String path) {

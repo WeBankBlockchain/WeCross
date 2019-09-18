@@ -1,5 +1,6 @@
 package com.webank.wecross.bcp.bcos2;
 
+import com.webank.wecross.bcp.EventCallback;
 import com.webank.wecross.bcp.Receipt;
 import com.webank.wecross.bcp.Resource;
 import com.webank.wecross.bcp.Transaction;
@@ -27,6 +28,18 @@ public class BCOS2Resource implements Resource {
 	@Override
 	public Transaction newTransaction() {
 		return null;
+	}
+
+	@Override
+	public Receipt call(Transaction transaction) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void registerEventHandler(EventCallback callback) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

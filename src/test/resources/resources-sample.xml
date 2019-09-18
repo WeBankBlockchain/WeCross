@@ -1,0 +1,86 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<bean id="groupChannelConnectionsConfig"
+		class="org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig">
+		<property name="caCert" value="ca.crt" />
+		<property name="sslCert" value="sdk.crt" />
+		<property name="sslKey" value="sdk.key" />
+		<property name="allChannelConnections">
+			<list>
+				<bean id="group1"
+					class="org.fisco.bcos.channel.handler.ChannelConnections">
+					<property name="groupId" value="1" />
+					<property name="connectionsStr">
+						<list>
+							<value>127.0.0.1:20200</value>
+						</list>
+					</property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="channelService"
+		class="org.fisco.bcos.channel.client.Service"
+		depends-on="groupChannelConnectionsConfig">
+		<property name="groupId" value="1" />
+		<property name="agencyName" value="fisco" />
+		<property name="allChannelConnections"
+			ref="groupChannelConnectionsConfig"></property>
+	</bean>
+
+	<bean id="bcosStub" class="com.webank.wecross.bcp.bcos2.Bcos2Stub">
+		<property name="service" ref="channelService"></property>
+		<property name="keystores">
+			<map>
+				<entry key="my_account">
+					<bean
+						class="com.webank.wecross.bcp.bcos.KeyStore">
+						<property name="privateKey" value="client.key"></property>
+					</bean>
+				</entry>
+			</map>
+		</property>
+		<property name="resources">
+			<map>
+				<entry key="HelloWorldContract">
+					<bean
+						class="com.webank.wecross.bcp.bcos.Bcos2ContractResource">
+						<property name="address" value="0x12345"></property>
+						<property name="abi" value="HelloWorld.abi"></property>
+					</bean>
+				</entry>
+				<entry key="PaymentNotify">
+					<bean class="com.webank.wecross.bcp.bcos.Bcos2AMOPResource">
+						<property name="topic" value="payment_notify"></property>
+					</bean>
+				</entry>
+				<entry key="Table">
+					<bean class="com.webank.wecross.bcp.bcos.Bcos2TableResource">
+						<property name="tableName" value="t_test"></property>
+					</bean>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="fabricStub"
+		class="com.webank.wecross.bcp.fabric.FabricStub">
+		<!-- ignore properties -->
+	</bean>
+
+	<bean id="wecrossStub" class="com.webank.wecross.stub.Stub">
+		<property name="networkID" value="payment" />
+		<property name="mapping">
+			<map>
+				<entry key="bcos" value-ref="bcosStub">
+				</entry>
+				<entry key="fabric" value-ref="fabricStub">
+				</entry>
+			</map>
+		</property>
+	</bean>
+</beans>
