@@ -1,6 +1,7 @@
 package com.webank.wecross.bcp;
 
 public interface Resource {
+	public URI getURI();
 	public String getData(String key);
 	public void setData(String key, String value);
 	

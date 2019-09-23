@@ -3,7 +3,6 @@ package com.webank.wecross.bcp;
 public class Receipt {
 	private String hash;
 	private Object result[];
-	private String proof;
 	
 	public String getHash() {
 		return hash;
@@ -16,11 +15,5 @@ public class Receipt {
 	}
 	public void setResult(Object result[]) {
 		this.result = result;
-	}
-	public String getProof() {
-		return proof;
-	}
-	public void setProof(String proof) {
-		this.proof = proof;
 	}
 }
