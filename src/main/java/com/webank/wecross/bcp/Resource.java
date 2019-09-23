@@ -5,10 +5,10 @@ public interface Resource {
 	public String getData(String key);
 	public void setData(String key, String value);
 	
-	public Receipt call(Transaction transaction);
-	public Receipt sendTransaction(Transaction transaction);
+	public Response call(Request request);
+	public Response sendTransaction(Request request);
 	
 	public void registerEventHandler(EventCallback callback);
 	
-	public Transaction newTransaction();
+	public Request newTransaction();
 }

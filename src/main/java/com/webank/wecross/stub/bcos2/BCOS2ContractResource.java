@@ -3,11 +3,12 @@ package com.webank.wecross.stub.bcos2;
 import org.fisco.bcos.channel.client.Service;
 
 import com.webank.wecross.bcp.EventCallback;
-import com.webank.wecross.bcp.Receipt;
+import com.webank.wecross.bcp.Response;
 import com.webank.wecross.bcp.Resource;
-import com.webank.wecross.bcp.Transaction;
+import com.webank.wecross.bcp.Request;
+import com.webank.wecross.bcp.URI;
 
-public class BCOS2Resource implements Resource {
+public class BCOS2ContractResource implements Resource {
 	private Service bcos2Service;
 	
 	@Override
@@ -21,22 +22,28 @@ public class BCOS2Resource implements Resource {
 	}
 
 	@Override
-	public Receipt sendTransaction(Transaction transaction) {
+	public Response sendTransaction(Request request) {
 		return null;
 	}
 
 	@Override
-	public Transaction newTransaction() {
+	public Request newTransaction() {
 		return null;
 	}
 
 	@Override
-	public Receipt call(Transaction transaction) {
+	public Response call(Request request) {
 		return null;
 	}
 
 	@Override
 	public void registerEventHandler(EventCallback callback) {
+	}
+
+	@Override
+	public URI getURI() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

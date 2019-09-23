@@ -1,6 +1,6 @@
 package com.webank.wecross.bcp;
 
-public class Receipt {
+public class Response {
 	private String hash;
 	private Object result[];
 	
