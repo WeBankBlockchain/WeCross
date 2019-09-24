@@ -6,7 +6,7 @@ import com.webank.wecross.bcp.Resource;
 import com.webank.wecross.bcp.Stub;
 import com.webank.wecross.bcp.URI;
 
-public class Manager {
+public class StubManager {
 	private List<StubConfig> stubs;
 	
 	public Stub getStub(URI uri) {

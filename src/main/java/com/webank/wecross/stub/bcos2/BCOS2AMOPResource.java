@@ -44,7 +44,7 @@ public class BCOS2AMOPResource implements Resource {
 	}
 
 	@Override
-	public Request newTransaction() {
+	public Request createRequest() {
 		// TODO Auto-generated method stub
 		return null;
 	}

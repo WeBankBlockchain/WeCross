@@ -10,5 +10,5 @@ public interface Resource {
 	
 	public void registerEventHandler(EventCallback callback);
 	
-	public Request newTransaction();
+	public Request createRequest();
 }

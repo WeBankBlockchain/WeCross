@@ -13,14 +13,14 @@ public class StubTest {
 		Resource contractResource = stub.getResource("bcp://payment.bcos.HelloWorldContract");
 
 		//call the get method
-		Request getTransaction = contractResource.newTransaction();
+		Request getTransaction = contractResource.createRequest();
 		getTransaction.setFrom("my_account");
 		getTransaction.setMethod("get");
 		
 		Response getReceipt = contractResource.call(getTransaction);
 		
 		//send transaction to set method
-		Request setTransaction = contractResource.newTransaction();
+		Request setTransaction = contractResource.createRequest();
 		setTransaction.setFrom("my_account");
 		setTransaction.setMethod("set");
 		setTransaction.setArgs(new Object[]{"world"});
@@ -36,7 +36,7 @@ public class StubTest {
 		});
 		
 		Resource amopClientResource = stub.getResource("bcp://payment.bcos.PaymentNotify2");
-		Request amopTransaction = contractResource.newTransaction();
+		Request amopTransaction = contractResource.createRequest();
 		amopTransaction.setMethod("sendMessage");
 		amopTransaction.setArgs(new Object[] {"Hello world!"});
 		

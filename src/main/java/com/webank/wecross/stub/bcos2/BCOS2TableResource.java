@@ -45,7 +45,7 @@ public class BCOS2TableResource implements Resource {
 	}
 
 	@Override
-	public Request newTransaction() {
+	public Request createRequest() {
 		// TODO Auto-generated method stub
 		return null;
 	}
