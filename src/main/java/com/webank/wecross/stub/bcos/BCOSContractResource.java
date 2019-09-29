@@ -1,4 +1,4 @@
-package com.webank.wecross.stub.bcos2;
+package com.webank.wecross.stub.bcos;
 
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.web3j.protocol.Web3j;
@@ -9,7 +9,7 @@ import com.webank.wecross.bcp.Resource;
 import com.webank.wecross.bcp.Request;
 import com.webank.wecross.bcp.URI;
 
-public class BCOS2ContractResource implements Resource {
+public class BCOSContractResource implements Resource {
 	private URI uri;
 	private Service bcos2Service;
 	private Web3j web3;
@@ -31,7 +31,7 @@ public class BCOS2ContractResource implements Resource {
 
 	@Override
 	public Request createRequest() {
-		return new BCOS2Request();
+		return new BCOSRequest();
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package com.webank.wecross.stub.bcos2;
+package com.webank.wecross.stub.bcos;
 
 import com.webank.wecross.bcp.EventCallback;
 import com.webank.wecross.bcp.Request;
@@ -6,7 +6,7 @@ import com.webank.wecross.bcp.Resource;
 import com.webank.wecross.bcp.Response;
 import com.webank.wecross.bcp.URI;
 
-public class BCOS2AMOPResource implements Resource {
+public class BCOSAMOPResource implements Resource {
 	@Override
 	public URI getURI() {
 		// TODO Auto-generated method stub

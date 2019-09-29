@@ -1,4 +1,4 @@
-package com.webank.wecross.stub.bcos2;
+package com.webank.wecross.stub.bcos;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -12,7 +12,8 @@ import com.webank.wecross.bcp.Resource;
 import com.webank.wecross.bcp.Stub;
 import com.webank.wecross.bcp.URI;
 
-public class BCOS2Stub implements Stub {
+public class BCOSStub implements Stub {
+	private String pattern;
 	private Service bcosService;
 	private Web3j web3;
 
@@ -26,10 +27,15 @@ public class BCOS2Stub implements Stub {
 		ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(500);
 		setWeb3(Web3j.build(channelEthereumService, 15 * 100, scheduledExecutorService, 1));
 	}
+	
+	@Override
+	public String getPattern() {
+		return pattern;
+	}
 
 	@Override
 	public Resource getResource(URI path) {
-		BCOS2ContractResource bcos2Resource = new BCOS2ContractResource();
+		BCOSContractResource bcos2Resource = new BCOSContractResource();
 		bcos2Resource.setBcos2Service(bcosService);
 		bcos2Resource.setWeb3(web3);
 
