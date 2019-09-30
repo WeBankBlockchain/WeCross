@@ -5,6 +5,20 @@ public class URI {
 	private String chain;
 	private String resource;
 	
+	static public URI decode(String uri) throws Exception {
+		String[] sp = uri.split("\\.");
+		if(sp.length < 3) {
+			throw new Exception("Decode uri error: " + uri);
+		}
+		
+		URI obj = new URI();
+		obj.setNetwork(sp[0]);
+		obj.setChain(sp[1]);
+		obj.setResource(sp[2]);
+		
+		return obj;
+	}
+	
 	public String getNetwork() {
 		return network;
 	}

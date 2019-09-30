@@ -1,18 +1,18 @@
 package com.webank.wecross.stub.bcos;
 
-import org.fisco.bcos.channel.client.Service;
-import org.fisco.bcos.web3j.protocol.Web3j;
-
 import com.webank.wecross.bcp.EventCallback;
 import com.webank.wecross.bcp.Response;
-import com.webank.wecross.bcp.Resource;
-import com.webank.wecross.bcp.Request;
-import com.webank.wecross.bcp.URI;
 
-public class BCOSContractResource implements Resource {
-	private URI uri;
-	private Service bcos2Service;
-	private Web3j web3;
+import com.webank.wecross.bcp.Request;
+
+import java.io.IOException;
+
+import org.fisco.bcos.channel.client.CallContract;
+import org.fisco.bcos.web3j.abi.datatypes.Type;
+
+public class BCOSContractResource extends BCOSResource {
+	private String contractAddress;
+	private CallContract callContract;
 	
 	@Override
 	public String getData(String key) {
@@ -26,7 +26,21 @@ public class BCOSContractResource implements Resource {
 
 	@Override
 	public Response sendTransaction(Request request) {
-		return null;
+		BCOSResponse bcosResponse = new BCOSResponse();
+		
+		String result = callContract.sendTransaction(contractAddress, request.getMethod(), (Type[]) request.getArgs());
+		
+		if(result.isEmpty()) {
+			bcosResponse.setErrorCode(1);
+			bcosResponse.setErrorMessage("Result is empty, please check contract address and arguments");
+		}
+		else {
+			bcosResponse.setErrorCode(0);
+			bcosResponse.setErrorMessage("");
+			bcosResponse.setResult(new Object[] {result});
+		}
+		
+		return bcosResponse;
 	}
 
 	@Override
@@ -36,31 +50,31 @@ public class BCOSContractResource implements Resource {
 
 	@Override
 	public Response call(Request request) {
-		return null;
+		BCOSResponse bcosResponse = new BCOSResponse();
+		
+		try {
+			String result = callContract.call(contractAddress, request.getMethod(), (Type[]) request.getArgs());
+			
+			if(result.isEmpty()) {
+				bcosResponse.setErrorCode(1);
+				bcosResponse.setErrorMessage("Result is empty, please check contract address and arguments");
+			}
+			else {
+				bcosResponse.setErrorCode(0);
+				bcosResponse.setErrorMessage("");
+				bcosResponse.setResult(new Object[] {result});
+			}
+			
+			return bcosResponse;
+		} catch (IOException e) {
+			bcosResponse.setErrorCode(2);
+			bcosResponse.setErrorMessage("Unexpected error: " + e.getMessage());
+			
+			return bcosResponse;
+		}
 	}
 
 	@Override
 	public void registerEventHandler(EventCallback callback) {
-	}
-
-	@Override
-	public URI getURI() {
-		return uri;
-	}
-	
-	public Service getBcos2Service() {
-		return bcos2Service;
-	}
-
-	public void setBcos2Service(Service bcos2Service) {
-		this.bcos2Service = bcos2Service;
-	}
-
-	public Web3j getWeb3() {
-		return web3;
-	}
-
-	public void setWeb3(Web3j web3) {
-		this.web3 = web3;
 	}
 }

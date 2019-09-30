@@ -1,5 +1,6 @@
 package com.webank.wecross.stub.bcos;
 
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -16,6 +17,7 @@ public class BCOSStub implements Stub {
 	private String pattern;
 	private Service bcosService;
 	private Web3j web3;
+	private Map<String, BCOSResource> resources;
 
 	public void init() {
 		ChannelEthereumService channelEthereumService = new ChannelEthereumService();
@@ -35,11 +37,16 @@ public class BCOSStub implements Stub {
 
 	@Override
 	public Resource getResource(URI path) {
-		BCOSContractResource bcos2Resource = new BCOSContractResource();
-		bcos2Resource.setBcos2Service(bcosService);
-		bcos2Resource.setWeb3(web3);
+		BCOSResource resource = resources.get(path.getResource());
+		
+		if(resource != null) {
+			resource.setWeb3(web3);
+			resource.setBcosService(bcosService);
+			
+			return resource;
+		}
 
-		return bcos2Resource;
+		return resource;
 	}
 
 	public Service getBcosService() {
