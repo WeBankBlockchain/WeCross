@@ -1,9 +1,13 @@
 package com.webank.wecross.stub.bcos;
 
 import com.webank.wecross.bcp.EventCallback;
-import com.webank.wecross.bcp.Response;
+import com.webank.wecross.bcp.GetDataRequest;
+import com.webank.wecross.bcp.GetDataResponse;
+import com.webank.wecross.bcp.SetDataRequest;
+import com.webank.wecross.bcp.SetDataResponse;
+import com.webank.wecross.bcp.TransactionResponse;
 
-import com.webank.wecross.bcp.Request;
+import com.webank.wecross.bcp.TransactionRequest;
 
 import java.io.IOException;
 
@@ -15,17 +19,17 @@ public class BCOSContractResource extends BCOSResource {
 	private CallContract callContract;
 	
 	@Override
-	public String getData(String key) {
+	public GetDataResponse getData(GetDataRequest request) {
 		return null;
 	}
 
 	@Override
-	public void setData(String key, String value) {
-		
+	public SetDataResponse setData(SetDataRequest request) {
+		return null;
 	}
 
 	@Override
-	public Response sendTransaction(Request request) {
+	public TransactionResponse sendTransaction(TransactionRequest request) {
 		BCOSResponse bcosResponse = new BCOSResponse();
 		
 		String result = callContract.sendTransaction(contractAddress, request.getMethod(), (Type[]) request.getArgs());
@@ -44,12 +48,12 @@ public class BCOSContractResource extends BCOSResource {
 	}
 
 	@Override
-	public Request createRequest() {
+	public TransactionRequest createRequest() {
 		return new BCOSRequest();
 	}
 
 	@Override
-	public Response call(Request request) {
+	public TransactionResponse call(TransactionRequest request) {
 		BCOSResponse bcosResponse = new BCOSResponse();
 		
 		try {

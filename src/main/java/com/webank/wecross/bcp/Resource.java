@@ -2,13 +2,13 @@ package com.webank.wecross.bcp;
 
 public interface Resource {
 	public URI getURI();
-	public String getData(String key);
-	public void setData(String key, String value);
+	public GetDataResponse getData(GetDataRequest request);
+	public SetDataResponse setData(SetDataRequest request);
 	
-	public Response call(Request request);
-	public Response sendTransaction(Request request);
+	public TransactionResponse call(TransactionRequest request);
+	public TransactionResponse sendTransaction(TransactionRequest request);
 	
 	public void registerEventHandler(EventCallback callback);
 	
-	public Request createRequest();
+	public TransactionRequest createRequest();
 }

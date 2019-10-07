@@ -1,6 +1,6 @@
 package com.webank.wecross.bcp;
 
-public class Response {
+public class TransactionResponse {
 	private Integer errorCode;
 	private String errorMessage;
 	private String hash;

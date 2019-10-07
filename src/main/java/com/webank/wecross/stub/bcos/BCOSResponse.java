@@ -1,8 +1,8 @@
 package com.webank.wecross.stub.bcos;
 
-import com.webank.wecross.bcp.Response;
+import com.webank.wecross.bcp.TransactionResponse;
 
-public class BCOSResponse extends Response {
+public class BCOSResponse extends TransactionResponse {
 	private String resultString;
 
 	public String getResultString() {

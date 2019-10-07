@@ -1,6 +1,6 @@
 package com.webank.wecross.bcp;
 
-public class Request {
+public class TransactionRequest {
 	private String to;
 	private String method;
 	private Object args[];

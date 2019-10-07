@@ -1,6 +1,6 @@
 package com.webank.wecross.stub.bcos;
 
-import com.webank.wecross.bcp.Request;
+import com.webank.wecross.bcp.TransactionRequest;
 
-public class BCOSRequest extends Request {
+public class BCOSRequest extends TransactionRequest {
 }

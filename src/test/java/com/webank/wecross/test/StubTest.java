@@ -2,10 +2,10 @@ package com.webank.wecross.test;
 
 import com.webank.wecross.bcp.Event;
 import com.webank.wecross.bcp.EventCallback;
-import com.webank.wecross.bcp.Response;
+import com.webank.wecross.bcp.TransactionResponse;
 import com.webank.wecross.bcp.Resource;
 import com.webank.wecross.bcp.Stub;
-import com.webank.wecross.bcp.Request;
+import com.webank.wecross.bcp.TransactionRequest;
 
 public class StubTest {
 	public void Test() {
@@ -13,19 +13,19 @@ public class StubTest {
 		Resource contractResource = stub.getResource("bcp://payment.bcos.HelloWorldContract");
 
 		//call the get method
-		Request getTransaction = contractResource.createRequest();
+		TransactionRequest getTransaction = contractResource.createRequest();
 		getTransaction.setFrom("my_account");
 		getTransaction.setMethod("get");
 		
-		Response getReceipt = contractResource.call(getTransaction);
+		TransactionResponse getReceipt = contractResource.call(getTransaction);
 		
 		//send transaction to set method
-		Request setTransaction = contractResource.createRequest();
+		TransactionRequest setTransaction = contractResource.createRequest();
 		setTransaction.setFrom("my_account");
 		setTransaction.setMethod("set");
 		setTransaction.setArgs(new Object[]{"world"});
 		
-		Response setReceipt = contractResource.sendTransaction(setTransaction);
+		TransactionResponse setReceipt = contractResource.sendTransaction(setTransaction);
 		
 		Resource amopServerResource = stub.getResource("bcp://payment.bcos.PaymentNotify");
 		amopServerResource.registerEventHandler(new EventCallback() {
@@ -36,10 +36,10 @@ public class StubTest {
 		});
 		
 		Resource amopClientResource = stub.getResource("bcp://payment.bcos.PaymentNotify2");
-		Request amopTransaction = contractResource.createRequest();
+		TransactionRequest amopTransaction = contractResource.createRequest();
 		amopTransaction.setMethod("sendMessage");
 		amopTransaction.setArgs(new Object[] {"Hello world!"});
 		
-		Response amopReceipt = amopClientResource.call(amopTransaction);
+		TransactionResponse amopReceipt = amopClientResource.call(amopTransaction);
 	}
 }

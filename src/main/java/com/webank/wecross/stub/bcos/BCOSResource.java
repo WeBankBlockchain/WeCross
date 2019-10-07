@@ -4,9 +4,13 @@ import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.web3j.protocol.Web3j;
 
 import com.webank.wecross.bcp.EventCallback;
-import com.webank.wecross.bcp.Request;
+import com.webank.wecross.bcp.GetDataRequest;
+import com.webank.wecross.bcp.GetDataResponse;
+import com.webank.wecross.bcp.TransactionRequest;
 import com.webank.wecross.bcp.Resource;
-import com.webank.wecross.bcp.Response;
+import com.webank.wecross.bcp.SetDataRequest;
+import com.webank.wecross.bcp.SetDataResponse;
+import com.webank.wecross.bcp.TransactionResponse;
 import com.webank.wecross.bcp.URI;
 
 public class BCOSResource implements Resource {
@@ -20,25 +24,25 @@ public class BCOSResource implements Resource {
 	}
 
 	@Override
-	public String getData(String key) {
+	public GetDataResponse getData(GetDataRequest request) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void setData(String key, String value) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public Response call(Request request) {
+	public SetDataResponse setData(SetDataRequest request) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Response sendTransaction(Request request) {
+	public TransactionResponse call(TransactionRequest request) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public TransactionResponse sendTransaction(TransactionRequest request) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -50,7 +54,7 @@ public class BCOSResource implements Resource {
 	}
 
 	@Override
-	public Request createRequest() {
+	public TransactionRequest createRequest() {
 		// TODO Auto-generated method stub
 		return null;
 	}
