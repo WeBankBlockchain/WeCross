@@ -1,0 +1,14 @@
+package com.webank.wecross.resource;
+
+public interface Resource {
+	public URI getURI();
+	public GetDataResponse getData(GetDataRequest request);
+	public SetDataResponse setData(SetDataRequest request);
+	
+	public TransactionResponse call(TransactionRequest request);
+	public TransactionResponse sendTransaction(TransactionRequest request);
+	
+	public void registerEventHandler(EventCallback callback);
+	
+	public TransactionRequest createRequest();
+}

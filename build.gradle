@@ -8,13 +8,15 @@
 
 // Apply the java-library plugin to add support for Java Library
 apply plugin: 'java-library'
+apply plugin: 'war'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
     // Use jcenter for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
-    maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url 'https://dl.bintray.com/ethereum/maven/' }
 }
 
 dependencies {
@@ -23,9 +25,44 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:23.0'
-    implementation "org.fisco-bcos:web3sdk:2.0.31-SNAPSHOT"
+    implementation 'org.fisco-bcos:web3sdk:2.1.0.1008-SNAPSHOT'
+    implementation 'javax.servlet:javax.servlet-api:3.1.0'
+    implementation 'org.springframework:spring-webmvc:4.3.25.RELEASE'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9.2'
+    implementation 'org.slf4j:slf4j-log4j12:1.7.25'
+    implementation 'org.springframework.boot:spring-boot-starter-web:1.5.9.RELEASE'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
 }
 
+jar {
+	destinationDir file('dist/apps')
+	archiveName project.name + '.jar'
+	exclude '**/*.xml'
+	exclude '**/*.properties'
+
+    doLast {
+        copy {
+            from file('src/main/resources/')
+            into 'dist/conf'
+        }
+		copy {
+			from configurations.runtime
+			into 'dist/lib'
+		}
+		copy {
+			from file('.').listFiles().findAll{File f -> (f.name.endsWith('.sh') || f.name.endsWith('.env'))}
+			into 'dist'
+		}
+	}
+}
+
+war {
+	webInf { from 'src/main/resources/applicationContext.xml' }
+	webInf { from 'src/main/resources/ca.crt' }
+	webInf { from 'src/main/resources/node.crt' }
+	webInf { from 'src/main/resources/node.key' }
+	webInf { from 'src/main/resources/sdk.key' }
+	webXml = file('src/main/resources/web.xml')
+}
