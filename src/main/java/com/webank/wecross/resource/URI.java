@@ -1,4 +1,4 @@
-package com.webank.wecross.bcp;
+package com.webank.wecross.resource;
 
 public class URI {
 	private String network;

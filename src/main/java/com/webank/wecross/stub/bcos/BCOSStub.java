@@ -1,8 +1,5 @@
 package com.webank.wecross.stub.bcos;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -14,10 +11,12 @@ import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.utils.Web3AsyncThreadPoolSize;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.webank.wecross.bcp.Resource;
-import com.webank.wecross.bcp.Stub;
-import com.webank.wecross.bcp.URI;
+import com.webank.wecross.core.Stub;
+import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.URI;
 
 public class BCOSStub implements Stub {
 	private Boolean isInit = false;
@@ -26,6 +25,8 @@ public class BCOSStub implements Stub {
 	private Web3j web3;
 	private Credentials credentials;
 	private Map<String, BCOSResource> resources;
+	
+	private Logger logger = LoggerFactory.getLogger(BCOSStub.class);
 
 	@Override
 	public void init() throws Exception {
@@ -39,8 +40,12 @@ public class BCOSStub implements Stub {
 			ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(50);
 			setWeb3(Web3j.build(channelEthereumService, 15 * 100, scheduledExecutorService, 1));
 			
-			ECKeyPair keyPair = Keys.createEcKeyPair();
-	        credentials = Credentials.create(keyPair);
+			credentials =
+	                Credentials.create(
+	                        "b83261efa42895c38c6c2364ca878f43e77f3cddbc922bf57d0d48070f79feb6");
+	        
+	        bcosService.run();
+	        logger.info("BCOS Service start ok!");
 	        
 	        isInit = true;
 		}
@@ -52,8 +57,10 @@ public class BCOSStub implements Stub {
 	}
 
 	@Override
-	public Resource getResource(URI path) throws Exception {
-		BCOSResource resource = resources.get(path.getResource());
+	public Resource getResource(URI uri) throws Exception {
+		logger.trace("get resource: {}", uri.getResource());
+		
+		BCOSResource resource = resources.get(uri.getResource());
 		
 		if(resource != null) {
 			resource.setWeb3(web3);

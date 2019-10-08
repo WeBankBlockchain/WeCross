@@ -1,14 +1,5 @@
 package com.webank.wecross.stub.bcos;
 
-import com.webank.wecross.bcp.EventCallback;
-import com.webank.wecross.bcp.GetDataRequest;
-import com.webank.wecross.bcp.GetDataResponse;
-import com.webank.wecross.bcp.SetDataRequest;
-import com.webank.wecross.bcp.SetDataResponse;
-import com.webank.wecross.bcp.TransactionResponse;
-
-import com.webank.wecross.bcp.TransactionRequest;
-
 import java.io.IOException;
 
 import org.fisco.bcos.channel.client.CallContract;
@@ -16,6 +7,14 @@ import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
+
+import com.webank.wecross.resource.EventCallback;
+import com.webank.wecross.resource.GetDataRequest;
+import com.webank.wecross.resource.GetDataResponse;
+import com.webank.wecross.resource.SetDataRequest;
+import com.webank.wecross.resource.SetDataResponse;
+import com.webank.wecross.resource.TransactionRequest;
+import com.webank.wecross.resource.TransactionResponse;
 
 public class BCOSContractResource extends BCOSResource {
 	private Boolean isInit = false;
@@ -67,7 +66,7 @@ public class BCOSContractResource extends BCOSResource {
 		BCOSResponse bcosResponse = new BCOSResponse();
 
 		try {
-			String result = callContract.call(contractAddress, request.getMethod(), (Type[]) request.getArgs());
+			String result = callContract.call(contractAddress, request.getMethod(), new Type[] {});
 
 			if (result.isEmpty()) {
 				bcosResponse.setErrorCode(1);

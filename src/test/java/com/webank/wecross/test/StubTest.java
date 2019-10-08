@@ -1,11 +1,11 @@
 package com.webank.wecross.test;
 
-import com.webank.wecross.bcp.Event;
-import com.webank.wecross.bcp.EventCallback;
-import com.webank.wecross.bcp.TransactionResponse;
-import com.webank.wecross.bcp.Resource;
-import com.webank.wecross.bcp.Stub;
-import com.webank.wecross.bcp.TransactionRequest;
+import com.webank.wecross.core.Stub;
+import com.webank.wecross.resource.Event;
+import com.webank.wecross.resource.EventCallback;
+import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.TransactionRequest;
+import com.webank.wecross.resource.TransactionResponse;
 
 public class StubTest {
 	/*

@@ -1,4 +1,4 @@
-package com.webank.wecross.bcp;
+package com.webank.wecross.resource;
 
 public interface Resource {
 	public URI getURI();

@@ -4,15 +4,15 @@ import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 
-import com.webank.wecross.bcp.EventCallback;
-import com.webank.wecross.bcp.GetDataRequest;
-import com.webank.wecross.bcp.GetDataResponse;
-import com.webank.wecross.bcp.TransactionRequest;
-import com.webank.wecross.bcp.Resource;
-import com.webank.wecross.bcp.SetDataRequest;
-import com.webank.wecross.bcp.SetDataResponse;
-import com.webank.wecross.bcp.TransactionResponse;
-import com.webank.wecross.bcp.URI;
+import com.webank.wecross.resource.EventCallback;
+import com.webank.wecross.resource.GetDataRequest;
+import com.webank.wecross.resource.GetDataResponse;
+import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.SetDataRequest;
+import com.webank.wecross.resource.SetDataResponse;
+import com.webank.wecross.resource.TransactionRequest;
+import com.webank.wecross.resource.TransactionResponse;
+import com.webank.wecross.resource.URI;
 
 public class BCOSResource implements Resource {
 	private Service bcosService;
