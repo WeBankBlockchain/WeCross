@@ -1,4 +1,4 @@
-package com.webank.wecross.server;
+package com.webank.wecross.restserver;
 
 public class RestRequest<T> {
 	private String version;

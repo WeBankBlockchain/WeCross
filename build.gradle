@@ -8,6 +8,7 @@
 
 // Apply the java-library plugin to add support for Java Library
 apply plugin: 'java-library'
+apply plugin: 'war'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -15,6 +16,7 @@ repositories {
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
     maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+    maven { url 'https://dl.bintray.com/ethereum/maven/' }
 }
 
 dependencies {
@@ -23,11 +25,16 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:23.0'
-    implementation "org.fisco-bcos:web3sdk:2.0.5"
+    implementation files('lib/web3sdk-call.jar')
     implementation 'javax.servlet:javax.servlet-api:3.1.0'
     implementation 'org.springframework:spring-webmvc:4.3.25.RELEASE'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9.2'
     implementation 'org.slf4j:slf4j-log4j12:1.7.25'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
+}
+
+war {
+	webXml = file('src/main/resources/web.xml')
 }

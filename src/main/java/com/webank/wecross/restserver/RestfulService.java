@@ -1,4 +1,4 @@
-package com.webank.wecross.server;
+package com.webank.wecross.restserver;
 
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;

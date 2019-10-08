@@ -8,6 +8,7 @@ import com.webank.wecross.bcp.Stub;
 import com.webank.wecross.bcp.TransactionRequest;
 
 public class StubTest {
+	/*
 	public void Test() {
 		Stub stub = null;
 		Resource contractResource = stub.getResource("bcp://payment.bcos.HelloWorldContract");
@@ -42,4 +43,5 @@ public class StubTest {
 		
 		TransactionResponse amopReceipt = amopClientResource.call(amopTransaction);
 	}
+	*/
 }
