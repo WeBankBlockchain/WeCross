@@ -3,6 +3,8 @@ package com.webank.wecross.restserver;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,10 +25,20 @@ import com.webank.wecross.bcp.URI;
 import com.webank.wecross.core.StubManager;
 
 @RestController
+@SpringBootApplication
 public class RestfulService {
 	private StubManager stubManager;
 	private Logger logger = LoggerFactory.getLogger(RestfulService.class);
 	private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+	
+	public static void main(String[] args) {
+		SpringApplication.run(RestfulService.class, args);
+	}
+	
+	@RequestMapping("/test")
+	public String test() {
+		return "OK!";
+	}
 
 	@RequestMapping(value = "/resource/{network}/{chain}/{resource}", method = RequestMethod.POST)
 	public RestResponse<Object> handleResource(@PathVariable("network") String network,
@@ -36,17 +48,17 @@ public class RestfulService {
 		uri.setNetwork(network);
 		uri.setChain(chain);
 		uri.setResource(resource);
-
-		Resource resourceObj = stubManager.getResource(uri);
-		if (resourceObj == null) {
-			logger.warn("Unable to find resource: {}.{}.{}", network, chain, resource);
-		}
-
+		
 		RestResponse<Object> restResponse = new RestResponse<Object>();
 		restResponse.setVersion("0.1");
 		restResponse.setResult(0);
 
 		try {
+			Resource resourceObj = stubManager.getResource(uri);
+			if (resourceObj == null) {
+				logger.warn("Unable to find resource: {}.{}.{}", network, chain, resource);
+			}
+		
 			switch (method) {
 			case "getData": {
 				RestRequest<GetDataRequest> restRequest = objectMapper.readValue(restRequestString,

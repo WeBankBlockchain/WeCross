@@ -19,8 +19,16 @@ public class StubManager {
 		return null;
 	}
 	
-	public Resource getResource(URI uri) {
+	public Resource getResource(URI uri) throws Exception {
 		Stub stub = getStub(uri);
 		return stub.getResource(uri);
+	}
+
+	public List<Stub> getStubs() {
+		return stubs;
+	}
+
+	public void setStubs(List<Stub> stubs) {
+		this.stubs = stubs;
 	}
 }
