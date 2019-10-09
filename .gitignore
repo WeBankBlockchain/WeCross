@@ -29,3 +29,8 @@ gradle.properties
 # OS X
 .DS_Store
 
+.settings/
+.classpath
+.project
+bin/
+build_chain.sh
