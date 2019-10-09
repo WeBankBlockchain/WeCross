@@ -59,10 +59,5 @@ jar {
 }
 
 war {
-	webInf { from 'src/main/resources/applicationContext.xml' }
-	webInf { from 'src/main/resources/ca.crt' }
-	webInf { from 'src/main/resources/node.crt' }
-	webInf { from 'src/main/resources/node.key' }
-	webInf { from 'src/main/resources/sdk.key' }
 	webXml = file('src/main/resources/web.xml')
 }
