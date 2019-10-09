@@ -7,40 +7,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NetworkManager {
-  private Map<String, Network> networks;
-  private Logger logger = LoggerFactory.getLogger(NetworkManager.class);
+    private Map<String, Network> networks;
+    private Logger logger = LoggerFactory.getLogger(NetworkManager.class);
 
-  public Resource getResource(URI uri) throws Exception {
-    Network network = getNetwork(uri);
+    public Resource getResource(URI uri) throws Exception {
+        Network network = getNetwork(uri);
 
-    if (network != null) {
-      Stub stub = network.getStub(uri);
+        if (network != null) {
+            Stub stub = network.getStub(uri);
 
-      if (stub != null) {
-        Resource resource = stub.getResource(uri);
+            if (stub != null) {
+                Resource resource = stub.getResource(uri);
 
-        return resource;
-      }
+                return resource;
+            }
+        }
+
+        return null;
     }
 
-    return null;
-  }
+    public Network getNetwork(URI uri) {
+        return getNetwork(uri.getNetwork());
+    }
 
-  public Network getNetwork(URI uri) {
-    return getNetwork(uri.getNetwork());
-  }
+    public Network getNetwork(String name) {
+        logger.trace("get network: {}", name);
+        Network network = networks.get(name);
+        return network;
+    }
 
-  public Network getNetwork(String name) {
-    logger.trace("get network: {}", name);
-    Network network = networks.get(name);
-    return network;
-  }
+    public Map<String, Network> getNetworks() {
+        return networks;
+    }
 
-  public Map<String, Network> getNetworks() {
-    return networks;
-  }
-
-  public void setNetworks(Map<String, Network> networks) {
-    this.networks = networks;
-  }
+    public void setNetworks(Map<String, Network> networks) {
+        this.networks = networks;
+    }
 }

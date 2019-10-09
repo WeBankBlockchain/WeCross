@@ -6,31 +6,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Network {
-  private Map<String, Stub> stubs;
-  private Logger logger = LoggerFactory.getLogger(Network.class);
+    private Map<String, Stub> stubs;
+    private Logger logger = LoggerFactory.getLogger(Network.class);
 
-  public Stub getStub(URI uri) {
-    return getStub(uri.getChain());
-  }
-
-  public Stub getStub(String name) {
-    logger.trace("get stub: {}", name);
-
-    Stub stub = stubs.get(name);
-    try {
-      stub.init();
-    } catch (Exception e) {
-      logger.error("Error while get stub:", e);
-      return null;
+    public Stub getStub(URI uri) {
+        return getStub(uri.getChain());
     }
-    return stub;
-  }
 
-  public Map<String, Stub> getStubs() {
-    return stubs;
-  }
+    public Stub getStub(String name) {
+        logger.trace("get stub: {}", name);
 
-  public void setStubs(Map<String, Stub> stubs) {
-    this.stubs = stubs;
-  }
+        Stub stub = stubs.get(name);
+        try {
+            stub.init();
+        } catch (Exception e) {
+            logger.error("Error while get stub:", e);
+            return null;
+        }
+        return stub;
+    }
+
+    public Map<String, Stub> getStubs() {
+        return stubs;
+    }
+
+    public void setStubs(Map<String, Stub> stubs) {
+        this.stubs = stubs;
+    }
 }

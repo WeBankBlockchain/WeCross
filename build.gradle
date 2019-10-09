@@ -6,7 +6,7 @@
  * user guide available at https://docs.gradle.org/4.3/userguide/java_library_plugin.html
  */
  
- plugins {
+plugins {
     id 'com.github.sherter.google-java-format' version '0.8'
 }
 
@@ -14,7 +14,9 @@
 apply plugin: 'java-library'
 apply plugin: 'war'
 
-
+googleJavaFormat {
+  options style: 'AOSP'
+}
 
 // In this section you declare where to find the dependencies of your project
 repositories {
