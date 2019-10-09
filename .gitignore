@@ -1,0 +1,31 @@
+# Created by .ignore support plugin (hsz.mobi)
+### Java template
+*.class
+
+# Package Files #
+*.war
+*.ear
+*.bin
+*.abi
+
+### Gradle template
+.gradle
+build
+gradle.properties
+
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.gradletasknamecache
+
+# Work around https://youtrack.jetbrains.com/issue/IDEA-116898
+# gradle/wrapper/gradle-wrapper.properties
+
+.idea
+*.iml
+
+# OS X
+.DS_Store
+
