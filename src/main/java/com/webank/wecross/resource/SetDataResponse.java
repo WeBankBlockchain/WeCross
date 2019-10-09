@@ -1,5 +1,3 @@
 package com.webank.wecross.resource;
 
-public class SetDataResponse {
-
-}
+public class SetDataResponse {}
