@@ -3,7 +3,8 @@
 set -e
 
 scan_code_script="cobra/cobra.py -f json -o /tmp/report.json -t "
-ignore_files=("/WeCrossContext-sample.xml")
+ignore_files=("WeCrossContext-sample.xml")
+
 
 LOG_ERROR() {
     content=${1}

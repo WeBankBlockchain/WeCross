@@ -15,6 +15,7 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'java-library'
 apply plugin: 'war'
+apply plugin: 'jacoco'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -48,14 +49,13 @@ dependencies {
     // implementation 'javax.servlet:javax.servlet-api:3.1.0'
     // implementation 'org.springframework:spring-webmvc:4.3.25.RELEASE'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9.2'
-    //implementation 'org.slf4j:slf4j-log4j12:1.7.25'
-
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 jar {
@@ -84,3 +84,9 @@ test {
 	testLogging.showStandardStreams = true
 }
 
+jacocoTestReport {
+	reports {
+		xml.enabled true
+		html.enabled false
+	}
+}
