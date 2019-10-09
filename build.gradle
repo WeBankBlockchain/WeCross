@@ -5,10 +5,16 @@
  * For more details take a look at the Java Libraries chapter in the Gradle
  * user guide available at https://docs.gradle.org/4.3/userguide/java_library_plugin.html
  */
+ 
+ plugins {
+    id 'com.github.sherter.google-java-format' version '0.8'
+}
 
 // Apply the java-library plugin to add support for Java Library
 apply plugin: 'java-library'
 apply plugin: 'war'
+
+
 
 // In this section you declare where to find the dependencies of your project
 repositories {
