@@ -71,12 +71,4 @@
 			</map>
 		</property>
 	</bean>
-
-	<!-- <bean id="bcosStub" class="com.webank.wecross.stub.bcos.BCOSStub"> 
-		<property name="pattern" value="bcos" /> <property name="bcosService" ref="channelService" 
-		/> <property name="resources"> <map> <entry key="HelloWorldContract"> <bean 
-		class="com.webank.wecross.stub.bcos.BCOSContractResource"> <property name="contractAddress" 
-		value="0x12345"></property> </bean> </entry> </map> </property> </bean> <bean 
-		id="network" class="com.webank.wecross.core.Network"> <property name="stubs"> 
-		<list> <ref bean="bcosStub" /> </list> </property> </bean> -->
 </beans>
