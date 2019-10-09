@@ -6,6 +6,10 @@
  * user guide available at https://docs.gradle.org/4.3/userguide/java_library_plugin.html
  */
 
+plugins {
+	id 'com.github.sherter.google-java-format' version '0.8'
+}
+
 // Apply the java-library plugin to add support for Java Library
 apply plugin: 'java-library'
 apply plugin: 'war'
@@ -17,6 +21,19 @@ repositories {
     jcenter()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { url 'https://dl.bintray.com/ethereum/maven/' }
+}
+
+googleJavaFormat {
+	options style: 'AOSP'
+	source = sourceSets*.allJava
+	include '**/*.java'
+	exclude '**/temp/*.java'
+}
+
+verifyGoogleJavaFormat {
+	source = sourceSets*.allJava
+	include '**/*.java'
+	exclude '**/temp/*.java'
 }
 
 dependencies {
