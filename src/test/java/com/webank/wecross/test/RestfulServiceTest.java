@@ -24,6 +24,19 @@ public class RestfulServiceTest {
     @Autowired private MockMvc mockMvc;
 
     @Test
+    public void okTest() throws Exception {
+        MvcResult rsp =
+                this.mockMvc
+                        .perform(get("/test"))
+                        .andDo(print())
+                        .andExpect(status().isOk())
+                        .andReturn();
+
+        String result = rsp.getResponse().getContentAsString();
+        System.out.println("####Respond: " + result);
+    }
+
+    @Test
     public void existTest() throws Exception {
         MvcResult rsp =
                 this.mockMvc
@@ -37,7 +50,7 @@ public class RestfulServiceTest {
     }
 
     @Test
-    public void shouldReturnDefaultMessage() throws Exception {
+    public void callTest() throws Exception {
 
         String json =
                 "{\n"
@@ -56,6 +69,39 @@ public class RestfulServiceTest {
                 this.mockMvc
                         .perform(
                                 post("/payment/bcos/HelloWorldContract/call")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(json))
+                        .andDo(print())
+                        .andExpect(status().isOk())
+                        .andReturn();
+
+        String result = rsp.getResponse().getContentAsString();
+        System.out.println("####Respond: " + result);
+    }
+
+    @Test
+    public void sendTransactionTest() throws Exception {
+
+        String json =
+                "{\n"
+                        + "\"version\":\"0.1\",\n"
+                        + "\"uri\":\"payment.bcos.HelloWorldContract\",\n"
+                        + "\"method\":\"sendTransaction\",\n"
+                        + "\"sig\":\"\",\n"
+                        + "\"data\": {\n"
+                        + "\"to\":\""
+                        + "0xc91d1f693c1c1236cc33ba4f8d11ea90ab7d6519"
+                        + "\",\n"
+                        + "\"method\":\"set\",\n"
+                        + "\"args\":[\"aaaaa\"]\n"
+                        + "}\n"
+                        + "}";
+
+        MvcResult rsp =
+                this.mockMvc
+                        .perform(
+                                post("/payment/bcos/HelloWorldContract/invoke")
+                                        .param("method", "sendTransaction")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(json))
                         .andDo(print())
