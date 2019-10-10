@@ -7,10 +7,12 @@
  */
 
 plugins {
-	id 'com.github.sherter.google-java-format' version '0.8'
+    id 'org.springframework.boot' version '2.1.4.RELEASE'
+    id 'com.github.sherter.google-java-format' version '0.8'
 }
 
 // Apply the java-library plugin to add support for Java Library
+apply plugin: 'io.spring.dependency-management'
 apply plugin: 'java-library'
 apply plugin: 'war'
 
@@ -24,16 +26,16 @@ repositories {
 }
 
 googleJavaFormat {
-	options style: 'AOSP'
-	source = sourceSets*.allJava
-	include '**/*.java'
-	exclude '**/temp/*.java'
+    options style: 'AOSP'
+    source = sourceSets*.allJava
+    include '**/*.java'
+    exclude '**/temp/*.java'
 }
 
 verifyGoogleJavaFormat {
-	source = sourceSets*.allJava
-	include '**/*.java'
-	exclude '**/temp/*.java'
+    source = sourceSets*.allJava
+    include '**/*.java'
+    exclude '**/temp/*.java'
 }
 
 dependencies {
@@ -42,39 +44,42 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:23.0'
-    implementation 'org.fisco-bcos:web3sdk:2.1.0.1008-SNAPSHOT'
-    implementation 'javax.servlet:javax.servlet-api:3.1.0'
-    implementation 'org.springframework:spring-webmvc:4.3.25.RELEASE'
+    implementation 'org.fisco-bcos:web3sdk:2.1.0.1010-SNAPSHOT'
+    // implementation 'javax.servlet:javax.servlet-api:3.1.0'
+    // implementation 'org.springframework:spring-webmvc:4.3.25.RELEASE'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9.2'
-    implementation 'org.slf4j:slf4j-log4j12:1.7.25'
-    implementation 'org.springframework.boot:spring-boot-starter-web:1.5.9.RELEASE'
+    //implementation 'org.slf4j:slf4j-log4j12:1.7.25'
 
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
 }
 
 jar {
-	destinationDir file('dist/apps')
-	archiveName project.name + '.jar'
-	exclude '**/*.xml'
-	exclude '**/*.properties'
+    destinationDir file('dist/apps')
+    archiveName project.name + '.jar'
+    exclude '**/*.xml'
+    exclude '**/*.properties'
 
     doLast {
         copy {
             from file('src/main/resources/')
             into 'dist/conf'
         }
-		copy {
-			from configurations.runtime
-			into 'dist/lib'
-		}
-		copy {
-			from file('.').listFiles().findAll{File f -> (f.name.endsWith('.sh') || f.name.endsWith('.env'))}
-			into 'dist'
-		}
-	}
+        copy {
+            from configurations.runtime
+            into 'dist/lib'
+        }
+        copy {
+            from file('.').listFiles().findAll { File f -> (f.name.endsWith('.sh') || f.name.endsWith('.env')) }
+            into 'dist'
+        }
+    }
 }
 
-war {
-	webXml = file('src/main/resources/web.xml')
-}
+//war {
+//    webXml = file('src/main/resources/web.xml')
+//}

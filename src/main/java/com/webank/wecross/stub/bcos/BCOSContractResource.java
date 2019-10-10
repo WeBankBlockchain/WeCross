@@ -9,12 +9,14 @@ import com.webank.wecross.resource.SetDataResponse;
 import com.webank.wecross.resource.TransactionRequest;
 import com.webank.wecross.resource.TransactionResponse;
 import org.fisco.bcos.channel.client.CallContract;
+import org.fisco.bcos.channel.client.CallResult;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.abi.datatypes.Utf8String;
 import org.fisco.bcos.web3j.abi.datatypes.generated.Int256;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 
 public class BCOSContractResource extends BCOSResource {
     private Boolean isInit = false;
@@ -62,20 +64,20 @@ public class BCOSContractResource extends BCOSResource {
         BCOSResponse bcosResponse = new BCOSResponse();
 
         try {
-            String result =
+            TransactionReceipt transactionReceipt =
                     callContract.sendTransaction(
                             contractAddress,
                             request.getMethod(),
                             javaType2BCOSType(request.getArgs()));
 
-            if (result.isEmpty()) {
+            if (transactionReceipt == null) {
                 bcosResponse.setErrorCode(1);
                 bcosResponse.setErrorMessage(
-                        "Result is empty, please check contract address and arguments");
+                        "TransactionReceipt is empty, please check contract address and arguments");
             } else {
                 bcosResponse.setErrorCode(0);
                 bcosResponse.setErrorMessage("");
-                bcosResponse.setResult(new Object[] {result});
+                bcosResponse.setResult(new Object[] {transactionReceipt.getOutput()});
             }
         } catch (Exception e) {
             bcosResponse.setErrorCode(2);
@@ -95,23 +97,26 @@ public class BCOSContractResource extends BCOSResource {
         BCOSResponse bcosResponse = new BCOSResponse();
 
         try {
-            String result =
+            CallResult callResult =
                     callContract.call(
                             contractAddress,
                             request.getMethod(),
                             javaType2BCOSType(request.getArgs()));
 
-            if (result.isEmpty()) {
+            if (callResult.getStatus().equals("RpcError")) {
                 bcosResponse.setErrorCode(1);
                 bcosResponse.setErrorMessage(
-                        "Result is empty, please check contract address and arguments");
+                        "There's something wrong with Rpc, please check contract address and arguments");
+            } else if (callResult.getStatus().equals("IOException")) {
+                bcosResponse.setErrorCode(2);
+                bcosResponse.setErrorMessage(callResult.getMessage());
             } else {
                 bcosResponse.setErrorCode(0);
                 bcosResponse.setErrorMessage("");
-                bcosResponse.setResult(new Object[] {result});
+                bcosResponse.setResult(new Object[] {callResult.getOutput()});
             }
         } catch (Exception e) {
-            bcosResponse.setErrorCode(2);
+            bcosResponse.setErrorCode(3);
             bcosResponse.setErrorMessage("Unexpected error: " + e.getMessage());
         }
 
