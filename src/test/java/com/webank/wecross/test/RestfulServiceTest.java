@@ -101,7 +101,6 @@ public class RestfulServiceTest {
                 this.mockMvc
                         .perform(
                                 post("/payment/bcos/HelloWorldContract/invoke")
-                                        .param("method", "sendTransaction")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(json))
                         .andDo(print())
