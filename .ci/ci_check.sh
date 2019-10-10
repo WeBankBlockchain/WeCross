@@ -25,7 +25,7 @@ cd -
 #configure WeCross
 cp nodes/127.0.0.1/sdk/* src/test/resources/
 cp src/main/resources/WeCrossContext-sample.xml src/test/resources/WeCrossContext.xml
-sed -i 's/0xb5d83b5265756ec114f13226efd341342d9ed49f/$hello_address/' src/test/resources/WeCrossContext.xml
+sed -i "s/0xb5d83b5265756ec114f13226efd341342d9ed49f/${hello_address}/" src/test/resources/WeCrossContext.xml
 
 ./gradlew verifyGoogleJavaFormat
 ./gradlew build
