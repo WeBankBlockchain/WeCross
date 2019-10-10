@@ -34,3 +34,7 @@ gradle.properties
 .project
 bin/
 build_chain.sh
+console.tar.gz
+nodes/
+console/
+out/
