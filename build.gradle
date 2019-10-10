@@ -80,6 +80,7 @@ jar {
     }
 }
 
-//war {
-//    webXml = file('src/main/resources/web.xml')
-//}
+test {
+	testLogging.showStandardStreams = true
+}
+
