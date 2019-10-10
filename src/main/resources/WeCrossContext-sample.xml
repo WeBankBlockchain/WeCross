@@ -39,18 +39,18 @@
         <property name="networks">
             <map>
                 <entry key="payment">
-                    <bean class="com.webank.wecross.core.Network">
+                    <bean class="com.webank.wecross.network.Network">
                         <property name="stubs">
                             <map>
                                 <entry key="bcos">
-                                    <bean class="com.webank.wecross.stub.bcos.BCOSStub">
+                                    <bean class="com.webank.wecross.bcos.BCOSStub">
                                         <property name="pattern" value="bcos"/>
                                         <property name="bcosService" ref="channelService"/>
                                         <property name="resources">
                                             <map>
                                                 <entry key="HelloWorldContract">
                                                     <bean
-                                                        class="com.webank.wecross.stub.bcos.BCOSContractResource">
+                                                        class="com.webank.wecross.bcos.BCOSContractResource">
                                                         <property name="contractAddress"
                                                             value="0xb5d83b5265756ec114f13226efd341342d9ed49f"></property>
                                                     </bean>

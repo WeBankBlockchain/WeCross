@@ -3,6 +3,8 @@ package com.webank.wecross.restserver;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.core.NetworkManager;
+import com.webank.wecross.core.StateRequest;
+import com.webank.wecross.core.StateResponse;
 import com.webank.wecross.resource.GetDataRequest;
 import com.webank.wecross.resource.GetDataResponse;
 import com.webank.wecross.resource.Resource;
@@ -20,7 +22,7 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -37,44 +39,54 @@ public class RestfulService {
         return "OK!";
     }
 
-    @RequestMapping(value = "/{network}/{chain}/{resource}/exists")
-    public String handleResource(
-            @PathVariable("network") String network,
-            @PathVariable("chain") String chain,
-            @PathVariable("resource") String resource) {
-        URI uri = new URI();
-        uri.setNetwork(network);
-        uri.setChain(chain);
-        uri.setResource(resource);
+    @RequestMapping(value = "/state")
+    public RestResponse<StateResponse> handleState() {
+        RestResponse<StateResponse> restResponse = new RestResponse<StateResponse>();
 
-        if (networkManager == null) {
-            return "Not init";
-        }
+        StateResponse stateResponse = networkManager.getState(new StateRequest());
+        restResponse.setVersion("0.1");
+        restResponse.setResult(0);
+        restResponse.setData(stateResponse);
 
-        Resource resourceObj = null;
-        try {
-            resourceObj = networkManager.getResource(uri);
-        } catch (Exception e) {
-            return "Error: " + e.getMessage();
-        }
-
-        if (resourceObj != null) {
-            return "Resource [" + network + "." + chain + "." + resource + "] exists";
-        }
-
-        return "Not found [" + network + "." + chain + "." + resource + "]";
+        return restResponse;
     }
 
-    @RequestMapping(value = "/{network}/{chain}/{resource}/invoke")
+    @RequestMapping(value = "/{network}/{method}")
+    public RestResponse<Object> handleNetwork(
+            @PathVariable("network") String network, @PathVariable("method") String method) {
+        //
+        return null;
+    }
+
+    @RequestMapping(value = "/{network}/{stub}/{method}")
+    public RestResponse<Object> handleStub(
+            @PathVariable("network") String network,
+            @PathVariable("stub") String stub,
+            @PathVariable("method") String method) {
+        // getState
+        // getBlockHeader
+        return null;
+    }
+
+    @RequestMapping(value = "/{network}/{stub}/{resource}/{method}", method = RequestMethod.GET)
     public RestResponse<Object> handleResource(
             @PathVariable("network") String network,
-            @PathVariable("chain") String chain,
+            @PathVariable("stub") String stub,
             @PathVariable("resource") String resource,
-            @RequestParam("method") String method,
+            @PathVariable("method") String method) {
+        return handleResource(network, stub, resource, method, "");
+    }
+
+    @RequestMapping(value = "/{network}/{stub}/{resource}/{method}", method = RequestMethod.POST)
+    public RestResponse<Object> handleResource(
+            @PathVariable("network") String network,
+            @PathVariable("stub") String stub,
+            @PathVariable("resource") String resource,
+            @PathVariable("method") String method,
             @RequestBody String restRequestString) {
         URI uri = new URI();
         uri.setNetwork(network);
-        uri.setChain(chain);
+        uri.setChain(stub);
         uri.setResource(resource);
 
         RestResponse<Object> restResponse = new RestResponse<Object>();
@@ -86,10 +98,17 @@ public class RestfulService {
         try {
             Resource resourceObj = networkManager.getResource(uri);
             if (resourceObj == null) {
-                logger.warn("Unable to find resource: {}.{}.{}", network, chain, resource);
+                logger.warn("Unable to find resource: {}.{}.{}", network, stub, resource);
+
+                throw new Exception("Resource not found");
             }
 
             switch (method) {
+                case "exists":
+                    {
+                        restResponse.setData("exists!");
+                        break;
+                    }
                 case "getData":
                     {
                         RestRequest<GetDataRequest> restRequest =
@@ -146,6 +165,12 @@ public class RestfulService {
                                         resourceObj.sendTransaction(transactionRequest);
 
                         restResponse.setData(transactionResponse);
+                        break;
+                    }
+                default:
+                    {
+                        restResponse.setResult(-1);
+                        restResponse.setMessage("Unsupport method: " + method);
                         break;
                     }
             }

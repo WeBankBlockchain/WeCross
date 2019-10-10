@@ -21,7 +21,6 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(RestfulService.class)
 // @ContextConfiguration(locations = "classpath:WeCrossContext.xml")
 public class RestfulServiceTest {
-
     @Autowired private MockMvc mockMvc;
 
     @Test
@@ -56,8 +55,7 @@ public class RestfulServiceTest {
         MvcResult rsp =
                 this.mockMvc
                         .perform(
-                                post("/payment/bcos/HelloWorldContract/invoke")
-                                        .param("method", "call")
+                                post("/payment/bcos/HelloWorldContract/call")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(json))
                         .andDo(print())

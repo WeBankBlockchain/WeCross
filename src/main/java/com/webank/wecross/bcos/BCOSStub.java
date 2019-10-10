@@ -1,8 +1,10 @@
-package com.webank.wecross.stub.bcos;
+package com.webank.wecross.bcos;
 
-import com.webank.wecross.core.Stub;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.URI;
+import com.webank.wecross.stub.BlockHeader;
+import com.webank.wecross.stub.State;
+import com.webank.wecross.stub.Stub;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -39,7 +41,7 @@ public class BCOSStub implements Stub {
 
             credentials =
                     Credentials.create(
-                            "b83261efa42895c38c6c2364ca878f43e77f3cddbc922bf57d0d48070f79feb6");
+                            "00000000000000000000000000000000000000000000000000000000000000");
 
             bcosService.run();
             logger.info("BCOS Service start ok!");
@@ -51,6 +53,16 @@ public class BCOSStub implements Stub {
     @Override
     public String getPattern() {
         return pattern;
+    }
+
+    @Override
+    public State getState() {
+        return null;
+    }
+
+    @Override
+    public BlockHeader getBlockHeader() {
+        return null;
     }
 
     @Override
