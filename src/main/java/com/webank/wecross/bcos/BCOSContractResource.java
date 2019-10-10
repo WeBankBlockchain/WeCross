@@ -1,6 +1,5 @@
-package com.webank.wecross.stub.bcos;
+package com.webank.wecross.bcos;
 
-import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.GetDataRequest;
 import com.webank.wecross.resource.GetDataResponse;
@@ -30,7 +29,7 @@ public class BCOSContractResource extends BCOSResource {
         }
     }
 
-    private Type<?>[] javaType2BCOSType(Object[] args) throws WeCrossException {
+    private Type<?>[] javaType2BCOSType(Object[] args) throws Exception {
         Type<?>[] data = new Type[args.length];
 
         int i = 0;
@@ -42,7 +41,7 @@ public class BCOSContractResource extends BCOSResource {
                 Int256 int256 = new Int256((Integer) obj);
                 data[i++] = int256;
             } else {
-                throw new WeCrossException(-5, "Unspport type");
+                throw new Exception("Unspport type");
             }
         }
 

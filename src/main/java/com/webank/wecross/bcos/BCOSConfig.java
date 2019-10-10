@@ -1,4 +1,4 @@
-package com.webank.wecross.stub.bcos;
+package com.webank.wecross.bcos;
 
 import java.util.List;
 
