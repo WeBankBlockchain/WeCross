@@ -89,9 +89,7 @@ public class RestfulServiceTest {
                         + "\"method\":\"sendTransaction\",\n"
                         + "\"sig\":\"\",\n"
                         + "\"data\": {\n"
-                        + "\"to\":\""
-                        + "0xc91d1f693c1c1236cc33ba4f8d11ea90ab7d6519"
-                        + "\",\n"
+                        + "\"to\":\"\",\n"
                         + "\"method\":\"set\",\n"
                         + "\"args\":[\"aaaaa\"]\n"
                         + "}\n"
@@ -100,7 +98,7 @@ public class RestfulServiceTest {
         MvcResult rsp =
                 this.mockMvc
                         .perform(
-                                post("/payment/bcos/HelloWorldContract/invoke")
+                                post("/payment/bcos/HelloWorldContract/sendTransaction")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(json))
                         .andDo(print())
