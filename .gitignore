@@ -13,6 +13,8 @@
 build
 gradle.properties
 
+### output
+dist
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
@@ -38,4 +40,4 @@ console.tar.gz
 nodes/
 console/
 out/
-dist/
+src/main/resources/WeCrossContext.xml
