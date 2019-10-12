@@ -1,6 +1,6 @@
 package com.webank.wecross.p2p;
 
-public class PeerState {
+public class PeerStatus {
     private int blockNumber = 0;
     private int seq = 0;
 

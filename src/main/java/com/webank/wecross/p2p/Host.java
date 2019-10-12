@@ -13,11 +13,11 @@ import org.springframework.web.client.RestTemplate;
 
 public class Host {
     private RestTemplate restTemplate = new RestTemplate();
-    private Map<String, PeerState> peers;
+    private Map<String, PeerStatus> peers;
     private Logger logger = LoggerFactory.getLogger(Host.class);
 
     public void syncAllState() {
-        for (Entry<String, PeerState> entry : peers.entrySet()) {
+        for (Entry<String, PeerStatus> entry : peers.entrySet()) {
             ResponseEntity<RestResponse<StateResponse>> response =
                     restTemplate.exchange(
                             entry.getKey() + "/state",
@@ -32,11 +32,11 @@ public class Host {
         }
     }
 
-    public Map<String, PeerState> getPeers() {
+    public Map<String, PeerStatus> getPeers() {
         return peers;
     }
 
-    public void setPeers(Map<String, PeerState> peers) {
+    public void setPeers(Map<String, PeerStatus> peers) {
         this.peers = peers;
     }
 }
