@@ -14,9 +14,10 @@ public class MessageTest {
 
         Assert.assertSame(msg.size(), 11);
 
-        int mockSeq = 22333;
+        int mockSeq = Message.newSeq();
         msg.setSeq(mockSeq);
         Assert.assertTrue(msg.getSeq() == mockSeq);
+        Assert.assertTrue(msg.getSeq() != Message.newSeq());
 
         msg.setBuffer("dddddddddd");
         Assert.assertSame(msg.getBuffer(), "dddddddddd");
