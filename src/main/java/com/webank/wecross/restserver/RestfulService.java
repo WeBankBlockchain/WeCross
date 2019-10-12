@@ -13,6 +13,7 @@ import com.webank.wecross.resource.SetDataResponse;
 import com.webank.wecross.resource.TransactionRequest;
 import com.webank.wecross.resource.TransactionResponse;
 import com.webank.wecross.resource.URI;
+import com.webank.wecross.restserver.p2p.P2PResponse;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,6 +183,58 @@ public class RestfulService {
         }
 
         return restResponse;
+    }
+
+    @RequestMapping(value = "/p2p/{method}", method = RequestMethod.POST)
+    public P2PResponse<Object> handleP2pMessage(
+            @PathVariable("method") String method, @RequestBody String restRequestString) {
+
+        P2PResponse<Object> response = new P2PResponse<Object>();
+        response.setVersion("0.1");
+        response.setResult(0);
+
+        logger.info("request string: {}", restRequestString);
+
+        try {
+
+            switch (method) {
+                case "peer":
+                    {
+                        logger.info("request peer method");
+                        response.setMessage("request peer method success");
+                        break;
+                    }
+
+                case "stub":
+                    {
+                        logger.info("request stub method");
+                        response.setMessage("request stub method success");
+                        break;
+                    }
+
+                case "remoteCall":
+                    {
+                        logger.info("request remoteCall method");
+                        response.setMessage("request remoteCall method success");
+                        break;
+                    }
+
+                default:
+                    {
+                        response.setResult(-1);
+                        response.setMessage("Unsupport method: " + method);
+                        break;
+                    }
+            }
+
+        } catch (Exception e) {
+            logger.warn("Process request error:", e);
+
+            response.setResult(-1);
+            response.setMessage(e.getLocalizedMessage());
+        }
+
+        return response;
     }
 
     public NetworkManager getNetworkManager() {
