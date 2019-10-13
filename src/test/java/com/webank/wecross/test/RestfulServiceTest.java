@@ -5,11 +5,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.webank.wecross.restserver.RestfulService;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -18,9 +22,10 @@ import org.springframework.test.web.servlet.MvcResult;
 // To run with: gradle test --tests RestfulServiceTest
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(RestfulService.class)
-// @ContextConfiguration(locations = "classpath:WeCrossContext.xml")
+@SpringBootTest
+@AutoConfigureMockMvc
 public class RestfulServiceTest {
+
     @Autowired private MockMvc mockMvc;
 
     @Test
@@ -40,7 +45,7 @@ public class RestfulServiceTest {
     public void existTest() throws Exception {
         MvcResult rsp =
                 this.mockMvc
-                        .perform(get("/payment/bcos/HelloWorldContract/exists"))
+                        .perform(get("/payment/bcos1/HelloWorldContract/exists"))
                         .andDo(print())
                         .andExpect(status().isOk())
                         .andReturn();
@@ -55,7 +60,7 @@ public class RestfulServiceTest {
         String json =
                 "{\n"
                         + "\"version\":\"0.1\",\n"
-                        + "\"uri\":\"payment.bcos.HelloWorldContract\",\n"
+                        + "\"uri\":\"payment.bcos1.HelloWorldContract\",\n"
                         + "\"method\":\"call\",\n"
                         + "\"sig\":\"\",\n"
                         + "\"data\": {\n"
@@ -68,7 +73,7 @@ public class RestfulServiceTest {
         MvcResult rsp =
                 this.mockMvc
                         .perform(
-                                post("/payment/bcos/HelloWorldContract/call")
+                                post("/payment/bcos1/HelloWorldContract/call")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(json))
                         .andDo(print())
@@ -85,7 +90,7 @@ public class RestfulServiceTest {
         String json =
                 "{\n"
                         + "\"version\":\"0.1\",\n"
-                        + "\"uri\":\"payment.bcos.HelloWorldContract\",\n"
+                        + "\"uri\":\"payment.bcos1.HelloWorldContract\",\n"
                         + "\"method\":\"sendTransaction\",\n"
                         + "\"sig\":\"\",\n"
                         + "\"data\": {\n"
@@ -98,7 +103,7 @@ public class RestfulServiceTest {
         MvcResult rsp =
                 this.mockMvc
                         .perform(
-                                post("/payment/bcos/HelloWorldContract/sendTransaction")
+                                post("/payment/bcos1/HelloWorldContract/sendTransaction")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(json))
                         .andDo(print())

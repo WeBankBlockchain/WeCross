@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NetworkManager {
+
     private Map<String, Network> networks;
     private int seq = 1;
     private Logger logger = LoggerFactory.getLogger(NetworkManager.class);
