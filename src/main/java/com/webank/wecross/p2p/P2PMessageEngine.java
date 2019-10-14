@@ -1,5 +1,18 @@
 package com.webank.wecross.p2p;
 
-public interface P2PMessageEngine {
-    public void asyncSendMessage(Peer peer, P2PMessage msg, P2PMessageCallback callback);
+import java.util.Map;
+
+public abstract class P2PMessageEngine {
+    private Map<String, P2PMessageCallback<?>> registeredHandler;
+
+    public abstract <T> void asyncSendMessage(
+            Peer peer, P2PMessage<T> msg, P2PMessageCallback callback);
+
+    public synchronized <T> void registerHandler(String type, P2PMessageCallback<T> handler)
+            throws Exception {
+        if (registeredHandler.containsKey(type)) {
+            throw new Exception("Duplicate register handler: " + type);
+        }
+        registeredHandler.put(type, handler);
+    }
 }

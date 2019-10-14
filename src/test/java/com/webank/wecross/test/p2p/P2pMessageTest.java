@@ -10,16 +10,14 @@ public class P2pMessageTest {
         String mockBuffer = new String("aabbccddefg");
         P2PMessage msg = new P2PMessage(mockBuffer);
 
-        Assert.assertSame(msg.getBuffer(), mockBuffer);
-
-        Assert.assertSame(msg.size(), 11);
+        Assert.assertSame(msg.getData(), mockBuffer);
 
         int mockSeq = P2PMessage.newSeq();
         msg.setSeq(mockSeq);
         Assert.assertTrue(msg.getSeq() == mockSeq);
         Assert.assertTrue(msg.getSeq() != P2PMessage.newSeq());
 
-        msg.setBuffer("dddddddddd");
-        Assert.assertSame(msg.getBuffer(), "dddddddddd");
+        msg.setData("dddddddddd");
+        Assert.assertSame(msg.getData(), "dddddddddd");
     }
 }
