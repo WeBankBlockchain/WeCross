@@ -4,18 +4,18 @@ import com.webank.wecross.p2p.P2PMessage;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class P2pMessageTest {
+public class P2PMessageTest {
     @Test
     public void allTest() throws Exception {
         String mockBuffer = new String("aabbccddefg");
-        P2PMessage msg = new P2PMessage(mockBuffer);
+        P2PMessage msg = new P2PMessage();
+        msg.setData(mockBuffer);
 
         Assert.assertSame(msg.getData(), mockBuffer);
 
-        int mockSeq = P2PMessage.newSeq();
-        msg.setSeq(mockSeq);
-        Assert.assertTrue(msg.getSeq() == mockSeq);
-        Assert.assertTrue(msg.getSeq() != P2PMessage.newSeq());
+        Assert.assertTrue(msg.getSeq() == 0);
+        msg.newSeq();
+        Assert.assertTrue(msg.getSeq() != 0);
 
         msg.setData("dddddddddd");
         Assert.assertSame(msg.getData(), "dddddddddd");
