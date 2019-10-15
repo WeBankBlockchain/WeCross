@@ -71,12 +71,17 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
 
                 ObjectMapper objMapper = new ObjectMapper();
                 callback.setStatus(responseMsg.getResult());
-                callback.setMsg(responseMsg.getData());
+                callback.setMessage(responseMsg.getMessage());
+                callback.setData(responseMsg.getData());
                 callback.execute();
             }
 
         } catch (Exception e) {
             logger.error("asyncSendMessage error", e);
+            callback.setStatus(-1);
+            callback.setMessage(e.toString());
+            callback.setData(null);
+            callback.execute();
         }
     }
 }

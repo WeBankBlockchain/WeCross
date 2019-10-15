@@ -14,7 +14,11 @@ public class PeerRequestSeqMessageCallback extends P2PMessageCallback<PeerSeqMes
                 new ParameterizedTypeReference<P2PHttpResponse<PeerSeqMessageData>>() {});
     }
 
-    public void onResponse(int status, PeerSeqMessageData msg) {
-        logger.info("Receive peer seq. status: {} seq: {}", status, msg.getDataSeq());
+    public void onResponse(int status, String message, PeerSeqMessageData data) {
+        logger.info(
+                "Receive peer seq. status: {} message: {} seq: {}",
+                status,
+                message,
+                data.getDataSeq());
     }
 }

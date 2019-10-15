@@ -18,13 +18,13 @@ public class RestfulP2PService {
 
     @RequestMapping(value = "/p2p/peer/{method}", method = RequestMethod.POST)
     public P2PHttpResponse<Object> handlePeer(
-            @PathVariable("method") String method, @RequestBody String restRequestString) {
+            @PathVariable("method") String method, @RequestBody String p2pRequestString) {
 
         P2PHttpResponse<Object> response = new P2PHttpResponse<Object>();
         response.setVersion("0.1");
         response.setResult(0);
 
-        logger.info("request string: {}", restRequestString);
+        logger.info("request string: {}", p2pRequestString);
 
         try {
 
@@ -32,9 +32,9 @@ public class RestfulP2PService {
                 case "requestSeq":
                     {
                         logger.info("request method: peer/" + method);
-                        P2PMessage<Object> restRequest =
+                        P2PMessage<Object> p2pRequest =
                                 objectMapper.readValue(
-                                        restRequestString,
+                                        p2pRequestString,
                                         new TypeReference<P2PMessage<Object>>() {});
 
                         PeerSeqMessageData data = new PeerSeqMessageData();
@@ -43,21 +43,28 @@ public class RestfulP2PService {
                         data.setDataSeq(666);
                         // --------- end
 
-                        response.setSeq(restRequest.getSeq());
+                        response.setSeq(p2pRequest.getSeq());
                         response.setResult(0);
                         response.setMessage("request peer/" + method + " method success");
                         response.setData(data);
                         break;
                     }
 
-                case "request":
+                case "seq":
                     {
                         logger.info("request method: peer/" + method);
                         response.setMessage("request peer/" + method + " method success");
                         break;
                     }
 
-                case "peer":
+                case "requestPeerInfo":
+                    {
+                        logger.info("request method: peer/" + method);
+                        response.setMessage("request peer/" + method + " method success");
+                        break;
+                    }
+
+                case "peerInfo":
                     {
                         logger.info("request method: peer/" + method);
                         response.setMessage("request peer/" + method + " method success");
@@ -84,25 +91,25 @@ public class RestfulP2PService {
 
     @RequestMapping(value = "/p2p/stub/{method}", method = RequestMethod.POST)
     public P2PHttpResponse<Object> handleStub(
-            @PathVariable("method") String method, @RequestBody String restRequestString) {
+            @PathVariable("method") String method, @RequestBody String p2pRequestString) {
 
         P2PHttpResponse<Object> response = new P2PHttpResponse<Object>();
         response.setVersion("0.1");
         response.setResult(0);
 
-        logger.info("request string: {}", restRequestString);
+        logger.info("request string: {}", p2pRequestString);
 
         try {
 
             switch (method) {
-                case "request":
+                case "requestChainState":
                     {
                         logger.info("request method: stub/" + method);
                         response.setMessage("request stub/" + method + " method success");
                         break;
                     }
 
-                case "response":
+                case "chainState":
                     {
                         logger.info("request method: stub/" + method);
                         response.setMessage("request stub/" + method + " method success");
@@ -129,13 +136,13 @@ public class RestfulP2PService {
 
     @RequestMapping(value = "/p2p/remoteCall", method = RequestMethod.POST)
     public P2PHttpResponse<Object> handleRemoteCall(
-            @PathVariable("method") String method, @RequestBody String restRequestString) {
+            @PathVariable("method") String method, @RequestBody String p2pRequestString) {
 
         P2PHttpResponse<Object> response = new P2PHttpResponse<Object>();
         response.setVersion("0.1");
         response.setResult(0);
 
-        logger.info("request string: {}", restRequestString);
+        logger.info("request string: {}", p2pRequestString);
 
         try {
 

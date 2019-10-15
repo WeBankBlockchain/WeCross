@@ -5,20 +5,21 @@ import org.springframework.core.ParameterizedTypeReference;
 public class P2PMessageCallback<T> {
     private ParameterizedTypeReference engineCallbackMessageClassType;
     protected int status;
-    protected T msg;
+    private String message;
+    protected T data;
 
     public void execute() {
-        this.onResponse(status, msg);
+        this.onResponse(status, message, data);
     }
 
-    public void onResponse(int status, T msg) {}
+    public void onResponse(int status, String message, T data) {}
 
     public void setStatus(int status) {
         this.status = status;
     }
 
-    public void setMsg(T msg) {
-        this.msg = msg;
+    public void setData(T msg) {
+        this.data = msg;
     }
 
     public ParameterizedTypeReference getEngineCallbackMessageClassType() {
@@ -28,5 +29,9 @@ public class P2PMessageCallback<T> {
     public void setEngineCallbackMessageClassType(
             ParameterizedTypeReference engineCallbackMessageClassType) {
         this.engineCallbackMessageClassType = engineCallbackMessageClassType;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }
