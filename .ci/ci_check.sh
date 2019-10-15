@@ -26,14 +26,20 @@ cd -
 sed -i "s/0xb5d83b5265756ec114f13226efd341342d9ed49f/${hello_address}/" src/main/resources/application-sample.yml
 
 #configure WeCross test
-cp nodes/127.0.0.1/sdk/* src/test/resources/
+mkdir -p src/test/resources/bcosconf/bcos1/
+mkdir -p src/test/resources/bcosconf/bcos2/
+cp nodes/127.0.0.1/sdk/* src/test/resources/bcosconf/bcos1/
+cp nodes/127.0.0.1/sdk/* src/test/resources/bcosconf/bcos2/
 cp src/main/resources/application-sample.yml src/test/resources/application.yml
 
 ./gradlew verifyGoogleJavaFormat
 ./gradlew build -x test
 
 #start
-cp nodes/127.0.0.1/sdk/* dist/conf/
+mkdir -p dist/conf/bcosconf/bcos1/
+mkdir -p dist/conf/bcosconf/bcos2/
+cp nodes/127.0.0.1/sdk/* dist/conf/bcosconf/bcos1/
+cp nodes/127.0.0.1/sdk/* dist/conf/bcosconf/bcos2/
 cp src/main/resources/application-sample.yml dist/conf/application.yml
 cd dist
 bash start.sh &

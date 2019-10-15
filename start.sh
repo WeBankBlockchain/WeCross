@@ -6,10 +6,10 @@ function run_wecross() {
         java -cp 'apps/*:lib/*:conf' com.webank.wecross.Application
     elif [ "$(uname -s | grep MINGW | wc -l)" != "0" ]; then
         # Windows
-        java -cp 'apps/*:lib/*:conf' com.webank.wecross.Application
+        java -cp 'apps/*;lib/*;conf' com.webank.wecross.Application
     else
         # GNU/Linux
-        java -cp 'apps/*;lib/*;conf' com.webank.wecross.Application
+        java -cp 'apps/*:lib/*:conf' com.webank.wecross.Application
     fi
 }
 
