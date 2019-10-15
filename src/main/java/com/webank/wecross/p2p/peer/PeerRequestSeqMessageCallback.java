@@ -11,8 +11,7 @@ public class PeerRequestSeqMessageCallback extends P2PMessageCallback<PeerSeqMes
 
     public PeerRequestSeqMessageCallback() {
         super.setEngineCallbackMessageClassType(
-                new ParameterizedTypeReference<P2PHttpResponse<PeerSeqMessageData>>() {
-                });
+                new ParameterizedTypeReference<P2PHttpResponse<PeerSeqMessageData>>() {});
     }
 
     @Override

@@ -134,8 +134,8 @@ public class RestfulP2PService {
         return response;
     }
 
-    @RequestMapping(value = "/p2p/remoteCall", method = RequestMethod.POST)
-    public P2PHttpResponse<Object> handleRemoteCall(
+    @RequestMapping(value = "/p2p/remote", method = RequestMethod.POST)
+    public P2PHttpResponse<Object> handleRemote(
             @PathVariable("method") String method, @RequestBody String p2pRequestString) {
 
         P2PHttpResponse<Object> response = new P2PHttpResponse<Object>();
@@ -145,9 +145,26 @@ public class RestfulP2PService {
         logger.info("request string: {}", p2pRequestString);
 
         try {
-
-            logger.info("request method: remoteCall");
-            response.setMessage("request remoteCall method success");
+            switch (method) {
+                case "call":
+                    {
+                        logger.info("request method: remote/" + method);
+                        response.setMessage("request remote/" + method + " method success");
+                        break;
+                    }
+                case "sendTransaction":
+                    {
+                        logger.info("request method: remote/" + method);
+                        response.setMessage("request remote/" + method + " method success");
+                        break;
+                    }
+                default:
+                    {
+                        response.setResult(-1);
+                        response.setMessage("Unsupport method: stub/" + method);
+                        break;
+                    }
+            }
 
         } catch (Exception e) {
             logger.warn("Process request error:", e);

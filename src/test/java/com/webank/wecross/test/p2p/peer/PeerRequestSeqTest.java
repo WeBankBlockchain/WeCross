@@ -13,9 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PeerRequestSeqTest {
-    class MockPeerRequestSeqMessageCallback extends PeerRequestSeqMessageCallback
-    {
+    class MockPeerRequestSeqMessageCallback extends PeerRequestSeqMessageCallback {
         private Logger logger = LoggerFactory.getLogger(MockPeerRequestSeqMessageCallback.class);
+
         @Override
         public void onResponse(int status, String message, PeerSeqMessageData data) {
             logger.info(
@@ -43,6 +43,5 @@ public class PeerRequestSeqTest {
         MockPeerRequestSeqMessageCallback callback = new MockPeerRequestSeqMessageCallback();
 
         engine.asyncSendMessage(peer, msg, callback);
-
     }
 }
