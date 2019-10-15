@@ -58,6 +58,7 @@ jar {
     exclude '**/*.properties'
     exclude '**/*.crt'
     exclude '**/*.key'
+    exclude '**/*.yml'
 
     manifest {
         attributes(

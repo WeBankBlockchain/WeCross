@@ -23,11 +23,23 @@ hello_address=$(grep 'HelloWorld' deploylog.txt | awk '{print $5}')
 cd -
 
 #configure WeCross
+sed -i "s/0xb5d83b5265756ec114f13226efd341342d9ed49f/${hello_address}/" src/main/resources/application-sample.yml
+
+#configure WeCross test
 cp nodes/127.0.0.1/sdk/* src/test/resources/
 cp src/main/resources/application-sample.yml src/test/resources/application.yml
-sed -i "s/0xb5d83b5265756ec114f13226efd341342d9ed49f/${hello_address}/" src/test/resources/application.yml
 
 ./gradlew verifyGoogleJavaFormat
-./gradlew build
+./gradlew build -x test
+
+#start
+cp nodes/127.0.0.1/sdk/* dist/conf/
+cp src/main/resources/application-sample.yml dist/conf/application.yml
+cd dist
+bash start.sh &
+echo "waiting for startup"
+sleep 10
+cd ..
+
 ./gradlew test
 ./gradlew jacocoTestReport
