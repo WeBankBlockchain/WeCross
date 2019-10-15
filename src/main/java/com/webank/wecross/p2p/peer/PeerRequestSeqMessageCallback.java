@@ -11,14 +11,16 @@ public class PeerRequestSeqMessageCallback extends P2PMessageCallback<PeerSeqMes
 
     public PeerRequestSeqMessageCallback() {
         super.setEngineCallbackMessageClassType(
-                new ParameterizedTypeReference<P2PHttpResponse<PeerSeqMessageData>>() {});
+                new ParameterizedTypeReference<P2PHttpResponse<PeerSeqMessageData>>() {
+                });
     }
 
+    @Override
     public void onResponse(int status, String message, PeerSeqMessageData data) {
         logger.info(
                 "Receive peer seq. status: {} message: {} seq: {}",
                 status,
                 message,
-                data.getDataSeq());
+                data == null ? "null" : data.getDataSeq());
     }
 }
