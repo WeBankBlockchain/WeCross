@@ -6,22 +6,25 @@ import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.State;
 import com.webank.wecross.stub.Stub;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
-import org.fisco.bcos.web3j.utils.Web3AsyncThreadPoolSize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// @org.springframework.stereotype.Service("BCOSStub")
 public class BCOSStub implements Stub {
+
     private Boolean isInit = false;
+
     private String pattern;
+
     private Service bcosService;
+
     private Web3j web3;
+
     private Credentials credentials;
+
     private Map<String, BCOSResource> resources;
 
     private Logger logger = LoggerFactory.getLogger(BCOSStub.class);
@@ -29,22 +32,24 @@ public class BCOSStub implements Stub {
     @Override
     public void init() throws Exception {
         if (!isInit) {
-            ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-            channelEthereumService.setChannelService(bcosService);
-
-            Web3AsyncThreadPoolSize.web3AsyncCorePoolSize = 30;
-            Web3AsyncThreadPoolSize.web3AsyncPoolSize = 20;
-
-            ScheduledExecutorService scheduledExecutorService =
-                    Executors.newScheduledThreadPool(50);
-            setWeb3(Web3j.build(channelEthereumService, 15 * 100, scheduledExecutorService, 1));
-
-            credentials =
-                    Credentials.create(
-                            "00000000000000000000000000000000000000000000000000000000000000");
-
-            bcosService.run();
-            logger.info("BCOS Service start ok!");
+            //            ChannelEthereumService channelEthereumService = new
+            // ChannelEthereumService();
+            //            channelEthereumService.setChannelService(bcosService);
+            //
+            //            Web3AsyncThreadPoolSize.web3AsyncCorePoolSize = 30;
+            //            Web3AsyncThreadPoolSize.web3AsyncPoolSize = 20;
+            //
+            //            ScheduledExecutorService scheduledExecutorService =
+            //                Executors.newScheduledThreadPool(50);
+            //            setWeb3(Web3j.build(channelEthereumService, 15 * 100,
+            // scheduledExecutorService, 1));
+            //
+            //            credentials =
+            //                Credentials.create(
+            //                    "00000000000000000000000000000000000000000000000000000000000000");
+            //
+            //            bcosService.run();
+            //            logger.info("BCOS Service start ok!");
 
             isInit = true;
         }
@@ -72,14 +77,20 @@ public class BCOSStub implements Stub {
         BCOSResource resource = resources.get(uri.getResource());
 
         if (resource != null) {
-            resource.setWeb3(web3);
-            resource.setBcosService(bcosService);
             resource.init(bcosService, web3, credentials);
 
             return resource;
         }
 
         return resource;
+    }
+
+    public Boolean getInit() {
+        return isInit;
+    }
+
+    public void setInit(Boolean init) {
+        isInit = init;
     }
 
     public Service getBcosService() {

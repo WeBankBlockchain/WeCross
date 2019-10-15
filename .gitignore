@@ -40,4 +40,6 @@ console.tar.gz
 nodes/
 console/
 out/
-src/main/resources/WeCrossContext.xml
+src/main/resources/application.yml
+src/main/resources/ca.crt
+src/main/resources/sdk*

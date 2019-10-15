@@ -1,0 +1,70 @@
+bcos-channel-service-manager:
+    channelServices:
+        channel-service1:
+            groupId: 1 # The specified group to which the SDK connects
+            agencyName: fisco # agency name
+            groupChannelConnections:
+                caCert: classpath:/bcosconf/bcos1/ca.crt
+                sslCert: classpath:/bcosconf/bcos1/sdk.crt
+                sslKey: classpath:/bcosconf/bcos1/sdk.key
+                allChannelConnections:
+                    -   groupId: 1 #group ID
+                        connectionsStr:
+                            - 127.0.0.1:20200 # node listen_ip:channel_listen_port
+                            - 127.0.0.1:20201
+                    -   groupId: 2
+                        connectionsStr:
+                            - 127.0.0.1:20202 # node listen_ip:channel_listen_port
+                            - 127.0.0.1:20203
+        channel-service2:
+            groupId: 1 # The specified group to which the SDK connects
+            agencyName: fisco # agency name
+            groupChannelConnections:
+                caCert: classpath:/bcosconf/bcos2/ca.crt
+                sslCert: classpath:/bcosconf/bcos2/sdk.crt
+                sslKey: classpath:/bcosconf/bcos2/sdk.key
+                allChannelConnections:
+                    -   groupId: 1 #group ID
+                        connectionsStr:
+                            - 127.0.0.1:20200 # node listen_ip:channel_listen_port
+                            - 127.0.0.1:20201
+                    -   groupId: 2
+                        connectionsStr:
+                            - 127.0.0.1:20202 # node listen_ip:channel_listen_port
+                            - 127.0.0.1:20203
+
+network-manager:
+    networks:
+        payment:
+            visible: true
+            stubs:
+                bcos1:
+                    pattern: bcos
+                    bcosService: channel-service1
+                    resources:
+                        HelloWorldContract:
+                            type: contract
+                            contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
+                bcos2:
+                    pattern: bcos
+                    bcosService: channel-service2
+                    resources:
+                        HelloWorldContract:
+                            type: contract
+                            contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
+        bill:
+            visible: true
+            stubs:
+                bcos1:
+                    pattern: bcos
+                    bcosService: channel-service1
+                    resources:
+                        HelloWorldContract:
+                            type: contract
+                            contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
+                jd:
+                    pattern: jd
+                    resources:
+                        HelloWorldContract:
+                            type: contract
+                            contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'

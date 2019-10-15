@@ -7,8 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Network {
-    private Map<String, Stub> stubs;
+
     private Logger logger = LoggerFactory.getLogger(Network.class);
+
+    private Map<String, Stub> stubs;
+
+    // Access control
+    private Boolean visible;
 
     public Stub getStub(URI uri) {
         return getStub(uri.getChain());
@@ -33,5 +38,13 @@ public class Network {
 
     public void setStubs(Map<String, Stub> stubs) {
         this.stubs = stubs;
+    }
+
+    public Boolean getVisible() {
+        return visible;
+    }
+
+    public void setVisible(Boolean visible) {
+        this.visible = visible;
     }
 }
