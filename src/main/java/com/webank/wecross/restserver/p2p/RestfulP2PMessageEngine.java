@@ -1,10 +1,10 @@
 package com.webank.wecross.restserver.p2p;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.host.Peer;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.Peer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;

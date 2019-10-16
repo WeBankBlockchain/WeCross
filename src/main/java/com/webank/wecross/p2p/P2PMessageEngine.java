@@ -1,6 +1,6 @@
 package com.webank.wecross.p2p;
 
-import com.webank.wecross.p2p.Peer;
+import com.webank.wecross.host.Peer;
 
 public abstract class P2PMessageEngine {
     public abstract <T> void asyncSendMessage(

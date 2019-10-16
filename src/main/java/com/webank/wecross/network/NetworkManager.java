@@ -1,8 +1,9 @@
-package com.webank.wecross.core;
+package com.webank.wecross.network;
 
-import com.webank.wecross.network.Network;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.stub.StateRequest;
+import com.webank.wecross.stub.StateResponse;
 import com.webank.wecross.stub.Stub;
 import java.util.Map;
 import org.slf4j.Logger;

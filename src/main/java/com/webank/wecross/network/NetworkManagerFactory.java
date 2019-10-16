@@ -1,19 +1,16 @@
-package com.webank.wecross.core.config;
+package com.webank.wecross.network;
 
-import com.webank.wecross.core.NetworkManager;
-import com.webank.wecross.network.Network;
 import java.util.Map;
 import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class NetworkManagerConfig {
-
+public class NetworkManagerFactory {
     @Resource private Map<String, Network> networks;
 
     @Bean
-    public NetworkManager getNetworkManager() {
+    public NetworkManager newNetworkManager() {
         NetworkManager networkManager = new NetworkManager();
         networkManager.setNetworks(networks);
         return networkManager;

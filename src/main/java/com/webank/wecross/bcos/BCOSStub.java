@@ -2,8 +2,7 @@ package com.webank.wecross.bcos;
 
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.stub.BlockHeader;
-import com.webank.wecross.stub.State;
+import com.webank.wecross.stub.ChainState;
 import com.webank.wecross.stub.Stub;
 import java.util.Map;
 import org.fisco.bcos.channel.client.Service;
@@ -61,12 +60,7 @@ public class BCOSStub implements Stub {
     }
 
     @Override
-    public State getState() {
-        return null;
-    }
-
-    @Override
-    public BlockHeader getBlockHeader() {
+    public ChainState getState() {
         return null;
     }
 
