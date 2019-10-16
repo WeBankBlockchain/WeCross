@@ -1,7 +1,7 @@
 package com.webank.wecross.stub;
 
+import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.URI;
 
 public interface Stub {
     public void init() throws Exception;
@@ -12,5 +12,5 @@ public interface Stub {
 
     public BlockHeader getBlockHeader();
 
-    public Resource getResource(URI uri) throws Exception;
+    public Resource getResource(Path path) throws Exception;
 }

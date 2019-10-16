@@ -1,17 +1,17 @@
 package com.webank.wecross.resource;
 
-public class URI {
+public class Path {
     private String network;
     private String chain;
     private String resource;
 
-    public static URI decode(String uri) throws Exception {
-        String[] sp = uri.split("\\.");
+    public static Path decode(String path) throws Exception {
+        String[] sp = path.split("\\.");
         if (sp.length < 3) {
-            throw new Exception("Decode uri error: " + uri);
+            throw new Exception("Decode path error: " + path);
         }
 
-        URI obj = new URI();
+        Path obj = new Path();
         obj.setNetwork(sp[0]);
         obj.setChain(sp[1]);
         obj.setResource(sp[2]);

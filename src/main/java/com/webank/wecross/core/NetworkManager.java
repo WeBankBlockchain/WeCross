@@ -1,8 +1,8 @@
 package com.webank.wecross.core;
 
 import com.webank.wecross.network.Network;
+import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.URI;
 import com.webank.wecross.stub.Stub;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -21,14 +21,14 @@ public class NetworkManager {
         return response;
     }
 
-    public Resource getResource(URI uri) throws Exception {
-        Network network = getNetwork(uri);
+    public Resource getResource(Path path) throws Exception {
+        Network network = getNetwork(path);
 
         if (network != null) {
-            Stub stub = network.getStub(uri);
+            Stub stub = network.getStub(path);
 
             if (stub != null) {
-                Resource resource = stub.getResource(uri);
+                Resource resource = stub.getResource(path);
 
                 return resource;
             }
@@ -37,8 +37,8 @@ public class NetworkManager {
         return null;
     }
 
-    public Network getNetwork(URI uri) {
-        return getNetwork(uri.getNetwork());
+    public Network getNetwork(Path path) {
+        return getNetwork(path.getNetwork());
     }
 
     public Network getNetwork(String name) {
