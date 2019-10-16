@@ -4,23 +4,44 @@ import com.webank.wecross.core.SeqUtil;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
+import com.webank.wecross.p2p.peer.PeerRequestSeqMessageCallback;
+import com.webank.wecross.p2p.peer.PeerRequestSeqMessageData;
 import com.webank.wecross.p2p.peer.PeerSeqMessageData;
 import java.util.Map;
 import javax.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PeerManager {
+    Logger logger = LoggerFactory.getLogger(PeerManager.class);
+
     @Resource(name = "newRestfulP2PMessageEngine")
     private P2PMessageEngine p2pEngine;
 
+    @Resource(name = "initPeers")
+    private Map<String, Peer> peers; // url -> peer
+
     private int seq; // Seq of the host
+
+    @Resource(name = "newSyncPeerMessageHandler")
+    SyncPeerMessageHandler messageHandler;
 
     public void start() {
         newSeq();
-        // broadcastSeq();
+        // TODO broadcastSeq();
     }
 
-    @Resource(name = "initPeers")
-    private Map<String, Peer> peers; // url -> peer
+    public void newSeq() {
+        seq = this.seq = SeqUtil.newSeq();
+    }
+
+    public int getSeq() {
+        return seq;
+    }
+
+    public int peerSize() {
+        return peers.size();
+    }
 
     public synchronized Peer getPeer(String url) {
         if (peers.containsKey(url)) {
@@ -45,6 +66,10 @@ public class PeerManager {
         return peers.get(url).getSeq() != currentSeq;
     }
 
+    public void onSyncPeerMessage(String method, P2PMessage msg) {
+        messageHandler.onSyncPeerMessage(method, msg);
+    }
+
     public <T> void broadcastToPeers(P2PMessage<T> msg, P2PMessageCallback callback) {
         for (Peer peer : peers.values()) {
             p2pEngine.asyncSendMessage(peer, msg, callback);
@@ -62,15 +87,15 @@ public class PeerManager {
         broadcastToPeers(msg, new P2PMessageCallback());
     }
 
-    public void newSeq() {
-        seq = this.seq = SeqUtil.newSeq();
-    }
+    public void broadcastSeqRequest() {
+        PeerRequestSeqMessageData data = new PeerRequestSeqMessageData();
+        P2PMessage<PeerRequestSeqMessageData> msg = new P2PMessage<>();
+        msg.newSeq();
+        msg.setData(data);
+        msg.setVersion("0.1");
+        msg.setType("peer");
+        PeerRequestSeqMessageCallback callback;
 
-    public int getSeq() {
-        return seq;
-    }
-
-    public int peerSize() {
-        return peers.size();
+        broadcastToPeers(msg, new P2PMessageCallback());
     }
 }

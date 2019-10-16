@@ -1,6 +1,7 @@
 package com.webank.wecross.host;
 
 import com.webank.wecross.network.NetworkManager;
+import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.StateRequest;
@@ -26,11 +27,11 @@ public class WeCrossHost {
         return networkManager.getState(request);
     }
 
-    public void syncAllState() {}
-
-    public NetworkManager getNetworkManager() {
-        return networkManager;
+    public void onSyncPeerMessage(String method, P2PMessage msg) {
+        peerManager.onSyncPeerMessage(method, msg);
     }
+
+    public void syncAllState() {}
 
     public void setNetworkManager(NetworkManager networkManager) {
         this.networkManager = networkManager;

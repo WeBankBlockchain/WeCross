@@ -5,7 +5,7 @@ import com.webank.wecross.p2p.P2PMessageData;
 public class PeerRequestSeqMessageData implements P2PMessageData {
     private String version = "0.1";
     private String method = "requestSeq";
-    private Object data;
+    private Object data = new Object();
 
     @Override
     public String getMethod() {

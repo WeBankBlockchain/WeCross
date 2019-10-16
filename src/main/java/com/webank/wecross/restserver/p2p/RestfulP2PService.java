@@ -2,6 +2,7 @@ package com.webank.wecross.restserver.p2p;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.peer.PeerSeqMessageData;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("p2p")
 public class RestfulP2PService {
+    @javax.annotation.Resource private WeCrossHost host;
+
     private Logger logger = LoggerFactory.getLogger(RestfulP2PService.class);
     private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
@@ -50,22 +53,18 @@ public class RestfulP2PService {
                     }
 
                 case "seq":
-                    {
-                        logger.info("request method: peer/" + method);
-                        response.setMessage("request peer/" + method + " method success");
-                        break;
-                    }
-
                 case "requestPeerInfo":
-                    {
-                        logger.info("request method: peer/" + method);
-                        response.setMessage("request peer/" + method + " method success");
-                        break;
-                    }
-
                 case "peerInfo":
                     {
                         logger.info("request method: peer/" + method);
+
+                        P2PMessage<Object> p2pRequest =
+                                objectMapper.readValue(
+                                        p2pRequestString,
+                                        new TypeReference<P2PMessage<Object>>() {});
+
+                        host.onSyncPeerMessage(method, p2pRequest);
+                        response.setSeq(p2pRequest.getSeq());
                         response.setMessage("request peer/" + method + " method success");
                         break;
                     }
