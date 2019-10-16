@@ -5,15 +5,19 @@ import com.jd.blockchain.sdk.BlockchainService;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.GetDataRequest;
 import com.webank.wecross.resource.GetDataResponse;
+import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.SetDataRequest;
 import com.webank.wecross.resource.SetDataResponse;
 import com.webank.wecross.resource.TransactionRequest;
 import com.webank.wecross.resource.TransactionResponse;
-import com.webank.wecross.resource.URI;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class JdChainContractResource extends JdChainResource {
+public class JDChainContractResource extends JDChainResource {
+
+    private Logger logger = LoggerFactory.getLogger(JDChainContractResource.class);
     private Boolean isInit = false;
     private String contractAddress;
 
@@ -26,7 +30,7 @@ public class JdChainContractResource extends JdChainResource {
     }
 
     @Override
-    public URI getURI() {
+    public Path getPath() {
         return null;
     }
 
@@ -43,7 +47,7 @@ public class JdChainContractResource extends JdChainResource {
     @Override
     public TransactionResponse call(TransactionRequest request) {
 
-        JdChainResponse response = new JdChainResponse();
+        JDChainResponse response = new JDChainResponse();
         int channelCount = this.blockchainService.size();
         if (channelCount == 0) {
             response.setErrorCode(-1);
@@ -53,14 +57,13 @@ public class JdChainContractResource extends JdChainResource {
         try {
             random = SecureRandom.getInstance("SHA1PRNG");
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            logger.error("rand Algorithm:{}", e);
         }
         Integer randNum = random.nextInt(channelCount);
         for (int index = 0; index < channelCount; ++index) {
             BlockchainService blockChainService = blockchainService.get(randNum);
             TransactionTemplate txTpl = blockChainService.newTransaction(ledgerHash);
         }
-
         return response;
     }
 
@@ -74,6 +77,6 @@ public class JdChainContractResource extends JdChainResource {
 
     @Override
     public TransactionRequest createRequest() {
-        return new JdChainRequest();
+        return new JDChainRequest();
     }
 }

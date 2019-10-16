@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HostTest {
+    public static String hello(String msg) {
+        return "Hello world: " + msg;
+    }
+
     public static void main(String args[]) {
         Host host = new Host();
         Map<String, PeerStatus> peers = new HashMap<String, PeerStatus>();

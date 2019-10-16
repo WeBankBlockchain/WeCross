@@ -1,8 +1,8 @@
 package com.webank.wecross.jdchain.config;
 
-import com.webank.wecross.jdchain.JdChainContractResource;
-import com.webank.wecross.jdchain.JdChainResource;
-import com.webank.wecross.jdchain.JdChainStub;
+import com.webank.wecross.jdchain.JDChainContractResource;
+import com.webank.wecross.jdchain.JDChainResource;
+import com.webank.wecross.jdchain.JDChainStub;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -13,25 +13,25 @@ public class JDChainStubConfig {
     private final Boolean isInit = false;
     private final String pattern = "jdchain";
 
-    public JdChainStub initJdChainStub(
-            Map<String, jdChainSdk> jdChainSdkMap,
+    public JDChainStub initJdChainStub(
+            Map<String, JDChainSdk> jdChainSdkMap,
             Map<String, Map<String, String>> resources,
             String service) {
-        JdChainStub jdChainStub = new JdChainStub();
+        JDChainStub jdChainStub = new JDChainStub();
         if (!jdChainSdkMap.containsKey(service)) {
             logger.error(
                     "Error in application.yml: services should contain a jdService named {}",
                     service);
             return null;
         }
-        jdChainSdk sdk = jdChainSdkMap.get(service);
+        JDChainSdk sdk = jdChainSdkMap.get(service);
         jdChainStub.setIsInit(isInit);
         jdChainStub.setPattern(pattern);
         jdChainStub.setAdminKey(sdk.getAdminKey());
         jdChainStub.setLedgerHash(sdk.getLedgerHash());
         jdChainStub.setBlockchainService(sdk.getBlockchainService());
 
-        Map<String, JdChainResource> jdChainResources = new HashMap<>();
+        Map<String, JDChainResource> jdChainResources = new HashMap<>();
 
         for (String resourceName : resources.keySet()) {
             Map<String, String> metaResource = resources.get(resourceName);
@@ -49,7 +49,7 @@ public class JDChainStubConfig {
                             "Error in application.yml: {} should contain a key named \"contractAddress\"",
                             resourceName);
                 }
-                JdChainContractResource jcChainContractResource = new JdChainContractResource();
+                JDChainContractResource jcChainContractResource = new JDChainContractResource();
                 String address = metaResource.get("contractAddress");
                 jcChainContractResource.setContractAddress(address);
                 jdChainResources.put(resourceName, jcChainContractResource);

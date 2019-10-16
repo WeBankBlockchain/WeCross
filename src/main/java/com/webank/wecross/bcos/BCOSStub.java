@@ -1,7 +1,7 @@
 package com.webank.wecross.bcos;
 
+import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.URI;
 import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.State;
 import com.webank.wecross.stub.Stub;
@@ -71,10 +71,10 @@ public class BCOSStub implements Stub {
     }
 
     @Override
-    public Resource getResource(URI uri) throws Exception {
-        logger.trace("get resource: {}", uri.getResource());
+    public Resource getResource(Path path) throws Exception {
+        logger.trace("get resource: {}", path.getResource());
 
-        BCOSResource resource = resources.get(uri.getResource());
+        BCOSResource resource = resources.get(path.getResource());
 
         if (resource != null) {
             resource.init(bcosService, web3, credentials);

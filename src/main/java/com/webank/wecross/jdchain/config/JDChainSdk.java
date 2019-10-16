@@ -6,7 +6,7 @@ import com.jd.blockchain.sdk.BlockchainService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class jdChainSdk {
+public class JDChainSdk {
     private BlockchainKeypair adminKey;
     private HashDigest ledgerHash;
     private List<BlockchainService> blockchainService = new ArrayList<BlockchainService>();

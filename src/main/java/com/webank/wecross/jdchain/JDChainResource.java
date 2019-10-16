@@ -6,16 +6,16 @@ import com.jd.blockchain.sdk.BlockchainService;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.GetDataRequest;
 import com.webank.wecross.resource.GetDataResponse;
+import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.SetDataRequest;
 import com.webank.wecross.resource.SetDataResponse;
 import com.webank.wecross.resource.TransactionRequest;
 import com.webank.wecross.resource.TransactionResponse;
-import com.webank.wecross.resource.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JdChainResource implements Resource {
+public class JDChainResource implements Resource {
 
     private Boolean isInit = false;
     protected BlockchainKeypair adminKey;
@@ -59,12 +59,12 @@ public class JdChainResource implements Resource {
     }
 
     @Override
-    public URI getURI() {
+    public GetDataResponse getData(GetDataRequest request) {
         return null;
     }
 
     @Override
-    public GetDataResponse getData(GetDataRequest request) {
+    public Path getPath() {
         return null;
     }
 

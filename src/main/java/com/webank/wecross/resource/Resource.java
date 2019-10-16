@@ -1,7 +1,7 @@
 package com.webank.wecross.resource;
 
 public interface Resource {
-    public URI getURI();
+    public Path getPath();
 
     public GetDataResponse getData(GetDataRequest request);
 

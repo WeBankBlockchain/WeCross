@@ -5,12 +5,12 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class jdChainChannelService {
-    private Logger logger = LoggerFactory.getLogger(jdChainChannelService.class);
+public class JDChainService {
+    private Logger logger = LoggerFactory.getLogger(JDChainService.class);
     private String privateKey;
     private String publicKey;
     private String passWord;
-    private List<String> allChannelConnections = new ArrayList<>();
+    private List<String> connectionsStr = new ArrayList<>();
 
     public String getPrivateKey() {
         return privateKey;
@@ -36,11 +36,11 @@ public class jdChainChannelService {
         this.passWord = passWord;
     }
 
-    public List<String> getAllChannelConnections() {
-        return allChannelConnections;
+    public List<String> getConnectionsStr() {
+        return connectionsStr;
     }
 
-    public void setAllChannelConnections(List<String> allChannelConnections) {
-        this.allChannelConnections = allChannelConnections;
+    public void setConnectionsStr(List<String> connectionsStr) {
+        this.connectionsStr = connectionsStr;
     }
 }

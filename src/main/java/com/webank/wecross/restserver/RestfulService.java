@@ -7,13 +7,12 @@ import com.webank.wecross.core.StateRequest;
 import com.webank.wecross.core.StateResponse;
 import com.webank.wecross.resource.GetDataRequest;
 import com.webank.wecross.resource.GetDataResponse;
+import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.SetDataRequest;
 import com.webank.wecross.resource.SetDataResponse;
 import com.webank.wecross.resource.TransactionRequest;
 import com.webank.wecross.resource.TransactionResponse;
-import com.webank.wecross.resource.URI;
-import com.webank.wecross.restserver.p2p.P2PResponse;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +38,7 @@ public class RestfulService {
     }
 
     @RequestMapping(value = "/state")
-    public RestResponse<StateResponse> handleState() {
+    public RestResponse<StateResponse> handlesState() {
         RestResponse<StateResponse> restResponse = new RestResponse<StateResponse>();
 
         StateResponse stateResponse = networkManager.getState(new StateRequest());
@@ -83,10 +82,10 @@ public class RestfulService {
             @PathVariable("resource") String resource,
             @PathVariable("method") String method,
             @RequestBody String restRequestString) {
-        URI uri = new URI();
-        uri.setNetwork(network);
-        uri.setChain(stub);
-        uri.setResource(resource);
+        Path path = new Path();
+        path.setNetwork(network);
+        path.setChain(stub);
+        path.setResource(resource);
 
         RestResponse<Object> restResponse = new RestResponse<Object>();
         restResponse.setVersion("0.1");
@@ -95,7 +94,7 @@ public class RestfulService {
         logger.info("request string: {}", restRequestString);
 
         try {
-            Resource resourceObj = networkManager.getResource(uri);
+            Resource resourceObj = networkManager.getResource(path);
             if (resourceObj == null) {
                 logger.warn("Unable to find resource: {}.{}.{}", network, stub, resource);
 
@@ -181,58 +180,6 @@ public class RestfulService {
         }
 
         return restResponse;
-    }
-
-    @RequestMapping(value = "/p2p/{method}", method = RequestMethod.POST)
-    public P2PResponse<Object> handleP2pMessage(
-            @PathVariable("method") String method, @RequestBody String restRequestString) {
-
-        P2PResponse<Object> response = new P2PResponse<Object>();
-        response.setVersion("0.1");
-        response.setResult(0);
-
-        logger.info("request string: {}", restRequestString);
-
-        try {
-
-            switch (method) {
-                case "peer":
-                    {
-                        logger.info("request peer method");
-                        response.setMessage("request peer method success");
-                        break;
-                    }
-
-                case "stub":
-                    {
-                        logger.info("request stub method");
-                        response.setMessage("request stub method success");
-                        break;
-                    }
-
-                case "remoteCall":
-                    {
-                        logger.info("request remoteCall method");
-                        response.setMessage("request remoteCall method success");
-                        break;
-                    }
-
-                default:
-                    {
-                        response.setResult(-1);
-                        response.setMessage("Unsupport method: " + method);
-                        break;
-                    }
-            }
-
-        } catch (Exception e) {
-            logger.warn("Process request error:", e);
-
-            response.setResult(-1);
-            response.setMessage(e.getLocalizedMessage());
-        }
-
-        return response;
     }
 
     public NetworkManager getNetworkManager() {

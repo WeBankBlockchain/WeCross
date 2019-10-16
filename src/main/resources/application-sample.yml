@@ -32,23 +32,22 @@ bcos-channel-service-manager:
                         connectionsStr:
                             - 127.0.0.1:20202 # node listen_ip:channel_listen_port
                             - 127.0.0.1:20203
-                            
-jdchain-channel-service-manager:
+jdchain-service-manager:
     services:
         jd-service1:
-        	privateKey:abcdefg_1
-        	publicKey:abcdefg_1
-        	passWord:abcdefg_1
-        	connectionsStr:
-				- 127.0.0.1:18080
-				- 127.0.0.1:18081
+            privateKey: 0000000000000000
+            publicKey: 111111111111111
+            passWord: 222222222222222
+            connectionsStr:
+              - 127.0.0.1:18080
+              - 127.0.0.1:18081
         jd-service2:
-        	privateKey:abcdefg_2
-        	publicKey:abcdefg_2
-        	passWord:abcdefg_1
-        	connectionsStr:
-				- 127.0.0.1:18082
-				- 127.0.0.1:18083
+            privateKey: 0000000000000000
+            publicKey: 111111111111111
+            passWord: 222222222222222
+            connectionsStr:
+              - 127.0.0.1:18082
+              - 127.0.0.1:18083
 network-manager:
     networks:
         payment:
