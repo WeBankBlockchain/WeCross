@@ -49,6 +49,10 @@ dependencies {
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.1.4.RELEASE'
+    
+    compile 'com.alibaba:fastjson:1.2.62'
+    compile 'com.jd.blockchain:sdk-pack:1.1.0.RELEASE'
+    compile 'com.jd.blockchain:crypto-pki:1.1.0.RELEASE'
 }
 
 jar {

@@ -32,7 +32,23 @@ bcos-channel-service-manager:
                         connectionsStr:
                             - 127.0.0.1:20202 # node listen_ip:channel_listen_port
                             - 127.0.0.1:20203
-
+                            
+jdchain-channel-service-manager:
+    services:
+        jd-service1:
+        	privateKey:abcdefg_1
+        	publicKey:abcdefg_1
+        	passWord:abcdefg_1
+        	connectionsStr:
+				- 127.0.0.1:18080
+				- 127.0.0.1:18081
+        jd-service2:
+        	privateKey:abcdefg_2
+        	publicKey:abcdefg_2
+        	passWord:abcdefg_1
+        	connectionsStr:
+				- 127.0.0.1:18082
+				- 127.0.0.1:18083
 network-manager:
     networks:
         payment:
@@ -64,6 +80,7 @@ network-manager:
                             contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
                 jd:
                     pattern: jd
+                    jdService: jd-service1
                     resources:
                         HelloWorldContract:
                             type: contract
