@@ -8,14 +8,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class WeCrossHostFactory {
     @Resource NetworkManager networkManager;
-    // @Resource
-    // PeerManager peerManager;
+
+    @Resource(name = "newPeerManager")
+    PeerManager peerManager;
 
     @Bean
     public WeCrossHost newWeCrossHost() {
         WeCrossHost host = new WeCrossHost();
         host.setNetworkManager(networkManager);
-        host.setPeerManager(new PeerManager());
+        host.setPeerManager(peerManager);
         host.start();
         return host;
     }

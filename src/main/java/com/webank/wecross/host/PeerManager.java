@@ -10,7 +10,7 @@ import javax.annotation.Resource;
 
 public class PeerManager {
     @Resource(name = "newRestfulP2PMessageEngine")
-    P2PMessageEngine p2pEngine;
+    private P2PMessageEngine p2pEngine;
 
     private int seq; // Seq of the host
 
@@ -19,6 +19,7 @@ public class PeerManager {
         // broadcastSeq();
     }
 
+    @Resource(name = "initPeers")
     private Map<String, Peer> peers; // url -> peer
 
     public synchronized Peer getPeer(String url) {
@@ -50,14 +51,6 @@ public class PeerManager {
         }
     }
 
-    public void newSeq() {
-        seq = this.seq = SeqUtil.newSeq();
-    }
-
-    public int getSeq() {
-        return seq;
-    }
-
     public void broadcastSeq() {
         PeerSeqMessageData data = new PeerSeqMessageData();
         data.setDataSeq(this.getSeq());
@@ -67,5 +60,17 @@ public class PeerManager {
         msg.setVersion("0.1");
         msg.setType("peer");
         broadcastToPeers(msg, new P2PMessageCallback());
+    }
+
+    public void newSeq() {
+        seq = this.seq = SeqUtil.newSeq();
+    }
+
+    public int getSeq() {
+        return seq;
+    }
+
+    public int peerSize() {
+        return peers.size();
     }
 }
