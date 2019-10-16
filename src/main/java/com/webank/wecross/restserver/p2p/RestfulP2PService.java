@@ -7,16 +7,15 @@ import com.webank.wecross.p2p.peer.PeerSeqMessageData;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@SpringBootApplication
+@RequestMapping("p2p")
 public class RestfulP2PService {
     private Logger logger = LoggerFactory.getLogger(RestfulP2PService.class);
     private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
-    @RequestMapping(value = "/p2p/peer/{method}", method = RequestMethod.POST)
+    @RequestMapping(value = "/peer/{method}", method = RequestMethod.POST)
     public P2PHttpResponse<Object> handlePeer(
             @PathVariable("method") String method, @RequestBody String p2pRequestString) {
 
@@ -89,7 +88,7 @@ public class RestfulP2PService {
         return response;
     }
 
-    @RequestMapping(value = "/p2p/stub/{method}", method = RequestMethod.POST)
+    @RequestMapping(value = "/stub/{method}", method = RequestMethod.POST)
     public P2PHttpResponse<Object> handleStub(
             @PathVariable("method") String method, @RequestBody String p2pRequestString) {
 
@@ -134,7 +133,7 @@ public class RestfulP2PService {
         return response;
     }
 
-    @RequestMapping(value = "/p2p/remote", method = RequestMethod.POST)
+    @RequestMapping(value = "/remote", method = RequestMethod.POST)
     public P2PHttpResponse<Object> handleRemote(
             @PathVariable("method") String method, @RequestBody String p2pRequestString) {
 
