@@ -58,6 +58,7 @@ jar {
     exclude '**/*.properties'
     exclude '**/*.crt'
     exclude '**/*.key'
+    exclude '**/*.yml'
 
     manifest {
         attributes(
@@ -77,6 +78,10 @@ jar {
         }
         copy {
             from file('.').listFiles().findAll { File f -> (f.name.endsWith('.sh') || f.name.endsWith('.env')) }
+            into 'dist'
+        }
+        copy {
+            from file('scripts/')
             into 'dist'
         }
     }
