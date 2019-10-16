@@ -1,6 +1,6 @@
 package com.webank.wecross.network;
 
-import com.webank.wecross.resource.URI;
+import com.webank.wecross.resource.Path;
 import com.webank.wecross.stub.Stub;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -15,8 +15,8 @@ public class Network {
     // Access control
     private Boolean visible;
 
-    public Stub getStub(URI uri) {
-        return getStub(uri.getChain());
+    public Stub getStub(Path path) {
+        return getStub(path.getChain());
     }
 
     public Stub getStub(String name) {

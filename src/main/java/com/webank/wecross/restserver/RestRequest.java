@@ -2,7 +2,7 @@ package com.webank.wecross.restserver;
 
 public class RestRequest<T> {
     private String version;
-    private String uri;
+    private String path;
     private String method;
     private String sig;
     private T data;
@@ -15,12 +15,12 @@ public class RestRequest<T> {
         this.version = version;
     }
 
-    public String getUri() {
-        return uri;
+    public String getPath() {
+        return path;
     }
 
-    public void setUri(String uri) {
-        this.uri = uri;
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public String getMethod() {

@@ -7,12 +7,12 @@ import com.webank.wecross.core.StateRequest;
 import com.webank.wecross.core.StateResponse;
 import com.webank.wecross.resource.GetDataRequest;
 import com.webank.wecross.resource.GetDataResponse;
+import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.SetDataRequest;
 import com.webank.wecross.resource.SetDataResponse;
 import com.webank.wecross.resource.TransactionRequest;
 import com.webank.wecross.resource.TransactionResponse;
-import com.webank.wecross.resource.URI;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,10 +82,10 @@ public class RestfulService {
             @PathVariable("resource") String resource,
             @PathVariable("method") String method,
             @RequestBody String restRequestString) {
-        URI uri = new URI();
-        uri.setNetwork(network);
-        uri.setChain(stub);
-        uri.setResource(resource);
+        Path path = new Path();
+        path.setNetwork(network);
+        path.setChain(stub);
+        path.setResource(resource);
 
         RestResponse<Object> restResponse = new RestResponse<Object>();
         restResponse.setVersion("0.1");
@@ -94,7 +94,7 @@ public class RestfulService {
         logger.info("request string: {}", restRequestString);
 
         try {
-            Resource resourceObj = networkManager.getResource(uri);
+            Resource resourceObj = networkManager.getResource(path);
             if (resourceObj == null) {
                 logger.warn("Unable to find resource: {}.{}.{}", network, stub, resource);
 
