@@ -34,7 +34,7 @@ public class PeerManager {
 
     public void start() {
         newSeq();
-        // TODO broadcastSeq();
+        //  broadcastSeq();
     }
 
     public void newSeq() {
@@ -114,7 +114,7 @@ public class PeerManager {
         msg.setType("peer");
         PeerRequestSeqMessageCallback callback;
 
-        broadcastToPeers(msg, new P2PMessageCallback()); // TODO add callback
+        broadcastToPeers(msg, new P2PMessageCallback()); //  add callback
     }
 
     public PeerSeqMessageData handleRequestSeq() {

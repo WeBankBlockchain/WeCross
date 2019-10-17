@@ -36,7 +36,12 @@ public class SyncPeerMessageHandler {
                         try {
                             handleSyncPeerMessage(url, method, msg);
                         } catch (Exception e) {
-
+                            logger.warn(
+                                    "handleSyncPeerMessage exception:{} url:{} method:{} msg:{}",
+                                    e.toString(),
+                                    url,
+                                    method,
+                                    msg);
                         }
                     }
                 });
