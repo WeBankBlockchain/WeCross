@@ -2,9 +2,7 @@ package com.webank.wecross.restserver;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.wecross.core.NetworkManager;
-import com.webank.wecross.core.StateRequest;
-import com.webank.wecross.core.StateResponse;
+import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.resource.GetDataRequest;
 import com.webank.wecross.resource.GetDataResponse;
 import com.webank.wecross.resource.Path;
@@ -13,6 +11,8 @@ import com.webank.wecross.resource.SetDataRequest;
 import com.webank.wecross.resource.SetDataResponse;
 import com.webank.wecross.resource.TransactionRequest;
 import com.webank.wecross.resource.TransactionResponse;
+import com.webank.wecross.stub.StateRequest;
+import com.webank.wecross.stub.StateResponse;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @SpringBootApplication
 public class RestfulService {
-
-    @javax.annotation.Resource private NetworkManager networkManager;
+    @javax.annotation.Resource private WeCrossHost host;
 
     private Logger logger = LoggerFactory.getLogger(RestfulService.class);
     private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
@@ -41,7 +40,7 @@ public class RestfulService {
     public RestResponse<StateResponse> handlesState() {
         RestResponse<StateResponse> restResponse = new RestResponse<StateResponse>();
 
-        StateResponse stateResponse = networkManager.getState(new StateRequest());
+        StateResponse stateResponse = host.getState(new StateRequest());
         restResponse.setVersion("0.1");
         restResponse.setResult(0);
         restResponse.setData(stateResponse);
@@ -94,7 +93,7 @@ public class RestfulService {
         logger.info("request string: {}", restRequestString);
 
         try {
-            Resource resourceObj = networkManager.getResource(path);
+            Resource resourceObj = host.getResource(path);
             if (resourceObj == null) {
                 logger.warn("Unable to find resource: {}.{}.{}", network, stub, resource);
 
@@ -180,13 +179,5 @@ public class RestfulService {
         }
 
         return restResponse;
-    }
-
-    public NetworkManager getNetworkManager() {
-        return networkManager;
-    }
-
-    public void setNetworkManager(NetworkManager networkManager) {
-        this.networkManager = networkManager;
     }
 }

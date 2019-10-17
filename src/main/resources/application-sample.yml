@@ -68,3 +68,9 @@ network-manager:
                         HelloWorldContract:
                             type: contract
                             contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
+
+peer-manager:
+    peers:
+        - peerA@127.0.0.1:8081
+        - peerB@127.0.0.1:8082
+
