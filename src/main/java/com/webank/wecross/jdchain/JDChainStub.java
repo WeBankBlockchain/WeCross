@@ -6,12 +6,12 @@ import com.jd.blockchain.sdk.BlockchainService;
 import com.webank.wecross.jdchain.config.JDChainSdk;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.stub.BlockHeader;
-import com.webank.wecross.stub.State;
+import com.webank.wecross.stub.ChainState;
 import com.webank.wecross.stub.Stub;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,16 +79,6 @@ public class JDChainStub implements Stub {
     }
 
     @Override
-    public State getState() {
-        return null;
-    }
-
-    @Override
-    public BlockHeader getBlockHeader() {
-        return null;
-    }
-
-    @Override
     public Resource getResource(Path path) throws Exception {
         logger.trace("get resource: {}", path.getResource());
         JDChainResource resource = resources.get(path.getResource());
@@ -97,5 +87,17 @@ public class JDChainStub implements Stub {
             return resource;
         }
         return resource;
+    }
+
+    @Override
+    public ChainState getState() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Set<String> getAllResourceName() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

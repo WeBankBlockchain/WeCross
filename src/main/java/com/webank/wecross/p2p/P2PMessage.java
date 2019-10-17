@@ -1,17 +1,16 @@
 package com.webank.wecross.p2p;
 
-import java.security.SecureRandom;
+import com.webank.wecross.core.SeqUtils;
 
 public class P2PMessage<T> {
-    static final int SEQ_BOUND = Integer.MAX_VALUE - 1;
     private String version;
     private String type;
     private int seq;
     private T data;
 
     public void newSeq() {
-        SecureRandom rand = new SecureRandom();
-        this.seq = rand.nextInt(SEQ_BOUND);
+
+        this.seq = SeqUtils.newSeq();
     }
 
     public int getSeq() {

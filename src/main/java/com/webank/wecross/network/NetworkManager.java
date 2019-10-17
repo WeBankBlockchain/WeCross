@@ -1,10 +1,14 @@
-package com.webank.wecross.core;
+package com.webank.wecross.network;
 
-import com.webank.wecross.network.Network;
+import com.webank.wecross.core.PathUtils;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.stub.StateRequest;
+import com.webank.wecross.stub.StateResponse;
 import com.webank.wecross.stub.Stub;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,5 +65,19 @@ public class NetworkManager {
 
     public void setSeq(int seq) {
         this.seq = seq;
+    }
+
+    public Set<String> getAllNetworkStubResourceName() {
+        Set<String> ret = new HashSet<>();
+
+        for (Map.Entry<String, Network> entry : networks.entrySet()) {
+            String networkName = PathUtils.toPureName(entry.getKey());
+            Set<String> allStubResourceName = entry.getValue().getAllStubResourceName();
+
+            for (String stubResourceName : allStubResourceName) {
+                ret.add(networkName + "/" + stubResourceName);
+            }
+        }
+        return ret;
     }
 }
