@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.p2p.P2PMessage;
+import com.webank.wecross.p2p.peer.PeerInfoMessageData;
 import com.webank.wecross.p2p.peer.PeerSeqMessageData;
+import javax.servlet.http.HttpServletRequest;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +22,9 @@ public class RestfulP2PService {
 
     @RequestMapping(value = "/peer/{method}", method = RequestMethod.POST)
     public P2PHttpResponse<Object> handlePeer(
-            @PathVariable("method") String method, @RequestBody String p2pRequestString) {
+            @PathVariable("method") String method,
+            @RequestBody String p2pRequestString,
+            HttpServletRequest request) {
 
         P2PHttpResponse<Object> response = new P2PHttpResponse<Object>();
         response.setVersion("0.1");
@@ -29,44 +33,42 @@ public class RestfulP2PService {
         logger.info("request string: {}", p2pRequestString);
 
         try {
-
+            logger.info("request method: peer/" + method);
+            P2PMessage<Object> p2pRequest =
+                    objectMapper.readValue(
+                            p2pRequestString, new TypeReference<P2PMessage<Object>>() {});
+            response.setSeq(p2pRequest.getSeq());
             switch (method) {
                 case "requestSeq":
                     {
-                        logger.info("request method: peer/" + method);
-                        P2PMessage<Object> p2pRequest =
-                                objectMapper.readValue(
-                                        p2pRequestString,
-                                        new TypeReference<P2PMessage<Object>>() {});
+                        PeerSeqMessageData data =
+                                (PeerSeqMessageData)
+                                        host.onSyncPeerMessage(
+                                                request.getRemoteAddr(), method, p2pRequest);
 
-                        PeerSeqMessageData data = new PeerSeqMessageData();
-
-                        // --------- mock handle seq request here
-                        data.setDataSeq(666);
-                        // --------- end
-
-                        response.setSeq(p2pRequest.getSeq());
                         response.setResult(0);
                         response.setMessage("request peer/" + method + " method success");
                         response.setData(data);
                         break;
                     }
-
-                case "seq":
                 case "requestPeerInfo":
+                    {
+                        PeerInfoMessageData data =
+                                (PeerInfoMessageData)
+                                        host.onSyncPeerMessage(
+                                                request.getRemoteAddr(), method, p2pRequest);
+
+                        response.setResult(0);
+                        response.setMessage("request peer/" + method + " method success");
+                        response.setData(data);
+                        break;
+                    }
+                case "seq":
                 case "peerInfo":
                     {
-                        logger.info("request method: peer/" + method);
-
-                        P2PMessage<Object> p2pRequest =
-                                objectMapper.readValue(
-                                        p2pRequestString,
-                                        new TypeReference<P2PMessage<Object>>() {});
-
-                        host.onSyncPeerMessage(method, p2pRequest);
-                        response.setSeq(p2pRequest.getSeq());
-                        response.setMessage("request peer/" + method + " method success");
-                        break;
+                        // host.onSyncPeerMessage(request.getRemoteAddr(), method, p2pRequest);
+                        // response.setMessage("request peer/" + method + " method success");
+                        // break;
                     }
                 default:
                     {

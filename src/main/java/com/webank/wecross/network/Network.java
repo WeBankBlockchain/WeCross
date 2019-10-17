@@ -1,8 +1,11 @@
 package com.webank.wecross.network;
 
+import com.webank.wecross.core.PathUtils;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.stub.Stub;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,5 +49,19 @@ public class Network {
 
     public void setVisible(Boolean visible) {
         this.visible = visible;
+    }
+
+    public Set<String> getAllStubResourceName() {
+        Set<String> ret = new HashSet<>();
+
+        for (Map.Entry<String, Stub> entry : stubs.entrySet()) {
+            String stubName = PathUtils.toPureName(entry.getKey());
+            Set<String> allResourceName = entry.getValue().getAllResourceName();
+
+            for (String resourceName : allResourceName) {
+                ret.add(stubName + "/" + PathUtils.toPureName(resourceName));
+            }
+        }
+        return ret;
     }
 }

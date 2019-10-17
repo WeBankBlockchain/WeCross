@@ -1,6 +1,6 @@
 package com.webank.wecross.p2p;
 
-import com.webank.wecross.core.SeqUtil;
+import com.webank.wecross.core.SeqUtils;
 
 public class P2PMessage<T> {
     private String version;
@@ -10,7 +10,7 @@ public class P2PMessage<T> {
 
     public void newSeq() {
 
-        this.seq = SeqUtil.newSeq();
+        this.seq = SeqUtils.newSeq();
     }
 
     public int getSeq() {

@@ -2,7 +2,7 @@ package com.webank.wecross.core;
 
 import java.security.SecureRandom;
 
-public class SeqUtil {
+public class SeqUtils {
     static final int SEQ_BOUND = Integer.MAX_VALUE - 1;
 
     public static int newSeq() {

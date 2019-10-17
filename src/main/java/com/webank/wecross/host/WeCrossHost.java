@@ -2,6 +2,7 @@ package com.webank.wecross.host;
 
 import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
+import com.webank.wecross.p2p.P2PMessageData;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.StateRequest;
@@ -27,8 +28,8 @@ public class WeCrossHost {
         return networkManager.getState(request);
     }
 
-    public void onSyncPeerMessage(String method, P2PMessage msg) {
-        peerManager.onSyncPeerMessage(method, msg);
+    public P2PMessageData onSyncPeerMessage(String url, String method, P2PMessage msg) {
+        return peerManager.onSyncPeerMessage(url, method, msg);
     }
 
     public void syncAllState() {}
