@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.peer.PeerInfoMessageData;
+import com.webank.wecross.p2p.peer.PeerRequestPeerInfoMessageData;
+import com.webank.wecross.p2p.peer.PeerRequestSeqMessageData;
 import com.webank.wecross.p2p.peer.PeerSeqMessageData;
 import javax.servlet.http.HttpServletRequest;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
@@ -33,46 +35,85 @@ public class RestfulP2PService {
         logger.info("request string: {}", p2pRequestString);
 
         try {
-            logger.info("request method: peer/" + method);
-            P2PMessage<Object> p2pRequest =
-                    objectMapper.readValue(
-                            p2pRequestString, new TypeReference<P2PMessage<Object>>() {});
-            response.setSeq(p2pRequest.getSeq());
+
             switch (method) {
                 case "requestSeq":
                     {
+                        logger.info("request method: peer/" + method);
+                        P2PMessage<PeerRequestSeqMessageData> p2pRequest =
+                                objectMapper.readValue(
+                                        p2pRequestString,
+                                        new TypeReference<
+                                                P2PMessage<PeerRequestSeqMessageData>>() {});
+
                         PeerSeqMessageData data =
-                                (PeerSeqMessageData)
-                                        host.onSyncPeerMessage(
-                                                request.getRemoteAddr(), method, p2pRequest);
+                                (PeerSeqMessageData) host.onRestfulPeerMessage(method, p2pRequest);
 
                         response.setResult(0);
                         response.setMessage("request peer/" + method + " method success");
+                        response.setSeq(p2pRequest.getSeq());
                         response.setData(data);
                         break;
                     }
                 case "requestPeerInfo":
                     {
+                        logger.info("request method: peer/" + method);
+                        P2PMessage<PeerRequestPeerInfoMessageData> p2pRequest =
+                                objectMapper.readValue(
+                                        p2pRequestString,
+                                        new TypeReference<
+                                                P2PMessage<PeerRequestPeerInfoMessageData>>() {});
+
                         PeerInfoMessageData data =
-                                (PeerInfoMessageData)
-                                        host.onSyncPeerMessage(
-                                                request.getRemoteAddr(), method, p2pRequest);
+                                (PeerInfoMessageData) host.onRestfulPeerMessage(method, p2pRequest);
 
                         response.setResult(0);
                         response.setMessage("request peer/" + method + " method success");
+                        response.setSeq(p2pRequest.getSeq());
                         response.setData(data);
                         break;
                     }
                 case "seq":
+                    {
+                        logger.info("request method: peer/" + method);
+                        P2PMessage<PeerSeqMessageData> p2pRequest =
+                                objectMapper.readValue(
+                                        p2pRequestString,
+                                        new TypeReference<P2PMessage<PeerSeqMessageData>>() {});
+
+                        host.onRestfulPeerMessage(method, p2pRequest);
+
+                        response.setResult(0);
+                        response.setMessage("request peer/" + method + " method success");
+                        response.setSeq(p2pRequest.getSeq());
+                        response.setData(null);
+                        break;
+                    }
                 case "peerInfo":
                     {
-                        // host.onSyncPeerMessage(request.getRemoteAddr(), method, p2pRequest);
-                        // response.setMessage("request peer/" + method + " method success");
-                        // break;
+                        logger.info("request method: peer/" + method);
+                        P2PMessage<PeerInfoMessageData> p2pRequest =
+                                objectMapper.readValue(
+                                        p2pRequestString,
+                                        new TypeReference<P2PMessage<PeerInfoMessageData>>() {});
+
+                        host.onRestfulPeerMessage(method, p2pRequest);
+
+                        response.setResult(0);
+                        response.setMessage("request peer/" + method + " method success");
+                        response.setSeq(p2pRequest.getSeq());
+                        response.setData(null);
+                        break;
                     }
                 default:
                     {
+                        logger.info("request method: peer/" + method);
+                        P2PMessage<Object> p2pRequest =
+                                objectMapper.readValue(
+                                        p2pRequestString,
+                                        new TypeReference<P2PMessage<Object>>() {});
                         response.setResult(-1);
+                        response.setSeq(p2pRequest.getSeq());
                         response.setMessage("Unsupport method: peer/" + method);
                         break;
                     }

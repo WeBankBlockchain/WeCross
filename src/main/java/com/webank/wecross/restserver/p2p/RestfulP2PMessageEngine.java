@@ -13,6 +13,8 @@ import org.springframework.web.client.RestTemplate;
 public class RestfulP2PMessageEngine extends P2PMessageEngine {
     private Logger logger = LoggerFactory.getLogger(RestfulP2PMessageEngine.class);
 
+    private int serverPort;
+
     private <T> void checkP2PMessage(P2PMessage<T> msg) throws Exception {
         if (msg.getVersion().isEmpty()) {
             throw new Exception("message version is empty");
@@ -28,6 +30,9 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
     private void checkCallback(P2PMessageCallback callback) throws Exception {
         if (callback.getEngineCallbackMessageClassType() == null) {
             throw new Exception("callback getEngineCallbackMessageClassType has not set");
+        }
+        if (callback.getPeer() == null) {
+            throw new Exception("callback from peer has not set");
         }
     }
 
@@ -45,7 +50,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
             checkCallback(callback);
 
             RestTemplate restTemplate = new RestTemplate();
-            String url = peer.getUrl() + "/p2p/" + msg.toUri();
+            String url = "http://" + peer.getUrl() + "/p2p/" + msg.toUri();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -72,7 +77,9 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
                 ObjectMapper objMapper = new ObjectMapper();
                 callback.setStatus(responseMsg.getResult());
                 callback.setMessage(responseMsg.getMessage());
-                callback.setData(responseMsg.getData());
+                callback.setData(
+                        responseMsg.toP2PMessage(
+                                msg.getType())); // callback type is the same as msg
                 callback.execute();
             }
 
@@ -83,5 +90,13 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
             callback.setData(null);
             callback.execute();
         }
+    }
+
+    public int getServerPort() {
+        return serverPort;
+    }
+
+    public void setServerPort(int serverPort) {
+        this.serverPort = serverPort;
     }
 }
