@@ -1,0 +1,61 @@
+bcos-channel-service-manager:
+    channelServices:
+        channel-service1:
+            groupId: 1 # The specified group to which the SDK connects
+            agencyName: fisco # agency name
+            groupChannelConnections:
+                caCert: classpath:/bcosconf/bcos1/ca.crt
+                sslCert: classpath:/bcosconf/bcos1/sdk.crt
+                sslKey: classpath:/bcosconf/bcos1/sdk.key
+                allChannelConnections:
+
+        channel-service2:
+            groupId: 1 # The specified group to which the SDK connects
+            agencyName: fisco # agency name
+            groupChannelConnections:
+                caCert: classpath:/bcosconf/bcos2/ca.crt
+                sslCert: classpath:/bcosconf/bcos2/sdk.crt
+                sslKey: classpath:/bcosconf/bcos2/sdk.key
+                allChannelConnections:
+
+
+network-manager:
+    networks:
+        payment:
+            visible: true
+            stubs:
+                bcos1:
+                    pattern: bcos
+                    bcosService: channel-service1
+                    resources:
+                        HelloWorldContract:
+                            type: contract
+                            contractAddress: '0xc91d1f693c1c1236cc33ba4f8d11ea90ab7d6519'
+                bcos2:
+                    pattern: bcos
+                    bcosService: channel-service2
+                    resources:
+                        HelloWorldContract:
+                            type: contract
+                            contractAddress: '0xc91d1f693c1c1236cc33ba4f8d11ea90ab7d6519'
+        bill:
+            visible: true
+            stubs:
+                bcos1:
+                    pattern: bcos
+                    bcosService: channel-service1
+                    resources:
+                        HelloWorldContract:
+                            type: contract
+                            contractAddress: '0xc91d1f693c1c1236cc33ba4f8d11ea90ab7d6519'
+                jd:
+                    pattern: jd
+                    resources:
+                        HelloWorldContract:
+                            type: contract
+                            contractAddress: '0xc91d1f693c1c1236cc33ba4f8d11ea90ab7d6519'
+
+peer-manager:
+    peers:
+        - peerA@127.0.0.1:8081
+        - peerB@127.0.0.1:8082
