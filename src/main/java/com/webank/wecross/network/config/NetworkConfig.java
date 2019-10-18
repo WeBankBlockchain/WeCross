@@ -3,6 +3,9 @@ package com.webank.wecross.network.config;
 import com.webank.wecross.bcos.BCOSStub;
 import com.webank.wecross.bcos.config.BCOSStubConfig;
 import com.webank.wecross.bcos.config.Web3Sdk;
+import com.webank.wecross.jdchain.JDChainStub;
+import com.webank.wecross.jdchain.config.JDChainSdk;
+import com.webank.wecross.jdchain.config.JDChainStubConfig;
 import com.webank.wecross.network.Network;
 import com.webank.wecross.stub.Stub;
 import java.util.HashMap;
@@ -25,6 +28,8 @@ public class NetworkConfig {
     private Map<String, NetworkUnit> networks;
 
     @Resource Map<String, Web3Sdk> web3SdkMap;
+
+    @Resource Map<String, JDChainSdk> jdChainSdkMap;
 
     @Bean
     public Map<String, Network> initNetworks() {
@@ -94,9 +99,29 @@ public class NetworkConfig {
                         bcosStubConfig.initBCOSStub(web3SdkMap, bcosResources, bcosService);
                 stubsBean.put(stubName, bcosStub);
 
-            } else if (Stubtype.equals("jd")) {
+            } else if (Stubtype.equals("jdchain")) {
                 // To be defined
-                continue;
+                if (!stubConfig.containsKey("jdService")) {
+                    logger.error(
+                            "Error in application.yml: {} should contain a key named \"jdService\"",
+                            stubName);
+                    return null;
+                }
+                String jdChainService = (String) stubConfig.get("jdService");
+                if (!stubConfig.containsKey("resources")) {
+                    logger.error(
+                            "Error in application.yml: {} should contain a key named \"resources\"",
+                            stubName);
+                    return null;
+                }
+                @SuppressWarnings("unchecked")
+                Map<String, Map<String, String>> jdChainResources =
+                        (Map<String, Map<String, String>>) stubConfig.get("resources");
+                JDChainStubConfig jdChainStubConfig = new JDChainStubConfig();
+                JDChainStub jdChainStub =
+                        jdChainStubConfig.initJdChainStub(
+                                jdChainSdkMap, jdChainResources, jdChainService);
+                stubsBean.put(stubName, jdChainStub);
 
             } else if (Stubtype.equals("BaiDu")) {
                 // To be defined

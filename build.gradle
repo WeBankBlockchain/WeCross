@@ -69,7 +69,7 @@ dependencies {
     {
         exclude module: 'slf4j-log4j12'
         exclude module: "spring-boot-starter-logging"
-    }
+	}
 }
 
 jar {
