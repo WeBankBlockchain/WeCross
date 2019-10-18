@@ -50,6 +50,6 @@ public class Peer {
 
     @Override
     public String toString() {
-        return "peer(name:" + url + ", url:" + url + ")";
+        return "peer(name:" + name + ", url:" + url + ")";
     }
 }
