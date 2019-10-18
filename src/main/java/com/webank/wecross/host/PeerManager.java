@@ -31,7 +31,7 @@ public class PeerManager {
 
     public void start() {
         newSeq();
-        broadcastSeqRequest();
+        // broadcastSeqRequest();
     }
 
     public void newSeq() {
@@ -187,7 +187,6 @@ public class PeerManager {
                     peer.setResources(currentSeq, currentResources);
                     updatePeer(peer);
                 } else {
-                    // TODO compare and update in networkManager
                     peerRecord.setResources(currentSeq, currentResources);
                 }
             }
