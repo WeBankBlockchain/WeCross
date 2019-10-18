@@ -28,8 +28,8 @@ public class WeCrossHost {
         return networkManager.getState(request);
     }
 
-    public P2PMessageData onSyncPeerMessage(String url, String method, P2PMessage msg) {
-        return peerManager.onSyncPeerMessage(url, method, msg);
+    public P2PMessageData onRestfulPeerMessage(String method, P2PMessage msg) {
+        return peerManager.onRestfulPeerMessage(method, msg);
     }
 
     public void syncAllState() {}

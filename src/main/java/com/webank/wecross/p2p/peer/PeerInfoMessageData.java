@@ -45,4 +45,9 @@ public class PeerInfoMessageData implements P2PMessageData {
     public void setData(Data data) {
         this.data = data;
     }
+
+    @JsonIgnore
+    public Set<String> getDataResources() {
+        return new HashSet<String>(data.resources);
+    }
 }

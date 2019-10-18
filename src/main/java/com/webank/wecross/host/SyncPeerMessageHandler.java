@@ -2,10 +2,12 @@ package com.webank.wecross.host;
 
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
+import com.webank.wecross.p2p.peer.PeerDoNothingCallback;
+import com.webank.wecross.p2p.peer.PeerInfoMessageData;
+import com.webank.wecross.p2p.peer.PeerSeqMessageData;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -28,18 +30,18 @@ public class SyncPeerMessageHandler {
         threadPool.initialize();
     }
 
-    public void onSyncPeerMessage(String url, String method, P2PMessage msg) {
+    public void onPeerMessage(Peer peer, String method, P2PMessage msg) {
         threadPool.execute(
                 new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            handleSyncPeerMessage(url, method, msg);
+                            handlePeerMessage(peer, method, msg);
                         } catch (Exception e) {
                             logger.warn(
-                                    "handleSyncPeerMessage exception:{} url:{} method:{} msg:{}",
+                                    "handleSyncPeerMessage exception:{} peer:{} method:{} msg:{}",
                                     e.toString(),
-                                    url,
+                                    peer,
                                     method,
                                     msg);
                         }
@@ -47,27 +49,27 @@ public class SyncPeerMessageHandler {
                 });
     }
 
-    private void handleSyncPeerMessage(String url, String method, P2PMessage msg) throws Exception {
-        logger.info("Receive peer message url:{}, method:{}, msg:{}", url, method, msg);
+    private void handlePeerMessage(Peer peer, String method, P2PMessage msg) throws Exception {
+        logger.info("Receive peer message peer:{}, method:{}, msg:{}", peer, method, msg);
         switch (method) {
             case "requestSeq":
                 {
-                    handleRequestSeq(url, msg);
+                    handleRequestSeq(peer, msg);
                     break;
                 }
             case "seq":
                 {
-                    handleSeq(url, msg);
+                    handleSeq(peer, msg);
                     break;
                 }
             case "requestPeerInfo":
                 {
-                    handleRequestPeerInfo(url, msg);
+                    handleRequestPeerInfo(peer, msg);
                     break;
                 }
             case "peerInfo":
                 {
-                    handlePeerInfo(url, msg);
+                    handlePeerInfo(peer, msg);
                     break;
                 }
             default:
@@ -77,24 +79,33 @@ public class SyncPeerMessageHandler {
         }
     }
 
-    private void handleRequestSeq(String url, P2PMessage msg) {
-        logger.error("Reach invalid function");
+    private void handleRequestSeq(Peer peer, P2PMessage msg) {
+        PeerSeqMessageData data = peerManager.handleRequestSeq();
+        P2PMessage<PeerSeqMessageData> rspMsg = new P2PMessage<>();
+        rspMsg.setVersion("0.1");
+        rspMsg.setSeq(msg.getSeq());
+        rspMsg.setType("peer");
+        rspMsg.setData(data);
+
+        p2pEngine.asyncSendMessage(peer, rspMsg, new PeerDoNothingCallback());
     }
 
-    private void handleSeq(String url, P2PMessage msg) {
-        logger.error("Reach invalid function");
+    private void handleSeq(Peer peer, P2PMessage msg) {
+        peerManager.handleSeq(peer, msg);
     }
 
-    private void handleRequestPeerInfo(String url, P2PMessage msg) {
-        logger.error("Reach invalid function");
+    private void handleRequestPeerInfo(Peer peer, P2PMessage msg) {
+        PeerInfoMessageData data = peerManager.handleRequestPeerInfo();
+        P2PMessage<PeerInfoMessageData> rspMsg = new P2PMessage<>();
+        rspMsg.setVersion("0.1");
+        rspMsg.setSeq(msg.getSeq());
+        rspMsg.setType("peer");
+        rspMsg.setData(data);
+
+        p2pEngine.asyncSendMessage(peer, rspMsg, new PeerDoNothingCallback());
     }
 
-    private void handlePeerInfo(String url, P2PMessage msg) {
-        logger.error("Reach invalid function");
-    }
-
-    @Bean
-    public SyncPeerMessageHandler newSyncPeerMessageHandler() {
-        return new SyncPeerMessageHandler();
+    private void handlePeerInfo(Peer peer, P2PMessage msg) {
+        peerManager.handlePeerInfo(peer, msg);
     }
 }

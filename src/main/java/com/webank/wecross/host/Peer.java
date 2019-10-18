@@ -8,6 +8,8 @@ public class Peer {
     private int seq = 0;
     private Set<String> resources;
 
+    public Peer() {}
+
     public Peer(String url, String name) {
         this.url = url;
         this.name = name;
@@ -41,7 +43,13 @@ public class Peer {
         return resources;
     }
 
-    public void setResources(Set<String> resources) {
+    public synchronized void setResources(int seq, Set<String> resources) {
+        this.setSeq(seq);
         this.resources = resources;
+    }
+
+    @Override
+    public String toString() {
+        return "peer(name:" + url + ", url:" + url + ")";
     }
 }
