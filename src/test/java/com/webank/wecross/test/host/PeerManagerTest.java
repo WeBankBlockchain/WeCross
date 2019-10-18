@@ -1,29 +1,31 @@
 package com.webank.wecross.test.host;
 
+import com.webank.wecross.Application;
 import com.webank.wecross.host.Peer;
 import com.webank.wecross.host.PeerManager;
 import java.util.Set;
 import javax.annotation.Resource;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@AutoConfigureMockMvc
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class PeerManagerTest {
-    @Autowired private MockMvc mockMvc;
 
     @Resource(name = "newPeerManager")
     PeerManager peerManager;
+
+    @BeforeClass
+    public static void runApp() {
+        Application.main(new String[] {});
+    }
 
     @Test
     public void a() // first to test
@@ -41,6 +43,10 @@ public class PeerManagerTest {
 
     @Test
     public void syncByRequestPeerInfo() throws Exception {
+        // Remove mock peers
+        peerManager.clearPeers();
+        Assert.assertEquals(0, peerManager.peerSize());
+
         // check all syncing
         Peer peer = new Peer("127.0.0.1:8080", "myself");
         peerManager.updatePeer(peer);
@@ -60,6 +66,10 @@ public class PeerManagerTest {
 
     @Test
     public void syncByRequestSeq() throws Exception {
+        // Remove mock peers
+        peerManager.clearPeers();
+        Assert.assertEquals(0, peerManager.peerSize());
+
         // check all syncing
         Peer peer = new Peer("127.0.0.1:8080", "myself");
         peerManager.updatePeer(peer);

@@ -5,7 +5,12 @@ import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageData;
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.peer.*;
+import com.webank.wecross.p2p.peer.PeerInfoCallback;
+import com.webank.wecross.p2p.peer.PeerInfoMessageData;
+import com.webank.wecross.p2p.peer.PeerRequestPeerInfoMessageData;
+import com.webank.wecross.p2p.peer.PeerRequestSeqMessageData;
+import com.webank.wecross.p2p.peer.PeerSeqCallback;
+import com.webank.wecross.p2p.peer.PeerSeqMessageData;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -122,9 +127,19 @@ public class PeerManager {
     }
 
     public void sendPeerInfoRequest(Peer peer) {
+        sendPeerInfoRequest(peer, 0);
+    }
+
+    public void sendPeerInfoRequest(Peer peer, int seq) {
         PeerRequestPeerInfoMessageData data = new PeerRequestPeerInfoMessageData();
         P2PMessage<PeerRequestPeerInfoMessageData> msg = new P2PMessage<>();
-        msg.newSeq();
+
+        if (seq == 0) {
+            msg.newSeq();
+        } else {
+            msg.setSeq(seq);
+        }
+
         msg.setData(data);
         msg.setVersion("0.1");
         msg.setType("peer");
@@ -150,7 +165,7 @@ public class PeerManager {
             if (hasPeerChanged(peer.getUrl(), currentSeq)) {
                 logger.info("Request peerInfo from {}", peer);
 
-                sendPeerInfoRequest(peer);
+                sendPeerInfoRequest(peer, msg.getSeq() + 1);
             }
         } else {
             logger.warn("Receive unrecognized seq message from peer:" + peer);
@@ -177,7 +192,7 @@ public class PeerManager {
                 // compare and update
                 Set<String> currentResources = data.getDataResources();
                 logger.info(
-                        "Update peerInfo url{}, seq:{}, resource:{}",
+                        "Update peerInfo peer:{}, seq:{}, resource:{}",
                         peer,
                         currentSeq,
                         currentResources);
