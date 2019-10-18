@@ -35,6 +35,10 @@ public class NetworkConfig {
     public Map<String, Network> initNetworks() {
 
         Map<String, Network> result = new HashMap<>();
+        if (networks == null) {
+            logger.info("no network configuration found");
+            return result;
+        }
 
         for (String networkName : networks.keySet()) {
 
@@ -59,6 +63,10 @@ public class NetworkConfig {
 
     public Map<String, Stub> initStub(Map<String, Map<String, Object>> stubs) {
         Map<String, Stub> stubsBean = new HashMap<>();
+        if (stubs == null) {
+            logger.info("no stubs configuration found");
+            return stubsBean;
+        }
 
         for (String stubName : stubs.keySet()) {
 
@@ -74,7 +82,6 @@ public class NetworkConfig {
             String Stubtype = (String) stubConfig.get("pattern");
 
             if (Stubtype.equals("bcos")) {
-                // init bcos hannel service
                 if (!stubConfig.containsKey("bcosService")) {
                     logger.error(
                             "Error in application.yml: {} should contain a key named \"bcosService\"",
@@ -100,7 +107,6 @@ public class NetworkConfig {
                 stubsBean.put(stubName, bcosStub);
 
             } else if (Stubtype.equals("jdchain")) {
-                // To be defined
                 if (!stubConfig.containsKey("jdService")) {
                     logger.error(
                             "Error in application.yml: {} should contain a key named \"jdService\"",

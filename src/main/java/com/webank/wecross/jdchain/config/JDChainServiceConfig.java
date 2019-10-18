@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "jdchain-service-manager")
 public class JDChainServiceConfig {
+
     private Logger logger = LoggerFactory.getLogger(JDChainServiceConfig.class);
     private Map<String, JDChainService> services = new HashMap<String, JDChainService>();
 
@@ -34,6 +35,10 @@ public class JDChainServiceConfig {
     public Map<String, JDChainSdk> getJdChainSdkMap() {
 
         Map<String, JDChainSdk> result = new HashMap<String, JDChainSdk>();
+        if (services == null) {
+            logger.info("no jdchain configuration found");
+            return result;
+        }
         try {
             for (Entry<String, JDChainService> entry : services.entrySet()) {
                 JDChainSdk sdk = new JDChainSdk();

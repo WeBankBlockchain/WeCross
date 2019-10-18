@@ -39,15 +39,15 @@ jdchain-service-manager:
             publicKey: 111111111111111
             passWord: 222222222222222
             connectionsStr:
-              - 127.0.0.1:18080
-              - 127.0.0.1:18081
+                - 127.0.0.1:18080
+                - 127.0.0.1:18081
         jd-service2:
             privateKey: 0000000000000000
             publicKey: 111111111111111
             passWord: 222222222222222
             connectionsStr:
-              - 127.0.0.1:18082
-              - 127.0.0.1:18083
+                - 127.0.0.1:18082
+                - 127.0.0.1:18083
 network-manager:
     networks:
         payment:
@@ -59,14 +59,14 @@ network-manager:
                     resources:
                         HelloWorldContract:
                             type: contract
-                            contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
+                            contractAddress: '0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a'
                 bcos2:
                     pattern: bcos
                     bcosService: channel-service2
                     resources:
                         HelloWorldContract:
                             type: contract
-                            contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
+                            contractAddress: '0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a'
         bill:
             visible: true
             stubs:

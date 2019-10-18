@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "peer-manager")
 public class PeerManagerConfig {
+
     private Logger logger = LoggerFactory.getLogger(PeerManagerConfig.class);
 
     private List<String> peers;
@@ -30,6 +31,10 @@ public class PeerManagerConfig {
     @Bean
     public Map<String, Peer> initPeers() {
         Map<String, Peer> ret = new HashMap<>();
+        if (peers == null) {
+            logger.info("no peer configuration found");
+            return ret;
+        }
         for (String peerString : peers) {
             try {
                 Peer peer = parsePeerString(peerString);
