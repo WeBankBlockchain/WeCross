@@ -8,7 +8,6 @@ bcos-channel-service-manager:
                 sslCert: classpath:/bcosconf/bcos1/sdk.crt
                 sslKey: classpath:/bcosconf/bcos1/sdk.key
                 allChannelConnections:
-                    
         channel-service2:
             groupId: 1 # The specified group to which the SDK connects
             agencyName: fisco # agency name
