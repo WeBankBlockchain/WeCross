@@ -36,7 +36,7 @@ public class PeerManager {
 
     public void start() {
         newSeq();
-        broadcastSeqRequest();
+        // broadcastSeqRequest();
     }
 
     public void newSeq() {
