@@ -1,5 +1,8 @@
 package com.webank.wecross.restserver.p2p;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.webank.wecross.p2p.P2PMessage;
+
 public class P2PHttpResponse<T> {
     private String version;
     private int seq;
@@ -45,5 +48,15 @@ public class P2PHttpResponse<T> {
 
     public void setData(T data) {
         this.data = data;
+    }
+
+    @JsonIgnore
+    public P2PMessage toP2PMessage(String type) {
+        P2PMessage msg = new P2PMessage<>();
+        msg.setVersion(this.getVersion());
+        msg.setType(type);
+        msg.setSeq(this.getSeq());
+        msg.setData(this.getData());
+        return msg;
     }
 }

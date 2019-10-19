@@ -26,7 +26,10 @@ public class ChannelServiceConfig {
     @Bean
     public Map<String, Web3Sdk> getConfigurations() {
         Map<String, Web3Sdk> result = new HashMap<>();
-
+        if (channelServices == null) {
+            logger.info("no bcos channelServices configuration found");
+            return result;
+        }
         for (String channelName : channelServices.keySet()) {
             Web3Sdk bcosConfiguration = new Web3Sdk();
 

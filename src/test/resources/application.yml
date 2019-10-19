@@ -8,14 +8,6 @@ bcos-channel-service-manager:
                 sslCert: classpath:/bcosconf/bcos1/sdk.crt
                 sslKey: classpath:/bcosconf/bcos1/sdk.key
                 allChannelConnections:
-                    -   groupId: 1 #group ID
-                        connectionsStr:
-                            - 127.0.0.1:20200 # node listen_ip:channel_listen_port
-                            - 127.0.0.1:20201
-                    -   groupId: 2
-                        connectionsStr:
-                            - 127.0.0.1:20202 # node listen_ip:channel_listen_port
-                            - 127.0.0.1:20203
         channel-service2:
             groupId: 1 # The specified group to which the SDK connects
             agencyName: fisco # agency name
@@ -24,30 +16,8 @@ bcos-channel-service-manager:
                 sslCert: classpath:/bcosconf/bcos2/sdk.crt
                 sslKey: classpath:/bcosconf/bcos2/sdk.key
                 allChannelConnections:
-                    -   groupId: 1 #group ID
-                        connectionsStr:
-                            - 127.0.0.1:20200 # node listen_ip:channel_listen_port
-                            - 127.0.0.1:20201
-                    -   groupId: 2
-                        connectionsStr:
-                            - 127.0.0.1:20202 # node listen_ip:channel_listen_port
-                            - 127.0.0.1:20203
-jdchain-service-manager:
-    services:
-        jd-service1:
-            privateKey: 0000000000000000
-            publicKey: 111111111111111
-            passWord: 222222222222222
-            connectionsStr:
-                - 127.0.0.1:18080
-                - 127.0.0.1:18081
-        jd-service2:
-            privateKey: 0000000000000000
-            publicKey: 111111111111111
-            passWord: 222222222222222
-            connectionsStr:
-                - 127.0.0.1:18082
-                - 127.0.0.1:18083
+
+
 network-manager:
     networks:
         payment:
@@ -59,14 +29,14 @@ network-manager:
                     resources:
                         HelloWorldContract:
                             type: contract
-                            contractAddress: '0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a'
+                            contractAddress: '0xc91d1f693c1c1236cc33ba4f8d11ea90ab7d6519'
                 bcos2:
                     pattern: bcos
                     bcosService: channel-service2
                     resources:
                         HelloWorldContract:
                             type: contract
-                            contractAddress: '0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a'
+                            contractAddress: '0xc91d1f693c1c1236cc33ba4f8d11ea90ab7d6519'
         bill:
             visible: true
             stubs:
@@ -76,17 +46,15 @@ network-manager:
                     resources:
                         HelloWorldContract:
                             type: contract
-                            contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
+                            contractAddress: '0xc91d1f693c1c1236cc33ba4f8d11ea90ab7d6519'
                 jd:
                     pattern: jd
-                    jdService: jd-service1
                     resources:
                         HelloWorldContract:
                             type: contract
-                            contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
+                            contractAddress: '0xc91d1f693c1c1236cc33ba4f8d11ea90ab7d6519'
 
 peer-manager:
     peers:
         - peerA@127.0.0.1:8081
         - peerB@127.0.0.1:8082
-

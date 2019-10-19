@@ -12,6 +12,7 @@ import com.webank.wecross.resource.TransactionRequest;
 import com.webank.wecross.resource.TransactionResponse;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +44,7 @@ public class JDChainContractResource extends JDChainResource {
     public SetDataResponse setData(SetDataRequest request) {
         return null;
     }
+    
 
     @Override
     public TransactionResponse call(TransactionRequest request) {
@@ -59,6 +61,10 @@ public class JDChainContractResource extends JDChainResource {
         } catch (NoSuchAlgorithmException e) {
             logger.error("rand Algorithm:{}", e);
         }
+        
+        String classname = "com.jd.chain.contract."+ UUID.randomUUID().toString().replaceAll("-", "");
+        
+        
         Integer randNum = random.nextInt(channelCount);
         for (int index = 0; index < channelCount; ++index) {
             BlockchainService blockChainService = blockchainService.get(randNum);
