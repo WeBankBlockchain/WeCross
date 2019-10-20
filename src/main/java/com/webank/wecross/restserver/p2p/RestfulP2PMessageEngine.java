@@ -86,9 +86,8 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
                                     callback.setMessage(responseMsg.getMessage());
                                     callback.setData(
                                             responseMsg.toP2PMessage(
-                                                    msg
-                                                            .getType())); // callback type is the
-                                                                          // same as msg
+                                                    msg.getType())); // callback type is the
+                                    // same as msg
                                     callback.execute();
                                 }
                             } catch (Exception e) {
