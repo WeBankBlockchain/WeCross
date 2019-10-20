@@ -3,6 +3,7 @@ package com.webank.wecross.test.host;
 import com.webank.wecross.Application;
 import com.webank.wecross.host.Peer;
 import com.webank.wecross.host.PeerManager;
+import com.webank.wecross.network.NetworkManager;
 import java.util.Set;
 import javax.annotation.Resource;
 import org.junit.Assert;
@@ -22,8 +23,12 @@ public class PeerManagerTest {
     @Resource(name = "newPeerManager")
     PeerManager peerManager;
 
+    @Resource(name = "")
+    NetworkManager networkManager;
+
     @BeforeClass
     public static void runApp() {
+        // Start the application to mock remote WeCross host
         Application.main(new String[] {});
     }
 
@@ -56,10 +61,10 @@ public class PeerManagerTest {
 
         Set<String> resources = peerManager.getAllPeerResource();
         System.out.println(resources);
-        Assert.assertEquals(3, resources.size());
-        Assert.assertTrue(resources.contains("payment/bcos1/HelloWorldContract"));
-        Assert.assertTrue(resources.contains("bill/bcos1/HelloWorldContract"));
-        Assert.assertTrue(resources.contains("payment/bcos2/HelloWorldContract"));
+        System.out.println(networkManager.getAllNetworkStubResourceName());
+
+        Assert.assertTrue(0 < resources.size());
+        Assert.assertEquals(networkManager.getAllNetworkStubResourceName(), resources);
 
         peerManager.clearPeers();
     }
@@ -79,10 +84,10 @@ public class PeerManagerTest {
 
         Set<String> resources = peerManager.getAllPeerResource();
         System.out.println(resources);
-        Assert.assertEquals(3, resources.size());
-        Assert.assertTrue(resources.contains("payment/bcos1/HelloWorldContract"));
-        Assert.assertTrue(resources.contains("bill/bcos1/HelloWorldContract"));
-        Assert.assertTrue(resources.contains("payment/bcos2/HelloWorldContract"));
+        System.out.println(networkManager.getAllNetworkStubResourceName());
+
+        Assert.assertTrue(0 < resources.size());
+        Assert.assertEquals(networkManager.getAllNetworkStubResourceName(), resources);
 
         peerManager.clearPeers();
     }
