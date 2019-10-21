@@ -3,12 +3,10 @@ package com.webank.wecross.test.host;
 import com.webank.wecross.Application;
 import com.webank.wecross.host.Peer;
 import com.webank.wecross.host.PeerManager;
+import com.webank.wecross.network.NetworkManager;
 import java.util.Set;
 import javax.annotation.Resource;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,9 +20,19 @@ public class PeerManagerTest {
     @Resource(name = "newPeerManager")
     PeerManager peerManager;
 
+    @Resource(name = "")
+    NetworkManager networkManager;
+
     @BeforeClass
     public static void runApp() {
+        // Start the application to mock remote WeCross host
         Application.main(new String[] {});
+    }
+
+    @AfterClass
+    public static void afterclass() {
+        // do nothing
+
     }
 
     @Test
@@ -52,14 +60,14 @@ public class PeerManagerTest {
         peerManager.updatePeer(peer);
 
         peerManager.broadcastPeerInfoRequest();
-        Thread.sleep(1000); // waiting for syncing
+        Thread.sleep(2000); // waiting for syncing
 
         Set<String> resources = peerManager.getAllPeerResource();
         System.out.println(resources);
-        Assert.assertEquals(3, resources.size());
-        Assert.assertTrue(resources.contains("payment/bcos1/HelloWorldContract"));
-        Assert.assertTrue(resources.contains("bill/bcos1/HelloWorldContract"));
-        Assert.assertTrue(resources.contains("payment/bcos2/HelloWorldContract"));
+        System.out.println(networkManager.getAllNetworkStubResourceName(true));
+
+        Assert.assertTrue(0 < resources.size());
+        Assert.assertEquals(networkManager.getAllNetworkStubResourceName(true), resources);
 
         peerManager.clearPeers();
     }
@@ -75,14 +83,14 @@ public class PeerManagerTest {
         peerManager.updatePeer(peer);
 
         peerManager.broadcastSeqRequest();
-        Thread.sleep(1000); // waiting for syncing
+        Thread.sleep(2000); // waiting for syncing
 
         Set<String> resources = peerManager.getAllPeerResource();
         System.out.println(resources);
-        Assert.assertEquals(3, resources.size());
-        Assert.assertTrue(resources.contains("payment/bcos1/HelloWorldContract"));
-        Assert.assertTrue(resources.contains("bill/bcos1/HelloWorldContract"));
-        Assert.assertTrue(resources.contains("payment/bcos2/HelloWorldContract"));
+        System.out.println(networkManager.getAllNetworkStubResourceName(true));
+
+        Assert.assertTrue(0 < resources.size());
+        Assert.assertEquals(networkManager.getAllNetworkStubResourceName(true), resources);
 
         peerManager.clearPeers();
     }

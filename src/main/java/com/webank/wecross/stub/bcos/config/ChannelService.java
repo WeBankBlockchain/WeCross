@@ -1,4 +1,4 @@
-package com.webank.wecross.bcos.config;
+package com.webank.wecross.stub.bcos.config;
 
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;

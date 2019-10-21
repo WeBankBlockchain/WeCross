@@ -1,4 +1,4 @@
-package com.webank.wecross.bcos;
+package com.webank.wecross.stub.bcos;
 
 import com.webank.wecross.resource.TransactionResponse;
 

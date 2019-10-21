@@ -3,6 +3,8 @@ package com.webank.wecross.resource;
 public interface Resource {
     public Path getPath();
 
+    public void setPath(Path path);
+
     public GetDataResponse getData(GetDataRequest request);
 
     public SetDataResponse setData(SetDataRequest request);
@@ -14,4 +16,8 @@ public interface Resource {
     public void registerEventHandler(EventCallback callback);
 
     public TransactionRequest createRequest();
+
+    public int getDistance(); // 0 local, > 0 remote
+
+    public boolean isLocal();
 }

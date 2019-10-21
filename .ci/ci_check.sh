@@ -2,6 +2,6 @@
 
 set -e
 ./gradlew verifyGoogleJavaFormat
-./gradlew build
-./gradlew test
+./gradlew build -x test
+./gradlew test -i
 ./gradlew jacocoTestReport
