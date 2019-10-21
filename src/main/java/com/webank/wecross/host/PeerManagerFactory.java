@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class PeerManagerFactory {
-    @Resource(name = "newRestfulP2PMessageEngine")
+    @Resource(name = "newP2PMessageEngine")
     private P2PMessageEngine p2pEngine;
 
     @Resource(name = "initPeers")

@@ -79,7 +79,7 @@ public class BCOSStub implements Stub {
 
         Resource resource = resources.get(path.getResource());
 
-        if (resource != null && !resource.isLocal()) {
+        if (resource != null && resource.isLocal()) {
             ((BCOSResource) resource).init(bcosService, web3, credentials);
             return resource;
         }

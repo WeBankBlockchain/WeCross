@@ -8,7 +8,6 @@ import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.remote.RemoteResource;
-import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -115,26 +114,28 @@ public class NetworkManager {
     }
 
     public void updateActivePeerNetwork(Set<Peer> peers) {
-        SecureRandom rand = new SecureRandom();
-        Map<String, Peer> resource2Peer = new HashMap<>();
+        Map<String, Set<Peer>> resource2Peers = new HashMap<>();
         for (Peer peer : peers) {
             for (String resource : peer.getResources()) {
-                // If resource exist, randomly choose one peer to add
-                if (rand.nextBoolean()) {
-                    resource2Peer.put(resource, peer); // Replace
-                } else {
-                    resource2Peer.putIfAbsent(resource, peer); // Not replace
+                Set<Peer> theResourcePeers = resource2Peers.get(resource);
+                if (theResourcePeers == null) {
+                    theResourcePeers = new HashSet<>();
                 }
+                theResourcePeers.add(peer);
+                resource2Peers.put(resource, theResourcePeers); // Replace
             }
         }
 
         Set<String> currentResources = getAllNetworkStubResourceName(false);
 
-        Set<String> resources2Add = new HashSet<>(resource2Peer.keySet());
+        Set<String> resources2Add = new HashSet<>(resource2Peers.keySet());
         resources2Add.removeAll(currentResources);
 
         Set<String> resources2Remove = new HashSet<>(currentResources);
-        resources2Remove.removeAll(resource2Peer.keySet());
+        resources2Remove.removeAll(resource2Peers.keySet());
+
+        Set<String> resources2Update = new HashSet<>(resource2Peers.keySet());
+        resources2Update.removeAll(resources2Remove);
 
         // Delete inactive remote resources
         logger.info("Remove inactive remote resources " + resources2Remove);
@@ -150,12 +151,27 @@ public class NetworkManager {
         logger.info("Add new remote resources " + resources2Add);
         for (String resource : resources2Add) {
             try {
-                Peer peer = resource2Peer.get(resource);
-                Resource newResource = new RemoteResource(peer, 1);
+                Set<Peer> newPeers = resource2Peers.get(resource);
+                Resource newResource = new RemoteResource(newPeers, 1);
                 newResource.setPath(Path.decode(resource));
                 addResource(newResource);
             } catch (Exception e) {
                 logger.error("Add resource exception: resource:{}, exception:{}", resource, e);
+            }
+        }
+
+        // Update peer to resources
+        logger.info("Update remote resources " + resources2Update);
+        for (String resource : resources2Update) {
+            try {
+                Set<Peer> newPeers = resource2Peers.get(resource);
+                Resource resource2Update = getResource(Path.decode(resource));
+                resource2Update.setPeers(newPeers);
+            } catch (Exception e) {
+                logger.error(
+                        "Update remote resources exception: resource:{}, exception:{}",
+                        resource,
+                        e);
             }
         }
     }

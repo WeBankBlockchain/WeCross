@@ -13,7 +13,7 @@ import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 
-public class BCOSResource implements Resource {
+public class BCOSResource extends Resource {
 
     public void init(Service service, Web3j web3j, Credentials credentials) {}
 
