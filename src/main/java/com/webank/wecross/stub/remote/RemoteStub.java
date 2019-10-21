@@ -41,7 +41,7 @@ public class RemoteStub implements Stub {
 
     @Override
     public Resource getResource(Path path) throws Exception {
-        return null;
+        return resources.get(path.getResource());
     }
 
     @Override

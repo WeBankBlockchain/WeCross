@@ -155,5 +155,23 @@ public class NetworkManagerTest {
 
         networkManager.updateActivePeerNetwork(activePeers);
         Assert.assertEquals(7, networkManager.getAllNetworkStubResourceName(false).size());
+
+        // Test resource contain more peers
+        for (int i = 0; i < 4; i++) {
+            String resourceName = "new.bcos.contract" + i;
+            Assert.assertEquals(
+                    networkManager.getResource(Path.decode(resourceName)).getPeers().size(), 1);
+        }
+
+        activeResourcesname.addAll(newResourcesname);
+        peer0.setResources(200, activeResourcesname);
+        networkManager.updateActivePeerNetwork(activePeers);
+
+        // Test resource contain more peers
+        for (int i = 0; i < 4; i++) {
+            String resourceName = "new.bcos.contract" + i;
+            Assert.assertEquals(
+                    networkManager.getResource(Path.decode(resourceName)).getPeers().size(), 2);
+        }
     }
 }

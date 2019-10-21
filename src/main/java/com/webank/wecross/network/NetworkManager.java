@@ -134,7 +134,7 @@ public class NetworkManager {
         Set<String> resources2Remove = new HashSet<>(currentResources);
         resources2Remove.removeAll(resource2Peers.keySet());
 
-        Set<String> resources2Update = new HashSet<>(resource2Peers.keySet());
+        Set<String> resources2Update = new HashSet<>(currentResources);
         resources2Update.removeAll(resources2Remove);
 
         // Delete inactive remote resources
