@@ -7,10 +7,14 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
 import com.webank.wecross.stub.Stub;
+import com.webank.wecross.stub.remote.RemoteResource;
+
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,17 +48,23 @@ public class NetworkManager {
     }
 
     public void addResource(Resource resource) throws Exception {
+        logger.info("Add resource path:{}", resource.getPath());
         String networkName = resource.getPath().getNetwork();
         networks.putIfAbsent(networkName, new Network());
         networks.get(networkName).addResource(resource);
     }
 
-    public void removeResource(Path path) throws Exception {
+    public void removeResource(Path path, boolean ignoreLocal) throws Exception {
+        logger.info("Remove resource ignore:{} path:{}", ignoreLocal, path);
         Network network = getNetwork(path);
-        network.removeResource(path);
+        network.removeResource(path, ignoreLocal);
         if (network.isEmpty()) {
             networks.remove(path.getNetwork());
         }
+    }
+
+    public void removeResource(Path path) throws Exception {
+        removeResource(path, false);
     }
 
     public Network getNetwork(Path path) {
@@ -107,6 +117,48 @@ public class NetworkManager {
     }
 
     public void updateActivePeerNetwork(Set<Peer> peers) {
-        //        Set<>
+        SecureRandom rand = new SecureRandom();
+        Map<String, Peer> resource2Peer = new HashMap<>();
+        for (Peer peer : peers) {
+            for (String resource : peer.getResources()) {
+                // If resource exist, randomly choose one peer to add
+                if (rand.nextBoolean()) {
+                    resource2Peer.put(resource, peer); // Replace
+                } else {
+                    resource2Peer.putIfAbsent(resource, peer); // Not replace
+                }
+            }
+        }
+
+        Set<String> currentResources = getAllNetworkStubResourceName(false);
+
+        Set<String> resources2Add = new HashSet<>(resource2Peer.keySet());
+        resources2Add.removeAll(currentResources);
+
+        Set<String> resources2Remove = new HashSet<>(currentResources);
+        resources2Remove.removeAll(resource2Peer.keySet());
+
+        // Delete inactive remote resources
+        logger.info("Remove inactive remote resources " + resources2Remove);
+        for (String resource : resources2Remove) {
+            try {
+                removeResource(Path.decode(resource), true);
+            } catch (Exception e) {
+                logger.error("Remove resource exception: resource:{}, exception:{}", resource, e);
+            }
+        }
+
+        // Add new remote resources
+        logger.info("Add new remote resources " + resources2Add);
+        for (String resource : resources2Add) {
+            try {
+                Peer peer = resource2Peer.get(resource);
+                Resource newResource = new RemoteResource(peer, 1);
+                newResource.setPath(Path.decode(resource));
+                addResource(newResource);
+            } catch (Exception e) {
+                logger.error("Add resource exception: resource:{}, exception:{}", resource, e);
+            }
+        }
     }
 }

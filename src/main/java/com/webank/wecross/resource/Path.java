@@ -48,4 +48,9 @@ public class Path {
                 && path.getChain().equals(this.chain)
                 && path.getResource().equals(this.resource);
     }
+
+    @Override
+    public String toString() {
+        return network + "." + chain + "." + resource;
+    }
 }

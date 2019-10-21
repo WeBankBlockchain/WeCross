@@ -1,5 +1,6 @@
 package com.webank.wecross.test.network;
 
+import com.webank.wecross.host.Peer;
 import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.GetDataRequest;
@@ -9,6 +10,8 @@ import com.webank.wecross.resource.SetDataRequest;
 import com.webank.wecross.resource.SetDataResponse;
 import com.webank.wecross.resource.TransactionRequest;
 import com.webank.wecross.resource.TransactionResponse;
+
+import java.util.HashSet;
 import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,8 +19,7 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
+
 public class NetworkManagerTest {
     class MockResource implements com.webank.wecross.resource.Resource {
         private Path path;
@@ -124,5 +126,46 @@ public class NetworkManagerTest {
             Set<String> currentResources = networkManager.getAllNetworkStubResourceName(false);
             Assert.assertEquals(currentResources.size(), resourcesSize);
         }
+    }
+
+    @Test
+    public void resourceUpdatePeerNetworkTest() throws Exception {
+        NetworkManager networkManager = new NetworkManager();
+
+        for (int i = 0; i < 2; i++) {
+            MockResource resource = new MockResource();
+            resource.setPath(Path.decode("old.bcos.contract" + i));
+            resource.setDistance(1); // i == 0, set it as local resource
+            networkManager.addResource(resource);
+        }
+        Assert.assertEquals(2, networkManager.getAllNetworkStubResourceName(false).size());
+
+        Set<Peer> activePeers = new HashSet<>();
+        Peer peer0 = new Peer();
+        activePeers.add(peer0);
+        Set<String> activeResourcesname = new HashSet<>();
+        for (int i = 0; i < 3; i++) {
+            MockResource resource = new MockResource();
+            String resourceName = "current.bcos.contract" + i;
+            activeResourcesname.add(resourceName);
+            resource.setPath(Path.decode(resourceName));
+            resource.setDistance(1); // i == 0, set it as local resource
+            networkManager.addResource(resource);
+        }
+        peer0.setResources(100, activeResourcesname);
+        Assert.assertEquals(5, networkManager.getAllNetworkStubResourceName(false).size());
+
+        Peer peer1 = new Peer();
+        activePeers.add(peer1);
+        Set<String> newResourcesname = new HashSet<>();
+        for (int i = 0; i < 4; i++) {
+            MockResource resource = new MockResource();
+            String resourceName = "new.bcos.contract" + i;
+            newResourcesname.add(resourceName);
+        }
+        peer1.setResources(100, newResourcesname);
+
+        networkManager.updateActivePeerNetwork(activePeers);
+        Assert.assertEquals(7, networkManager.getAllNetworkStubResourceName(false).size());
     }
 }

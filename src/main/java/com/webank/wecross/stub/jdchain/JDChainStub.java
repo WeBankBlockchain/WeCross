@@ -106,7 +106,12 @@ public class JDChainStub implements Stub {
     }
 
     @Override
-    public void removeResource(Path path) throws Exception {
+    public void removeResource(Path path, boolean ignoreLocal) throws Exception {
+        Resource resource = getResource(path);
+        if (ignoreLocal && resource != null && resource.isLocal()) {
+            logger.trace("remove resource ignore local resources: {}", path.getResource());
+            return;
+        }
         logger.trace("remove resource: {}", path.getResource());
         resources.remove(path.getResource());
     }

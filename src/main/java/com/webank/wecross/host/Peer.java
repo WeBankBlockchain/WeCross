@@ -1,12 +1,13 @@
 package com.webank.wecross.host;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class Peer {
     private String url;
     private String name;
-    private int seq = 0;
-    private Set<String> resources;
+    private int seq = 1;
+    private Set<String> resources = new HashSet<>();
     private long lastActiveTimestamp = System.currentTimeMillis();
 
     public Peer() {}

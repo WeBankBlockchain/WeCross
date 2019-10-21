@@ -18,7 +18,7 @@ public interface Stub {
 
     public void addResource(Resource resource) throws Exception;
 
-    public void removeResource(Path path) throws Exception;
+    public void removeResource(Path path, boolean ignoreLocal) throws Exception;
 
     public Map<String, Resource> getResources();
 

@@ -44,20 +44,24 @@ public class Network {
         stubs.get(stubName).addResource(resource);
     }
 
-    public void removeResource(Path path) throws Exception {
+    public void removeResource(Path path, boolean ignoreLocal) throws Exception {
         Stub stub = getStub(path);
         if (stub != null) {
-            stub.removeResource(path);
+            stub.removeResource(path, ignoreLocal);
 
             if (stub.getPattern() == "remote") {
                 // delete empty remote stub
-                logger.info("Delete remote stub " + stub);
                 Map<String, Resource> resources = stub.getResources();
                 if (resources == null || resources.size() == 0) {
+                    logger.info("Delete remote stub " + stub);
                     stubs.remove(path.getChain());
                 }
             }
         }
+    }
+
+    public void removeResource(Path path) throws Exception {
+        removeResource(path, false);
     }
 
     public boolean isEmpty() {

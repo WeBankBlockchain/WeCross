@@ -58,8 +58,8 @@ public class RemoteStub implements Stub {
     }
 
     @Override
-    public void removeResource(Path path) throws Exception {
-        logger.trace("remove resource: {}", path.getResource());
+    public void removeResource(Path path, boolean ignoreLocal) throws Exception {
+        logger.info("remove resource: {}", path.getResource());
         resources.remove(path.getResource());
     }
 
