@@ -7,6 +7,7 @@ public class Peer {
     private String name;
     private int seq = 0;
     private Set<String> resources;
+    private long lastActiveTimestamp = System.currentTimeMillis();
 
     public Peer() {}
 
@@ -48,8 +49,20 @@ public class Peer {
         this.resources = resources;
     }
 
+    public void noteAlive() {
+        this.lastActiveTimestamp = System.currentTimeMillis();
+    }
+
+    public boolean isTimeout(long timeout) {
+        return (System.currentTimeMillis() - lastActiveTimestamp) > timeout;
+    }
+
     @Override
     public String toString() {
         return "peer(name:" + name + ", url:" + url + ")";
+    }
+
+    public long getLastActiveTimestamp() {
+        return lastActiveTimestamp;
     }
 }

@@ -7,7 +7,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class WeCrossHostFactory {
-    @Resource NetworkManager networkManager;
+    @Resource(name = "newNetworkManager")
+    NetworkManager networkManager;
 
     @Resource(name = "newPeerManager")
     PeerManager peerManager;

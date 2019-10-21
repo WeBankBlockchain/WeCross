@@ -1,4 +1,4 @@
-package com.webank.wecross.restserver.p2p;
+package com.webank.wecross.p2p.engine.p2p;
 
 import com.webank.wecross.p2p.P2PMessageEngine;
 import org.slf4j.Logger;
@@ -23,7 +23,7 @@ public class RestfulP2PMessageEngineFactory {
 
     @Bean
     public P2PMessageEngine newRestfulP2PMessageEngine() {
-        logger.info("New  RestfulP2PMessageEngine");
+        logger.info("New RestfulP2PMessageEngine");
         RestfulP2PMessageEngine engine = new RestfulP2PMessageEngine();
         engine.setThreadPool(threadPool);
         return engine;

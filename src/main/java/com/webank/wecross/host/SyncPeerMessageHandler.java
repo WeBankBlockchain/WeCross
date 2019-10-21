@@ -5,18 +5,13 @@ import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.peer.PeerDoNothingCallback;
 import com.webank.wecross.p2p.peer.PeerInfoMessageData;
 import com.webank.wecross.p2p.peer.PeerSeqMessageData;
-import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-@Configuration
 public class SyncPeerMessageHandler {
-    @Resource(name = "newPeerManager")
     private PeerManager peerManager;
 
-    @Resource(name = "newRestfulP2PMessageEngine")
     private P2PMessageEngine p2pEngine;
 
     Logger logger = LoggerFactory.getLogger(SyncPeerMessageHandler.class);
@@ -40,7 +35,7 @@ public class SyncPeerMessageHandler {
                         } catch (Exception e) {
                             logger.warn(
                                     "handleSyncPeerMessage exception:{} peer:{} method:{} msg:{}",
-                                    e.toString(),
+                                    e,
                                     peer,
                                     method,
                                     msg);
@@ -107,5 +102,13 @@ public class SyncPeerMessageHandler {
 
     private void handlePeerInfo(Peer peer, P2PMessage msg) {
         peerManager.handlePeerInfo(peer, msg);
+    }
+
+    public void setPeerManager(PeerManager peerManager) {
+        this.peerManager = peerManager;
+    }
+
+    public void setP2pEngine(P2PMessageEngine p2pEngine) {
+        this.p2pEngine = p2pEngine;
     }
 }

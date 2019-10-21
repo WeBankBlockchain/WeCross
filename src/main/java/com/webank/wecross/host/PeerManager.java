@@ -1,7 +1,6 @@
 package com.webank.wecross.host;
 
 import com.webank.wecross.core.SeqUtils;
-import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageData;
 import com.webank.wecross.p2p.P2PMessageEngine;
@@ -14,25 +13,23 @@ import com.webank.wecross.p2p.peer.PeerSeqMessageData;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PeerManager {
     Logger logger = LoggerFactory.getLogger(PeerManager.class);
 
-    @Resource(name = "newRestfulP2PMessageEngine")
     private P2PMessageEngine p2pEngine;
 
-    @Resource(name = "initPeers")
     private Map<String, Peer> peers; // url -> peer
 
     private int seq = 1; // Seq of the host
 
-    @Resource(name = "newSyncPeerMessageHandler")
-    public SyncPeerMessageHandler messageHandler;
+    private SyncPeerMessageHandler messageHandler;
 
-    @Resource NetworkManager networkManager;
+    private long peerActiveTimeout;
+
+    private Set<String> activeResources = new HashSet<>();
 
     public void start() {
         newSeq();
@@ -69,6 +66,14 @@ public class PeerManager {
 
     public synchronized void clearPeers() {
         peers.clear();
+    }
+
+    public synchronized void notePeerActive(String url) {
+        Peer peer = getPeer(url);
+        if (peer == null) {
+            updatePeer(new Peer(url, ""));
+        }
+        getPeer(url).noteAlive();
     }
 
     public synchronized boolean hasPeerChanged(String url, int currentSeq) {
@@ -159,6 +164,8 @@ public class PeerManager {
 
     public void handleSeq(Peer peer, P2PMessage msg) {
         logger.info("Receive peer seq from {}", peer);
+        notePeerActive(peer.getUrl());
+
         PeerSeqMessageData data = (PeerSeqMessageData) msg.getData();
         if (data != null && data.getMethod().equals("seq")) {
             int currentSeq = data.getDataSeq();
@@ -176,8 +183,7 @@ public class PeerManager {
         PeerInfoMessageData data = new PeerInfoMessageData();
         data.setDataSeq(seq);
 
-        Set<String> resources = networkManager.getAllNetworkStubResourceName(true);
-        for (String resource : resources) {
+        for (String resource : activeResources) {
             data.addResource(resource);
         }
         return data;
@@ -185,6 +191,8 @@ public class PeerManager {
 
     public void handlePeerInfo(Peer peer, P2PMessage msg) {
         logger.info("Receive peer info from {}", peer);
+        notePeerActive(peer.getUrl());
+
         PeerInfoMessageData data = (PeerInfoMessageData) msg.getData();
         if (data != null && data.getMethod().equals("peerInfo")) {
             int currentSeq = data.getDataSeq();
@@ -220,5 +228,43 @@ public class PeerManager {
             }
         }
         return ret;
+    }
+
+    public void setP2pEngine(P2PMessageEngine p2pEngine) {
+        this.p2pEngine = p2pEngine;
+    }
+
+    public void setPeers(Map<String, Peer> peers) {
+        this.peers = peers;
+    }
+
+    public synchronized Set<Peer> getActivePeers() {
+        Set<Peer> ret = new HashSet<>();
+        for (Peer peer : peers.values()) {
+            if (!peer.isTimeout(peerActiveTimeout)) {
+                ret.add(peer);
+            }
+        }
+        return ret;
+    }
+
+    public void setMessageHandler(SyncPeerMessageHandler messageHandler) {
+        this.messageHandler = messageHandler;
+    }
+
+    public long getPeerActiveTimeout() {
+        return peerActiveTimeout;
+    }
+
+    public void setPeerActiveTimeout(long peerActiveTimeout) {
+        this.peerActiveTimeout = peerActiveTimeout;
+    }
+
+    public Set<String> getActiveResources() {
+        return activeResources;
+    }
+
+    public void setActiveResources(Set<String> activeResources) {
+        this.activeResources = activeResources;
     }
 }

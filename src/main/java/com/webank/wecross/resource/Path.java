@@ -42,4 +42,10 @@ public class Path {
     public void setResource(String resource) {
         this.resource = resource;
     }
+
+    public boolean equals(Path path) {
+        return path.getNetwork().equals(this.network)
+                && path.getChain().equals(this.chain)
+                && path.getResource().equals(this.resource);
+    }
 }

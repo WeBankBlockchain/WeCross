@@ -1,6 +1,7 @@
 package com.webank.wecross.network;
 
 import com.webank.wecross.core.PathUtils;
+import com.webank.wecross.host.Peer;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.StateRequest;
@@ -94,5 +95,18 @@ public class NetworkManager {
             }
         }
         return ret;
+    }
+
+    public Set<Path> getAllNetworkStubResourcePath(boolean ignoreRemote) throws Exception {
+        Set<String> resourcesString = getAllNetworkStubResourceName(ignoreRemote);
+        Set<Path> ret = new HashSet<>();
+        for (String str : resourcesString) {
+            ret.add(Path.decode(str));
+        }
+        return ret;
+    }
+
+    public void updateActivePeerNetwork(Set<Peer> peers) {
+        //        Set<>
     }
 }
