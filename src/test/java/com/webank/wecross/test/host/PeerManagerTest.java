@@ -57,7 +57,7 @@ public class PeerManagerTest {
         peerManager.updatePeer(peer);
 
         peerManager.broadcastPeerInfoRequest();
-        Thread.sleep(1000); // waiting for syncing
+        Thread.sleep(5000); // waiting for syncing
 
         Set<String> resources = peerManager.getAllPeerResource();
         System.out.println(resources);
@@ -80,7 +80,7 @@ public class PeerManagerTest {
         peerManager.updatePeer(peer);
 
         peerManager.broadcastSeqRequest();
-        Thread.sleep(1000); // waiting for syncing
+        Thread.sleep(5000); // waiting for syncing
 
         Set<String> resources = peerManager.getAllPeerResource();
         System.out.println(resources);
