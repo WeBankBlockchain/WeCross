@@ -1,8 +1,8 @@
-package com.webank.wecross.jdchain.config;
+package com.webank.wecross.stub.jdchain.config;
 
-import com.webank.wecross.jdchain.JDChainContractResource;
-import com.webank.wecross.jdchain.JDChainResource;
-import com.webank.wecross.jdchain.JDChainStub;
+import com.webank.wecross.resource.Resource;
+import com.webank.wecross.stub.jdchain.JDChainContractResource;
+import com.webank.wecross.stub.jdchain.JDChainStub;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -31,7 +31,7 @@ public class JDChainStubConfig {
         jdChainStub.setLedgerHash(sdk.getLedgerHash());
         jdChainStub.setBlockchainService(sdk.getBlockchainService());
 
-        Map<String, JDChainResource> jdChainResources = new HashMap<>();
+        Map<String, Resource> jdChainResources = new HashMap<>();
 
         for (String resourceName : resources.keySet()) {
             Map<String, String> metaResource = resources.get(resourceName);

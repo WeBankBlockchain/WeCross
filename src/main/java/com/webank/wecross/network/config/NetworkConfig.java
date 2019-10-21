@@ -1,13 +1,13 @@
 package com.webank.wecross.network.config;
 
-import com.webank.wecross.bcos.BCOSStub;
-import com.webank.wecross.bcos.config.BCOSStubConfig;
-import com.webank.wecross.bcos.config.Web3Sdk;
-import com.webank.wecross.jdchain.JDChainStub;
-import com.webank.wecross.jdchain.config.JDChainSdk;
-import com.webank.wecross.jdchain.config.JDChainStubConfig;
 import com.webank.wecross.network.Network;
 import com.webank.wecross.stub.Stub;
+import com.webank.wecross.stub.bcos.BCOSStub;
+import com.webank.wecross.stub.bcos.config.BCOSStubConfig;
+import com.webank.wecross.stub.bcos.config.Web3Sdk;
+import com.webank.wecross.stub.jdchain.JDChainStub;
+import com.webank.wecross.stub.jdchain.config.JDChainSdk;
+import com.webank.wecross.stub.jdchain.config.JDChainStubConfig;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Resource;

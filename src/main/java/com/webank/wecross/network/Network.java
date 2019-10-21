@@ -2,7 +2,10 @@ package com.webank.wecross.network;
 
 import com.webank.wecross.core.PathUtils;
 import com.webank.wecross.resource.Path;
+import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.Stub;
+import com.webank.wecross.stub.remote.RemoteStub;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -13,7 +16,7 @@ public class Network {
 
     private Logger logger = LoggerFactory.getLogger(Network.class);
 
-    private Map<String, Stub> stubs;
+    private Map<String, Stub> stubs = new HashMap<>();
 
     // Access control
     private Boolean visible;
@@ -35,6 +38,32 @@ public class Network {
         return stub;
     }
 
+    public void addResource(Resource resource) throws Exception {
+        String stubName = resource.getPath().getChain();
+        stubs.putIfAbsent(stubName, new RemoteStub());
+        stubs.get(stubName).addResource(resource);
+    }
+
+    public void removeResource(Path path) throws Exception {
+        Stub stub = getStub(path);
+        if (stub != null) {
+            stub.removeResource(path);
+
+            if (stub.getPattern() == "remote") {
+                // delete empty remote stub
+                logger.info("Delete remote stub " + stub);
+                Map<String, Resource> resources = stub.getResources();
+                if (resources == null || resources.size() == 0) {
+                    stubs.remove(path.getChain());
+                }
+            }
+        }
+    }
+
+    public boolean isEmpty() {
+        return getStubs() == null || getStubs().isEmpty();
+    }
+
     public Map<String, Stub> getStubs() {
         return stubs;
     }
@@ -51,15 +80,15 @@ public class Network {
         this.visible = visible;
     }
 
-    public Set<String> getAllStubResourceName() {
+    public Set<String> getAllStubResourceName(boolean ignoreRemote) {
         Set<String> ret = new HashSet<>();
 
         for (Map.Entry<String, Stub> entry : stubs.entrySet()) {
             String stubName = PathUtils.toPureName(entry.getKey());
-            Set<String> allResourceName = entry.getValue().getAllResourceName();
+            Set<String> allResourceName = entry.getValue().getAllResourceName(ignoreRemote);
 
             for (String resourceName : allResourceName) {
-                ret.add(stubName + "/" + PathUtils.toPureName(resourceName));
+                ret.add(stubName + "." + PathUtils.toPureName(resourceName));
             }
         }
         return ret;

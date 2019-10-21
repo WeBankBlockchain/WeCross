@@ -1,4 +1,4 @@
-package com.webank.wecross.jdchain;
+package com.webank.wecross.stub.jdchain;
 
 import com.jd.blockchain.ledger.TransactionTemplate;
 import com.jd.blockchain.sdk.BlockchainService;

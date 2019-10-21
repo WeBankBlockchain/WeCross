@@ -1,4 +1,4 @@
-package com.webank.wecross.jdchain;
+package com.webank.wecross.stub.jdchain;
 
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.ledger.BlockchainKeypair;
@@ -21,6 +21,7 @@ public class JDChainResource implements Resource {
     protected BlockchainKeypair adminKey;
     protected HashDigest ledgerHash;
     protected List<BlockchainService> blockchainService = new ArrayList<BlockchainService>();
+    private Path path;
 
     public void init(
             BlockchainKeypair adminKey,
@@ -65,7 +66,12 @@ public class JDChainResource implements Resource {
 
     @Override
     public Path getPath() {
-        return null;
+        return path;
+    }
+
+    @Override
+    public void setPath(Path path) {
+        this.path = path;
     }
 
     @Override
@@ -89,5 +95,15 @@ public class JDChainResource implements Resource {
     @Override
     public TransactionRequest createRequest() {
         return null;
+    }
+
+    @Override
+    public int getDistance() {
+        return 0;
+    }
+
+    @Override
+    public boolean isLocal() {
+        return true;
     }
 }
