@@ -1,7 +1,14 @@
 package com.webank.wecross.test.network;
 
 import com.webank.wecross.network.NetworkManager;
-import com.webank.wecross.resource.*;
+import com.webank.wecross.resource.EventCallback;
+import com.webank.wecross.resource.GetDataRequest;
+import com.webank.wecross.resource.GetDataResponse;
+import com.webank.wecross.resource.Path;
+import com.webank.wecross.resource.SetDataRequest;
+import com.webank.wecross.resource.SetDataResponse;
+import com.webank.wecross.resource.TransactionRequest;
+import com.webank.wecross.resource.TransactionResponse;
 import java.util.Set;
 import javax.annotation.Resource;
 import org.junit.Assert;
@@ -17,7 +24,7 @@ public class NetworkManagerTest {
 
     class MockResource implements com.webank.wecross.resource.Resource {
         private Path path;
-        private int accessDepth = 0;
+        private int distance = 0;
 
         @Override
         public Path getPath() {
@@ -58,17 +65,17 @@ public class NetworkManagerTest {
         }
 
         @Override
-        public int getAccessDepth() {
-            return accessDepth;
+        public int getDistance() {
+            return distance;
         }
 
-        public void setAccessDepth(int accessDepth) {
-            this.accessDepth = accessDepth;
+        public void setDistance(int accessDepth) {
+            this.distance = accessDepth;
         }
 
         @Override
         public boolean isLocal() {
-            return getAccessDepth() == 0;
+            return getDistance() == 0;
         }
     }
 
@@ -98,7 +105,7 @@ public class NetworkManagerTest {
             for (int j = 0; j < 4; j++) {
                 MockResource resource = new MockResource();
                 resource.setPath(Path.decode("payment.bcos" + i + ".contract" + j));
-                resource.setAccessDepth(i); // i == 0, set it as local resource
+                resource.setDistance(i); // i == 0, set it as local resource
                 networkManager.addResource(resource);
             }
         }
@@ -116,7 +123,7 @@ public class NetworkManagerTest {
             for (int j = 0; j < 4; j++) {
                 MockResource resource = new MockResource();
                 resource.setPath(Path.decode("payment.bcos" + i + ".contract" + j));
-                resource.setAccessDepth(i - 1); // i == 0, set it as local resource
+                resource.setDistance(i - 1); // i == 0, set it as local resource
                 networkManager.addResource(resource);
             }
         }

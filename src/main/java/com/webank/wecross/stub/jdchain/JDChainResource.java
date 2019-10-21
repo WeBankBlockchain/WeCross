@@ -98,7 +98,7 @@ public class JDChainResource implements Resource {
     }
 
     @Override
-    public int getAccessDepth() {
+    public int getDistance() {
         return 0;
     }
 

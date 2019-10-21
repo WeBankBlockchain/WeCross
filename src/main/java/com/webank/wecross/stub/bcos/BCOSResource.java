@@ -67,7 +67,7 @@ public class BCOSResource implements Resource {
     }
 
     @Override
-    public int getAccessDepth() {
+    public int getDistance() {
         return 0;
     }
 

@@ -8,7 +8,11 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.ChainState;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.jdchain.config.JDChainSdk;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +99,7 @@ public class JDChainStub implements Stub {
         if (currentResource == null) {
             resources.put(name, resource);
         } else {
-            if (currentResource.getAccessDepth() > resource.getAccessDepth()) {
+            if (currentResource.getDistance() > resource.getDistance()) {
                 resources.put(name, resource); // Update to shorter path resource
             }
         }

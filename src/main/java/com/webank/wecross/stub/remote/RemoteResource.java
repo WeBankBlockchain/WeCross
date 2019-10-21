@@ -1,16 +1,24 @@
 package com.webank.wecross.stub.remote;
 
 import com.webank.wecross.host.Peer;
-import com.webank.wecross.resource.*;
+import com.webank.wecross.resource.EventCallback;
+import com.webank.wecross.resource.GetDataRequest;
+import com.webank.wecross.resource.GetDataResponse;
+import com.webank.wecross.resource.Path;
+import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.SetDataRequest;
+import com.webank.wecross.resource.SetDataResponse;
+import com.webank.wecross.resource.TransactionRequest;
+import com.webank.wecross.resource.TransactionResponse;
 
 public class RemoteResource implements Resource {
-    private int accessDepth; // How many jumps to local stub
+    private int distance; // How many jumps to local stub
     private Peer peer;
     private Path path;
 
     public RemoteResource(Peer peer, int accessDepth) {
         this.peer = peer;
-        this.accessDepth = accessDepth;
+        this.distance = accessDepth;
     }
 
     @Override
@@ -51,17 +59,9 @@ public class RemoteResource implements Resource {
         return null;
     }
 
-    public int getAccessDepth() {
-        return accessDepth;
-    }
-
     @Override
     public boolean isLocal() {
         return false;
-    }
-
-    public void setAccessDepth(int accessDepth) {
-        this.accessDepth = accessDepth;
     }
 
     public Peer getPeer() {
@@ -70,5 +70,14 @@ public class RemoteResource implements Resource {
 
     public void setPeer(Peer peer) {
         this.peer = peer;
+    }
+
+    @Override
+    public int getDistance() {
+        return distance;
+    }
+
+    public void setDistance(int distance) {
+        this.distance = distance;
     }
 }

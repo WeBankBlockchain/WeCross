@@ -93,7 +93,7 @@ public class BCOSStub implements Stub {
         if (currentResource == null) {
             resources.put(name, resource);
         } else {
-            if (currentResource.getAccessDepth() > resource.getAccessDepth()) {
+            if (currentResource.getDistance() > resource.getDistance()) {
                 resources.put(name, resource); // Update to shorter path resource
             }
         }

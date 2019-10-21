@@ -17,7 +17,7 @@ public interface Resource {
 
     public TransactionRequest createRequest();
 
-    public int getAccessDepth(); // 0 local, > 0 remote
+    public int getDistance(); // 0 local, > 0 remote
 
     public boolean isLocal();
 }
