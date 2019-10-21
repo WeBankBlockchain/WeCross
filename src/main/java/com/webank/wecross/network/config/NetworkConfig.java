@@ -69,9 +69,7 @@ public class NetworkConfig {
         }
 
         for (String stubName : stubs.keySet()) {
-
             Map<String, Object> stubConfig = stubs.get(stubName);
-
             if (!stubConfig.containsKey("pattern")) {
                 logger.error(
                         "Error in application.yml: {} should contain a key named \"pattern\"",
@@ -106,7 +104,8 @@ public class NetworkConfig {
                         bcosStubConfig.initBCOSStub(web3SdkMap, bcosResources, bcosService);
                 stubsBean.put(stubName, bcosStub);
 
-            } else if (Stubtype.equals("jdchain")) {
+            } else if (Stubtype.equals("jd")) {
+
                 if (!stubConfig.containsKey("jdService")) {
                     logger.error(
                             "Error in application.yml: {} should contain a key named \"jdService\"",
@@ -114,6 +113,9 @@ public class NetworkConfig {
                     return null;
                 }
                 String jdChainService = (String) stubConfig.get("jdService");
+
+                logger.info("jdService:{}", jdChainService);
+
                 if (!stubConfig.containsKey("resources")) {
                     logger.error(
                             "Error in application.yml: {} should contain a key named \"resources\"",

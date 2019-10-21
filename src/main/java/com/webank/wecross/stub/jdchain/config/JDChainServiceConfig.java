@@ -39,8 +39,11 @@ public class JDChainServiceConfig {
             logger.info("no jdchain configuration found");
             return result;
         }
+
+        logger.info("service size:{}", services.size());
         try {
             for (Entry<String, JDChainService> entry : services.entrySet()) {
+
                 JDChainSdk sdk = new JDChainSdk();
                 JDChainService service = entry.getValue();
                 String publicKey = service.getPublicKey();
@@ -73,6 +76,7 @@ public class JDChainServiceConfig {
             return result;
 
         } catch (Exception e) {
+            logger.error("init jd chain sdk failed:{}", e);
             return result;
         }
     }

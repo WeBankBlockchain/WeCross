@@ -1,6 +1,21 @@
 package com.webank.wecross.resource;
 
+import java.util.Arrays;
+
 public class TransactionResponse {
+    @Override
+    public String toString() {
+        return "TransactionResponse [errorCode="
+                + errorCode
+                + ", errorMessage="
+                + errorMessage
+                + ", hash="
+                + hash
+                + ", result="
+                + Arrays.toString(result)
+                + "]";
+    }
+
     private Integer errorCode;
     private String errorMessage;
     private String hash;
