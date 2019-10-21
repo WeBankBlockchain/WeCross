@@ -10,15 +10,10 @@ import com.webank.wecross.resource.SetDataRequest;
 import com.webank.wecross.resource.SetDataResponse;
 import com.webank.wecross.resource.TransactionRequest;
 import com.webank.wecross.resource.TransactionResponse;
-
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 
 public class NetworkManagerTest {
     class MockResource implements com.webank.wecross.resource.Resource {
