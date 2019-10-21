@@ -41,6 +41,20 @@ public class NetworkManager {
         return null;
     }
 
+    public void addResource(Resource resource) throws Exception {
+        String networkName = resource.getPath().getNetwork();
+        networks.putIfAbsent(networkName, new Network());
+        networks.get(networkName).addResource(resource);
+    }
+
+    public void removeResource(Path path) throws Exception {
+        Network network = getNetwork(path);
+        network.removeResource(path);
+        if (network.isEmpty()) {
+            networks.remove(path.getNetwork());
+        }
+    }
+
     public Network getNetwork(Path path) {
         return getNetwork(path.getNetwork());
     }
@@ -67,15 +81,15 @@ public class NetworkManager {
         this.seq = seq;
     }
 
-    public Set<String> getAllNetworkStubResourceName() {
+    public Set<String> getAllNetworkStubResourceName(boolean ignoreRemote) {
         Set<String> ret = new HashSet<>();
 
         for (Map.Entry<String, Network> entry : networks.entrySet()) {
             String networkName = PathUtils.toPureName(entry.getKey());
-            Set<String> allStubResourceName = entry.getValue().getAllStubResourceName();
+            Set<String> allStubResourceName = entry.getValue().getAllStubResourceName(ignoreRemote);
 
             for (String stubResourceName : allStubResourceName) {
-                ret.add(networkName + "/" + stubResourceName);
+                ret.add(networkName + "." + stubResourceName);
             }
         }
         return ret;

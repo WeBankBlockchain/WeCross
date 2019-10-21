@@ -176,7 +176,7 @@ public class PeerManager {
         PeerInfoMessageData data = new PeerInfoMessageData();
         data.setDataSeq(seq);
 
-        Set<String> resources = networkManager.getAllNetworkStubResourceName();
+        Set<String> resources = networkManager.getAllNetworkStubResourceName(true);
         for (String resource : resources) {
             data.addResource(resource);
         }

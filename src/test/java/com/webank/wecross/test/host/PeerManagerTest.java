@@ -61,10 +61,10 @@ public class PeerManagerTest {
 
         Set<String> resources = peerManager.getAllPeerResource();
         System.out.println(resources);
-        System.out.println(networkManager.getAllNetworkStubResourceName());
+        System.out.println(networkManager.getAllNetworkStubResourceName(true));
 
         Assert.assertTrue(0 < resources.size());
-        Assert.assertEquals(networkManager.getAllNetworkStubResourceName(), resources);
+        Assert.assertEquals(networkManager.getAllNetworkStubResourceName(true), resources);
 
         peerManager.clearPeers();
     }
@@ -84,10 +84,10 @@ public class PeerManagerTest {
 
         Set<String> resources = peerManager.getAllPeerResource();
         System.out.println(resources);
-        System.out.println(networkManager.getAllNetworkStubResourceName());
+        System.out.println(networkManager.getAllNetworkStubResourceName(true));
 
         Assert.assertTrue(0 < resources.size());
-        Assert.assertEquals(networkManager.getAllNetworkStubResourceName(), resources);
+        Assert.assertEquals(networkManager.getAllNetworkStubResourceName(true), resources);
 
         peerManager.clearPeers();
     }

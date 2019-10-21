@@ -1,4 +1,4 @@
-package com.webank.wecross.bcos.config;
+package com.webank.wecross.stub.bcos.config;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;

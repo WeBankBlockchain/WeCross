@@ -32,8 +32,6 @@ public class WeCrossHost {
         return peerManager.onRestfulPeerMessage(method, msg);
     }
 
-    public void syncAllState() {}
-
     public void setNetworkManager(NetworkManager networkManager) {
         this.networkManager = networkManager;
     }
@@ -41,4 +39,8 @@ public class WeCrossHost {
     public void setPeerManager(PeerManager peerManager) {
         this.peerManager = peerManager;
     }
+
+    public void syncAllState() {}
+
+    public void syncPeerInfo() {}
 }

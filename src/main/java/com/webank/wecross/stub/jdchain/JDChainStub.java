@@ -1,17 +1,14 @@
-package com.webank.wecross.jdchain;
+package com.webank.wecross.stub.jdchain;
 
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.sdk.BlockchainService;
-import com.webank.wecross.jdchain.config.JDChainSdk;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.ChainState;
 import com.webank.wecross.stub.Stub;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.webank.wecross.stub.jdchain.config.JDChainSdk;
+import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,15 +19,17 @@ public class JDChainStub implements Stub {
     private BlockchainKeypair adminKey;
     private HashDigest ledgerHash;
     private List<BlockchainService> blockchainService = new ArrayList<BlockchainService>();
-    private Map<String, JDChainResource> resources;
+    private Map<String, Resource> resources;
+    private ChainState chainState;
 
     private Logger logger = LoggerFactory.getLogger(JDChainSdk.class);
 
-    public Map<String, JDChainResource> getResources() {
+    @Override
+    public Map<String, Resource> getResources() {
         return resources;
     }
 
-    public void setResources(Map<String, JDChainResource> resources) {
+    public void setResources(Map<String, Resource> resources) {
         this.resources = resources;
     }
 
@@ -81,23 +80,55 @@ public class JDChainStub implements Stub {
     @Override
     public Resource getResource(Path path) throws Exception {
         logger.trace("get resource: {}", path.getResource());
-        JDChainResource resource = resources.get(path.getResource());
-        if (resource != null) {
-            resource.init(adminKey, ledgerHash, blockchainService);
+        Resource resource = resources.get(path.getResource());
+        if (resource != null && resource.isLocal()) {
+            ((JDChainResource) resource).init(adminKey, ledgerHash, blockchainService);
             return resource;
         }
         return resource;
     }
 
     @Override
-    public ChainState getState() {
-        // TODO Auto-generated method stub
-        return null;
+    public void addResource(Resource resource) throws Exception {
+        String name = resource.getPath().getResource();
+        Resource currentResource = resources.get(name);
+        if (currentResource == null) {
+            resources.put(name, resource);
+        } else {
+            if (currentResource.getAccessDepth() > resource.getAccessDepth()) {
+                resources.put(name, resource); // Update to shorter path resource
+            }
+        }
     }
 
     @Override
-    public Set<String> getAllResourceName() {
-        // TODO Auto-generated method stub
-        return null;
+    public void removeResource(Path path) throws Exception {
+        logger.trace("remove resource: {}", path.getResource());
+        resources.remove(path.getResource());
+    }
+
+    @Override
+    public ChainState getChainState() {
+        return chainState;
+    }
+
+    @Override
+    public void updateChainstate() {
+        // get state from chain and update chainState
+    }
+
+    @Override
+    public Set<String> getAllResourceName(boolean ignoreRemote) {
+        Set<String> names = new HashSet<>();
+        for (Resource resource : resources.values()) {
+            if (resource.isLocal() || !ignoreRemote) {
+                names.add(resource.getPath().getResource());
+            }
+        }
+        return names;
+    }
+
+    public void setChainState(ChainState chainState) {
+        this.chainState = chainState;
     }
 }

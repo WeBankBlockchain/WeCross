@@ -1,4 +1,4 @@
-package com.webank.wecross.jdchain.config;
+package com.webank.wecross.stub.jdchain.config;
 
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.ledger.BlockchainKeypair;

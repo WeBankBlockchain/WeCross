@@ -1,4 +1,4 @@
-package com.webank.wecross.jdchain.config;
+package com.webank.wecross.stub.jdchain.config;
 
 import java.util.ArrayList;
 import java.util.List;

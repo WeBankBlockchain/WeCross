@@ -1,8 +1,8 @@
-package com.webank.wecross.bcos.config;
+package com.webank.wecross.stub.bcos.config;
 
-import com.webank.wecross.bcos.BCOSContractResource;
-import com.webank.wecross.bcos.BCOSResource;
-import com.webank.wecross.bcos.BCOSStub;
+import com.webank.wecross.resource.Resource;
+import com.webank.wecross.stub.bcos.BCOSContractResource;
+import com.webank.wecross.stub.bcos.BCOSStub;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ public class BCOSStubConfig {
         bcosStub.setWeb3(web3SDK.getWeb3());
         bcosStub.setCredentials(web3SDK.getCredentials());
 
-        Map<String, BCOSResource> bcosResources = new HashMap<>();
+        Map<String, Resource> bcosResources = new HashMap<>();
 
         for (String resourceName : resources.keySet()) {
 
