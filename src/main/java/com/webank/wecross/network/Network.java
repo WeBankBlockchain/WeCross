@@ -5,6 +5,7 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.remote.RemoteStub;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -15,7 +16,7 @@ public class Network {
 
     private Logger logger = LoggerFactory.getLogger(Network.class);
 
-    private Map<String, Stub> stubs;
+    private Map<String, Stub> stubs = new HashMap<>();
 
     // Access control
     private Boolean visible;

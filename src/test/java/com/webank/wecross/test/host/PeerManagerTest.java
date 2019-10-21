@@ -6,10 +6,7 @@ import com.webank.wecross.host.PeerManager;
 import com.webank.wecross.network.NetworkManager;
 import java.util.Set;
 import javax.annotation.Resource;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,6 +27,12 @@ public class PeerManagerTest {
     public static void runApp() {
         // Start the application to mock remote WeCross host
         Application.main(new String[] {});
+    }
+
+    @AfterClass
+    public static void afterclass() {
+        // do nothing
+
     }
 
     @Test
@@ -57,7 +60,7 @@ public class PeerManagerTest {
         peerManager.updatePeer(peer);
 
         peerManager.broadcastPeerInfoRequest();
-        Thread.sleep(5000); // waiting for syncing
+        Thread.sleep(2000); // waiting for syncing
 
         Set<String> resources = peerManager.getAllPeerResource();
         System.out.println(resources);
@@ -80,7 +83,7 @@ public class PeerManagerTest {
         peerManager.updatePeer(peer);
 
         peerManager.broadcastSeqRequest();
-        Thread.sleep(5000); // waiting for syncing
+        Thread.sleep(2000); // waiting for syncing
 
         Set<String> resources = peerManager.getAllPeerResource();
         System.out.println(resources);

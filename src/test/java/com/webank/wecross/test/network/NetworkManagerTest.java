@@ -10,7 +10,6 @@ import com.webank.wecross.resource.SetDataResponse;
 import com.webank.wecross.resource.TransactionRequest;
 import com.webank.wecross.resource.TransactionResponse;
 import java.util.Set;
-import javax.annotation.Resource;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,8 +19,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 public class NetworkManagerTest {
-    @Resource NetworkManager networkManager;
-
     class MockResource implements com.webank.wecross.resource.Resource {
         private Path path;
         private int distance = 0;
@@ -80,25 +77,8 @@ public class NetworkManagerTest {
     }
 
     @Test
-    public void getAllNetworkStubResourceNameTest() {}
-
-    @Test
     public void resourceAddAndRemoveTest() throws Exception {
-        Set<String> resources = networkManager.getAllNetworkStubResourceName(true);
-        System.out.println(resources);
-        Assert.assertTrue(resources.contains("payment.bcos1.HelloWorldContract"));
-        Assert.assertTrue(resources.contains("bill.bcos1.HelloWorldContract"));
-        Assert.assertTrue(resources.contains("payment.bcos2.HelloWorldContract"));
-        Assert.assertEquals(3, resources.size());
-
-        // Remove test
-        int resourcesSize = resources.size();
-        for (String pathName : resources) {
-            networkManager.removeResource(Path.decode(pathName));
-            resourcesSize--;
-            Set<String> currentResources = networkManager.getAllNetworkStubResourceName(true);
-            Assert.assertEquals(currentResources.size(), resourcesSize);
-        }
+        NetworkManager networkManager = new NetworkManager();
 
         // Add test some are local
         for (int i = 0; i < 3; i++) {
@@ -135,5 +115,14 @@ public class NetworkManagerTest {
         allLocalResources = networkManager.getAllNetworkStubResourceName(true);
         System.out.println(allLocalResources);
         Assert.assertEquals(8, allLocalResources.size());
+
+        // Remove test
+        int resourcesSize = allResources.size();
+        for (String pathName : allResources) {
+            networkManager.removeResource(Path.decode(pathName));
+            resourcesSize--;
+            Set<String> currentResources = networkManager.getAllNetworkStubResourceName(false);
+            Assert.assertEquals(currentResources.size(), resourcesSize);
+        }
     }
 }

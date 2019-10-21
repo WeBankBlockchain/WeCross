@@ -6,6 +6,7 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
 import com.webank.wecross.stub.Stub;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 public class NetworkManager {
 
-    private Map<String, Network> networks;
+    private Map<String, Network> networks = new HashMap<>();
     private int seq = 1;
     private Logger logger = LoggerFactory.getLogger(NetworkManager.class);
 
