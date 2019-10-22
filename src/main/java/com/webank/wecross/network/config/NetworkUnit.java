@@ -5,7 +5,7 @@ import java.util.Map;
 public class NetworkUnit {
 
     private Boolean visible = false;
-    private Map<String, Map<String, Object>> stubs;
+    private Map<String, Object> stubs;
 
     public Boolean getVisible() {
         return visible;
@@ -15,11 +15,11 @@ public class NetworkUnit {
         this.visible = visible;
     }
 
-    public Map<String, Map<String, Object>> getStubs() {
+    public Map<String, Object> getStubs() {
         return stubs;
     }
 
-    public void setStubs(Map<String, Map<String, Object>> stubs) {
+    public void setStubs(Map<String, Object> stubs) {
         this.stubs = stubs;
     }
 }

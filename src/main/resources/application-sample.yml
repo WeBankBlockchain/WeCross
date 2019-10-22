@@ -1,53 +1,3 @@
-bcos-channel-service-manager:
-    channelServices:
-        channel-service1:
-            groupId: 1 # The specified group to which the SDK connects
-            agencyName: fisco # agency name
-            groupChannelConnections:
-                caCert: classpath:/bcosconf/bcos1/ca.crt
-                sslCert: classpath:/bcosconf/bcos1/sdk.crt
-                sslKey: classpath:/bcosconf/bcos1/sdk.key
-                allChannelConnections:
-                    -   groupId: 1 #group ID
-                        connectionsStr:
-                            - 127.0.0.1:20200 # node listen_ip:channel_listen_port
-                            - 127.0.0.1:20201
-                    -   groupId: 2
-                        connectionsStr:
-                            - 127.0.0.1:20202 # node listen_ip:channel_listen_port
-                            - 127.0.0.1:20203
-        channel-service2:
-            groupId: 1 # The specified group to which the SDK connects
-            agencyName: fisco # agency name
-            groupChannelConnections:
-                caCert: classpath:/bcosconf/bcos2/ca.crt
-                sslCert: classpath:/bcosconf/bcos2/sdk.crt
-                sslKey: classpath:/bcosconf/bcos2/sdk.key
-                allChannelConnections:
-                    -   groupId: 1 #group ID
-                        connectionsStr:
-                            - 127.0.0.1:20200 # node listen_ip:channel_listen_port
-                            - 127.0.0.1:20201
-                    -   groupId: 2
-                        connectionsStr:
-                            - 127.0.0.1:20202 # node listen_ip:channel_listen_port
-                            - 127.0.0.1:20203
-jdchain-service-manager:
-    services:
-        jd-service1:
-            privateKey: 0000000000000000
-            publicKey: 111111111111111
-            passWord: 222222222222222
-            connectionsStr:
-                - 127.0.0.1:18080
-                - 127.0.0.1:18081
-        jd-service2:
-            privateKey: 0000000000000000
-            publicKey: 111111111111111
-            passWord: 222222222222222
-            connectionsStr:
-                - 127.0.0.1:18082
-                - 127.0.0.1:18083
 network-manager:
     networks:
         payment:
@@ -55,31 +5,58 @@ network-manager:
             stubs:
                 bcos1:
                     pattern: bcos
-                    bcosService: channel-service1
+                    accounts:
+                        pemFile: /bcosconf/bcos1/0xcdcce60801c0a2e6bb534322c32ae528b9dec8d2.pem
+                        p12File: /bcosconf/bcos1/0x98333491efac02f8ce109b0c499074d47e7779a6.p12
+                        password: '123456'
+                    channelService:
+                        groupId: 1 # The specified group to which the SDK connects
+                        agencyName: fisco # agency name
+                        groupChannelConnections:
+                            caCert: 'classpath:/bcosconf/bcos1/ca.crt'
+                            sslCert: 'classpath:/bcosconf/bcos1/sdk.crt'
+                            sslKey: 'classpath:/bcosconf/bcos1/sdk.key'
+                            allChannelConnections:
+                                -   groupId: 1 #group ID
+                                    connectionsStr:
+                                        - 127.0.0.1:20200 # node listen_ip:channel_listen_port
                     resources:
                         HelloWorldContract:
                             type: contract
                             contractAddress: '0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a'
                 bcos2:
                     pattern: bcos
-                    bcosService: channel-service2
+                    accounts:
+                        pemFile: /bcosconf/bcos2/0xcdcce60801c0a2e6bb534322c32ae528b9dec8d2.pem
+                        p12File: /bcosconf/bcos2/0x98333491efac02f8ce109b0c499074d47e7779a6.p12
+                        password: '123456'
+                    channelService:
+                        groupId: 1 # The specified group to which the SDK connects
+                        agencyName: fisco # agency name
+                        groupChannelConnections:
+                            caCert: 'classpath:/bcosconf/bcos2/ca.crt'
+                            sslCert: 'classpath:/bcosconf/bcos2/sdk.crt'
+                            sslKey: 'classpath:/bcosconf/bcos2/sdk.key'
+                            allChannelConnections:
+                                -   groupId: 1 #group ID
+                                    connectionsStr:
+                                        - 127.0.0.1:20200 # node listen_ip:channel_listen_port
                     resources:
                         HelloWorldContract:
                             type: contract
-                            contractAddress: '0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a'
+                            contractAddress: '0x95a8c1ca4a68a322414b8c52acce56c3eab3cbdb'
         bill:
             visible: true
             stubs:
-                bcos1:
-                    pattern: bcos
-                    bcosService: channel-service1
-                    resources:
-                        HelloWorldContract:
-                            type: contract
-                            contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
                 jd:
-                    pattern: jd
-                    jdService: jd-service1
+                    pattern: jdchain
+                    jdService:
+                        privateKey: '0000000000000000'
+                        publicKey: '111111111111111'
+                        password: '222222222222222'
+                        connectionsStr:
+                            - 127.0.0.1:18080
+                            - 127.0.0.1:18081
                     resources:
                         HelloWorldContract:
                             type: contract
@@ -89,4 +66,3 @@ peer-manager:
     peers:
         - peerA@127.0.0.1:8081
         - peerB@127.0.0.1:8082
-

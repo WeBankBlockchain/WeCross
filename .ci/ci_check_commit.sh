@@ -3,7 +3,7 @@
 set -e
 
 scan_code_script="cobra/cobra.py -f json -o /tmp/report.json -t "
-ignore_files=(application-sample.yml application.yml ci_check.sh)
+ignore_files=(application-sample.yml application.yml ci_check.sh get_bcos_account.sh)
 
 LOG_ERROR() {
     content=${1}

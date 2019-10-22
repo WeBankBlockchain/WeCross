@@ -3,13 +3,13 @@ package com.webank.wecross.stub.jdchain.config;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.sdk.BlockchainService;
-import java.util.ArrayList;
 import java.util.List;
 
 public class JDChainSdk {
+
     private BlockchainKeypair adminKey;
     private HashDigest ledgerHash;
-    private List<BlockchainService> blockchainService = new ArrayList<BlockchainService>();
+    private List<BlockchainService> blockchainService;
 
     public List<BlockchainService> getBlockchainService() {
         return blockchainService;

@@ -1,6 +1,5 @@
 package com.webank.wecross.stub.bcos.config;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
@@ -11,9 +10,22 @@ public class GroupChannelConnections {
     private Resource caCert;
     private Resource sslCert;
     private Resource sslKey;
-    List<ChannelConnections> allChannelConnections = new ArrayList<>();
+    List<ChannelConnections> allChannelConnections;
 
-    public GroupChannelConnectionsConfig getGroupChannelConnections() {
+    public GroupChannelConnections() {}
+
+    public GroupChannelConnections(
+            Resource caCert,
+            Resource sslCert,
+            Resource sslKey,
+            List<ChannelConnections> allChannelConnections) {
+        this.caCert = caCert;
+        this.sslCert = sslCert;
+        this.sslKey = sslKey;
+        this.allChannelConnections = allChannelConnections;
+    }
+
+    public GroupChannelConnectionsConfig getGroupChannelConnectionsConfig() {
         GroupChannelConnectionsConfig groupChannelConnectionsConfig =
                 new GroupChannelConnectionsConfig();
         groupChannelConnectionsConfig.setCaCert(caCert);
