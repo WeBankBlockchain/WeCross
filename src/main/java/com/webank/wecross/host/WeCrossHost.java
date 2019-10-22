@@ -7,6 +7,7 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,7 @@ public class WeCrossHost {
 
     public void start() {
         peerManager.start();
+        syncPeerNetworks();
     }
 
     public Resource getResource(Path path) throws Exception {
@@ -42,5 +44,13 @@ public class WeCrossHost {
 
     public void syncAllState() {}
 
-    public void syncPeerInfo() {}
+    public void syncPeerNetworks() {
+        // Update peers' resource into networks
+        Set<Peer> activePeers = peerManager.getActivePeers();
+        networkManager.updateActivePeerNetwork(activePeers);
+
+        // Update active resource back to peerManager
+        Set<String> activeResources = networkManager.getAllNetworkStubResourceName(true);
+        peerManager.setActiveResources(activeResources);
+    }
 }

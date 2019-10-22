@@ -26,7 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @SpringBootApplication
 public class RestfulService {
-    @javax.annotation.Resource private WeCrossHost host;
+    @javax.annotation.Resource(name = "newWeCrossHost")
+    private WeCrossHost host;
 
     private Logger logger = LoggerFactory.getLogger(RestfulService.class);
     private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();

@@ -1,4 +1,4 @@
-package com.webank.wecross.restserver.p2p;
+package com.webank.wecross.p2p.engine.p2p;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.webank.wecross.p2p.P2PMessage;
