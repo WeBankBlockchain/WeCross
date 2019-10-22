@@ -3,22 +3,20 @@ package com.webank.wecross.network.config;
 import com.webank.wecross.network.Network;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.bcos.BCOSStub;
+import com.webank.wecross.stub.bcos.config.Account;
 import com.webank.wecross.stub.bcos.config.BCOSStubConfig;
-import com.webank.wecross.stub.bcos.config.Web3Sdk;
+import com.webank.wecross.stub.bcos.config.ChannelService;
 import com.webank.wecross.stub.jdchain.JDChainStub;
-import com.webank.wecross.stub.jdchain.config.JDChainSdk;
+import com.webank.wecross.stub.jdchain.config.JDChainService;
 import com.webank.wecross.stub.jdchain.config.JDChainStubConfig;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 
-@DependsOn(value = {"channelServiceConfig"})
 @Configuration
 @ConfigurationProperties(prefix = "network-manager")
 public class NetworkConfig {
@@ -26,10 +24,6 @@ public class NetworkConfig {
     private Logger logger = LoggerFactory.getLogger(NetworkConfig.class);
 
     private Map<String, NetworkUnit> networks;
-
-    @Resource Map<String, Web3Sdk> web3SdkMap;
-
-    @Resource Map<String, JDChainSdk> jdChainSdkMap;
 
     @Bean
     public Map<String, Network> initNetworks() {
@@ -46,7 +40,7 @@ public class NetworkConfig {
 
             NetworkUnit networkUnit = networks.get(networkName);
 
-            Map<String, Map<String, Object>> stubs = networkUnit.getStubs();
+            Map<String, Object> stubs = networkUnit.getStubs();
 
             // get stubs bean
             Map<String, Stub> stubsBean = initStub(stubs);
@@ -61,7 +55,7 @@ public class NetworkConfig {
         return result;
     }
 
-    public Map<String, Stub> initStub(Map<String, Map<String, Object>> stubs) {
+    public Map<String, Stub> initStub(Map<String, Object> stubs) {
         Map<String, Stub> stubsBean = new HashMap<>();
         if (stubs == null) {
             logger.info("no stubs configuration found");
@@ -70,7 +64,8 @@ public class NetworkConfig {
 
         for (String stubName : stubs.keySet()) {
 
-            Map<String, Object> stubConfig = stubs.get(stubName);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> stubConfig = (Map<String, Object>) stubs.get(stubName);
 
             if (!stubConfig.containsKey("pattern")) {
                 logger.error(
@@ -82,51 +77,13 @@ public class NetworkConfig {
             String Stubtype = (String) stubConfig.get("pattern");
 
             if (Stubtype.equals("bcos")) {
-                if (!stubConfig.containsKey("bcosService")) {
-                    logger.error(
-                            "Error in application.yml: {} should contain a key named \"bcosService\"",
-                            stubName);
-                    return null;
-                }
-                String bcosService = (String) stubConfig.get("bcosService");
 
-                if (!stubConfig.containsKey("resources")) {
-                    logger.error(
-                            "Error in application.yml: {} should contain a key named \"resources\"",
-                            stubName);
-                    return null;
-                }
-
-                // parse bcos resources
-                @SuppressWarnings("unchecked")
-                Map<String, Map<String, String>> bcosResources =
-                        (Map<String, Map<String, String>>) stubConfig.get("resources");
-                BCOSStubConfig bcosStubConfig = new BCOSStubConfig();
-                BCOSStub bcosStub =
-                        bcosStubConfig.initBCOSStub(web3SdkMap, bcosResources, bcosService);
+                BCOSStub bcosStub = getBcosStub(stubName, stubConfig);
                 stubsBean.put(stubName, bcosStub);
 
             } else if (Stubtype.equals("jdchain")) {
-                if (!stubConfig.containsKey("jdService")) {
-                    logger.error(
-                            "Error in application.yml: {} should contain a key named \"jdService\"",
-                            stubName);
-                    return null;
-                }
-                String jdChainService = (String) stubConfig.get("jdService");
-                if (!stubConfig.containsKey("resources")) {
-                    logger.error(
-                            "Error in application.yml: {} should contain a key named \"resources\"",
-                            stubName);
-                    return null;
-                }
-                @SuppressWarnings("unchecked")
-                Map<String, Map<String, String>> jdChainResources =
-                        (Map<String, Map<String, String>>) stubConfig.get("resources");
-                JDChainStubConfig jdChainStubConfig = new JDChainStubConfig();
-                JDChainStub jdChainStub =
-                        jdChainStubConfig.initJdChainStub(
-                                jdChainSdkMap, jdChainResources, jdChainService);
+
+                JDChainStub jdChainStub = getJdStub(stubName, stubConfig);
                 stubsBean.put(stubName, jdChainStub);
 
             } else if (Stubtype.equals("BaiDu")) {
@@ -141,19 +98,83 @@ public class NetworkConfig {
         return stubsBean;
     }
 
+    public BCOSStub getBcosStub(String stubName, Map<String, Object> stubConfig) {
+        if (!stubConfig.containsKey("accounts")) {
+            logger.error(
+                    "Error in application.yml: {} should contain a key named \"accounts\"",
+                    stubName);
+            return null;
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, String> accountConfig = (Map<String, String>) stubConfig.get("accounts");
+        Account account = ConfigUtils.getBcoseAccount(accountConfig);
+
+        if (!stubConfig.containsKey("channelService")) {
+            logger.error(
+                    "Error in application.yml: {} should contain a key named \"channelService\"",
+                    stubName);
+            return null;
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> channelServiceConfig =
+                (Map<String, Object>) stubConfig.get("channelService");
+        ChannelService channelService = ConfigUtils.getBcosChannelService(channelServiceConfig);
+
+        if (!stubConfig.containsKey("resources")) {
+            logger.error(
+                    "Error in application.yml: {} should contain a key named \"resources\"",
+                    stubName);
+            return null;
+        }
+
+        // parse bcos resources
+        @SuppressWarnings("unchecked")
+        Map<String, Map<String, String>> bcosResources =
+                (Map<String, Map<String, String>>) stubConfig.get("resources");
+        BCOSStubConfig bcosStubConfig = new BCOSStubConfig();
+
+        BCOSStub bcosStub =
+                bcosStubConfig.initBCOSStub(stubName, account, channelService, bcosResources);
+        return bcosStub;
+    }
+
+    public JDChainStub getJdStub(String stubName, Map<String, Object> stubConfig) {
+        if (!stubConfig.containsKey("jdService")) {
+            logger.error(
+                    "Error in application.yml: {} should contain a key named \"jdService\"",
+                    stubName);
+            return null;
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> jdChainServiceConfig =
+                (Map<String, Object>) stubConfig.get("jdService");
+        JDChainService jdChainService = ConfigUtils.getJDChainService(jdChainServiceConfig);
+
+        if (!stubConfig.containsKey("resources")) {
+            logger.error(
+                    "Error in application.yml: {} should contain a key named \"resources\"",
+                    stubName);
+            return null;
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Map<String, String>> jdChainResources =
+                (Map<String, Map<String, String>>) stubConfig.get("resources");
+        JDChainStubConfig jdChainStubConfig = new JDChainStubConfig();
+
+        JDChainStub jdChainStub =
+                jdChainStubConfig.initJdChainStub(stubName, jdChainService, jdChainResources);
+        return jdChainStub;
+    }
+
     public Map<String, NetworkUnit> getNetworks() {
         return networks;
     }
 
     public void setNetworks(Map<String, NetworkUnit> networks) {
         this.networks = networks;
-    }
-
-    public Map<String, Web3Sdk> getWeb3SdkMap() {
-        return web3SdkMap;
-    }
-
-    public void setWeb3SdkMap(Map<String, Web3Sdk> web3SdkMap) {
-        this.web3SdkMap = web3SdkMap;
     }
 }

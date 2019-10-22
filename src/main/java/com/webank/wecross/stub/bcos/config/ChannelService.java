@@ -13,6 +13,15 @@ public class ChannelService {
     private String agencyName;
     private GroupChannelConnections groupChannelConnections;
 
+    public ChannelService() {}
+
+    public ChannelService(
+            int groupId, String agencyName, GroupChannelConnections groupChannelConnections) {
+        this.groupId = groupId;
+        this.agencyName = agencyName;
+        this.groupChannelConnections = groupChannelConnections;
+    }
+
     public Service getService(GroupChannelConnectionsConfig groupChannelConnectionsConfig) {
         Service channelService = new Service();
         channelService.setConnectSeconds(30);
