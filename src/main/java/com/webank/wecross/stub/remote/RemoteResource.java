@@ -75,12 +75,7 @@ public class RemoteResource extends Resource {
         if (peers == null || peers.isEmpty()) {
             throw new Exception("Peers of the resource is empty");
         }
-        Peer firstPeer = new Peer();
-        for (Peer peer : this.peers) {
-            // choose the first peer
-            firstPeer = peer;
-            break;
-        }
+        Peer firstPeer = this.peers.stream().findFirst().get();
         return firstPeer;
     }
 

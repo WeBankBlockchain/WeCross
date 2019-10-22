@@ -55,7 +55,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
             checkP2PMessage(msg);
             checkCallback(callback);
 
-            String url = "http://" + peer.getUrl() + "/restful/" + msg.toUri();
+            String url = "http://" + peer.getUrl() + "/p2p/" + msg.toUri();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 

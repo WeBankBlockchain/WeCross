@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("restful")
+@RequestMapping("p2p")
 public class RestfulP2PService {
     @javax.annotation.Resource private WeCrossHost host;
 
