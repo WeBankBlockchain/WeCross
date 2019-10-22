@@ -10,14 +10,14 @@ import com.webank.wecross.resource.SetDataRequest;
 import com.webank.wecross.resource.SetDataResponse;
 import com.webank.wecross.resource.TransactionRequest;
 import com.webank.wecross.resource.TransactionResponse;
+import java.util.Set;
 
-public class RemoteResource implements Resource {
+public class RemoteResource extends Resource {
     private int distance; // How many jumps to local stub
-    private Peer peer;
     private Path path;
 
-    public RemoteResource(Peer peer, int accessDepth) {
-        this.peer = peer;
+    public RemoteResource(Set<Peer> peers, int accessDepth) {
+        setPeers(peers);
         this.distance = accessDepth;
     }
 
@@ -57,19 +57,6 @@ public class RemoteResource implements Resource {
     @Override
     public TransactionRequest createRequest() {
         return null;
-    }
-
-    @Override
-    public boolean isLocal() {
-        return false;
-    }
-
-    public Peer getPeer() {
-        return peer;
-    }
-
-    public void setPeer(Peer peer) {
-        this.peer = peer;
     }
 
     @Override

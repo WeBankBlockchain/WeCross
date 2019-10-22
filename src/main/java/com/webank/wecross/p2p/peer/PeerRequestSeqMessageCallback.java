@@ -2,7 +2,7 @@ package com.webank.wecross.p2p.peer;
 
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
-import com.webank.wecross.restserver.p2p.P2PHttpResponse;
+import com.webank.wecross.p2p.engine.p2p.P2PHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;

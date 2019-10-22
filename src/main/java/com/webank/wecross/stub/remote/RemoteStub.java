@@ -41,7 +41,7 @@ public class RemoteStub implements Stub {
 
     @Override
     public Resource getResource(Path path) throws Exception {
-        return null;
+        return resources.get(path.getResource());
     }
 
     @Override
@@ -58,8 +58,8 @@ public class RemoteStub implements Stub {
     }
 
     @Override
-    public void removeResource(Path path) throws Exception {
-        logger.trace("remove resource: {}", path.getResource());
+    public void removeResource(Path path, boolean ignoreLocal) throws Exception {
+        logger.info("remove resource: {}", path.getResource());
         resources.remove(path.getResource());
     }
 
@@ -67,7 +67,7 @@ public class RemoteStub implements Stub {
     public Set<String> getAllResourceName(boolean ignoreRemote) {
         Set<String> names = new HashSet<>();
         for (Resource resource : resources.values()) {
-            if (resource.isLocal() || !ignoreRemote) {
+            if (resource.getDistance() == 0 || !ignoreRemote) {
                 names.add(resource.getPath().getResource());
             }
         }

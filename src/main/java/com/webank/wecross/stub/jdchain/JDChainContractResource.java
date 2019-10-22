@@ -1,5 +1,7 @@
 package com.webank.wecross.stub.jdchain;
 
+import com.jd.blockchain.contract.Contract;
+import com.jd.blockchain.contract.ContractEvent;
 import com.jd.blockchain.ledger.OperationResult;
 import com.jd.blockchain.ledger.PreparedTransaction;
 import com.jd.blockchain.ledger.TransactionTemplate;
@@ -105,14 +107,13 @@ public class JDChainContractResource extends JDChainResource {
         ConstPool constpool = ccFile.getConstPool();
         AnnotationsAttribute attrForClass =
                 new AnnotationsAttribute(constpool, AnnotationsAttribute.visibleTag);
-        Annotation annotForClass = new Annotation("com.jd.blockchain.contract.Contract", constpool);
+        Annotation annotForClass = new Annotation(Contract.class.getName(), constpool);
         attrForClass.addAnnotation(annotForClass);
         ccFile.addAttribute(attrForClass);
 
         AnnotationsAttribute attrForMethod =
                 new AnnotationsAttribute(constpool, AnnotationsAttribute.visibleTag);
-        Annotation annotForMethod =
-                new Annotation("com.jd.blockchain.contract.ContractEvent", constpool);
+        Annotation annotForMethod = new Annotation(ContractEvent.class.getName(), constpool);
         annotForMethod.addMemberValue(
                 "name", new StringMemberValue(request.getMethod(), constpool));
         attrForMethod.addAnnotation(annotForMethod);
@@ -139,7 +140,7 @@ public class JDChainContractResource extends JDChainResource {
             return response;
         }
 
-        CtClass ctClass = this.dynamicGenerateClass(request);
+        CtClass ctClass = dynamicGenerateClass(request);
         if (ctClass == null) {
             response.setErrorCode(-2);
             response.setErrorMessage("generate class failed");
@@ -161,16 +162,16 @@ public class JDChainContractResource extends JDChainResource {
                     "request method:{}  new transaction  success ledgerhash:{}",
                     request.getMethod(),
                     ledgerHash);
-            Object object;
+            Object contractObject;
             try {
-                object = txTpl.contract(contractAddress, ctClass.toClass());
-                Method[] methods = object.getClass().getMethods();
+                contractObject = txTpl.contract(contractAddress, ctClass.toClass());
+                Method[] methods = contractObject.getClass().getMethods();
                 for (int i = 0; i < methods.length; i++) {
                     Method method = methods[i];
                     if (method != null && request.getMethod().equals(method.getName())) {
                         try {
                             logger.debug("invoke  method:{}", request.getMethod());
-                            method.invoke(object, request.getArgs());
+                            method.invoke(contractObject, request.getArgs());
 
                         } catch (IllegalAccessException e) {
                             response.setErrorCode(-3);
@@ -240,7 +241,7 @@ public class JDChainContractResource extends JDChainResource {
 
     @Override
     public TransactionResponse sendTransaction(TransactionRequest request) {
-        return this.call(request);
+        return call(request);
     }
 
     @Override

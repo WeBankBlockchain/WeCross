@@ -1,23 +1,34 @@
 package com.webank.wecross.resource;
 
-public interface Resource {
-    public Path getPath();
+import com.webank.wecross.host.Peer;
+import java.util.Set;
 
-    public void setPath(Path path);
+public abstract class Resource {
+    private Set<Peer> peers;
 
-    public GetDataResponse getData(GetDataRequest request);
+    public abstract Path getPath();
 
-    public SetDataResponse setData(SetDataRequest request);
+    public abstract void setPath(Path path);
 
-    public TransactionResponse call(TransactionRequest request);
+    public abstract GetDataResponse getData(GetDataRequest request);
 
-    public TransactionResponse sendTransaction(TransactionRequest request);
+    public abstract SetDataResponse setData(SetDataRequest request);
 
-    public void registerEventHandler(EventCallback callback);
+    public abstract TransactionResponse call(TransactionRequest request);
 
-    public TransactionRequest createRequest();
+    public abstract TransactionResponse sendTransaction(TransactionRequest request);
 
-    public int getDistance(); // 0 local, > 0 remote
+    public abstract void registerEventHandler(EventCallback callback);
 
-    public boolean isLocal();
+    public abstract TransactionRequest createRequest();
+
+    public abstract int getDistance(); // 0 local, > 0 remote
+
+    public Set<Peer> getPeers() {
+        return peers;
+    }
+
+    public void setPeers(Set<Peer> peers) {
+        this.peers = peers;
+    }
 }

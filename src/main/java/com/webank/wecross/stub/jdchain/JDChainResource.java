@@ -15,7 +15,7 @@ import com.webank.wecross.resource.TransactionResponse;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JDChainResource implements Resource {
+public class JDChainResource extends Resource {
 
     private Boolean isInit = false;
     protected BlockchainKeypair adminKey;
@@ -100,10 +100,5 @@ public class JDChainResource implements Resource {
     @Override
     public int getDistance() {
         return 0;
-    }
-
-    @Override
-    public boolean isLocal() {
-        return true;
     }
 }

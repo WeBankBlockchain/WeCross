@@ -20,19 +20,13 @@ public class PeerManagerTest {
     @Resource(name = "newPeerManager")
     PeerManager peerManager;
 
-    @Resource(name = "")
+    @Resource(name = "newNetworkManager")
     NetworkManager networkManager;
 
     @BeforeClass
     public static void runApp() {
         // Start the application to mock remote WeCross host
         Application.main(new String[] {});
-    }
-
-    @AfterClass
-    public static void afterclass() {
-        // do nothing
-
     }
 
     @Test
