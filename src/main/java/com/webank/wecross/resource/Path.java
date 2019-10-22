@@ -53,4 +53,8 @@ public class Path {
     public String toString() {
         return network + "." + chain + "." + resource;
     }
+
+    public String toURI() {
+        return network + "/" + chain + "/" + resource;
+    }
 }

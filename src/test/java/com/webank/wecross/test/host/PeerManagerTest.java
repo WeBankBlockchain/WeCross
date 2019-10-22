@@ -4,6 +4,10 @@ import com.webank.wecross.Application;
 import com.webank.wecross.host.Peer;
 import com.webank.wecross.host.PeerManager;
 import com.webank.wecross.network.NetworkManager;
+import com.webank.wecross.resource.Path;
+import com.webank.wecross.resource.TransactionRequest;
+import com.webank.wecross.resource.TransactionResponse;
+import com.webank.wecross.stub.remote.RemoteResource;
 import java.util.Set;
 import javax.annotation.Resource;
 import org.junit.*;
@@ -87,5 +91,21 @@ public class PeerManagerTest {
         Assert.assertEquals(networkManager.getAllNetworkStubResourceName(true), resources);
 
         peerManager.clearPeers();
+    }
+
+    @Test
+    public void remoteResourceCallTest() throws Exception {
+        Peer peer = new Peer();
+        peer.setUrl("127.0.0.1:8080");
+        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1);
+        resource.setPath(Path.decode("networkx.stubx.simple0"));
+
+        TransactionRequest request = new TransactionRequest();
+        request.setMethod("get");
+        request.setArgs(new String[] {"123", "aabb"});
+
+        TransactionResponse response = resource.call(request);
+        Assert.assertEquals(new Integer(0), response.getErrorCode());
+        System.out.println(response.getErrorMessage());
     }
 }

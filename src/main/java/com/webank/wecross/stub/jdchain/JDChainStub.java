@@ -78,7 +78,7 @@ public class JDChainStub implements Stub {
 
     @Override
     public String getPattern() {
-        return null;
+        return "jdc";
     }
 
     @Override

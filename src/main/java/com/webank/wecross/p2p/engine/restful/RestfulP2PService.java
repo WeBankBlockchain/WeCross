@@ -1,4 +1,4 @@
-package com.webank.wecross.p2p.engine.p2p;
+package com.webank.wecross.p2p.engine.restful;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("p2p")
+@RequestMapping("restful")
 public class RestfulP2PService {
     @javax.annotation.Resource private WeCrossHost host;
 
@@ -157,48 +157,6 @@ public class RestfulP2PService {
                         break;
                     }
 
-                default:
-                    {
-                        response.setResult(-1);
-                        response.setMessage("Unsupport method: stub/" + method);
-                        break;
-                    }
-            }
-
-        } catch (Exception e) {
-            logger.warn("Process request error:", e);
-
-            response.setResult(-1);
-            response.setMessage(e.getLocalizedMessage());
-        }
-
-        return response;
-    }
-
-    @RequestMapping(value = "/remote", method = RequestMethod.POST)
-    public P2PHttpResponse<Object> handleRemote(
-            @PathVariable("method") String method, @RequestBody String p2pRequestString) {
-
-        P2PHttpResponse<Object> response = new P2PHttpResponse<Object>();
-        response.setVersion("0.1");
-        response.setResult(0);
-
-        logger.info("request string: {}", p2pRequestString);
-
-        try {
-            switch (method) {
-                case "call":
-                    {
-                        logger.info("request method: remote/" + method);
-                        response.setMessage("request remote/" + method + " method success");
-                        break;
-                    }
-                case "sendTransaction":
-                    {
-                        logger.info("request method: remote/" + method);
-                        response.setMessage("request remote/" + method + " method success");
-                        break;
-                    }
                 default:
                     {
                         response.setResult(-1);

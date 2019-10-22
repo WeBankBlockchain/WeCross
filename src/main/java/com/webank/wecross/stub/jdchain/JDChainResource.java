@@ -6,7 +6,6 @@ import com.jd.blockchain.sdk.BlockchainService;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.GetDataRequest;
 import com.webank.wecross.resource.GetDataResponse;
-import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.SetDataRequest;
 import com.webank.wecross.resource.SetDataResponse;
@@ -21,7 +20,6 @@ public class JDChainResource extends Resource {
     protected BlockchainKeypair adminKey;
     protected HashDigest ledgerHash;
     protected List<BlockchainService> blockchainService = new ArrayList<BlockchainService>();
-    private Path path;
 
     public void init(
             BlockchainKeypair adminKey,
@@ -62,16 +60,6 @@ public class JDChainResource extends Resource {
     @Override
     public GetDataResponse getData(GetDataRequest request) {
         return null;
-    }
-
-    @Override
-    public Path getPath() {
-        return path;
-    }
-
-    @Override
-    public void setPath(Path path) {
-        this.path = path;
     }
 
     @Override

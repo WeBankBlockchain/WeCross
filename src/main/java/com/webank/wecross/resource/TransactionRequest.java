@@ -1,16 +1,16 @@
 package com.webank.wecross.resource;
 
 public class TransactionRequest {
-    private String to;
+    private String sig;
     private String method;
     private Object args[];
 
-    public String getTo() {
-        return to;
+    public String getSig() {
+        return sig;
     }
 
-    public void setTo(String to) {
-        this.to = to;
+    public void setSig(String sig) {
+        this.sig = sig;
     }
 
     public String getMethod() {

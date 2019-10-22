@@ -1,6 +1,7 @@
 package com.webank.wecross.host;
 
 import com.webank.wecross.p2p.P2PMessageEngine;
+import com.webank.wecross.p2p.P2PMessageEngineFactory;
 import java.util.Map;
 import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
@@ -8,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class PeerManagerFactory {
-    @Resource(name = "newP2PMessageEngine")
     private P2PMessageEngine p2pEngine;
 
     @Resource(name = "initPeers")
@@ -22,7 +22,7 @@ public class PeerManagerFactory {
     @Bean
     public PeerManager newPeerManager() {
         PeerManager manager = new PeerManager();
-        manager.setP2pEngine(p2pEngine);
+        manager.setP2pEngine(getP2pEngine());
         manager.setPeers(peers);
         messageHandler.setPeerManager(manager);
         manager.setMessageHandler(messageHandler);
@@ -36,6 +36,13 @@ public class PeerManagerFactory {
 
     public void setPeers(Map<String, Peer> peers) {
         this.peers = peers;
+    }
+
+    public P2PMessageEngine getP2pEngine() {
+        if (p2pEngine == null) {
+            p2pEngine = P2PMessageEngineFactory.getEngineInstance();
+        }
+        return p2pEngine;
     }
 
     public void setP2pEngine(P2PMessageEngine p2pEngine) {

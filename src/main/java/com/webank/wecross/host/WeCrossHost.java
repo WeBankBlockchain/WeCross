@@ -5,6 +5,7 @@ import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageData;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.SimpleResource;
 import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
 import java.util.Set;
@@ -19,6 +20,7 @@ public class WeCrossHost {
 
     public void start() {
         peerManager.start();
+        addSimpleResources();
         syncPeerNetworks();
     }
 
@@ -52,5 +54,20 @@ public class WeCrossHost {
         // Update active resource back to peerManager
         Set<String> activeResources = networkManager.getAllNetworkStubResourceName(true);
         peerManager.setActiveResources(activeResources);
+    }
+
+    private void addSimpleResources() {
+        logger.info("Add simple resource");
+        try {
+            for (int i = 0; i < 1; i++) {
+                String name = "networkx.stubx.simple" + i;
+                Path path = Path.decode(name);
+                Resource resource = new SimpleResource();
+                resource.setPath(path);
+                networkManager.addResource(resource);
+            }
+        } catch (Exception e) {
+            logger.warn("Add simple resource exception " + e);
+        }
     }
 }

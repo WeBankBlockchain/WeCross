@@ -1,4 +1,4 @@
-package com.webank.wecross.p2p.engine.p2p;
+package com.webank.wecross.p2p.engine.restful;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.host.Peer;
@@ -55,7 +55,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
             checkP2PMessage(msg);
             checkCallback(callback);
 
-            String url = "http://" + peer.getUrl() + "/p2p/" + msg.toUri();
+            String url = "http://" + peer.getUrl() + "/restful/" + msg.toUri();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 

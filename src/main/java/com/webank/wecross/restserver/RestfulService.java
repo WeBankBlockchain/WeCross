@@ -75,7 +75,12 @@ public class RestfulService {
         return handleResource(network, stub, resource, method, "");
     }
 
-    @RequestMapping(value = "/{network}/{stub}/{resource}/{method}", method = RequestMethod.POST)
+    @RequestMapping(
+            value = {
+                "/{network}/{stub}/{resource}/{method}",
+                "/restful/remote/{network}/{stub}/{resource}/{method}"
+            },
+            method = RequestMethod.POST)
     public RestResponse<Object> handleResource(
             @PathVariable("network") String network,
             @PathVariable("stub") String stub,

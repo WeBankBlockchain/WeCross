@@ -14,7 +14,7 @@ build
 gradle.properties
 
 ### output
-dist
+dist*
 logs
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)

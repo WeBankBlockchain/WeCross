@@ -4,11 +4,8 @@ import com.webank.wecross.host.Peer;
 import java.util.Set;
 
 public abstract class Resource {
-    private Set<Peer> peers;
-
-    public abstract Path getPath();
-
-    public abstract void setPath(Path path);
+    protected Set<Peer> peers;
+    protected Path path;
 
     public abstract GetDataResponse getData(GetDataRequest request);
 
@@ -30,5 +27,13 @@ public abstract class Resource {
 
     public void setPeers(Set<Peer> peers) {
         this.peers = peers;
+    }
+
+    public Path getPath() {
+        return path;
+    }
+
+    public void setPath(Path path) {
+        this.path = path;
     }
 }
