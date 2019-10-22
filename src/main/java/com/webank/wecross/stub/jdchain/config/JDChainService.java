@@ -2,15 +2,21 @@ package com.webank.wecross.stub.jdchain.config;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class JDChainService {
-    private Logger logger = LoggerFactory.getLogger(JDChainService.class);
+
     private String privateKey;
     private String publicKey;
-    private String passWord;
+    private String password;
     private List<String> connectionsStr = new ArrayList<>();
+
+    public JDChainService(
+            String privateKey, String publicKey, String password, List<String> connectionsStr) {
+        this.privateKey = privateKey;
+        this.publicKey = publicKey;
+        this.password = password;
+        this.connectionsStr = connectionsStr;
+    }
 
     public String getPrivateKey() {
         return privateKey;
@@ -28,12 +34,12 @@ public class JDChainService {
         this.publicKey = publicKey;
     }
 
-    public String getPassWord() {
-        return passWord;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPassWord(String passWord) {
-        this.passWord = passWord;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public List<String> getConnectionsStr() {
