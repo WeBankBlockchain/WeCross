@@ -70,9 +70,4 @@ public class BCOSResource extends Resource {
     public int getDistance() {
         return 0;
     }
-
-    @Override
-    public boolean isLocal() {
-        return true;
-    }
 }

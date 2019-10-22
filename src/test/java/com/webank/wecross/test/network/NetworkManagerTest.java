@@ -59,11 +59,6 @@ public class NetworkManagerTest {
         public void setDistance(int accessDepth) {
             this.distance = accessDepth;
         }
-
-        @Override
-        public boolean isLocal() {
-            return getDistance() == 0;
-        }
     }
 
     @Test

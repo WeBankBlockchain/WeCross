@@ -85,7 +85,7 @@ public class JDChainStub implements Stub {
     public Resource getResource(Path path) throws Exception {
         logger.trace("get resource: {}", path.getResource());
         Resource resource = resources.get(path.getResource());
-        if (resource != null && resource.isLocal()) {
+        if (resource != null && resource.getDistance() == 0) {
             ((JDChainResource) resource).init(adminKey, ledgerHash, blockchainService);
             return resource;
         }
@@ -108,7 +108,7 @@ public class JDChainStub implements Stub {
     @Override
     public void removeResource(Path path, boolean ignoreLocal) throws Exception {
         Resource resource = getResource(path);
-        if (ignoreLocal && resource != null && resource.isLocal()) {
+        if (ignoreLocal && resource != null && resource.getDistance() == 0) {
             logger.trace("remove resource ignore local resources: {}", path.getResource());
             return;
         }
@@ -130,7 +130,7 @@ public class JDChainStub implements Stub {
     public Set<String> getAllResourceName(boolean ignoreRemote) {
         Set<String> names = new HashSet<>();
         for (Resource resource : resources.values()) {
-            if (resource.isLocal() || !ignoreRemote) {
+            if (resource.getDistance() == 0 || !ignoreRemote) {
                 names.add(resource.getPath().getResource());
             }
         }

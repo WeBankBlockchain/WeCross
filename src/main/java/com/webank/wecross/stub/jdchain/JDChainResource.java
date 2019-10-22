@@ -101,9 +101,4 @@ public class JDChainResource extends Resource {
     public int getDistance() {
         return 0;
     }
-
-    @Override
-    public boolean isLocal() {
-        return true;
-    }
 }

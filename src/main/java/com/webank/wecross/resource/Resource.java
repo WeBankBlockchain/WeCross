@@ -24,8 +24,6 @@ public abstract class Resource {
 
     public abstract int getDistance(); // 0 local, > 0 remote
 
-    public abstract boolean isLocal();
-
     public Set<Peer> getPeers() {
         return peers;
     }

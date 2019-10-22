@@ -79,7 +79,7 @@ public class BCOSStub implements Stub {
 
         Resource resource = resources.get(path.getResource());
 
-        if (resource != null && resource.isLocal()) {
+        if (resource != null && resource.getDistance() == 0) {
             ((BCOSResource) resource).init(bcosService, web3, credentials);
             return resource;
         }
@@ -102,7 +102,7 @@ public class BCOSStub implements Stub {
     @Override
     public void removeResource(Path path, boolean ignoreLocal) throws Exception {
         Resource resource = getResource(path);
-        if (ignoreLocal && resource != null && resource.isLocal()) {
+        if (ignoreLocal && resource != null && resource.getDistance() == 0) {
             logger.trace("remove resource ignore local resources: {}", path.getResource());
             return;
         }
@@ -114,7 +114,7 @@ public class BCOSStub implements Stub {
     public Set<String> getAllResourceName(boolean ignoreRemote) {
         Set<String> names = new HashSet<>();
         for (Map.Entry<String, Resource> entry : resources.entrySet()) {
-            if (entry.getValue().isLocal() || !ignoreRemote) {
+            if (entry.getValue().getDistance() == 0 || !ignoreRemote) {
                 names.add(entry.getKey());
             }
         }

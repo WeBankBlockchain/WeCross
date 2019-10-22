@@ -60,11 +60,6 @@ public class RemoteResource extends Resource {
     }
 
     @Override
-    public boolean isLocal() {
-        return false;
-    }
-
-    @Override
     public int getDistance() {
         return distance;
     }
