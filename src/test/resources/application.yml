@@ -45,7 +45,22 @@ network-manager:
                         HelloWorldContract:
                             type: BCOS_CONTRACT
                             contractAddress: '0x95a8c1ca4a68a322414b8c52acce56c3eab3cbdb'
-
+        bill:
+            visible: true
+            stubs:
+                jd:
+                    pattern: jdchain
+                    jdService:
+                        privateKey: '0000000000000000'
+                        publicKey: '111111111111111'
+                        password: '222222222222222'
+                        connectionsStr:
+                            - 127.0.0.1:18080
+                            - 127.0.0.1:18081
+                    resources:
+                        HelloWorldContract:
+                            type: JD_CONTRACT
+                            contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
 peer-manager:
     peers:
         - peerA@127.0.0.1:8081

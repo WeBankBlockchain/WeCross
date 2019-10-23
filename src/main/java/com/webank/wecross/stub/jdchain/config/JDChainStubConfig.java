@@ -33,9 +33,14 @@ public class JDChainStubConfig {
         // init jdchain stub
         jdChainStub.setIsInit(isInit);
         jdChainStub.setPattern(pattern);
-        jdChainStub.setAdminKey(jdChainSdk.getAdminKey());
-        jdChainStub.setLedgerHash(jdChainSdk.getLedgerHash());
-        jdChainStub.setBlockchainService(jdChainSdk.getBlockchainService());
+
+        try {
+            jdChainStub.setAdminKey(jdChainSdk.getAdminKey());
+            jdChainStub.setLedgerHash(jdChainSdk.getLedgerHash());
+            jdChainStub.setBlockchainService(jdChainSdk.getBlockchainService());
+        } catch (Exception e) {
+            return null;
+        }
 
         // init bcos resources
         String prefix = networkName + "." + stubName;
