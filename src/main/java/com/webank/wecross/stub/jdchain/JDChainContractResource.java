@@ -1,15 +1,15 @@
 package com.webank.wecross.stub.jdchain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jd.blockchain.ledger.TransactionTemplate;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.webank.wecross.resource.EventCallback;
-import com.webank.wecross.resource.GetDataRequest;
-import com.webank.wecross.resource.GetDataResponse;
-import com.webank.wecross.resource.Path;
-import com.webank.wecross.resource.SetDataRequest;
-import com.webank.wecross.resource.SetDataResponse;
-import com.webank.wecross.resource.TransactionRequest;
-import com.webank.wecross.resource.TransactionResponse;
+import com.webank.wecross.resource.request.GetDataRequest;
+import com.webank.wecross.resource.request.SetDataRequest;
+import com.webank.wecross.resource.request.TransactionRequest;
+import com.webank.wecross.resource.response.GetDataResponse;
+import com.webank.wecross.resource.response.SetDataResponse;
+import com.webank.wecross.resource.response.TransactionResponse;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ public class JDChainContractResource extends JDChainResource {
 
     private Logger logger = LoggerFactory.getLogger(JDChainContractResource.class);
     private Boolean isInit = false;
-    private String contractAddress;
+    @JsonIgnore private String contractAddress;
 
     public String getContractAddress() {
         return contractAddress;
@@ -30,8 +30,8 @@ public class JDChainContractResource extends JDChainResource {
     }
 
     @Override
-    public Path getPath() {
-        return null;
+    public String getType() {
+        return "JD_CONTRACT";
     }
 
     @Override

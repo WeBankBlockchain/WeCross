@@ -2,14 +2,24 @@ package com.webank.wecross.test.network;
 
 import com.webank.wecross.host.Peer;
 import com.webank.wecross.network.NetworkManager;
-import com.webank.wecross.resource.*;
+import com.webank.wecross.resource.EventCallback;
+import com.webank.wecross.resource.Path;
+import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.request.GetDataRequest;
+import com.webank.wecross.resource.request.SetDataRequest;
+import com.webank.wecross.resource.request.TransactionRequest;
+import com.webank.wecross.resource.response.GetDataResponse;
+import com.webank.wecross.resource.response.SetDataResponse;
+import com.webank.wecross.resource.response.TransactionResponse;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class NetworkManagerTest {
-    class MockResource extends Resource {
+
+    class MockResource implements Resource {
+
         private Path path;
         private int distance = 0;
 
@@ -21,6 +31,24 @@ public class NetworkManagerTest {
         @Override
         public void setPath(Path path) {
             this.path = path;
+        }
+
+        @Override
+        public String getPathAsString() {
+            return null;
+        }
+
+        @Override
+        public Set<Peer> getPeers() {
+            return null;
+        }
+
+        @Override
+        public void setPeers(Set<Peer> peers) {}
+
+        @Override
+        public String getType() {
+            return "MOCK_RESOURCE";
         }
 
         @Override

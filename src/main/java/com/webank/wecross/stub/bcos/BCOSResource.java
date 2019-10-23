@@ -1,18 +1,23 @@
 package com.webank.wecross.stub.bcos;
 
+import com.webank.wecross.host.Peer;
 import com.webank.wecross.resource.EventCallback;
-import com.webank.wecross.resource.GetDataRequest;
-import com.webank.wecross.resource.GetDataResponse;
+import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.SetDataRequest;
-import com.webank.wecross.resource.SetDataResponse;
-import com.webank.wecross.resource.TransactionRequest;
-import com.webank.wecross.resource.TransactionResponse;
+import com.webank.wecross.resource.request.GetDataRequest;
+import com.webank.wecross.resource.request.SetDataRequest;
+import com.webank.wecross.resource.request.TransactionRequest;
+import com.webank.wecross.resource.response.GetDataResponse;
+import com.webank.wecross.resource.response.SetDataResponse;
+import com.webank.wecross.resource.response.TransactionResponse;
+import java.util.Set;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 
-public class BCOSResource extends Resource {
+public class BCOSResource implements Resource {
+
+    protected Path path;
 
     public void init(Service service, Web3j web3j, Credentials credentials) {}
 
@@ -56,4 +61,32 @@ public class BCOSResource extends Resource {
     public int getDistance() {
         return 0;
     }
+
+    @Override
+    public String getType() {
+        return "BCOS_RESOURCE";
+    }
+
+    @Override
+    public Path getPath() {
+        return path;
+    }
+
+    @Override
+    public void setPath(Path path) {
+        this.path = path;
+    }
+
+    @Override
+    public String getPathAsString() {
+        return path.toString();
+    }
+
+    @Override
+    public Set<Peer> getPeers() {
+        return null;
+    }
+
+    @Override
+    public void setPeers(Set<Peer> peers) {}
 }

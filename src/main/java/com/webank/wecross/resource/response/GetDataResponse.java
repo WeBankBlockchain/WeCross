@@ -1,6 +1,7 @@
-package com.webank.wecross.resource;
+package com.webank.wecross.resource.response;
 
 public class GetDataResponse {
+
     private String value;
 
     public String getValue() {

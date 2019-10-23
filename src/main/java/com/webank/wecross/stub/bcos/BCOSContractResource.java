@@ -1,12 +1,13 @@
 package com.webank.wecross.stub.bcos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.webank.wecross.resource.EventCallback;
-import com.webank.wecross.resource.GetDataRequest;
-import com.webank.wecross.resource.GetDataResponse;
-import com.webank.wecross.resource.SetDataRequest;
-import com.webank.wecross.resource.SetDataResponse;
-import com.webank.wecross.resource.TransactionRequest;
-import com.webank.wecross.resource.TransactionResponse;
+import com.webank.wecross.resource.request.GetDataRequest;
+import com.webank.wecross.resource.request.SetDataRequest;
+import com.webank.wecross.resource.request.TransactionRequest;
+import com.webank.wecross.resource.response.GetDataResponse;
+import com.webank.wecross.resource.response.SetDataResponse;
+import com.webank.wecross.resource.response.TransactionResponse;
 import org.fisco.bcos.channel.client.CallContract;
 import org.fisco.bcos.channel.client.CallResult;
 import org.fisco.bcos.channel.client.Service;
@@ -18,8 +19,9 @@ import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 
 public class BCOSContractResource extends BCOSResource {
+
     private Boolean isInit = false;
-    private String contractAddress;
+    @JsonIgnore private String contractAddress;
     private CallContract callContract;
 
     public void init(Service service, Web3j web3j, Credentials credentials) {
@@ -46,6 +48,11 @@ public class BCOSContractResource extends BCOSResource {
         }
 
         return data;
+    }
+
+    @Override
+    public String getType() {
+        return "BCOS_CONTRACT";
     }
 
     @Override

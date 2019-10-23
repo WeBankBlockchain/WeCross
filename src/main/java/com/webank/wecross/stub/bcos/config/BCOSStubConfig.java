@@ -1,5 +1,6 @@
 package com.webank.wecross.stub.bcos.config;
 
+import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.bcos.BCOSContractResource;
 import com.webank.wecross.stub.bcos.BCOSStub;
@@ -18,6 +19,7 @@ public class BCOSStubConfig {
     private final String pattern = "bcos";
 
     public BCOSStub initBCOSStub(
+            String networkName,
             String stubName,
             Account account,
             ChannelService channelService,
@@ -46,13 +48,15 @@ public class BCOSStubConfig {
         bcosStub.setCredentials(web3Sdk.getCredentials());
 
         // init bcos resources
-        Map<String, Resource> bcosResources = initBcosResources(resources);
+        String prefix = networkName + "." + stubName;
+        Map<String, Resource> bcosResources = initBcosResources(prefix, resources);
         bcosStub.setResources(bcosResources);
 
         return bcosStub;
     }
 
-    public Map<String, Resource> initBcosResources(Map<String, Map<String, String>> resources) {
+    public Map<String, Resource> initBcosResources(
+            String prefix, Map<String, Map<String, String>> resources) {
         Map<String, Resource> bcosResources = new HashMap<>();
 
         for (String resourceName : resources.keySet()) {
@@ -70,7 +74,7 @@ public class BCOSStubConfig {
             String type = metaResource.get("type");
 
             //  handle contract resource
-            if (type.equals("contract")) {
+            if (type.equals("BCOS_CONTRACT")) {
                 if (!metaResource.containsKey("contractAddress")) {
                     logger.error(
                             "Error in application.yml: {} should contain a key named \"contractAddress\"",
@@ -79,6 +83,16 @@ public class BCOSStubConfig {
                 BCOSContractResource bcosContractResource = new BCOSContractResource();
                 String address = metaResource.get("contractAddress");
                 bcosContractResource.setContractAddress(address);
+
+                // set path
+                String stringPath = prefix + "." + resourceName;
+                try {
+                    bcosContractResource.setPath(Path.decode(stringPath));
+                } catch (Exception e) {
+                    logger.error(e.toString());
+                    continue;
+                }
+
                 bcosResources.put(resourceName, bcosContractResource);
 
             } else if (type.equals("assets")) {

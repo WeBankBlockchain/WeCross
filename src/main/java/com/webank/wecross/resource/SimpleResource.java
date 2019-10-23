@@ -1,7 +1,24 @@
 package com.webank.wecross.resource;
 
+import com.webank.wecross.host.Peer;
+import com.webank.wecross.resource.request.GetDataRequest;
+import com.webank.wecross.resource.request.SetDataRequest;
+import com.webank.wecross.resource.request.TransactionRequest;
+import com.webank.wecross.resource.response.GetDataResponse;
+import com.webank.wecross.resource.response.SetDataResponse;
+import com.webank.wecross.resource.response.TransactionResponse;
+import java.util.Set;
+
 // No reliable chain, just respond what you call
-public class SimpleResource extends Resource {
+public class SimpleResource implements Resource {
+
+    protected Path path;
+
+    @Override
+    public String getType() {
+        return "SIMPLE_RESOURCE";
+    }
+
     @Override
     public GetDataResponse getData(GetDataRequest request) {
         return null;
@@ -44,4 +61,27 @@ public class SimpleResource extends Resource {
     public int getDistance() {
         return 0;
     }
+
+    @Override
+    public Path getPath() {
+        return this.path;
+    }
+
+    @Override
+    public void setPath(Path path) {
+        this.path = path;
+    }
+
+    @Override
+    public String getPathAsString() {
+        return path.toString();
+    }
+
+    @Override
+    public Set<Peer> getPeers() {
+        return null;
+    }
+
+    @Override
+    public void setPeers(Set<Peer> peers) {}
 }

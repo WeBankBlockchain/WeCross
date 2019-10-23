@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WeCrossHost {
+
     private Logger logger = LoggerFactory.getLogger(WeCrossHost.class);
 
     private NetworkManager networkManager;
@@ -38,6 +39,10 @@ public class WeCrossHost {
 
     public void setNetworkManager(NetworkManager networkManager) {
         this.networkManager = networkManager;
+    }
+
+    public NetworkManager getNetworkManager() {
+        return this.networkManager;
     }
 
     public void setPeerManager(PeerManager peerManager) {

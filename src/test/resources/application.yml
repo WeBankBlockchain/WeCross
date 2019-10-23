@@ -22,7 +22,7 @@ network-manager:
                                         - 127.0.0.1:20200 # node listen_ip:channel_listen_port
                     resources:
                         HelloWorldContract:
-                            type: contract
+                            type: BCOS_CONTRACT
                             contractAddress: '0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a'
                 bcos2:
                     pattern: bcos
@@ -43,9 +43,8 @@ network-manager:
                                         - 127.0.0.1:20200 # node listen_ip:channel_listen_port
                     resources:
                         HelloWorldContract:
-                            type: contract
+                            type: BCOS_CONTRACT
                             contractAddress: '0x95a8c1ca4a68a322414b8c52acce56c3eab3cbdb'
-
 
 peer-manager:
     peers:

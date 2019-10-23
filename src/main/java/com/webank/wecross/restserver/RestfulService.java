@@ -3,14 +3,17 @@ package com.webank.wecross.restserver;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.host.WeCrossHost;
-import com.webank.wecross.resource.GetDataRequest;
-import com.webank.wecross.resource.GetDataResponse;
+import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.SetDataRequest;
-import com.webank.wecross.resource.SetDataResponse;
-import com.webank.wecross.resource.TransactionRequest;
-import com.webank.wecross.resource.TransactionResponse;
+import com.webank.wecross.resource.request.GetDataRequest;
+import com.webank.wecross.resource.request.ResourceRequest;
+import com.webank.wecross.resource.request.SetDataRequest;
+import com.webank.wecross.resource.request.TransactionRequest;
+import com.webank.wecross.resource.response.GetDataResponse;
+import com.webank.wecross.resource.response.ResourceResponse;
+import com.webank.wecross.resource.response.SetDataResponse;
+import com.webank.wecross.resource.response.TransactionResponse;
 import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @SpringBootApplication
 public class RestfulService {
+
     @javax.annotation.Resource(name = "newWeCrossHost")
     private WeCrossHost host;
 
@@ -35,6 +39,33 @@ public class RestfulService {
     @RequestMapping("/test")
     public String test() {
         return "OK!";
+    }
+
+    @RequestMapping(value = "/list", method = RequestMethod.POST)
+    public RestResponse<ResourceResponse> handleList(@RequestBody String restRequestString) {
+        RestResponse<ResourceResponse> restResponse = new RestResponse<>();
+        restResponse.setVersion("0.1");
+        restResponse.setResult(0);
+
+        logger.info("request string: {}", restRequestString);
+
+        try {
+            RestRequest<ResourceRequest> restRequest =
+                    objectMapper.readValue(
+                            restRequestString,
+                            new TypeReference<RestRequest<ResourceRequest>>() {});
+
+            ResourceRequest resourceRequest = restRequest.getData();
+            NetworkManager networkManager = host.getNetworkManager();
+            ResourceResponse resourceResponse = networkManager.list(resourceRequest);
+            restResponse.setData(resourceResponse);
+        } catch (Exception e) {
+            logger.warn("Process request error:", e);
+
+            restResponse.setResult(-1);
+            restResponse.setMessage(e.getLocalizedMessage());
+        }
+        return restResponse;
     }
 
     @RequestMapping(value = "/state")
