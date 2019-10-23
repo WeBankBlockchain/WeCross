@@ -93,7 +93,11 @@ public class BCOSStubConfig {
                     continue;
                 }
 
-                bcosResources.put(resourceName, bcosContractResource);
+                if (bcosContractResource != null) {
+                    bcosResources.put(resourceName, bcosContractResource);
+                } else {
+                    logger.error("Init BCOSContractResource failed");
+                }
 
             } else if (type.equals("assets")) {
                 // To be defined

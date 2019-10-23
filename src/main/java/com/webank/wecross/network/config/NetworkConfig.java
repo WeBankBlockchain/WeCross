@@ -45,11 +45,15 @@ public class NetworkConfig {
             // get stubs bean
             Map<String, Stub> stubsBean = initStub(networkName, stubs);
 
-            // init network bean
-            networkBean.setStubs(stubsBean);
-            networkBean.setVisible(networkUnit.getVisible());
+            if (stubsBean != null) {
+                // init network bean
+                networkBean.setStubs(stubsBean);
+                networkBean.setVisible(networkUnit.getVisible());
 
-            result.put(networkName, networkBean);
+                result.put(networkName, networkBean);
+            } else {
+                logger.error("Init {} failed", networkName);
+            }
         }
 
         return result;
