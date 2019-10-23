@@ -1,6 +1,7 @@
-package com.webank.wecross.resource;
+package com.webank.wecross.resource.request;
 
 public class SetDataRequest {
+
     private String key;
     private String value;
 

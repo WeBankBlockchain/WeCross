@@ -1,6 +1,7 @@
-package com.webank.wecross.resource;
+package com.webank.wecross.resource.response;
 
 public class TransactionResponse {
+
     private Integer errorCode;
     private String errorMessage;
     private String hash;

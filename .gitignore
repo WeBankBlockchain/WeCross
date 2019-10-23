@@ -42,7 +42,5 @@ nodes/
 console/
 out/
 src/main/resources/application.yml
-src/main/resources/ca.crt
-src/main/resources/sdk*
-src/main/resources/*.pem
-src/main/resources/*.p12
+src/main/resources/log4j2.xml
+src/main/resources/bcosconf

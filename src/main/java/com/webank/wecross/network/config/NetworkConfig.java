@@ -43,7 +43,7 @@ public class NetworkConfig {
             Map<String, Object> stubs = networkUnit.getStubs();
 
             // get stubs bean
-            Map<String, Stub> stubsBean = initStub(stubs);
+            Map<String, Stub> stubsBean = initStub(networkName, stubs);
 
             // init network bean
             networkBean.setStubs(stubsBean);
@@ -55,7 +55,7 @@ public class NetworkConfig {
         return result;
     }
 
-    public Map<String, Stub> initStub(Map<String, Object> stubs) {
+    public Map<String, Stub> initStub(String networkName, Map<String, Object> stubs) {
         Map<String, Stub> stubsBean = new HashMap<>();
         if (stubs == null) {
             logger.info("no stubs configuration found");
@@ -78,12 +78,12 @@ public class NetworkConfig {
 
             if (Stubtype.equals("bcos")) {
 
-                BCOSStub bcosStub = getBcosStub(stubName, stubConfig);
+                BCOSStub bcosStub = getBcosStub(networkName, stubName, stubConfig);
                 stubsBean.put(stubName, bcosStub);
 
             } else if (Stubtype.equals("jdchain")) {
 
-                JDChainStub jdChainStub = getJdStub(stubName, stubConfig);
+                JDChainStub jdChainStub = getJdStub(networkName, stubName, stubConfig);
                 stubsBean.put(stubName, jdChainStub);
 
             } else if (Stubtype.equals("BaiDu")) {
@@ -98,7 +98,8 @@ public class NetworkConfig {
         return stubsBean;
     }
 
-    public BCOSStub getBcosStub(String stubName, Map<String, Object> stubConfig) {
+    public BCOSStub getBcosStub(
+            String networkName, String stubName, Map<String, Object> stubConfig) {
         if (!stubConfig.containsKey("accounts")) {
             logger.error(
                     "Error in application.yml: {} should contain a key named \"accounts\"",
@@ -136,11 +137,13 @@ public class NetworkConfig {
         BCOSStubConfig bcosStubConfig = new BCOSStubConfig();
 
         BCOSStub bcosStub =
-                bcosStubConfig.initBCOSStub(stubName, account, channelService, bcosResources);
+                bcosStubConfig.initBCOSStub(
+                        networkName, stubName, account, channelService, bcosResources);
         return bcosStub;
     }
 
-    public JDChainStub getJdStub(String stubName, Map<String, Object> stubConfig) {
+    public JDChainStub getJdStub(
+            String networkName, String stubName, Map<String, Object> stubConfig) {
         if (!stubConfig.containsKey("jdService")) {
             logger.error(
                     "Error in application.yml: {} should contain a key named \"jdService\"",
@@ -166,7 +169,8 @@ public class NetworkConfig {
         JDChainStubConfig jdChainStubConfig = new JDChainStubConfig();
 
         JDChainStub jdChainStub =
-                jdChainStubConfig.initJdChainStub(stubName, jdChainService, jdChainResources);
+                jdChainStubConfig.initJdChainStub(
+                        networkName, stubName, jdChainService, jdChainResources);
         return jdChainStub;
     }
 

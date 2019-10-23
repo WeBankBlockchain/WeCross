@@ -55,16 +55,39 @@ public class RestfulServiceTest {
     }
 
     @Test
+    public void listTest() throws Exception {
+        String json =
+                "{\n"
+                        + "\"version\":\"0.1\",\n"
+                        + "\"path\":\"\",\n"
+                        + "\"method\":\"list\",\n"
+                        + "\"data\": {\n"
+                        + "\"ignoreRemote\":true\n"
+                        + "}\n"
+                        + "}";
+
+        MvcResult rsp =
+                this.mockMvc
+                        .perform(
+                                post("/list").contentType(MediaType.APPLICATION_JSON).content(json))
+                        .andDo(print())
+                        .andExpect(status().isOk())
+                        .andReturn();
+
+        String result = rsp.getResponse().getContentAsString();
+        System.out.println("####Respond: " + result);
+    }
+
+    @Test
     public void callTest() throws Exception {
 
         String json =
                 "{\n"
                         + "\"version\":\"0.1\",\n"
-                        + "\"uri\":\"payment.bcos1.HelloWorldContract\",\n"
+                        + "\"path\":\"payment.bcos1.HelloWorldContract\",\n"
                         + "\"method\":\"call\",\n"
-                        + "\"sig\":\"\",\n"
                         + "\"data\": {\n"
-                        + "\"to\":\"\",\n"
+                        + "\"sig\":\"\",\n"
                         + "\"method\":\"get\",\n"
                         + "\"args\":[]\n"
                         + "}\n"
@@ -90,11 +113,10 @@ public class RestfulServiceTest {
         String json =
                 "{\n"
                         + "\"version\":\"0.1\",\n"
-                        + "\"uri\":\"payment.bcos1.HelloWorldContract\",\n"
+                        + "\"path\":\"payment.bcos1.HelloWorldContract\",\n"
                         + "\"method\":\"sendTransaction\",\n"
-                        + "\"sig\":\"\",\n"
                         + "\"data\": {\n"
-                        + "\"to\":\"\",\n"
+                        + "\"sig\":\"\",\n"
                         + "\"method\":\"set\",\n"
                         + "\"args\":[\"aaaaa\"]\n"
                         + "}\n"

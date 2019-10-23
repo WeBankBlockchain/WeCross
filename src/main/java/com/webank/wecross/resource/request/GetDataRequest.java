@@ -1,6 +1,7 @@
-package com.webank.wecross.resource;
+package com.webank.wecross.resource.request;
 
 public class GetDataRequest {
+
     private String key;
 
     public String getKey() {

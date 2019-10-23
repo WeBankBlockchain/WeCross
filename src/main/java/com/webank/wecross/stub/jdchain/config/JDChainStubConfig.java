@@ -1,5 +1,6 @@
 package com.webank.wecross.stub.jdchain.config;
 
+import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.jdchain.JDChainContractResource;
 import com.webank.wecross.stub.jdchain.JDChainStub;
@@ -15,6 +16,7 @@ public class JDChainStubConfig {
     private final String pattern = "jdchain";
 
     public JDChainStub initJdChainStub(
+            String networkName,
             String stubName,
             JDChainService jdChainService,
             Map<String, Map<String, String>> resources) {
@@ -36,13 +38,15 @@ public class JDChainStubConfig {
         jdChainStub.setBlockchainService(jdChainSdk.getBlockchainService());
 
         // init bcos resources
-        Map<String, Resource> jdChainResources = initJdChainResources(resources);
+        String prefix = networkName + "." + stubName;
+        Map<String, Resource> jdChainResources = initJdChainResources(prefix, resources);
         jdChainStub.setResources(jdChainResources);
 
         return jdChainStub;
     }
 
-    public Map<String, Resource> initJdChainResources(Map<String, Map<String, String>> resources) {
+    public Map<String, Resource> initJdChainResources(
+            String prefix, Map<String, Map<String, String>> resources) {
         Map<String, Resource> jdChainResources = new HashMap<>();
 
         for (String resourceName : resources.keySet()) {
@@ -55,7 +59,7 @@ public class JDChainStubConfig {
             }
             String type = metaResource.get("type");
             //  handle contract resource
-            if (type.equals("contract")) {
+            if (type.equals("JD_CONTRACT")) {
                 if (!metaResource.containsKey("contractAddress")) {
                     logger.error(
                             "Error in application.yml: {} should contain a key named \"contractAddress\"",
@@ -64,6 +68,16 @@ public class JDChainStubConfig {
                 JDChainContractResource jcChainContractResource = new JDChainContractResource();
                 String address = metaResource.get("contractAddress");
                 jcChainContractResource.setContractAddress(address);
+
+                // set path
+                String stringPath = prefix + "." + resourceName;
+                try {
+                    jcChainContractResource.setPath(Path.decode(stringPath));
+                } catch (Exception e) {
+                    logger.error(e.toString());
+                    continue;
+                }
+
                 jdChainResources.put(resourceName, jcChainContractResource);
 
             } else if (type.equals("assets")) {

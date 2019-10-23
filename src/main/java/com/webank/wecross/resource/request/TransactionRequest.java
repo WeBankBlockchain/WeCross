@@ -1,6 +1,7 @@
-package com.webank.wecross.resource;
+package com.webank.wecross.resource.request;
 
 public class TransactionRequest {
+
     private String sig;
     private String method;
     private Object args[];

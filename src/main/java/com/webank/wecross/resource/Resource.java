@@ -1,39 +1,44 @@
 package com.webank.wecross.resource;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webank.wecross.host.Peer;
+import com.webank.wecross.resource.request.GetDataRequest;
+import com.webank.wecross.resource.request.SetDataRequest;
+import com.webank.wecross.resource.request.TransactionRequest;
+import com.webank.wecross.resource.response.GetDataResponse;
+import com.webank.wecross.resource.response.SetDataResponse;
+import com.webank.wecross.resource.response.TransactionResponse;
 import java.util.Set;
 
-public abstract class Resource {
-    protected Set<Peer> peers;
-    protected Path path;
+public interface Resource {
 
-    public abstract GetDataResponse getData(GetDataRequest request);
+    String getType();
 
-    public abstract SetDataResponse setData(SetDataRequest request);
+    GetDataResponse getData(GetDataRequest request);
 
-    public abstract TransactionResponse call(TransactionRequest request);
+    SetDataResponse setData(SetDataRequest request);
 
-    public abstract TransactionResponse sendTransaction(TransactionRequest request);
+    TransactionResponse call(TransactionRequest request);
 
-    public abstract void registerEventHandler(EventCallback callback);
+    TransactionResponse sendTransaction(TransactionRequest request);
 
-    public abstract TransactionRequest createRequest();
+    void registerEventHandler(EventCallback callback);
 
-    public abstract int getDistance(); // 0 local, > 0 remote
+    TransactionRequest createRequest();
 
-    public Set<Peer> getPeers() {
-        return peers;
-    }
+    int getDistance(); // 0 local, > 0 remote
 
-    public void setPeers(Set<Peer> peers) {
-        this.peers = peers;
-    }
+    @JsonIgnore
+    Path getPath();
 
-    public Path getPath() {
-        return path;
-    }
+    void setPath(Path path);
 
-    public void setPath(Path path) {
-        this.path = path;
-    }
+    @JsonProperty("path")
+    String getPathAsString();
+
+    @JsonIgnore
+    public Set<Peer> getPeers();
+
+    public void setPeers(Set<Peer> peers);
 }

@@ -9,6 +9,7 @@ import com.webank.wecross.stub.ChainState;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.jdchain.config.JDChainSdk;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class JDChainStub implements Stub {
     private BlockchainKeypair adminKey;
     private HashDigest ledgerHash;
     private List<BlockchainService> blockchainService = new ArrayList<BlockchainService>();
-    private Map<String, Resource> resources;
+    private Map<String, Resource> resources = new HashMap<String, Resource>();
     private ChainState chainState;
 
     private Logger logger = LoggerFactory.getLogger(JDChainSdk.class);

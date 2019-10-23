@@ -2,9 +2,10 @@ package com.webank.wecross.stub.remote;
 
 import com.webank.wecross.p2p.P2PMessageData;
 import com.webank.wecross.resource.Path;
-import com.webank.wecross.resource.TransactionRequest;
+import com.webank.wecross.resource.request.TransactionRequest;
 
 public class TransactionRequestMessageData implements P2PMessageData {
+
     private String version = "0.1";
     private String path;
     private String method;

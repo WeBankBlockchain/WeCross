@@ -4,12 +4,16 @@ import com.webank.wecross.core.PathUtils;
 import com.webank.wecross.host.Peer;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.request.ResourceRequest;
+import com.webank.wecross.resource.response.ResourceResponse;
 import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.remote.RemoteResource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -174,5 +178,33 @@ public class NetworkManager {
                         e);
             }
         }
+    }
+
+    public List<Resource> getAllResources(boolean ignoreRemote) throws Exception {
+        List<Resource> resourcesList = new ArrayList<>();
+
+        Set<Path> pathSet = getAllNetworkStubResourcePath(ignoreRemote);
+        for (Path path : pathSet) {
+            Resource resource = getResource(path);
+            resourcesList.add(resource);
+        }
+
+        return resourcesList;
+    }
+
+    public ResourceResponse list(ResourceRequest request) {
+        ResourceResponse resourceResponse = new ResourceResponse();
+
+        try {
+            List<Resource> resources = getAllResources(request.isIgnoreRemote());
+            resourceResponse.setErrorCode(0);
+            resourceResponse.setErrorMessage("");
+            resourceResponse.setResources(resources);
+        } catch (Exception e) {
+            resourceResponse.setErrorCode(1);
+            resourceResponse.setErrorMessage("Unexpected error: " + e.getMessage());
+        }
+
+        return resourceResponse;
     }
 }

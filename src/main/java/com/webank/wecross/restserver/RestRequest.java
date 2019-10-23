@@ -1,10 +1,10 @@
 package com.webank.wecross.restserver;
 
 public class RestRequest<T> {
+
     private String version;
     private String path;
     private String method;
-    private String sig;
     private T data;
 
     public String getVersion() {
@@ -29,14 +29,6 @@ public class RestRequest<T> {
 
     public void setMethod(String method) {
         this.method = method;
-    }
-
-    public String getSig() {
-        return sig;
-    }
-
-    public void setSig(String sig) {
-        this.sig = sig;
     }
 
     public T getData() {
