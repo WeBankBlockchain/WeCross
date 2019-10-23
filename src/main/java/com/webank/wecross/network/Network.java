@@ -32,7 +32,7 @@ public class Network {
         try {
             stub.init();
         } catch (Exception e) {
-            logger.error("Error while get stub:", e);
+            logger.error("Error while get stub:", e.getMessage());
             return null;
         }
         return stub;

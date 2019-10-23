@@ -60,7 +60,7 @@ public class RestfulService {
             ResourceResponse resourceResponse = networkManager.list(resourceRequest);
             restResponse.setData(resourceResponse);
         } catch (Exception e) {
-            logger.warn("Process request error:", e);
+            logger.warn("Process request error:", e.getMessage());
 
             restResponse.setResult(-1);
             restResponse.setMessage(e.getLocalizedMessage());
@@ -208,7 +208,7 @@ public class RestfulService {
                     }
             }
         } catch (Exception e) {
-            logger.warn("Process request error:", e);
+            logger.warn("Process request error:", e.getMessage());
 
             restResponse.setResult(-1);
             restResponse.setMessage(e.getLocalizedMessage());

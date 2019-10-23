@@ -14,7 +14,7 @@ public class P2PMessageSemaphoreCallback<T> extends P2PMessageCallback<T> {
             semaphore.acquire(1);
 
         } catch (InterruptedException e) {
-            logger.error("error:", e);
+            logger.error("error:", e.getMessage());
         }
     }
 

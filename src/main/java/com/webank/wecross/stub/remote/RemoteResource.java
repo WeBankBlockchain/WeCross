@@ -151,7 +151,7 @@ public class RemoteResource implements Resource {
             response = (TransactionResponse) sendRemote(peerToSend, p2pReq, callback);
         } catch (Exception e) {
             response.setErrorCode(-1);
-            response.setErrorMessage("Call remote resource error, exception:" + e);
+            response.setErrorMessage("Call remote resource error, exception:" + e.getMessage());
         }
         return response;
     }
