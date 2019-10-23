@@ -170,8 +170,7 @@ public class PeerManager {
         if (data != null && data.getMethod().equals("seq")) {
             int currentSeq = data.getDataSeq();
             if (hasPeerChanged(peer.getUrl(), currentSeq)) {
-                logger.info("Request peerInfo from {}", peer);
-
+                logger.info("Request peerInfo to {}", peer);
                 sendPeerInfoRequest(peer, msg.getSeq() + 1);
             }
         } else {
@@ -180,12 +179,14 @@ public class PeerManager {
     }
 
     public PeerInfoMessageData handleRequestPeerInfo() {
+        logger.info("Receive request peer info");
         PeerInfoMessageData data = new PeerInfoMessageData();
         data.setDataSeq(seq);
 
         for (String resource : activeResources) {
             data.addResource(resource);
         }
+        logger.info("Respond peerInfo: " + activeResources);
         return data;
     }
 
@@ -212,6 +213,8 @@ public class PeerManager {
                 } else {
                     peerRecord.setResources(currentSeq, currentResources);
                 }
+            } else {
+                logger.info("Peer info not changed, seq:{}", currentSeq);
             }
         } else {
             logger.warn("Receive unrecognized seq message from peer:" + peer);
@@ -265,6 +268,11 @@ public class PeerManager {
     }
 
     public void setActiveResources(Set<String> activeResources) {
-        this.activeResources = activeResources;
+        if (!this.activeResources.equals(activeResources)) {
+            this.newSeq();
+            this.activeResources = activeResources;
+            logger.info(
+                    "Update active resources newSeq:{}, resource:{}", seq, this.activeResources);
+        }
     }
 }

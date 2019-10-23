@@ -76,7 +76,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
 
                                 checkHttpResponse(response);
                                 P2PHttpResponse<Object> responseMsg = response.getBody();
-                                logger.info(
+                                logger.debug(
                                         "Receive status:{} message:{} data:{}",
                                         responseMsg.getResult(),
                                         responseMsg.getMessage(),
@@ -84,7 +84,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
 
                                 if (responseMsg.getData() != null) {
 
-                                    logger.info("trigger callback ", responseMsg.getData());
+                                    logger.trace("trigger callback ", responseMsg.getData());
 
                                     ObjectMapper objMapper = new ObjectMapper();
                                     callback.setStatus(responseMsg.getResult());

@@ -22,7 +22,25 @@ public class WeCrossHost {
     public void start() {
         peerManager.start();
         addSimpleResources();
-        syncPeerNetworks();
+
+        final long timeInterval = 5000;
+        Runnable runnable =
+                new Runnable() {
+                    public void run() {
+                        while (true) {
+                            try {
+                                Thread.sleep(timeInterval);
+                                syncPeerNetworks();
+                                peerManager.broadcastSeqRequest();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                };
+
+        Thread thread = new Thread(runnable);
+        thread.start();
     }
 
     public Resource getResource(Path path) throws Exception {
@@ -56,9 +74,14 @@ public class WeCrossHost {
         Set<Peer> activePeers = peerManager.getActivePeers();
         networkManager.updateActivePeerNetwork(activePeers);
 
+        // Log all active resources
+        Set<String> activeResources = networkManager.getAllNetworkStubResourceName(false);
+        logger.info("Current active resource:" + activeResources);
+
         // Update active resource back to peerManager
-        Set<String> activeResources = networkManager.getAllNetworkStubResourceName(true);
-        peerManager.setActiveResources(activeResources);
+        Set<String> activeLocalResources = networkManager.getAllNetworkStubResourceName(true);
+        logger.info("Current active local resources:" + activeLocalResources);
+        peerManager.setActiveResources(activeLocalResources);
     }
 
     private void addSimpleResources() {

@@ -45,7 +45,7 @@ public class SyncPeerMessageHandler {
     }
 
     private void handlePeerMessage(Peer peer, String method, P2PMessage msg) throws Exception {
-        logger.info("Receive peer message peer:{}, method:{}, msg:{}", peer, method, msg);
+        logger.trace("Receive peer message peer:{}, method:{}, msg:{}", peer, method, msg);
         switch (method) {
             case "requestSeq":
                 {

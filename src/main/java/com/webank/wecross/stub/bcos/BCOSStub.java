@@ -106,7 +106,7 @@ public class BCOSStub implements Stub {
             logger.trace("remove resource ignore local resources: {}", path.getResource());
             return;
         }
-        logger.trace("remove resource: {}", path.getResource());
+        logger.info("remove resource: {}", path.getResource());
         resources.remove(path.getResource());
     }
 
