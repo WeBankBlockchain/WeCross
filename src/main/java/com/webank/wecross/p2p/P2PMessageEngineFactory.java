@@ -1,21 +1,23 @@
 package com.webank.wecross.p2p;
 
-import com.webank.wecross.p2p.engine.p2p.RestfulP2PMessageEngine;
-import javax.annotation.Resource;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import com.webank.wecross.p2p.engine.restful.RestfulP2PMessageEngine;
+import com.webank.wecross.p2p.engine.restful.RestfulP2PMessageEngineFactory;
 
-@Configuration
 public class P2PMessageEngineFactory {
-    @Resource(name = "newRestfulP2PMessageEngine")
-    private RestfulP2PMessageEngine restfulEngine;
 
-    @Bean
-    public P2PMessageEngine newP2PMessageEngine() {
-        return restfulEngine;
+    private static RestfulP2PMessageEngine restfulEngineInstance;
+
+    // private static NettyP2PMessageEngine nettyEngine = facXXX.getXXX();
+
+    private static RestfulP2PMessageEngine getRestfulEngineInstance() {
+        if (restfulEngineInstance == null) {
+            restfulEngineInstance = RestfulP2PMessageEngineFactory.getEngineInstance();
+        }
+        return restfulEngineInstance;
     }
 
-    public void setRestfulEngine(RestfulP2PMessageEngine restfulEngine) {
-        this.restfulEngine = restfulEngine;
+    public static P2PMessageEngine getEngineInstance() {
+
+        return getRestfulEngineInstance();
     }
 }

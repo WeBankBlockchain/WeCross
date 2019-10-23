@@ -59,7 +59,12 @@ public class RemoteStub implements Stub {
 
     @Override
     public void removeResource(Path path, boolean ignoreLocal) throws Exception {
-        logger.info("remove resource: {}", path.getResource());
+        Resource resource = getResource(path);
+        if (ignoreLocal && resource != null && resource.getDistance() == 0) {
+            logger.trace("remove resource ignore local resources: {}", path.getResource());
+            return;
+        }
+        logger.trace("remove resource: {}", path.getResource());
         resources.remove(path.getResource());
     }
 

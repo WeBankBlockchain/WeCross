@@ -45,7 +45,7 @@ public class P2PMessage<T> {
         this.type = type;
     }
 
-    public String toUri() {
+    public String toUri() throws Exception {
         // Only for RestfulP2PMessageEngine
         if (data != null && ((P2PMessageData) data).getMethod() != null) {
             return "/" + type + "/" + ((P2PMessageData) data).getMethod();

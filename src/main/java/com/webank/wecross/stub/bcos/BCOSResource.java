@@ -3,7 +3,6 @@ package com.webank.wecross.stub.bcos;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.GetDataRequest;
 import com.webank.wecross.resource.GetDataResponse;
-import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.SetDataRequest;
 import com.webank.wecross.resource.SetDataResponse;
@@ -16,19 +15,6 @@ import org.fisco.bcos.web3j.protocol.Web3j;
 public class BCOSResource extends Resource {
 
     public void init(Service service, Web3j web3j, Credentials credentials) {}
-
-    private Path path;
-
-    @Override
-    public Path getPath() {
-        // TODO Auto-generated method stub
-        return path;
-    }
-
-    @Override
-    public void setPath(Path path) {
-        this.path = path;
-    }
 
     @Override
     public GetDataResponse getData(GetDataRequest request) {
