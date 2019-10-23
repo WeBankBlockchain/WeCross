@@ -109,7 +109,6 @@ public class RestfulService {
     @RequestMapping(
             value = {
                 "/{network}/{stub}/{resource}/{method}",
-                "/p2p/remote/{network}/{stub}/{resource}/{method}"
             },
             method = RequestMethod.POST)
     public RestResponse<Object> handleResource(

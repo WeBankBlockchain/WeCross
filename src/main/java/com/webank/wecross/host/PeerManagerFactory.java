@@ -17,7 +17,7 @@ public class PeerManagerFactory {
     @Resource(name = "newSyncPeerMessageHandler")
     private SyncPeerMessageHandler messageHandler;
 
-    private long peerActiveTimeout = 170000; // 17s
+    private long peerActiveTimeout = 17000; // 17s
 
     @Bean
     public PeerManager newPeerManager() {

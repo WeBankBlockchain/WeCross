@@ -29,11 +29,12 @@ public class WeCrossHost {
                     public void run() {
                         while (true) {
                             try {
-                                Thread.sleep(timeInterval);
                                 syncPeerNetworks();
                                 peerManager.broadcastSeqRequest();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+                                Thread.sleep(timeInterval);
+                            } catch (Exception e) {
+                                logger.error("Startup error: " + e);
+                                System.exit(-1);
                             }
                         }
                     }

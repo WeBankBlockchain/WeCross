@@ -4,6 +4,7 @@ import com.webank.wecross.host.Peer;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.P2PMessageEngineFactory;
+import com.webank.wecross.p2p.P2PMessageSemaphoreCallback;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
@@ -64,12 +65,12 @@ public class RemoteResource implements Resource {
 
     @Override
     public TransactionResponse call(TransactionRequest request) {
-        return callOrSendRemote(request, "call");
+        return callOrSendTransactionRemote("call", request);
     }
 
     @Override
     public TransactionResponse sendTransaction(TransactionRequest request) {
-        return callOrSendRemote(request, "sendTransaction");
+        return callOrSendTransactionRemote("sendTransaction", request);
     }
 
     @Override
@@ -112,36 +113,46 @@ public class RemoteResource implements Resource {
         return firstPeer;
     }
 
-    private TransactionResponse callOrSendRemote(TransactionRequest request, String method) {
-        TransactionRequestMessageData data = new TransactionRequestMessageData();
-        data.setVersion("0.1");
-        data.setPath(getPath().toString());
-        data.setMethod(method);
-        data.setData(request);
+    private Object sendRemote(Peer peer, P2PMessage request, P2PMessageSemaphoreCallback callback)
+            throws Exception {
 
-        P2PMessage<TransactionRequestMessageData> p2pReq = new P2PMessage<>();
-        p2pReq.setVersion("0.1");
-        p2pReq.newSeq();
-        p2pReq.setType("remote");
-        p2pReq.setData(data);
+        p2pEngine.asyncSendMessage(peer, request, callback);
 
-        TransactionResponse response = new TransactionResponse();
-        try {
-            TransactionResponseCallback callback = new TransactionResponseCallback();
-            Peer peerToSend = getPrimaryPeerToSend();
-            callback.setPeer(peerToSend);
+        callback.semaphore.acquire(1);
 
-            p2pEngine.asyncSendMessage(peerToSend, p2pReq, callback);
-
-            callback.semaphore.acquire(1);
-
-            response = callback.getResponseData();
-        } catch (Exception e) {
-            logger.error(method + " remote resource failed" + e);
-            response.setErrorCode(-1);
-            response.setErrorMessage("Call remote resource failed" + e);
+        if (callback.getStatus() != 0) {
+            throw new Exception(callback.getMessage());
         }
 
+        return callback.getResponseData();
+    }
+
+    private TransactionResponse callOrSendTransactionRemote(
+            String method, TransactionRequest request) {
+        TransactionResponse response = new TransactionResponse();
+        try {
+            Peer peerToSend = getPrimaryPeerToSend();
+
+            TransactionRequestMessageData data = new TransactionRequestMessageData();
+            data.setVersion("0.1");
+            data.setPath(getPath().toString());
+            data.setMethod(method);
+            data.setData(request);
+
+            P2PMessage<TransactionRequestMessageData> p2pReq = new P2PMessage<>();
+            p2pReq.setVersion("0.1");
+            p2pReq.newSeq();
+            p2pReq.setType("remote");
+            p2pReq.setData(data);
+
+            TransactionResponseCallback callback = new TransactionResponseCallback();
+            callback.setPeer(peerToSend);
+
+            response = (TransactionResponse) sendRemote(peerToSend, p2pReq, callback);
+        } catch (Exception e) {
+            response.setErrorCode(-1);
+            response.setErrorMessage("Call remote resource error, exception:" + e);
+        }
         return response;
     }
 }

@@ -186,7 +186,7 @@ public class PeerManager {
         for (String resource : activeResources) {
             data.addResource(resource);
         }
-        logger.info("Respond peerInfo: " + activeResources);
+        logger.info("Respond peerInfo to peer, resource:" + activeResources);
         return data;
     }
 
