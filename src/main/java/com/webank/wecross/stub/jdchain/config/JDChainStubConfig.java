@@ -65,20 +65,24 @@ public class JDChainStubConfig {
                             "Error in application.yml: {} should contain a key named \"contractAddress\"",
                             resourceName);
                 }
-                JDChainContractResource jcChainContractResource = new JDChainContractResource();
+                JDChainContractResource jdChainContractResource = new JDChainContractResource();
                 String address = metaResource.get("contractAddress");
-                jcChainContractResource.setContractAddress(address);
+                jdChainContractResource.setContractAddress(address);
 
                 // set path
                 String stringPath = prefix + "." + resourceName;
                 try {
-                    jcChainContractResource.setPath(Path.decode(stringPath));
+                    jdChainContractResource.setPath(Path.decode(stringPath));
                 } catch (Exception e) {
                     logger.error(e.toString());
                     continue;
                 }
 
-                jdChainResources.put(resourceName, jcChainContractResource);
+                if (jdChainContractResource != null) {
+                    jdChainResources.put(resourceName, jdChainContractResource);
+                } else {
+                    logger.error("Init JDChainContractResource failed");
+                }
 
             } else if (type.equals("assets")) {
                 // To be defined
