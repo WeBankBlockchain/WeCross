@@ -1,6 +1,5 @@
 package com.webank.wecross.p2p.engine.restful;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
@@ -91,7 +90,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
                                         responseMsg.getResult(),
                                         responseMsg.getMessage(),
                                         responseMsg.getData());
-                                
+
                                 callback.setData(
                                         responseMsg.toP2PMessage(
                                                 "restfulP2PMessageResponse")); // callback type
