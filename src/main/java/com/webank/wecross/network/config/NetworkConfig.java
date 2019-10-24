@@ -83,12 +83,28 @@ public class NetworkConfig {
             if (Stubtype.equals("bcos")) {
 
                 BCOSStub bcosStub = getBcosStub(networkName, stubName, stubConfig);
-                stubsBean.put(stubName, bcosStub);
+                if (bcosStub != null) {
+                    stubsBean.put(stubName, bcosStub);
+                } else {
+                    logger.error(
+                            "get bcos stub failed networkname:{} stubname:{},Stubtype:{}",
+                            networkName,
+                            stubName,
+                            Stubtype);
+                }
 
             } else if (Stubtype.equals("jdchain")) {
 
                 JDChainStub jdChainStub = getJdStub(networkName, stubName, stubConfig);
-                stubsBean.put(stubName, jdChainStub);
+                if (jdChainStub != null) {
+                    stubsBean.put(stubName, jdChainStub);
+                } else {
+                    logger.error(
+                            "get bcos stub failed networkname:{} stubname:{},Stubtype:{}",
+                            networkName,
+                            stubName,
+                            Stubtype);
+                }
 
             } else if (Stubtype.equals("BaiDu")) {
                 // To be defined

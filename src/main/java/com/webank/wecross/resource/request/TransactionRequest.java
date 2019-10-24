@@ -1,5 +1,7 @@
 package com.webank.wecross.resource.request;
 
+import java.util.Arrays;
+
 public class TransactionRequest {
 
     private String sig;
@@ -16,6 +18,17 @@ public class TransactionRequest {
 
     public String getMethod() {
         return method;
+    }
+
+    @Override
+    public String toString() {
+        return "TransactionRequest [sig="
+                + sig
+                + ", method="
+                + method
+                + ", args="
+                + Arrays.toString(args)
+                + "]";
     }
 
     public void setMethod(String method) {
