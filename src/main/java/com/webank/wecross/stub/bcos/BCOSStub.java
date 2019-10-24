@@ -4,9 +4,11 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.ChainState;
 import com.webank.wecross.stub.Stub;
+import com.webank.wecross.stub.remote.RemoteResource;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
@@ -106,8 +108,17 @@ public class BCOSStub implements Stub {
             logger.trace("remove resource ignore local resources: {}", path.getResource());
             return;
         }
-        logger.info("remove resource: {}", path.getResource());
-        resources.remove(path.getResource());
+
+        if (resource.getDistance() > 0) {
+            ReadWriteLock lock = ((RemoteResource) resource).getLock();
+            lock.writeLock().lock();
+            logger.info("remove resource: {}", path.getResource());
+            resources.remove(path.getResource());
+            lock.writeLock().unlock();
+        } else {
+            logger.info("remove resource: {}", path.getResource());
+            resources.remove(path.getResource());
+        }
     }
 
     @Override

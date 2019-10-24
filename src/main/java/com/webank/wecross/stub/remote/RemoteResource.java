@@ -16,6 +16,8 @@ import com.webank.wecross.resource.response.SetDataResponse;
 import com.webank.wecross.resource.response.TransactionResponse;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,16 +27,8 @@ public class RemoteResource implements Resource {
     private P2PMessageEngine p2pEngine = P2PMessageEngineFactory.getEngineInstance();
     private int distance; // How many jumps to local stub
     private Set<Peer> peers;
-
     private Path path;
-
-    public Set<Peer> getPeers() {
-        return peers;
-    }
-
-    public void setPeers(Set<Peer> peers) {
-        this.peers = peers;
-    }
+    ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public RemoteResource(Set<Peer> peers, int distance) {
         setPeers(peers);
@@ -48,6 +42,14 @@ public class RemoteResource implements Resource {
         this.distance = distance;
     }
 
+    public Set<Peer> getPeers() {
+        return peers;
+    }
+
+    public void setPeers(Set<Peer> peers) {
+        this.peers = peers;
+    }
+
     @Override
     public String getType() {
         return "REMOTE_RESOURCE";
@@ -55,30 +57,63 @@ public class RemoteResource implements Resource {
 
     @Override
     public GetDataResponse getData(GetDataRequest request) {
-        return null;
+        lock.readLock().lock();
+        try {
+            return null;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
     public SetDataResponse setData(SetDataRequest request) {
-        return null;
+        lock.readLock().lock();
+        try {
+            return null;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
     public TransactionResponse call(TransactionRequest request) {
-        return callOrSendTransactionRemote("call", request);
+        lock.readLock().lock();
+        try {
+            return callOrSendTransactionRemote("call", request);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
     public TransactionResponse sendTransaction(TransactionRequest request) {
-        return callOrSendTransactionRemote("sendTransaction", request);
+        lock.readLock().lock();
+        try {
+            return callOrSendTransactionRemote("sendTransaction", request);
+
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
-    public void registerEventHandler(EventCallback callback) {}
+    public void registerEventHandler(EventCallback callback) {
+        lock.readLock().lock();
+        try {
+            return;
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
 
     @Override
     public TransactionRequest createRequest() {
-        return null;
+        lock.readLock().lock();
+        try {
+            return null;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
@@ -129,6 +164,7 @@ public class RemoteResource implements Resource {
 
     private TransactionResponse callOrSendTransactionRemote(
             String method, TransactionRequest request) {
+
         TransactionResponse response = new TransactionResponse();
         try {
             Peer peerToSend = getPrimaryPeerToSend();
@@ -151,8 +187,13 @@ public class RemoteResource implements Resource {
             response = (TransactionResponse) sendRemote(peerToSend, p2pReq, callback);
         } catch (Exception e) {
             response.setErrorCode(-1);
-            response.setErrorMessage("Call remote resource error, exception:" + e.getMessage());
+            response.setErrorMessage("Call remote resource exception");
         }
+
         return response;
+    }
+
+    public ReadWriteLock getLock() {
+        return lock;
     }
 }
