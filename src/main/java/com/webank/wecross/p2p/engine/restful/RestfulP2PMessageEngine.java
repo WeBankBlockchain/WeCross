@@ -44,8 +44,17 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
 
     private <T> void checkHttpResponse(ResponseEntity<P2PHttpResponse<T>> response)
             throws Exception {
+        if (response == null) {
+            throw new Exception("Remote response null");
+        }
         if (response.getStatusCode() != HttpStatus.OK) {
             throw new Exception("Method not exists: " + response.toString());
+        }
+    }
+
+    private void checkPeerResponse(P2PHttpResponse responseMsg) throws Exception {
+        if (responseMsg == null) {
+            throw new Exception("Peer response null");
         }
     }
 
@@ -73,29 +82,23 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
                                                 HttpMethod.POST,
                                                 request,
                                                 callback.getEngineCallbackMessageClassType());
-
                                 checkHttpResponse(response);
+
                                 P2PHttpResponse<Object> responseMsg = response.getBody();
+                                checkPeerResponse(responseMsg);
                                 logger.debug(
                                         "Receive status:{} message:{} data:{}",
                                         responseMsg.getResult(),
                                         responseMsg.getMessage(),
                                         responseMsg.getData());
+                                
+                                callback.setData(
+                                        responseMsg.toP2PMessage(
+                                                "restfulP2PMessageResponse")); // callback type
+                                callback.setStatus(responseMsg.getResult());
+                                callback.setMessage(responseMsg.getMessage());
+                                callback.execute();
 
-                                if (responseMsg.getData() != null) {
-
-                                    logger.trace("trigger callback ", responseMsg.getData());
-
-                                    ObjectMapper objMapper = new ObjectMapper();
-                                    callback.setStatus(responseMsg.getResult());
-                                    callback.setMessage(responseMsg.getMessage());
-                                    callback.setData(
-                                            responseMsg.toP2PMessage(
-                                                    "restfulP2PMessageResponse")); // callback type
-                                    // is the
-                                    // same as msg
-                                    callback.execute();
-                                }
                             } catch (Exception e) {
                                 logger.error(
                                         "asyncSendMessage failed, to:{}, exception:{}", url, e);

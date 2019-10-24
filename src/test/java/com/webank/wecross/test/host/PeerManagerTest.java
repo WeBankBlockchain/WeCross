@@ -105,7 +105,7 @@ public class PeerManagerTest {
         Peer peer = new Peer();
         peer.setUrl("127.0.0.1:8080");
         com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pEngine);
-        resource.setPath(Path.decode("networkx.stubx.simple0"));
+        resource.setPath(Path.decode("test-network.test-stub.test-resource"));
 
         TransactionRequest request = new TransactionRequest();
         request.setMethod("get");
@@ -121,7 +121,7 @@ public class PeerManagerTest {
         Peer peer = new Peer();
         peer.setUrl("127.0.0.1:8080");
         com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pEngine);
-        resource.setPath(Path.decode("networkx.stubx.simple0"));
+        resource.setPath(Path.decode("test-network.test-stub.test-resource"));
 
         TransactionRequest request = new TransactionRequest();
         request.setMethod("sendTransaction");

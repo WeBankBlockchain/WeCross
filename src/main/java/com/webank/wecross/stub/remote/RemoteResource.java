@@ -1,5 +1,6 @@
 package com.webank.wecross.stub.remote;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
@@ -253,6 +254,7 @@ public class RemoteResource implements Resource {
         return callback.getResponseData();
     }
 
+    @JsonIgnore
     public ReadWriteLock getLock() {
         return lock;
     }
