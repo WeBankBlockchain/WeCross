@@ -14,7 +14,8 @@ public class AccountConfig {
 
     @Bean
     public Credentials getCredentials()
-        throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+            throws InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+                    NoSuchProviderException {
 
         ECKeyPair keyPair = Keys.createEcKeyPair();
         return Credentials.create(keyPair);
