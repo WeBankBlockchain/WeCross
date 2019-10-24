@@ -15,6 +15,7 @@ gradle.properties
 
 ### output
 dist
+logs
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
@@ -41,5 +42,4 @@ nodes/
 console/
 out/
 src/main/resources/application.yml
-src/main/resources/ca.crt
-src/main/resources/sdk*
+src/main/resources/bcosconf

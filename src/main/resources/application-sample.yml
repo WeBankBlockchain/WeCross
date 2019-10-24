@@ -1,3 +1,6 @@
+# log level: ALL < TRACE < DEBUG < INFO < WARN < ERROR < FATAL < OFF
+logging.level.org.springframework.boot.autoconfigure: INFO
+
 bcos-channel-service-manager:
     channelServices:
         channel-service1:
