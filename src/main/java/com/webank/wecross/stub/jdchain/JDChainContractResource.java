@@ -57,7 +57,7 @@ public class JDChainContractResource extends JDChainResource {
         try {
             random = SecureRandom.getInstance("SHA1PRNG");
         } catch (NoSuchAlgorithmException e) {
-            logger.error("rand Algorithm:{}", e.getMessage());
+            logger.error("rand Algorithm:{}", e);
         }
         Integer randNum = random.nextInt(channelCount);
         for (int index = 0; index < channelCount; ++index) {

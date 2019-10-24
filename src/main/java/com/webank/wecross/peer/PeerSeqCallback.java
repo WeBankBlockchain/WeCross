@@ -1,21 +1,21 @@
-package com.webank.wecross.p2p.peer;
+package com.webank.wecross.peer;
 
-import com.webank.wecross.host.SyncPeerMessageHandler;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.engine.restful.P2PHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 
-public class PeerInfoCallback extends P2PMessageCallback<PeerInfoMessageData> {
+@Configuration
+public class PeerSeqCallback extends P2PMessageCallback<PeerSeqMessageData> {
     private SyncPeerMessageHandler handler;
+    private Logger logger = LoggerFactory.getLogger(PeerSeqCallback.class);
 
-    private Logger logger = LoggerFactory.getLogger(PeerInfoCallback.class);
-
-    public PeerInfoCallback() {
+    public PeerSeqCallback() {
         super.setEngineCallbackMessageClassType(
-                new ParameterizedTypeReference<P2PHttpResponse<PeerInfoMessageData>>() {});
+                new ParameterizedTypeReference<P2PHttpResponse<PeerSeqMessageData>>() {});
     }
 
     @Override
@@ -30,14 +30,15 @@ public class PeerInfoCallback extends P2PMessageCallback<PeerInfoMessageData> {
             return;
         }
 
-        PeerInfoMessageData data = (PeerInfoMessageData) msg.getData();
+        PeerSeqMessageData data = (PeerSeqMessageData) msg.getData();
         logger.debug(
-                "Receive peer seq. status: {} message: {} seq: {}",
+                "Receive com.webank.wecross.peer seq. status: {} message: {} seq: {}",
                 status,
                 message,
-                data == null ? "null" : data.getDataSeq());
+                data == null ? "null" : data.getSeq());
 
-        handler.onPeerMessage(getPeer(), data.getMethod(), msg);
+        msg.setMethod("seq");
+        handler.onPeerMessage(this.getPeer(), msg.getMethod(), msg);
     }
 
     public void setHandler(SyncPeerMessageHandler handler) {

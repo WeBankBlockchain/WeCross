@@ -1,3 +1,3 @@
-package com.webank.wecross.p2p.stub;
+package com.webank.wecross.stub;
 
 public class StubChainStateCallback {}

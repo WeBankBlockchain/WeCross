@@ -2,7 +2,7 @@ package com.webank.wecross.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.webank.wecross.host.Peer;
+import com.webank.wecross.p2p.Peer;
 import com.webank.wecross.resource.request.GetDataRequest;
 import com.webank.wecross.resource.request.SetDataRequest;
 import com.webank.wecross.resource.request.TransactionRequest;

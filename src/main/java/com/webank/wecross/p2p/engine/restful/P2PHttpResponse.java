@@ -51,10 +51,10 @@ public class P2PHttpResponse<T> {
     }
 
     @JsonIgnore
-    public P2PMessage toP2PMessage(String type) {
+    public P2PMessage toP2PMessage(String method) {
         P2PMessage msg = new P2PMessage<>();
         msg.setVersion(this.getVersion());
-        msg.setType(type);
+        msg.setMethod(method);
         msg.setSeq(this.getSeq());
         msg.setData(this.getData());
         return msg;

@@ -1,6 +1,8 @@
-package com.webank.wecross.host;
+package com.webank.wecross.host.config;
 
+import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.network.NetworkManager;
+import com.webank.wecross.peer.PeerManager;
 import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

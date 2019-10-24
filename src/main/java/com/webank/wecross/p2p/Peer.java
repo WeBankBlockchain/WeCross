@@ -1,4 +1,4 @@
-package com.webank.wecross.host;
+package com.webank.wecross.p2p;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -60,7 +60,7 @@ public class Peer {
 
     @Override
     public String toString() {
-        return "peer(name:" + name + ", url:" + url + ")";
+        return "com.webank.wecross.peer(name:" + name + ", url:" + url + ")";
     }
 
     public long getLastActiveTimestamp() {

@@ -1,22 +1,20 @@
-package com.webank.wecross.p2p.peer;
+package com.webank.wecross.peer;
 
-import com.webank.wecross.host.SyncPeerMessageHandler;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.engine.restful.P2PHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 
-@Configuration
-public class PeerSeqCallback extends P2PMessageCallback<PeerSeqMessageData> {
+public class PeerInfoCallback extends P2PMessageCallback<PeerInfoMessageData> {
     private SyncPeerMessageHandler handler;
-    private Logger logger = LoggerFactory.getLogger(PeerSeqCallback.class);
 
-    public PeerSeqCallback() {
+    private Logger logger = LoggerFactory.getLogger(PeerInfoCallback.class);
+
+    public PeerInfoCallback() {
         super.setEngineCallbackMessageClassType(
-                new ParameterizedTypeReference<P2PHttpResponse<PeerSeqMessageData>>() {});
+                new ParameterizedTypeReference<P2PHttpResponse<PeerInfoMessageData>>() {});
     }
 
     @Override
@@ -31,14 +29,16 @@ public class PeerSeqCallback extends P2PMessageCallback<PeerSeqMessageData> {
             return;
         }
 
-        PeerSeqMessageData data = (PeerSeqMessageData) msg.getData();
+        PeerInfoMessageData data = (PeerInfoMessageData) msg.getData();
         logger.debug(
                 "Receive peer seq. status: {} message: {} seq: {}",
                 status,
                 message,
-                data == null ? "null" : data.getDataSeq());
+                data == null ? "null" : data.getSeq());
 
-        handler.onPeerMessage(this.getPeer(), data.getMethod(), msg);
+        msg.setMethod("peerInfo");
+
+        handler.onPeerMessage(getPeer(), msg.getMethod(), msg);
     }
 
     public void setHandler(SyncPeerMessageHandler handler) {

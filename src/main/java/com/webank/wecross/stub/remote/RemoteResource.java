@@ -1,10 +1,7 @@
 package com.webank.wecross.stub.remote;
 
-import com.webank.wecross.host.Peer;
-import com.webank.wecross.p2p.P2PMessage;
-import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.P2PMessageEngineFactory;
-import com.webank.wecross.p2p.P2PMessageSemaphoreCallback;
+import com.webank.wecross.p2p.*;
+import com.webank.wecross.p2p.engine.restful.P2PHttpResponse;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
@@ -14,32 +11,35 @@ import com.webank.wecross.resource.request.TransactionRequest;
 import com.webank.wecross.resource.response.GetDataResponse;
 import com.webank.wecross.resource.response.SetDataResponse;
 import com.webank.wecross.resource.response.TransactionResponse;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
 
 public class RemoteResource implements Resource {
 
     private Logger logger = LoggerFactory.getLogger(RemoteResource.class);
-    private P2PMessageEngine p2pEngine = P2PMessageEngineFactory.getEngineInstance();
+    private P2PMessageEngine p2pEngine;
     private int distance; // How many jumps to local stub
     private Set<Peer> peers;
     private Path path;
     ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    public RemoteResource(Set<Peer> peers, int distance) {
+    public RemoteResource(Set<Peer> peers, int distance, P2PMessageEngine p2pEngine) {
         setPeers(peers);
         this.distance = distance;
+        this.p2pEngine = p2pEngine;
     }
 
-    public RemoteResource(Peer peer, int distance) {
+    public RemoteResource(Peer peer, int distance, P2PMessageEngine p2pEngine) {
         Set<Peer> peers = new HashSet<>();
         peers.add(peer);
         setPeers(peers);
         this.distance = distance;
+        this.p2pEngine = p2pEngine;
     }
 
     public Set<Peer> getPeers() {
@@ -78,22 +78,67 @@ public class RemoteResource implements Resource {
     @Override
     public TransactionResponse call(TransactionRequest request) {
         lock.readLock().lock();
+        TransactionResponse response = new TransactionResponse();
         try {
-            return callOrSendTransactionRemote("call", request);
+            List<Peer> peerList = getRandPeerList();
+            for (Peer peerToSend : peerList) {
+                try {
+                    P2PMessage<TransactionRequest> p2pReq = new P2PMessage<>();
+                    p2pReq.setVersion("0.1");
+                    p2pReq.newSeq();
+                    p2pReq.setMethod(path.toURI() + "/call");
+                    p2pReq.setData(request);
+
+                    response = (TransactionResponse) sendRemote(peerToSend, p2pReq);
+
+                    if (response.getErrorCode() == 0) {
+                        return response;
+                    }
+                } catch (Exception e) {
+                    continue;
+                }
+            }
+            throw new Exception("Not an available peer to request");
+        } catch (Exception e) {
+            response.setErrorCode(-1);
+            response.setErrorMessage("Call remote resource exception");
         } finally {
             lock.readLock().unlock();
         }
+        return response;
     }
 
     @Override
     public TransactionResponse sendTransaction(TransactionRequest request) {
         lock.readLock().lock();
+        TransactionResponse response = new TransactionResponse();
         try {
-            return callOrSendTransactionRemote("sendTransaction", request);
+            List<Peer> peerList = getRandPeerList();
+            for (Peer peerToSend : peerList) {
+                try {
+                    P2PMessage<TransactionRequest> p2pReq = new P2PMessage<>();
+                    p2pReq.setVersion("0.1");
+                    p2pReq.newSeq();
+                    p2pReq.setMethod(path.toURI() + "/sendTransaction");
+                    p2pReq.setData(request);
 
+                    response = (TransactionResponse) sendRemote(peerToSend, p2pReq);
+
+                    if (response.getErrorCode() == 0) {
+                        return response;
+                    }
+                } catch (Exception e) {
+                    continue;
+                }
+            }
+            throw new Exception("Not an available peer to request");
+        } catch (Exception e) {
+            response.setErrorCode(-1);
+            response.setErrorMessage("Call remote resource exception");
         } finally {
             lock.readLock().unlock();
         }
+        return response;
     }
 
     @Override
@@ -148,8 +193,47 @@ public class RemoteResource implements Resource {
         return firstPeer;
     }
 
-    private Object sendRemote(Peer peer, P2PMessage request, P2PMessageSemaphoreCallback callback)
-            throws Exception {
+    private List<Peer> getRandPeerList() throws Exception {
+        if (peers == null || peers.isEmpty()) {
+            throw new Exception("Peers of the resource is empty");
+        }
+
+        List<Peer> peerList = new ArrayList<>(peers);
+        Collections.shuffle(peerList);
+        return peerList;
+    }
+
+    private TransactionResponse sendRemote(Peer peer, P2PMessage request) throws Exception {
+
+        class SemaphoreCallback extends P2PMessageCallback {
+            public transient Semaphore semaphore = new Semaphore(1, true);
+            private TransactionResponse responseData;
+
+            public SemaphoreCallback() {
+                super.setEngineCallbackMessageClassType(
+                        new ParameterizedTypeReference<P2PHttpResponse<TransactionResponse>>() {});
+                try {
+                    semaphore.acquire(1);
+
+                } catch (InterruptedException e) {
+                    logger.error("error:", e);
+                }
+            }
+
+            @Override
+            public void onResponse(int status, String message, P2PMessage msg) {
+                responseData = (TransactionResponse) msg.getData();
+                semaphore.release();
+            }
+
+            public TransactionResponse getResponseData() {
+                return responseData;
+            }
+        }
+
+        SemaphoreCallback callback = new SemaphoreCallback();
+
+        callback.setPeer(peer);
 
         p2pEngine.asyncSendMessage(peer, request, callback);
 
@@ -160,37 +244,6 @@ public class RemoteResource implements Resource {
         }
 
         return callback.getResponseData();
-    }
-
-    private TransactionResponse callOrSendTransactionRemote(
-            String method, TransactionRequest request) {
-
-        TransactionResponse response = new TransactionResponse();
-        try {
-            Peer peerToSend = getPrimaryPeerToSend();
-
-            TransactionRequestMessageData data = new TransactionRequestMessageData();
-            data.setVersion("0.1");
-            data.setPath(getPath().toString());
-            data.setMethod(method);
-            data.setData(request);
-
-            P2PMessage<TransactionRequestMessageData> p2pReq = new P2PMessage<>();
-            p2pReq.setVersion("0.1");
-            p2pReq.newSeq();
-            p2pReq.setType("remote");
-            p2pReq.setData(data);
-
-            TransactionResponseCallback callback = new TransactionResponseCallback();
-            callback.setPeer(peerToSend);
-
-            response = (TransactionResponse) sendRemote(peerToSend, p2pReq, callback);
-        } catch (Exception e) {
-            response.setErrorCode(-1);
-            response.setErrorMessage("Call remote resource exception");
-        }
-
-        return response;
     }
 
     public ReadWriteLock getLock() {

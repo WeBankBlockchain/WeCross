@@ -1,6 +1,6 @@
 package com.webank.wecross.stub.bcos;
 
-import com.webank.wecross.host.Peer;
+import com.webank.wecross.p2p.Peer;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;

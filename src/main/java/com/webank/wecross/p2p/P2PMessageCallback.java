@@ -1,7 +1,6 @@
 package com.webank.wecross.p2p;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.webank.wecross.host.Peer;
 import org.springframework.core.ParameterizedTypeReference;
 
 public class P2PMessageCallback<T> {

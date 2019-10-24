@@ -1,7 +1,8 @@
 package com.webank.wecross.network;
 
 import com.webank.wecross.core.PathUtils;
-import com.webank.wecross.host.Peer;
+import com.webank.wecross.p2p.P2PMessageEngine;
+import com.webank.wecross.p2p.Peer;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.request.ResourceRequest;
@@ -24,6 +25,7 @@ public class NetworkManager {
     private Map<String, Network> networks = new HashMap<>();
     private int seq = 1;
     private Logger logger = LoggerFactory.getLogger(NetworkManager.class);
+    private P2PMessageEngine p2pEngine;
 
     public StateResponse getState(StateRequest request) {
 
@@ -158,7 +160,7 @@ public class NetworkManager {
         for (String resource : resources2Add) {
             try {
                 Set<Peer> newPeers = resource2Peers.get(resource);
-                Resource newResource = new RemoteResource(newPeers, 1);
+                Resource newResource = new RemoteResource(newPeers, 1, p2pEngine);
                 newResource.setPath(Path.decode(resource));
                 addResource(newResource);
             } catch (Exception e) {
@@ -208,5 +210,9 @@ public class NetworkManager {
         }
 
         return resourceResponse;
+    }
+
+    public void setP2pEngine(P2PMessageEngine p2pEngine) {
+        this.p2pEngine = p2pEngine;
     }
 }
