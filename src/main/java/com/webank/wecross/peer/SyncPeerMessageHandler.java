@@ -1,10 +1,8 @@
-package com.webank.wecross.host;
+package com.webank.wecross.peer;
 
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.peer.PeerDoNothingCallback;
-import com.webank.wecross.p2p.peer.PeerInfoMessageData;
-import com.webank.wecross.p2p.peer.PeerSeqMessageData;
+import com.webank.wecross.p2p.Peer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -45,7 +43,7 @@ public class SyncPeerMessageHandler {
     }
 
     private void handlePeerMessage(Peer peer, String method, P2PMessage msg) throws Exception {
-        logger.info("Receive peer message peer:{}, method:{}, msg:{}", peer, method, msg);
+        logger.trace("Receive peer message peer:{}, method:{}, msg:{}", peer, method, msg);
         switch (method) {
             case "requestSeq":
                 {
@@ -79,7 +77,7 @@ public class SyncPeerMessageHandler {
         P2PMessage<PeerSeqMessageData> rspMsg = new P2PMessage<>();
         rspMsg.setVersion("0.1");
         rspMsg.setSeq(msg.getSeq());
-        rspMsg.setType("peer");
+        rspMsg.setMethod("com/webank/wecross/peer/seq");
         rspMsg.setData(data);
 
         p2pEngine.asyncSendMessage(peer, rspMsg, new PeerDoNothingCallback());
@@ -94,7 +92,7 @@ public class SyncPeerMessageHandler {
         P2PMessage<PeerInfoMessageData> rspMsg = new P2PMessage<>();
         rspMsg.setVersion("0.1");
         rspMsg.setSeq(msg.getSeq());
-        rspMsg.setType("peer");
+        rspMsg.setMethod("com/webank/wecross/peer/peerInfo");
         rspMsg.setData(data);
 
         p2pEngine.asyncSendMessage(peer, rspMsg, new PeerDoNothingCallback());

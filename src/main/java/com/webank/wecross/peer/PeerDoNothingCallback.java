@@ -1,4 +1,4 @@
-package com.webank.wecross.p2p.peer;
+package com.webank.wecross.peer;
 
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.engine.restful.P2PHttpResponse;

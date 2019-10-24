@@ -2,13 +2,12 @@ package com.webank.wecross.host;
 
 import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
-import com.webank.wecross.p2p.P2PMessageData;
+import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.SimpleResource;
+import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +19,27 @@ public class WeCrossHost {
     private PeerManager peerManager;
 
     public void start() {
+        addTestResources();
         peerManager.start();
-        addSimpleResources();
-        syncPeerNetworks();
+
+        final long timeInterval = 5000;
+        Runnable runnable =
+                new Runnable() {
+                    public void run() {
+                        while (true) {
+                            try {
+                                peerManager.broadcastSeqRequest();
+                                Thread.sleep(timeInterval);
+                            } catch (Exception e) {
+                                logger.error("Startup error: " + e);
+                                System.exit(-1);
+                            }
+                        }
+                    }
+                };
+
+        Thread thread = new Thread(runnable);
+        thread.start();
     }
 
     public Resource getResource(Path path) throws Exception {
@@ -33,7 +50,7 @@ public class WeCrossHost {
         return networkManager.getState(request);
     }
 
-    public P2PMessageData onRestfulPeerMessage(String method, P2PMessage msg) {
+    public Object onRestfulPeerMessage(String method, P2PMessage msg) {
         return peerManager.onRestfulPeerMessage(method, msg);
     }
 
@@ -51,23 +68,13 @@ public class WeCrossHost {
 
     public void syncAllState() {}
 
-    public void syncPeerNetworks() {
-        // Update peers' resource into networks
-        Set<Peer> activePeers = peerManager.getActivePeers();
-        networkManager.updateActivePeerNetwork(activePeers);
-
-        // Update active resource back to peerManager
-        Set<String> activeResources = networkManager.getAllNetworkStubResourceName(true);
-        peerManager.setActiveResources(activeResources);
-    }
-
-    private void addSimpleResources() {
+    private void addTestResources() {
         logger.info("Add simple resource");
         try {
             for (int i = 0; i < 1; i++) {
                 String name = "networkx.stubx.simple" + i;
                 Path path = Path.decode(name);
-                Resource resource = new SimpleResource();
+                Resource resource = new TestResource();
                 resource.setPath(path);
                 networkManager.addResource(resource);
             }

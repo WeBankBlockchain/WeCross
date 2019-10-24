@@ -1,6 +1,5 @@
-package com.webank.wecross.p2p.peer;
+package com.webank.wecross.peer;
 
-import com.webank.wecross.host.SyncPeerMessageHandler;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.engine.restful.P2PHttpResponse;
@@ -22,23 +21,24 @@ public class PeerSeqCallback extends P2PMessageCallback<PeerSeqMessageData> {
     @Override
     public void onResponse(int status, String message, P2PMessage msg) {
         if (status != 0) {
-            logger.warn("Response status: " + status);
+            logger.debug("Response status: " + status);
             return;
         }
 
         if (msg == null) {
-            logger.warn("Response msg is null");
+            logger.debug("Response msg is null");
             return;
         }
 
         PeerSeqMessageData data = (PeerSeqMessageData) msg.getData();
-        logger.info(
-                "Receive peer seq. status: {} message: {} seq: {}",
+        logger.debug(
+                "Receive com.webank.wecross.peer seq. status: {} message: {} seq: {}",
                 status,
                 message,
-                data == null ? "null" : data.getDataSeq());
+                data == null ? "null" : data.getSeq());
 
-        handler.onPeerMessage(this.getPeer(), data.getMethod(), msg);
+        msg.setMethod("seq");
+        handler.onPeerMessage(this.getPeer(), msg.getMethod(), msg);
     }
 
     public void setHandler(SyncPeerMessageHandler handler) {

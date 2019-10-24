@@ -1,9 +1,10 @@
 package com.webank.wecross.test.host;
 
 import com.webank.wecross.Application;
-import com.webank.wecross.host.Peer;
-import com.webank.wecross.host.PeerManager;
 import com.webank.wecross.network.NetworkManager;
+import com.webank.wecross.p2p.P2PMessageEngine;
+import com.webank.wecross.p2p.Peer;
+import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.request.TransactionRequest;
 import com.webank.wecross.resource.response.TransactionResponse;
@@ -29,6 +30,9 @@ public class PeerManagerTest {
 
     @Resource(name = "newNetworkManager")
     NetworkManager networkManager;
+
+    @Resource(name = "newP2PMessageEngine")
+    private P2PMessageEngine p2pEngine;
 
     @BeforeClass
     public static void runApp() {
@@ -100,11 +104,27 @@ public class PeerManagerTest {
     public void remoteResourceCallTest() throws Exception {
         Peer peer = new Peer();
         peer.setUrl("127.0.0.1:8080");
-        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1);
+        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pEngine);
         resource.setPath(Path.decode("networkx.stubx.simple0"));
 
         TransactionRequest request = new TransactionRequest();
         request.setMethod("get");
+        request.setArgs(new String[] {"123", "aabb"});
+
+        TransactionResponse response = resource.call(request);
+        Assert.assertEquals(new Integer(0), response.getErrorCode());
+        System.out.println(response.getErrorMessage());
+    }
+
+    @Test
+    public void remoteResourceSendTransactionTest() throws Exception {
+        Peer peer = new Peer();
+        peer.setUrl("127.0.0.1:8080");
+        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pEngine);
+        resource.setPath(Path.decode("networkx.stubx.simple0"));
+
+        TransactionRequest request = new TransactionRequest();
+        request.setMethod("sendTransaction");
         request.setArgs(new String[] {"123", "aabb"});
 
         TransactionResponse response = resource.call(request);

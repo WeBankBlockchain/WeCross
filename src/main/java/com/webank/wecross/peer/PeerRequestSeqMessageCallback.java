@@ -1,4 +1,4 @@
-package com.webank.wecross.p2p.peer;
+package com.webank.wecross.peer;
 
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
@@ -18,10 +18,10 @@ public class PeerRequestSeqMessageCallback extends P2PMessageCallback<PeerSeqMes
     @Override
     public void onResponse(int status, String message, P2PMessage msg) {
         PeerSeqMessageData data = (PeerSeqMessageData) msg.getData();
-        logger.info(
-                "Receive peer seq. status: {} message: {} seq: {}",
+        logger.debug(
+                "Receive com.webank.wecross.peer seq. status: {} message: {} seq: {}",
                 status,
                 message,
-                data == null ? "null" : data.getDataSeq());
+                data == null ? "null" : data.getSeq());
     }
 }

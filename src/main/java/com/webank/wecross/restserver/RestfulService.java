@@ -47,7 +47,7 @@ public class RestfulService {
         restResponse.setVersion("0.1");
         restResponse.setResult(0);
 
-        logger.info("request string: {}", restRequestString);
+        logger.debug("request string: {}", restRequestString);
 
         try {
             RestRequest<ResourceRequest> restRequest =
@@ -109,7 +109,6 @@ public class RestfulService {
     @RequestMapping(
             value = {
                 "/{network}/{stub}/{resource}/{method}",
-                "/p2p/remote/{network}/{stub}/{resource}/{method}"
             },
             method = RequestMethod.POST)
     public RestResponse<Object> handleResource(
@@ -127,7 +126,7 @@ public class RestfulService {
         restResponse.setVersion("0.1");
         restResponse.setResult(0);
 
-        logger.info("request string: {}", restRequestString);
+        logger.debug("request string: {}", restRequestString);
 
         try {
             Resource resourceObj = host.getResource(path);

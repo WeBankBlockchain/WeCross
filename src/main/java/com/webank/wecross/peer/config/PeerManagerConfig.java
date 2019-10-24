@@ -1,6 +1,6 @@
-package com.webank.wecross.host.config;
+package com.webank.wecross.peer.config;
 
-import com.webank.wecross.host.Peer;
+import com.webank.wecross.p2p.Peer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

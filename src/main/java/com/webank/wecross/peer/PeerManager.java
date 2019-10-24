@@ -1,15 +1,10 @@
-package com.webank.wecross.host;
+package com.webank.wecross.peer;
 
 import com.webank.wecross.core.SeqUtils;
+import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
-import com.webank.wecross.p2p.P2PMessageData;
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.peer.PeerInfoCallback;
-import com.webank.wecross.p2p.peer.PeerInfoMessageData;
-import com.webank.wecross.p2p.peer.PeerRequestPeerInfoMessageData;
-import com.webank.wecross.p2p.peer.PeerRequestSeqMessageData;
-import com.webank.wecross.p2p.peer.PeerSeqCallback;
-import com.webank.wecross.p2p.peer.PeerSeqMessageData;
+import com.webank.wecross.p2p.Peer;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 public class PeerManager {
     Logger logger = LoggerFactory.getLogger(PeerManager.class);
+
+    private NetworkManager networkManager;
 
     private P2PMessageEngine p2pEngine;
 
@@ -33,7 +30,7 @@ public class PeerManager {
 
     public void start() {
         newSeq();
-        // broadcastSeqRequest();
+        syncWithPeerNetworks();
     }
 
     public void newSeq() {
@@ -83,7 +80,7 @@ public class PeerManager {
         return peers.get(url).getSeq() != currentSeq;
     }
 
-    public P2PMessageData onRestfulPeerMessage(String method, P2PMessage msg) {
+    public Object onRestfulPeerMessage(String method, P2PMessage msg) {
         switch (method) {
             case "requestSeq":
                 {
@@ -100,12 +97,11 @@ public class PeerManager {
     }
 
     public void broadcastSeqRequest() {
-        PeerRequestSeqMessageData data = new PeerRequestSeqMessageData();
-        P2PMessage<PeerRequestSeqMessageData> msg = new P2PMessage<>();
+        P2PMessage<Object> msg = new P2PMessage<>();
         msg.newSeq();
-        msg.setData(data);
+        msg.setData(null);
         msg.setVersion("0.1");
-        msg.setType("peer");
+        msg.setMethod("requestSeq");
 
         for (Peer peer : peers.values()) {
             PeerSeqCallback callback = new PeerSeqCallback();
@@ -116,12 +112,11 @@ public class PeerManager {
     }
 
     public void broadcastPeerInfoRequest() {
-        PeerRequestPeerInfoMessageData data = new PeerRequestPeerInfoMessageData();
-        P2PMessage<PeerRequestPeerInfoMessageData> msg = new P2PMessage<>();
+        P2PMessage<Object> msg = new P2PMessage<>();
         msg.newSeq();
-        msg.setData(data);
+        msg.setData(null);
         msg.setVersion("0.1");
-        msg.setType("peer");
+        msg.setMethod("requestPeerInfo");
 
         for (Peer peer : peers.values()) {
             PeerInfoCallback callback = new PeerInfoCallback();
@@ -136,8 +131,8 @@ public class PeerManager {
     }
 
     public void sendPeerInfoRequest(Peer peer, int seq) {
-        PeerRequestPeerInfoMessageData data = new PeerRequestPeerInfoMessageData();
-        P2PMessage<PeerRequestPeerInfoMessageData> msg = new P2PMessage<>();
+
+        P2PMessage<Object> msg = new P2PMessage<>();
 
         if (seq == 0) {
             msg.newSeq();
@@ -145,9 +140,9 @@ public class PeerManager {
             msg.setSeq(seq);
         }
 
-        msg.setData(data);
+        msg.setData(null);
         msg.setVersion("0.1");
-        msg.setType("peer");
+        msg.setMethod("requestPeerInfo");
 
         PeerInfoCallback callback = new PeerInfoCallback();
         callback.setHandler(messageHandler);
@@ -158,7 +153,7 @@ public class PeerManager {
 
     public PeerSeqMessageData handleRequestSeq() {
         PeerSeqMessageData data = new PeerSeqMessageData();
-        data.setDataSeq(seq);
+        data.setSeq(seq);
         return data;
     }
 
@@ -167,11 +162,10 @@ public class PeerManager {
         notePeerActive(peer.getUrl());
 
         PeerSeqMessageData data = (PeerSeqMessageData) msg.getData();
-        if (data != null && data.getMethod().equals("seq")) {
-            int currentSeq = data.getDataSeq();
+        if (data != null && msg.getMethod().equals("seq")) {
+            int currentSeq = data.getSeq();
             if (hasPeerChanged(peer.getUrl(), currentSeq)) {
-                logger.info("Request peerInfo from {}", peer);
-
+                logger.info("Request peerInfo to {}", peer);
                 sendPeerInfoRequest(peer, msg.getSeq() + 1);
             }
         } else {
@@ -180,12 +174,14 @@ public class PeerManager {
     }
 
     public PeerInfoMessageData handleRequestPeerInfo() {
+        logger.info("Receive request peer info");
         PeerInfoMessageData data = new PeerInfoMessageData();
-        data.setDataSeq(seq);
+        data.setSeq(seq);
 
         for (String resource : activeResources) {
             data.addResource(resource);
         }
+        logger.info("Respond peerInfo to peer, resource:" + activeResources);
         return data;
     }
 
@@ -194,11 +190,11 @@ public class PeerManager {
         notePeerActive(peer.getUrl());
 
         PeerInfoMessageData data = (PeerInfoMessageData) msg.getData();
-        if (data != null && data.getMethod().equals("peerInfo")) {
-            int currentSeq = data.getDataSeq();
+        if (data != null && msg.getMethod().equals("peerInfo")) {
+            int currentSeq = data.getSeq();
             if (hasPeerChanged(peer.getUrl(), currentSeq)) {
                 // compare and update
-                Set<String> currentResources = data.getDataResources();
+                Set<String> currentResources = data.getResources();
                 logger.info(
                         "Update peerInfo peer:{}, seq:{}, resource:{}",
                         peer,
@@ -212,6 +208,10 @@ public class PeerManager {
                 } else {
                     peerRecord.setResources(currentSeq, currentResources);
                 }
+                //
+                syncWithPeerNetworks();
+            } else {
+                logger.info("Peer info not changed, seq:{}", currentSeq);
             }
         } else {
             logger.warn("Receive unrecognized seq message from peer:" + peer);
@@ -265,6 +265,30 @@ public class PeerManager {
     }
 
     public void setActiveResources(Set<String> activeResources) {
-        this.activeResources = activeResources;
+        if (!this.activeResources.equals(activeResources)) {
+            this.newSeq();
+            this.activeResources = activeResources;
+            logger.info(
+                    "Update active resources newSeq:{}, resource:{}", seq, this.activeResources);
+        }
+    }
+
+    public void syncWithPeerNetworks() {
+        // Update peers' resource into networks
+        Set<Peer> activePeers = this.getActivePeers();
+        networkManager.updateActivePeerNetwork(activePeers);
+
+        // Log all active resources
+        Set<String> activeResources = networkManager.getAllNetworkStubResourceName(false);
+        logger.info("Current active resource:" + activeResources);
+
+        // Update active resource back to peerManager
+        Set<String> activeLocalResources = networkManager.getAllNetworkStubResourceName(true);
+        logger.info("Current active local resources:" + activeLocalResources);
+        this.setActiveResources(activeLocalResources);
+    }
+
+    public void setNetworkManager(NetworkManager networkManager) {
+        this.networkManager = networkManager;
     }
 }

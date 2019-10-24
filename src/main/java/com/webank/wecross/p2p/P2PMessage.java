@@ -4,8 +4,8 @@ import com.webank.wecross.core.SeqUtils;
 
 public class P2PMessage<T> {
     private String version;
-    private String type;
     private int seq;
+    private String method;
     private T data;
 
     public void newSeq() {
@@ -37,19 +37,11 @@ public class P2PMessage<T> {
         this.version = version;
     }
 
-    public String getType() {
-        return type;
+    public String getMethod() {
+        return method;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String toUri() throws Exception {
-        // Only for RestfulP2PMessageEngine
-        if (data != null && ((P2PMessageData) data).getMethod() != null) {
-            return "/" + type + "/" + ((P2PMessageData) data).getMethod();
-        }
-        return "/" + type;
+    public void setMethod(String method) {
+        this.method = method;
     }
 }

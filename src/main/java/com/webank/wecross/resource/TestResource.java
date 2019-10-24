@@ -1,6 +1,6 @@
 package com.webank.wecross.resource;
 
-import com.webank.wecross.host.Peer;
+import com.webank.wecross.p2p.Peer;
 import com.webank.wecross.resource.request.GetDataRequest;
 import com.webank.wecross.resource.request.SetDataRequest;
 import com.webank.wecross.resource.request.TransactionRequest;
@@ -10,13 +10,13 @@ import com.webank.wecross.resource.response.TransactionResponse;
 import java.util.Set;
 
 // No reliable chain, just respond what you call
-public class SimpleResource implements Resource {
+public class TestResource implements Resource {
 
     protected Path path;
 
     @Override
     public String getType() {
-        return "SIMPLE_RESOURCE";
+        return "TEST_RESOURCE";
     }
 
     @Override
@@ -33,7 +33,7 @@ public class SimpleResource implements Resource {
     public TransactionResponse call(TransactionRequest request) {
         TransactionResponse response = new TransactionResponse();
         response.setErrorCode(0);
-        response.setErrorMessage("Call simplie resource success");
+        response.setErrorMessage("Call test resource success");
         response.setHash("010157f4");
         response.setResult(new Object[] {request});
         return response;
@@ -43,7 +43,7 @@ public class SimpleResource implements Resource {
     public TransactionResponse sendTransaction(TransactionRequest request) {
         TransactionResponse response = new TransactionResponse();
         response.setErrorCode(0);
-        response.setErrorMessage("sendTransaction simplie resource success");
+        response.setErrorMessage("sendTransaction test resource success");
         response.setHash("010157f4");
         response.setResult(new Object[] {request});
         return response;
