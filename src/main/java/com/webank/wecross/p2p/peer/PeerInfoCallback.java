@@ -21,17 +21,17 @@ public class PeerInfoCallback extends P2PMessageCallback<PeerInfoMessageData> {
     @Override
     public void onResponse(int status, String message, P2PMessage msg) {
         if (status != 0) {
-            logger.warn("Response status: " + status);
+            logger.debug("Response status: " + status);
             return;
         }
 
         if (msg == null) {
-            logger.warn("Response msg is null");
+            logger.debug("Response msg is null");
             return;
         }
 
         PeerInfoMessageData data = (PeerInfoMessageData) msg.getData();
-        logger.info(
+        logger.debug(
                 "Receive peer seq. status: {} message: {} seq: {}",
                 status,
                 message,

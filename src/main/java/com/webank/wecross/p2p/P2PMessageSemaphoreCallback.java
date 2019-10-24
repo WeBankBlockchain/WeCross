@@ -20,7 +20,9 @@ public class P2PMessageSemaphoreCallback<T> extends P2PMessageCallback<T> {
 
     @Override
     public void execute() {
-        this.responseData = data.getData();
+        if (data != null) {
+            this.responseData = data.getData();
+        }
         semaphore.release();
         this.onResponse(status, message, data);
     }

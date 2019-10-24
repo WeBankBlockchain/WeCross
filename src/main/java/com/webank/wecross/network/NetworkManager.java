@@ -26,6 +26,7 @@ public class NetworkManager {
     private Logger logger = LoggerFactory.getLogger(NetworkManager.class);
 
     public StateResponse getState(StateRequest request) {
+
         StateResponse response = new StateResponse();
         response.setSeq(seq);
 

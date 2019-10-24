@@ -42,14 +42,14 @@ public class RestfulP2PService {
         response.setVersion("0.1");
         response.setResult(0);
 
-        logger.info("request string: {}", p2pRequestString);
+        logger.debug("request string: {}", p2pRequestString);
 
         try {
 
             switch (method) {
                 case "requestSeq":
                     {
-                        logger.info("request method: peer/" + method);
+                        logger.debug("request method: peer/" + method);
                         P2PMessage<PeerRequestSeqMessageData> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
@@ -67,7 +67,7 @@ public class RestfulP2PService {
                     }
                 case "requestPeerInfo":
                     {
-                        logger.info("request method: peer/" + method);
+                        logger.debug("request method: peer/" + method);
                         P2PMessage<PeerRequestPeerInfoMessageData> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
@@ -85,7 +85,7 @@ public class RestfulP2PService {
                     }
                 case "seq":
                     {
-                        logger.info("request method: peer/" + method);
+                        logger.debug("request method: peer/" + method);
                         P2PMessage<PeerSeqMessageData> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
@@ -101,7 +101,7 @@ public class RestfulP2PService {
                     }
                 case "peerInfo":
                     {
-                        logger.info("request method: peer/" + method);
+                        logger.debug("request method: peer/" + method);
                         P2PMessage<PeerInfoMessageData> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
@@ -117,7 +117,7 @@ public class RestfulP2PService {
                     }
                 default:
                     {
-                        logger.info("request method: peer/" + method);
+                        logger.debug("request method: peer/" + method);
                         P2PMessage<Object> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
@@ -136,7 +136,7 @@ public class RestfulP2PService {
             response.setMessage(e.getLocalizedMessage());
         }
 
-        logger.info("Response " + response);
+        logger.trace("Response " + response);
         return response;
     }
 
@@ -148,21 +148,21 @@ public class RestfulP2PService {
         response.setVersion("0.1");
         response.setResult(0);
 
-        logger.info("request string: {}", p2pRequestString);
+        logger.debug("request string: {}", p2pRequestString);
 
         try {
 
             switch (method) {
                 case "requestChainState":
                     {
-                        logger.info("request method: stub/" + method);
+                        logger.debug("request method: stub/" + method);
                         response.setMessage("request stub/" + method + " method success");
                         break;
                     }
 
                 case "chainState":
                     {
-                        logger.info("request method: stub/" + method);
+                        logger.debug("request method: stub/" + method);
                         response.setMessage("request stub/" + method + " method success");
                         break;
                     }
@@ -203,7 +203,7 @@ public class RestfulP2PService {
         p2pResponse.setVersion("0.1");
         p2pResponse.setResult(0);
 
-        logger.info("request string: {}", p2pRequestString);
+        logger.debug("request string: {}", p2pRequestString);
 
         try {
             Resource resourceObj = host.getResource(path);

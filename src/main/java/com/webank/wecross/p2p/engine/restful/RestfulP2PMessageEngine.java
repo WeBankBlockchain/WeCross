@@ -96,7 +96,10 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
                                     callback.execute();
                                 }
                             } catch (Exception e) {
-                                logger.error("asyncSendMessage failed: ", e.getMessage());
+                                logger.error(
+                                        "asyncSendMessage failed, to:{}, exception:{}",
+                                        url,
+                                        e.getMessage());
                                 callback.setStatus(-1);
                                 callback.setMessage(e.toString());
                                 callback.setData(null);
