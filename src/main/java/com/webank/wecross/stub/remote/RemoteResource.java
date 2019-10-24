@@ -1,6 +1,9 @@
 package com.webank.wecross.stub.remote;
 
-import com.webank.wecross.p2p.*;
+import com.webank.wecross.p2p.P2PMessage;
+import com.webank.wecross.p2p.P2PMessageCallback;
+import com.webank.wecross.p2p.P2PMessageEngine;
+import com.webank.wecross.p2p.Peer;
 import com.webank.wecross.p2p.engine.restful.P2PHttpResponse;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
@@ -11,7 +14,11 @@ import com.webank.wecross.resource.request.TransactionRequest;
 import com.webank.wecross.resource.response.GetDataResponse;
 import com.webank.wecross.resource.response.SetDataResponse;
 import com.webank.wecross.resource.response.TransactionResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;

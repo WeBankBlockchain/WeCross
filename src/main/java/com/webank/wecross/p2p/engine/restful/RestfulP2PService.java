@@ -6,7 +6,8 @@ import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.peer.PeerInfoMessageData;
 import com.webank.wecross.peer.PeerSeqMessageData;
-import com.webank.wecross.resource.*;
+import com.webank.wecross.resource.Path;
+import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.request.GetDataRequest;
 import com.webank.wecross.resource.request.SetDataRequest;
 import com.webank.wecross.resource.request.TransactionRequest;
@@ -17,7 +18,11 @@ import javax.servlet.http.HttpServletRequest;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("p2p")
