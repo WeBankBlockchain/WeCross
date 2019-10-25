@@ -16,7 +16,7 @@ public class SyncPeerMessageHandler {
     private ThreadPoolTaskExecutor threadPool;
 
     public SyncPeerMessageHandler() {
-        final int threadNum = 1;
+        final int threadNum = 1; // Just use 1 thread as a queue to be synchronized
         threadPool = new ThreadPoolTaskExecutor();
         threadPool.setCorePoolSize(threadNum);
         threadPool.setMaxPoolSize(threadNum);

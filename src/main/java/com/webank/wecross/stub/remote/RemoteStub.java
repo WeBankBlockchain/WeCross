@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.ReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,16 +65,8 @@ public class RemoteStub implements Stub {
             return;
         }
 
-        if (resource.getDistance() > 0) {
-            ReadWriteLock lock = ((RemoteResource) resource).getLock();
-            lock.writeLock().lock();
-            logger.info("remove resource: {}", path.getResource());
-            resources.remove(path.getResource());
-            lock.writeLock().unlock();
-        } else {
-            logger.info("remove resource: {}", path.getResource());
-            resources.remove(path.getResource());
-        }
+        logger.info("remove resource: {}", path.getResource());
+        resources.remove(path.getResource());
     }
 
     @Override
