@@ -31,7 +31,11 @@ public class WeCrossHost {
                     public void run() {
                         while (true) {
                             try {
-                                peerManager.broadcastSeqRequest();
+                                // addSomeTestResources(200);
+                                // workLoop();
+                                // Thread.sleep(2);
+                                // removeSomeTestResources(200);
+                                workLoop();
                                 Thread.sleep(timeInterval);
                             } catch (Exception e) {
                                 logger.error("Startup error: " + e);
