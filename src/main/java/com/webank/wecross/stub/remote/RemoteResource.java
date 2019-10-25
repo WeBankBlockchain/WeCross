@@ -20,8 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -33,7 +31,6 @@ public class RemoteResource implements Resource {
     private int distance; // How many jumps to local stub
     private Set<Peer> peers;
     private Path path;
-    ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public RemoteResource(Set<Peer> peers, int distance, P2PMessageEngine p2pEngine) {
         setPeers(peers);
@@ -64,27 +61,19 @@ public class RemoteResource implements Resource {
 
     @Override
     public GetDataResponse getData(GetDataRequest request) {
-        lock.readLock().lock();
-        try {
-            return null;
-        } finally {
-            lock.readLock().unlock();
-        }
+
+        return null;
     }
 
     @Override
     public SetDataResponse setData(SetDataRequest request) {
-        lock.readLock().lock();
-        try {
-            return null;
-        } finally {
-            lock.readLock().unlock();
-        }
+
+        return null;
     }
 
     @Override
     public TransactionResponse call(TransactionRequest request) {
-        lock.readLock().lock();
+
         TransactionResponse response = new TransactionResponse();
         try {
             List<Peer> peerList = getRandPeerList();
@@ -109,15 +98,13 @@ public class RemoteResource implements Resource {
         } catch (Exception e) {
             response.setErrorCode(-1);
             response.setErrorMessage("Call remote resource exception");
-        } finally {
-            lock.readLock().unlock();
         }
         return response;
     }
 
     @Override
     public TransactionResponse sendTransaction(TransactionRequest request) {
-        lock.readLock().lock();
+
         TransactionResponse response = new TransactionResponse();
         try {
             List<Peer> peerList = getRandPeerList();
@@ -142,30 +129,20 @@ public class RemoteResource implements Resource {
         } catch (Exception e) {
             response.setErrorCode(-1);
             response.setErrorMessage("Call remote resource exception");
-        } finally {
-            lock.readLock().unlock();
         }
         return response;
     }
 
     @Override
     public void registerEventHandler(EventCallback callback) {
-        lock.readLock().lock();
-        try {
-            return;
-        } finally {
-            lock.readLock().unlock();
-        }
+
+        return;
     }
 
     @Override
     public TransactionRequest createRequest() {
-        lock.readLock().lock();
-        try {
-            return null;
-        } finally {
-            lock.readLock().unlock();
-        }
+
+        return null;
     }
 
     @Override
@@ -251,9 +228,5 @@ public class RemoteResource implements Resource {
         }
 
         return callback.getResponseData();
-    }
-
-    public ReadWriteLock getLock() {
-        return lock;
     }
 }

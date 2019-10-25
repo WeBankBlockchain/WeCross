@@ -8,14 +8,12 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.ChainState;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.jdchain.config.JDChainSdk;
-import com.webank.wecross.stub.remote.RemoteResource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.ReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,16 +114,8 @@ public class JDChainStub implements Stub {
             return;
         }
 
-        if (resource.getDistance() > 0) {
-            ReadWriteLock lock = ((RemoteResource) resource).getLock();
-            lock.writeLock().lock();
-            logger.info("remove resource: {}", path.getResource());
-            resources.remove(path.getResource());
-            lock.writeLock().unlock();
-        } else {
-            logger.info("remove resource: {}", path.getResource());
-            resources.remove(path.getResource());
-        }
+        logger.info("remove resource: {}", path.getResource());
+        resources.remove(path.getResource());
     }
 
     @Override
