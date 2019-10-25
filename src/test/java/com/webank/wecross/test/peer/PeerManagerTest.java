@@ -127,7 +127,7 @@ public class PeerManagerTest {
         request.setMethod("sendTransaction");
         request.setArgs(new String[] {"123", "aabb"});
 
-        TransactionResponse response = resource.call(request);
+        TransactionResponse response = resource.sendTransaction(request);
         Assert.assertEquals(new Integer(0), response.getErrorCode());
         System.out.println(response.getErrorMessage());
     }

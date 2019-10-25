@@ -169,14 +169,6 @@ public class RemoteResource implements Resource {
         this.distance = distance;
     }
 
-    private Peer getPrimaryPeerToSend() throws Exception {
-        if (peers == null || peers.isEmpty()) {
-            throw new Exception("Peers of the resource is empty");
-        }
-        Peer firstPeer = this.peers.stream().findFirst().get();
-        return firstPeer;
-    }
-
     private List<Peer> getRandPeerList() throws Exception {
         if (peers == null || peers.isEmpty()) {
             throw new Exception("Peers of the resource is empty");
