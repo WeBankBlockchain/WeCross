@@ -1,6 +1,5 @@
 package com.webank.wecross.test.p2p.engine.restful;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -20,18 +19,18 @@ import org.springframework.test.web.servlet.MvcResult;
 @SpringBootTest
 @AutoConfigureMockMvc
 public class RestfulP2PServiceTest {
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
     @Test
     public void requestSeqTest() throws Exception {
         try {
-            String json = "{\n" +
-                    "  \"version\": \"0.1\",\n" +
-                    "  \"seq\": \"100\",\n" +
-                    "  \"method\": \"requestSeq\",\n" +
-                    "  \"data\": {}\n" +
-                    "}";
+            String json =
+                    "{\n"
+                            + "  \"version\": \"0.1\",\n"
+                            + "  \"seq\": \"100\",\n"
+                            + "  \"method\": \"requestSeq\",\n"
+                            + "  \"data\": {}\n"
+                            + "}";
 
             MvcResult rsp =
                     this.mockMvc
@@ -46,7 +45,8 @@ public class RestfulP2PServiceTest {
             String result = rsp.getResponse().getContentAsString();
             System.out.println("####Respond: " + result);
 
-            String expectRsp = "{\"version\":\"0.1\",\"seq\":100,\"result\":0,\"message\":\"request requestSeq method success\",\"data\":{\"seq\":";
+            String expectRsp =
+                    "{\"version\":\"0.1\",\"seq\":100,\"result\":0,\"message\":\"request requestSeq method success\",\"data\":{\"seq\":";
 
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
@@ -57,14 +57,15 @@ public class RestfulP2PServiceTest {
     @Test
     public void seqTest() throws Exception {
         try {
-            String json = "{\n" +
-                    "  \"version\": \"0.1\",\n" +
-                    "  \"seq\": 100,\n" +
-                    "  \"method\": \"seq\",\n" +
-                    "  \"data\": {\n" +
-                    "    \"seq\": 1415412187\n" +
-                    "  }\n" +
-                    "}";
+            String json =
+                    "{\n"
+                            + "  \"version\": \"0.1\",\n"
+                            + "  \"seq\": 100,\n"
+                            + "  \"method\": \"seq\",\n"
+                            + "  \"data\": {\n"
+                            + "    \"seq\": 1415412187\n"
+                            + "  }\n"
+                            + "}";
 
             MvcResult rsp =
                     this.mockMvc
@@ -79,7 +80,8 @@ public class RestfulP2PServiceTest {
             String result = rsp.getResponse().getContentAsString();
             System.out.println("####Respond: " + result);
 
-            String expectRsp = "{\"version\":\"0.1\",\"seq\":100,\"result\":0,\"message\":\"request seq method success\",\"data\":null}";
+            String expectRsp =
+                    "{\"version\":\"0.1\",\"seq\":100,\"result\":0,\"message\":\"request seq method success\",\"data\":null}";
 
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
@@ -90,12 +92,13 @@ public class RestfulP2PServiceTest {
     @Test
     public void requestPeerInfoTest() throws Exception {
         try {
-            String json = "{\n" +
-                    "  \"version\": \"0.1\",\n" +
-                    "  \"seq\": \"100\",\n" +
-                    "  \"method\": \"requestPeerInfo\",\n" +
-                    "  \"data\": {}\n" +
-                    "}";
+            String json =
+                    "{\n"
+                            + "  \"version\": \"0.1\",\n"
+                            + "  \"seq\": \"100\",\n"
+                            + "  \"method\": \"requestPeerInfo\",\n"
+                            + "  \"data\": {}\n"
+                            + "}";
 
             MvcResult rsp =
                     this.mockMvc
@@ -121,20 +124,21 @@ public class RestfulP2PServiceTest {
     @Test
     public void peerInfoTest() throws Exception {
         try {
-            String json = "{\n" +
-                    "  \"version\": \"0.1\",\n" +
-                    "  \"seq\": 100,\n" +
-                    "  \"result\": 0,\n" +
-                    "  \"message\": \"request requestPeerInfo method success\",\n" +
-                    "  \"data\": {\n" +
-                    "    \"seq\": 769518166,\n" +
-                    "    \"resources\": [\n" +
-                    "      \"test-network.test-stub.test-resource\",\n" +
-                    "      \"payment.bcos2.HelloWorldContract\",\n" +
-                    "      \"payment.bcos1.HelloWorldContract\"\n" +
-                    "    ]\n" +
-                    "  }\n" +
-                    "}";
+            String json =
+                    "{\n"
+                            + "  \"version\": \"0.1\",\n"
+                            + "  \"seq\": 100,\n"
+                            + "  \"result\": 0,\n"
+                            + "  \"message\": \"request requestPeerInfo method success\",\n"
+                            + "  \"data\": {\n"
+                            + "    \"seq\": 769518166,\n"
+                            + "    \"resources\": [\n"
+                            + "      \"test-network.test-stub.test-resource\",\n"
+                            + "      \"payment.bcos2.HelloWorldContract\",\n"
+                            + "      \"payment.bcos1.HelloWorldContract\"\n"
+                            + "    ]\n"
+                            + "  }\n"
+                            + "}";
 
             MvcResult rsp =
                     this.mockMvc
@@ -149,7 +153,8 @@ public class RestfulP2PServiceTest {
             String result = rsp.getResponse().getContentAsString();
             System.out.println("####Respond: " + result);
 
-            String expectRsp = "{\"version\":\"0.1\",\"seq\":100,\"result\":0,\"message\":\"request peerInfo method success\",\"data\":null}";
+            String expectRsp =
+                    "{\"version\":\"0.1\",\"seq\":100,\"result\":0,\"message\":\"request peerInfo method success\",\"data\":null}";
 
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
@@ -160,16 +165,17 @@ public class RestfulP2PServiceTest {
     @Test
     public void callTest() throws Exception {
         try {
-            String json = "{\n" +
-                    "  \"version\": \"0.1\",\n" +
-                    "  \"seq\": 100,\n" +
-                    "  \"method\": \"/test-network/test-stub/test-resource/call\",\n" +
-                    "  \"data\": {\n" +
-                    "    \"sig\": \"\",\n" +
-                    "    \"method\": \"get\",\n" +
-                    "    \"args\": []\n" +
-                    "  }\n" +
-                    "}";
+            String json =
+                    "{\n"
+                            + "  \"version\": \"0.1\",\n"
+                            + "  \"seq\": 100,\n"
+                            + "  \"method\": \"/test-network/test-stub/test-resource/call\",\n"
+                            + "  \"data\": {\n"
+                            + "    \"sig\": \"\",\n"
+                            + "    \"method\": \"get\",\n"
+                            + "    \"args\": []\n"
+                            + "  }\n"
+                            + "}";
 
             MvcResult rsp =
                     this.mockMvc
@@ -184,7 +190,8 @@ public class RestfulP2PServiceTest {
             String result = rsp.getResponse().getContentAsString();
             System.out.println("####Respond: " + result);
 
-            String expectRsp = "{\"version\":\"0.1\",\"seq\":100,\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"Call test resource success\",\"hash\":\"010157f4\",\"result\":[{\"sig\":\"\",\"method\":\"get\",\"args\":[]}]}}";
+            String expectRsp =
+                    "{\"version\":\"0.1\",\"seq\":100,\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"Call test resource success\",\"hash\":\"010157f4\",\"result\":[{\"sig\":\"\",\"method\":\"get\",\"args\":[]}]}}";
 
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
@@ -195,16 +202,17 @@ public class RestfulP2PServiceTest {
     @Test
     public void sendTransactionTest() throws Exception {
         try {
-            String json = "{\n" +
-                    "  \"version\": \"0.1\",\n" +
-                    "  \"seq\": 100,\n" +
-                    "  \"method\": \"/test-network/test-stub/test-resource/sendTransaction\",\n" +
-                    "  \"data\": {\n" +
-                    "    \"sig\": \"\",\n" +
-                    "    \"method\": \"set\",\n" +
-                    "    \"args\": [\"HelloWorld\"]\n" +
-                    "  }\n" +
-                    "}";
+            String json =
+                    "{\n"
+                            + "  \"version\": \"0.1\",\n"
+                            + "  \"seq\": 100,\n"
+                            + "  \"method\": \"/test-network/test-stub/test-resource/sendTransaction\",\n"
+                            + "  \"data\": {\n"
+                            + "    \"sig\": \"\",\n"
+                            + "    \"method\": \"set\",\n"
+                            + "    \"args\": [\"HelloWorld\"]\n"
+                            + "  }\n"
+                            + "}";
 
             MvcResult rsp =
                     this.mockMvc
@@ -219,23 +227,24 @@ public class RestfulP2PServiceTest {
             String result = rsp.getResponse().getContentAsString();
             System.out.println("####Respond: " + result);
 
-            String expectRsp = "{\"version\":\"0.1\",\"seq\":100,\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"sendTransaction test resource success\",\"hash\":\"010157f4\",\"result\":[{\"sig\":\"\",\"method\":\"set\",\"args\":[\"HelloWorld\"]}]}}";
+            String expectRsp =
+                    "{\"version\":\"0.1\",\"seq\":100,\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"sendTransaction test resource success\",\"hash\":\"010157f4\",\"result\":[{\"sig\":\"\",\"method\":\"set\",\"args\":[\"HelloWorld\"]}]}}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
         }
     }
 
-
     @Test
     public void exceptionTest1() {
         try {
-            String json = "{\n" +
-                    "  \"version\": \"0.1\",\n" +
-                    "  \"seq\": 100,\n" +
-                    "  \"method\": \"mock\",\n" +
-                    "  \"data\": {}\n" +
-                    "}";
+            String json =
+                    "{\n"
+                            + "  \"version\": \"0.1\",\n"
+                            + "  \"seq\": 100,\n"
+                            + "  \"method\": \"mock\",\n"
+                            + "  \"data\": {}\n"
+                            + "}";
 
             MvcResult rsp =
                     this.mockMvc
@@ -250,7 +259,8 @@ public class RestfulP2PServiceTest {
             String result = rsp.getResponse().getContentAsString();
             System.out.println("####Respond: " + result);
 
-            String expectRsp = "{\"version\":\"0.1\",\"seq\":100,\"result\":-1,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
+            String expectRsp =
+                    "{\"version\":\"0.1\",\"seq\":100,\"result\":-1,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
@@ -260,16 +270,17 @@ public class RestfulP2PServiceTest {
     @Test
     public void exceptionTest2() {
         try {
-            String json = "{\n" +
-                    "  \"version\": \"0.1\",\n" +
-                    "  \"seq\": 100,\n" +
-                    "  \"method\": \"/test-network/test-stub/test-resource/sendTransaction\",\n" +
-                    "  \"data\": {\n" +
-                    "    \"sig\": \"\",\n" +
-                    "    \"method\": \"set\",\n" +
-                    "    \"args\": [\"HelloWorld\"]\n" +
-                    "  }\n" +
-                    "}";
+            String json =
+                    "{\n"
+                            + "  \"version\": \"0.1\",\n"
+                            + "  \"seq\": 100,\n"
+                            + "  \"method\": \"/test-network/test-stub/test-resource/sendTransaction\",\n"
+                            + "  \"data\": {\n"
+                            + "    \"sig\": \"\",\n"
+                            + "    \"method\": \"set\",\n"
+                            + "    \"args\": [\"HelloWorld\"]\n"
+                            + "  }\n"
+                            + "}";
 
             MvcResult rsp =
                     this.mockMvc
@@ -284,11 +295,11 @@ public class RestfulP2PServiceTest {
             String result = rsp.getResponse().getContentAsString();
             System.out.println("####Respond: " + result);
 
-            String expectRsp = "{\"version\":\"0.1\",\"seq\":100,\"result\":-1,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
+            String expectRsp =
+                    "{\"version\":\"0.1\",\"seq\":100,\"result\":-1,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
         }
     }
-
 }

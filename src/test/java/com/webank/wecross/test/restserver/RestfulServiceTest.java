@@ -22,8 +22,7 @@ import org.springframework.test.web.servlet.MvcResult;
 @AutoConfigureMockMvc
 public class RestfulServiceTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
     @Test
     public void okTest() throws Exception {
@@ -82,7 +81,9 @@ public class RestfulServiceTest {
             MvcResult rsp =
                     this.mockMvc
                             .perform(
-                                    post("/list").contentType(MediaType.APPLICATION_JSON).content(json))
+                                    post("/list")
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .content(json))
                             .andDo(print())
                             .andExpect(status().isOk())
                             .andReturn();
@@ -90,12 +91,12 @@ public class RestfulServiceTest {
             String result = rsp.getResponse().getContentAsString();
             System.out.println("####Respond: " + result);
 
-            String expectRsp = "{\"version\":\"0.1\",\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"\",\"resources\":[{\"type\":\"";
+            String expectRsp =
+                    "{\"version\":\"0.1\",\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"\",\"resources\"";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
         }
-
     }
 
     @Test
@@ -198,7 +199,8 @@ public class RestfulServiceTest {
             String result = rsp.getResponse().getContentAsString();
             System.out.println("####Respond: " + result);
 
-            String expectRsp = "{\"version\":\"0.1\",\"result\":-1,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
+            String expectRsp =
+                    "{\"version\":\"0.1\",\"result\":-1,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);

@@ -88,7 +88,7 @@ public class WeCrossHost {
         }
     }
 
-    private void addManyTestResources(int num) {
+    private void addSomeTestResources(int num) {
         try {
             logger.info("Add resource");
             List<Integer> idList = new ArrayList<>();
@@ -114,7 +114,7 @@ public class WeCrossHost {
         }
     }
 
-    private void removeManyTestResources(int num) {
+    private void removeSomeTestResources(int num) {
         try {
             logger.info("Remove resource");
             List<Integer> idList = new ArrayList<>();
