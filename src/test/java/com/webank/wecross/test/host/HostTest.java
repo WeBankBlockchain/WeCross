@@ -1,4 +1,4 @@
-package com.webank.wecross.test;
+package com.webank.wecross.test.host;
 
 public class HostTest {
     public static String hello(String msg) {

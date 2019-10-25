@@ -1,4 +1,4 @@
-package com.webank.wecross.test.host;
+package com.webank.wecross.test.peer;
 
 import com.webank.wecross.Application;
 import com.webank.wecross.network.NetworkManager;
