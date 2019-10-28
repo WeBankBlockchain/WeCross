@@ -4,6 +4,7 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.jdchain.JDChainContractResource;
 import com.webank.wecross.stub.jdchain.JDChainStub;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -76,6 +77,12 @@ public class JDChainStubConfig {
 
                 // set path
                 String stringPath = prefix + "." + resourceName;
+                String templateUrl = "http://127.0.0.1:8080/" + stringPath.replace('.', '/');
+                try {
+                    new URL(templateUrl);
+                } catch (Exception e) {
+                    logger.error("Invalid path: {}", stringPath);
+                }
                 try {
                     jdChainContractResource.setPath(Path.decode(stringPath));
                 } catch (Exception e) {

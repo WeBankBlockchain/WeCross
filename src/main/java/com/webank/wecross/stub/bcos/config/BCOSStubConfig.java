@@ -4,6 +4,7 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.bcos.BCOSContractResource;
 import com.webank.wecross.stub.bcos.BCOSStub;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -60,7 +61,6 @@ public class BCOSStubConfig {
         Map<String, Resource> bcosResources = new HashMap<>();
 
         for (String resourceName : resources.keySet()) {
-
             // parse meta resource
             Map<String, String> metaResource = resources.get(resourceName);
 
@@ -86,6 +86,12 @@ public class BCOSStubConfig {
 
                 // set path
                 String stringPath = prefix + "." + resourceName;
+                String templateUrl = "http://127.0.0.1:8080/" + stringPath.replace('.', '/');
+                try {
+                    new URL(templateUrl);
+                } catch (Exception e) {
+                    logger.error("Invalid path: {}", stringPath);
+                }
                 try {
                     bcosContractResource.setPath(Path.decode(stringPath));
                 } catch (Exception e) {

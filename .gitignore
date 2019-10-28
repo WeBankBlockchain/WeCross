@@ -16,6 +16,7 @@ gradle.properties
 ### output
 dist*
 logs
+start.out
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar

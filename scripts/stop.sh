@@ -2,17 +2,17 @@
 
 rm -f start.out
 
-wecross_pid=$(ps aux | grep com.webank.wecross.Application | grep -v grep | awk '{print $2}')
+wecross_pid=$(ps aux | grep com.webank.wecross.Service | grep -v grep | awk '{print $2}')
 if [ -z ${wecross_pid} ]; then
-    echo -e "\033[31m WeCross isn't running \033[0m"
+    echo -e "\033[31m Wecross isn't running \033[0m"
     exit 0
 fi
 
-ps aux | grep com.webank.wecross.Application | grep -v grep | awk '{print $2}' | xargs kill -9
+ps aux | grep com.webank.wecross.Service | grep -v grep | awk '{print $2}' | xargs kill -9
 
-wecross_pid=$(ps aux | grep com.webank.wecross.Application | grep -v grep | awk '{print $2}')
+wecross_pid=$(ps aux | grep com.webank.wecross.Service | grep -v grep | awk '{print $2}')
 if [ -z ${wecross_pid} ]; then
-    echo -e "\033[32m Stop WeCross successfully \033[0m"
+    echo -e "\033[32m Stop Wecross successfully \033[0m"
     exit 0
 fi
 sleep 0.5

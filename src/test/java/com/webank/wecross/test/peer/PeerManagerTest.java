@@ -1,6 +1,6 @@
 package com.webank.wecross.test.peer;
 
-import com.webank.wecross.Application;
+import com.webank.wecross.Service;
 import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.Peer;
@@ -37,7 +37,7 @@ public class PeerManagerTest {
     @BeforeClass
     public static void runApp() {
         // Start the application to mock remote WeCross host
-        Application.main(new String[] {});
+        Service.main(new String[] {});
     }
 
     @Test

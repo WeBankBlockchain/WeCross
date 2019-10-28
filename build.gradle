@@ -41,13 +41,7 @@ configurations.all {
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     compile 'org.apache.logging.log4j:log4j-web:2.7'
-    compile 'org.apache.commons:commons-math3:3.6.1'
-    compile 'org.codehaus.groovy:groovy-all:2.5.6'
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    compile 'com.google.guava:guava:23.0'
-    // implementation 'javax.servlet:javax.servlet-api:3.1.0'
-    // implementation 'org.springframework:spring-webmvc:4.3.25.RELEASE'
-    // compile 'com.fasterxml.jackson.core:jackson-databind:2.9.9.2'
+    compile 'com.alibaba:fastjson:1.2.62'
     compile 'org.springframework.boot:spring-boot-starter-actuator:2.1.4.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-web:2.1.4.RELEASE'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.1.4.RELEASE'
@@ -56,7 +50,6 @@ dependencies {
     compile 'org.fisco-bcos:web3sdk:2.1.0.1010-SNAPSHOT'
 
     // JDChain
-    compile 'com.alibaba:fastjson:1.2.62'
     compile 'com.jd.blockchain:sdk-pack:1.1.0.RELEASE'
     compile 'com.jd.blockchain:crypto-pki:1.1.0.RELEASE'
 
@@ -65,7 +58,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.1.4.RELEASE'
 
     compile 'javassist:javassist:3.12.1.GA'
-    
+
 }
 
 jar {
