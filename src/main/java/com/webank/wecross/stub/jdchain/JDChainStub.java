@@ -3,6 +3,7 @@ package com.webank.wecross.stub.jdchain;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.sdk.BlockchainService;
+import com.webank.wecross.network.config.ConfigType;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.ChainState;
@@ -19,8 +20,6 @@ import org.slf4j.LoggerFactory;
 
 public class JDChainStub implements Stub {
 
-    private Boolean isInit = false;
-    private String pattern;
     private BlockchainKeypair adminKey;
     private HashDigest ledgerHash;
     private List<BlockchainService> blockchainService = new ArrayList<BlockchainService>();
@@ -36,14 +35,6 @@ public class JDChainStub implements Stub {
 
     public void setResources(Map<String, Resource> resources) {
         this.resources = resources;
-    }
-
-    public Boolean getIsInit() {
-        return isInit;
-    }
-
-    public void setIsInit(Boolean isInit) {
-        this.isInit = isInit;
     }
 
     public BlockchainKeypair getAdminKey() {
@@ -70,16 +61,9 @@ public class JDChainStub implements Stub {
         this.blockchainService = blockchainService;
     }
 
-    public void setPattern(String pattern) {
-        this.pattern = pattern;
-    }
-
     @Override
-    public void init() throws Exception {}
-
-    @Override
-    public String getPattern() {
-        return "jd";
+    public String getType() {
+        return ConfigType.STUB_TYPE_JDCHAIN;
     }
 
     @Override
@@ -131,6 +115,10 @@ public class JDChainStub implements Stub {
     @Override
     public Set<String> getAllResourceName(boolean ignoreRemote) {
         Set<String> names = new HashSet<>();
+        if (resources == null) {
+            return names;
+        }
+
         for (Resource resource : resources.values()) {
             if (resource.getDistance() == 0 || !ignoreRemote) {
                 names.add(resource.getPath().getResource());

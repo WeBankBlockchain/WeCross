@@ -1,4 +1,4 @@
-package com.webank.wecross.resource.response;
+package com.webank.wecross.restserver.response;
 
 import java.util.Arrays;
 

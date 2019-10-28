@@ -1,12 +1,12 @@
 package com.webank.wecross.resource;
 
 import com.webank.wecross.p2p.Peer;
-import com.webank.wecross.resource.request.GetDataRequest;
-import com.webank.wecross.resource.request.SetDataRequest;
-import com.webank.wecross.resource.request.TransactionRequest;
-import com.webank.wecross.resource.response.GetDataResponse;
-import com.webank.wecross.resource.response.SetDataResponse;
-import com.webank.wecross.resource.response.TransactionResponse;
+import com.webank.wecross.restserver.request.GetDataRequest;
+import com.webank.wecross.restserver.request.SetDataRequest;
+import com.webank.wecross.restserver.request.TransactionRequest;
+import com.webank.wecross.restserver.response.GetDataResponse;
+import com.webank.wecross.restserver.response.SetDataResponse;
+import com.webank.wecross.restserver.response.TransactionResponse;
 import java.util.Set;
 
 // No reliable chain, just respond what you call

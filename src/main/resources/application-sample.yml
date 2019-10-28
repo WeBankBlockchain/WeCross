@@ -8,10 +8,9 @@ network-manager:
             visible: true
             stubs:
                 bcos1:
-                    pattern: bcos
+                    type: BCOS
                     accounts:
-                        pemFile: /bcosconf/bcos1/0xcdcce60801c0a2e6bb534322c32ae528b9dec8d2.pem
-                        p12File: /bcosconf/bcos1/0x98333491efac02f8ce109b0c499074d47e7779a6.p12
+                        accountFile: /bcosconf/bcos1/0xcdcce60801c0a2e6bb534322c32ae528b9dec8d2.pem
                         password: '123456'
                     channelService:
                         groupId: 1 # The specified group to which the SDK connects
@@ -26,13 +25,13 @@ network-manager:
                                         - 127.0.0.1:20200 # node listen_ip:channel_listen_port
                     resources:
                         HelloWorldContract:
+                            # bcos resource types include: BCOS_CONTRACT, AMOP
                             type: BCOS_CONTRACT
                             contractAddress: '0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a'
                 bcos2:
-                    pattern: bcos
+                    type: BCOS
                     accounts:
-                        pemFile: /bcosconf/bcos2/0xcdcce60801c0a2e6bb534322c32ae528b9dec8d2.pem
-                        p12File: /bcosconf/bcos2/0x98333491efac02f8ce109b0c499074d47e7779a6.p12
+                        accountFile: /bcosconf/bcos2/0x98333491efac02f8ce109b0c499074d47e7779a6.p12
                         password: '123456'
                     channelService:
                         groupId: 1 # The specified group to which the SDK connects
@@ -53,7 +52,7 @@ network-manager:
             visible: true
             stubs:
                 jd:
-                    pattern: jdchain
+                    type: JDCHAIN
                     jdService:
                         privateKey: '0000000000000000'
                         publicKey: '111111111111111'
@@ -63,7 +62,8 @@ network-manager:
                             - 127.0.0.1:18081
                     resources:
                         HelloWorldContract:
-                            type: JD_CONTRACT
+                            # jdchain resource types include: JD_CONTRACT, AMOP
+                            type: JDCHAIN_CONTRACT
                             contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
 
 peer-manager:

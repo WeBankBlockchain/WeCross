@@ -205,7 +205,7 @@ public class RestfulServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.1\",\"result\":-1,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
+                    "{\"version\":\"0.1\",\"result\":3,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);

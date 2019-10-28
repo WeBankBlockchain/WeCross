@@ -1,5 +1,6 @@
 package com.webank.wecross.network.config;
 
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.bcos.config.Account;
 import com.webank.wecross.stub.bcos.config.ChannelService;
 import com.webank.wecross.stub.bcos.config.GroupChannelConnections;
@@ -17,43 +18,46 @@ public class ConfigUtils {
 
     private static Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
 
-    public static Account getBcoseAccount(Map<String, String> accountConfig) {
-        if (!accountConfig.containsKey("pemFile")) {
-            logger.error(
-                    "Error in application.yml: bcos accounts should contain a key named \"pemFile\"");
-            return null;
+    public static Account getBcosAccount(Map<String, String> accountConfig)
+            throws WeCrossException {
+        if (!accountConfig.containsKey("accountFile")
+                || ((String) accountConfig.get("accountFile")).equals("")) {
+            String errorMessage = "\"accountFile\" of account not found";
+            throw new WeCrossException(2, errorMessage);
         }
-        if (!accountConfig.containsKey("p12File")) {
-            logger.error(
-                    "Error in application.yml: bcos accounts should contain a key named \"p12File\"");
-            return null;
+
+        String accountFile = accountConfig.get("accountFile");
+
+        if (accountFile.contains(".pem")) {
+            return new Account(accountFile, "");
+        } else if (accountFile.contains(".p12")) {
+            if (!accountConfig.containsKey("password")
+                    || ((String) accountConfig.get("password")).equals("")) {
+                String errorMessage = "\"password\" of account not found";
+                throw new WeCrossException(2, errorMessage);
+            }
+            return new Account(accountFile, accountConfig.get("password"));
+        } else {
+            String errorMessage = "Unsupported account file";
+            throw new WeCrossException(3, errorMessage);
         }
-        if (!accountConfig.containsKey("password")) {
-            logger.error(
-                    "Error in application.yml: bcos accounts should contain a key named \"password\"");
-            return null;
-        }
-        return new Account(
-                accountConfig.get("pemFile"),
-                accountConfig.get("p12File"),
-                accountConfig.get("password"));
     }
 
-    public static ChannelService getBcosChannelService(Map<String, Object> channelServiceConfig) {
+    public static ChannelService getBcosChannelService(Map<String, Object> channelServiceConfig)
+            throws WeCrossException {
         if (!channelServiceConfig.containsKey("groupId")) {
-            logger.error(
-                    "Error in application.yml: bcos channelService should contain a key named \"groupId\"");
-            return null;
+            String errorMessage = "\"groupId\" of channelService not found";
+            throw new WeCrossException(2, errorMessage);
         }
-        if (!channelServiceConfig.containsKey("agencyName")) {
-            logger.error(
-                    "Error in application.yml: bcos channelService should contain a key named \"agencyName\"");
-            return null;
+        if (!channelServiceConfig.containsKey("agencyName")
+                || ((String) channelServiceConfig.get("agencyName")).equals("")) {
+            String errorMessage = "\"agencyName\" of channelService not found";
+            throw new WeCrossException(2, errorMessage);
         }
-        if (!channelServiceConfig.containsKey("groupChannelConnections")) {
-            logger.error(
-                    "Error in application.yml: bcos channelService should contain a key named \"groupChannelConnections\"");
-            return null;
+        if (!channelServiceConfig.containsKey("groupChannelConnections")
+                || channelServiceConfig.get("groupChannelConnections") == null) {
+            String errorMessage = "\"groupChannelConnections\" of channelService not found";
+            throw new WeCrossException(2, errorMessage);
         }
 
         int groupId = (int) channelServiceConfig.get("groupId");
@@ -65,31 +69,31 @@ public class ConfigUtils {
         GroupChannelConnections groupChannelConnections =
                 getBcosGroupChannelConnections(groupChannelConnectionsConfig);
 
+        logger.debug("Init ChannelService class finished");
         return new ChannelService(groupId, agencyName, groupChannelConnections);
     }
 
     public static GroupChannelConnections getBcosGroupChannelConnections(
-            Map<String, Object> groupChannelConnectionsConfig) {
+            Map<String, Object> groupChannelConnectionsConfig) throws WeCrossException {
         GroupChannelConnections groupChannelConnections = new GroupChannelConnections();
-        if (!groupChannelConnectionsConfig.containsKey("caCert")) {
-            logger.error(
-                    "Error in application.yml: bcos groupChannelConnections should contain a key named \"caCert\"");
-            return null;
+        if (!groupChannelConnectionsConfig.containsKey("caCert")
+                || ((String) groupChannelConnectionsConfig.get("caCert")).equals("")) {
+            String errorMessage = "\"caCert\" of GroupChannelConnections not found";
+            throw new WeCrossException(2, errorMessage);
         }
-        if (!groupChannelConnectionsConfig.containsKey("sslCert")) {
-            logger.error(
-                    "Error in application.yml: bcos groupChannelConnections should contain a key named \"sslCert\"");
-            return null;
+        if (!groupChannelConnectionsConfig.containsKey("sslCert")
+                || ((String) groupChannelConnectionsConfig.get("sslCert")).equals("")) {
+            String errorMessage = "\"sslCert\" of GroupChannelConnections not found";
+            throw new WeCrossException(2, errorMessage);
         }
-        if (!groupChannelConnectionsConfig.containsKey("sslKey")) {
-            logger.error(
-                    "Error in application.yml: bcos groupChannelConnections should contain a key named \"sslKey\"");
-            return null;
+        if (!groupChannelConnectionsConfig.containsKey("sslKey")
+                || ((String) groupChannelConnectionsConfig.get("sslKey")).equals("")) {
+            String errorMessage = "\"sslKey\" of GroupChannelConnections not found";
+            throw new WeCrossException(2, errorMessage);
         }
         if (!groupChannelConnectionsConfig.containsKey("allChannelConnections")) {
-            logger.error(
-                    "Error in application.yml: bcos groupChannelConnections should contain a key named \"allChannelConnections\"");
-            return null;
+            String errorMessage = "\"allChannelConnections\" of GroupChannelConnections not found";
+            throw new WeCrossException(2, errorMessage);
         }
 
         String caCertPath = (String) groupChannelConnectionsConfig.get("caCert");
@@ -117,22 +121,23 @@ public class ConfigUtils {
                 getBcosAllChannelConnections(allChannelConnectionsConfig);
 
         groupChannelConnections.setAllChannelConnections(allChannelConnections);
+        logger.debug("Init GroupChannelConnections class finished");
+
         return groupChannelConnections;
     }
 
     public static List<ChannelConnections> getBcosAllChannelConnections(
-            List<Map<String, Object>> allChannelConnectionsConfig) {
+            List<Map<String, Object>> allChannelConnectionsConfig) throws WeCrossException {
         List<ChannelConnections> allChannelConnections = new ArrayList<>();
         for (Map<String, Object> channelConnectionsConfig : allChannelConnectionsConfig) {
             if (!channelConnectionsConfig.containsKey("groupId")) {
-                logger.error(
-                        "Error in application.yml: bcos allChannelConnections should contain a key named \"groupId\"");
-                return null;
+                String errorMessage = "\"groupId\" of ChannelConnections not found";
+                throw new WeCrossException(2, errorMessage);
             }
-            if (!channelConnectionsConfig.containsKey("connectionsStr")) {
-                logger.error(
-                        "Error in application.yml: bcos allChannelConnections should contain a key named \"connectionsStr\"");
-                return null;
+            if (!channelConnectionsConfig.containsKey("connectionsStr")
+                    || channelConnectionsConfig.get("connectionsStr") == null) {
+                String errorMessage = "\"connectionsStr\" of ChannelConnections not found";
+                throw new WeCrossException(2, errorMessage);
             }
 
             ChannelConnections channelConnections = new ChannelConnections();
@@ -152,29 +157,31 @@ public class ConfigUtils {
 
             allChannelConnections.add(channelConnections);
         }
+
+        logger.debug("Init allChannelConnections finished");
         return allChannelConnections;
     }
 
-    public static JDChainService getJDChainService(Map<String, Object> jdChainServiceConfig) {
-        if (!jdChainServiceConfig.containsKey("privateKey")) {
-            logger.error(
-                    "Error in application.yml: jdchain service should contain a key named \"privateKey\"");
-            return null;
+    public static JDChainService getJDChainService(Map<String, Object> jdChainServiceConfig)
+            throws WeCrossException {
+        if (!jdChainServiceConfig.containsKey("privateKey")
+                || ((String) jdChainServiceConfig.get("privateKey")).equals("")) {
+            String errorMessage = "\"privateKey\" of jdService not found";
+            throw new WeCrossException(2, errorMessage);
         }
-        if (!jdChainServiceConfig.containsKey("publicKey")) {
-            logger.error(
-                    "Error in application.yml: jdchain service should contain a key named \"publicKey\"");
-            return null;
+        if (!jdChainServiceConfig.containsKey("publicKey")
+                || ((String) jdChainServiceConfig.get("publicKey")).equals("")) {
+            String errorMessage = "\"publicKey\" of jdService not found";
+            throw new WeCrossException(2, errorMessage);
         }
-        if (!jdChainServiceConfig.containsKey("password")) {
-            logger.error(
-                    "Error in application.yml: jdchain service should contain a key named \"password\"");
-            return null;
+        if (!jdChainServiceConfig.containsKey("password")
+                || ((String) jdChainServiceConfig.get("password")).equals("")) {
+            String errorMessage = "\"password\" of jdService not found";
+            throw new WeCrossException(2, errorMessage);
         }
         if (!jdChainServiceConfig.containsKey("connectionsStr")) {
-            logger.error(
-                    "Error in application.yml: jdchain service should contain a key named \"connectionsStr\"");
-            return null;
+            String errorMessage = "\"connectionsStr\" of jdService not found";
+            throw new WeCrossException(2, errorMessage);
         }
 
         String privateKey = (String) jdChainServiceConfig.get("privateKey");
@@ -191,6 +198,7 @@ public class ConfigUtils {
             connectionsStr.add(connectionsStrUnit);
         }
 
+        logger.debug("Init JDChainService class finished");
         return new JDChainService(privateKey, publicKey, password, connectionsStr);
     }
 }

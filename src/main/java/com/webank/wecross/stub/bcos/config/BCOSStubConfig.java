@@ -1,5 +1,7 @@
 package com.webank.wecross.stub.bcos.config;
 
+import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.network.config.ConfigType;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.bcos.BCOSContractResource;
@@ -15,35 +17,21 @@ public class BCOSStubConfig {
 
     private Logger logger = LoggerFactory.getLogger(BCOSStubConfig.class);
 
-    private final Boolean isInit = false;
-
-    private final String pattern = "bcos";
-
     public BCOSStub initBCOSStub(
             String networkName,
             String stubName,
             Account account,
             ChannelService channelService,
-            Map<String, Map<String, String>> resources) {
-        if (account == null) {
-            logger.error("Error in {}: bcos configure is wrong", stubName);
-            return null;
-        }
+            Map<String, Map<String, String>> resources)
+            throws WeCrossException {
 
-        if (channelService == null) {
-            logger.error("Error in {}: channelService configure is wrong", stubName);
-            return null;
-        }
-
-        Credentials credentials = account.getCredentials("pem");
+        Credentials credentials = account.getCredentials();
 
         Web3SdkConfig web3SdkConfig = new Web3SdkConfig(credentials, channelService);
         Web3Sdk web3Sdk = web3SdkConfig.getWeb3Sdk(stubName);
 
         // init bcos stub
         BCOSStub bcosStub = new BCOSStub();
-        bcosStub.setInit(isInit);
-        bcosStub.setPattern(pattern);
         bcosStub.setBcosService(web3Sdk.getBcosService());
         bcosStub.setWeb3(web3Sdk.getWeb3());
         bcosStub.setCredentials(web3Sdk.getCredentials());
@@ -53,32 +41,37 @@ public class BCOSStubConfig {
         Map<String, Resource> bcosResources = initBcosResources(prefix, resources);
         bcosStub.setResources(bcosResources);
 
+        logger.debug("Init {}.{} finished", networkName, stubName);
         return bcosStub;
     }
 
     public Map<String, Resource> initBcosResources(
-            String prefix, Map<String, Map<String, String>> resources) {
+            String prefix, Map<String, Map<String, String>> resources) throws WeCrossException {
+        if (resources == null) {
+            return null;
+        }
+
         Map<String, Resource> bcosResources = new HashMap<>();
 
         for (String resourceName : resources.keySet()) {
             // parse meta resource
             Map<String, String> metaResource = resources.get(resourceName);
 
-            if (!metaResource.containsKey("type")) {
-                logger.error(
-                        "Error in application.yml: {} should contain a key named \"type\"",
-                        metaResource);
-                return null;
+            if (!metaResource.containsKey("type")
+                    || ((String) metaResource.get("type")).equals("")) {
+                String errorMessage = "\"type\" of bcos resource not found: " + resourceName;
+                throw new WeCrossException(2, errorMessage);
             }
 
             String type = metaResource.get("type");
 
             //  handle contract resource
-            if (type.equals("BCOS_CONTRACT")) {
-                if (!metaResource.containsKey("contractAddress")) {
-                    logger.error(
-                            "Error in application.yml: {} should contain a key named \"contractAddress\"",
-                            resourceName);
+            if (type.equalsIgnoreCase(ConfigType.RESOURCE_TYPE_BCOS_CONTRACT)) {
+                if (!metaResource.containsKey("contractAddress")
+                        || ((String) metaResource.get("contractAddress")).equals("")) {
+                    String errorMessage =
+                            "\"contractAddress\" of bcos resource not found: " + resourceName;
+                    throw new WeCrossException(2, errorMessage);
                 }
                 BCOSContractResource bcosContractResource = new BCOSContractResource();
                 String address = metaResource.get("contractAddress");
@@ -90,36 +83,24 @@ public class BCOSStubConfig {
                 try {
                     new URL(templateUrl);
                 } catch (Exception e) {
-                    logger.error("Invalid path: {}", stringPath);
+                    throw new WeCrossException(4, "Invalid path: " + stringPath);
                 }
                 try {
                     bcosContractResource.setPath(Path.decode(stringPath));
                 } catch (Exception e) {
-                    logger.error(e.toString());
-                    continue;
+                    throw new WeCrossException(1, e.getMessage());
                 }
 
-                if (bcosContractResource != null) {
-                    bcosResources.put(resourceName, bcosContractResource);
-                } else {
-                    logger.error("Init BCOSContractResource failed");
-                }
+                bcosResources.put(resourceName, bcosContractResource);
 
-            } else if (type.equals("assets")) {
+            } else if (type.equals("another")) {
                 // To be defined
                 continue;
             } else {
-                logger.info("Undefined type \"{}\" in {}", type, resourceName);
+                String errorMessage = "Undefined bcos resource type: " + type;
+                throw new WeCrossException(3, errorMessage);
             }
         }
         return bcosResources;
-    }
-
-    public Boolean getInit() {
-        return isInit;
-    }
-
-    public String getPattern() {
-        return pattern;
     }
 }

@@ -7,6 +7,7 @@ import com.jd.blockchain.crypto.PubKey;
 import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.jd.blockchain.sdk.client.GatewayServiceFactory;
+import com.webank.wecross.exception.WeCrossException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,13 +21,9 @@ public class JDChainSdkConfig {
         this.jdChainService = jdChainService;
     }
 
-    public JDChainSdk getJdChainSdk() {
+    public JDChainSdk getJdChainSdk() throws WeCrossException {
 
         JDChainSdk jdChainSdk = new JDChainSdk();
-        if (jdChainService == null) {
-            logger.info("no jdchain configuration found");
-            return jdChainSdk;
-        }
         try {
             String publicKey = jdChainService.getPublicKey();
             String privateKey = jdChainService.getPrivateKey();
@@ -53,11 +50,13 @@ public class JDChainSdkConfig {
                     jdChainSdk.setLedgerHash(ledgerHashs[0]);
                 }
             }
+
+            logger.debug("Init jdChainSdk finished");
+            return jdChainSdk;
+
         } catch (Exception e) {
-            logger.error("something wrong with getJdChainSdk: {}", e.toString());
-            return null;
+            throw new WeCrossException(1, e.getMessage());
         }
-        return jdChainSdk;
     }
 
     public JDChainService getJdChainService() {

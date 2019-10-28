@@ -1,5 +1,6 @@
 package com.webank.wecross.stub.bcos.config;
 
+import com.webank.wecross.exception.WeCrossException;
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -19,27 +20,25 @@ public class Account {
 
     private Logger logger = LoggerFactory.getLogger(Account.class);
 
-    private String pemFile;
-    private String p12File;
+    private String accountFile;
     private String password;
 
     public Account() {}
 
-    public Account(String pemFile, String p12File, String password) {
-        this.pemFile = pemFile;
-        this.p12File = p12File;
+    public Account(String accountFile, String password) {
+        this.accountFile = accountFile;
         this.password = password;
     }
 
-    public Credentials getCredentials(String pattern) {
+    public Credentials getCredentials() throws WeCrossException {
         Credentials credentials = null;
         try {
-            if (pattern.equals("pem")) {
+            if (accountFile.contains(".pem")) {
                 credentials = loadPemAccount();
-            } else if (pattern.equals("p12")) {
+            } else if (accountFile.contains(".p12")) {
                 credentials = loadP12Account();
             } else {
-                logger.error("get credentials failed, pattern: {} not found", pattern);
+                throw new WeCrossException(3, "Unsupported account file");
             }
         } catch (KeyStoreException
                 | NoSuchAlgorithmException
@@ -48,7 +47,7 @@ public class Account {
                 | InvalidKeySpecException
                 | UnrecoverableKeyException
                 | IOException e) {
-            logger.error("get credentials failed: {}", e.toString());
+            throw new WeCrossException(3, e.toString());
         }
         return credentials;
     }
@@ -58,11 +57,12 @@ public class Account {
             throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
                     NoSuchProviderException, InvalidKeySpecException, UnrecoverableKeyException {
         PEMManager pem = new PEMManager();
-        pem.setPemFile("classpath:" + pemFile);
+        pem.setPemFile("classpath:" + accountFile);
         pem.load();
         ECKeyPair keyPair = pem.getECKeyPair();
         Credentials credentials = GenCredential.create(keyPair.getPrivateKey().toString(16));
-        System.out.println(credentials.getAddress());
+
+        logger.info("Bcos credentials address: {}", credentials.getAddress());
         return credentials;
     }
 
@@ -71,12 +71,13 @@ public class Account {
             throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
                     NoSuchProviderException, InvalidKeySpecException, UnrecoverableKeyException {
         P12Manager p12Manager = new P12Manager();
-        p12Manager.setP12File("classpath:" + p12File);
+        p12Manager.setP12File("classpath:" + accountFile);
         p12Manager.setPassword(password);
         p12Manager.load();
         ECKeyPair keyPair = p12Manager.getECKeyPair();
         Credentials credentials = GenCredential.create(keyPair.getPrivateKey().toString(16));
-        System.out.println(credentials.getAddress());
+
+        logger.info("Bcos credentials address: {}", credentials.getAddress());
         return credentials;
     }
 }
