@@ -49,7 +49,7 @@ public class RestfulP2PService {
             switch (method) {
                 case "requestSeq":
                     {
-                        logger.debug("request method: com.webank.wecross.peer/" + method);
+                        logger.debug("request method: " + method);
                         P2PMessage<Object> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
@@ -59,15 +59,14 @@ public class RestfulP2PService {
                                 (PeerSeqMessageData) host.onRestfulPeerMessage(method, p2pRequest);
 
                         response.setResult(0);
-                        response.setMessage(
-                                "request com.webank.wecross.peer/" + method + " method success");
+                        response.setMessage("request " + method + " method success");
                         response.setSeq(p2pRequest.getSeq());
                         response.setData(data);
                         break;
                     }
                 case "requestPeerInfo":
                     {
-                        logger.debug("request method: com.webank.wecross.peer/" + method);
+                        logger.debug("request method: " + method);
                         P2PMessage<Object> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
@@ -77,15 +76,14 @@ public class RestfulP2PService {
                                 (PeerInfoMessageData) host.onRestfulPeerMessage(method, p2pRequest);
 
                         response.setResult(0);
-                        response.setMessage(
-                                "request com.webank.wecross.peer/" + method + " method success");
+                        response.setMessage("request " + method + " method success");
                         response.setSeq(p2pRequest.getSeq());
                         response.setData(data);
                         break;
                     }
                 case "seq":
                     {
-                        logger.debug("request method: com.webank.wecross.peer/" + method);
+                        logger.debug("request method: " + method);
                         P2PMessage<PeerSeqMessageData> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
@@ -94,15 +92,14 @@ public class RestfulP2PService {
                         host.onRestfulPeerMessage(method, p2pRequest);
 
                         response.setResult(0);
-                        response.setMessage(
-                                "request com.webank.wecross.peer/" + method + " method success");
+                        response.setMessage("request " + method + " method success");
                         response.setSeq(p2pRequest.getSeq());
                         response.setData(null);
                         break;
                     }
                 case "peerInfo":
                     {
-                        logger.debug("request method: com.webank.wecross.peer/" + method);
+                        logger.debug("request method: " + method);
                         P2PMessage<PeerInfoMessageData> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
@@ -111,36 +108,35 @@ public class RestfulP2PService {
                         host.onRestfulPeerMessage(method, p2pRequest);
 
                         response.setResult(0);
-                        response.setMessage(
-                                "request com.webank.wecross.peer/" + method + " method success");
+                        response.setMessage("request " + method + " method success");
                         response.setSeq(p2pRequest.getSeq());
                         response.setData(null);
                         break;
                     }
                 case "requestChainState":
                     {
-                        logger.debug("request method: stub/" + method);
-                        response.setMessage("request stub/" + method + " method success");
+                        logger.debug("request method: " + method);
+                        response.setMessage("request " + method + " method success");
                         break;
                     }
 
                 case "chainState":
                     {
-                        logger.debug("request method: stub/" + method);
-                        response.setMessage("request stub/" + method + " method success");
+                        logger.debug("request method: " + method);
+                        response.setMessage("request " + method + " method success");
                         break;
                     }
 
                 default:
                     {
-                        logger.debug("request method: com.webank.wecross.peer/" + method);
+                        logger.debug("request method: " + method);
                         P2PMessage<Object> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<Object>>() {});
                         response.setResult(-1);
                         response.setSeq(p2pRequest.getSeq());
-                        response.setMessage("Unsupport method: com.webank.wecross.peer/" + method);
+                        response.setMessage("Unsupported method: " + method);
                         break;
                     }
             }
@@ -196,6 +192,7 @@ public class RestfulP2PService {
                         GetDataResponse getDataResponse = resourceObj.getData(getDataRequest);
 
                         p2pResponse.setData(getDataResponse);
+                        p2pResponse.setSeq(p2pRequest.getSeq());
                         break;
                     }
                 case "setData":
@@ -210,6 +207,7 @@ public class RestfulP2PService {
                                 (SetDataResponse) resourceObj.setData(setDataRequest);
 
                         p2pResponse.setData(setDataResponse);
+                        p2pResponse.setSeq(p2pRequest.getSeq());
                         break;
                     }
                 case "call":
@@ -225,6 +223,7 @@ public class RestfulP2PService {
                                 (TransactionResponse) resourceObj.call(transactionRequest);
 
                         p2pResponse.setData(transactionResponse);
+                        p2pResponse.setSeq(p2pRequest.getSeq());
                         break;
                     }
                 case "sendTransaction":
@@ -241,12 +240,18 @@ public class RestfulP2PService {
                                         resourceObj.sendTransaction(transactionRequest);
 
                         p2pResponse.setData(transactionResponse);
+                        p2pResponse.setSeq(p2pRequest.getSeq());
                         break;
                     }
                 default:
                     {
+                        P2PMessage<Object> p2pRequest =
+                                objectMapper.readValue(
+                                        p2pRequestString,
+                                        new TypeReference<P2PMessage<Object>>() {});
                         p2pResponse.setResult(-1);
-                        p2pResponse.setMessage("Unsupport method: " + method);
+                        p2pResponse.setMessage("Unsupported method: " + method);
+                        p2pResponse.setSeq(p2pRequest.getSeq());
                         break;
                     }
             }

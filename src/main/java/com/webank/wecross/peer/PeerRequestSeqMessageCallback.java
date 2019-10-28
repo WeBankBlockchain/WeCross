@@ -19,7 +19,7 @@ public class PeerRequestSeqMessageCallback extends P2PMessageCallback<PeerSeqMes
     public void onResponse(int status, String message, P2PMessage msg) {
         PeerSeqMessageData data = (PeerSeqMessageData) msg.getData();
         logger.debug(
-                "Receive com.webank.wecross.peer seq. status: {} message: {} seq: {}",
+                "Receive peer seq. status: {} message: {} seq: {}",
                 status,
                 message,
                 data == null ? "null" : data.getSeq());

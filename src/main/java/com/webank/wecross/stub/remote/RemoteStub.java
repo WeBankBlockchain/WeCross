@@ -66,7 +66,10 @@ public class RemoteStub implements Stub {
         }
 
         logger.info("remove resource: {}", path.getResource());
-        resources.remove(path.getResource());
+
+        if (resources.containsKey(path.getResource())) {
+            resources.remove(path.getResource());
+        }
     }
 
     @Override

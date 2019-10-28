@@ -60,7 +60,7 @@ public class Peer {
 
     @Override
     public String toString() {
-        return "com.webank.wecross.peer(name:" + name + ", url:" + url + ")";
+        return "peer(name:" + name + ", url:" + url + ")";
     }
 
     public long getLastActiveTimestamp() {

@@ -4,12 +4,19 @@ import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.Peer;
 import com.webank.wecross.resource.Path;
+import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.stub.remote.RemoteResource;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.Resource;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
@@ -18,6 +25,8 @@ public class NetworkManagerTest {
 
     @Resource(name = "newP2PMessageEngine")
     private P2PMessageEngine p2pEngine;
+
+    private Logger logger = LoggerFactory.getLogger(NetworkManagerTest.class);
 
     @Test
     public void resourceAddAndRemoveTest() throws Exception {
@@ -124,6 +133,91 @@ public class NetworkManagerTest {
             String resourceName = "new.bcos.contract" + i;
             Assert.assertEquals(
                     networkManager.getResource(Path.decode(resourceName)).getPeers().size(), 2);
+        }
+    }
+
+    @Test
+    public void addAndRemoveConcurrentTest() {
+        try {
+            NetworkManager networkManager = new NetworkManager();
+            Set<Thread> threads = new HashSet<>();
+            for (int i = 0; i < 8; i++) {
+                Runnable runnable =
+                        new Runnable() {
+                            public void run() {
+                                try {
+                                    SecureRandom rand = new SecureRandom();
+                                    if (rand.nextBoolean()) {
+                                        addSomeTestResources(networkManager, 128);
+                                    } else {
+                                        removeSomeTestResources(networkManager, 128);
+                                    }
+                                } catch (Exception e) {
+                                    System.out.println("Thread exception:" + e);
+                                    Assert.assertTrue(e.getMessage(), false);
+                                }
+                            }
+                        };
+
+                Thread thread = new Thread(runnable);
+                threads.add(thread);
+                thread.start();
+            }
+
+            for (Thread thread : threads) {
+                // System.out.println("waiting thread");
+                thread.join();
+            }
+        } catch (Exception e) {
+            Assert.assertTrue(e.getMessage(), false);
+        }
+    }
+
+    private void addSomeTestResources(NetworkManager networkManager, int num) throws Exception {
+        try {
+            logger.info("Add resource");
+            List<Integer> idList = new ArrayList<>();
+            for (int i = 0; i < num; i++) {
+                idList.add(i);
+            }
+            Collections.shuffle(idList);
+            for (int i : idList) {
+                String name =
+                        "test-network"
+                                + (i / 100)
+                                + ".test-stub"
+                                + ((i / 10) % 10)
+                                + ".test-resource"
+                                + i % 10;
+                Path path = Path.decode(name);
+                com.webank.wecross.resource.Resource resource = new TestResource();
+                resource.setPath(path);
+                networkManager.addResource(resource);
+            }
+        } catch (Exception e) {
+            logger.warn("Add resource exception " + e);
+            throw new Exception("Add resource exception " + e.getLocalizedMessage());
+        }
+    }
+
+    private void removeSomeTestResources(NetworkManager networkManager, int num) throws Exception {
+
+        logger.info("Remove resource");
+        List<Integer> idList = new ArrayList<>();
+        for (int i = 0; i < num; i++) {
+            idList.add(i);
+        }
+        Collections.shuffle(idList);
+        for (int i : idList) {
+            String name =
+                    "test-network"
+                            + (i / 100)
+                            + ".test-stub"
+                            + ((i / 10) % 10)
+                            + ".test-resource"
+                            + i % 10;
+            Path path = Path.decode(name);
+            networkManager.removeResource(path);
         }
     }
 }

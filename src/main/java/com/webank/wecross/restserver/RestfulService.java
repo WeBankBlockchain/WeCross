@@ -203,7 +203,7 @@ public class RestfulService {
                 default:
                     {
                         restResponse.setResult(-1);
-                        restResponse.setMessage("Unsupport method: " + method);
+                        restResponse.setMessage("Unsupported method: " + method);
                         break;
                     }
             }
