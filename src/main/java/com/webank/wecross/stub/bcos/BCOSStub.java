@@ -35,8 +35,8 @@ public class BCOSStub implements Stub {
     @Override
     public void init() throws Exception {
         if (!isInit) {
-            //            ChannelEthereumService channelEthereumService = new
-            // ChannelEthereumService();
+            //            //            ChannelEthereumService channelEthereumService = new
+            //            // ChannelEthereumService();
             //            channelEthereumService.setChannelService(bcosService);
             //
             //            Web3AsyncThreadPoolSize.web3AsyncCorePoolSize = 30;

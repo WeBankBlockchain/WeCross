@@ -27,14 +27,7 @@ public class Network {
 
     public Stub getStub(String name) {
         logger.trace("get stub: {}", name);
-
         Stub stub = stubs.get(name);
-        try {
-            stub.init();
-        } catch (Exception e) {
-            logger.error("Error while get stub:", e);
-            return null;
-        }
         return stub;
     }
 

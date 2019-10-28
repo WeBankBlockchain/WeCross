@@ -8,9 +8,6 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,10 +28,6 @@ public class WeCrossHost {
                     public void run() {
                         while (true) {
                             try {
-                                // addSomeTestResources(200);
-                                // workLoop();
-                                // Thread.sleep(2);
-                                // removeSomeTestResources(200);
                                 workLoop();
                                 Thread.sleep(timeInterval);
                             } catch (Exception e) {
@@ -85,56 +78,6 @@ public class WeCrossHost {
 
         } catch (Exception e) {
             logger.warn("Add test resource exception " + e);
-        }
-    }
-
-    private void addSomeTestResources(int num) {
-        try {
-            logger.info("Add resource");
-            List<Integer> idList = new ArrayList<>();
-            for (int i = 0; i < num; i++) {
-                idList.add(i);
-            }
-            Collections.shuffle(idList);
-            for (int i : idList) {
-                String name =
-                        "test-network"
-                                + (i / 100)
-                                + ".test-stub"
-                                + ((i / 10) % 10)
-                                + ".test-resource"
-                                + i % 10;
-                Path path = Path.decode(name);
-                Resource resource = new TestResource();
-                resource.setPath(path);
-                networkManager.addResource(resource);
-            }
-        } catch (Exception e) {
-            logger.warn("Add resource exception " + e);
-        }
-    }
-
-    private void removeSomeTestResources(int num) {
-        try {
-            logger.info("Remove resource");
-            List<Integer> idList = new ArrayList<>();
-            for (int i = 0; i < num; i++) {
-                idList.add(i);
-            }
-            Collections.shuffle(idList);
-            for (int i : idList) {
-                String name =
-                        "test-network"
-                                + (i / 100)
-                                + ".test-stub"
-                                + ((i / 10) % 10)
-                                + ".test-resource"
-                                + i % 10;
-                Path path = Path.decode(name);
-                networkManager.removeResource(path);
-            }
-        } catch (Exception e) {
-            logger.warn("Remove resource exception " + e);
         }
     }
 

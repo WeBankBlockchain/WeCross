@@ -76,9 +76,12 @@ public class NetworkManager {
         try {
             logger.trace("Remove resource ignore:{} path:{}", ignoreLocal, path);
             Network network = getNetwork(path);
-            network.removeResource(path, ignoreLocal);
-            if (network.isEmpty()) {
-                networks.remove(path.getNetwork());
+            if (network != null) {
+                network.removeResource(path, ignoreLocal);
+
+                if (network.isEmpty()) {
+                    networks.remove(path.getNetwork());
+                }
             }
         } finally {
             lock.writeLock().unlock();
