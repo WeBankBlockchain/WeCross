@@ -30,7 +30,7 @@ public class NetworkConfig {
 
         Map<String, Network> result = new HashMap<>();
         if (networks == null) {
-            logger.info("no network configuration found");
+            logger.info("No network configuration found");
             return result;
         }
 
@@ -62,12 +62,11 @@ public class NetworkConfig {
     public Map<String, Stub> initStub(String networkName, Map<String, Object> stubs) {
         Map<String, Stub> stubsBean = new HashMap<>();
         if (stubs == null) {
-            logger.info("no stubs configuration found");
+            logger.info("No stubs configuration found");
             return stubsBean;
         }
 
         for (String stubName : stubs.keySet()) {
-
             @SuppressWarnings("unchecked")
             Map<String, Object> stubConfig = (Map<String, Object>) stubs.get(stubName);
 
@@ -87,7 +86,7 @@ public class NetworkConfig {
                     stubsBean.put(stubName, bcosStub);
                 } else {
                     logger.error(
-                            "get bcos stub failed networkname:{} stubname:{},Stubtype:{}",
+                            "Get bcos stub failed networkname:{} stubname:{},Stubtype:{}",
                             networkName,
                             stubName,
                             Stubtype);
@@ -100,7 +99,7 @@ public class NetworkConfig {
                     stubsBean.put(stubName, jdChainStub);
                 } else {
                     logger.error(
-                            "get bcos stub failed networkname:{} stubname:{},Stubtype:{}",
+                            "Get bcos stub failed networkname:{} stubname:{},Stubtype:{}",
                             networkName,
                             stubName,
                             Stubtype);
