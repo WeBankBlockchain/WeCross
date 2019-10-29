@@ -122,7 +122,7 @@ public class RestfulServiceTest {
             MvcResult rsp =
                     this.mockMvc
                             .perform(
-                                    post("/test-network/test-stub/test-resource//call")
+                                    post("/test-network/test-stub/test-resource/call")
                                             .contentType(MediaType.APPLICATION_JSON)
                                             .content(json))
                             .andDo(print())
