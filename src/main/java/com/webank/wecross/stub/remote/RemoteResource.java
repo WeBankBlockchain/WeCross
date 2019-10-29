@@ -73,7 +73,6 @@ public class RemoteResource implements Resource {
 
     @Override
     public TransactionResponse call(TransactionRequest request) {
-
         TransactionResponse response = new TransactionResponse();
         try {
             List<Peer> peerList = getRandPeerList();
@@ -212,10 +211,18 @@ public class RemoteResource implements Resource {
 
         callback.setPeer(peer);
 
+        logger.info(
+                "Request remote resource: method:{}, data:{}",
+                request.getMethod(),
+                request.getData().toString());
         p2pEngine.asyncSendMessage(peer, request, callback);
 
         callback.semaphore.acquire(1);
 
+        logger.info(
+                "Respond from remote resource: status:{}, data:{}",
+                callback.getStatus(),
+                callback.getResponseData().toString());
         if (callback.getStatus() != 0) {
             throw new Exception(callback.getMessage());
         }

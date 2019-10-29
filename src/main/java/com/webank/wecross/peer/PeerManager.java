@@ -97,32 +97,29 @@ public class PeerManager {
     }
 
     public void broadcastSeqRequest() {
+        for (Peer peer : peers.values()) {
+            sendSeqRequest(peer);
+        }
+    }
+
+    public void sendSeqRequest(Peer peer) {
         P2PMessage<Object> msg = new P2PMessage<>();
         msg.newSeq();
         msg.setData(null);
         msg.setVersion("0.1");
         msg.setMethod("requestSeq");
 
-        for (Peer peer : peers.values()) {
-            PeerSeqCallback callback = new PeerSeqCallback();
-            callback.setHandler(messageHandler);
-            callback.setPeer(peer);
-            p2pEngine.asyncSendMessage(peer, msg, callback);
-        }
+        PeerSeqCallback callback = new PeerSeqCallback();
+        callback.setHandler(messageHandler);
+        callback.setPeer(peer);
+
+        logger.info("Request peer seq, peer:{}, seq:{}", peer, msg.getSeq());
+        p2pEngine.asyncSendMessage(peer, msg, callback);
     }
 
     public void broadcastPeerInfoRequest() {
-        P2PMessage<Object> msg = new P2PMessage<>();
-        msg.newSeq();
-        msg.setData(null);
-        msg.setVersion("0.1");
-        msg.setMethod("requestPeerInfo");
-
         for (Peer peer : peers.values()) {
-            PeerInfoCallback callback = new PeerInfoCallback();
-            callback.setHandler(messageHandler);
-            callback.setPeer(peer);
-            p2pEngine.asyncSendMessage(peer, msg, callback);
+            sendPeerInfoRequest(peer);
         }
     }
 
@@ -148,6 +145,7 @@ public class PeerManager {
         callback.setHandler(messageHandler);
         callback.setPeer(peer);
 
+        logger.info("Request peer info, peer:{}, seq:{}", peer, msg.getSeq());
         p2pEngine.asyncSendMessage(peer, msg, callback);
     }
 
@@ -158,14 +156,14 @@ public class PeerManager {
     }
 
     public void handleSeq(Peer peer, P2PMessage msg) {
-        logger.info("Receive peer seq from {}", peer);
+        logger.info("Receive peer seq from peer:{}", peer);
         notePeerActive(peer.getUrl());
 
         PeerSeqMessageData data = (PeerSeqMessageData) msg.getData();
         if (data != null && msg.getMethod().equals("seq")) {
             int currentSeq = data.getSeq();
             if (hasPeerChanged(peer.getUrl(), currentSeq)) {
-                logger.info("Request peerInfo to {}", peer);
+
                 sendPeerInfoRequest(peer, msg.getSeq() + 1);
             }
         } else {
@@ -194,7 +192,7 @@ public class PeerManager {
                 // compare and update
                 Set<String> currentResources = data.getResources();
                 logger.info(
-                        "Update peerInfo peer:{}, seq:{}, resource:{}",
+                        "Update peerInfo from {}, seq:{}, resource:{}",
                         peer,
                         currentSeq,
                         currentResources);
