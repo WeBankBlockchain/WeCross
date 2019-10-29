@@ -177,10 +177,8 @@ public class PeerManager {
         logger.info("Receive request peer info");
         PeerInfoMessageData data = new PeerInfoMessageData();
         data.setSeq(seq);
+        data.setResources(activeResources);
 
-        for (String resource : activeResources) {
-            data.addResource(resource);
-        }
         logger.info("Respond peerInfo to peer, resource:" + activeResources);
         return data;
     }

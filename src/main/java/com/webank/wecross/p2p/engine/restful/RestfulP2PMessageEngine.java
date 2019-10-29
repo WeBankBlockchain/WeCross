@@ -75,6 +75,8 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
                         public void run() {
                             try {
                                 RestTemplate restTemplate = new RestTemplate();
+
+                                @SuppressWarnings("unchecked")
                                 ResponseEntity<P2PHttpResponse<Object>> response =
                                         restTemplate.exchange(
                                                 url,
