@@ -1,5 +1,6 @@
 package com.webank.wecross.stub.bcos;
 
+import com.webank.wecross.network.config.ConfigType;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.ChainState;
@@ -16,10 +17,6 @@ import org.slf4j.LoggerFactory;
 // @org.springframework.stereotype.Service("BCOSStub")
 public class BCOSStub implements Stub {
 
-    private Boolean isInit = false;
-
-    private String pattern;
-
     private Service bcosService;
 
     private Web3j web3;
@@ -33,34 +30,8 @@ public class BCOSStub implements Stub {
     private Logger logger = LoggerFactory.getLogger(BCOSStub.class);
 
     @Override
-    public void init() throws Exception {
-        if (!isInit) {
-            //            //            ChannelEthereumService channelEthereumService = new
-            //            // ChannelEthereumService();
-            //            channelEthereumService.setChannelService(bcosService);
-            //
-            //            Web3AsyncThreadPoolSize.web3AsyncCorePoolSize = 30;
-            //            Web3AsyncThreadPoolSize.web3AsyncPoolSize = 20;
-            //
-            //            ScheduledExecutorService scheduledExecutorService =
-            //                Executors.newScheduledThreadPool(50);
-            //            setWeb3(Web3j.build(channelEthereumService, 15 * 100,
-            // scheduledExecutorService, 1));
-            //
-            //            credentials =
-            //                Credentials.create(
-            //                    "00000000000000000000000000000000000000000000000000000000000000");
-            //
-            //            bcosService.run();
-            //            logger.info("BCOS Service start ok!");
-
-            isInit = true;
-        }
-    }
-
-    @Override
-    public String getPattern() {
-        return pattern;
+    public String getType() {
+        return ConfigType.STUB_TYPE_BCOS;
     }
 
     @Override
@@ -114,20 +85,15 @@ public class BCOSStub implements Stub {
     @Override
     public Set<String> getAllResourceName(boolean ignoreRemote) {
         Set<String> names = new HashSet<>();
+        if (resources == null) {
+            return names;
+        }
         for (Map.Entry<String, Resource> entry : resources.entrySet()) {
             if (entry.getValue().getDistance() == 0 || !ignoreRemote) {
                 names.add(entry.getKey());
             }
         }
         return names;
-    }
-
-    public Boolean getInit() {
-        return isInit;
-    }
-
-    public void setInit(Boolean init) {
-        isInit = init;
     }
 
     public Service getBcosService() {
@@ -152,10 +118,6 @@ public class BCOSStub implements Stub {
 
     public void setCredentials(Credentials credentials) {
         this.credentials = credentials;
-    }
-
-    public void setPattern(String pattern) {
-        this.pattern = pattern;
     }
 
     @Override

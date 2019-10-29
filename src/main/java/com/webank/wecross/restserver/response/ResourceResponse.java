@@ -1,4 +1,4 @@
-package com.webank.wecross.resource.response;
+package com.webank.wecross.restserver.response;
 
 import com.webank.wecross.resource.Resource;
 import java.util.List;

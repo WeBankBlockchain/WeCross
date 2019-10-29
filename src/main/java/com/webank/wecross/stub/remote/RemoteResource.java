@@ -8,12 +8,12 @@ import com.webank.wecross.p2p.engine.restful.P2PHttpResponse;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.request.GetDataRequest;
-import com.webank.wecross.resource.request.SetDataRequest;
-import com.webank.wecross.resource.request.TransactionRequest;
-import com.webank.wecross.resource.response.GetDataResponse;
-import com.webank.wecross.resource.response.SetDataResponse;
-import com.webank.wecross.resource.response.TransactionResponse;
+import com.webank.wecross.restserver.request.GetDataRequest;
+import com.webank.wecross.restserver.request.SetDataRequest;
+import com.webank.wecross.restserver.request.TransactionRequest;
+import com.webank.wecross.restserver.response.GetDataResponse;
+import com.webank.wecross.restserver.response.SetDataResponse;
+import com.webank.wecross.restserver.response.TransactionResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -182,6 +182,7 @@ public class RemoteResource implements Resource {
     private TransactionResponse sendRemote(Peer peer, P2PMessage request) throws Exception {
 
         class SemaphoreCallback extends P2PMessageCallback {
+
             public transient Semaphore semaphore = new Semaphore(1, true);
             private TransactionResponse responseData;
 

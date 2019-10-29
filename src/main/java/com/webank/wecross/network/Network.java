@@ -42,7 +42,7 @@ public class Network {
         if (stub != null) {
             stub.removeResource(path, ignoreLocal);
 
-            if (stub.getPattern() == "remote") {
+            if (stub.getType() == "remote") {
                 // delete empty remote stub
                 Map<String, Resource> resources = stub.getResources();
                 if (resources == null || resources.size() == 0) {

@@ -1,4 +1,4 @@
-package com.webank.wecross.resource.request;
+package com.webank.wecross.restserver.request;
 
 public class GetDataRequest {
 

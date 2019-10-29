@@ -1,5 +1,6 @@
 package com.webank.wecross.stub.bcos.config;
 
+import com.webank.wecross.exception.WeCrossException;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -20,7 +21,7 @@ public class Web3SdkConfig {
         this.channelService = channelService;
     }
 
-    public Web3Sdk getWeb3Sdk(String stubName) {
+    public Web3Sdk getWeb3Sdk(String stubName) throws WeCrossException {
         Web3Sdk web3Sdk = new Web3Sdk();
 
         GroupChannelConnections groupChannelConnections =
@@ -45,9 +46,10 @@ public class Web3SdkConfig {
             web3Sdk.setCredentials(credentials);
             web3Sdk.setWeb3(web3j);
         } catch (Exception e) {
-            logger.error("Error in {}: {}", stubName, e.toString());
+            throw new WeCrossException(1, e.toString());
         }
 
+        logger.debug("Init web3sdk finished");
         return web3Sdk;
     }
 

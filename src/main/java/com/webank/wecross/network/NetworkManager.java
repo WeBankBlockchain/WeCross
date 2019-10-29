@@ -5,8 +5,8 @@ import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.Peer;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.request.ResourceRequest;
-import com.webank.wecross.resource.response.ResourceResponse;
+import com.webank.wecross.restserver.request.ResourceRequest;
+import com.webank.wecross.restserver.response.ResourceResponse;
 import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
 import com.webank.wecross.stub.Stub;
@@ -142,6 +142,10 @@ public class NetworkManager {
                 String networkName = PathUtils.toPureName(entry.getKey());
                 Set<String> allStubResourceName =
                         entry.getValue().getAllStubResourceName(ignoreRemote);
+
+                if (allStubResourceName == null) {
+                    return null;
+                }
 
                 for (String stubResourceName : allStubResourceName) {
                     ret.add(networkName + "." + stubResourceName);

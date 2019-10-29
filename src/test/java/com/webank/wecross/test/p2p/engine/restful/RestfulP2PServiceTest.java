@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MvcResult;
 @SpringBootTest
 @AutoConfigureMockMvc
 public class RestfulP2PServiceTest {
+
     @Autowired private MockMvc mockMvc;
 
     @Test
@@ -260,7 +261,7 @@ public class RestfulP2PServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.1\",\"seq\":100,\"result\":-1,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
+                    "{\"version\":\"0.1\",\"seq\":100,\"result\":3,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
@@ -296,7 +297,7 @@ public class RestfulP2PServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.1\",\"seq\":100,\"result\":-1,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
+                    "{\"version\":\"0.1\",\"seq\":100,\"result\":3,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
