@@ -60,7 +60,7 @@ public class Peer {
 
     @Override
     public String toString() {
-        return "peer(name:" + name + ", url:" + url + ")";
+        return "(name:" + name + ", url:" + url + ")";
     }
 
     public long getLastActiveTimestamp() {
