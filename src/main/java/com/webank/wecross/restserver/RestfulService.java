@@ -6,14 +6,14 @@ import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.request.GetDataRequest;
-import com.webank.wecross.resource.request.ResourceRequest;
-import com.webank.wecross.resource.request.SetDataRequest;
-import com.webank.wecross.resource.request.TransactionRequest;
-import com.webank.wecross.resource.response.GetDataResponse;
-import com.webank.wecross.resource.response.ResourceResponse;
-import com.webank.wecross.resource.response.SetDataResponse;
-import com.webank.wecross.resource.response.TransactionResponse;
+import com.webank.wecross.restserver.request.GetDataRequest;
+import com.webank.wecross.restserver.request.ResourceRequest;
+import com.webank.wecross.restserver.request.SetDataRequest;
+import com.webank.wecross.restserver.request.TransactionRequest;
+import com.webank.wecross.restserver.response.GetDataResponse;
+import com.webank.wecross.restserver.response.ResourceResponse;
+import com.webank.wecross.restserver.response.SetDataResponse;
+import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
@@ -44,10 +44,10 @@ public class RestfulService {
     @RequestMapping(value = "/list", method = RequestMethod.POST)
     public RestResponse<ResourceResponse> handleList(@RequestBody String restRequestString) {
         RestResponse<ResourceResponse> restResponse = new RestResponse<>();
-        restResponse.setVersion("0.1");
-        restResponse.setResult(0);
+        restResponse.setVersion("0.2");
+        restResponse.setResult(Status.SUCCESS);
 
-        logger.info("request string: {}", restRequestString);
+        logger.debug("request string: {}", restRequestString);
 
         try {
             RestRequest<ResourceRequest> restRequest =
@@ -55,14 +55,21 @@ public class RestfulService {
                             restRequestString,
                             new TypeReference<RestRequest<ResourceRequest>>() {});
 
+            String version = restRequest.getVersion();
+            if (!Versions.checkVersion(version)) {
+                logger.warn("Unsupported version: {}", version);
+                restResponse.setResult(Status.VERSION_ERROR);
+                restResponse.setMessage("Unsupported version :" + version);
+                return restResponse;
+            }
+
             ResourceRequest resourceRequest = restRequest.getData();
             NetworkManager networkManager = host.getNetworkManager();
             ResourceResponse resourceResponse = networkManager.list(resourceRequest);
             restResponse.setData(resourceResponse);
         } catch (Exception e) {
             logger.warn("Process request error:", e);
-
-            restResponse.setResult(-1);
+            restResponse.setResult(Status.INTERNAL_ERROR);
             restResponse.setMessage(e.getLocalizedMessage());
         }
         return restResponse;
@@ -73,8 +80,8 @@ public class RestfulService {
         RestResponse<StateResponse> restResponse = new RestResponse<StateResponse>();
 
         StateResponse stateResponse = host.getState(new StateRequest());
-        restResponse.setVersion("0.1");
-        restResponse.setResult(0);
+        restResponse.setVersion("0.2");
+        restResponse.setResult(Status.SUCCESS);
         restResponse.setData(stateResponse);
 
         return restResponse;
@@ -109,7 +116,6 @@ public class RestfulService {
     @RequestMapping(
             value = {
                 "/{network}/{stub}/{resource}/{method}",
-                "/p2p/remote/{network}/{stub}/{resource}/{method}"
             },
             method = RequestMethod.POST)
     public RestResponse<Object> handleResource(
@@ -124,10 +130,29 @@ public class RestfulService {
         path.setResource(resource);
 
         RestResponse<Object> restResponse = new RestResponse<Object>();
-        restResponse.setVersion("0.1");
-        restResponse.setResult(0);
+        restResponse.setVersion("0.2");
+        restResponse.setResult(Status.SUCCESS);
 
-        logger.info("request string: {}", restRequestString);
+        logger.debug("request string: {}", restRequestString);
+
+        try {
+            RestRequest request =
+                    objectMapper.readValue(restRequestString, new TypeReference<RestRequest>() {});
+
+            String version = request.getVersion();
+            if (!Versions.checkVersion(version)) {
+                logger.warn("Unsupported version: {}", version);
+                restResponse.setResult(Status.VERSION_ERROR);
+                restResponse.setMessage("Unsupported version :" + version);
+                return restResponse;
+            }
+        } catch (Exception e) {
+            logger.warn("Process request error:", e);
+
+            restResponse.setResult(Status.INTERNAL_ERROR);
+            restResponse.setMessage(e.getLocalizedMessage());
+            return restResponse;
+        }
 
         try {
             Resource resourceObj = host.getResource(path);
@@ -203,15 +228,16 @@ public class RestfulService {
                     }
                 default:
                     {
-                        restResponse.setResult(-1);
-                        restResponse.setMessage("Unsupport method: " + method);
+                        logger.warn("Unsupported method: {}", method);
+                        restResponse.setResult(Status.METHOD_ERROR);
+                        restResponse.setMessage("Unsupported method: " + method);
                         break;
                     }
             }
         } catch (Exception e) {
             logger.warn("Process request error:", e);
 
-            restResponse.setResult(-1);
+            restResponse.setResult(Status.INTERNAL_ERROR);
             restResponse.setMessage(e.getLocalizedMessage());
         }
 

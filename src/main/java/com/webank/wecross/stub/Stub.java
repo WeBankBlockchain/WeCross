@@ -7,9 +7,7 @@ import java.util.Set;
 
 public interface Stub {
 
-    public void init() throws Exception;
-
-    public String getPattern();
+    public String getType();
 
     public ChainState getChainState();
 

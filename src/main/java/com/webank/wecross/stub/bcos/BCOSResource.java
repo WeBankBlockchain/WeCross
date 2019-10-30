@@ -1,15 +1,15 @@
 package com.webank.wecross.stub.bcos;
 
-import com.webank.wecross.host.Peer;
+import com.webank.wecross.p2p.Peer;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.request.GetDataRequest;
-import com.webank.wecross.resource.request.SetDataRequest;
-import com.webank.wecross.resource.request.TransactionRequest;
-import com.webank.wecross.resource.response.GetDataResponse;
-import com.webank.wecross.resource.response.SetDataResponse;
-import com.webank.wecross.resource.response.TransactionResponse;
+import com.webank.wecross.restserver.request.GetDataRequest;
+import com.webank.wecross.restserver.request.SetDataRequest;
+import com.webank.wecross.restserver.request.TransactionRequest;
+import com.webank.wecross.restserver.response.GetDataResponse;
+import com.webank.wecross.restserver.response.SetDataResponse;
+import com.webank.wecross.restserver.response.TransactionResponse;
 import java.util.Set;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.web3j.crypto.Credentials;

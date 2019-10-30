@@ -1,13 +1,16 @@
+# log level: ALL < TRACE < DEBUG < INFO < WARN < ERROR < FATAL < OFF
+logging.level.org.springframework.boot.autoconfigure: INFO
+
+# manager WeCross resources
 network-manager:
     networks:
         payment:
             visible: true
             stubs:
                 bcos1:
-                    pattern: bcos
+                    type: BCOS
                     accounts:
-                        pemFile: /bcosconf/bcos1/0xcdcce60801c0a2e6bb534322c32ae528b9dec8d2.pem
-                        p12File: /bcosconf/bcos1/0x98333491efac02f8ce109b0c499074d47e7779a6.p12
+                        accountFile: /bcosconf/bcos1/0xcdcce60801c0a2e6bb534322c32ae528b9dec8d2.pem
                         password: '123456'
                     channelService:
                         groupId: 1 # The specified group to which the SDK connects
@@ -22,13 +25,13 @@ network-manager:
                                         - 127.0.0.1:20200 # node listen_ip:channel_listen_port
                     resources:
                         HelloWorldContract:
+                            # bcos resource types include: BCOS_CONTRACT, AMOP
                             type: BCOS_CONTRACT
                             contractAddress: '0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a'
                 bcos2:
-                    pattern: bcos
+                    type: BCOS
                     accounts:
-                        pemFile: /bcosconf/bcos2/0xcdcce60801c0a2e6bb534322c32ae528b9dec8d2.pem
-                        p12File: /bcosconf/bcos2/0x98333491efac02f8ce109b0c499074d47e7779a6.p12
+                        accountFile: /bcosconf/bcos2/0x98333491efac02f8ce109b0c499074d47e7779a6.p12
                         password: '123456'
                     channelService:
                         groupId: 1 # The specified group to which the SDK connects
@@ -44,12 +47,20 @@ network-manager:
                     resources:
                         HelloWorldContract:
                             type: BCOS_CONTRACT
+<<<<<<< HEAD
                             contractAddress: '0x95a8c1ca4a68a322414b8c52acce56c3eab3cbdb'
+=======
+                            contractAddress: '0xab9cd8203b907f26f24c3d3fd8a328d1e9cd9cf5'
+>>>>>>> ac9e9c8aa665725642244ce45a6c2bfe06ebfcf8
         bill:
             visible: true
             stubs:
                 jd:
+<<<<<<< HEAD
                     pattern: jdchain
+=======
+                    type: JDCHAIN
+>>>>>>> ac9e9c8aa665725642244ce45a6c2bfe06ebfcf8
                     jdService:
                         privateKey: '0000000000000000'
                         publicKey: '111111111111111'
@@ -59,8 +70,15 @@ network-manager:
                             - 127.0.0.1:18081
                     resources:
                         HelloWorldContract:
+<<<<<<< HEAD
                             type: JD_CONTRACT
                             contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
+=======
+                            # jdchain resource types include: JD_CONTRACT, AMOP
+                            type: JDCHAIN_CONTRACT
+                            contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
+
+>>>>>>> ac9e9c8aa665725642244ce45a6c2bfe06ebfcf8
 peer-manager:
     peers:
         - peerA@127.0.0.1:8081

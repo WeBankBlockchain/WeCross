@@ -1,5 +1,6 @@
 package com.webank.wecross.stub.remote;
 
+import com.webank.wecross.network.config.ConfigType;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.ChainState;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RemoteStub implements Stub {
+
     private Logger logger = LoggerFactory.getLogger(RemoteStub.class);
     private ChainState chainState;
     private Map<String, Resource> resources;
@@ -22,11 +24,8 @@ public class RemoteStub implements Stub {
     }
 
     @Override
-    public void init() throws Exception {}
-
-    @Override
-    public String getPattern() {
-        return "remote";
+    public String getType() {
+        return ConfigType.STUB_TYPE_REMOTE;
     }
 
     @Override
@@ -64,13 +63,21 @@ public class RemoteStub implements Stub {
             logger.trace("remove resource ignore local resources: {}", path.getResource());
             return;
         }
-        logger.trace("remove resource: {}", path.getResource());
-        resources.remove(path.getResource());
+
+        logger.info("remove resource: {}", path.getResource());
+
+        if (resources.containsKey(path.getResource())) {
+            resources.remove(path.getResource());
+        }
     }
 
     @Override
     public Set<String> getAllResourceName(boolean ignoreRemote) {
         Set<String> names = new HashSet<>();
+        if (resources == null) {
+            return names;
+        }
+
         for (Resource resource : resources.values()) {
             if (resource.getDistance() == 0 || !ignoreRemote) {
                 names.add(resource.getPath().getResource());

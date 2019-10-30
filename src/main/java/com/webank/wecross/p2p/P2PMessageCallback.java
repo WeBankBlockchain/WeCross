@@ -1,13 +1,12 @@
 package com.webank.wecross.p2p;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.webank.wecross.host.Peer;
 import org.springframework.core.ParameterizedTypeReference;
 
 public class P2PMessageCallback<T> {
     private ParameterizedTypeReference engineCallbackMessageClassType;
     protected int status;
-    private String message;
+    protected String message;
     protected P2PMessage<T> data;
 
     private Peer peer;
@@ -20,6 +19,11 @@ public class P2PMessageCallback<T> {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    @JsonIgnore
+    public int getStatus() {
+        return this.status;
     }
 
     public void setData(P2PMessage msg) {
@@ -37,6 +41,11 @@ public class P2PMessageCallback<T> {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    @JsonIgnore
+    public String getMessage() {
+        return this.message;
     }
 
     @JsonIgnore

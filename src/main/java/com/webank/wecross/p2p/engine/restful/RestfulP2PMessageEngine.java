@@ -1,10 +1,9 @@
 package com.webank.wecross.p2p.engine.restful;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.wecross.host.Peer;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
+import com.webank.wecross.p2p.Peer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -25,8 +24,8 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
         if (msg.getVersion().isEmpty()) {
             throw new Exception("message version is empty");
         }
-        if (msg.getType().isEmpty()) {
-            throw new Exception("message type is empty");
+        if (msg.getMethod().isEmpty()) {
+            throw new Exception("message method is empty");
         }
         if (msg.getSeq() == 0) {
             throw new Exception("message seq is 0");
@@ -38,14 +37,23 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
             throw new Exception("callback getEngineCallbackMessageClassType has not set");
         }
         if (callback.getPeer() == null) {
-            throw new Exception("callback from peer has not set");
+            throw new Exception("callback from com.webank.wecross.peer has not set");
         }
     }
 
     private <T> void checkHttpResponse(ResponseEntity<P2PHttpResponse<T>> response)
             throws Exception {
+        if (response == null) {
+            throw new Exception("Remote response null");
+        }
         if (response.getStatusCode() != HttpStatus.OK) {
             throw new Exception("Method not exists: " + response.toString());
+        }
+    }
+
+    private void checkPeerResponse(P2PHttpResponse responseMsg) throws Exception {
+        if (responseMsg == null) {
+            throw new Exception("Peer response null");
         }
     }
 
@@ -55,7 +63,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
             checkP2PMessage(msg);
             checkCallback(callback);
 
-            String url = "http://" + peer.getUrl() + "/p2p/" + msg.toUri();
+            String url = "http://" + peer.getUrl() + "/p2p/" + msg.getMethod();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -67,36 +75,34 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
                         public void run() {
                             try {
                                 RestTemplate restTemplate = new RestTemplate();
+
+                                @SuppressWarnings("unchecked")
                                 ResponseEntity<P2PHttpResponse<Object>> response =
                                         restTemplate.exchange(
                                                 url,
                                                 HttpMethod.POST,
                                                 request,
                                                 callback.getEngineCallbackMessageClassType());
-
                                 checkHttpResponse(response);
+
                                 P2PHttpResponse<Object> responseMsg = response.getBody();
-                                logger.info(
+                                checkPeerResponse(responseMsg);
+                                logger.debug(
                                         "Receive status:{} message:{} data:{}",
                                         responseMsg.getResult(),
                                         responseMsg.getMessage(),
                                         responseMsg.getData());
 
-                                if (responseMsg.getData() != null) {
+                                callback.setData(
+                                        responseMsg.toP2PMessage(
+                                                "restfulP2PMessageResponse")); // callback type
+                                callback.setStatus(responseMsg.getResult());
+                                callback.setMessage(responseMsg.getMessage());
+                                callback.execute();
 
-                                    logger.info("trigger callback ", responseMsg.getData());
-
-                                    ObjectMapper objMapper = new ObjectMapper();
-                                    callback.setStatus(responseMsg.getResult());
-                                    callback.setMessage(responseMsg.getMessage());
-                                    callback.setData(
-                                            responseMsg.toP2PMessage(
-                                                    msg.getType())); // callback type is the
-                                    // same as msg
-                                    callback.execute();
-                                }
                             } catch (Exception e) {
-                                logger.error("asyncSendMessage error", e);
+                                logger.error(
+                                        "asyncSendMessage failed, to:{}, exception:{}", url, e);
                                 callback.setStatus(-1);
                                 callback.setMessage(e.toString());
                                 callback.setData(null);

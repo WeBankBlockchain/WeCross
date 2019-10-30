@@ -1,11 +1,12 @@
 package com.webank.wecross.network;
 
 import com.webank.wecross.core.PathUtils;
-import com.webank.wecross.host.Peer;
+import com.webank.wecross.p2p.P2PMessageEngine;
+import com.webank.wecross.p2p.Peer;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.request.ResourceRequest;
-import com.webank.wecross.resource.response.ResourceResponse;
+import com.webank.wecross.restserver.request.ResourceRequest;
+import com.webank.wecross.restserver.response.ResourceResponse;
 import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
 import com.webank.wecross.stub.Stub;
@@ -16,6 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +27,11 @@ public class NetworkManager {
     private Map<String, Network> networks = new HashMap<>();
     private int seq = 1;
     private Logger logger = LoggerFactory.getLogger(NetworkManager.class);
+    private P2PMessageEngine p2pEngine;
+    private ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public StateResponse getState(StateRequest request) {
+
         StateResponse response = new StateResponse();
         response.setSeq(seq);
 
@@ -33,49 +39,82 @@ public class NetworkManager {
     }
 
     public Resource getResource(Path path) throws Exception {
-        Network network = getNetwork(path);
+        lock.readLock().lock();
+        try {
+            Network network = getNetwork(path);
 
-        if (network != null) {
-            Stub stub = network.getStub(path);
+            if (network != null) {
+                Stub stub = network.getStub(path);
 
-            if (stub != null) {
-                Resource resource = stub.getResource(path);
+                if (stub != null) {
+                    Resource resource = stub.getResource(path);
 
-                return resource;
+                    return resource;
+                }
             }
-        }
 
-        return null;
+            return null;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public void addResource(Resource resource) throws Exception {
-        logger.info("Add resource path:{}", resource.getPath());
-        String networkName = resource.getPath().getNetwork();
-        networks.putIfAbsent(networkName, new Network());
-        networks.get(networkName).addResource(resource);
+        lock.writeLock().lock();
+        try {
+            logger.trace("Add resource path:{}", resource.getPath());
+            String networkName = resource.getPath().getNetwork();
+            networks.putIfAbsent(networkName, new Network());
+            networks.get(networkName).addResource(resource);
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     public void removeResource(Path path, boolean ignoreLocal) throws Exception {
-        logger.info("Remove resource ignore:{} path:{}", ignoreLocal, path);
-        Network network = getNetwork(path);
-        network.removeResource(path, ignoreLocal);
-        if (network.isEmpty()) {
-            networks.remove(path.getNetwork());
+        lock.writeLock().lock();
+        try {
+            logger.trace("Remove resource ignore:{} path:{}", ignoreLocal, path);
+            Network network = getNetwork(path);
+            if (network != null) {
+                network.removeResource(path, ignoreLocal);
+
+                if (network.isEmpty()) {
+                    networks.remove(path.getNetwork());
+                }
+            }
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
     public void removeResource(Path path) throws Exception {
-        removeResource(path, false);
+        lock.writeLock().lock();
+        try {
+            removeResource(path, false);
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     public Network getNetwork(Path path) {
-        return getNetwork(path.getNetwork());
+        lock.readLock().lock();
+        try {
+            return getNetwork(path.getNetwork());
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public Network getNetwork(String name) {
-        logger.trace("get network: {}", name);
-        Network network = networks.get(name);
-        return network;
+        lock.readLock().lock();
+        try {
+            logger.trace("get network: {}", name);
+            Network network = networks.get(name);
+            return network;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public Map<String, Network> getNetworks() {
@@ -95,116 +134,151 @@ public class NetworkManager {
     }
 
     public Set<String> getAllNetworkStubResourceName(boolean ignoreRemote) {
-        Set<String> ret = new HashSet<>();
+        lock.readLock().lock();
+        try {
+            Set<String> ret = new HashSet<>();
 
-        for (Map.Entry<String, Network> entry : networks.entrySet()) {
-            String networkName = PathUtils.toPureName(entry.getKey());
-            Set<String> allStubResourceName = entry.getValue().getAllStubResourceName(ignoreRemote);
+            for (Map.Entry<String, Network> entry : networks.entrySet()) {
+                String networkName = PathUtils.toPureName(entry.getKey());
+                Set<String> allStubResourceName =
+                        entry.getValue().getAllStubResourceName(ignoreRemote);
 
-            for (String stubResourceName : allStubResourceName) {
-                ret.add(networkName + "." + stubResourceName);
+                if (allStubResourceName == null) {
+                    return null;
+                }
+
+                for (String stubResourceName : allStubResourceName) {
+                    ret.add(networkName + "." + stubResourceName);
+                }
             }
+            return ret;
+        } finally {
+            lock.readLock().unlock();
         }
-        return ret;
     }
 
     public Set<Path> getAllNetworkStubResourcePath(boolean ignoreRemote) throws Exception {
-        Set<String> resourcesString = getAllNetworkStubResourceName(ignoreRemote);
-        Set<Path> ret = new HashSet<>();
-        for (String str : resourcesString) {
-            ret.add(Path.decode(str));
+        lock.readLock().lock();
+        try {
+            Set<String> resourcesString = getAllNetworkStubResourceName(ignoreRemote);
+            Set<Path> ret = new HashSet<>();
+            for (String str : resourcesString) {
+                ret.add(Path.decode(str));
+            }
+            return ret;
+        } finally {
+            lock.readLock().unlock();
         }
-        return ret;
     }
 
     public void updateActivePeerNetwork(Set<Peer> peers) {
-        Map<String, Set<Peer>> resource2Peers = new HashMap<>();
-        for (Peer peer : peers) {
-            for (String resource : peer.getResources()) {
-                Set<Peer> theResourcePeers = resource2Peers.get(resource);
-                if (theResourcePeers == null) {
-                    theResourcePeers = new HashSet<>();
+        lock.writeLock().lock();
+        try {
+            Map<String, Set<Peer>> resource2Peers = new HashMap<>();
+            for (Peer peer : peers) {
+                for (String resource : peer.getResources()) {
+                    Set<Peer> theResourcePeers = resource2Peers.get(resource);
+                    if (theResourcePeers == null) {
+                        theResourcePeers = new HashSet<>();
+                    }
+                    theResourcePeers.add(peer);
+                    resource2Peers.put(resource, theResourcePeers); // Replace
                 }
-                theResourcePeers.add(peer);
-                resource2Peers.put(resource, theResourcePeers); // Replace
             }
-        }
 
-        Set<String> currentResources = getAllNetworkStubResourceName(false);
+            Set<String> currentResources = getAllNetworkStubResourceName(false);
+            logger.debug("Old resources:{}", currentResources);
 
-        Set<String> resources2Add = new HashSet<>(resource2Peers.keySet());
-        resources2Add.removeAll(currentResources);
+            Set<String> resources2Add = new HashSet<>(resource2Peers.keySet());
+            resources2Add.removeAll(currentResources);
 
-        Set<String> resources2Remove = new HashSet<>(currentResources);
-        resources2Remove.removeAll(resource2Peers.keySet());
+            Set<String> resources2Remove = new HashSet<>(currentResources);
+            resources2Remove.removeAll(resource2Peers.keySet());
 
-        Set<String> resources2Update = new HashSet<>(currentResources);
-        resources2Update.removeAll(resources2Remove);
+            Set<String> resources2Update = new HashSet<>(currentResources);
+            resources2Update.removeAll(resources2Remove);
 
-        // Delete inactive remote resources
-        logger.info("Remove inactive remote resources " + resources2Remove);
-        for (String resource : resources2Remove) {
-            try {
-                removeResource(Path.decode(resource), true);
-            } catch (Exception e) {
-                logger.error("Remove resource exception: resource:{}, exception:{}", resource, e);
+            // Delete inactive remote resources
+            logger.debug("Remove inactive remote resources " + resources2Remove);
+            for (String resource : resources2Remove) {
+                try {
+                    removeResource(Path.decode(resource), true);
+                } catch (Exception e) {
+                    logger.error(
+                            "Remove resource exception: resource:{}, exception:{}", resource, e);
+                }
             }
-        }
 
-        // Add new remote resources
-        logger.info("Add new remote resources " + resources2Add);
-        for (String resource : resources2Add) {
-            try {
-                Set<Peer> newPeers = resource2Peers.get(resource);
-                Resource newResource = new RemoteResource(newPeers, 1);
-                newResource.setPath(Path.decode(resource));
-                addResource(newResource);
-            } catch (Exception e) {
-                logger.error("Add resource exception: resource:{}, exception:{}", resource, e);
+            // Add new remote resources
+            logger.debug("Add new remote resources " + resources2Add);
+            for (String resource : resources2Add) {
+                try {
+                    Set<Peer> newPeers = resource2Peers.get(resource);
+                    Resource newResource = new RemoteResource(newPeers, 1, p2pEngine);
+                    newResource.setPath(Path.decode(resource));
+                    addResource(newResource);
+                } catch (Exception e) {
+                    logger.error("Add resource exception: resource:{}, exception:{}", resource, e);
+                }
             }
-        }
 
-        // Update peer to resources
-        logger.info("Update remote resources " + resources2Update);
-        for (String resource : resources2Update) {
-            try {
-                Set<Peer> newPeers = resource2Peers.get(resource);
-                Resource resource2Update = getResource(Path.decode(resource));
-                resource2Update.setPeers(newPeers);
-            } catch (Exception e) {
-                logger.error(
-                        "Update remote resources exception: resource:{}, exception:{}",
-                        resource,
-                        e);
+            // Update peer to resources
+            logger.debug("Update remote resources " + resources2Update);
+            for (String resource : resources2Update) {
+                try {
+                    Set<Peer> newPeers = resource2Peers.get(resource);
+                    Resource resource2Update = getResource(Path.decode(resource));
+                    resource2Update.setPeers(newPeers);
+                } catch (Exception e) {
+                    logger.error(
+                            "Update remote resources exception: resource:{}, exception:{}",
+                            resource,
+                            e);
+                }
             }
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
     public List<Resource> getAllResources(boolean ignoreRemote) throws Exception {
-        List<Resource> resourcesList = new ArrayList<>();
+        lock.readLock().lock();
+        try {
+            List<Resource> resourcesList = new ArrayList<>();
 
-        Set<Path> pathSet = getAllNetworkStubResourcePath(ignoreRemote);
-        for (Path path : pathSet) {
-            Resource resource = getResource(path);
-            resourcesList.add(resource);
+            Set<Path> pathSet = getAllNetworkStubResourcePath(ignoreRemote);
+            for (Path path : pathSet) {
+                Resource resource = getResource(path);
+                resourcesList.add(resource);
+            }
+
+            return resourcesList;
+        } finally {
+            lock.readLock().unlock();
         }
-
-        return resourcesList;
     }
 
     public ResourceResponse list(ResourceRequest request) {
-        ResourceResponse resourceResponse = new ResourceResponse();
-
+        lock.readLock().lock();
         try {
-            List<Resource> resources = getAllResources(request.isIgnoreRemote());
-            resourceResponse.setErrorCode(0);
-            resourceResponse.setErrorMessage("");
-            resourceResponse.setResources(resources);
-        } catch (Exception e) {
-            resourceResponse.setErrorCode(1);
-            resourceResponse.setErrorMessage("Unexpected error: " + e.getMessage());
-        }
+            ResourceResponse resourceResponse = new ResourceResponse();
+            try {
+                List<Resource> resources = getAllResources(request.isIgnoreRemote());
+                resourceResponse.setErrorCode(0);
+                resourceResponse.setErrorMessage("");
+                resourceResponse.setResources(resources);
+            } catch (Exception e) {
+                resourceResponse.setErrorCode(1);
+                resourceResponse.setErrorMessage("Unexpected error: " + e.getMessage());
+            }
 
-        return resourceResponse;
+            return resourceResponse;
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public void setP2pEngine(P2PMessageEngine p2pEngine) {
+        this.p2pEngine = p2pEngine;
     }
 }

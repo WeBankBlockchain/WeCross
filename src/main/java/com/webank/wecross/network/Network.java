@@ -27,14 +27,7 @@ public class Network {
 
     public Stub getStub(String name) {
         logger.trace("get stub: {}", name);
-
         Stub stub = stubs.get(name);
-        try {
-            stub.init();
-        } catch (Exception e) {
-            logger.error("Error while get stub:", e);
-            return null;
-        }
         return stub;
     }
 
@@ -49,7 +42,7 @@ public class Network {
         if (stub != null) {
             stub.removeResource(path, ignoreLocal);
 
-            if (stub.getPattern() == "remote") {
+            if (stub.getType() == "remote") {
                 // delete empty remote stub
                 Map<String, Resource> resources = stub.getResources();
                 if (resources == null || resources.size() == 0) {
