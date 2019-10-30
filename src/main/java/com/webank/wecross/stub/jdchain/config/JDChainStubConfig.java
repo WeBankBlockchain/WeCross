@@ -8,6 +8,7 @@ import com.webank.wecross.stub.jdchain.JDChainContractResource;
 import com.webank.wecross.stub.jdchain.JDChainStub;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,7 @@ public class JDChainStubConfig {
     public JDChainStub initJdChainStub(
             String networkName,
             String stubName,
-            JDChainService jdChainService,
+            List<JDChainService> jdChainService,
             Map<String, Map<String, String>> resources)
             throws WeCrossException {
         JDChainStub jdChainStub = new JDChainStub();

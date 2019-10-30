@@ -58,7 +58,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.1.4.RELEASE'
 
     compile 'javassist:javassist:3.12.1.GA'
-
 }
 
 jar {

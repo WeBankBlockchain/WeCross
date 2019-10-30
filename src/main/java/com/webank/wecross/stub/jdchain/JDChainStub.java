@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 public class JDChainStub implements Stub {
 
-    private BlockchainKeypair adminKey;
+    private List<BlockchainKeypair> adminKey = new ArrayList<BlockchainKeypair>();
     private HashDigest ledgerHash;
     private List<BlockchainService> blockchainService = new ArrayList<BlockchainService>();
     private Map<String, Resource> resources = new HashMap<String, Resource>();
@@ -37,11 +37,11 @@ public class JDChainStub implements Stub {
         this.resources = resources;
     }
 
-    public BlockchainKeypair getAdminKey() {
+    public List<BlockchainKeypair> getAdminKey() {
         return adminKey;
     }
 
-    public void setAdminKey(BlockchainKeypair adminKey) {
+    public void setAdminKey(List<BlockchainKeypair> adminKey) {
         this.adminKey = adminKey;
     }
 

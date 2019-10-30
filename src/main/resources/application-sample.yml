@@ -54,12 +54,14 @@ network-manager:
                 jd:
                     type: JDCHAIN
                     jdService:
-                        privateKey: '0000000000000000'
-                        publicKey: '111111111111111'
-                        password: '222222222222222'
-                        connectionsStr:
-                            - 127.0.0.1:18080
-                            - 127.0.0.1:18081
+                        - privateKey: '0000000000000000'
+                          publicKey: '111111111111111'
+                          password: '222222222222222'
+                          connectionsStr: '127.0.0.1:18081'
+                        - privateKey: '0000000000000000'
+                          publicKey: '111111111111111'
+                          password: '222222222222222'
+                          connectionsStr: '127.0.0.1:18081'
                     resources:
                         HelloWorldContract:
                             # jdchain resource types include: JD_CONTRACT, AMOP

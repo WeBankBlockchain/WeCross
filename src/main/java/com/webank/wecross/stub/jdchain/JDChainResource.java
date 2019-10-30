@@ -20,14 +20,14 @@ import java.util.Set;
 public class JDChainResource implements Resource {
 
     private Boolean isInit = false;
-    protected BlockchainKeypair adminKey;
+    protected List<BlockchainKeypair> adminKey = new ArrayList<BlockchainKeypair>();
     protected HashDigest ledgerHash;
     protected List<BlockchainService> blockchainService = new ArrayList<BlockchainService>();
 
     protected Path path;
 
     public void init(
-            BlockchainKeypair adminKey,
+            List<BlockchainKeypair> adminKey,
             HashDigest ledgerHash,
             List<BlockchainService> blockchainService) {
         if (!isInit) {
@@ -38,11 +38,11 @@ public class JDChainResource implements Resource {
         }
     }
 
-    public BlockchainKeypair getAdminKey() {
+    public List<BlockchainKeypair> getAdminKey() {
         return adminKey;
     }
 
-    public void setAdminKey(BlockchainKeypair adminKey) {
+    public void setAdminKey(List<BlockchainKeypair> adminKey) {
         this.adminKey = adminKey;
     }
 

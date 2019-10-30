@@ -11,6 +11,7 @@ import com.webank.wecross.stub.jdchain.JDChainStub;
 import com.webank.wecross.stub.jdchain.config.JDChainService;
 import com.webank.wecross.stub.jdchain.config.JDChainStubConfig;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,7 +158,7 @@ public class NetworkConfig {
         @SuppressWarnings("unchecked")
         Map<String, Object> jdChainServiceConfig =
                 (Map<String, Object>) stubConfig.get("jdService");
-        JDChainService jdChainService = ConfigUtils.getJDChainService(jdChainServiceConfig);
+        List<JDChainService> jdChainService = ConfigUtils.getJDChainService(jdChainServiceConfig);
 
         if (!stubConfig.containsKey("resources")) {
             String warnMessage = "\"resources\" of jdchain stub not found: " + stubName;
