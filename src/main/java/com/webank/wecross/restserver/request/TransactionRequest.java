@@ -2,8 +2,6 @@ package com.webank.wecross.restserver.request;
 
 import java.util.Arrays;
 
-import java.util.Arrays;
-
 public class TransactionRequest {
 
     private String sig;

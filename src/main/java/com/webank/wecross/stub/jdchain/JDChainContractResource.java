@@ -3,6 +3,7 @@ package com.webank.wecross.stub.jdchain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jd.blockchain.contract.Contract;
 import com.jd.blockchain.contract.ContractEvent;
+import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.ledger.OperationResult;
 import com.jd.blockchain.ledger.PreparedTransaction;
 import com.jd.blockchain.ledger.TransactionTemplate;
@@ -62,9 +63,11 @@ public class JDChainContractResource extends JDChainResource {
         return null;
     }
 
-    public com.jd.blockchain.ledger.TransactionResponse commit(TransactionTemplate txTpl) {
+    public com.jd.blockchain.ledger.TransactionResponse commit(
+            TransactionTemplate txTpl, Integer index) {
         PreparedTransaction ptx = txTpl.prepare();
-        ptx.sign(adminKey);
+        BlockchainKeypair blockchainKeypair = adminKey.get(index);
+        ptx.sign(blockchainKeypair);
         return ptx.commit();
     }
 
@@ -195,7 +198,7 @@ public class JDChainContractResource extends JDChainResource {
 
                         com.jd.blockchain.ledger.TransactionResponse txResponse = null;
                         try {
-                            txResponse = commit(txTpl);
+                            txResponse = commit(txTpl, useIndex);
                         } catch (Exception e) {
                             logger.error(
                                     "execute method:{} commit failed:{}",

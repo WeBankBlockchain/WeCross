@@ -8,7 +8,7 @@ import java.util.List;
 
 public class JDChainSdk {
 
-    private BlockchainKeypair adminKey;
+    private List<BlockchainKeypair> adminKey = new ArrayList<BlockchainKeypair>();
     private HashDigest ledgerHash;
     private List<BlockchainService> blockchainService = new ArrayList<BlockchainService>();
 
@@ -20,11 +20,11 @@ public class JDChainSdk {
         this.blockchainService = blockchainService;
     }
 
-    public BlockchainKeypair getAdminKey() {
+    public List<BlockchainKeypair> getAdminKey() {
         return adminKey;
     }
 
-    public void setAdminKey(BlockchainKeypair adminKey) {
+    public void setAdminKey(List<BlockchainKeypair> adminKey) {
         this.adminKey = adminKey;
     }
 

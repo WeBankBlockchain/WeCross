@@ -6,6 +6,7 @@ import com.webank.wecross.stub.bcos.config.ChannelService;
 import com.webank.wecross.stub.bcos.config.GroupChannelConnections;
 import com.webank.wecross.stub.jdchain.config.JDChainService;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -162,43 +163,42 @@ public class ConfigUtils {
         return allChannelConnections;
     }
 
-    public static JDChainService getJDChainService(Map<String, Object> jdChainServiceConfig)
+    public static List<JDChainService> getJDChainService(Map<String, Object> jdChainServiceConfig)
             throws WeCrossException {
-        if (!jdChainServiceConfig.containsKey("privateKey")
-                || ((String) jdChainServiceConfig.get("privateKey")).equals("")) {
-            String errorMessage = "\"privateKey\" of jdService not found";
-            throw new WeCrossException(2, errorMessage);
-        }
-        if (!jdChainServiceConfig.containsKey("publicKey")
-                || ((String) jdChainServiceConfig.get("publicKey")).equals("")) {
-            String errorMessage = "\"publicKey\" of jdService not found";
-            throw new WeCrossException(2, errorMessage);
-        }
-        if (!jdChainServiceConfig.containsKey("password")
-                || ((String) jdChainServiceConfig.get("password")).equals("")) {
-            String errorMessage = "\"password\" of jdService not found";
-            throw new WeCrossException(2, errorMessage);
-        }
-        if (!jdChainServiceConfig.containsKey("connectionsStr")) {
-            String errorMessage = "\"connectionsStr\" of jdService not found";
-            throw new WeCrossException(2, errorMessage);
-        }
 
-        String privateKey = (String) jdChainServiceConfig.get("privateKey");
-        String publicKey = (String) jdChainServiceConfig.get("publicKey");
-        String password = (String) jdChainServiceConfig.get("password");
-
-        @SuppressWarnings("unchecked")
-        Map<String, String> connectionsStrMap =
-                (Map<String, String>) jdChainServiceConfig.get("connectionsStr");
-
-        List<String> connectionsStr = new ArrayList<>();
-        for (Entry<String, String> entry : connectionsStrMap.entrySet()) {
-            String connectionsStrUnit = entry.getValue();
-            connectionsStr.add(connectionsStrUnit);
+        List<JDChainService> jDChainServiceList = new ArrayList<JDChainService>();
+        Iterator<String> iterator = jdChainServiceConfig.keySet().iterator();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> jdChainConfig = (Map<String, Object>) jdChainServiceConfig.get(key);
+            if (!jdChainConfig.containsKey("privateKey")
+                    || ((String) jdChainConfig.get("privateKey")).equals("")) {
+                String errorMessage = "\"privateKey\" of jdService not found";
+                throw new WeCrossException(2, errorMessage);
+            }
+            if (!jdChainConfig.containsKey("publicKey")
+                    || ((String) jdChainConfig.get("publicKey")).equals("")) {
+                String errorMessage = "\"publicKey\" of jdService not found";
+                throw new WeCrossException(2, errorMessage);
+            }
+            if (!jdChainConfig.containsKey("password")
+                    || ((String) jdChainConfig.get("password")).equals("")) {
+                String errorMessage = "\"password\" of jdService not found";
+                throw new WeCrossException(2, errorMessage);
+            }
+            if (!jdChainConfig.containsKey("connectionsStr")
+                    || ((String) jdChainConfig.get("connectionsStr")).equals("")) {
+                String errorMessage = "\"connectionsStr\" of jdService not found";
+                throw new WeCrossException(2, errorMessage);
+            }
+            String privateKey = (String) jdChainConfig.get("privateKey");
+            String publicKey = (String) jdChainConfig.get("publicKey");
+            String password = (String) jdChainConfig.get("password");
+            String connectionsStr = (String) jdChainConfig.get("connectionsStr");
+            jDChainServiceList.add(
+                    new JDChainService(privateKey, publicKey, password, connectionsStr));
         }
-
-        logger.debug("Init JDChainService class finished");
-        return new JDChainService(privateKey, publicKey, password, connectionsStr);
+        return jDChainServiceList;
     }
 }

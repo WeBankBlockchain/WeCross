@@ -2,8 +2,6 @@ package com.webank.wecross.restserver.response;
 
 import java.util.Arrays;
 
-import java.util.Arrays;
-
 public class TransactionResponse {
 
     @Override

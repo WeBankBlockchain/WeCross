@@ -1,17 +1,14 @@
 package com.webank.wecross.stub.jdchain.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class JDChainService {
 
     private String privateKey;
     private String publicKey;
     private String password;
-    private List<String> connectionsStr = new ArrayList<>();
+    private String connectionsStr;
 
     public JDChainService(
-            String privateKey, String publicKey, String password, List<String> connectionsStr) {
+            String privateKey, String publicKey, String password, String connectionsStr) {
         this.privateKey = privateKey;
         this.publicKey = publicKey;
         this.password = password;
@@ -42,11 +39,11 @@ public class JDChainService {
         this.password = password;
     }
 
-    public List<String> getConnectionsStr() {
+    public String getConnectionsStr() {
         return connectionsStr;
     }
 
-    public void setConnectionsStr(List<String> connectionsStr) {
+    public void setConnectionsStr(String connectionsStr) {
         this.connectionsStr = connectionsStr;
     }
 }
