@@ -8,21 +8,12 @@ import com.jd.blockchain.ledger.PreparedTransaction;
 import com.jd.blockchain.ledger.TransactionTemplate;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.webank.wecross.resource.EventCallback;
-<<<<<<< HEAD
-import com.webank.wecross.resource.request.GetDataRequest;
-import com.webank.wecross.resource.request.SetDataRequest;
-import com.webank.wecross.resource.request.TransactionRequest;
-import com.webank.wecross.resource.response.GetDataResponse;
-import com.webank.wecross.resource.response.SetDataResponse;
-import com.webank.wecross.resource.response.TransactionResponse;
-=======
 import com.webank.wecross.restserver.request.GetDataRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
->>>>>>> ac9e9c8aa665725642244ce45a6c2bfe06ebfcf8
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.SecureRandom;

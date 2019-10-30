@@ -27,25 +27,13 @@ public class JDChainStubConfig {
         JDChainSdkConfig jdChainSdkConfig = new JDChainSdkConfig(jdChainService);
         JDChainSdk jdChainSdk = jdChainSdkConfig.getJdChainSdk();
 
-<<<<<<< HEAD
-        // init jdchain stub
-        jdChainStub.setIsInit(isInit);
-        jdChainStub.setPattern(pattern);
-
-        try {
-=======
         try {
             // init jdchain stub
->>>>>>> ac9e9c8aa665725642244ce45a6c2bfe06ebfcf8
             jdChainStub.setAdminKey(jdChainSdk.getAdminKey());
             jdChainStub.setLedgerHash(jdChainSdk.getLedgerHash());
             jdChainStub.setBlockchainService(jdChainSdk.getBlockchainService());
         } catch (Exception e) {
-<<<<<<< HEAD
-            return null;
-=======
             throw new WeCrossException(1, e.getMessage());
->>>>>>> ac9e9c8aa665725642244ce45a6c2bfe06ebfcf8
         }
 
         // init bcos resources
