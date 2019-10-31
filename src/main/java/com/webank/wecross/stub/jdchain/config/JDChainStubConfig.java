@@ -1,5 +1,6 @@
 package com.webank.wecross.stub.jdchain.config;
 
+import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.config.ConfigType;
 import com.webank.wecross.resource.Path;
@@ -34,7 +35,7 @@ public class JDChainStubConfig {
             jdChainStub.setLedgerHash(jdChainSdk.getLedgerHash());
             jdChainStub.setBlockchainService(jdChainSdk.getBlockchainService());
         } catch (Exception e) {
-            throw new WeCrossException(1, e.getMessage());
+            throw new WeCrossException(Status.INTERNAL_ERROR, e.getMessage());
         }
 
         // init bcos resources
@@ -58,7 +59,7 @@ public class JDChainStubConfig {
             if (!metaResource.containsKey("type")
                     || ((String) metaResource.get("type")).equals("")) {
                 String errorMessage = "\"type\" of jdchain resource not found: " + resourceName;
-                throw new WeCrossException(2, errorMessage);
+                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
             }
             String type = metaResource.get("type");
             //  handle contract resource
@@ -68,7 +69,7 @@ public class JDChainStubConfig {
                     String errorMessage =
                             "\"contractAddress\" of jdchain contract resource not found: "
                                     + resourceName;
-                    throw new WeCrossException(2, errorMessage);
+                    throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
                 }
                 JDChainContractResource jdChainContractResource = new JDChainContractResource();
                 String address = metaResource.get("contractAddress");
@@ -80,12 +81,13 @@ public class JDChainStubConfig {
                 try {
                     new URL(templateUrl);
                 } catch (Exception e) {
-                    throw new WeCrossException(4, "Invalid path: " + stringPath);
+                    throw new WeCrossException(
+                            Status.ILLEGAL_SYMBOL, "Invalid path: " + stringPath);
                 }
                 try {
                     jdChainContractResource.setPath(Path.decode(stringPath));
                 } catch (Exception e) {
-                    throw new WeCrossException(1, e.getMessage());
+                    throw new WeCrossException(Status.INTERNAL_ERROR, e.getMessage());
                 }
 
                 jdChainResources.put(resourceName, jdChainContractResource);
@@ -95,7 +97,7 @@ public class JDChainStubConfig {
                 continue;
             } else {
                 String errorMessage = "Undefined jdchain resource type: " + type;
-                throw new WeCrossException(3, errorMessage);
+                throw new WeCrossException(Status.UNEXPECTED_CONFIG, errorMessage);
             }
         }
         return jdChainResources;

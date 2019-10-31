@@ -1,5 +1,6 @@
 package com.webank.wecross.network.config;
 
+import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.Network;
 import com.webank.wecross.stub.Stub;
@@ -80,7 +81,7 @@ public class NetworkConfig {
 
             if (!stubConfig.containsKey("type") || ((String) stubConfig.get("type")).equals("")) {
                 String errorMessage = "\"type\" of stub not found: " + stubName;
-                throw new WeCrossException(2, errorMessage);
+                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
             }
 
             String Stubtype = (String) stubConfig.get("type");
@@ -95,7 +96,7 @@ public class NetworkConfig {
 
             } else {
                 String errorMessage = "Undefined stub type: " + Stubtype;
-                throw new WeCrossException(3, errorMessage);
+                throw new WeCrossException(Status.UNEXPECTED_CONFIG, errorMessage);
             }
         }
 
@@ -107,7 +108,7 @@ public class NetworkConfig {
             throws WeCrossException {
         if (!stubConfig.containsKey("accounts")) {
             String errorMessage = "\"accounts\" of bcos stub not found: " + stubName;
-            throw new WeCrossException(2, errorMessage);
+            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
         @SuppressWarnings("unchecked")
@@ -116,7 +117,7 @@ public class NetworkConfig {
 
         if (!stubConfig.containsKey("channelService") || stubConfig.get("channelService") == null) {
             String errorMessage = "\"channelService\" of bcos stub not found: " + stubName;
-            throw new WeCrossException(2, errorMessage);
+            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
         @SuppressWarnings("unchecked")
@@ -152,7 +153,7 @@ public class NetworkConfig {
             throws WeCrossException {
         if (!stubConfig.containsKey("jdService")) {
             String errorMessage = "\"jdService\" of jdchain stub not found: " + stubName;
-            throw new WeCrossException(2, errorMessage);
+            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
         @SuppressWarnings("unchecked")

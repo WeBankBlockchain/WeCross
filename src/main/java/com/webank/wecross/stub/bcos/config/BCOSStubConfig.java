@@ -1,5 +1,6 @@
 package com.webank.wecross.stub.bcos.config;
 
+import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.config.ConfigType;
 import com.webank.wecross.resource.Path;
@@ -60,7 +61,7 @@ public class BCOSStubConfig {
             if (!metaResource.containsKey("type")
                     || ((String) metaResource.get("type")).equals("")) {
                 String errorMessage = "\"type\" of bcos resource not found: " + resourceName;
-                throw new WeCrossException(2, errorMessage);
+                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
             }
 
             String type = metaResource.get("type");
@@ -71,7 +72,7 @@ public class BCOSStubConfig {
                         || ((String) metaResource.get("contractAddress")).equals("")) {
                     String errorMessage =
                             "\"contractAddress\" of bcos resource not found: " + resourceName;
-                    throw new WeCrossException(2, errorMessage);
+                    throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
                 }
                 BCOSContractResource bcosContractResource = new BCOSContractResource();
                 String address = metaResource.get("contractAddress");
@@ -83,12 +84,13 @@ public class BCOSStubConfig {
                 try {
                     new URL(templateUrl);
                 } catch (Exception e) {
-                    throw new WeCrossException(4, "Invalid path: " + stringPath);
+                    throw new WeCrossException(
+                            Status.ILLEGAL_SYMBOL, "Invalid path: " + stringPath);
                 }
                 try {
                     bcosContractResource.setPath(Path.decode(stringPath));
                 } catch (Exception e) {
-                    throw new WeCrossException(1, e.getMessage());
+                    throw new WeCrossException(Status.INTERNAL_ERROR, e.getMessage());
                 }
 
                 bcosResources.put(resourceName, bcosContractResource);
@@ -98,7 +100,7 @@ public class BCOSStubConfig {
                 continue;
             } else {
                 String errorMessage = "Undefined bcos resource type: " + type;
-                throw new WeCrossException(3, errorMessage);
+                throw new WeCrossException(Status.UNEXPECTED_CONFIG, errorMessage);
             }
         }
         return bcosResources;
