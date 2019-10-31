@@ -56,11 +56,11 @@ public class NetworkConfig {
                     result.put(networkName, networkBean);
                 } else {
                     logger.error("No stubs found in {}", networkName);
-                    System.exit(0);
+                    System.exit(1);
                 }
             } catch (WeCrossException e) {
                 logger.error(e.getMessage());
-                System.exit(0);
+                System.exit(1);
             }
         }
 

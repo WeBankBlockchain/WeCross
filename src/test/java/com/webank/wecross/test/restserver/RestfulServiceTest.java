@@ -63,7 +63,7 @@ public class RestfulServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.1\",\"result\":0,\"message\":null,\"data\":\"exists!\"}";
+                    "{\"version\":\"0.2\",\"result\":0,\"message\":null,\"data\":\"exists!\"}";
             Assert.assertEquals(expectRsp, result);
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
@@ -97,7 +97,7 @@ public class RestfulServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.1\",\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"\",\"resources\"";
+                    "{\"version\":\"0.2\",\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"\",\"resources\"";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
@@ -109,8 +109,8 @@ public class RestfulServiceTest {
         try {
             String json =
                     "{\n"
-                            + "\"version\":\"0.1\",\n"
-                            + "\"path\":\"test-network.test-stub.test-resource/\",\n"
+                            + "\"version\":\"0.2\",\n"
+                            + "\"path\":\"test-network.test-stub.test-resource\",\n"
                             + "\"method\":\"call\",\n"
                             + "\"data\": {\n"
                             + "\"sig\":\"\",\n"
@@ -133,7 +133,7 @@ public class RestfulServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.1\",\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"Call test resource success\",\"hash\":\"010157f4\",\"result\":[{\"sig\":\"\",\"method\":\"get\",\"args\":[]}]}}";
+                    "{\"version\":\"0.2\",\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"Call test resource success\",\"hash\":\"010157f4\",\"result\":[{\"sig\":\"\",\"method\":\"get\",\"args\":[]}]}}";
             Assert.assertEquals(expectRsp, result);
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
@@ -145,7 +145,7 @@ public class RestfulServiceTest {
         try {
             String json =
                     "{\n"
-                            + "\"version\":\"0.1\",\n"
+                            + "\"version\":\"0.2\",\n"
                             + "\"path\":\"test-network.test-stub.test-resource\",\n"
                             + "\"method\":\"sendTransaction\",\n"
                             + "\"data\": {\n"
@@ -169,7 +169,7 @@ public class RestfulServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.1\",\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"sendTransaction test resource success\",\"hash\":\"010157f4\",\"result\":[{\"sig\":\"\",\"method\":\"set\",\"args\":[\"aaaaa\"]}]}}";
+                    "{\"version\":\"0.2\",\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"sendTransaction test resource success\",\"hash\":\"010157f4\",\"result\":[{\"sig\":\"\",\"method\":\"set\",\"args\":[\"aaaaa\"]}]}}";
             Assert.assertEquals(expectRsp, result);
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
@@ -181,7 +181,7 @@ public class RestfulServiceTest {
         try {
             String json =
                     "{\n"
-                            + "\"version\":\"0.1\",\n"
+                            + "\"version\":\"0.2\",\n"
                             + "\"path\":\"test-network.test-stub.test-resource\",\n"
                             + "\"method\":\"sendTransaction\",\n"
                             + "\"data\": {\n"
@@ -205,7 +205,7 @@ public class RestfulServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.1\",\"result\":3,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
+                    "{\"version\":\"0.2\",\"result\":2003,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);

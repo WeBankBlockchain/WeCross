@@ -14,7 +14,20 @@ public class Web3jConfig {
 
     public Web3j getWeb3j() throws Exception {
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-        bcosService.run();
+
+        Runnable runnable =
+                new Runnable() {
+                    public void run() {
+                        try {
+                            bcosService.run();
+                        } catch (Exception e) {
+                        }
+                    }
+                };
+
+        Thread thread = new Thread(runnable);
+        thread.start();
+
         channelEthereumService.setChannelService(bcosService);
 
         return Web3j.build(channelEthereumService, bcosService.getGroupId());

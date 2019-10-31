@@ -57,7 +57,7 @@ public class RestfulP2PService {
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<Object>>() {});
 
-                        p2pRequest.checkRestRequest(method);
+                        p2pRequest.checkP2PMessage(method);
                         PeerSeqMessageData data =
                                 (PeerSeqMessageData) host.onRestfulPeerMessage(method, p2pRequest);
 
@@ -75,7 +75,7 @@ public class RestfulP2PService {
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<Object>>() {});
 
-                        p2pRequest.checkRestRequest(method);
+                        p2pRequest.checkP2PMessage(method);
 
                         PeerInfoMessageData data =
                                 (PeerInfoMessageData) host.onRestfulPeerMessage(method, p2pRequest);
@@ -94,7 +94,7 @@ public class RestfulP2PService {
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<PeerSeqMessageData>>() {});
 
-                        p2pRequest.checkRestRequest(method);
+                        p2pRequest.checkP2PMessage(method);
 
                         host.onRestfulPeerMessage(method, p2pRequest);
 
@@ -112,7 +112,7 @@ public class RestfulP2PService {
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<PeerInfoMessageData>>() {});
 
-                        p2pRequest.checkRestRequest(method);
+                        p2pRequest.checkP2PMessage(method);
 
                         host.onRestfulPeerMessage(method, p2pRequest);
 
@@ -201,7 +201,7 @@ public class RestfulP2PService {
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<GetDataRequest>>() {});
 
-                        p2pRequest.checkRestRequest(method);
+                        p2pRequest.checkP2PMessage(method);
 
                         GetDataRequest getDataRequest = p2pRequest.getData();
                         GetDataResponse getDataResponse = resourceObj.getData(getDataRequest);
@@ -217,7 +217,7 @@ public class RestfulP2PService {
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<SetDataRequest>>() {});
 
-                        p2pRequest.checkRestRequest(method);
+                        p2pRequest.checkP2PMessage(method);
 
                         SetDataRequest setDataRequest = (SetDataRequest) p2pRequest.getData();
                         SetDataResponse setDataResponse =
@@ -234,7 +234,7 @@ public class RestfulP2PService {
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<TransactionRequest>>() {});
 
-                        p2pRequest.checkRestRequest(method);
+                        p2pRequest.checkP2PMessage(method);
 
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) p2pRequest.getData();
@@ -252,7 +252,7 @@ public class RestfulP2PService {
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<TransactionRequest>>() {});
 
-                        p2pRequest.checkRestRequest(method);
+                        p2pRequest.checkP2PMessage(method);
 
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) p2pRequest.getData();

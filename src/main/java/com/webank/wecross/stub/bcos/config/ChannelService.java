@@ -24,7 +24,7 @@ public class ChannelService {
 
     public Service getService(GroupChannelConnectionsConfig groupChannelConnectionsConfig) {
         Service channelService = new Service();
-        channelService.setConnectSeconds(30);
+        channelService.setConnectSeconds(2147483);
         channelService.setOrgID(agencyName);
         logger.info("agencyName : {}", agencyName);
         channelService.setConnectSleepPerMillis(1);
