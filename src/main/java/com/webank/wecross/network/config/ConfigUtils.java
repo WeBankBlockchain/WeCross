@@ -1,5 +1,6 @@
 package com.webank.wecross.network.config;
 
+import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.bcos.config.Account;
 import com.webank.wecross.stub.bcos.config.ChannelService;
@@ -24,7 +25,7 @@ public class ConfigUtils {
         if (!accountConfig.containsKey("accountFile")
                 || ((String) accountConfig.get("accountFile")).equals("")) {
             String errorMessage = "\"accountFile\" of account not found";
-            throw new WeCrossException(2, errorMessage);
+            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
         String accountFile = accountConfig.get("accountFile");
@@ -35,12 +36,12 @@ public class ConfigUtils {
             if (!accountConfig.containsKey("password")
                     || ((String) accountConfig.get("password")).equals("")) {
                 String errorMessage = "\"password\" of account not found";
-                throw new WeCrossException(2, errorMessage);
+                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
             }
             return new Account(accountFile, accountConfig.get("password"));
         } else {
             String errorMessage = "Unsupported account file";
-            throw new WeCrossException(3, errorMessage);
+            throw new WeCrossException(Status.UNEXPECTED_CONFIG, errorMessage);
         }
     }
 
@@ -48,17 +49,16 @@ public class ConfigUtils {
             throws WeCrossException {
         if (!channelServiceConfig.containsKey("groupId")) {
             String errorMessage = "\"groupId\" of channelService not found";
-            throw new WeCrossException(2, errorMessage);
+            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
         if (!channelServiceConfig.containsKey("agencyName")
                 || ((String) channelServiceConfig.get("agencyName")).equals("")) {
             String errorMessage = "\"agencyName\" of channelService not found";
-            throw new WeCrossException(2, errorMessage);
+            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
-        if (!channelServiceConfig.containsKey("groupChannelConnections")
-                || channelServiceConfig.get("groupChannelConnections") == null) {
+        if (!channelServiceConfig.containsKey("groupChannelConnections")) {
             String errorMessage = "\"groupChannelConnections\" of channelService not found";
-            throw new WeCrossException(2, errorMessage);
+            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
         int groupId = (int) channelServiceConfig.get("groupId");
@@ -80,21 +80,21 @@ public class ConfigUtils {
         if (!groupChannelConnectionsConfig.containsKey("caCert")
                 || ((String) groupChannelConnectionsConfig.get("caCert")).equals("")) {
             String errorMessage = "\"caCert\" of GroupChannelConnections not found";
-            throw new WeCrossException(2, errorMessage);
+            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
         if (!groupChannelConnectionsConfig.containsKey("sslCert")
                 || ((String) groupChannelConnectionsConfig.get("sslCert")).equals("")) {
             String errorMessage = "\"sslCert\" of GroupChannelConnections not found";
-            throw new WeCrossException(2, errorMessage);
+            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
         if (!groupChannelConnectionsConfig.containsKey("sslKey")
                 || ((String) groupChannelConnectionsConfig.get("sslKey")).equals("")) {
             String errorMessage = "\"sslKey\" of GroupChannelConnections not found";
-            throw new WeCrossException(2, errorMessage);
+            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
         if (!groupChannelConnectionsConfig.containsKey("allChannelConnections")) {
             String errorMessage = "\"allChannelConnections\" of GroupChannelConnections not found";
-            throw new WeCrossException(2, errorMessage);
+            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
         String caCertPath = (String) groupChannelConnectionsConfig.get("caCert");
@@ -133,12 +133,12 @@ public class ConfigUtils {
         for (Map<String, Object> channelConnectionsConfig : allChannelConnectionsConfig) {
             if (!channelConnectionsConfig.containsKey("groupId")) {
                 String errorMessage = "\"groupId\" of ChannelConnections not found";
-                throw new WeCrossException(2, errorMessage);
+                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
             }
             if (!channelConnectionsConfig.containsKey("connectionsStr")
                     || channelConnectionsConfig.get("connectionsStr") == null) {
                 String errorMessage = "\"connectionsStr\" of ChannelConnections not found";
-                throw new WeCrossException(2, errorMessage);
+                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
             }
 
             ChannelConnections channelConnections = new ChannelConnections();
@@ -175,22 +175,22 @@ public class ConfigUtils {
             if (!jdChainConfig.containsKey("privateKey")
                     || ((String) jdChainConfig.get("privateKey")).equals("")) {
                 String errorMessage = "\"privateKey\" of jdService not found";
-                throw new WeCrossException(2, errorMessage);
+                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
             }
             if (!jdChainConfig.containsKey("publicKey")
                     || ((String) jdChainConfig.get("publicKey")).equals("")) {
                 String errorMessage = "\"publicKey\" of jdService not found";
-                throw new WeCrossException(2, errorMessage);
+                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
             }
             if (!jdChainConfig.containsKey("password")
                     || ((String) jdChainConfig.get("password")).equals("")) {
                 String errorMessage = "\"password\" of jdService not found";
-                throw new WeCrossException(2, errorMessage);
+                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
             }
             if (!jdChainConfig.containsKey("connectionsStr")
                     || ((String) jdChainConfig.get("connectionsStr")).equals("")) {
                 String errorMessage = "\"connectionsStr\" of jdService not found";
-                throw new WeCrossException(2, errorMessage);
+                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
             }
             String privateKey = (String) jdChainConfig.get("privateKey");
             String publicKey = (String) jdChainConfig.get("publicKey");

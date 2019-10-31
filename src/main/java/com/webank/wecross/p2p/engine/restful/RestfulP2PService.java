@@ -2,14 +2,14 @@ package com.webank.wecross.p2p.engine.restful;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.exception.Status;
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.peer.PeerInfoMessageData;
 import com.webank.wecross.peer.PeerSeqMessageData;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.restserver.Status;
-import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.restserver.request.GetDataRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
@@ -46,24 +46,6 @@ public class RestfulP2PService {
         response.setResult(Status.SUCCESS);
 
         logger.debug("request string: {}", p2pRequestString);
-        try {
-            P2PMessage p2pRequest =
-                    objectMapper.readValue(p2pRequestString, new TypeReference<P2PMessage>() {});
-
-            String version = p2pRequest.getVersion();
-            if (!Versions.checkVersion(version)) {
-                logger.warn("Unsupported version: {}", version);
-                response.setResult(Status.VERSION_ERROR);
-                response.setMessage("Unsupported version :" + version);
-                return response;
-            }
-        } catch (Exception e) {
-            logger.warn("Process request error:", e);
-
-            response.setResult(Status.INTERNAL_ERROR);
-            response.setMessage(e.getLocalizedMessage());
-            return response;
-        }
 
         try {
             switch (method) {
@@ -75,6 +57,7 @@ public class RestfulP2PService {
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<Object>>() {});
 
+                        p2pRequest.checkRestRequest(method);
                         PeerSeqMessageData data =
                                 (PeerSeqMessageData) host.onRestfulPeerMessage(method, p2pRequest);
 
@@ -91,6 +74,8 @@ public class RestfulP2PService {
                                 objectMapper.readValue(
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<Object>>() {});
+
+                        p2pRequest.checkRestRequest(method);
 
                         PeerInfoMessageData data =
                                 (PeerInfoMessageData) host.onRestfulPeerMessage(method, p2pRequest);
@@ -109,6 +94,8 @@ public class RestfulP2PService {
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<PeerSeqMessageData>>() {});
 
+                        p2pRequest.checkRestRequest(method);
+
                         host.onRestfulPeerMessage(method, p2pRequest);
 
                         response.setResult(Status.SUCCESS);
@@ -124,6 +111,8 @@ public class RestfulP2PService {
                                 objectMapper.readValue(
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<PeerInfoMessageData>>() {});
+
+                        p2pRequest.checkRestRequest(method);
 
                         host.onRestfulPeerMessage(method, p2pRequest);
 
@@ -161,11 +150,15 @@ public class RestfulP2PService {
                     }
             }
 
+        } catch (WeCrossException e) {
+            logger.warn("Process request error: {}", e.getMessage());
+            response.setResult(e.getErrorCode());
+            response.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error:", e);
 
             response.setResult(Status.INTERNAL_ERROR);
-            response.setMessage(e.getLocalizedMessage());
+            response.setMessage(e.getMessage());
         }
 
         logger.trace("Response " + response);
@@ -191,24 +184,6 @@ public class RestfulP2PService {
         p2pResponse.setResult(Status.SUCCESS);
 
         logger.debug("request string: {}", p2pRequestString);
-        try {
-            P2PMessage p2pRequest =
-                    objectMapper.readValue(p2pRequestString, new TypeReference<P2PMessage>() {});
-
-            String version = p2pRequest.getVersion();
-            if (!Versions.checkVersion(version)) {
-                logger.warn("Unsupported version: {}", version);
-                p2pResponse.setResult(Status.VERSION_ERROR);
-                p2pResponse.setMessage("Unsupported version :" + version);
-                return p2pResponse;
-            }
-        } catch (Exception e) {
-            logger.warn("Process request error:", e);
-
-            p2pResponse.setResult(Status.INTERNAL_ERROR);
-            p2pResponse.setMessage(e.getLocalizedMessage());
-            return p2pResponse;
-        }
 
         try {
             Resource resourceObj = host.getResource(path);
@@ -226,6 +201,8 @@ public class RestfulP2PService {
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<GetDataRequest>>() {});
 
+                        p2pRequest.checkRestRequest(method);
+
                         GetDataRequest getDataRequest = p2pRequest.getData();
                         GetDataResponse getDataResponse = resourceObj.getData(getDataRequest);
 
@@ -239,6 +216,8 @@ public class RestfulP2PService {
                                 objectMapper.readValue(
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<SetDataRequest>>() {});
+
+                        p2pRequest.checkRestRequest(method);
 
                         SetDataRequest setDataRequest = (SetDataRequest) p2pRequest.getData();
                         SetDataResponse setDataResponse =
@@ -255,6 +234,8 @@ public class RestfulP2PService {
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<TransactionRequest>>() {});
 
+                        p2pRequest.checkRestRequest(method);
+
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) p2pRequest.getData();
                         TransactionResponse transactionResponse =
@@ -270,6 +251,8 @@ public class RestfulP2PService {
                                 objectMapper.readValue(
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<TransactionRequest>>() {});
+
+                        p2pRequest.checkRestRequest(method);
 
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) p2pRequest.getData();
@@ -294,6 +277,10 @@ public class RestfulP2PService {
                         break;
                     }
             }
+        } catch (WeCrossException e) {
+            logger.warn("Process request error: {}", e.getMessage());
+            p2pResponse.setResult(e.getErrorCode());
+            p2pResponse.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error:", e);
 

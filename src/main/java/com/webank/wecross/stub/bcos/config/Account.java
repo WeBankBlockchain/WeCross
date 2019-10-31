@@ -1,5 +1,6 @@
 package com.webank.wecross.stub.bcos.config;
 
+import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import java.io.IOException;
 import java.security.KeyStoreException;
@@ -38,7 +39,7 @@ public class Account {
             } else if (accountFile.contains(".p12")) {
                 credentials = loadP12Account();
             } else {
-                throw new WeCrossException(3, "Unsupported account file");
+                throw new WeCrossException(Status.UNEXPECTED_CONFIG, "Unsupported account file");
             }
         } catch (KeyStoreException
                 | NoSuchAlgorithmException
@@ -47,7 +48,7 @@ public class Account {
                 | InvalidKeySpecException
                 | UnrecoverableKeyException
                 | IOException e) {
-            throw new WeCrossException(3, e.toString());
+            throw new WeCrossException(Status.INTERNAL_ERROR, e.toString());
         }
         return credentials;
     }
