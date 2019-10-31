@@ -31,7 +31,7 @@ network-manager:
                 bcos2:
                     type: BCOS
                     accounts:
-                        accountFile: /bcosconf/bcos2/0x98333491efac02f8ce109b0c499074d47e7779a6.p12
+                        accountFile: /bcosconf/bcos2/0x4c16922e30890eec4a3dfe9305cbdef9bdd57341.p12
                         password: '123456'
                     channelService:
                         groupId: 1 # The specified group to which the SDK connects
