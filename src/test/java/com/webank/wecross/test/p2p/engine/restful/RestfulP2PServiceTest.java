@@ -47,7 +47,7 @@ public class RestfulP2PServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.1\",\"seq\":100,\"result\":0,\"message\":\"request requestSeq method success\",\"data\":{\"seq\":";
+                    "{\"version\":\"0.2\",\"seq\":100,\"result\":0,\"message\":\"request requestSeq method success\",\"data\":{\"seq\":";
 
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
@@ -82,7 +82,7 @@ public class RestfulP2PServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.1\",\"seq\":100,\"result\":0,\"message\":\"request seq method success\",\"data\":null}";
+                    "{\"version\":\"0.2\",\"seq\":100,\"result\":0,\"message\":\"request seq method success\",\"data\":null}";
 
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
@@ -129,8 +129,7 @@ public class RestfulP2PServiceTest {
                     "{\n"
                             + "  \"version\": \"0.1\",\n"
                             + "  \"seq\": 100,\n"
-                            + "  \"result\": 0,\n"
-                            + "  \"message\": \"request requestPeerInfo method success\",\n"
+                            + "  \"method\": \"peerInfo\",\n"
                             + "  \"data\": {\n"
                             + "    \"seq\": 769518166,\n"
                             + "    \"resources\": [\n"
@@ -155,7 +154,7 @@ public class RestfulP2PServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.1\",\"seq\":100,\"result\":0,\"message\":\"request peerInfo method success\",\"data\":null}";
+                    "{\"version\":\"0.2\",\"seq\":100,\"result\":0,\"message\":\"request peerInfo method success\",\"data\":null}";
 
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
@@ -170,7 +169,7 @@ public class RestfulP2PServiceTest {
                     "{\n"
                             + "  \"version\": \"0.1\",\n"
                             + "  \"seq\": 100,\n"
-                            + "  \"method\": \"/test-network/test-stub/test-resource/call\",\n"
+                            + "  \"method\": \"call\",\n"
                             + "  \"data\": {\n"
                             + "    \"sig\": \"\",\n"
                             + "    \"method\": \"get\",\n"
@@ -192,7 +191,7 @@ public class RestfulP2PServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.1\",\"seq\":100,\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"Call test resource success\",\"hash\":\"010157f4\",\"result\":[{\"sig\":\"\",\"method\":\"get\",\"args\":[]}]}}";
+                    "{\"version\":\"0.2\",\"seq\":100,\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"Call test resource success\",\"hash\":\"010157f4\",\"result\":[{\"sig\":\"\",\"method\":\"get\",\"args\":[]}]}}";
 
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
@@ -207,7 +206,7 @@ public class RestfulP2PServiceTest {
                     "{\n"
                             + "  \"version\": \"0.1\",\n"
                             + "  \"seq\": 100,\n"
-                            + "  \"method\": \"/test-network/test-stub/test-resource/sendTransaction\",\n"
+                            + "  \"method\": \"sendTransaction\",\n"
                             + "  \"data\": {\n"
                             + "    \"sig\": \"\",\n"
                             + "    \"method\": \"set\",\n"
@@ -229,7 +228,7 @@ public class RestfulP2PServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.1\",\"seq\":100,\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"sendTransaction test resource success\",\"hash\":\"010157f4\",\"result\":[{\"sig\":\"\",\"method\":\"set\",\"args\":[\"HelloWorld\"]}]}}";
+                    "{\"version\":\"0.2\",\"seq\":100,\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"sendTransaction test resource success\",\"hash\":\"010157f4\",\"result\":[{\"sig\":\"\",\"method\":\"set\",\"args\":[\"HelloWorld\"]}]}}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
@@ -261,7 +260,7 @@ public class RestfulP2PServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.1\",\"seq\":100,\"result\":3,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
+                    "{\"version\":\"0.2\",\"seq\":100,\"result\":2003,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
@@ -297,7 +296,7 @@ public class RestfulP2PServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.1\",\"seq\":100,\"result\":3,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
+                    "{\"version\":\"0.2\",\"seq\":100,\"result\":2003,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);

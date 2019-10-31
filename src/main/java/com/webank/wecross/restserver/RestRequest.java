@@ -12,6 +12,21 @@ public class RestRequest<T> {
 
     public void checkRestRequest(String path, String method) throws WeCrossException {
         String errorMessage;
+        if (this.version == null) {
+            errorMessage = "\"version\" not found in request package";
+            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+        }
+
+        if (this.path == null) {
+            errorMessage = "\"path\" not found in request package";
+            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+        }
+
+        if (this.method == null) {
+            errorMessage = "\"method\" not found in request package";
+            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+        }
+
         if (!Versions.checkVersion(version)) {
             errorMessage = "Unsupported version :" + version;
             throw new WeCrossException(Status.VERSION_ERROR, errorMessage);
