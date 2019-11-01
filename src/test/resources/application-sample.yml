@@ -48,25 +48,6 @@ network-manager:
                         HelloWorldContract:
                             type: BCOS_CONTRACT
                             contractAddress: '0xab9cd8203b907f26f24c3d3fd8a328d1e9cd9cf5'
-        bill:
-            visible: true
-            stubs:
-                jd:
-                    type: JDCHAIN
-                    jdService:
-                        -   privateKey: '0000000000000000'
-                            publicKey: '111111111111111'
-                            password: '222222222222222'
-                            connectionsStr: '127.0.0.1:18081'
-                        -   privateKey: '0000000000000000'
-                            publicKey: '111111111111111'
-                            password: '222222222222222'
-                            connectionsStr: '127.0.0.1:18081'
-                    resources:
-                        HelloWorldContract:
-                            # jdchain resource types include: JD_CONTRACT, AMOP
-                            type: JDCHAIN_CONTRACT
-                            contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
 
 peer-manager:
     peers:
