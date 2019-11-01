@@ -43,7 +43,6 @@ nodes/
 console/
 out/
 src/main/resources/application.yml
-src/main/resources/log4j2.xml
 src/main/resources/bcosconf
 
 *.p12
