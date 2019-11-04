@@ -288,6 +288,16 @@ public class PeerManager {
         }
     }
 
+    public void setNetworkManager(NetworkManager networkManager) {
+        this.networkManager = networkManager;
+    }
+
+    public Set<Peer> getConnectedPeers() {
+        // Update me if netty ready
+        Set<Peer> peers = new HashSet<>(peerInfos.keySet());
+        return peers;
+    }
+
     public void syncWithPeerNetworks() {
         // Update peers' resource into networks
         Set<PeerInfo> activePeers = this.getActivePeerInfos();
@@ -303,12 +313,33 @@ public class PeerManager {
         this.setActiveResources(activeLocalResources);
     }
 
-    public void setNetworkManager(NetworkManager networkManager) {
-        this.networkManager = networkManager;
+    public void maintainPeerConnections() {
+        Set<Peer> connectedPeers = getConnectedPeers();
+
+        Set<Peer> peers2Add = new HashSet<>(connectedPeers);
+        peers2Add.removeAll(peerInfos.keySet());
+
+        Set<Peer> peers2Remove = new HashSet<>(peerInfos.keySet());
+        peers2Remove.removeAll(connectedPeers);
+
+        if (peers2Add != null) {
+            for (Peer peer : peers2Add) {
+                updatePeerInfo(new PeerInfo(peer));
+            }
+        }
+
+        if (peers2Remove != null) {
+            for (Peer peer : peers2Remove) {
+                removePeerInfo(peer);
+            }
+        }
+
+        logger.info("Current connected peers: {}", peerInfos.keySet());
     }
 
     private void workLoop() {
         try {
+            maintainPeerConnections();
             syncWithPeerNetworks();
             broadcastSeqRequest();
         } catch (Exception e) {
