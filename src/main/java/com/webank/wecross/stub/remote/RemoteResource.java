@@ -96,7 +96,7 @@ public class RemoteResource implements Resource {
             throw new Exception("Not an available peer to request");
         } catch (Exception e) {
             response.setErrorCode(-1);
-            response.setErrorMessage("Call remote resource exception");
+            response.setErrorMessage("Call remote resource exception: " + e.getLocalizedMessage());
         }
         return response;
     }
