@@ -21,25 +21,6 @@ public class WeCrossHost {
     public void start() {
         addTestResources();
         peerManager.start();
-
-        final long timeInterval = 5000;
-        Runnable runnable =
-                new Runnable() {
-                    public void run() {
-                        while (true) {
-                            try {
-                                workLoop();
-                                Thread.sleep(timeInterval);
-                            } catch (Exception e) {
-                                logger.error("Startup error: " + e);
-                                System.exit(-1);
-                            }
-                        }
-                    }
-                };
-
-        Thread thread = new Thread(runnable);
-        thread.start();
     }
 
     public Resource getResource(Path path) throws Exception {
@@ -75,14 +56,8 @@ public class WeCrossHost {
             Resource resource = new TestResource();
             resource.setPath(path);
             networkManager.addResource(resource);
-
         } catch (Exception e) {
             logger.warn("Add test resource exception " + e);
         }
-    }
-
-    private void workLoop() {
-        peerManager.broadcastSeqRequest();
-        peerManager.syncWithPeerNetworks();
     }
 }

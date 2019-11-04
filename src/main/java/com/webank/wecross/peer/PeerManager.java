@@ -30,7 +30,25 @@ public class PeerManager {
 
     public void start() {
         newSeq();
-        syncWithPeerNetworks();
+
+        final long timeInterval = 5000;
+        Runnable runnable =
+                new Runnable() {
+                    public void run() {
+                        while (true) {
+                            try {
+                                workLoop();
+                                Thread.sleep(timeInterval);
+                            } catch (Exception e) {
+                                logger.error("Startup error: " + e);
+                                System.exit(-1);
+                            }
+                        }
+                    }
+                };
+
+        Thread thread = new Thread(runnable);
+        thread.start();
     }
 
     public void newSeq() {
@@ -287,5 +305,14 @@ public class PeerManager {
 
     public void setNetworkManager(NetworkManager networkManager) {
         this.networkManager = networkManager;
+    }
+
+    private void workLoop() {
+        try {
+            syncWithPeerNetworks();
+            broadcastSeqRequest();
+        } catch (Exception e) {
+            logger.warn("workloop exception:" + e);
+        }
     }
 }
