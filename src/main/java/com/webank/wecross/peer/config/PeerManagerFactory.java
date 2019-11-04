@@ -6,11 +6,8 @@ import com.webank.wecross.p2p.Peer;
 import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.peer.SyncPeerMessageHandler;
-
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,7 +39,7 @@ public class PeerManagerFactory {
 
         // delete me after netty ready
         Map<Peer, PeerInfo> peerInfos = new HashMap<>();
-        for(Peer peer : peers.values()) {
+        for (Peer peer : peers.values()) {
             peerInfos.putIfAbsent(peer, new PeerInfo(peer));
         }
         manager.setPeerInfos(peerInfos);

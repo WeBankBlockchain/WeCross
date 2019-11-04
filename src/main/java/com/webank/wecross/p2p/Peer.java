@@ -1,8 +1,5 @@
 package com.webank.wecross.p2p;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class Peer {
     private String url;
     private String name;
@@ -29,7 +26,6 @@ public class Peer {
     public void setName(String name) {
         this.name = name;
     }
-
 
     @Override
     public String toString() {

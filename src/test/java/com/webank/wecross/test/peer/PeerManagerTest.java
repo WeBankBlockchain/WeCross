@@ -12,7 +12,6 @@ import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.stub.remote.RemoteResource;
 import java.util.Set;
 import javax.annotation.Resource;
-
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -46,7 +45,7 @@ public class PeerManagerTest {
         Assert.assertEquals(0, peerManager.peerSize());
 
         // check all syncing
-        PeerInfo peerInfo = new PeerInfo( new Peer("127.0.0.1:8080", "myself"));
+        PeerInfo peerInfo = new PeerInfo(new Peer("127.0.0.1:8080", "myself"));
         peerManager.updatePeerInfo(peerInfo);
 
         peerManager.broadcastPeerInfoRequest();
@@ -69,7 +68,7 @@ public class PeerManagerTest {
         Assert.assertEquals(0, peerManager.peerSize());
 
         // check all syncing
-        PeerInfo peerInfo = new PeerInfo( new Peer("127.0.0.1:8080", "myself"));
+        PeerInfo peerInfo = new PeerInfo(new Peer("127.0.0.1:8080", "myself"));
         peerManager.updatePeerInfo(peerInfo);
 
         peerManager.broadcastSeqRequest();

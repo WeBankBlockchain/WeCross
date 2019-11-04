@@ -1,7 +1,6 @@
 package com.webank.wecross.peer;
 
 import com.webank.wecross.p2p.Peer;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,7 +10,7 @@ public class PeerInfo {
     private Set<String> resources = new HashSet<>();
     private long lastActiveTimestamp = System.currentTimeMillis();
 
-    public PeerInfo(Peer peer){
+    public PeerInfo(Peer peer) {
         this.peer = peer;
     }
 
@@ -45,11 +44,11 @@ public class PeerInfo {
     }
 
     public Peer getPeer() {
-        assert(this.peer != null);
+        assert (this.peer != null);
         return this.peer;
     }
 
-    public void setPeer(Peer peer){
+    public void setPeer(Peer peer) {
         this.peer = peer;
     }
 }
