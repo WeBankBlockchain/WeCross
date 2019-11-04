@@ -3,6 +3,7 @@ package com.webank.wecross.test.network;
 import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.Peer;
+import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.stub.remote.RemoteResource;
@@ -89,8 +90,8 @@ public class NetworkManagerTest {
         }
         Assert.assertEquals(2, networkManager.getAllNetworkStubResourceName(false).size());
 
-        Set<Peer> activePeers = new HashSet<>();
-        Peer peer0 = new Peer();
+        Set<PeerInfo> activePeers = new HashSet<>();
+        PeerInfo peer0 = new PeerInfo(new Peer());
         activePeers.add(peer0);
         Set<String> activeResourcesname = new HashSet<>();
         for (int i = 0; i < 3; i++) {
@@ -104,7 +105,7 @@ public class NetworkManagerTest {
         peer0.setResources(100, activeResourcesname);
         Assert.assertEquals(5, networkManager.getAllNetworkStubResourceName(false).size());
 
-        Peer peer1 = new Peer();
+        PeerInfo peer1 = new PeerInfo(new Peer());
         activePeers.add(peer1);
         Set<String> newResourcesname = new HashSet<>();
         for (int i = 0; i < 4; i++) {
