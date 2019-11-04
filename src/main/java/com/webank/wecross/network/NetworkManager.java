@@ -3,6 +3,7 @@ package com.webank.wecross.network;
 import com.webank.wecross.core.PathUtils;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.Peer;
+import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.request.ResourceRequest;
@@ -171,17 +172,17 @@ public class NetworkManager {
         }
     }
 
-    public void updateActivePeerNetwork(Set<Peer> peers) {
+    public void updateActivePeerNetwork(Set<PeerInfo> peerInfos) {
         lock.writeLock().lock();
         try {
             Map<String, Set<Peer>> resource2Peers = new HashMap<>();
-            for (Peer peer : peers) {
-                for (String resource : peer.getResources()) {
+            for (PeerInfo peerInfo : peerInfos) {
+                for (String resource : peerInfo.getResources()) {
                     Set<Peer> theResourcePeers = resource2Peers.get(resource);
                     if (theResourcePeers == null) {
                         theResourcePeers = new HashSet<>();
                     }
-                    theResourcePeers.add(peer);
+                    theResourcePeers.add(peerInfo.getPeer());
                     resource2Peers.put(resource, theResourcePeers); // Replace
                 }
             }

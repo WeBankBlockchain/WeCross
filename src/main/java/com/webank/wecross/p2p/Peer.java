@@ -6,9 +6,6 @@ import java.util.Set;
 public class Peer {
     private String url;
     private String name;
-    private int seq = 1;
-    private Set<String> resources = new HashSet<>();
-    private long lastActiveTimestamp = System.currentTimeMillis();
 
     public Peer() {}
 
@@ -33,37 +30,9 @@ public class Peer {
         this.name = name;
     }
 
-    public int getSeq() {
-        return seq;
-    }
-
-    public void setSeq(int seq) {
-        this.seq = seq;
-    }
-
-    public Set<String> getResources() {
-        return resources;
-    }
-
-    public synchronized void setResources(int seq, Set<String> resources) {
-        this.setSeq(seq);
-        this.resources = resources;
-    }
-
-    public void noteAlive() {
-        this.lastActiveTimestamp = System.currentTimeMillis();
-    }
-
-    public boolean isTimeout(long timeout) {
-        return (System.currentTimeMillis() - lastActiveTimestamp) > timeout;
-    }
 
     @Override
     public String toString() {
         return "(name:" + name + ", url:" + url + ")";
-    }
-
-    public long getLastActiveTimestamp() {
-        return lastActiveTimestamp;
     }
 }

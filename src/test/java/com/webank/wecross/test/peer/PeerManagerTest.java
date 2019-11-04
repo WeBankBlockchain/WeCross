@@ -4,6 +4,7 @@ import com.webank.wecross.Service;
 import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.Peer;
+import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.restserver.request.TransactionRequest;
@@ -11,10 +12,8 @@ import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.stub.remote.RemoteResource;
 import java.util.Set;
 import javax.annotation.Resource;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
+
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,28 +40,14 @@ public class PeerManagerTest {
     }
 
     @Test
-    public void a() // first to test
-            {
-        // Check configure loading
-        System.out.println("Peer size: " + peerManager.peerSize());
-        Assert.assertEquals(2, peerManager.peerSize());
-        Assert.assertTrue(peerManager.getPeer("127.0.0.1:8081") != null);
-        Assert.assertTrue(peerManager.getPeer("127.0.0.1:8082") != null);
-
-        // Remove mock peers
-        peerManager.clearPeers();
-        Assert.assertEquals(0, peerManager.peerSize());
-    }
-
-    @Test
     public void syncByRequestPeerInfo() throws Exception {
         // Remove mock peers
-        peerManager.clearPeers();
+        peerManager.clearPeerInfos();
         Assert.assertEquals(0, peerManager.peerSize());
 
         // check all syncing
-        Peer peer = new Peer("127.0.0.1:8080", "myself");
-        peerManager.updatePeer(peer);
+        PeerInfo peerInfo = new PeerInfo( new Peer("127.0.0.1:8080", "myself"));
+        peerManager.updatePeerInfo(peerInfo);
 
         peerManager.broadcastPeerInfoRequest();
         Thread.sleep(2000); // waiting for syncing
@@ -74,18 +59,18 @@ public class PeerManagerTest {
         Assert.assertTrue(0 < resources.size());
         Assert.assertEquals(networkManager.getAllNetworkStubResourceName(true), resources);
 
-        peerManager.clearPeers();
+        peerManager.clearPeerInfos();
     }
 
     @Test
     public void syncByRequestSeq() throws Exception {
         // Remove mock peers
-        peerManager.clearPeers();
+        peerManager.clearPeerInfos();
         Assert.assertEquals(0, peerManager.peerSize());
 
         // check all syncing
-        Peer peer = new Peer("127.0.0.1:8080", "myself");
-        peerManager.updatePeer(peer);
+        PeerInfo peerInfo = new PeerInfo( new Peer("127.0.0.1:8080", "myself"));
+        peerManager.updatePeerInfo(peerInfo);
 
         peerManager.broadcastSeqRequest();
         Thread.sleep(2000); // waiting for syncing
@@ -97,7 +82,7 @@ public class PeerManagerTest {
         Assert.assertTrue(0 < resources.size());
         Assert.assertEquals(networkManager.getAllNetworkStubResourceName(true), resources);
 
-        peerManager.clearPeers();
+        peerManager.clearPeerInfos();
     }
 
     @Test
