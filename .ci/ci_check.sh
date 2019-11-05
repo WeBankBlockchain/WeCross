@@ -40,6 +40,15 @@ cd -
 
 cp src/test/resources/application-sample.yml src/test/resources/application.yml
 
+#generate wecross cert
+bash ./scripts/build_cert.sh -c -d ./ca
+bash ./scripts/build_cert.sh -n -D ./ca -d ./ca/node
+mkdir ./test/resources/p2p
+cp ./ca/ca.crt ./test/resources/p2p/
+cp ./ca/node/node.crt ./test/resources/p2p/
+cp ./ca/node/node.key ./test/resources/p2p/
+cp ./ca/node/node.nodeid ./test/resources/p2p/
+
 #configure wecross
 if [ "$(uname)" == "Darwin" ]; then
     # Mac
