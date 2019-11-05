@@ -25,9 +25,9 @@ public class Compoment {
 
     @Resource HeartBeatProcessor heartBeatProcessor;
 
-    @Resource ResourceRequestProcessor resourceRequestProcessor;
-
     @Resource ResourceResponseProcessor resourceResponseProcessor;
+
+    @Resource ResourceRequestProcessor resourceRequestProcessor;
 
     @Resource(name = "newMessageCallBack")
     MessageCallBack messageCallBack;
@@ -41,6 +41,7 @@ public class Compoment {
     @Bean
     public ThreadPoolTaskExecutor newThreadPoolTaskExecutor() {
         // init default thread pool
+
         final int threadNum = 8;
         ThreadPoolTaskExecutor threadPool = new ThreadPoolTaskExecutor();
         threadPool.setCorePoolSize(threadNum);
@@ -68,7 +69,7 @@ public class Compoment {
     public ChannelHandlerCallBack newChannelHandlerCallBack() {
         ChannelHandlerCallBack callBack = new ChannelHandlerCallBack();
         callBack.setConnections(connections);
-        callBack.setThreadPool(threadPoolTaskExecutor);
+        // callBack.setThreadPool(threadPoolTaskExecutor);
         callBack.setCallBack(messageCallBack);
         return callBack;
     }
@@ -87,11 +88,12 @@ public class Compoment {
     public P2PService newP2PService() {
 
         P2PService p2PService = new P2PService();
-        p2PService.setThreadPool(threadPoolTaskExecutor);
+        // p2PService.setThreadPool(threadPoolTaskExecutor);
         p2PService.setInitializer(initializer);
         p2PService.setConnections(connections);
         p2PService.setSeqMapper(seqMapper);
         p2PService.setChannelHandlerCallBack(channelHandlerCallBack);
+        resourceResponseProcessor.setSeqMapper(seqMapper);
 
         return p2PService;
     }
