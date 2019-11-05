@@ -1,10 +1,12 @@
 package com.webank.wecross.p2p;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.core.ParameterizedTypeReference;
 
 public class P2PMessageCallback<T> {
     private ParameterizedTypeReference engineCallbackMessageClassType;
+    private TypeReference typeReference;
     protected int status;
     protected String message;
     protected P2PMessage<T> data;
@@ -37,6 +39,14 @@ public class P2PMessageCallback<T> {
     public void setEngineCallbackMessageClassType(
             ParameterizedTypeReference engineCallbackMessageClassType) {
         this.engineCallbackMessageClassType = engineCallbackMessageClassType;
+    }
+
+    public void setTypeReference(TypeReference typeReference) {
+        this.typeReference = typeReference;
+    }
+
+    public TypeReference getTypeReference() {
+        return typeReference;
     }
 
     public void setMessage(String message) {

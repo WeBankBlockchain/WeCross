@@ -1,13 +1,18 @@
-package com.webank.wecross.p2p.engine.restful;
+package com.webank.wecross.p2p.netty.message.processor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
-import com.webank.wecross.host.WeCrossHost;
+import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.engine.P2PResponse;
+import com.webank.wecross.p2p.netty.common.Host;
+import com.webank.wecross.p2p.netty.common.Utils;
+import com.webank.wecross.p2p.netty.message.MessageType;
+import com.webank.wecross.p2p.netty.message.proto.Message;
+import com.webank.wecross.p2p.netty.message.serialize.MessageSerializer;
 import com.webank.wecross.peer.PeerInfoMessageData;
+import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.peer.PeerSeqMessageData;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
@@ -17,30 +22,100 @@ import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
-import javax.servlet.http.HttpServletRequest;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-@RequestMapping("p2p")
-public class RestfulP2PService {
+public class ResourceRequestProcessor implements Processor {
 
-    @javax.annotation.Resource private WeCrossHost host;
+    private static final Logger logger = LoggerFactory.getLogger(ResourceRequestProcessor.class);
 
-    private Logger logger = LoggerFactory.getLogger(RestfulP2PService.class);
-    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+    private PeerManager peerManager;
+    private NetworkManager networkManager;
 
-    @RequestMapping(value = "/{method}", method = RequestMethod.POST)
-    public P2PResponse<Object> handlePeer(
-            @PathVariable("method") String method,
-            @RequestBody String p2pRequestString,
-            HttpServletRequest request) {
+    public PeerManager getPeerManager() {
+        return peerManager;
+    }
+
+    public void setPeerManager(PeerManager peerManager) {
+        this.peerManager = peerManager;
+    }
+
+    public NetworkManager getNetworkManager() {
+        return networkManager;
+    }
+
+    public void setNetworkManager(NetworkManager networkManager) {
+        this.networkManager = networkManager;
+    }
+
+    @Override
+    public String name() {
+        return "SourceRequest";
+    }
+
+    @Override
+    public void process(ChannelHandlerContext ctx, Message message) {
+        Host host = Utils.channelContextPeerHost(ctx);
+        try {
+            String content = new String(message.getData(), "utf-8");
+
+            logger.info(
+                    "  resource request message, host: {}, seq: {}, content: {}",
+                    host,
+                    message.getSeq(),
+                    content);
+
+            P2PMessage p2PMessage =
+                    ObjectMapperFactory.getObjectMapper().readValue(content, P2PMessage.class);
+
+            String method = p2PMessage.getMethod();
+            String r[] = method.split("/");
+
+            P2PResponse<Object> p2PResponse = null;
+            if (r.length == 1) {
+                /** method */
+                p2PResponse = handlePeer(r[0], content);
+            } else if (r.length == 4) {
+                /** network/stub/resource/method */
+                p2PResponse = handleRemote(r[0], r[1], r[2], r[3], content);
+            } else {
+                // invalid paramter method
+                p2PResponse.setData(null);
+                p2PResponse.setMessage(" invalid method paramter format");
+                p2PResponse.setResult(Status.INTERNAL_ERROR);
+                p2PResponse.setSeq(p2PMessage.getSeq());
+                p2PResponse.setVersion(p2PMessage.getVersion());
+
+                logger.error(
+                        " invalid method parameter, seq: {}, method: {}", message.getSeq(), method);
+            }
+
+            String responseContent =
+                    ObjectMapperFactory.getObjectMapper().writeValueAsString(p2PResponse);
+
+            // send response
+            message.setType(MessageType.RESOURCE_RESPONSE);
+            message.setData(responseContent.getBytes());
+
+            MessageSerializer serializer = new MessageSerializer();
+            ByteBuf byteBuf = ctx.alloc().buffer();
+            serializer.serialize(message, byteBuf);
+            ctx.writeAndFlush(byteBuf);
+
+            logger.info(
+                    " resource request, host: {}, seq: {}, response content: {}",
+                    host,
+                    message.getSeq(),
+                    responseContent);
+        } catch (Exception e) {
+            logger.error(" invalid format, host: {}, e: {}", host, e);
+        }
+    }
+
+    public P2PResponse<Object> handlePeer(String method, String p2pRequestString) {
 
         P2PResponse<Object> response = new P2PResponse<Object>();
         response.setVersion("0.2");
@@ -54,13 +129,15 @@ public class RestfulP2PService {
                     {
                         logger.debug("request method: " + method);
                         P2PMessage<Object> p2pRequest =
-                                objectMapper.readValue(
-                                        p2pRequestString,
-                                        new TypeReference<P2PMessage<Object>>() {});
+                                ObjectMapperFactory.getObjectMapper()
+                                        .readValue(
+                                                p2pRequestString,
+                                                new TypeReference<P2PMessage<Object>>() {});
 
                         p2pRequest.checkP2PMessage(method);
                         PeerSeqMessageData data =
-                                (PeerSeqMessageData) host.onRestfulPeerMessage(method, p2pRequest);
+                                (PeerSeqMessageData)
+                                        peerManager.onRestfulPeerMessage(method, p2pRequest);
 
                         response.setResult(Status.SUCCESS);
                         response.setMessage("request " + method + " method success");
@@ -72,14 +149,16 @@ public class RestfulP2PService {
                     {
                         logger.debug("request method: " + method);
                         P2PMessage<Object> p2pRequest =
-                                objectMapper.readValue(
-                                        p2pRequestString,
-                                        new TypeReference<P2PMessage<Object>>() {});
+                                ObjectMapperFactory.getObjectMapper()
+                                        .readValue(
+                                                p2pRequestString,
+                                                new TypeReference<P2PMessage<Object>>() {});
 
                         p2pRequest.checkP2PMessage(method);
 
                         PeerInfoMessageData data =
-                                (PeerInfoMessageData) host.onRestfulPeerMessage(method, p2pRequest);
+                                (PeerInfoMessageData)
+                                        peerManager.onRestfulPeerMessage(method, p2pRequest);
 
                         response.setResult(Status.SUCCESS);
                         response.setMessage("request " + method + " method success");
@@ -91,13 +170,15 @@ public class RestfulP2PService {
                     {
                         logger.debug("request method: " + method);
                         P2PMessage<PeerSeqMessageData> p2pRequest =
-                                objectMapper.readValue(
-                                        p2pRequestString,
-                                        new TypeReference<P2PMessage<PeerSeqMessageData>>() {});
+                                ObjectMapperFactory.getObjectMapper()
+                                        .readValue(
+                                                p2pRequestString,
+                                                new TypeReference<
+                                                        P2PMessage<PeerSeqMessageData>>() {});
 
                         p2pRequest.checkP2PMessage(method);
 
-                        host.onRestfulPeerMessage(method, p2pRequest);
+                        peerManager.onRestfulPeerMessage(method, p2pRequest);
 
                         response.setResult(Status.SUCCESS);
                         response.setMessage("request " + method + " method success");
@@ -109,13 +190,15 @@ public class RestfulP2PService {
                     {
                         logger.debug("request method: " + method);
                         P2PMessage<PeerInfoMessageData> p2pRequest =
-                                objectMapper.readValue(
-                                        p2pRequestString,
-                                        new TypeReference<P2PMessage<PeerInfoMessageData>>() {});
+                                ObjectMapperFactory.getObjectMapper()
+                                        .readValue(
+                                                p2pRequestString,
+                                                new TypeReference<
+                                                        P2PMessage<PeerInfoMessageData>>() {});
 
                         p2pRequest.checkP2PMessage(method);
 
-                        host.onRestfulPeerMessage(method, p2pRequest);
+                        peerManager.onRestfulPeerMessage(method, p2pRequest);
 
                         response.setResult(Status.SUCCESS);
                         response.setMessage("request " + method + " method success");
@@ -141,9 +224,10 @@ public class RestfulP2PService {
                     {
                         logger.debug("request method: " + method);
                         P2PMessage<Object> p2pRequest =
-                                objectMapper.readValue(
-                                        p2pRequestString,
-                                        new TypeReference<P2PMessage<Object>>() {});
+                                ObjectMapperFactory.getObjectMapper()
+                                        .readValue(
+                                                p2pRequestString,
+                                                new TypeReference<P2PMessage<Object>>() {});
                         response.setResult(Status.METHOD_ERROR);
                         response.setSeq(p2pRequest.getSeq());
                         response.setMessage("Unsupported method: " + method);
@@ -166,15 +250,8 @@ public class RestfulP2PService {
         return response;
     }
 
-    @RequestMapping(
-            value = {"/{network}/{stub}/{resource}/{method}"},
-            method = RequestMethod.POST)
     public P2PResponse<Object> handleRemote(
-            @PathVariable("network") String network,
-            @PathVariable("stub") String stub,
-            @PathVariable("resource") String resource,
-            @PathVariable("method") String method,
-            @RequestBody String p2pRequestString) {
+            String network, String stub, String resource, String method, String p2pRequestString) {
         Path path = new Path();
         path.setNetwork(network);
         path.setChain(stub);
@@ -187,7 +264,7 @@ public class RestfulP2PService {
         logger.debug("request string: {}", p2pRequestString);
 
         try {
-            Resource resourceObj = host.getResource(path);
+            Resource resourceObj = networkManager.getResource(path);
             if (resourceObj == null) {
                 logger.warn("Unable to find resource: {}.{}.{}", network, stub, resource);
 
@@ -198,9 +275,10 @@ public class RestfulP2PService {
                 case "getData":
                     {
                         P2PMessage<GetDataRequest> p2pRequest =
-                                objectMapper.readValue(
-                                        p2pRequestString,
-                                        new TypeReference<P2PMessage<GetDataRequest>>() {});
+                                ObjectMapperFactory.getObjectMapper()
+                                        .readValue(
+                                                p2pRequestString,
+                                                new TypeReference<P2PMessage<GetDataRequest>>() {});
 
                         p2pRequest.checkP2PMessage(method);
 
@@ -214,9 +292,10 @@ public class RestfulP2PService {
                 case "setData":
                     {
                         P2PMessage<SetDataRequest> p2pRequest =
-                                objectMapper.readValue(
-                                        p2pRequestString,
-                                        new TypeReference<P2PMessage<SetDataRequest>>() {});
+                                ObjectMapperFactory.getObjectMapper()
+                                        .readValue(
+                                                p2pRequestString,
+                                                new TypeReference<P2PMessage<SetDataRequest>>() {});
 
                         p2pRequest.checkP2PMessage(method);
 
@@ -231,9 +310,11 @@ public class RestfulP2PService {
                 case "call":
                     {
                         P2PMessage<TransactionRequest> p2pRequest =
-                                objectMapper.readValue(
-                                        p2pRequestString,
-                                        new TypeReference<P2PMessage<TransactionRequest>>() {});
+                                ObjectMapperFactory.getObjectMapper()
+                                        .readValue(
+                                                p2pRequestString,
+                                                new TypeReference<
+                                                        P2PMessage<TransactionRequest>>() {});
 
                         p2pRequest.checkP2PMessage(method);
 
@@ -249,9 +330,11 @@ public class RestfulP2PService {
                 case "sendTransaction":
                     {
                         P2PMessage<TransactionRequest> p2pRequest =
-                                objectMapper.readValue(
-                                        p2pRequestString,
-                                        new TypeReference<P2PMessage<TransactionRequest>>() {});
+                                ObjectMapperFactory.getObjectMapper()
+                                        .readValue(
+                                                p2pRequestString,
+                                                new TypeReference<
+                                                        P2PMessage<TransactionRequest>>() {});
 
                         p2pRequest.checkP2PMessage(method);
 
@@ -268,9 +351,10 @@ public class RestfulP2PService {
                 default:
                     {
                         P2PMessage<Object> p2pRequest =
-                                objectMapper.readValue(
-                                        p2pRequestString,
-                                        new TypeReference<P2PMessage<Object>>() {});
+                                ObjectMapperFactory.getObjectMapper()
+                                        .readValue(
+                                                p2pRequestString,
+                                                new TypeReference<P2PMessage<Object>>() {});
                         logger.warn("Unsupported method: {}", method);
                         p2pResponse.setResult(Status.METHOD_ERROR);
                         p2pResponse.setMessage("Unsupported method: " + method);

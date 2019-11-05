@@ -124,7 +124,7 @@ public class PeerManager {
         P2PMessage<Object> msg = new P2PMessage<>();
         msg.newSeq();
         msg.setData(null);
-        msg.setVersion("0.1");
+        msg.setVersion("0.2");
         msg.setMethod("requestSeq");
 
         PeerSeqCallback callback = new PeerSeqCallback();

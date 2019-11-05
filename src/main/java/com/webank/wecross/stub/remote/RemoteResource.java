@@ -1,10 +1,11 @@
 package com.webank.wecross.stub.remote;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.Peer;
-import com.webank.wecross.p2p.engine.restful.P2PHttpResponse;
+import com.webank.wecross.p2p.engine.P2PResponse;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
@@ -187,7 +188,8 @@ public class RemoteResource implements Resource {
 
             public SemaphoreCallback() {
                 super.setEngineCallbackMessageClassType(
-                        new ParameterizedTypeReference<P2PHttpResponse<TransactionResponse>>() {});
+                        new ParameterizedTypeReference<P2PResponse<TransactionResponse>>() {});
+                super.setTypeReference(new TypeReference<P2PResponse<TransactionResponse>>() {});
                 try {
                     semaphore.acquire(1);
 

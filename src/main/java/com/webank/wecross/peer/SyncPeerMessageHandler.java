@@ -75,7 +75,7 @@ public class SyncPeerMessageHandler {
     private void handleRequestSeq(Peer peer, P2PMessage msg) {
         PeerSeqMessageData data = peerManager.handleRequestSeq();
         P2PMessage<PeerSeqMessageData> rspMsg = new P2PMessage<>();
-        rspMsg.setVersion("0.1");
+        rspMsg.setVersion("0.2");
         rspMsg.setSeq(msg.getSeq());
         rspMsg.setMethod("com/webank/wecross/peer/seq");
         rspMsg.setData(data);
@@ -90,7 +90,7 @@ public class SyncPeerMessageHandler {
     private void handleRequestPeerInfo(Peer peer, P2PMessage msg) {
         PeerInfoMessageData data = peerManager.handleRequestPeerInfo();
         P2PMessage<PeerInfoMessageData> rspMsg = new P2PMessage<>();
-        rspMsg.setVersion("0.1");
+        rspMsg.setVersion("0.2");
         rspMsg.setSeq(msg.getSeq());
         rspMsg.setMethod("com/webank/wecross/peer/peerInfo");
         rspMsg.setData(data);
