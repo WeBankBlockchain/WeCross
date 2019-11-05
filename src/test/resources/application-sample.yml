@@ -49,7 +49,12 @@ network-manager:
                             type: BCOS_CONTRACT
                             contractAddress: '0xab9cd8203b907f26f24c3d3fd8a328d1e9cd9cf5'
 
-peer-manager:
+# manager WeCross resources
+p2p:
+    listenIP: '0.0.0.0'
+    listenPort: 12346
+    caCert: 'classpath:p2p/ca.crt'
+    sslCert: 'classpath:p2p/node.crt'
+    sslKey: 'classpath:p2p/node.key'
     peers:
-        - peerA@127.0.0.1:8081
-        - peerB@127.0.0.1:8082
+        - 127.0.0.1:12345
