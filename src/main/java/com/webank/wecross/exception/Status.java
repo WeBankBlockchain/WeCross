@@ -15,4 +15,5 @@ public class Status {
     public static final int VERSION_ERROR = 2001;
     public static final int PATH_ERROR = 2002;
     public static final int METHOD_ERROR = 2003;
+    public static final int RESOURCE_ERROR = 2004;
 }

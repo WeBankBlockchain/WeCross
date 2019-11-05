@@ -139,18 +139,23 @@ public class RestfulService {
             Resource resourceObj = host.getResource(path);
             if (resourceObj == null) {
                 logger.warn("Unable to find resource: {}", path.toString());
-
-                throw new Exception("Resource not found");
             }
 
             switch (method) {
                 case "exists":
                     {
-                        restResponse.setData("exists!");
+                        if (resourceObj == null) {
+                            restResponse.setData("not exists");
+                        } else {
+                            restResponse.setData("exists");
+                        }
                         break;
                     }
                 case "getData":
                     {
+                        if (resourceObj == null) {
+                            throw new WeCrossException(Status.RESOURCE_ERROR, "Resource not found");
+                        }
                         RestRequest<GetDataRequest> restRequest =
                                 objectMapper.readValue(
                                         restRequestString,
@@ -166,6 +171,9 @@ public class RestfulService {
                     }
                 case "setData":
                     {
+                        if (resourceObj == null) {
+                            throw new WeCrossException(Status.RESOURCE_ERROR, "Resource not found");
+                        }
                         RestRequest<SetDataRequest> restRequest =
                                 objectMapper.readValue(
                                         restRequestString,
@@ -182,6 +190,9 @@ public class RestfulService {
                     }
                 case "call":
                     {
+                        if (resourceObj == null) {
+                            throw new WeCrossException(Status.RESOURCE_ERROR, "Resource not found");
+                        }
                         RestRequest<TransactionRequest> restRequest =
                                 objectMapper.readValue(
                                         restRequestString,
@@ -199,6 +210,9 @@ public class RestfulService {
                     }
                 case "sendTransaction":
                     {
+                        if (resourceObj == null) {
+                            throw new WeCrossException(Status.RESOURCE_ERROR, "Resource not found");
+                        }
                         RestRequest<TransactionRequest> restRequest =
                                 objectMapper.readValue(
                                         restRequestString,
