@@ -63,7 +63,7 @@ public class RestfulServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.2\",\"result\":0,\"message\":null,\"data\":\"exists!\"}";
+                    "{\"version\":\"0.2\",\"result\":0,\"message\":null,\"data\":\"exists\"}";
             Assert.assertEquals(expectRsp, result);
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
