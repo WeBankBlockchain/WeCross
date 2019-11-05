@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.Peer;
 import com.webank.wecross.p2p.engine.P2PResponse;
+import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.concurrent.Semaphore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
 
 public class RemoteResource implements Resource {
 
@@ -187,8 +186,6 @@ public class RemoteResource implements Resource {
             private TransactionResponse responseData;
 
             public SemaphoreCallback() {
-                super.setEngineCallbackMessageClassType(
-                        new ParameterizedTypeReference<P2PResponse<TransactionResponse>>() {});
                 super.setTypeReference(new TypeReference<P2PResponse<TransactionResponse>>() {});
                 try {
                     semaphore.acquire(1);

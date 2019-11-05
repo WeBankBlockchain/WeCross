@@ -1,7 +1,8 @@
 package com.webank.wecross.p2p.netty;
 
-import com.webank.wecross.p2p.Peer;
+import com.webank.wecross.p2p.netty.channel.handler.ChannelHandlerCallBack;
 import com.webank.wecross.p2p.netty.common.Host;
+import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.p2p.netty.common.Utils;
 import com.webank.wecross.p2p.netty.message.proto.Message;
 import com.webank.wecross.p2p.netty.message.serialize.MessageSerializer;
@@ -38,6 +39,8 @@ public class P2PService {
 
     private ThreadPoolTaskExecutor threadPool;
 
+    private ChannelHandlerCallBack channelHandlerCallBack;
+
     public Initializer getInitializer() {
         return initializer;
     }
@@ -68,6 +71,14 @@ public class P2PService {
 
     public void setThreadPool(ThreadPoolTaskExecutor threadPool) {
         this.threadPool = threadPool;
+    }
+
+    public ChannelHandlerCallBack getChannelHandlerCallBack() {
+        return channelHandlerCallBack;
+    }
+
+    public void setChannelHandlerCallBack(ChannelHandlerCallBack channelHandlerCallBack) {
+        this.channelHandlerCallBack = channelHandlerCallBack;
     }
 
     /**
@@ -133,7 +144,7 @@ public class P2PService {
         callback.setMessage(message);
         callback.setSeqMapper(getSeqMapper());
 
-        String nodeID = peer.getName();
+        String nodeID = peer.getNodeID();
 
         logger.debug(
                 " request content, node: {}, seq: {}, type: {}, timeout: {}, content: {}",

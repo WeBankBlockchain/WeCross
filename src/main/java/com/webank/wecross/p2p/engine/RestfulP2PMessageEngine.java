@@ -4,7 +4,7 @@ import com.webank.wecross.exception.Status;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.Peer;
+import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.p2p.netty.message.MessageType;
 import com.webank.wecross.p2p.netty.request.Request;
 import com.webank.wecross.p2p.netty.response.Response;

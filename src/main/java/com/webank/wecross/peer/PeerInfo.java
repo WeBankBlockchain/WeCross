@@ -1,6 +1,6 @@
 package com.webank.wecross.peer;
 
-import com.webank.wecross.p2p.Peer;
+import com.webank.wecross.p2p.netty.common.Peer;
 import java.util.HashSet;
 import java.util.Set;
 

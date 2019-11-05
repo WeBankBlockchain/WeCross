@@ -4,7 +4,12 @@ import com.webank.wecross.core.SeqUtils;
 import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.Peer;
+import com.webank.wecross.p2p.netty.P2PService;
+import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.resource.Path;
+import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.TestResource;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -18,11 +23,13 @@ public class PeerManager {
 
     private P2PMessageEngine p2pEngine;
 
-    private Map<Peer, PeerInfo> peerInfos; // peer
+    private Map<Peer, PeerInfo> peerInfos = new HashMap<>(); // peer
 
     private int seq = 1; // Seq of the host
 
     private SyncPeerMessageHandler messageHandler;
+
+    private P2PService p2PService;
 
     private long peerActiveTimeout;
 
@@ -34,6 +41,7 @@ public class PeerManager {
         final long timeInterval = 5000;
         Runnable runnable =
                 new Runnable() {
+                    @Override
                     public void run() {
                         while (true) {
                             try {
@@ -293,9 +301,7 @@ public class PeerManager {
     }
 
     public Set<Peer> getConnectedPeers() {
-        // Update me if netty ready
-        Set<Peer> peers = new HashSet<>(peerInfos.keySet());
-        return peers;
+        return getP2PService().getConnections().getPeers();
     }
 
     public void syncWithPeerNetworks() {
@@ -339,11 +345,41 @@ public class PeerManager {
 
     private void workLoop() {
         try {
+            addMockResources();
             maintainPeerConnections();
             syncWithPeerNetworks();
             broadcastSeqRequest();
         } catch (Exception e) {
-            logger.warn("workloop exception:" + e);
+            logger.warn("workloop exception: {}", e);
         }
+    }
+
+    private void addMockResources() {
+        try {
+            Long timestamp = System.currentTimeMillis();
+            logger.info("Add test resource");
+            Path path =
+                    Path.decode(
+                            "test-network"
+                                    + ((timestamp / 1000) % 10)
+                                    + ".test-stub"
+                                    + ((timestamp / 100) % 100)
+                                    + ".test-resource"
+                                    + timestamp % 100);
+            Resource resource = new TestResource();
+            resource.setPath(path);
+            networkManager.addResource(resource);
+
+        } catch (Exception e) {
+            logger.warn("Add test resource exception " + e);
+        }
+    }
+
+    public P2PService getP2PService() {
+        return p2PService;
+    }
+
+    public void setP2PService(P2PService p2PService) {
+        this.p2PService = p2PService;
     }
 }

@@ -6,7 +6,6 @@ import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.engine.P2PResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
 
 public class PeerInfoCallback extends P2PMessageCallback<PeerInfoMessageData> {
     private SyncPeerMessageHandler handler;
@@ -14,8 +13,6 @@ public class PeerInfoCallback extends P2PMessageCallback<PeerInfoMessageData> {
     private Logger logger = LoggerFactory.getLogger(PeerInfoCallback.class);
 
     public PeerInfoCallback() {
-        super.setEngineCallbackMessageClassType(
-                new ParameterizedTypeReference<P2PResponse<PeerInfoMessageData>>() {});
         super.setTypeReference(new TypeReference<P2PResponse<PeerInfoMessageData>>() {});
     }
 

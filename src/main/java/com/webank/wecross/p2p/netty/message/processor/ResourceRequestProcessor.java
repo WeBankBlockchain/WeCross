@@ -27,7 +27,9 @@ import io.netty.channel.ChannelHandlerContext;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ResourceRequestProcessor implements Processor {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceRequestProcessor.class);

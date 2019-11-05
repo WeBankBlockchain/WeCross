@@ -18,7 +18,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
     private Boolean connectToServer = false;
 
     /** channel handler callback */
-    private ChannelHandlerCallBack callBack;
+    private ChannelHandlerCallBack channelHandlerCallBack;
 
     public Boolean getConnectToServer() {
         return connectToServer;
@@ -55,7 +55,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
             logger.info(" handshake success, host: {}, ctx: {}", host, hashCode);
             // ssl handshake success.
             try {
-                getCallBack().onConnect(ctx, getConnectToServer());
+                getChannelHandlerCallBack().onConnect(ctx, getConnectToServer());
             } catch (Exception e) {
                 logger.error(
                         " disconnect, host: {}, ctx: {}, error: {}",
@@ -82,18 +82,18 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
         try {
             logger.info(" channel inactive: {}", host);
 
-            getCallBack().onDisconnect(ctx);
+            getChannelHandlerCallBack().onDisconnect(ctx);
         } catch (Exception e) {
             logger.error("host: {}, ctx: {}, error: {}", host, System.identityHashCode(ctx), e);
         }
     }
 
-    public ChannelHandlerCallBack getCallBack() {
-        return callBack;
+    public ChannelHandlerCallBack getChannelHandlerCallBack() {
+        return channelHandlerCallBack;
     }
 
-    public void setCallBack(ChannelHandlerCallBack callBack) {
-        this.callBack = callBack;
+    public void setChannelHandlerCallBack(ChannelHandlerCallBack channelHandlerCallBack) {
+        this.channelHandlerCallBack = channelHandlerCallBack;
     }
 
     @Override
@@ -108,7 +108,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        getCallBack().onMessage(ctx, (ByteBuf) msg);
+        getChannelHandlerCallBack().onMessage(ctx, (ByteBuf) msg);
     }
 
     @Override

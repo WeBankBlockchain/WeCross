@@ -132,7 +132,13 @@ public class ChannelHandlerCallBack {
         if (threadPool == null) {
             callBack.onMessage(ctx, message);
         } else {
-            threadPool.execute(() -> callBack.onMessage(ctx, message));
+            threadPool.execute(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onMessage(ctx, message);
+                        }
+                    });
         }
     }
 }

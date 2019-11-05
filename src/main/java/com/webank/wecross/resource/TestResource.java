@@ -1,6 +1,6 @@
 package com.webank.wecross.resource;
 
-import com.webank.wecross.p2p.Peer;
+import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.restserver.request.GetDataRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;

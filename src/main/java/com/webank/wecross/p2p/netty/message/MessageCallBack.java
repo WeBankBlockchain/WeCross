@@ -3,7 +3,10 @@ package com.webank.wecross.p2p.netty.message;
 import com.webank.wecross.p2p.netty.SeqMapper;
 import com.webank.wecross.p2p.netty.common.Host;
 import com.webank.wecross.p2p.netty.common.Utils;
+import com.webank.wecross.p2p.netty.message.processor.HeartBeatProcessor;
 import com.webank.wecross.p2p.netty.message.processor.Processor;
+import com.webank.wecross.p2p.netty.message.processor.ResourceRequestProcessor;
+import com.webank.wecross.p2p.netty.message.processor.ResourceResponseProcessor;
 import com.webank.wecross.p2p.netty.message.proto.Message;
 import com.webank.wecross.p2p.netty.message.serialize.MessageSerializer;
 import io.netty.buffer.ByteBuf;
@@ -42,6 +45,18 @@ public class MessageCallBack {
 
     public void setProcessor(short type, Processor processor) {
         this.messageToProcessor.put(type, processor);
+    }
+
+    public HeartBeatProcessor getHeartBeatProcessor() {
+        return (HeartBeatProcessor) messageToProcessor.get(MessageType.HEARTBEAT);
+    }
+
+    public ResourceResponseProcessor getResourceResponseProcessor() {
+        return (ResourceResponseProcessor) messageToProcessor.get(MessageType.RESOURCE_RESPONSE);
+    }
+
+    public ResourceRequestProcessor getResourceRequestProcessor() {
+        return (ResourceRequestProcessor) messageToProcessor.get(MessageType.RESOURCE_REQUEST);
     }
 
     public void onMessage(ChannelHandlerContext ctx, ByteBuf byteBuf) {

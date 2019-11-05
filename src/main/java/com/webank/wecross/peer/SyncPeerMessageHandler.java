@@ -2,7 +2,7 @@ package com.webank.wecross.peer;
 
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.Peer;
+import com.webank.wecross.p2p.netty.common.Peer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -94,7 +94,6 @@ public class SyncPeerMessageHandler {
         rspMsg.setSeq(msg.getSeq());
         rspMsg.setMethod("com/webank/wecross/peer/peerInfo");
         rspMsg.setData(data);
-
         p2pEngine.asyncSendMessage(peer, rspMsg, new PeerDoNothingCallback());
     }
 

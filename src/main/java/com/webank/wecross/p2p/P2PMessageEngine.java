@@ -2,6 +2,7 @@ package com.webank.wecross.p2p;
 
 import com.webank.wecross.p2p.engine.P2PResponse;
 import com.webank.wecross.p2p.netty.P2PService;
+import com.webank.wecross.p2p.netty.common.Peer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 

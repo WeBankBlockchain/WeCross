@@ -57,7 +57,7 @@ public class Initializer {
     /** ssl handle shake timeout default 10000 ms */
     private static final Integer handShakeTimeoutMS = 10000;
 
-    private ChannelHandlerCallBack callback;
+    private ChannelHandlerCallBack channelHandlerCallBack;
     private Connections connections;
     private P2PConfig config;
 
@@ -69,12 +69,12 @@ public class Initializer {
         this.config = config;
     }
 
-    public ChannelHandlerCallBack getCallback() {
-        return callback;
+    public ChannelHandlerCallBack getChannelHandlerCallBack() {
+        return channelHandlerCallBack;
     }
 
-    public void setCallback(ChannelHandlerCallBack callback) {
-        this.callback = callback;
+    public void setChannelHandlerCallBack(ChannelHandlerCallBack channelHandlerCallBack) {
+        this.channelHandlerCallBack = channelHandlerCallBack;
     }
 
     public Connections getConnections() {
@@ -182,7 +182,7 @@ public class Initializer {
                                  * Each connection is fetched from the socketChannel, using the new handler connection information
                                  */
                                 ChannelHandler handler = new ChannelHandler();
-                                handler.setCallBack(getCallback());
+                                handler.setChannelHandlerCallBack(getChannelHandlerCallBack());
 
                                 SslHandler sslHandler = sslCtx.newHandler(ch.alloc());
                                 sslHandler.setHandshakeTimeout(
@@ -232,7 +232,7 @@ public class Initializer {
                          */
                         ChannelHandler handler = new ChannelHandler();
                         handler.setConnectToServer(true);
-                        handler.setCallBack(getCallback());
+                        handler.setChannelHandlerCallBack(getChannelHandlerCallBack());
 
                         SslHandler sslHandler = sslCtx.newHandler(ch.alloc());
                         sslHandler.setHandshakeTimeout(handShakeTimeoutMS, TimeUnit.MILLISECONDS);

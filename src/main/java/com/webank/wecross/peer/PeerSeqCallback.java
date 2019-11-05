@@ -7,7 +7,6 @@ import com.webank.wecross.p2p.engine.P2PResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.ParameterizedTypeReference;
 
 @Configuration
 public class PeerSeqCallback extends P2PMessageCallback<PeerSeqMessageData> {
@@ -16,8 +15,6 @@ public class PeerSeqCallback extends P2PMessageCallback<PeerSeqMessageData> {
 
     public PeerSeqCallback() {
         super.setTypeReference(new TypeReference<P2PResponse<PeerSeqMessageData>>() {});
-        super.setEngineCallbackMessageClassType(
-                new ParameterizedTypeReference<P2PResponse<PeerSeqMessageData>>() {});
     }
 
     @Override
