@@ -43,7 +43,7 @@ cp src/test/resources/application-sample.yml src/test/resources/application.yml
 #generate wecross cert
 bash ./scripts/build_cert.sh -c -d ./ca
 bash ./scripts/build_cert.sh -n -D ./ca -d ./ca/node
-mkdir ./src/test/resources/p2p
+mkdir -p ./src/test/resources/p2p
 cp ./ca/ca.crt ./src/test/resources/p2p/
 cp ./ca/node/node.crt ./src/test/resources/p2p/
 cp ./ca/node/node.key ./src/test/resources/p2p/
