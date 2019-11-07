@@ -19,8 +19,17 @@ public class WeCrossHost {
     private PeerManager peerManager;
 
     public void start() {
-        addTestResources();
-        peerManager.start();
+        /** start netty p2p service */
+        try {
+            addTestResources();
+            // start p2p first
+            peerManager.getP2PService().start();
+            // start peer manager
+            peerManager.start();
+        } catch (Exception e) {
+            logger.error("Startup host error: {}", e);
+            System.exit(-1);
+        }
     }
 
     public Resource getResource(Path path) throws Exception {

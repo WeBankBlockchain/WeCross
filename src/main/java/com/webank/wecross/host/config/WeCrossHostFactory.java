@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class WeCrossHostFactory {
+
     @Resource(name = "newNetworkManager")
     NetworkManager networkManager;
 

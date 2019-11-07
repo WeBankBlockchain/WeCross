@@ -1,9 +1,9 @@
-package com.webank.wecross.p2p.engine.restful;
+package com.webank.wecross.p2p.engine;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.webank.wecross.p2p.P2PMessage;
 
-public class P2PHttpResponse<T> {
+public class P2PResponse<T> {
     private String version;
     private int seq;
     private int result = 0;
