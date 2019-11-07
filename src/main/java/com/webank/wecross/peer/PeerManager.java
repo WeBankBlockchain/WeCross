@@ -67,6 +67,10 @@ public class PeerManager {
         return seq;
     }
 
+    public NetworkManager getNetworkManager() {
+        return this.networkManager;
+    }
+
     public int peerSize() {
         return peerInfos.size();
     }
@@ -301,7 +305,7 @@ public class PeerManager {
     }
 
     public Set<Peer> getConnectedPeers() {
-        return getP2PService().getConnections().getPeers();
+        return getP2PService().getConnectedPeers();
     }
 
     public void syncWithPeerNetworks() {
