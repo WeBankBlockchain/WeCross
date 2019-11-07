@@ -68,7 +68,12 @@ network-manager:
                             type: JDCHAIN_CONTRACT
                             contractAddress: '0xb5d83b5265756ec114f13226efd341342d9ed49f'
 
-peer-manager:
+# manager WeCross resources
+p2p:
+    listenIP: '0.0.0.0'
+    listenPort: 12346
+    caCert: 'classpath:p2p/ca.crt'
+    sslCert: 'classpath:p2p/node.crt'
+    sslKey: 'classpath:p2p/node.key'
     peers:
-        - peerA@127.0.0.1:8081
-        - peerB@127.0.0.1:8082
+        - 127.0.0.1:12345

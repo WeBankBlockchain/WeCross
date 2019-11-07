@@ -2,7 +2,7 @@ package com.webank.wecross.network;
 
 import com.webank.wecross.core.PathUtils;
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.Peer;
+import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
