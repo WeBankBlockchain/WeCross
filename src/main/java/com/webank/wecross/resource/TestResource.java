@@ -22,6 +22,7 @@ public class TestResource implements Resource {
     @Override
     public GetDataResponse getData(GetDataRequest request) {
         GetDataResponse response = new GetDataResponse();
+        response.setKey(request.getKey());
         response.setErrorCode(0);
         response.setErrorMessage("getData test resource success");
         response.setResult(new Object[] {request});

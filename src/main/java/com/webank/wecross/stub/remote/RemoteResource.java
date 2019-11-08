@@ -62,6 +62,7 @@ public class RemoteResource implements Resource {
     @Override
     public GetDataResponse getData(GetDataRequest request) {
         GetDataResponse response = new GetDataResponse();
+        response.setKey(request.getKey());
         try {
             List<Peer> peerList = getRandPeerList();
             for (Peer peerToSend : peerList) {
