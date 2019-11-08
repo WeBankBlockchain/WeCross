@@ -24,7 +24,6 @@ public class TestResource implements Resource {
         GetDataResponse response = new GetDataResponse();
         response.setErrorCode(0);
         response.setErrorMessage("getData test resource success");
-        response.setHash("010157f4");
         response.setResult(new Object[] {request});
         return response;
     }
@@ -35,7 +34,6 @@ public class TestResource implements Resource {
         SetDataResponse response = new SetDataResponse();
         response.setErrorCode(0);
         response.setErrorMessage("setData test resource success");
-        response.setHash("010157f4");
         response.setResult(new Object[] {request});
         return response;
     }

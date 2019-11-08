@@ -103,13 +103,13 @@ public class JDChainContractResource extends JDChainResource {
             if (kvDataEntry.getVersion() == -1) {
                 response.setErrorCode(0);
                 response.setErrorMessage("");
-                response.setValue("");
+                response.setResult(new Object[] {""});
                 return response;
             }
 
             response.setErrorCode(0);
             response.setErrorMessage("");
-            response.setValue(String.valueOf(kvDataEntry.getValue()));
+            response.setResult(new Object[] {String.valueOf(kvDataEntry.getValue())});
             return response;
         }
 
