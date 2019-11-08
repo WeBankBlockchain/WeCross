@@ -134,7 +134,7 @@ public class RestfulServiceTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"0.2\",\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"Call test resource success\",\"hash\":\"010157f4\",\"result\":[{\"sig\":\"\",\"method\":\"get\",\"args\":[]}]}}";
+                    "{\"version\":\"0.2\",\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"call test resource success\",\"hash\":\"010157f4\",\"result\":[{\"sig\":\"\",\"method\":\"get\",\"args\":[]}]}}";
             Assert.assertEquals(expectRsp, result);
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);

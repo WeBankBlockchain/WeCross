@@ -168,7 +168,7 @@ public class PeerManager {
         }
 
         msg.setData(null);
-        msg.setVersion("0.1");
+        msg.setVersion("0.2");
         msg.setMethod("requestPeerInfo");
 
         PeerInfoCallback callback = new PeerInfoCallback();

@@ -3,6 +3,7 @@ package com.webank.wecross.restserver.response;
 public class GetDataResponse {
     private Integer errorCode;
     private String errorMessage;
+    private String value;
 
     public Integer getErrorCode() {
         return errorCode;
@@ -19,8 +20,6 @@ public class GetDataResponse {
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
     }
-
-    private String value;
 
     public String getValue() {
         return value;
