@@ -17,6 +17,7 @@ import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -198,5 +199,9 @@ public class P2PService {
         } else {
             callback.sendFailed(StatusCode.UNREACHABLE, "node unreachable");
         }
+    }
+
+    public Set<Peer> getConnectedPeers() {
+        return getConnections().getPeers();
     }
 }
