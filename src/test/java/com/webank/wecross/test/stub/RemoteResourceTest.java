@@ -130,7 +130,7 @@ public class RemoteResourceTest {
         GetDataResponse response = resource.getData(request);
         Assert.assertEquals(new Integer(0), response.getErrorCode());
         Assert.assertTrue(response.getErrorMessage().contains("getData test resource success"));
-        Assert.assertEquals(request, response.getResult()[0]);
+        Assert.assertEquals(request.toString(), response.getValue());
         System.out.println(response.getErrorMessage());
     }
 
@@ -147,7 +147,6 @@ public class RemoteResourceTest {
         SetDataResponse response = resource.setData(request);
         Assert.assertEquals(new Integer(0), response.getErrorCode());
         Assert.assertTrue(response.getErrorMessage().contains("setData test resource success"));
-        Assert.assertEquals(request, response.getResult()[0]);
         System.out.println(response.getErrorMessage());
     }
 

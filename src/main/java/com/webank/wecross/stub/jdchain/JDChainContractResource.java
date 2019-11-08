@@ -58,7 +58,6 @@ public class JDChainContractResource extends JDChainResource {
     @Override
     public GetDataResponse getData(GetDataRequest request) {
         GetDataResponse response = new GetDataResponse();
-        response.setKey(request.getKey());
         String[] splitKey = request.getKey().split("\\|");
         if (splitKey.length != 2) {
             logger.error(
@@ -104,13 +103,13 @@ public class JDChainContractResource extends JDChainResource {
             if (kvDataEntry.getVersion() == -1) {
                 response.setErrorCode(0);
                 response.setErrorMessage("");
-                response.setResult(new Object[] {""});
+                response.setValue("");
                 return response;
             }
 
             response.setErrorCode(0);
             response.setErrorMessage("");
-            response.setResult(new Object[] {String.valueOf(kvDataEntry.getValue())});
+            response.setValue(String.valueOf(kvDataEntry.getValue()));
             return response;
         }
 

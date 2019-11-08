@@ -3,8 +3,7 @@ package com.webank.wecross.restserver.response;
 public class GetDataResponse {
     private Integer errorCode;
     private String errorMessage;
-    private String key;
-    private Object result[];
+    private String value;
 
     public Integer getErrorCode() {
         return errorCode;
@@ -22,19 +21,11 @@ public class GetDataResponse {
         this.errorMessage = errorMessage;
     }
 
-    public Object[] getResult() {
-        return result;
+    public String getValue() {
+        return value;
     }
 
-    public void setResult(Object[] result) {
-        this.result = result;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
+    public void setValue(String value) {
+        this.value = value;
     }
 }

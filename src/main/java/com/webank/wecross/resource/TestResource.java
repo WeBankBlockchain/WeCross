@@ -22,10 +22,9 @@ public class TestResource implements Resource {
     @Override
     public GetDataResponse getData(GetDataRequest request) {
         GetDataResponse response = new GetDataResponse();
-        response.setKey(request.getKey());
         response.setErrorCode(0);
         response.setErrorMessage("getData test resource success");
-        response.setResult(new Object[] {request});
+        response.setValue(request.toString());
         return response;
     }
 
@@ -35,7 +34,6 @@ public class TestResource implements Resource {
         SetDataResponse response = new SetDataResponse();
         response.setErrorCode(0);
         response.setErrorMessage("setData test resource success");
-        response.setResult(new Object[] {request});
         return response;
     }
 
