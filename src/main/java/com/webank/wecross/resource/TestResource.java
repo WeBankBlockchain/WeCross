@@ -21,19 +21,30 @@ public class TestResource implements Resource {
 
     @Override
     public GetDataResponse getData(GetDataRequest request) {
-        return null;
+        GetDataResponse response = new GetDataResponse();
+        response.setErrorCode(0);
+        response.setErrorMessage("getData test resource success");
+        response.setHash("010157f4");
+        response.setResult(new Object[] {request});
+        return response;
     }
 
     @Override
     public SetDataResponse setData(SetDataRequest request) {
-        return null;
+
+        SetDataResponse response = new SetDataResponse();
+        response.setErrorCode(0);
+        response.setErrorMessage("setData test resource success");
+        response.setHash("010157f4");
+        response.setResult(new Object[] {request});
+        return response;
     }
 
     @Override
     public TransactionResponse call(TransactionRequest request) {
         TransactionResponse response = new TransactionResponse();
         response.setErrorCode(0);
-        response.setErrorMessage("Call test resource success");
+        response.setErrorMessage("call test resource success");
         response.setHash("010157f4");
         response.setResult(new Object[] {request});
         return response;
