@@ -61,14 +61,72 @@ public class RemoteResource implements Resource {
 
     @Override
     public GetDataResponse getData(GetDataRequest request) {
+        GetDataResponse response = new GetDataResponse();
+        try {
+            List<Peer> peerList = getRandPeerList();
+            for (Peer peerToSend : peerList) {
+                try {
+                    P2PMessage<GetDataRequest> p2pReq = new P2PMessage<>();
+                    p2pReq.setVersion("0.2");
+                    p2pReq.newSeq();
+                    p2pReq.setMethod(path.toURI() + "/getData");
+                    p2pReq.setData(request);
 
-        return null;
+                    response =
+                            (GetDataResponse)
+                                    sendRemote(
+                                            peerToSend,
+                                            p2pReq,
+                                            new TypeReference<P2PResponse<GetDataResponse>>() {});
+
+                    if (response.getErrorCode() == 0) {
+                        return response;
+                    }
+                } catch (Exception e) {
+                    continue;
+                }
+            }
+            throw new Exception("Not an available peer to request");
+        } catch (Exception e) {
+            response.setErrorCode(-1);
+            response.setErrorMessage("Call remote resource exception: " + e.getLocalizedMessage());
+        }
+        return response;
     }
 
     @Override
     public SetDataResponse setData(SetDataRequest request) {
+        SetDataResponse response = new SetDataResponse();
+        try {
+            List<Peer> peerList = getRandPeerList();
+            for (Peer peerToSend : peerList) {
+                try {
+                    P2PMessage<SetDataRequest> p2pReq = new P2PMessage<>();
+                    p2pReq.setVersion("0.2");
+                    p2pReq.newSeq();
+                    p2pReq.setMethod(path.toURI() + "/setData");
+                    p2pReq.setData(request);
 
-        return null;
+                    response =
+                            (SetDataResponse)
+                                    sendRemote(
+                                            peerToSend,
+                                            p2pReq,
+                                            new TypeReference<P2PResponse<SetDataResponse>>() {});
+
+                    if (response.getErrorCode() == 0) {
+                        return response;
+                    }
+                } catch (Exception e) {
+                    continue;
+                }
+            }
+            throw new Exception("Not an available peer to request");
+        } catch (Exception e) {
+            response.setErrorCode(-1);
+            response.setErrorMessage("Call remote resource exception: " + e.getLocalizedMessage());
+        }
+        return response;
     }
 
     @Override
@@ -79,12 +137,18 @@ public class RemoteResource implements Resource {
             for (Peer peerToSend : peerList) {
                 try {
                     P2PMessage<TransactionRequest> p2pReq = new P2PMessage<>();
-                    p2pReq.setVersion("0.1");
+                    p2pReq.setVersion("0.2");
                     p2pReq.newSeq();
                     p2pReq.setMethod(path.toURI() + "/call");
                     p2pReq.setData(request);
 
-                    response = (TransactionResponse) sendRemote(peerToSend, p2pReq);
+                    response =
+                            (TransactionResponse)
+                                    sendRemote(
+                                            peerToSend,
+                                            p2pReq,
+                                            new TypeReference<
+                                                    P2PResponse<TransactionResponse>>() {});
 
                     if (response.getErrorCode() == 0) {
                         return response;
@@ -110,12 +174,18 @@ public class RemoteResource implements Resource {
             for (Peer peerToSend : peerList) {
                 try {
                     P2PMessage<TransactionRequest> p2pReq = new P2PMessage<>();
-                    p2pReq.setVersion("0.1");
+                    p2pReq.setVersion("0.2");
                     p2pReq.newSeq();
                     p2pReq.setMethod(path.toURI() + "/sendTransaction");
                     p2pReq.setData(request);
 
-                    response = (TransactionResponse) sendRemote(peerToSend, p2pReq);
+                    response =
+                            (TransactionResponse)
+                                    sendRemote(
+                                            peerToSend,
+                                            p2pReq,
+                                            new TypeReference<
+                                                    P2PResponse<TransactionResponse>>() {});
 
                     if (response.getErrorCode() == 0) {
                         return response;
@@ -178,15 +248,16 @@ public class RemoteResource implements Resource {
         return peerList;
     }
 
-    private TransactionResponse sendRemote(Peer peer, P2PMessage request) throws Exception {
+    private Object sendRemote(Peer peer, P2PMessage request, TypeReference responseType)
+            throws Exception {
 
         class SemaphoreCallback extends P2PMessageCallback {
 
             public transient Semaphore semaphore = new Semaphore(1, true);
-            private TransactionResponse responseData;
+            private Object responseData;
 
             public SemaphoreCallback() {
-                super.setTypeReference(new TypeReference<P2PResponse<TransactionResponse>>() {});
+                super.setTypeReference(responseType);
                 try {
                     semaphore.acquire(1);
 
@@ -197,11 +268,11 @@ public class RemoteResource implements Resource {
 
             @Override
             public void onResponse(int status, String message, P2PMessage msg) {
-                responseData = (TransactionResponse) msg.getData();
+                responseData = msg.getData();
                 semaphore.release();
             }
 
-            public TransactionResponse getResponseData() {
+            public Object getResponseData() {
                 return responseData;
             }
         }
