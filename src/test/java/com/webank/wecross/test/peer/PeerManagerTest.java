@@ -9,13 +9,17 @@ import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.peer.PeerInfoMessageData;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.peer.PeerSeqMessageData;
+import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.test.Mock.MockNetworkManagerFactory;
 import com.webank.wecross.test.Mock.MockP2PMessageEngineFactory;
 import com.webank.wecross.test.Mock.MockP2PService;
 import com.webank.wecross.test.Mock.MockPeerManagerFactory;
 import com.webank.wecross.test.Mock.P2PEngineMessageFilter;
+
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -72,10 +76,10 @@ public class PeerManagerTest {
             Assert.assertEquals("requestPeerInfo", msg.getMethod());
             Assert.assertNotEquals(0, msg.getSeq());
 
-            Set<String> activeResources = new HashSet<>();
-            activeResources.add("network.stub.resource0");
-            activeResources.add("network.stub.resource1");
-            activeResources.add("network.stub.resource2");
+            Set<ResourceInfo> activeResources = new HashSet<>();
+            activeResources.add(new ResourceInfo("network.stub.resource0"));
+            activeResources.add(new ResourceInfo("network.stub.resource1"));
+            activeResources.add(new ResourceInfo("network.stub.resource2"));
 
             PeerInfoMessageData data = new PeerInfoMessageData();
             data.setSeq(12345);
@@ -137,13 +141,19 @@ public class PeerManagerTest {
         Thread.sleep(500); // waiting for syncing
         peerManager.syncWithPeerNetworks();
 
-        Set<String> resources = peerManager.getAllPeerResource();
+        Map<String, ResourceInfo> resources = peerManager.getNetworkManager().getAllNetworkStubResourceInfo(false);
         System.out.println(resources);
-        System.out.println(peerManager.getNetworkManager().getAllNetworkStubResourceName(false));
 
         Assert.assertTrue(0 < resources.size());
-        Assert.assertEquals(
-                peerManager.getNetworkManager().getAllNetworkStubResourceName(false), resources);
+
+        Set<String> paths = new HashSet<>();
+        for(ResourceInfo info: resources.values()){
+            paths.add(info.getPath());
+        }
+
+        Assert.assertTrue(paths.contains("network.stub.resource0"));
+        Assert.assertTrue(paths.contains("network.stub.resource1"));
+        Assert.assertTrue(paths.contains("network.stub.resource2"));
 
         peerManager.clearPeerInfos();
     }
@@ -164,13 +174,19 @@ public class PeerManagerTest {
         Thread.sleep(500); // waiting for syncing
         peerManager.syncWithPeerNetworks();
 
-        Set<String> resources = peerManager.getAllPeerResource();
+        Map<String, ResourceInfo> resources = peerManager.getNetworkManager().getAllNetworkStubResourceInfo(false);
         System.out.println(resources);
-        System.out.println(peerManager.getNetworkManager().getAllNetworkStubResourceName(false));
 
         Assert.assertTrue(0 < resources.size());
-        Assert.assertEquals(
-                peerManager.getNetworkManager().getAllNetworkStubResourceName(false), resources);
+
+        Set<String> paths = new HashSet<>();
+        for(ResourceInfo info: resources.values()){
+            paths.add(info.getPath());
+        }
+
+        Assert.assertTrue(paths.contains("network.stub.resource0"));
+        Assert.assertTrue(paths.contains("network.stub.resource1"));
+        Assert.assertTrue(paths.contains("network.stub.resource2"));
 
         peerManager.clearPeerInfos();
     }

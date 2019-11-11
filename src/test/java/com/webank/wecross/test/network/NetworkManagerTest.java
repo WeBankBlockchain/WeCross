@@ -5,8 +5,10 @@ import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.resource.Path;
+import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.stub.remote.RemoteResource;
+
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Resource;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -93,27 +96,27 @@ public class NetworkManagerTest {
         Set<PeerInfo> activePeers = new HashSet<>();
         PeerInfo peer0 = new PeerInfo(new Peer("peer0"));
         activePeers.add(peer0);
-        Set<String> activeResourcesname = new HashSet<>();
+        Set<ResourceInfo> activeResourceInfos = new HashSet<>();
         for (int i = 0; i < 3; i++) {
             RemoteResource resource = new RemoteResource(mockPeer, 1, p2pEngine);
             String resourceName = "current.bcos.contract" + i;
-            activeResourcesname.add(resourceName);
+            activeResourceInfos.add(new ResourceInfo(resourceName));
             resource.setPath(Path.decode(resourceName));
             resource.setDistance(1); // i == 0, set it as local resource
             networkManager.addResource(resource);
         }
-        peer0.setResources(100, activeResourcesname);
+        peer0.setResources(100, activeResourceInfos);
         Assert.assertEquals(5, networkManager.getAllNetworkStubResourceName(false).size());
 
         PeerInfo peer1 = new PeerInfo(new Peer("peer1"));
         activePeers.add(peer1);
-        Set<String> newResourcesname = new HashSet<>();
+        Set<ResourceInfo> newResourceInfos = new HashSet<>();
         for (int i = 0; i < 4; i++) {
             RemoteResource resource = new RemoteResource(mockPeer, 1, p2pEngine);
             String resourceName = "new.bcos.contract" + i;
-            newResourcesname.add(resourceName);
+            newResourceInfos.add(new ResourceInfo(resourceName));
         }
-        peer1.setResources(100, newResourcesname);
+        peer1.setResources(100, newResourceInfos);
 
         networkManager.updateActivePeerNetwork(activePeers);
         Assert.assertEquals(7, networkManager.getAllNetworkStubResourceName(false).size());
@@ -125,8 +128,8 @@ public class NetworkManagerTest {
                     networkManager.getResource(Path.decode(resourceName)).getPeers().size(), 1);
         }
 
-        activeResourcesname.addAll(newResourcesname);
-        peer0.setResources(200, activeResourcesname);
+        activeResourceInfos.addAll(newResourceInfos);
+        peer0.setResources(200, activeResourceInfos);
         networkManager.updateActivePeerNetwork(activePeers);
 
         // Test resource contain more peers

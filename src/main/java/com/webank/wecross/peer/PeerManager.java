@@ -8,13 +8,18 @@ import com.webank.wecross.p2p.netty.P2PService;
 import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.resource.TestResource;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.webank.wecross.resource.ResourceInfo.isEqualInfos;
 
 public class PeerManager {
     Logger logger = LoggerFactory.getLogger(PeerManager.class);
@@ -33,7 +38,7 @@ public class PeerManager {
 
     private long peerActiveTimeout;
 
-    private Set<String> activeResources = new HashSet<>();
+    private Map<String, ResourceInfo> activeResources = new HashMap<>();
 
     public void start() {
         newSeq();
@@ -112,14 +117,12 @@ public class PeerManager {
 
     public Object onRestfulPeerMessage(String method, P2PMessage msg) {
         switch (method) {
-            case "requestSeq":
-                {
-                    return handleRequestSeq();
-                }
-            case "requestPeerInfo":
-                {
-                    return handleRequestPeerInfo();
-                }
+            case "requestSeq": {
+                return handleRequestSeq();
+            }
+            case "requestPeerInfo": {
+                return handleRequestPeerInfo();
+            }
             default:
                 messageHandler.onPeerMessage(new Peer(), method, msg);
         }
@@ -202,10 +205,15 @@ public class PeerManager {
     }
 
     public PeerInfoMessageData handleRequestPeerInfo() {
+        Set<ResourceInfo> activeResourceSet = new HashSet<>();
+        for (ResourceInfo activeResource : activeResources.values()) {
+            activeResourceSet.add(activeResource);
+        }
+
         logger.info("Receive request peer info");
         PeerInfoMessageData data = new PeerInfoMessageData();
         data.setSeq(seq);
-        data.setResources(activeResources);
+        data.setResources(activeResourceSet);
 
         logger.info("Respond peerInfo to peer, resource:" + activeResources);
         return data;
@@ -220,7 +228,7 @@ public class PeerManager {
             int currentSeq = data.getSeq();
             if (hasPeerChanged(peer, currentSeq)) {
                 // compare and update
-                Set<String> currentResources = data.getResources();
+                Set<ResourceInfo> currentResources = data.getResources();
                 logger.info(
                         "Update peerInfo from {}, seq:{}, resource:{}",
                         peer,
@@ -243,18 +251,6 @@ public class PeerManager {
         } else {
             logger.warn("Receive unrecognized seq message from peer:" + peer);
         }
-    }
-
-    public Set<String> getAllPeerResource() {
-        Set<String> ret = new HashSet<>();
-        for (PeerInfo peerInfo : peerInfos.values()) {
-            if (peerInfo.getResources() != null) {
-                for (String resource : peerInfo.getResources()) {
-                    ret.add(resource);
-                }
-            }
-        }
-        return ret;
     }
 
     public void setP2pEngine(P2PMessageEngine p2pEngine) {
@@ -287,12 +283,12 @@ public class PeerManager {
         this.peerActiveTimeout = peerActiveTimeout;
     }
 
-    public Set<String> getActiveResources() {
+    public Map<String, ResourceInfo> getActiveResourceInfos() {
         return activeResources;
     }
 
-    public void setActiveResources(Set<String> activeResources) {
-        if (!this.activeResources.equals(activeResources)) {
+    public void setActiveResourceInfos(Map<String, ResourceInfo> activeResources) {
+        if (!isEqualInfos(this.activeResources, activeResources)) {
             this.newSeq();
             this.activeResources = activeResources;
             logger.info(
@@ -318,9 +314,9 @@ public class PeerManager {
         logger.info("Current active resource:" + activeResources);
 
         // Update active resource back to peerManager
-        Set<String> activeLocalResources = networkManager.getAllNetworkStubResourceName(true);
+        Map<String, ResourceInfo> activeLocalResources = networkManager.getAllNetworkStubResourceInfo(true);
         logger.info("Current active local resources:" + activeLocalResources);
-        this.setActiveResources(activeLocalResources);
+        this.setActiveResourceInfos(activeLocalResources);
     }
 
     public void maintainPeerConnections() {

@@ -1,13 +1,15 @@
 package com.webank.wecross.peer;
 
 import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.resource.ResourceInfo;
+
 import java.util.HashSet;
 import java.util.Set;
 
 public class PeerInfo {
     Peer peer;
     private int seq = 1;
-    private Set<String> resources = new HashSet<>();
+    private Set<ResourceInfo> resourceInfos = new HashSet<>();
     private long lastActiveTimestamp = System.currentTimeMillis();
 
     public PeerInfo(Peer peer) {
@@ -22,13 +24,10 @@ public class PeerInfo {
         this.seq = seq;
     }
 
-    public Set<String> getResources() {
-        return resources;
-    }
 
-    public synchronized void setResources(int seq, Set<String> resources) {
+    public synchronized void setResources(int seq, Set<ResourceInfo> resourceInfos) {
         this.setSeq(seq);
-        this.resources = resources;
+        this.resourceInfos = resourceInfos;
     }
 
     public void noteAlive() {
@@ -50,5 +49,13 @@ public class PeerInfo {
 
     public void setPeer(Peer peer) {
         this.peer = peer;
+    }
+
+    public Set<ResourceInfo> getResourceInfos() {
+        return resourceInfos;
+    }
+
+    public void setResourceInfos(Set<ResourceInfo> resourceInfos) {
+        this.resourceInfos = resourceInfos;
     }
 }

@@ -31,6 +31,7 @@ public class RemoteResource implements Resource {
     private int distance; // How many jumps to local stub
     private Set<Peer> peers;
     private Path path;
+    private String checksum;
 
     public RemoteResource(Set<Peer> peers, int distance, P2PMessageEngine p2pEngine) {
         setPeers(peers);
@@ -217,6 +218,15 @@ public class RemoteResource implements Resource {
     @Override
     public int getDistance() {
         return distance;
+    }
+
+    @Override
+    public String getChecksum() {
+        return checksum;
+    }
+
+    public void setChecksum(String checksum) {
+        this.checksum = checksum;
     }
 
     @Override
