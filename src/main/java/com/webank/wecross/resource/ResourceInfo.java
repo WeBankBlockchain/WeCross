@@ -32,11 +32,24 @@ public class ResourceInfo {
     }
 
     @Override
+    public int hashCode() {
+        int result = 17;
+        result = result * 31 + (this.path == null ? 0 : this.path.hashCode());
+        result = result * 31 + (this.checksum == null ? 0 : this.checksum.hashCode());
+        return result;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         try {
+            if (obj == this) return true;
+            if (!(obj instanceof ResourceInfo)) {
+                return false;
+            }
+
+            ResourceInfo info = (ResourceInfo) obj;
             // no need to check distance
-            return ((ResourceInfo) obj).path.equals(this.path)
-                    && ((ResourceInfo) obj).checksum.equals(this.checksum);
+            return info.path.equals(this.path) && info.checksum.equals(this.checksum);
 
         } catch (Exception e) {
             return false;
