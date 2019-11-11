@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -279,10 +281,10 @@ public class NetworkManager {
         return ret;
     }
 
-    public Map<String, Set<Peer>> getResource2Peers(Set<PeerInfo> peerInfos) {
+    public Map<String, Pair<String,Set<Peer>>> getResource2Peers(Set<PeerInfo> peerInfos) {
         Set<String> invalidResources = getInvalidResources(peerInfos);
 
-        Map<String, Set<Peer>> resource2Peers = new HashMap<>();
+        Map<String, Pair<String,Set<Peer>>> resource2Peers = new HashMap<>();
 
         for (PeerInfo peerInfo : peerInfos) {
             for (ResourceInfo info : peerInfo.getResourceInfos()) {
@@ -291,12 +293,16 @@ public class NetworkManager {
                     continue;
                 }
 
-                Set<Peer> theResourcePeers = resource2Peers.get(info.getPath());
-                if (theResourcePeers == null) {
-                    theResourcePeers = new HashSet<>();
+                Pair<String,Set<Peer>> checkSumAndPeers = resource2Peers.get(info.getPath());
+                if (checkSumAndPeers == null){
+                    checkSumAndPeers = new Pair<>(info.getChecksum(), new HashSet<>());
                 }
+
+                Set<Peer> theResourcePeers = checkSumAndPeers.getValue();
+
                 theResourcePeers.add(peerInfo.getPeer());
-                resource2Peers.put(info.getPath(), theResourcePeers); // Replace
+           
+                resource2Peers.put(info.getPath(), checkSumAndPeers); // Replace
             }
         }
         return resource2Peers;
@@ -305,7 +311,7 @@ public class NetworkManager {
     public void updateActivePeerNetwork(Set<PeerInfo> peerInfos) {
         lock.writeLock().lock();
         try {
-            Map<String, Set<Peer>> resource2Peers = getResource2Peers(peerInfos);
+            Map<String, Pair<String,Set<Peer>>> resource2Peers = getResource2Peers(peerInfos);
 
             Set<String> currentResources = getAllNetworkStubResourceName(false);
             logger.debug("Old resources:{}", currentResources);
@@ -334,8 +340,11 @@ public class NetworkManager {
             logger.debug("Add new remote resources " + resources2Add);
             for (String resource : resources2Add) {
                 try {
-                    Set<Peer> newPeers = resource2Peers.get(resource);
+                    Pair<String, Set<Peer>> checksumAndPeers = resource2Peers.get(resource);
+                    String checksum = checksumAndPeers.getKey();
+                    Set<Peer> newPeers = checksumAndPeers.getValue();
                     Resource newResource = new RemoteResource(newPeers, 1, p2pEngine);
+                    ((RemoteResource) newResource).setChecksum(checksum);
                     newResource.setPath(Path.decode(resource));
                     addResource(newResource);
                 } catch (Exception e) {
@@ -347,9 +356,16 @@ public class NetworkManager {
             logger.debug("Update remote resources " + resources2Update);
             for (String resource : resources2Update) {
                 try {
-                    Set<Peer> newPeers = resource2Peers.get(resource);
+                    Pair<String, Set<Peer>> checksumAndPeers = resource2Peers.get(resource);
+                    String checksum = checksumAndPeers.getKey();
+                    Set<Peer> newPeers = checksumAndPeers.getValue();
                     Resource resource2Update = getResource(Path.decode(resource));
                     resource2Update.setPeers(newPeers);
+
+                    if (resource2Update.getDistance() > 1) {
+                        ((RemoteResource) resource2Update).setChecksum(checksum);
+                    }
+
                 } catch (Exception e) {
                     logger.error(
                             "Update remote resources exception: resource:{}, exception:{}",
