@@ -5,6 +5,7 @@ import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.resource.Path;
+import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.stub.remote.RemoteResource;
@@ -194,9 +195,13 @@ public class NetworkManagerTest {
     }
 
     @Test
-    public void updateActivePeerNetworkTest() {
+    public void updateActivePeerNetworkTest() throws Exception {
         NetworkManager networkManager = new NetworkManager();
         Set<PeerInfo> peerInfos = newMockInvalidPeerInfos();
+
+        Resource localResource = new TestResource();
+        localResource.setPath(Path.decode("network.stub.resource1"));
+        networkManager.addResource(localResource);
 
         networkManager.updateActivePeerNetwork(peerInfos);
 

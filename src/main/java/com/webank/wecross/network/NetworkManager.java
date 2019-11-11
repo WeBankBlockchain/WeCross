@@ -40,7 +40,7 @@ public class NetworkManager {
         return response;
     }
 
-    public Resource getResource(Path path) throws Exception {
+    public Resource getResource(Path path) {
         lock.readLock().lock();
         try {
             Network network = getNetwork(path);
@@ -54,11 +54,13 @@ public class NetworkManager {
                     return resource;
                 }
             }
-
             return null;
+        } catch (Exception e) {
+            logger.debug("Exception: " + e);
         } finally {
             lock.readLock().unlock();
         }
+        return null;
     }
 
     public void addResource(Resource resource) throws Exception {
@@ -136,16 +138,10 @@ public class NetworkManager {
     }
 
     public Map<String, ResourceInfo> getAllNetworkStubResourceInfo(boolean ignoreRemote) {
-        Set<Path> resourcePaths;
-        try {
-            resourcePaths = getAllNetworkStubResourcePath(ignoreRemote);
-        } catch (Exception e) {
-            logger.warn("getAllNetworkStubResourcePath exception, return null. Exception: " + e);
-            return null;
-        }
 
         lock.readLock().lock();
         try {
+            Set<Path> resourcePaths = getAllNetworkStubResourcePath(ignoreRemote);
             Map<String, ResourceInfo> ret = new HashMap<>();
 
             for (Path path : resourcePaths) {
@@ -163,9 +159,12 @@ public class NetworkManager {
             }
 
             return ret;
+        } catch (Exception e) {
+            logger.debug("Exception: " + e);
         } finally {
             lock.readLock().unlock();
         }
+        return null;
     }
 
     public Set<String> getAllNetworkStubResourceName(boolean ignoreRemote) {
@@ -192,7 +191,7 @@ public class NetworkManager {
         }
     }
 
-    public Set<Path> getAllNetworkStubResourcePath(boolean ignoreRemote) throws Exception {
+    public Set<Path> getAllNetworkStubResourcePath(boolean ignoreRemote) {
         lock.readLock().lock();
         try {
             Set<String> resourcesString = getAllNetworkStubResourceName(ignoreRemote);
@@ -201,20 +200,19 @@ public class NetworkManager {
                 ret.add(Path.decode(str));
             }
             return ret;
+        } catch (Exception e) {
+            logger.debug("Exception: " + e);
         } finally {
             lock.readLock().unlock();
         }
+        return null;
     }
 
     public Set<String> getInvalidResources(Set<PeerInfo> peerInfos) {
+        class Path2Checksum2PeerInfos {
+            Map<String, Map<String, Set<PeerInfo>>> path2Checksum2PeerInfos = new HashMap<>();
 
-        // Generate a map with: path -> checksum -> peerInfo set
-        Map<String, Map<String, Set<PeerInfo>>> path2Checksum2PeerInfos = new HashMap<>();
-        for (PeerInfo peerInfo : peerInfos) {
-            for (ResourceInfo resourceInfo : peerInfo.getResourceInfos()) {
-                String path = resourceInfo.getPath();
-                String checksum = resourceInfo.getChecksum();
-
+            public void update(String path, String checksum, PeerInfo peerInfo) {
                 Map<String, Set<PeerInfo>> theChecksum2PeerInfos =
                         path2Checksum2PeerInfos.get(path);
                 if (theChecksum2PeerInfos == null) {
@@ -231,6 +229,27 @@ public class NetworkManager {
                 theChecksum2PeerInfos.putIfAbsent(checksum, thePeerInfos);
                 path2Checksum2PeerInfos.putIfAbsent(path, theChecksum2PeerInfos);
             }
+
+            public Set<Map.Entry<String, Map<String, Set<PeerInfo>>>> entrySet() {
+                return path2Checksum2PeerInfos.entrySet();
+            }
+        }
+
+        // Generate a map with: path -> checksum -> peerInfo set
+        Path2Checksum2PeerInfos path2Checksum2PeerInfos = new Path2Checksum2PeerInfos();
+        for (PeerInfo peerInfo : peerInfos) {
+            for (ResourceInfo resourceInfo : peerInfo.getResourceInfos()) {
+                String path = resourceInfo.getPath();
+                String checksum = resourceInfo.getChecksum();
+                path2Checksum2PeerInfos.update(path, checksum, peerInfo);
+            }
+        }
+        // add my local resource info
+        Set<Path> localPaths = getAllNetworkStubResourcePath(true);
+        for (Path path : localPaths) {
+            Resource localResource = getResource(path);
+            path2Checksum2PeerInfos.update(
+                    path.toString(), localResource.getChecksum(), new PeerInfo(new Peer("myself")));
         }
 
         Set<String> ret = new HashSet<>();
