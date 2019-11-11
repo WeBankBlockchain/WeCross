@@ -1,7 +1,6 @@
 package com.webank.wecross.peer;
 
 import com.webank.wecross.resource.ResourceInfo;
-
 import java.util.HashSet;
 import java.util.Set;
 

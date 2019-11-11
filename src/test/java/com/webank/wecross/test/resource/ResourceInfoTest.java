@@ -1,18 +1,12 @@
 package com.webank.wecross.test.resource;
 
-import com.webank.wecross.resource.Path;
-import com.webank.wecross.resource.Resource;
+import static com.webank.wecross.resource.ResourceInfo.isEqualInfos;
+
 import com.webank.wecross.resource.ResourceInfo;
-import com.webank.wecross.resource.TestResource;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static com.webank.wecross.resource.ResourceInfo.isEqualInfos;
 
 public class ResourceInfoTest {
     @Test
@@ -34,12 +28,13 @@ public class ResourceInfoTest {
         for (int i = 0; i < num; i++) {
             ResourceInfo info = new ResourceInfo();
             int id = i + startId;
-            String path = "test-network"
-                    + ((id / 1000) % 10)
-                    + ".test-stub"
-                    + ((id / 100) % 100)
-                    + ".test-resource"
-                    + id % 100;
+            String path =
+                    "test-network"
+                            + ((id / 1000) % 10)
+                            + ".test-stub"
+                            + ((id / 100) % 100)
+                            + ".test-resource"
+                            + id % 100;
             info.setPath(path);
             info.setChecksum("0xaabbccdd" + id);
             info.setDistance(id % 2);

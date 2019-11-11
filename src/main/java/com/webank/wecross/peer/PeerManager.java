@@ -1,5 +1,7 @@
 package com.webank.wecross.peer;
 
+import static com.webank.wecross.resource.ResourceInfo.isEqualInfos;
+
 import com.webank.wecross.core.SeqUtils;
 import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
@@ -10,16 +12,12 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.resource.TestResource;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.webank.wecross.resource.ResourceInfo.isEqualInfos;
 
 public class PeerManager {
     Logger logger = LoggerFactory.getLogger(PeerManager.class);
@@ -117,12 +115,14 @@ public class PeerManager {
 
     public Object onRestfulPeerMessage(String method, P2PMessage msg) {
         switch (method) {
-            case "requestSeq": {
-                return handleRequestSeq();
-            }
-            case "requestPeerInfo": {
-                return handleRequestPeerInfo();
-            }
+            case "requestSeq":
+                {
+                    return handleRequestSeq();
+                }
+            case "requestPeerInfo":
+                {
+                    return handleRequestPeerInfo();
+                }
             default:
                 messageHandler.onPeerMessage(new Peer(), method, msg);
         }
@@ -314,7 +314,8 @@ public class PeerManager {
         logger.info("Current active resource:" + activeResources);
 
         // Update active resource back to peerManager
-        Map<String, ResourceInfo> activeLocalResources = networkManager.getAllNetworkStubResourceInfo(true);
+        Map<String, ResourceInfo> activeLocalResources =
+                networkManager.getAllNetworkStubResourceInfo(true);
         logger.info("Current active local resources:" + activeLocalResources);
         this.setActiveResourceInfos(activeLocalResources);
     }

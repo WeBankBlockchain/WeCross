@@ -13,7 +13,6 @@ import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.remote.RemoteResource;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,7 +160,6 @@ public class NetworkManager {
                     logger.debug("Jump exception resources: " + path.toString());
                     continue;
                 }
-
             }
 
             return ret;
@@ -209,11 +206,71 @@ public class NetworkManager {
         }
     }
 
-    private Map<String, Set<Peer>> getResource2Peers(Set<PeerInfo> peerInfos) {
+    public Set<String> getInvalidResources(Set<PeerInfo> peerInfos) {
+
+        // Generate a map with: path -> checksum -> peerInfo set
+        Map<String, Map<String, Set<PeerInfo>>> path2Checksum2PeerInfos = new HashMap<>();
+        for (PeerInfo peerInfo : peerInfos) {
+            for (ResourceInfo resourceInfo : peerInfo.getResourceInfos()) {
+                String path = resourceInfo.getPath();
+                String checksum = resourceInfo.getChecksum();
+
+                Map<String, Set<PeerInfo>> theChecksum2PeerInfos =
+                        path2Checksum2PeerInfos.get(path);
+                if (theChecksum2PeerInfos == null) {
+                    theChecksum2PeerInfos = new HashMap<>();
+                }
+
+                Set<PeerInfo> thePeerInfos = theChecksum2PeerInfos.get(checksum);
+                if (thePeerInfos == null) {
+                    thePeerInfos = new HashSet<>();
+                }
+
+                thePeerInfos.add(peerInfo);
+
+                theChecksum2PeerInfos.putIfAbsent(checksum, thePeerInfos);
+                path2Checksum2PeerInfos.putIfAbsent(path, theChecksum2PeerInfos);
+            }
+        }
+
+        Set<String> ret = new HashSet<>();
+        for (Map.Entry<String, Map<String, Set<PeerInfo>>> entry :
+                path2Checksum2PeerInfos.entrySet()) {
+            if (entry.getValue().size() > 1) {
+                // same path has not unique checksum
+                ret.add(entry.getKey());
+
+                String warningContent =
+                        "Receive same path with diffrent checksum, path: " + entry.getKey() + " [";
+                for (Map.Entry<String, Set<PeerInfo>> errorEntry : entry.getValue().entrySet()) {
+                    for (PeerInfo errorPeerInfo : errorEntry.getValue()) {
+                        warningContent +=
+                                "{checksum: "
+                                        + errorEntry.getKey()
+                                        + ", peer: "
+                                        + errorPeerInfo.toString()
+                                        + "},";
+                    }
+                }
+                warningContent += "]";
+                logger.warn(warningContent);
+            }
+        }
+
+        return ret;
+    }
+
+    public Map<String, Set<Peer>> getResource2Peers(Set<PeerInfo> peerInfos) {
+        Set<String> invalidResources = getInvalidResources(peerInfos);
+
         Map<String, Set<Peer>> resource2Peers = new HashMap<>();
 
         for (PeerInfo peerInfo : peerInfos) {
             for (ResourceInfo info : peerInfo.getResourceInfos()) {
+                if (invalidResources.contains(info.getPath())) {
+                    // ignore invalid resources
+                    continue;
+                }
 
                 Set<Peer> theResourcePeers = resource2Peers.get(info.getPath());
                 if (theResourcePeers == null) {

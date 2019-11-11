@@ -15,11 +15,9 @@ import com.webank.wecross.test.Mock.MockP2PMessageEngineFactory;
 import com.webank.wecross.test.Mock.MockP2PService;
 import com.webank.wecross.test.Mock.MockPeerManagerFactory;
 import com.webank.wecross.test.Mock.P2PEngineMessageFilter;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -141,13 +139,14 @@ public class PeerManagerTest {
         Thread.sleep(500); // waiting for syncing
         peerManager.syncWithPeerNetworks();
 
-        Map<String, ResourceInfo> resources = peerManager.getNetworkManager().getAllNetworkStubResourceInfo(false);
+        Map<String, ResourceInfo> resources =
+                peerManager.getNetworkManager().getAllNetworkStubResourceInfo(false);
         System.out.println(resources);
 
         Assert.assertTrue(0 < resources.size());
 
         Set<String> paths = new HashSet<>();
-        for(ResourceInfo info: resources.values()){
+        for (ResourceInfo info : resources.values()) {
             paths.add(info.getPath());
         }
 
@@ -174,13 +173,14 @@ public class PeerManagerTest {
         Thread.sleep(500); // waiting for syncing
         peerManager.syncWithPeerNetworks();
 
-        Map<String, ResourceInfo> resources = peerManager.getNetworkManager().getAllNetworkStubResourceInfo(false);
+        Map<String, ResourceInfo> resources =
+                peerManager.getNetworkManager().getAllNetworkStubResourceInfo(false);
         System.out.println(resources);
 
         Assert.assertTrue(0 < resources.size());
 
         Set<String> paths = new HashSet<>();
-        for(ResourceInfo info: resources.values()){
+        for (ResourceInfo info : resources.values()) {
             paths.add(info.getPath());
         }
 

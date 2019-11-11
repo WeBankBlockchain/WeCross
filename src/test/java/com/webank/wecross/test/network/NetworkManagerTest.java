@@ -8,27 +8,22 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.stub.remote.RemoteResource;
-
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import javax.annotation.Resource;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
 public class NetworkManagerTest {
     private Peer mockPeer = new Peer();
 
-    @Resource(name = "newP2PMessageEngine")
-    private P2PMessageEngine p2pEngine;
+    private P2PMessageEngine p2pEngine = null;
 
     private Logger logger = LoggerFactory.getLogger(NetworkManagerTest.class);
 
@@ -138,6 +133,78 @@ public class NetworkManagerTest {
             Assert.assertEquals(
                     networkManager.getResource(Path.decode(resourceName)).getPeers().size(), 2);
         }
+    }
+
+    private Set<PeerInfo> newMockInvalidPeerInfos() {
+        ResourceInfo resourceInfo0 = new ResourceInfo();
+        resourceInfo0.setDistance(0);
+        resourceInfo0.setPath("network.stub.resource0");
+        resourceInfo0.setChecksum("000000");
+
+        ResourceInfo resourceInfo1 = new ResourceInfo();
+        resourceInfo1.setDistance(0);
+        resourceInfo1.setPath("network.stub.resource1");
+        resourceInfo1.setChecksum("111111");
+
+        ResourceInfo resourceInfo2 = new ResourceInfo();
+        resourceInfo2.setDistance(0);
+        resourceInfo2.setPath("network.stub.resource2");
+        resourceInfo2.setChecksum("222222");
+
+        ResourceInfo resourceInfo0Mock = new ResourceInfo();
+        resourceInfo0Mock.setDistance(0);
+        resourceInfo0Mock.setPath("network.stub.resource0");
+        resourceInfo0Mock.setChecksum("666666"); // checksum is not the same as resourceInfo0
+
+        PeerInfo info0 = new PeerInfo(new Peer("peer0"));
+        Set<ResourceInfo> resourceInfos0 = new HashSet<>();
+        resourceInfos0.add(resourceInfo0);
+        resourceInfos0.add(resourceInfo1);
+        info0.setResourceInfos(resourceInfos0);
+
+        PeerInfo info1 = new PeerInfo(new Peer("peer1"));
+        Set<ResourceInfo> resourceInfos1 = new HashSet<>();
+        resourceInfos1.add(resourceInfo2);
+        resourceInfos1.add(resourceInfo0Mock);
+        info1.setResourceInfos(resourceInfos1);
+
+        Set<PeerInfo> ret = new HashSet<>();
+        ret.add(info0);
+        ret.add(info1);
+        return ret;
+    }
+
+    @Test
+    public void getInvalidResourcesTest() {
+        NetworkManager networkManager = new NetworkManager();
+        Set<PeerInfo> peerInfos = newMockInvalidPeerInfos();
+        Set<String> ret = networkManager.getInvalidResources(peerInfos);
+
+        Assert.assertEquals(1, ret.size());
+        Assert.assertTrue(ret.contains("network.stub.resource0"));
+    }
+
+    @Test
+    public void getResource2PeersTest() {
+        NetworkManager networkManager = new NetworkManager();
+        Set<PeerInfo> peerInfos = newMockInvalidPeerInfos();
+
+        Map<String, Set<Peer>> ret = networkManager.getResource2Peers(peerInfos);
+        Assert.assertEquals(2, ret.size());
+    }
+
+    @Test
+    public void updateActivePeerNetworkTest() {
+        NetworkManager networkManager = new NetworkManager();
+        Set<PeerInfo> peerInfos = newMockInvalidPeerInfos();
+
+        networkManager.updateActivePeerNetwork(peerInfos);
+
+        Set<String> ret = networkManager.getAllNetworkStubResourceName(false);
+
+        Assert.assertEquals(2, ret.size());
+        Assert.assertTrue(ret.contains("network.stub.resource1"));
+        Assert.assertTrue(ret.contains("network.stub.resource2"));
     }
 
     @Test

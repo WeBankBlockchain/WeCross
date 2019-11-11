@@ -2,7 +2,6 @@ package com.webank.wecross.peer;
 
 import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.resource.ResourceInfo;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,7 +22,6 @@ public class PeerInfo {
     public void setSeq(int seq) {
         this.seq = seq;
     }
-
 
     public synchronized void setResources(int seq, Set<ResourceInfo> resourceInfos) {
         this.setSeq(seq);
@@ -57,5 +55,10 @@ public class PeerInfo {
 
     public void setResourceInfos(Set<ResourceInfo> resourceInfos) {
         this.resourceInfos = resourceInfos;
+    }
+
+    @Override
+    public String toString() {
+        return this.peer.toString();
     }
 }

@@ -7,8 +7,7 @@ public class ResourceInfo {
     private int distance;
     private String checksum;
 
-    public ResourceInfo() {
-    }
+    public ResourceInfo() {}
 
     public ResourceInfo(String path) {
         this.path = path;
@@ -35,7 +34,9 @@ public class ResourceInfo {
     @Override
     public boolean equals(Object obj) {
         try {
-            return ((ResourceInfo) obj).path.equals(this.path) && ((ResourceInfo) obj).distance == this.distance && ((ResourceInfo) obj).checksum.equals(this.checksum);
+            // no need to check distance
+            return ((ResourceInfo) obj).path.equals(this.path)
+                    && ((ResourceInfo) obj).checksum.equals(this.checksum);
 
         } catch (Exception e) {
             return false;
