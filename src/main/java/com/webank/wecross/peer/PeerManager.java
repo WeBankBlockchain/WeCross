@@ -261,14 +261,18 @@ public class PeerManager {
         this.peerInfos = peerInfos;
     }
 
-    public synchronized Set<PeerInfo> getActivePeerInfos() {
-        Set<PeerInfo> ret = new HashSet<>();
+    public synchronized PeerResources getActivePeerResources() {
+        Set<PeerInfo> activeInfos = new HashSet<>();
         for (PeerInfo peerInfo : peerInfos.values()) {
             if (!peerInfo.isTimeout(peerActiveTimeout)) {
-                ret.add(peerInfo);
+                activeInfos.add(peerInfo);
             }
         }
-        return ret;
+
+        // Add myself Resource Info
+        Set<ResourceInfo> resourceInfos = new HashSet<>();
+
+        return new PeerResources(activeInfos);
     }
 
     public void setMessageHandler(SyncPeerMessageHandler messageHandler) {
@@ -306,7 +310,7 @@ public class PeerManager {
 
     public void syncWithPeerNetworks() {
         // Update peers' resource into networks
-        Set<PeerInfo> activePeers = this.getActivePeerInfos();
+        PeerResources activePeers = this.getActivePeerResources();
         networkManager.updateActivePeerNetwork(activePeers);
 
         // Log all active resources

@@ -3,7 +3,7 @@ package com.webank.wecross.network;
 import com.webank.wecross.core.PathUtils;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.netty.common.Peer;
-import com.webank.wecross.peer.PeerInfo;
+import com.webank.wecross.peer.PeerResources;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -209,108 +208,16 @@ public class NetworkManager {
         return null;
     }
 
-    public Set<String> getInvalidResources(Set<PeerInfo> peerInfos) {
-        class Path2Checksum2PeerInfos {
-            Map<String, Map<String, Set<PeerInfo>>> path2Checksum2PeerInfos = new HashMap<>();
-
-            public void update(String path, String checksum, PeerInfo peerInfo) {
-                Map<String, Set<PeerInfo>> theChecksum2PeerInfos =
-                        path2Checksum2PeerInfos.get(path);
-                if (theChecksum2PeerInfos == null) {
-                    theChecksum2PeerInfos = new HashMap<>();
-                }
-
-                Set<PeerInfo> thePeerInfos = theChecksum2PeerInfos.get(checksum);
-                if (thePeerInfos == null) {
-                    thePeerInfos = new HashSet<>();
-                }
-
-                thePeerInfos.add(peerInfo);
-
-                theChecksum2PeerInfos.putIfAbsent(checksum, thePeerInfos);
-                path2Checksum2PeerInfos.putIfAbsent(path, theChecksum2PeerInfos);
-            }
-
-            public Set<Map.Entry<String, Map<String, Set<PeerInfo>>>> entrySet() {
-                return path2Checksum2PeerInfos.entrySet();
-            }
-        }
-
-        // Generate a map with: path -> checksum -> peerInfo set
-        Path2Checksum2PeerInfos path2Checksum2PeerInfos = new Path2Checksum2PeerInfos();
-        for (PeerInfo peerInfo : peerInfos) {
-            for (ResourceInfo resourceInfo : peerInfo.getResourceInfos()) {
-                String path = resourceInfo.getPath();
-                String checksum = resourceInfo.getChecksum();
-                path2Checksum2PeerInfos.update(path, checksum, peerInfo);
-            }
-        }
-        // add my local resource info
-        Set<Path> localPaths = getAllNetworkStubResourcePath(true);
-        for (Path path : localPaths) {
-            Resource localResource = getResource(path);
-            path2Checksum2PeerInfos.update(
-                    path.toString(), localResource.getChecksum(), new PeerInfo(new Peer("myself")));
-        }
-
-        Set<String> ret = new HashSet<>();
-        for (Map.Entry<String, Map<String, Set<PeerInfo>>> entry :
-                path2Checksum2PeerInfos.entrySet()) {
-            if (entry.getValue().size() > 1) {
-                // same path has not unique checksum
-                ret.add(entry.getKey());
-
-                String warningContent =
-                        "Receive same path with diffrent checksum, path: " + entry.getKey() + " [";
-                for (Map.Entry<String, Set<PeerInfo>> errorEntry : entry.getValue().entrySet()) {
-                    for (PeerInfo errorPeerInfo : errorEntry.getValue()) {
-                        warningContent +=
-                                "{checksum: "
-                                        + errorEntry.getKey()
-                                        + ", peer: "
-                                        + errorPeerInfo.toString()
-                                        + "},";
-                    }
-                }
-                warningContent += "]";
-                logger.warn(warningContent);
-            }
-        }
-
-        return ret;
-    }
-
-    public Map<String, Pair<String, Set<Peer>>> getResource2Peers(Set<PeerInfo> peerInfos) {
-        Set<String> invalidResources = getInvalidResources(peerInfos);
-
-        Map<String, Pair<String, Set<Peer>>> resource2Peers = new HashMap<>();
-
-        for (PeerInfo peerInfo : peerInfos) {
-            for (ResourceInfo info : peerInfo.getResourceInfos()) {
-                if (invalidResources.contains(info.getPath())) {
-                    // ignore invalid resources
-                    continue;
-                }
-
-                Pair<String, Set<Peer>> checkSumAndPeers = resource2Peers.get(info.getPath());
-                if (checkSumAndPeers == null) {
-                    checkSumAndPeers = new Pair<>(info.getChecksum(), new HashSet<>());
-                }
-
-                Set<Peer> theResourcePeers = checkSumAndPeers.getValue();
-
-                theResourcePeers.add(peerInfo.getPeer());
-
-                resource2Peers.put(info.getPath(), checkSumAndPeers); // Replace
-            }
-        }
-        return resource2Peers;
-    }
-
-    public void updateActivePeerNetwork(Set<PeerInfo> peerInfos) {
+    public void updateActivePeerNetwork(PeerResources peerResource) {
         lock.writeLock().lock();
         try {
-            Map<String, Pair<String, Set<Peer>>> resource2Peers = getResource2Peers(peerInfos);
+            Map<String, ResourceInfo> myselfResourceInfo = getAllNetworkStubResourceInfo(true);
+            peerResource.updateMyselfResources(myselfResourceInfo);
+
+            peerResource.loggingInvalidResources();
+
+            Map<String, Set<Peer>> resource2Peers = peerResource.getResource2Peers();
+            Map<String, String> resource2Checksum = peerResource.getResource2Checksum();
 
             Set<String> currentResources = getAllNetworkStubResourceName(false);
             logger.debug("Old resources:{}", currentResources);
@@ -339,9 +246,8 @@ public class NetworkManager {
             logger.debug("Add new remote resources " + resources2Add);
             for (String resource : resources2Add) {
                 try {
-                    Pair<String, Set<Peer>> checksumAndPeers = resource2Peers.get(resource);
-                    String checksum = checksumAndPeers.getKey();
-                    Set<Peer> newPeers = checksumAndPeers.getValue();
+                    Set<Peer> newPeers = resource2Peers.get(resource);
+                    String checksum = resource2Checksum.get(resource);
                     Resource newResource = new RemoteResource(newPeers, 1, p2pEngine);
                     ((RemoteResource) newResource).setChecksum(checksum);
                     newResource.setPath(Path.decode(resource));
@@ -355,9 +261,8 @@ public class NetworkManager {
             logger.debug("Update remote resources " + resources2Update);
             for (String resource : resources2Update) {
                 try {
-                    Pair<String, Set<Peer>> checksumAndPeers = resource2Peers.get(resource);
-                    String checksum = checksumAndPeers.getKey();
-                    Set<Peer> newPeers = checksumAndPeers.getValue();
+                    Set<Peer> newPeers = resource2Peers.get(resource);
+                    String checksum = resource2Checksum.get(resource);
                     Resource resource2Update = getResource(Path.decode(resource));
                     resource2Update.setPeers(newPeers);
 
