@@ -1,5 +1,6 @@
 package com.webank.wecross.stub.jdchain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.sdk.BlockchainService;
@@ -20,8 +21,10 @@ import java.util.Set;
 public class JDChainResource implements Resource {
 
     private Boolean isInit = false;
-    protected List<BlockchainKeypair> adminKey = new ArrayList<BlockchainKeypair>();
-    protected HashDigest ledgerHash;
+    @JsonIgnore protected List<BlockchainKeypair> adminKey = new ArrayList<BlockchainKeypair>();
+    @JsonIgnore protected HashDigest ledgerHash;
+
+    @JsonIgnore
     protected List<BlockchainService> blockchainService = new ArrayList<BlockchainService>();
 
     protected Path path;
