@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -281,10 +280,10 @@ public class NetworkManager {
         return ret;
     }
 
-    public Map<String, Pair<String,Set<Peer>>> getResource2Peers(Set<PeerInfo> peerInfos) {
+    public Map<String, Pair<String, Set<Peer>>> getResource2Peers(Set<PeerInfo> peerInfos) {
         Set<String> invalidResources = getInvalidResources(peerInfos);
 
-        Map<String, Pair<String,Set<Peer>>> resource2Peers = new HashMap<>();
+        Map<String, Pair<String, Set<Peer>>> resource2Peers = new HashMap<>();
 
         for (PeerInfo peerInfo : peerInfos) {
             for (ResourceInfo info : peerInfo.getResourceInfos()) {
@@ -293,15 +292,15 @@ public class NetworkManager {
                     continue;
                 }
 
-                Pair<String,Set<Peer>> checkSumAndPeers = resource2Peers.get(info.getPath());
-                if (checkSumAndPeers == null){
+                Pair<String, Set<Peer>> checkSumAndPeers = resource2Peers.get(info.getPath());
+                if (checkSumAndPeers == null) {
                     checkSumAndPeers = new Pair<>(info.getChecksum(), new HashSet<>());
                 }
 
                 Set<Peer> theResourcePeers = checkSumAndPeers.getValue();
 
                 theResourcePeers.add(peerInfo.getPeer());
-           
+
                 resource2Peers.put(info.getPath(), checkSumAndPeers); // Replace
             }
         }
@@ -311,7 +310,7 @@ public class NetworkManager {
     public void updateActivePeerNetwork(Set<PeerInfo> peerInfos) {
         lock.writeLock().lock();
         try {
-            Map<String, Pair<String,Set<Peer>>> resource2Peers = getResource2Peers(peerInfos);
+            Map<String, Pair<String, Set<Peer>>> resource2Peers = getResource2Peers(peerInfos);
 
             Set<String> currentResources = getAllNetworkStubResourceName(false);
             logger.debug("Old resources:{}", currentResources);
