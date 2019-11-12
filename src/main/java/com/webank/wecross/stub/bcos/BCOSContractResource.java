@@ -1,6 +1,7 @@
 package com.webank.wecross.stub.bcos;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.webank.wecross.core.HashUtils;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.restserver.request.GetDataRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
@@ -17,12 +18,16 @@ import org.fisco.bcos.web3j.abi.datatypes.generated.Int256;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BCOSContractResource extends BCOSResource {
+    private Logger logger = LoggerFactory.getLogger(BCOSContractResource.class);
 
     private Boolean isInit = false;
     @JsonIgnore private String contractAddress;
     private CallContract callContract;
+    private String checksum;
 
     public void init(Service service, Web3j web3j, Credentials credentials) {
         if (!isInit) {
@@ -138,5 +143,19 @@ public class BCOSContractResource extends BCOSResource {
 
     public void setContractAddress(String contractAddress) {
         this.contractAddress = contractAddress;
+    }
+
+    @Override
+    public String getChecksum() {
+        try {
+            if (checksum == null || checksum.equals("")) {
+                checksum = HashUtils.sha256String(contractAddress);
+            }
+            return checksum;
+
+        } catch (Exception e) {
+            logger.error("Caculate checksum exception: " + e);
+        }
+        return null;
     }
 }

@@ -9,6 +9,7 @@ import com.jd.blockchain.ledger.OperationResult;
 import com.jd.blockchain.ledger.PreparedTransaction;
 import com.jd.blockchain.ledger.TransactionTemplate;
 import com.jd.blockchain.sdk.BlockchainService;
+import com.webank.wecross.core.HashUtils;
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.restserver.request.GetDataRequest;
@@ -41,6 +42,7 @@ public class JDChainContractResource extends JDChainResource {
     private Logger logger = LoggerFactory.getLogger(JDChainContractResource.class);
     private Boolean isInit = false;
     @JsonIgnore private String contractAddress;
+    private String checksum;
 
     public String getContractAddress() {
         return contractAddress;
@@ -324,5 +326,19 @@ public class JDChainContractResource extends JDChainResource {
     @Override
     public TransactionRequest createRequest() {
         return new JDChainRequest();
+    }
+
+    @Override
+    public String getChecksum() {
+        try {
+            if (checksum == null || checksum.equals("")) {
+                checksum = HashUtils.sha256String(contractAddress);
+            }
+            return checksum;
+
+        } catch (Exception e) {
+            logger.error("Caculate checksum exception: " + e);
+        }
+        return null;
     }
 }

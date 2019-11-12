@@ -122,4 +122,9 @@ public class JDChainResource implements Resource {
     public int getDistance() {
         return 0;
     }
+
+    @Override
+    public String getChecksum() {
+        return null;
+    }
 }
