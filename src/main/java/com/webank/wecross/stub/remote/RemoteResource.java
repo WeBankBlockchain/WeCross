@@ -15,14 +15,12 @@ import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,16 +79,27 @@ public class RemoteResource implements Resource {
                                     sendRemote(
                                             peerToSend,
                                             p2pReq,
-                                            new TypeReference<P2PResponse<GetDataResponse>>() {
-                                            });
+                                            new TypeReference<P2PResponse<GetDataResponse>>() {});
 
                     if (response.getErrorCode() == 0) {
                         return response;
                     } else {
-                        errorHistory += "{" + peerToSend.toString() + ", errorCode:" + response.getErrorCode() + ", msg:" + response.getErrorMessage() + "},";
+                        errorHistory +=
+                                "{"
+                                        + peerToSend.toString()
+                                        + ", errorCode:"
+                                        + response.getErrorCode()
+                                        + ", msg:"
+                                        + response.getErrorMessage()
+                                        + "},";
                     }
                 } catch (Exception e) {
-                    errorHistory += "{" + peerToSend.toString() + ", exception:" + e.getLocalizedMessage() + "},";
+                    errorHistory +=
+                            "{"
+                                    + peerToSend.toString()
+                                    + ", exception:"
+                                    + e.getLocalizedMessage()
+                                    + "},";
                     continue;
                 }
             }
@@ -121,22 +130,32 @@ public class RemoteResource implements Resource {
                                     sendRemote(
                                             peerToSend,
                                             p2pReq,
-                                            new TypeReference<P2PResponse<SetDataResponse>>() {
-                                            });
+                                            new TypeReference<P2PResponse<SetDataResponse>>() {});
 
                     if (response.getErrorCode() == 0) {
                         return response;
                     } else {
-                        errorHistory += "{" + peerToSend.toString() + ", errorCode:" + response.getErrorCode() + ", msg:" + response.getErrorMessage() + "},";
+                        errorHistory +=
+                                "{"
+                                        + peerToSend.toString()
+                                        + ", errorCode:"
+                                        + response.getErrorCode()
+                                        + ", msg:"
+                                        + response.getErrorMessage()
+                                        + "},";
                     }
                 } catch (Exception e) {
-                    errorHistory += "{" + peerToSend.toString() + ", exception:" + e.getLocalizedMessage() + "},";
+                    errorHistory +=
+                            "{"
+                                    + peerToSend.toString()
+                                    + ", exception:"
+                                    + e.getLocalizedMessage()
+                                    + "},";
                     continue;
                 }
             }
             throw new Exception("Not an available peer to request: " + errorHistory + "]");
-        } catch (
-                Exception e) {
+        } catch (Exception e) {
             response.setErrorCode(-1);
             response.setErrorMessage("Call remote resource exception: " + e.getLocalizedMessage());
         }
@@ -163,16 +182,27 @@ public class RemoteResource implements Resource {
                                             peerToSend,
                                             p2pReq,
                                             new TypeReference<
-                                                    P2PResponse<TransactionResponse>>() {
-                                            });
+                                                    P2PResponse<TransactionResponse>>() {});
 
                     if (response.getErrorCode() == 0) {
                         return response;
                     } else {
-                        errorHistory += "{" + peerToSend.toString() + ", errorCode:" + response.getErrorCode() + ", msg:" + response.getErrorMessage() + "},";
+                        errorHistory +=
+                                "{"
+                                        + peerToSend.toString()
+                                        + ", errorCode:"
+                                        + response.getErrorCode()
+                                        + ", msg:"
+                                        + response.getErrorMessage()
+                                        + "},";
                     }
                 } catch (Exception e) {
-                    errorHistory += "{" + peerToSend.toString() + ", exception:" + e.getLocalizedMessage() + "},";
+                    errorHistory +=
+                            "{"
+                                    + peerToSend.toString()
+                                    + ", exception:"
+                                    + e.getLocalizedMessage()
+                                    + "},";
                     continue;
                 }
             }
@@ -205,16 +235,27 @@ public class RemoteResource implements Resource {
                                             peerToSend,
                                             p2pReq,
                                             new TypeReference<
-                                                    P2PResponse<TransactionResponse>>() {
-                                            });
+                                                    P2PResponse<TransactionResponse>>() {});
 
                     if (response.getErrorCode() == 0) {
                         return response;
                     } else {
-                        errorHistory += "{" + peerToSend.toString() + ", errorCode:" + response.getErrorCode() + ", msg:" + response.getErrorMessage() + "},";
+                        errorHistory +=
+                                "{"
+                                        + peerToSend.toString()
+                                        + ", errorCode:"
+                                        + response.getErrorCode()
+                                        + ", msg:"
+                                        + response.getErrorMessage()
+                                        + "},";
                     }
                 } catch (Exception e) {
-                    errorHistory += "{" + peerToSend.toString() + ", exception:" + e.getLocalizedMessage() + "},";
+                    errorHistory +=
+                            "{"
+                                    + peerToSend.toString()
+                                    + ", exception:"
+                                    + e.getLocalizedMessage()
+                                    + "},";
                     continue;
                 }
             }
