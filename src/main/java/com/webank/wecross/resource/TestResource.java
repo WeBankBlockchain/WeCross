@@ -1,5 +1,6 @@
 package com.webank.wecross.resource;
 
+import com.webank.wecross.core.HashUtils;
 import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.restserver.request.GetDataRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
@@ -8,11 +9,15 @@ import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // No reliable chain, just respond what you call
 public class TestResource implements Resource {
+    private Logger logger = LoggerFactory.getLogger(TestResource.class);
 
     protected Path path;
+    protected String checksum;
 
     @Override
     public String getType() {
@@ -68,6 +73,20 @@ public class TestResource implements Resource {
     @Override
     public int getDistance() {
         return 0;
+    }
+
+    @Override
+    public String getChecksum() {
+        try {
+            if (checksum == null || checksum.equals("")) {
+                checksum = HashUtils.sha256String(path.toString());
+            }
+            return checksum;
+
+        } catch (Exception e) {
+            logger.error("Caculate checksum exception: " + e);
+        }
+        return null;
     }
 
     @Override

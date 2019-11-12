@@ -3,9 +3,10 @@ package com.webank.wecross.network;
 import com.webank.wecross.core.PathUtils;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.netty.common.Peer;
-import com.webank.wecross.peer.PeerInfo;
+import com.webank.wecross.peer.PeerResources;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.restserver.request.ResourceRequest;
 import com.webank.wecross.restserver.response.ResourceResponse;
 import com.webank.wecross.stub.StateRequest;
@@ -39,7 +40,7 @@ public class NetworkManager {
         return response;
     }
 
-    public Resource getResource(Path path) throws Exception {
+    public Resource getResource(Path path) {
         lock.readLock().lock();
         try {
             Network network = getNetwork(path);
@@ -53,11 +54,13 @@ public class NetworkManager {
                     return resource;
                 }
             }
-
             return null;
+        } catch (Exception e) {
+            logger.debug("Exception: " + e);
         } finally {
             lock.readLock().unlock();
         }
+        return null;
     }
 
     public void addResource(Resource resource) throws Exception {
@@ -134,6 +137,36 @@ public class NetworkManager {
         this.seq = seq;
     }
 
+    public Map<String, ResourceInfo> getAllNetworkStubResourceInfo(boolean ignoreRemote) {
+
+        lock.readLock().lock();
+        try {
+            Set<Path> resourcePaths = getAllNetworkStubResourcePath(ignoreRemote);
+            Map<String, ResourceInfo> ret = new HashMap<>();
+
+            for (Path path : resourcePaths) {
+                try {
+                    Resource resource = getResource(path);
+                    ResourceInfo info = new ResourceInfo();
+                    info.setPath(path.toString());
+                    info.setDistance(resource.getDistance());
+                    info.setChecksum(resource.getChecksum());
+                    ret.put(path.toString(), info);
+                } catch (Exception e) {
+                    logger.debug("Jump exception resources: " + path.toString());
+                    continue;
+                }
+            }
+
+            return ret;
+        } catch (Exception e) {
+            logger.debug("Exception: " + e);
+        } finally {
+            lock.readLock().unlock();
+        }
+        return null;
+    }
+
     public Set<String> getAllNetworkStubResourceName(boolean ignoreRemote) {
         lock.readLock().lock();
         try {
@@ -158,7 +191,7 @@ public class NetworkManager {
         }
     }
 
-    public Set<Path> getAllNetworkStubResourcePath(boolean ignoreRemote) throws Exception {
+    public Set<Path> getAllNetworkStubResourcePath(boolean ignoreRemote) {
         lock.readLock().lock();
         try {
             Set<String> resourcesString = getAllNetworkStubResourceName(ignoreRemote);
@@ -167,25 +200,24 @@ public class NetworkManager {
                 ret.add(Path.decode(str));
             }
             return ret;
+        } catch (Exception e) {
+            logger.debug("Exception: " + e);
         } finally {
             lock.readLock().unlock();
         }
+        return null;
     }
 
-    public void updateActivePeerNetwork(Set<PeerInfo> peerInfos) {
+    public void updateActivePeerNetwork(PeerResources peerResource) {
         lock.writeLock().lock();
         try {
-            Map<String, Set<Peer>> resource2Peers = new HashMap<>();
-            for (PeerInfo peerInfo : peerInfos) {
-                for (String resource : peerInfo.getResources()) {
-                    Set<Peer> theResourcePeers = resource2Peers.get(resource);
-                    if (theResourcePeers == null) {
-                        theResourcePeers = new HashSet<>();
-                    }
-                    theResourcePeers.add(peerInfo.getPeer());
-                    resource2Peers.put(resource, theResourcePeers); // Replace
-                }
-            }
+            Map<String, ResourceInfo> myselfResourceInfo = getAllNetworkStubResourceInfo(true);
+            peerResource.updateMyselfResources(myselfResourceInfo);
+
+            peerResource.loggingInvalidResources();
+
+            Map<String, Set<Peer>> resource2Peers = peerResource.getResource2Peers();
+            Map<String, String> resource2Checksum = peerResource.getResource2Checksum();
 
             Set<String> currentResources = getAllNetworkStubResourceName(false);
             logger.debug("Old resources:{}", currentResources);
@@ -215,7 +247,9 @@ public class NetworkManager {
             for (String resource : resources2Add) {
                 try {
                     Set<Peer> newPeers = resource2Peers.get(resource);
+                    String checksum = resource2Checksum.get(resource);
                     Resource newResource = new RemoteResource(newPeers, 1, p2pEngine);
+                    ((RemoteResource) newResource).setChecksum(checksum);
                     newResource.setPath(Path.decode(resource));
                     addResource(newResource);
                 } catch (Exception e) {
@@ -228,8 +262,14 @@ public class NetworkManager {
             for (String resource : resources2Update) {
                 try {
                     Set<Peer> newPeers = resource2Peers.get(resource);
+                    String checksum = resource2Checksum.get(resource);
                     Resource resource2Update = getResource(Path.decode(resource));
                     resource2Update.setPeers(newPeers);
+
+                    if (resource2Update.getDistance() > 1) {
+                        ((RemoteResource) resource2Update).setChecksum(checksum);
+                    }
+
                 } catch (Exception e) {
                     logger.error(
                             "Update remote resources exception: resource:{}, exception:{}",

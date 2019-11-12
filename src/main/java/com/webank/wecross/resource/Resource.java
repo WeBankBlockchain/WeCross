@@ -29,6 +29,8 @@ public interface Resource {
 
     int getDistance(); // 0 local, > 0 remote
 
+    String getChecksum();
+
     @JsonIgnore
     Path getPath();
 
