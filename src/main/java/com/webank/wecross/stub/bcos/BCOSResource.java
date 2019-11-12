@@ -63,6 +63,11 @@ public class BCOSResource implements Resource {
     }
 
     @Override
+    public String getChecksum() {
+        return null;
+    }
+
+    @Override
     public String getType() {
         return "BCOS_RESOURCE";
     }
