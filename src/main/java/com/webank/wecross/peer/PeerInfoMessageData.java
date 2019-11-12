@@ -1,12 +1,13 @@
 package com.webank.wecross.peer;
 
+import com.webank.wecross.resource.ResourceInfo;
 import java.util.HashSet;
 import java.util.Set;
 
 public class PeerInfoMessageData {
 
     private int seq;
-    private Set<String> resources = new HashSet<>();
+    private Set<ResourceInfo> resources = new HashSet<>();
 
     public int getSeq() {
         return seq;
@@ -16,15 +17,15 @@ public class PeerInfoMessageData {
         this.seq = seq;
     }
 
-    public Set<String> getResources() {
+    public Set<ResourceInfo> getResources() {
         return resources;
     }
 
-    public void setResources(Set<String> resources) {
+    public void setResources(Set<ResourceInfo> resources) {
         this.resources = resources;
     }
 
-    public void addResource(String resource) {
+    public void addResource(ResourceInfo resource) {
         resources.add(resource);
     }
 }

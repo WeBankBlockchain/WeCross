@@ -31,6 +31,7 @@ public class RemoteResource implements Resource {
     private int distance; // How many jumps to local stub
     private Set<Peer> peers;
     private Path path;
+    private String checksum;
 
     public RemoteResource(Set<Peer> peers, int distance, P2PMessageEngine p2pEngine) {
         setPeers(peers);
@@ -64,6 +65,7 @@ public class RemoteResource implements Resource {
         GetDataResponse response = new GetDataResponse();
         try {
             List<Peer> peerList = getRandPeerList();
+            String errorHistory = "[";
             for (Peer peerToSend : peerList) {
                 try {
                     P2PMessage<GetDataRequest> p2pReq = new P2PMessage<>();
@@ -81,12 +83,27 @@ public class RemoteResource implements Resource {
 
                     if (response.getErrorCode() == 0) {
                         return response;
+                    } else {
+                        errorHistory +=
+                                "{"
+                                        + peerToSend.toString()
+                                        + ", errorCode:"
+                                        + response.getErrorCode()
+                                        + ", msg:"
+                                        + response.getErrorMessage()
+                                        + "},";
                     }
                 } catch (Exception e) {
+                    errorHistory +=
+                            "{"
+                                    + peerToSend.toString()
+                                    + ", exception:"
+                                    + e.getLocalizedMessage()
+                                    + "},";
                     continue;
                 }
             }
-            throw new Exception("Not an available peer to request");
+            throw new Exception("Not an available peer to request: " + errorHistory + "]");
         } catch (Exception e) {
             response.setErrorCode(-1);
             response.setErrorMessage("Call remote resource exception: " + e.getLocalizedMessage());
@@ -99,6 +116,7 @@ public class RemoteResource implements Resource {
         SetDataResponse response = new SetDataResponse();
         try {
             List<Peer> peerList = getRandPeerList();
+            String errorHistory = "[";
             for (Peer peerToSend : peerList) {
                 try {
                     P2PMessage<SetDataRequest> p2pReq = new P2PMessage<>();
@@ -116,12 +134,27 @@ public class RemoteResource implements Resource {
 
                     if (response.getErrorCode() == 0) {
                         return response;
+                    } else {
+                        errorHistory +=
+                                "{"
+                                        + peerToSend.toString()
+                                        + ", errorCode:"
+                                        + response.getErrorCode()
+                                        + ", msg:"
+                                        + response.getErrorMessage()
+                                        + "},";
                     }
                 } catch (Exception e) {
+                    errorHistory +=
+                            "{"
+                                    + peerToSend.toString()
+                                    + ", exception:"
+                                    + e.getLocalizedMessage()
+                                    + "},";
                     continue;
                 }
             }
-            throw new Exception("Not an available peer to request");
+            throw new Exception("Not an available peer to request: " + errorHistory + "]");
         } catch (Exception e) {
             response.setErrorCode(-1);
             response.setErrorMessage("Call remote resource exception: " + e.getLocalizedMessage());
@@ -134,6 +167,7 @@ public class RemoteResource implements Resource {
         TransactionResponse response = new TransactionResponse();
         try {
             List<Peer> peerList = getRandPeerList();
+            String errorHistory = "[";
             for (Peer peerToSend : peerList) {
                 try {
                     P2PMessage<TransactionRequest> p2pReq = new P2PMessage<>();
@@ -152,12 +186,27 @@ public class RemoteResource implements Resource {
 
                     if (response.getErrorCode() == 0) {
                         return response;
+                    } else {
+                        errorHistory +=
+                                "{"
+                                        + peerToSend.toString()
+                                        + ", errorCode:"
+                                        + response.getErrorCode()
+                                        + ", msg:"
+                                        + response.getErrorMessage()
+                                        + "},";
                     }
                 } catch (Exception e) {
+                    errorHistory +=
+                            "{"
+                                    + peerToSend.toString()
+                                    + ", exception:"
+                                    + e.getLocalizedMessage()
+                                    + "},";
                     continue;
                 }
             }
-            throw new Exception("Not an available peer to request");
+            throw new Exception("Not an available peer to request: " + errorHistory + "]");
         } catch (Exception e) {
             response.setErrorCode(-1);
             response.setErrorMessage("Call remote resource exception: " + e.getLocalizedMessage());
@@ -171,6 +220,7 @@ public class RemoteResource implements Resource {
         TransactionResponse response = new TransactionResponse();
         try {
             List<Peer> peerList = getRandPeerList();
+            String errorHistory = "[";
             for (Peer peerToSend : peerList) {
                 try {
                     P2PMessage<TransactionRequest> p2pReq = new P2PMessage<>();
@@ -189,12 +239,27 @@ public class RemoteResource implements Resource {
 
                     if (response.getErrorCode() == 0) {
                         return response;
+                    } else {
+                        errorHistory +=
+                                "{"
+                                        + peerToSend.toString()
+                                        + ", errorCode:"
+                                        + response.getErrorCode()
+                                        + ", msg:"
+                                        + response.getErrorMessage()
+                                        + "},";
                     }
                 } catch (Exception e) {
+                    errorHistory +=
+                            "{"
+                                    + peerToSend.toString()
+                                    + ", exception:"
+                                    + e.getLocalizedMessage()
+                                    + "},";
                     continue;
                 }
             }
-            throw new Exception("Not an available peer to request");
+            throw new Exception("Not an available peer to request: " + errorHistory + "]");
         } catch (Exception e) {
             response.setErrorCode(-1);
             response.setErrorMessage("Call remote resource exception");
@@ -217,6 +282,15 @@ public class RemoteResource implements Resource {
     @Override
     public int getDistance() {
         return distance;
+    }
+
+    @Override
+    public String getChecksum() {
+        return checksum;
+    }
+
+    public void setChecksum(String checksum) {
+        this.checksum = checksum;
     }
 
     @Override
