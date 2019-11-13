@@ -2,6 +2,7 @@ package com.webank.wecross.stub.bcos;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.webank.wecross.core.HashUtils;
+import com.webank.wecross.exception.Status;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.restserver.request.GetDataRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
@@ -82,17 +83,21 @@ public class BCOSContractResource extends BCOSResource {
                             javaType2BCOSType(request.getArgs()));
 
             if (transactionReceipt == null) {
-                bcosResponse.setErrorCode(1);
-                bcosResponse.setErrorMessage(
-                        "TransactionReceipt is empty, please check contract address and arguments");
+                bcosResponse.setErrorCode(Status.RPC_ERROR);
+                bcosResponse.setErrorMessage("error in RPC");
             } else {
-                bcosResponse.setErrorCode(0);
-                bcosResponse.setErrorMessage("");
-                bcosResponse.setResult(new Object[] {transactionReceipt.getOutput()});
+                // status: 0x00 - 0x1a, errorCode: 0 - 26
+                String status = transactionReceipt.getStatus();
+                Integer errorCode = Integer.valueOf(status.substring(2), 16);
+                bcosResponse.setErrorCode(errorCode);
+                bcosResponse.setErrorMessage(transactionReceipt.getMessage());
+                if (errorCode == 0) {
+                    bcosResponse.setResult(new Object[] {transactionReceipt.getOutput()});
+                }
             }
         } catch (Exception e) {
-            bcosResponse.setErrorCode(2);
-            bcosResponse.setErrorMessage("Unexpected error: " + e.getMessage());
+            bcosResponse.setErrorCode(Status.INTERNAL_ERROR);
+            bcosResponse.setErrorMessage(e.getMessage());
         }
 
         return bcosResponse;
@@ -114,21 +119,17 @@ public class BCOSContractResource extends BCOSResource {
                             request.getMethod(),
                             javaType2BCOSType(request.getArgs()));
 
-            if (callResult.getStatus().equals("RpcError")) {
-                bcosResponse.setErrorCode(1);
-                bcosResponse.setErrorMessage(
-                        "There's something wrong with Rpc, please check contract address and arguments");
-            } else if (callResult.getStatus().equals("IOException")) {
-                bcosResponse.setErrorCode(2);
-                bcosResponse.setErrorMessage(callResult.getMessage());
-            } else {
-                bcosResponse.setErrorCode(0);
-                bcosResponse.setErrorMessage("");
+            String status = callResult.getStatus();
+            Integer errorCode = Integer.valueOf(status.substring(2), 16);
+            bcosResponse.setErrorCode(errorCode);
+            bcosResponse.setErrorMessage(callResult.getMessage());
+            if (errorCode == 0) {
                 bcosResponse.setResult(new Object[] {callResult.getOutput()});
             }
+
         } catch (Exception e) {
-            bcosResponse.setErrorCode(3);
-            bcosResponse.setErrorMessage("Unexpected error: " + e.getMessage());
+            bcosResponse.setErrorCode(Status.INTERNAL_ERROR);
+            bcosResponse.setErrorMessage(e.getMessage());
         }
 
         return bcosResponse;
