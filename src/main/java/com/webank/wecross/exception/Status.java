@@ -4,19 +4,23 @@ public class Status {
 
     // common
     public static final int SUCCESS = 0;
-    public static final int INTERNAL_ERROR = 1;
-    public static final int FIELD_MISSING = 2;
+    public static final int FIELD_MISSING = 100;
 
-    // status in config
+    // transaction receipt
+    public static final int RPC_ERROR = 49;
+    public static final int INTERNAL_ERROR = 50;
+
+    // configuration
     public static final int UNEXPECTED_CONFIG = 1001;
     public static final int ILLEGAL_SYMBOL = 1002;
 
-    // status in http
+    // http
     public static final int VERSION_ERROR = 2001;
     public static final int PATH_ERROR = 2002;
     public static final int METHOD_ERROR = 2003;
     public static final int RESOURCE_ERROR = 2004;
 
+    // JDChain
     public static final int JDCHAIN_CONNECTION_COUNRT_ERROR = 3001;
     public static final int JDCHAIN_GENERATE_CLASS_ERROR = 3002;
     public static final int JDCHAIN_INVOKE_METHOD_ERROR = 3003;

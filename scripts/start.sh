@@ -25,11 +25,9 @@ else
 fi
 
 wecross_pid=$(ps aux | grep com.webank.wecross.Service | grep -v grep | awk '{print $2}')
-failed_flag=$(tail -n20 start.out | grep error | grep -v asyncSendMessage)
-if [[ -z ${wecross_pid} || ! -z "${failed_flag}" ]]; then
+if [ -z ${wecross_pid} ]; then
     echo -e "\033[31m Wecross start failed \033[0m"
     echo -e "\033[31m See logs/error.log for details \033[0m"
-    ps aux | grep com.webank.wecross.Service | grep -v grep | awk '{print $2}' | xargs kill -9
     exit 0
 else
     echo -e "\033[32m Wecross start successfully \033[0m"
