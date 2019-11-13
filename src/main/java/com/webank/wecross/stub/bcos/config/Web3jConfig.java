@@ -29,6 +29,7 @@ public class Web3jConfig {
         thread.start();
 
         channelEthereumService.setChannelService(bcosService);
+        channelEthereumService.setTimeout(60 * 1000);
 
         return Web3j.build(channelEthereumService, bcosService.getGroupId());
     }
