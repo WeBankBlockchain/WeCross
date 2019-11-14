@@ -2,7 +2,9 @@ package com.webank.wecross.p2p;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.webank.wecross.p2p.engine.P2PResponse;
 import com.webank.wecross.p2p.netty.common.Peer;
+import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 
 public class P2PMessageCallback<T> {
     private TypeReference typeReference;
@@ -20,6 +22,16 @@ public class P2PMessageCallback<T> {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public P2PResponse<Object> parseContent(String content) throws Exception {
+        if (typeReference == null) {
+            throw new Exception("Callback message type has not been set");
+        }
+
+        P2PResponse<Object> p2PResponse =
+                ObjectMapperFactory.getObjectMapper().readValue(content, typeReference);
+        return p2PResponse;
     }
 
     @JsonIgnore

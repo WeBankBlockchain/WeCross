@@ -61,9 +61,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
                                     }
 
                                     P2PResponse<Object> p2PResponse =
-                                            ObjectMapperFactory.getObjectMapper()
-                                                    .readValue(
-                                                            content, callback.getTypeReference());
+                                            callback.parseContent(content);
                                     /** remote execute return not ok */
                                     if (p2PResponse.getResult() != Status.SUCCESS) {
                                         throw new IOException(p2PResponse.getMessage());
