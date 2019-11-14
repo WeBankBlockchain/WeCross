@@ -2,13 +2,12 @@ package com.webank.wecross.exception;
 
 public class Status {
 
-    // common
+    // reserved code 1-48
     public static final int SUCCESS = 0;
-    public static final int FIELD_MISSING = 100;
-
-    // transaction receipt
     public static final int RPC_ERROR = 49;
     public static final int INTERNAL_ERROR = 50;
+    public static final int FIELD_MISSING = 100;
+    public static final int NONSENSE_CALL = 101;
 
     // configuration
     public static final int UNEXPECTED_CONFIG = 1001;

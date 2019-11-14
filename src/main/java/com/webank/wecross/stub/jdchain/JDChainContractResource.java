@@ -123,7 +123,10 @@ public class JDChainContractResource extends JDChainResource {
 
     @Override
     public SetDataResponse setData(SetDataRequest request) {
-        return null;
+        SetDataResponse setDataResponse = new SetDataResponse();
+        setDataResponse.setErrorCode(Status.NONSENSE_CALL);
+        setDataResponse.setErrorMessage("Not supported by JDCHAIN_CONTRACT");
+        return setDataResponse;
     }
 
     public com.jd.blockchain.ledger.TransactionResponse commit(

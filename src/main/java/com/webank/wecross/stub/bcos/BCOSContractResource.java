@@ -63,12 +63,18 @@ public class BCOSContractResource extends BCOSResource {
 
     @Override
     public GetDataResponse getData(GetDataRequest request) {
-        return null;
+        GetDataResponse getDataResponse = new GetDataResponse();
+        getDataResponse.setErrorCode(Status.NONSENSE_CALL);
+        getDataResponse.setErrorMessage("Not supported by BCOS_CONTRACT");
+        return getDataResponse;
     }
 
     @Override
     public SetDataResponse setData(SetDataRequest request) {
-        return null;
+        SetDataResponse setDataResponse = new SetDataResponse();
+        setDataResponse.setErrorCode(Status.NONSENSE_CALL);
+        setDataResponse.setErrorMessage("Not supported by BCOS_CONTRACT");
+        return setDataResponse;
     }
 
     @Override
