@@ -2,6 +2,7 @@ package com.webank.wecross.restserver.response;
 
 import com.webank.wecross.network.config.ConfigType;
 import com.webank.wecross.proof.PathProof;
+import com.webank.wecross.proof.ProofConfig;
 import com.webank.wecross.proof.RootProof;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,33 +70,14 @@ public class TransactionResponse {
     }
 
     public PathProof[] getProofs() {
-        return null;
+        return new PathProof[] {};
     }
 
     public boolean verify() {
         try {
-            /*
-                        if (proofs == null || proofs.length == 0){
-                            throw new Exception("failed, response has no proofs");
-                        }
-            //*/
-            if (getProofs() == null || getBlockHeader() == null) {
+
+            if (!ProofConfig.supportSPV(getType())) {
                 return true;
-            }
-
-            // Verify root
-            for (PathProof pathProof : getProofs()) {
-                if (!pathProof.verifyRoot(getBlockHeader())) {
-                    throw new Exception(
-                            "root failed, path:" + pathProof + ", blockHeader:" + getBlockHeader());
-                }
-            }
-
-            // Verify path
-            for (PathProof pathProof : getProofs()) {
-                if (!pathProof.verify()) {
-                    throw new Exception("path failed, path:" + pathProof);
-                }
             }
 
             // Verify leaf: hash (transaction hash)
@@ -104,7 +86,11 @@ public class TransactionResponse {
                 hasLeaf |= pathProof.hasLeaf(hash);
             }
             if (!hasLeaf) {
-                throw new Exception("leaf failed, path:" + getProofs() + ", leaf:{}" + hash);
+                throw new Exception(
+                        "leaf failed, no path can prove the leaf. paths:"
+                                + getProofs().toString()
+                                + ", leaf:"
+                                + hash);
             }
 
             // Verify leaf: extraHashes (receipt hash and so on)
@@ -116,7 +102,26 @@ public class TransactionResponse {
                     }
                 }
                 if (!hasLeaf) {
-                    throw new Exception("leaf failed, path:" + getProofs() + ", leaf:" + hash);
+                    throw new Exception(
+                            "leaf failed, no path can prove the leaf. paths:"
+                                    + getProofs().toString()
+                                    + ", leaf:"
+                                    + hash);
+                }
+            }
+
+            // Verify path
+            for (PathProof pathProof : getProofs()) {
+                if (!pathProof.verify()) {
+                    throw new Exception("path failed, path:" + pathProof);
+                }
+            }
+
+            // Verify root
+            for (PathProof pathProof : getProofs()) {
+                if (!pathProof.verifyRoot(getBlockHeader())) {
+                    throw new Exception(
+                            "root failed, path:" + pathProof + ", blockHeader:" + getBlockHeader());
                 }
             }
 
