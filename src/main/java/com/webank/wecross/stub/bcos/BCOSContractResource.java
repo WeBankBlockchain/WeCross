@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.webank.wecross.core.HashUtils;
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.network.config.ConfigType;
-import com.webank.wecross.proof.BCOSReceiptProof;
-import com.webank.wecross.proof.BCOSTransactionProof;
 import com.webank.wecross.proof.BlockHeaderProof;
 import com.webank.wecross.proof.MerkleProof;
 import com.webank.wecross.resource.EventCallback;
@@ -110,7 +108,6 @@ public class BCOSContractResource extends BCOSResource {
                 String status = transactionReceipt.getStatus();
                 Integer errorCode = Integer.valueOf(status.substring(2), 16);
                 if (errorCode == 0) {
-
                     bcosResponse =
                             generateResponseWithProof(
                                     transactionReceipt); // query proof, verify and set to response
@@ -145,11 +142,11 @@ public class BCOSContractResource extends BCOSResource {
 
             String status = callResult.getStatus();
             Integer errorCode = Integer.valueOf(status.substring(2), 16);
-            bcosResponse.setErrorCode(errorCode);
-            bcosResponse.setErrorMessage(callResult.getMessage());
             if (errorCode == 0) {
                 bcosResponse.setResult(new Object[] {callResult.getOutput()});
             }
+            bcosResponse.setErrorCode(errorCode);
+            bcosResponse.setErrorMessage(callResult.getMessage());
 
         } catch (Exception e) {
             bcosResponse.setErrorCode(Status.INTERNAL_ERROR);

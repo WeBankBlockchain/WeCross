@@ -5,7 +5,7 @@ public class LeafProof {
     protected String proof;
 
     boolean verifyLeaf(String leaf) {
-        return true;
+        return this.leaf.equals(leaf);
     }
 
     public String getLeaf() {
