@@ -11,6 +11,7 @@ import com.jd.blockchain.ledger.TransactionTemplate;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.webank.wecross.core.HashUtils;
 import com.webank.wecross.exception.Status;
+import com.webank.wecross.network.config.ConfigType;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.restserver.request.GetDataRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
@@ -54,7 +55,7 @@ public class JDChainContractResource extends JDChainResource {
 
     @Override
     public String getType() {
-        return "JD_CONTRACT";
+        return ConfigType.RESOURCE_TYPE_JDCHAIN_CONTRACT;
     }
 
     @Override
@@ -123,7 +124,10 @@ public class JDChainContractResource extends JDChainResource {
 
     @Override
     public SetDataResponse setData(SetDataRequest request) {
-        return null;
+        SetDataResponse setDataResponse = new SetDataResponse();
+        setDataResponse.setErrorCode(Status.NONSENSE_CALL);
+        setDataResponse.setErrorMessage("Not supported by JDCHAIN_CONTRACT");
+        return setDataResponse;
     }
 
     public com.jd.blockchain.ledger.TransactionResponse commit(

@@ -2,7 +2,6 @@ package com.webank.wecross.stub.remote;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.wecross.p2p.P2PMessage;
-import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.engine.P2PResponse;
 import com.webank.wecross.p2p.netty.common.Peer;
@@ -20,7 +19,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Semaphore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +60,6 @@ public class RemoteResource implements Resource {
 
     @Override
     public GetDataResponse getData(GetDataRequest request) {
-        GetDataResponse response = new GetDataResponse();
         try {
             List<Peer> peerList = getRandPeerList();
             String errorHistory = "[";
@@ -74,24 +71,23 @@ public class RemoteResource implements Resource {
                     p2pReq.setMethod(path.toURI() + "/getData");
                     p2pReq.setData(request);
 
-                    response =
-                            (GetDataResponse)
-                                    sendRemote(
-                                            peerToSend,
-                                            p2pReq,
-                                            new TypeReference<P2PResponse<GetDataResponse>>() {});
+                    RemoteSemaphoreCallback callback =
+                            new RemoteSemaphoreCallback(
+                                    new TypeReference<P2PResponse<SetDataResponse>>() {});
+                    GetDataResponse response =
+                            (GetDataResponse) sendRemote(peerToSend, p2pReq, callback);
 
                     if (response.getErrorCode() == 0) {
                         return response;
                     } else {
-                        errorHistory +=
+                        throw new Exception(
                                 "{"
                                         + peerToSend.toString()
                                         + ", errorCode:"
                                         + response.getErrorCode()
                                         + ", msg:"
                                         + response.getErrorMessage()
-                                        + "},";
+                                        + "},");
                     }
                 } catch (Exception e) {
                     errorHistory +=
@@ -99,21 +95,21 @@ public class RemoteResource implements Resource {
                                     + peerToSend.toString()
                                     + ", exception:"
                                     + e.getLocalizedMessage()
-                                    + "},";
+                                    + "}";
                     continue;
                 }
             }
             throw new Exception("Not an available peer to request: " + errorHistory + "]");
         } catch (Exception e) {
+            GetDataResponse response = new GetDataResponse();
             response.setErrorCode(-1);
             response.setErrorMessage("Call remote resource exception: " + e.getLocalizedMessage());
+            return response;
         }
-        return response;
     }
 
     @Override
     public SetDataResponse setData(SetDataRequest request) {
-        SetDataResponse response = new SetDataResponse();
         try {
             List<Peer> peerList = getRandPeerList();
             String errorHistory = "[";
@@ -125,24 +121,23 @@ public class RemoteResource implements Resource {
                     p2pReq.setMethod(path.toURI() + "/setData");
                     p2pReq.setData(request);
 
-                    response =
-                            (SetDataResponse)
-                                    sendRemote(
-                                            peerToSend,
-                                            p2pReq,
-                                            new TypeReference<P2PResponse<SetDataResponse>>() {});
+                    RemoteSemaphoreCallback callback =
+                            new RemoteSemaphoreCallback(
+                                    new TypeReference<P2PResponse<SetDataResponse>>() {});
+                    SetDataResponse response =
+                            (SetDataResponse) sendRemote(peerToSend, p2pReq, callback);
 
                     if (response.getErrorCode() == 0) {
                         return response;
                     } else {
-                        errorHistory +=
+                        throw new Exception(
                                 "{"
                                         + peerToSend.toString()
                                         + ", errorCode:"
                                         + response.getErrorCode()
                                         + ", msg:"
                                         + response.getErrorMessage()
-                                        + "},";
+                                        + "},");
                     }
                 } catch (Exception e) {
                     errorHistory +=
@@ -150,21 +145,21 @@ public class RemoteResource implements Resource {
                                     + peerToSend.toString()
                                     + ", exception:"
                                     + e.getLocalizedMessage()
-                                    + "},";
+                                    + "}";
                     continue;
                 }
             }
             throw new Exception("Not an available peer to request: " + errorHistory + "]");
         } catch (Exception e) {
+            SetDataResponse response = new SetDataResponse();
             response.setErrorCode(-1);
             response.setErrorMessage("Call remote resource exception: " + e.getLocalizedMessage());
+            return response;
         }
-        return response;
     }
 
     @Override
     public TransactionResponse call(TransactionRequest request) {
-        TransactionResponse response = new TransactionResponse();
         try {
             List<Peer> peerList = getRandPeerList();
             String errorHistory = "[";
@@ -176,25 +171,23 @@ public class RemoteResource implements Resource {
                     p2pReq.setMethod(path.toURI() + "/call");
                     p2pReq.setData(request);
 
-                    response =
-                            (TransactionResponse)
-                                    sendRemote(
-                                            peerToSend,
-                                            p2pReq,
-                                            new TypeReference<
-                                                    P2PResponse<TransactionResponse>>() {});
+                    RemoteTransactionResponseCallback callback =
+                            new RemoteTransactionResponseCallback(
+                                    new TypeReference<P2PResponse<TransactionResponse>>() {});
+                    TransactionResponse response =
+                            (TransactionResponse) sendRemote(peerToSend, p2pReq, callback);
 
                     if (response.getErrorCode() == 0) {
                         return response;
                     } else {
-                        errorHistory +=
+                        throw new Exception(
                                 "{"
                                         + peerToSend.toString()
                                         + ", errorCode:"
                                         + response.getErrorCode()
                                         + ", msg:"
                                         + response.getErrorMessage()
-                                        + "},";
+                                        + "},");
                     }
                 } catch (Exception e) {
                     errorHistory +=
@@ -202,22 +195,22 @@ public class RemoteResource implements Resource {
                                     + peerToSend.toString()
                                     + ", exception:"
                                     + e.getLocalizedMessage()
-                                    + "},";
+                                    + "}";
                     continue;
                 }
             }
             throw new Exception("Not an available peer to request: " + errorHistory + "]");
         } catch (Exception e) {
+            TransactionResponse response = new TransactionResponse();
             response.setErrorCode(-1);
             response.setErrorMessage("Call remote resource exception: " + e.getLocalizedMessage());
+            return response;
         }
-        return response;
     }
 
     @Override
     public TransactionResponse sendTransaction(TransactionRequest request) {
 
-        TransactionResponse response = new TransactionResponse();
         try {
             List<Peer> peerList = getRandPeerList();
             String errorHistory = "[";
@@ -229,25 +222,27 @@ public class RemoteResource implements Resource {
                     p2pReq.setMethod(path.toURI() + "/sendTransaction");
                     p2pReq.setData(request);
 
-                    response =
-                            (TransactionResponse)
-                                    sendRemote(
-                                            peerToSend,
-                                            p2pReq,
-                                            new TypeReference<
-                                                    P2PResponse<TransactionResponse>>() {});
+                    RemoteTransactionResponseCallback callback =
+                            new RemoteTransactionResponseCallback(
+                                    new TypeReference<P2PResponse<TransactionResponse>>() {});
+                    TransactionResponse response =
+                            (TransactionResponse) sendRemote(peerToSend, p2pReq, callback);
+
+                    if (!response.verify()) {
+                        throw new Exception("Verify response proof failed. response:" + response);
+                    }
 
                     if (response.getErrorCode() == 0) {
                         return response;
                     } else {
-                        errorHistory +=
+                        throw new Exception(
                                 "{"
                                         + peerToSend.toString()
                                         + ", errorCode:"
                                         + response.getErrorCode()
                                         + ", msg:"
                                         + response.getErrorMessage()
-                                        + "},";
+                                        + "}");
                     }
                 } catch (Exception e) {
                     errorHistory +=
@@ -261,10 +256,11 @@ public class RemoteResource implements Resource {
             }
             throw new Exception("Not an available peer to request: " + errorHistory + "]");
         } catch (Exception e) {
+            TransactionResponse response = new TransactionResponse();
             response.setErrorCode(-1);
-            response.setErrorMessage("Call remote resource exception");
+            response.setErrorMessage("Call remote resource exception: " + e.getLocalizedMessage());
+            return response;
         }
-        return response;
     }
 
     @Override
@@ -322,53 +318,28 @@ public class RemoteResource implements Resource {
         return peerList;
     }
 
-    private Object sendRemote(Peer peer, P2PMessage request, TypeReference responseType)
+    private Object sendRemote(Peer peer, P2PMessage request, RemoteSemaphoreCallback callback)
             throws Exception {
+        try {
+            callback.setPeer(peer);
 
-        class SemaphoreCallback extends P2PMessageCallback {
+            logger.info(
+                    "Request remote resource: method:{}, data:{}",
+                    request.getMethod(),
+                    request.getData().toString());
+            p2pEngine.asyncSendMessage(peer, request, callback);
 
-            public transient Semaphore semaphore = new Semaphore(1, true);
-            private Object responseData;
+            callback.semaphore.acquire(1);
 
-            public SemaphoreCallback() {
-                super.setTypeReference(responseType);
-                try {
-                    semaphore.acquire(1);
-
-                } catch (InterruptedException e) {
-                    logger.error("error:", e);
-                }
+            logger.info(
+                    "Respond from remote resource: status:{}, data:{}",
+                    callback.getStatus(),
+                    callback.getResponseData().toString());
+            if (callback.getStatus() != 0) {
+                throw new Exception(callback.getMessage());
             }
-
-            @Override
-            public void onResponse(int status, String message, P2PMessage msg) {
-                responseData = msg.getData();
-                semaphore.release();
-            }
-
-            public Object getResponseData() {
-                return responseData;
-            }
-        }
-
-        SemaphoreCallback callback = new SemaphoreCallback();
-
-        callback.setPeer(peer);
-
-        logger.info(
-                "Request remote resource: method:{}, data:{}",
-                request.getMethod(),
-                request.getData().toString());
-        p2pEngine.asyncSendMessage(peer, request, callback);
-
-        callback.semaphore.acquire(1);
-
-        logger.info(
-                "Respond from remote resource: status:{}, data:{}",
-                callback.getStatus(),
-                callback.getResponseData().toString());
-        if (callback.getStatus() != 0) {
-            throw new Exception(callback.getMessage());
+        } finally {
+            callback.semaphore.release();
         }
 
         return callback.getResponseData();

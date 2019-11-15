@@ -91,6 +91,7 @@ public class RemoteResourceTest {
         private P2PMessage handleSendTransaction(Resource resource, P2PMessage msg) {
             TransactionResponse responseData =
                     resource.sendTransaction((TransactionRequest) msg.getData());
+
             P2PMessage<TransactionResponse> response = new P2PMessage<>();
             response.setData(responseData);
             response.setSeq(msg.getSeq());

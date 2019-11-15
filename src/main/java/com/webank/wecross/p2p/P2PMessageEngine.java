@@ -34,7 +34,7 @@ public abstract class P2PMessageEngine {
 
     protected void checkCallback(P2PMessageCallback callback) throws Exception {
         if (callback.getPeer() == null) {
-            throw new Exception("callback from com.webank.wecross.peer has not set");
+            throw new Exception("callback from peer has not set");
         }
     }
 
