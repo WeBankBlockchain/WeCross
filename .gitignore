@@ -47,6 +47,8 @@ src/main/resources/bcosconf
 src/test/resources/application.yml
 src/test/resources/bcosconf
 
+src/main/resources/wecross.toml
+*stub.toml
 *.p12
 *.pem
 *.crt

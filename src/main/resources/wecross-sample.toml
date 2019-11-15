@@ -1,0 +1,13 @@
+[common]
+    network = 'payment'
+
+[stubs]
+    path = 'stubs/'
+
+[p2p]
+    listenIP = '0.0.0.0'
+    listenPort = 12346
+    caCert = 'classpath:ca.crt'
+    sslCert = 'classpath:node.crt'
+    sslKey = 'classpath:node.key'
+    peers = ['127.0.0.1:12345','127.0.0.1:12347']
