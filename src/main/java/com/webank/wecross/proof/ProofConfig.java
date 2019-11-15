@@ -9,7 +9,7 @@ public class ProofConfig {
                 return true;
 
             case ConfigType.TRANSACTION_RSP_TYPE_JDCHAIN:
-            case ConfigType.TRANSACTION_RSP_TYPE_NORMAL:
+            case ConfigType.TRANSACTION_RSP_TYPE_FABRIC:
             default:
                 return false;
         }

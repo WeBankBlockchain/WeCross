@@ -1,6 +1,5 @@
 package com.webank.wecross.restserver.response;
 
-import com.webank.wecross.network.config.ConfigType;
 import com.webank.wecross.proof.PathProof;
 import com.webank.wecross.proof.ProofConfig;
 import com.webank.wecross.proof.RootProof;
@@ -31,7 +30,7 @@ public class TransactionResponse {
     private String hash;
     private List<String> extraHashes;
     private Object result[];
-    private String type = ConfigType.TRANSACTION_RSP_TYPE_NORMAL;
+    private String type = "";
 
     public Integer getErrorCode() {
         return errorCode;
