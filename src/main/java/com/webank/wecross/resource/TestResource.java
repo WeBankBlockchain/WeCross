@@ -1,6 +1,7 @@
 package com.webank.wecross.resource;
 
 import com.webank.wecross.core.HashUtils;
+import com.webank.wecross.network.config.ConfigType;
 import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.restserver.request.GetDataRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
@@ -21,7 +22,7 @@ public class TestResource implements Resource {
 
     @Override
     public String getType() {
-        return "TEST_RESOURCE";
+        return ConfigType.RESOURCE_TYPE_TEST;
     }
 
     @Override

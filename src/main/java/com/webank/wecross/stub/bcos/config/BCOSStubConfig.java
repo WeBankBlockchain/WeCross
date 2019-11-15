@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.protocol.Web3j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,8 @@ public class BCOSStubConfig {
 
         // init bcos resources
         String prefix = networkName + "." + stubName;
-        Map<String, Resource> bcosResources = initBcosResources(prefix, resources);
+        Map<String, Resource> bcosResources =
+                initBcosResources(prefix, resources, web3Sdk.getWeb3());
         bcosStub.setResources(bcosResources);
 
         logger.debug("Init {}.{} finished", networkName, stubName);
@@ -47,7 +49,8 @@ public class BCOSStubConfig {
     }
 
     public Map<String, Resource> initBcosResources(
-            String prefix, Map<String, Map<String, String>> resources) throws WeCrossException {
+            String prefix, Map<String, Map<String, String>> resources, Web3j web3)
+            throws WeCrossException {
         if (resources == null) {
             return null;
         }
@@ -77,6 +80,7 @@ public class BCOSStubConfig {
                 BCOSContractResource bcosContractResource = new BCOSContractResource();
                 String address = metaResource.get("contractAddress");
                 bcosContractResource.setContractAddress(address);
+                bcosContractResource.setWeb3(web3);
 
                 // set path
                 String stringPath = prefix + "." + resourceName;
