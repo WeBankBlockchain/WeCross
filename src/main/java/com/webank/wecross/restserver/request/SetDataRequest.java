@@ -1,7 +1,7 @@
 package com.webank.wecross.restserver.request;
 
 public class SetDataRequest {
-
+    // WeCross set data request
     private String key;
     private String value;
 
