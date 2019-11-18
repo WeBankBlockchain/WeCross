@@ -12,7 +12,11 @@ import org.junit.Test;
 public class BCOSResponseTest {
     @Test
     public void verifyTest() throws Exception {
-        String path = BCOSResponseTest.class.getClassLoader().getResource("data/transaction_response_with_proof.json").getPath();
+        String path =
+                BCOSResponseTest.class
+                        .getClassLoader()
+                        .getResource("data/transaction_response_with_proof.json")
+                        .getPath();
         System.out.println(path);
         File file = new File(path);
 
