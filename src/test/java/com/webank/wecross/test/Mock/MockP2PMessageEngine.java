@@ -25,7 +25,7 @@ public class MockP2PMessageEngine extends P2PMessageEngine {
 
             executeCallback(callback, 0, "Success", response);
         } catch (Exception e) {
-            Assert.assertTrue("Exception: " + e, false);
+            executeCallback(callback, -1, "Error", null);
         }
     }
 

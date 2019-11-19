@@ -10,8 +10,8 @@ import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 
 public class RemoteTransactionResponseCallback extends RemoteSemaphoreCallback {
 
-    public RemoteTransactionResponseCallback(TypeReference responseType) {
-        super(responseType);
+    public RemoteTransactionResponseCallback() {
+        super(new TypeReference<P2PResponse<TransactionResponse>>() {});
     }
 
     @Override
