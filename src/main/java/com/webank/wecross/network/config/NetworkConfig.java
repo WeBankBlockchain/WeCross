@@ -8,9 +8,14 @@ import com.webank.wecross.stub.bcos.BCOSStub;
 import com.webank.wecross.stub.bcos.config.Account;
 import com.webank.wecross.stub.bcos.config.BCOSStubConfig;
 import com.webank.wecross.stub.bcos.config.ChannelService;
+import com.webank.wecross.stub.fabric.FabricStub;
+import com.webank.wecross.stub.fabric.config.FabricConfig;
+import com.webank.wecross.stub.fabric.config.FabricPeerConfig;
+import com.webank.wecross.stub.fabric.config.FabricStubConfig;
 import com.webank.wecross.stub.jdchain.JDChainStub;
 import com.webank.wecross.stub.jdchain.config.JDChainService;
 import com.webank.wecross.stub.jdchain.config.JDChainStubConfig;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,6 +99,9 @@ public class NetworkConfig {
                 JDChainStub jdChainStub = getJdStub(networkName, stubName, stubConfig);
                 stubsBean.put(stubName, jdChainStub);
 
+            } else if (Stubtype.equalsIgnoreCase(ConfigType.STUB_TYPE_FABRIC)) {
+                FabricStub fabricStub = getFabricStub(networkName, stubName, stubConfig);
+                stubsBean.put(stubName, fabricStub);
             } else {
                 String errorMessage = "Undefined stub type: " + Stubtype;
                 throw new WeCrossException(Status.UNEXPECTED_CONFIG, errorMessage);
@@ -180,6 +188,53 @@ public class NetworkConfig {
                 jdChainStubConfig.initJdChainStub(
                         networkName, stubName, jdChainService, jdChainResources);
         return jdChainStub;
+    }
+
+    public FabricStub getFabricStub(
+            String networkName, String stubName, Map<String, Object> stubConfig) {
+        /* replace configure here */
+        FabricConfig fabricConfig = new FabricConfig();
+        fabricConfig.setChannelName("mychannel");
+        fabricConfig.setOrgName("Org1");
+        fabricConfig.setMspId("Org1MSP");
+        fabricConfig.setOrgUserName("Admin");
+        fabricConfig.setOrgUserKeyFile(
+                "/data/darren/wecross_3.1/WeCross/dist/conf/fabric/fabric1/5895923570c12e5a0ba4ff9a908ed10574b475797b1fa838a4a465d6121b8ddf_sk");
+        fabricConfig.setOrgUserCertFile(
+                "/data/darren/wecross_3.1/WeCross/dist/conf/fabric/fabric1/Admin@org1.example.com-cert.pem");
+        FabricPeerConfig peerconfig = new FabricPeerConfig();
+
+        List<FabricPeerConfig> perConfigs = new ArrayList<FabricPeerConfig>();
+        peerconfig.setPeerAddress("grpcs://10.107.105.106:7051");
+        peerconfig.setPeerTlsCaFile(
+                "/data/darren/wecross_3.1/WeCross/dist/conf/fabric/fabric1/tlsca.org1.example.com-cert.pem");
+        perConfigs.add(peerconfig);
+
+        FabricPeerConfig peerconfig2 = new FabricPeerConfig();
+        peerconfig2.setPeerAddress("grpcs://10.107.105.106:9051");
+        peerconfig2.setPeerTlsCaFile(
+                "/data/darren/wecross_3.1/WeCross/dist/conf/fabric/fabric1/tlsca.org2.example.com-cert.pem");
+        perConfigs.add(peerconfig2);
+        fabricConfig.setPeerConfigs(perConfigs);
+
+        fabricConfig.setOrdererAddress("grpcs://10.107.105.106:7050");
+        fabricConfig.setOrdererTlsCaFile(
+                "/data/darren/wecross_3.1/WeCross/dist/conf/fabric/fabric1/tlsca.example.com-cert.pem");
+        Map<String, Map<String, String>> resources = new HashMap<String, Map<String, String>>();
+
+        Map<String, String> kvResource = new HashMap<String, String>();
+        kvResource.put("chaincode", "mycc");
+        resources.put("HelloWorldContract", kvResource);
+
+        FabricStubConfig fabricStubConfig = new FabricStubConfig();
+        FabricStub fabricStub = new FabricStub();
+        try {
+            fabricStub =
+                    fabricStubConfig.initFabricStub(networkName, stubName, fabricConfig, resources);
+        } catch (WeCrossException e) {
+            e.printStackTrace();
+        }
+        return fabricStub;
     }
 
     public Map<String, NetworkUnit> getNetworks() {
