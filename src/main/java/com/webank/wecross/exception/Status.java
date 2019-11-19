@@ -12,6 +12,8 @@ public class Status {
     // configuration
     public static final int UNEXPECTED_CONFIG = 1001;
     public static final int ILLEGAL_SYMBOL = 1002;
+    public static final int FILE_NOT_EXISTS = 1003;
+    public static final int DIR_NOT_EXISTS = 1004;
 
     // http
     public static final int VERSION_ERROR = 2001;

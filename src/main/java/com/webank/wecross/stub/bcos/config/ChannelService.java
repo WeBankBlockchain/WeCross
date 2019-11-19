@@ -9,11 +9,19 @@ public class ChannelService {
 
     private Logger logger = LoggerFactory.getLogger(ChannelService.class);
 
+    private Integer timeout;
     private int groupId;
-    private String agencyName;
+    private String agencyName = "fisco";
     private GroupChannelConnections groupChannelConnections;
 
     public ChannelService() {}
+
+    public ChannelService(
+            Integer timeout, int groupId, GroupChannelConnections groupChannelConnections) {
+        this.timeout = timeout;
+        this.groupId = groupId;
+        this.groupChannelConnections = groupChannelConnections;
+    }
 
     public ChannelService(
             int groupId, String agencyName, GroupChannelConnections groupChannelConnections) {
@@ -31,6 +39,14 @@ public class ChannelService {
         channelService.setGroupId(groupId);
         channelService.setAllChannelConnections(groupChannelConnectionsConfig);
         return channelService;
+    }
+
+    public Integer getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(Integer timeout) {
+        this.timeout = timeout;
     }
 
     public int getGroupId() {

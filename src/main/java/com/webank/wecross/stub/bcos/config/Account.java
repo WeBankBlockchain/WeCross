@@ -13,6 +13,7 @@ import org.fisco.bcos.channel.client.P12Manager;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +24,7 @@ public class Account {
 
     private String accountFile;
     private String password;
-
-    public Account() {}
+    private EncryptType encryptType;
 
     public Account(String accountFile, String password) {
         this.accountFile = accountFile;
@@ -80,5 +80,29 @@ public class Account {
 
         logger.info("Bcos credentials address: {}", credentials.getAddress());
         return credentials;
+    }
+
+    public String getAccountFile() {
+        return accountFile;
+    }
+
+    public void setAccountFile(String accountFile) {
+        this.accountFile = accountFile;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public EncryptType getEncryptType() {
+        return encryptType;
+    }
+
+    public void setEncryptType(EncryptType encryptType) {
+        this.encryptType = encryptType;
     }
 }

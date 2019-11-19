@@ -3,7 +3,7 @@ package com.webank.wecross.stub.jdchain;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.sdk.BlockchainService;
-import com.webank.wecross.network.config.ConfigType;
+import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.ChainState;
@@ -63,7 +63,7 @@ public class JDChainStub implements Stub {
 
     @Override
     public String getType() {
-        return ConfigType.STUB_TYPE_JDCHAIN;
+        return ConfigInfo.STUB_TYPE_JDCHAIN;
     }
 
     @Override
