@@ -1,4 +1,4 @@
-package com.webank.wecross.test.stub;
+package com.webank.wecross.test.stub.remote;
 
 import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
@@ -17,12 +17,18 @@ import com.webank.wecross.stub.remote.RemoteResource;
 import com.webank.wecross.test.Mock.MockNetworkManagerFactory;
 import com.webank.wecross.test.Mock.MockP2PMessageEngineFactory;
 import com.webank.wecross.test.Mock.P2PEngineMessageFilter;
+import java.security.SecureRandom;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class RemoteResourceTest {
+public class RemoteResourceExceptionTest {
 
-    class RemoteResourceEngineFilter extends P2PEngineMessageFilter {
+    class AlwaysErrorFilter extends P2PEngineMessageFilter {
+
+        private P2PMessage randToNull(P2PMessage msg) {
+            SecureRandom rand = new SecureRandom();
+            return rand.nextBoolean() ? null : msg;
+        }
 
         @Override
         public P2PMessage handle1(P2PMessage msg) {
@@ -65,48 +71,48 @@ public class RemoteResourceTest {
 
         private P2PMessage handleGetData(Resource resource, P2PMessage msg) {
             GetDataResponse responseData = resource.getData((GetDataRequest) msg.getData());
+            responseData.setErrorCode(1); // set error
             P2PMessage<GetDataResponse> response = new P2PMessage<>();
             response.setData(responseData);
             response.setSeq(msg.getSeq());
-            return response;
+            return randToNull(response); // random return null
         }
 
         private P2PMessage handleSetData(Resource resource, P2PMessage msg) {
             SetDataResponse responseData = resource.setData((SetDataRequest) msg.getData());
+            responseData.setErrorCode(1); // set error
             P2PMessage<SetDataResponse> response = new P2PMessage<>();
             response.setData(responseData);
             response.setSeq(msg.getSeq());
-            return response;
+            return randToNull(response); // random return null
         }
 
         private P2PMessage handleCall(Resource resource, P2PMessage msg) {
             TransactionResponse responseData = resource.call((TransactionRequest) msg.getData());
+            responseData.setErrorCode(1); // set error
             P2PMessage<TransactionResponse> response = new P2PMessage<>();
             response.setData(responseData);
             response.setSeq(msg.getSeq());
-
-            return response;
+            return randToNull(response); // random return null
         }
 
         private P2PMessage handleSendTransaction(Resource resource, P2PMessage msg) {
             TransactionResponse responseData =
                     resource.sendTransaction((TransactionRequest) msg.getData());
-
+            responseData.setErrorCode(1); // set error
             P2PMessage<TransactionResponse> response = new P2PMessage<>();
             response.setData(responseData);
             response.setSeq(msg.getSeq());
 
-            return response;
+            return randToNull(response); // random return null
         }
     }
 
     private P2PMessageEngine p2pEngine;
     private NetworkManager networkManager;
 
-    public RemoteResourceTest() {
-        p2pEngine =
-                MockP2PMessageEngineFactory.newMockP2PMessageEngine(
-                        new RemoteResourceEngineFilter());
+    public RemoteResourceExceptionTest() {
+        p2pEngine = MockP2PMessageEngineFactory.newMockP2PMessageEngine(new AlwaysErrorFilter());
         networkManager = MockNetworkManagerFactory.newMockNteworkManager(p2pEngine);
 
         try {
@@ -122,67 +128,83 @@ public class RemoteResourceTest {
     @Test
     public void remoteResourceGetDataTest() throws Exception {
         Peer peer = new Peer();
-        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pEngine);
+        Resource resource = new RemoteResource(peer, 1, p2pEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 
         GetDataRequest request = new GetDataRequest();
         request.setKey("mockKey");
 
-        GetDataResponse response = resource.getData(request);
-        Assert.assertEquals(new Integer(0), response.getErrorCode());
-        Assert.assertTrue(response.getErrorMessage().contains("getData test resource success"));
-        Assert.assertEquals(request.toString(), response.getValue());
-        System.out.println(response.getErrorMessage());
+        try {
+            for (int i = 0; i < 10; i++) {
+                GetDataResponse response = resource.getData(request);
+                Assert.assertFalse(response.getErrorCode().equals(0));
+            }
+
+        } catch (Exception e) {
+            Assert.assertTrue("Resource exception", false);
+        }
     }
 
     @Test
     public void remoteResourceSetDataTest() throws Exception {
         Peer peer = new Peer();
-        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pEngine);
+        Resource resource = new RemoteResource(peer, 1, p2pEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 
         SetDataRequest request = new SetDataRequest();
         request.setKey("mockKey");
         request.setKey("mockValue");
 
-        SetDataResponse response = resource.setData(request);
-        Assert.assertEquals(new Integer(0), response.getErrorCode());
-        Assert.assertTrue(response.getErrorMessage().contains("setData test resource success"));
-        System.out.println(response.getErrorMessage());
+        try {
+            for (int i = 0; i < 10; i++) {
+                SetDataResponse response = resource.setData(request);
+                Assert.assertFalse(response.getErrorCode().equals(0));
+            }
+
+        } catch (Exception e) {
+            Assert.assertTrue("Resource exception", false);
+        }
     }
 
     @Test
     public void remoteResourceCallTest() throws Exception {
         Peer peer = new Peer();
-        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pEngine);
+        Resource resource = new RemoteResource(peer, 1, p2pEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 
         TransactionRequest request = new TransactionRequest();
         request.setMethod("get");
         request.setArgs(new String[] {"123", "aabb"});
 
-        TransactionResponse response = resource.call(request);
-        Assert.assertEquals(new Integer(0), response.getErrorCode());
-        Assert.assertTrue(response.getErrorMessage().contains("call test resource success"));
-        Assert.assertEquals(request, response.getResult()[0]);
-        System.out.println(response.getErrorMessage());
+        try {
+            for (int i = 0; i < 10; i++) {
+                TransactionResponse response = resource.call(request);
+                Assert.assertFalse(response.getErrorCode().equals(0));
+            }
+
+        } catch (Exception e) {
+            Assert.assertTrue("Resource exception", false);
+        }
     }
 
     @Test
     public void remoteResourceSendTransactionTest() throws Exception {
         Peer peer = new Peer();
-        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pEngine);
+        Resource resource = new RemoteResource(peer, 1, p2pEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 
         TransactionRequest request = new TransactionRequest();
         request.setMethod("sendTransaction");
         request.setArgs(new String[] {"123", "aabb"});
 
-        TransactionResponse response = resource.sendTransaction(request);
-        Assert.assertEquals(new Integer(0), response.getErrorCode());
-        Assert.assertTrue(
-                response.getErrorMessage().contains("sendTransaction test resource success"));
-        Assert.assertEquals(request, response.getResult()[0]);
-        System.out.println(response.getErrorMessage());
+        try {
+            for (int i = 0; i < 10; i++) {
+                TransactionResponse response = resource.sendTransaction(request);
+                Assert.assertFalse(response.getErrorCode().equals(0));
+            }
+
+        } catch (Exception e) {
+            Assert.assertTrue("Resource exception", false);
+        }
     }
 }
