@@ -190,4 +190,31 @@ public class PeerManagerTest {
 
         peerManager.clearPeerInfos();
     }
+
+    @Test
+    public void handleRequestSeqTest() {
+        PeerManager peerManager = newMockPeerManager();
+        P2PMessage<Object> request = new P2PMessage<>();
+        PeerSeqMessageData data =
+                (PeerSeqMessageData) peerManager.onRestfulPeerMessage("requestSeq", request);
+
+        Assert.assertNotEquals(0, data.getSeq());
+    }
+
+    @Test
+    public void handleRequestPeerInfoTest() {
+        PeerManager peerManager = newMockPeerManager();
+
+        for (int i = 1; i <= 10; i++) {
+            peerManager.addMockResources();
+            peerManager.syncWithPeerNetworks();
+            P2PMessage<Object> request = new P2PMessage<>();
+            PeerInfoMessageData data =
+                    (PeerInfoMessageData)
+                            peerManager.onRestfulPeerMessage("requestPeerInfo", request);
+
+            Assert.assertNotEquals(0, data.getSeq());
+            Assert.assertEquals(i, data.getResources().size());
+        }
+    }
 }

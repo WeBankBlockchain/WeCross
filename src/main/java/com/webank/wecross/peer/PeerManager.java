@@ -359,7 +359,7 @@ public class PeerManager {
         }
     }
 
-    private void addMockResources() {
+    public void addMockResources() {
         try {
             Long timestamp = System.currentTimeMillis();
             logger.info("Add test resource");

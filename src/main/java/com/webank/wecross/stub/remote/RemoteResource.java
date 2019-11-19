@@ -172,8 +172,7 @@ public class RemoteResource implements Resource {
                     p2pReq.setData(request);
 
                     RemoteTransactionResponseCallback callback =
-                            new RemoteTransactionResponseCallback(
-                                    new TypeReference<P2PResponse<TransactionResponse>>() {});
+                            new RemoteTransactionResponseCallback();
                     TransactionResponse response =
                             (TransactionResponse) sendRemote(peerToSend, p2pReq, callback);
 
@@ -223,8 +222,7 @@ public class RemoteResource implements Resource {
                     p2pReq.setData(request);
 
                     RemoteTransactionResponseCallback callback =
-                            new RemoteTransactionResponseCallback(
-                                    new TypeReference<P2PResponse<TransactionResponse>>() {});
+                            new RemoteTransactionResponseCallback();
                     TransactionResponse response =
                             (TransactionResponse) sendRemote(peerToSend, p2pReq, callback);
 

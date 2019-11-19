@@ -106,6 +106,75 @@ public class RestfulServiceTest {
     }
 
     @Test
+    public void setDataTest() throws Exception {
+        try {
+            String json =
+                    "{\n"
+                            + "\"version\":\"0.2\",\n"
+                            + "\"path\":\"test-network.test-stub.test-resource\",\n"
+                            + "\"method\":\"setData\",\n"
+                            + "\"data\": {\n"
+                            + "\"key\":\"mockKey\",\n"
+                            + "\"value\":\"mockValueaaaa\"\n"
+                            + "}\n"
+                            + "}";
+
+            MvcResult rsp =
+                    this.mockMvc
+                            .perform(
+                                    post("/test-network/test-stub/test-resource/setData")
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .content(json))
+                            .andDo(print())
+                            .andExpect(status().isOk())
+                            .andReturn();
+
+            String result = rsp.getResponse().getContentAsString();
+            System.out.println("####Respond: " + result);
+
+            String expectRsp =
+                    "{\"version\":\"0.2\",\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"setData test resource success\"}}";
+            Assert.assertTrue(result.contains(expectRsp));
+        } catch (Exception e) {
+            Assert.assertTrue(e.getMessage(), false);
+        }
+    }
+
+    @Test
+    public void getDataTest() throws Exception {
+        try {
+            String json =
+                    "{\n"
+                            + "\"version\":\"0.2\",\n"
+                            + "\"path\":\"test-network.test-stub.test-resource\",\n"
+                            + "\"method\":\"getData\",\n"
+                            + "\"data\": {\n"
+                            + "\"key\":\"mockKey\"\n"
+                            + "}\n"
+                            + "}";
+
+            MvcResult rsp =
+                    this.mockMvc
+                            .perform(
+                                    post("/test-network/test-stub/test-resource/getData")
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .content(json))
+                            .andDo(print())
+                            .andExpect(status().isOk())
+                            .andReturn();
+
+            String result = rsp.getResponse().getContentAsString();
+            System.out.println("####Respond: " + result);
+
+            String expectRsp =
+                    "{\"version\":\"0.2\",\"result\":0,\"message\":null,\"data\":{\"errorCode\":0,\"errorMessage\":\"getData test resource success\"";
+            Assert.assertTrue(result.contains(expectRsp));
+        } catch (Exception e) {
+            Assert.assertTrue(e.getMessage(), false);
+        }
+    }
+
+    @Test
     public void callTest() throws Exception {
         try {
             String json =

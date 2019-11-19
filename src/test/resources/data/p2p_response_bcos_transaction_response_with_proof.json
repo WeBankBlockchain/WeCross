@@ -1,0 +1,57 @@
+{
+  "version": "0.2",
+  "seq": 100,
+  "result": 0,
+  "message": null,
+  "data": {
+    "errorCode": 0,
+    "errorMessage": null,
+    "hash": "0xa0c03d93c2b89a4039dddf11575729ba1c8072756d2d92b813bfce76e521b30c",
+    "extraHashes": [
+      "0x187645f8724f37d063e56b6191119fffac3f82953948642139dcf5cca09b08fb"
+    ],
+    "result": [
+      "0x"
+    ],
+    "type": "NORMAL",
+    "blockHeader": {
+      "blockNumber": 154,
+      "hash": "0x0603607730dea204ec454c9235c2938d18e2a4d3d83ceb20654525408ae92fa2",
+      "roots": [
+        "0x917c14bed3c97a85590ce8abb186df8374901e152a11818a98a816c19e5916cc",
+        "0x38723a2e5e8a17aa7950dc008209944e898f69a7bd10a23c839d341e935fd5ca",
+        "0x94d831afa13b6f9d252f8e8ca10474d6cbf026910b151e2044f2f8a20b0e1b57"
+      ]
+    },
+    "proofs": [
+      {
+        "root": "0x94d831afa13b6f9d252f8e8ca10474d6cbf026910b151e2044f2f8a20b0e1b57",
+        "path": [
+          {
+            "left": [],
+            "right": []
+          }
+        ],
+        "leaf": {
+          "leaf": "0xa0c03d93c2b89a4039dddf11575729ba1c8072756d2d92b813bfce76e521b30c",
+          "proof": "0x669b3be642fac251a3c934ead7521642077f116d6b58659463138084684687a9",
+          "index": "0x0"
+        }
+      },
+      {
+        "root": "0x917c14bed3c97a85590ce8abb186df8374901e152a11818a98a816c19e5916cc",
+        "path": [
+          {
+            "left": [],
+            "right": []
+          }
+        ],
+        "leaf": {
+          "leaf": "0x187645f8724f37d063e56b6191119fffac3f82953948642139dcf5cca09b08fb",
+          "proof": "0x99f42975acacaa1f2b5facff1170efb13df72001166081d98ed5eab454ef75b8",
+          "index": "0x0"
+        }
+      }
+    ]
+  }
+}
