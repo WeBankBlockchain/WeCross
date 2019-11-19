@@ -8,12 +8,8 @@ import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 
-@Configuration
-@ConfigurationProperties(prefix = "p2p")
 public class P2PConfig {
 
     private static Logger logger = LoggerFactory.getLogger(P2PConfig.class);

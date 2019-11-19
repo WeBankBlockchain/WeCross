@@ -14,13 +14,13 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JDChainSdkConfig {
+public class JDChainSdkFactory {
 
-    private Logger logger = LoggerFactory.getLogger(JDChainSdkConfig.class);
+    private Logger logger = LoggerFactory.getLogger(JDChainSdkFactory.class);
 
     private List<JDChainService> jdChainService = new ArrayList<JDChainService>();
 
-    public JDChainSdkConfig(List<JDChainService> jdChainService) {
+    public JDChainSdkFactory(List<JDChainService> jdChainService) {
         this.jdChainService = jdChainService;
     }
 

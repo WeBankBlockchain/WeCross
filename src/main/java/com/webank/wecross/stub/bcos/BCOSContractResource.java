@@ -1,9 +1,9 @@
 package com.webank.wecross.stub.bcos;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.core.HashUtils;
 import com.webank.wecross.exception.Status;
-import com.webank.wecross.network.config.ConfigType;
 import com.webank.wecross.proof.BlockHeaderProof;
 import com.webank.wecross.proof.MerkleProof;
 import com.webank.wecross.resource.EventCallback;
@@ -69,7 +69,7 @@ public class BCOSContractResource extends BCOSResource {
 
     @Override
     public String getType() {
-        return ConfigType.RESOURCE_TYPE_BCOS_CONTRACT;
+        return ConfigInfo.RESOURCE_TYPE_BCOS_CONTRACT;
     }
 
     @Override
@@ -90,7 +90,7 @@ public class BCOSContractResource extends BCOSResource {
 
     @Override
     public TransactionResponse sendTransaction(TransactionRequest request) {
-        BCOSResponse bcosResponse = new BCOSResponse();
+        BCOSTransactionResponse bcosTransactionResponse = new BCOSTransactionResponse();
 
         try {
             TransactionReceipt transactionReceipt =
@@ -100,28 +100,29 @@ public class BCOSContractResource extends BCOSResource {
                             javaType2BCOSType(request.getArgs()));
 
             if (transactionReceipt == null) {
-                bcosResponse.setErrorCode(Status.RPC_ERROR);
-                bcosResponse.setErrorMessage("error in RPC");
+                bcosTransactionResponse.setErrorCode(Status.RPC_ERROR);
+                bcosTransactionResponse.setErrorMessage("error in RPC");
             } else {
 
                 // status: 0x00 - 0x1a, errorCode: 0 - 26
                 String status = transactionReceipt.getStatus();
                 Integer errorCode = Integer.valueOf(status.substring(2), 16);
                 if (errorCode == 0) {
-                    bcosResponse =
+                    bcosTransactionResponse =
                             generateResponseWithProof(
                                     transactionReceipt); // query proof, verify and set to response
-                    bcosResponse.setResult(new Object[] {transactionReceipt.getOutput()});
+                    bcosTransactionResponse.setResult(
+                            new Object[] {transactionReceipt.getOutput()});
                 }
-                bcosResponse.setErrorCode(errorCode);
-                bcosResponse.setErrorMessage(transactionReceipt.getMessage());
+                bcosTransactionResponse.setErrorCode(errorCode);
+                bcosTransactionResponse.setErrorMessage(transactionReceipt.getMessage());
             }
         } catch (Exception e) {
-            bcosResponse.setErrorCode(Status.INTERNAL_ERROR);
-            bcosResponse.setErrorMessage(e.getMessage());
+            bcosTransactionResponse.setErrorCode(Status.INTERNAL_ERROR);
+            bcosTransactionResponse.setErrorMessage(e.getMessage());
         }
 
-        return bcosResponse;
+        return bcosTransactionResponse;
     }
 
     @Override
@@ -131,7 +132,7 @@ public class BCOSContractResource extends BCOSResource {
 
     @Override
     public TransactionResponse call(TransactionRequest request) {
-        BCOSResponse bcosResponse = new BCOSResponse();
+        BCOSTransactionResponse bcosTransactionResponse = new BCOSTransactionResponse();
 
         try {
             CallResult callResult =
@@ -143,17 +144,17 @@ public class BCOSContractResource extends BCOSResource {
             String status = callResult.getStatus();
             Integer errorCode = Integer.valueOf(status.substring(2), 16);
             if (errorCode == 0) {
-                bcosResponse.setResult(new Object[] {callResult.getOutput()});
+                bcosTransactionResponse.setResult(new Object[] {callResult.getOutput()});
             }
-            bcosResponse.setErrorCode(errorCode);
-            bcosResponse.setErrorMessage(callResult.getMessage());
+            bcosTransactionResponse.setErrorCode(errorCode);
+            bcosTransactionResponse.setErrorMessage(callResult.getMessage());
 
         } catch (Exception e) {
-            bcosResponse.setErrorCode(Status.INTERNAL_ERROR);
-            bcosResponse.setErrorMessage(e.getMessage());
+            bcosTransactionResponse.setErrorCode(Status.INTERNAL_ERROR);
+            bcosTransactionResponse.setErrorMessage(e.getMessage());
         }
 
-        return bcosResponse;
+        return bcosTransactionResponse;
     }
 
     @Override
@@ -236,7 +237,7 @@ public class BCOSContractResource extends BCOSResource {
         return proof;
     }
 
-    private BCOSResponse generateResponseWithProof(TransactionReceipt transactionReceipt)
+    private BCOSTransactionResponse generateResponseWithProof(TransactionReceipt transactionReceipt)
             throws Exception {
         // Get header proof
 
@@ -261,17 +262,17 @@ public class BCOSContractResource extends BCOSResource {
                 getTransactionReceiptProof(
                         transactionReceipt.getTransactionHash(), block.getReceiptsRoot());
 
-        BCOSResponse bcosResponse = new BCOSResponse();
-        bcosResponse.setBlockHeader(headerProof);
-        bcosResponse.setProofs(new MerkleProof[] {txProof, receiptsProof});
+        BCOSTransactionResponse bcosTransactionResponse = new BCOSTransactionResponse();
+        bcosTransactionResponse.setBlockHeader(headerProof);
+        bcosTransactionResponse.setProofs(new MerkleProof[] {txProof, receiptsProof});
 
-        bcosResponse.setHash(transactionReceipt.getTransactionHash());
+        bcosTransactionResponse.setHash(transactionReceipt.getTransactionHash());
 
         String receiptRlp = ReceiptEncoder.encode(transactionReceipt);
         String receiptHash = Hash.sha3(receiptRlp);
-        bcosResponse.addExtraHash(receiptHash);
+        bcosTransactionResponse.addExtraHash(receiptHash);
 
-        return bcosResponse;
+        return bcosTransactionResponse;
     }
 
     public void setWeb3(Web3j web3) {

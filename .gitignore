@@ -42,11 +42,10 @@ console.tar.gz
 nodes/
 console/
 out/
-src/main/resources/application.yml
-src/main/resources/bcosconf
-src/test/resources/application.yml
-src/test/resources/bcosconf
 
+src/main/resources/wecross.toml
+src/test/resources/wecross.toml
+*stub.toml
 *.p12
 *.pem
 *.crt

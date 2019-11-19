@@ -1,15 +1,15 @@
 package com.webank.wecross.proof;
 
-import com.webank.wecross.network.config.ConfigType;
+import com.webank.wecross.config.ConfigInfo;
 
 public class ProofConfig {
     public static boolean supportSPV(String type) {
         switch (type) {
-            case ConfigType.TRANSACTION_RSP_TYPE_BCOS:
+            case ConfigInfo.TRANSACTION_RSP_TYPE_BCOS:
                 return true;
 
-            case ConfigType.TRANSACTION_RSP_TYPE_JDCHAIN:
-            case ConfigType.TRANSACTION_RSP_TYPE_FABRIC:
+            case ConfigInfo.TRANSACTION_RSP_TYPE_JDCHAIN:
+            case ConfigInfo.TRANSACTION_RSP_TYPE_FABRIC:
             default:
                 return false;
         }

@@ -1,0 +1,26 @@
+[common]
+    stub = 'jd' # stub must be same with directory name
+    type = 'JDCHAIN'
+
+# jdServices is a list
+[[jdServices]]
+     privateKey = '0000000000000000'
+     publicKey = '111111111111111'
+     password = '222222222222222'
+     connectionsStr = '127.0.0.1:18081'
+[[jdServices]]
+     privateKey = '0000000000000000'
+     publicKey = '111111111111111'
+     password = '222222222222222'
+     connectionsStr = '127.0.0.1:18082'
+
+# resources is a list
+[[resources]]
+    # name cannot be repeated
+    name = 'HelloWorldContract'
+    type = 'JDCHAIN_CONTRACT'
+    contractAddress = '0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a'
+[[resources]]
+    name = 'FirstTomlContract'
+    type = 'JDCHAIN_CONTRACT'
+    contractAddress = '0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a'
