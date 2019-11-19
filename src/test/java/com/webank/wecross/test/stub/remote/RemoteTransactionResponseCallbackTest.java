@@ -1,7 +1,7 @@
 package com.webank.wecross.test.stub.remote;
 
 import com.webank.wecross.p2p.engine.P2PResponse;
-import com.webank.wecross.stub.bcos.BCOSResponse;
+import com.webank.wecross.stub.bcos.BCOSTransactionResponse;
 import com.webank.wecross.stub.remote.RemoteTransactionResponseCallback;
 import java.io.File;
 import org.apache.commons.io.FileUtils;
@@ -25,8 +25,9 @@ public class RemoteTransactionResponseCallbackTest {
 
         Assert.assertTrue(response.getResult().equals(0));
 
-        BCOSResponse bcosResponse = (BCOSResponse) response.getData();
-        Assert.assertTrue(bcosResponse.getErrorCode().equals(0));
-        Assert.assertNotEquals(0, bcosResponse.getProofs().length);
+        BCOSTransactionResponse bcosTransactionResponse =
+                (BCOSTransactionResponse) response.getData();
+        Assert.assertTrue(bcosTransactionResponse.getErrorCode().equals(0));
+        Assert.assertNotEquals(0, bcosTransactionResponse.getProofs().length);
     }
 }

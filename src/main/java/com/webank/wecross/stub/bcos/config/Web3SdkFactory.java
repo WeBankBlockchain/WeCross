@@ -9,15 +9,15 @@ import org.fisco.bcos.web3j.protocol.Web3j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Web3SdkConfig {
+public class Web3SdkFactory {
 
-    private Logger logger = LoggerFactory.getLogger(Web3SdkConfig.class);
+    private Logger logger = LoggerFactory.getLogger(Web3SdkFactory.class);
 
     private Credentials credentials;
 
     private ChannelService channelService;
 
-    public Web3SdkConfig(Credentials credentials, ChannelService channelService) {
+    public Web3SdkFactory(Credentials credentials, ChannelService channelService) {
         this.credentials = credentials;
         this.channelService = channelService;
     }
@@ -40,9 +40,9 @@ public class Web3SdkConfig {
         Service bcosService = channelService.getService(groupChannelConnectionsConfig);
 
         // init Web3j
-        Web3jConfig web3jConfig = new Web3jConfig(bcosService);
+        Web3jFactory web3JFactory = new Web3jFactory(bcosService);
         try {
-            Web3j web3j = web3jConfig.getWeb3j();
+            Web3j web3j = web3JFactory.getWeb3j(channelService.getTimeout());
             web3Sdk.setBcosService(bcosService);
             web3Sdk.setCredentials(credentials);
             web3Sdk.setWeb3(web3j);

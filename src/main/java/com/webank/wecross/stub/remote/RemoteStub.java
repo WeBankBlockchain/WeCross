@@ -1,6 +1,6 @@
 package com.webank.wecross.stub.remote;
 
-import com.webank.wecross.network.config.ConfigType;
+import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.ChainState;
@@ -25,7 +25,7 @@ public class RemoteStub implements Stub {
 
     @Override
     public String getType() {
-        return ConfigType.STUB_TYPE_REMOTE;
+        return ConfigInfo.STUB_TYPE_REMOTE;
     }
 
     @Override

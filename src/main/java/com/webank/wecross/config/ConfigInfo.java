@@ -1,6 +1,10 @@
-package com.webank.wecross.network.config;
+package com.webank.wecross.config;
 
-public class ConfigType {
+public class ConfigInfo {
+
+    // config file
+    public static final String MAIN_CONFIG_FILE = "wecross.toml";
+    public static final String STUB_CONFIG_FILE = "stub.toml";
 
     // stub type
     public static final String STUB_TYPE_BCOS = "BCOS";

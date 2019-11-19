@@ -361,6 +361,7 @@ public class PeerManager {
 
     public void addMockResources() {
         try {
+            Thread.sleep(10);
             Long timestamp = System.currentTimeMillis();
             logger.info("Add test resource");
             Path path =

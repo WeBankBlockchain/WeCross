@@ -13,7 +13,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
-public class Compoment {
+public class Component {
+
     @Resource P2PConfig p2PConfig;
 
     @Resource SeqMapper seqMapper;

@@ -38,7 +38,7 @@ pem_file=$(ls *.pem | awk -F'.' '{print $0}')
 p12_file=$(ls *.p12 | awk -F'.' '{print $0}')
 cd -
 
-cp src/test/resources/application-sample.yml src/test/resources/application.yml
+cp src/test/resources/wecross-sample.toml src/test/resources/wecross.toml
 
 #generate wecross cert
 bash ./scripts/build_cert.sh -c -d ./ca
@@ -49,27 +49,22 @@ cp ./ca/node/node.crt ./src/test/resources/p2p/
 cp ./ca/node/node.key ./src/test/resources/p2p/
 cp ./ca/node/node.nodeid ./src/test/resources/p2p/
 
+cp src/test/resources/stubs/bcos1/stub-sample.toml src/test/resources/stubs/bcos1/stub.toml
+
 #configure wecross
 if [ "$(uname)" == "Darwin" ]; then
     # Mac
-    sed -i "" "s/0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a/${hello_address}/g" src/test/resources/application.yml
-    sed -i "" "s/0xcdcce60801c0a2e6bb534322c32ae528b9dec8d2.pem/${pem_file}/g" src/test/resources/application.yml
-    sed -i "" "s/0x4c16922e30890eec4a3dfe9305cbdef9bdd57341.p12/${p12_file}/g" src/test/resources/application.yml
+    sed -i "" "s/0x8827cca7f0f38b861b62dae6d711efe92a1e3602/${hello_address}/g" src/test/resources/stubs/bcos1/stub.toml
+    sed -i "" "s/0xa1ca07c7ff567183c889e1ad5f4dcd37716831ca.pem/${pem_file}/g" src/test/resources/stubs/bcos1/stub.toml
 else
     # Other
-    sed -i "s/0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a/${hello_address}/g" src/test/resources/application.yml
-    sed -i "s/0xcdcce60801c0a2e6bb534322c32ae528b9dec8d2.pem/${pem_file}/g" src/test/resources/application.yml
-    sed -i "s/0x4c16922e30890eec4a3dfe9305cbdef9bdd57341.p12/${p12_file}/g" src/test/resources/application.yml
+    sed -i "s/0x8827cca7f0f38b861b62dae6d711efe92a1e3602/${hello_address}/g" src/test/resources/stubs/bcos1/stub.toml
+    sed -i "s/0xa1ca07c7ff567183c889e1ad5f4dcd37716831ca.pem/${pem_file}/g" src/test/resources/stubs/bcos1/stub.toml
 fi
 
-mkdir -p src/test/resources/bcosconf/bcos1
-mkdir -p src/test/resources/bcosconf/bcos2
+cp accounts/* src/test/resources/stubs/bcos1/
 
-cp accounts/* src/test/resources/bcosconf/bcos1
-cp accounts/* src/test/resources/bcosconf/bcos2
-
-cp nodes/127.0.0.1/sdk/* src/test/resources/bcosconf/bcos1/
-cp nodes/127.0.0.1/sdk/* src/test/resources/bcosconf/bcos2/
+cp nodes/127.0.0.1/sdk/* src/test/resources/stubs/bcos1/
 
 rm -rf accounts
 
