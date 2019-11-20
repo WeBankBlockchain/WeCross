@@ -61,14 +61,17 @@ dependencies {
     compile 'javassist:javassist:3.12.1.GA'
 }
 
+sourceSets {
+    main {
+        resources {
+            exclude '/*'
+        }
+    }
+}
+
 jar {
     destinationDir file('dist/apps')
     archiveName project.name + '.jar'
-    exclude '**/*.xml'
-    exclude '**/*.properties'
-    exclude '**/*.crt'
-    exclude '**/*.key'
-    exclude '**/*.yml'
 
     manifest {
         attributes(

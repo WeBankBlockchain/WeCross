@@ -39,6 +39,7 @@ p12_file=$(ls *.p12 | awk -F'.' '{print $0}')
 cd -
 
 cp src/test/resources/wecross-sample.toml src/test/resources/wecross.toml
+cp src/test/resources/stubs/bcos1/stub-sample.toml src/test/resources/stubs/bcos1/stub.toml
 
 #generate wecross cert
 bash ./scripts/build_cert.sh -c -d ./ca
@@ -48,8 +49,6 @@ cp ./ca/ca.crt ./src/test/resources/p2p/
 cp ./ca/node/node.crt ./src/test/resources/p2p/
 cp ./ca/node/node.key ./src/test/resources/p2p/
 cp ./ca/node/node.nodeid ./src/test/resources/p2p/
-
-cp src/test/resources/stubs/bcos1/stub-sample.toml src/test/resources/stubs/bcos1/stub.toml
 
 #configure wecross
 if [ "$(uname)" == "Darwin" ]; then
@@ -63,7 +62,6 @@ else
 fi
 
 cp accounts/* src/test/resources/stubs/bcos1/
-
 cp nodes/127.0.0.1/sdk/* src/test/resources/stubs/bcos1/
 
 rm -rf accounts
