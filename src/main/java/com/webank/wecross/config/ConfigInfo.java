@@ -5,6 +5,7 @@ public class ConfigInfo {
     // config file
     public static final String MAIN_CONFIG_FILE = "wecross.toml";
     public static final String STUB_CONFIG_FILE = "stub.toml";
+    public static final String TEMPLATE_URL = "http://127.0.0.1:8080/";
 
     // stub type
     public static final String STUB_TYPE_BCOS = "BCOS";

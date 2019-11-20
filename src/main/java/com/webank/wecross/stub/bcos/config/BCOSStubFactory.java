@@ -26,9 +26,9 @@ public class BCOSStubFactory {
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
-        Boolean guomi = guomiMap.get("open");
+        Boolean guomi = guomiMap.get("enable");
         if (guomi == null) {
-            String errorMessage = "\"open\" in [guomi] item  not found, please check " + stubPath;
+            String errorMessage = "\"enable\" in [guomi] item  not found, please check " + stubPath;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
