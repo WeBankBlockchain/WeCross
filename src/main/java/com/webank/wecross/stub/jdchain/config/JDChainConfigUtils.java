@@ -116,44 +116,4 @@ public class JDChainConfigUtils {
         }
         return jdChainResources;
     }
-
-    //    public static List<JDChainService> getJDChainServiceYmlVersion(
-    //        Map<String, Object> jdChainServiceConfig) throws WeCrossException {
-    //
-    //        List<JDChainService> jDChainServiceList = new ArrayList<JDChainService>();
-    //        Iterator<String> iterator = jdChainServiceConfig.keySet().iterator();
-    //        while (iterator.hasNext()) {
-    //            String key = iterator.next();
-    //            @SuppressWarnings("unchecked")
-    //            Map<String, Object> jdChainConfig = (Map<String, Object>)
-    // jdChainServiceConfig.get(key);
-    //            if (!jdChainConfig.containsKey("privateKey")
-    //                || ((String) jdChainConfig.get("privateKey")).equals("")) {
-    //                String errorMessage = "\"privateKey\" of jdService not found";
-    //                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
-    //            }
-    //            if (!jdChainConfig.containsKey("publicKey")
-    //                || ((String) jdChainConfig.get("publicKey")).equals("")) {
-    //                String errorMessage = "\"publicKey\" of jdService not found";
-    //                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
-    //            }
-    //            if (!jdChainConfig.containsKey("password")
-    //                || ((String) jdChainConfig.get("password")).equals("")) {
-    //                String errorMessage = "\"password\" of jdService not found";
-    //                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
-    //            }
-    //            if (!jdChainConfig.containsKey("connectionsStr")
-    //                || ((String) jdChainConfig.get("connectionsStr")).equals("")) {
-    //                String errorMessage = "\"connectionsStr\" of jdService not found";
-    //                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
-    //            }
-    //            String privateKey = (String) jdChainConfig.get("privateKey");
-    //            String publicKey = (String) jdChainConfig.get("publicKey");
-    //            String password = (String) jdChainConfig.get("password");
-    //            String connectionsStr = (String) jdChainConfig.get("connectionsStr");
-    //            jDChainServiceList.add(
-    //                new JDChainService(privateKey, publicKey, password, connectionsStr));
-    //        }
-    //        return jDChainServiceList;
-    //    }
 }

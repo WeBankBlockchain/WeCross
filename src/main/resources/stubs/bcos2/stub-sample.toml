@@ -7,7 +7,7 @@
     enable = false
 
 [account]
-    accountFile = '/stubs/bcos2/0xa1ca07c7ff567183c889e1ad5f4dcd37716831ca.p12'
+    accountFile = 'classpath:/stubs/bcos2/0xa1ca07c7ff567183c889e1ad5f4dcd37716831ca.p12'
     password = '123456'
 
 [channelService]

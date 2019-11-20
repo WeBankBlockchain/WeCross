@@ -7,7 +7,7 @@
     enable = false
 
 [account]
-    accountFile = '/stubs/bcos1/0xa1ca07c7ff567183c889e1ad5f4dcd37716831ca.pem'
+    accountFile = 'classpath:/stubs/bcos1/0xa1ca07c7ff567183c889e1ad5f4dcd37716831ca.pem'
 
 [channelService]
     timeout = 60000  # millisecond
