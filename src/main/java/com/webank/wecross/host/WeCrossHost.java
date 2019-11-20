@@ -18,10 +18,14 @@ public class WeCrossHost {
     private NetworkManager networkManager;
     private PeerManager peerManager;
 
+    private boolean enableTestResource = false;
+
     public void start() {
         /** start netty p2p service */
         try {
-            addTestResources();
+            if (enableTestResource) {
+                addTestResources();
+            }
             // start p2p first
             peerManager.getP2PService().start();
             // start peer manager
@@ -58,7 +62,7 @@ public class WeCrossHost {
 
     public void syncAllState() {}
 
-    private void addTestResources() {
+    public void addTestResources() {
         try {
             logger.info("Add test resource");
             Path path = Path.decode("test-network.test-stub.test-resource");
@@ -68,5 +72,9 @@ public class WeCrossHost {
         } catch (Exception e) {
             logger.warn("Add test resource exception " + e);
         }
+    }
+
+    public void setEnableTestResource(boolean enableTestResource) {
+        this.enableTestResource = enableTestResource;
     }
 }
