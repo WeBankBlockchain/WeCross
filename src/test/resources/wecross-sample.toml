@@ -16,3 +16,6 @@
     sslCert = 'classpath:p2p/node.crt'
     sslKey = 'classpath:p2p/node.key'
     peers = ['127.0.0.1:12345','127.0.0.1:12347']
+
+[test]
+    enableTestResource = true

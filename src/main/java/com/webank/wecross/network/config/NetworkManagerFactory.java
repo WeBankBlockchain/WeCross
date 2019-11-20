@@ -10,7 +10,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class NetworkManagerFactory {
-    @Resource private Map<String, Network> networks;
+    @Resource(name = "produceNetworks")
+    private Map<String, Network> networks;
 
     @Resource(name = "newP2PMessageEngine")
     private P2PMessageEngine p2pEngine;
