@@ -18,7 +18,7 @@ public class ConfigUtils {
     private static Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
 
     public static void checkPath(String path) throws WeCrossException {
-        String templateUrl = "http://127.0.0.1:8080/" + path.replace('.', '/');
+        String templateUrl = ConfigInfo.TEMPLATE_URL + path.replace('.', '/');
 
         try {
             new URL(templateUrl);
@@ -35,7 +35,7 @@ public class ConfigUtils {
         } catch (Exception e) {
             throw new WeCrossException(
                     Status.INTERNAL_ERROR,
-                    "Something wrong with parse " + fileName + ": " + e.getLocalizedMessage());
+                    "Something wrong with parse " + fileName + ": " + e.getMessage());
         }
     }
 
