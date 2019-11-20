@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 public class ConfigUtils {
 
@@ -29,7 +30,9 @@ public class ConfigUtils {
 
     public static Toml getToml(String fileName) throws WeCrossException {
         try {
-            Path path = Paths.get(ClassLoader.getSystemResource(fileName).toURI());
+            PathMatchingResourcePatternResolver resolver =
+                    new PathMatchingResourcePatternResolver();
+            Path path = Paths.get(resolver.getResource(fileName).getURI());
             String encryptedSecret = new String(Files.readAllBytes(path));
             return new Toml().read(encryptedSecret);
         } catch (Exception e) {
@@ -40,16 +43,30 @@ public class ConfigUtils {
     }
 
     public static Map<String, String> getStubsDir(String stubsPath) throws WeCrossException {
-        File dir = new File(ConfigUtils.class.getClassLoader().getResource(stubsPath).getFile());
-        if (!dir.isDirectory()) {
-            String errorMessage = "Stubs directory not exists";
+        File dir;
+        try {
+            PathMatchingResourcePatternResolver resolver =
+                    new PathMatchingResourcePatternResolver();
+            dir = resolver.getResource(stubsPath).getFile();
+            // dir = new File(ConfigUtils.class.getClassLoader().getResource(stubsPath).getFile());
+        } catch (Exception e) {
+            String errorMessage = "Directory: " + stubsPath + " not exists";
             throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
         }
 
+        if (!dir.isDirectory()) {
+            String errorMessage = stubsPath + " is not a valid directory";
+            throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+        }
+
+        String thisPath = stubsPath;
+        if (stubsPath.endsWith("/")) {
+            thisPath = stubsPath.substring(0, stubsPath.length() - 1);
+        }
         Map<String, String> result = new HashMap<>();
         String stubsDir[] = dir.list();
         for (String stub : stubsDir) {
-            String stubPath = stubsPath + "/" + stub + "/" + ConfigInfo.STUB_CONFIG_FILE;
+            String stubPath = thisPath + "/" + stub + "/" + ConfigInfo.STUB_CONFIG_FILE;
             result.put(stub, stubPath);
         }
 

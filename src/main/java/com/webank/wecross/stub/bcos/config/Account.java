@@ -58,7 +58,7 @@ public class Account {
             throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
                     NoSuchProviderException, InvalidKeySpecException, UnrecoverableKeyException {
         PEMManager pem = new PEMManager();
-        pem.setPemFile("classpath:" + accountFile);
+        pem.setPemFile(accountFile);
         pem.load();
         ECKeyPair keyPair = pem.getECKeyPair();
         Credentials credentials = GenCredential.create(keyPair.getPrivateKey().toString(16));
@@ -72,7 +72,7 @@ public class Account {
             throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
                     NoSuchProviderException, InvalidKeySpecException, UnrecoverableKeyException {
         P12Manager p12Manager = new P12Manager();
-        p12Manager.setP12File("classpath:" + accountFile);
+        p12Manager.setP12File(accountFile);
         p12Manager.setPassword(password);
         p12Manager.load();
         ECKeyPair keyPair = p12Manager.getECKeyPair();
