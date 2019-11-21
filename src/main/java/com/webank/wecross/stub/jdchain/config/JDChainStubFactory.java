@@ -36,19 +36,13 @@ public class JDChainStubFactory {
         if (resources == null) {
             String warnMessage = "\"resources\" of jdchain stub not found: " + stubName;
             logger.warn(warnMessage);
-
-            JDChainStubFactory jdChainStubFactory = new JDChainStubFactory();
-            JDChainStub jdChainStub =
-                    jdChainStubFactory.initJdChainStub(
-                            networkName, stubName, stubPath, jdChainService, null);
-            return jdChainStub;
-        } else {
-            JDChainStubFactory jdChainStubFactory = new JDChainStubFactory();
-            JDChainStub jdChainStub =
-                    jdChainStubFactory.initJdChainStub(
-                            networkName, stubName, stubPath, jdChainService, resources);
-            return jdChainStub;
         }
+
+        JDChainStubFactory jdChainStubFactory = new JDChainStubFactory();
+        JDChainStub jdChainStub =
+                jdChainStubFactory.initJdChainStub(
+                        networkName, stubName, stubPath, jdChainService, resources);
+        return jdChainStub;
     }
 
     public JDChainStub initJdChainStub(

@@ -66,7 +66,7 @@ public class JDChainSdkFactory {
         return jdChainService;
     }
 
-    public void setJdChainService(JDChainService jdChainService) {
-        this.jdChainService = (List<JDChainService>) jdChainService;
+    public void setJdChainService(List<JDChainService> jdChainService) {
+        this.jdChainService = jdChainService;
     }
 }
