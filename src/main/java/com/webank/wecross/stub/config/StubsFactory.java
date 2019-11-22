@@ -8,6 +8,8 @@ import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.bcos.BCOSStub;
 import com.webank.wecross.stub.bcos.config.BCOSStubFactory;
+import com.webank.wecross.stub.fabric.FabricStub;
+import com.webank.wecross.stub.fabric.config.FabricStubFactory;
 import com.webank.wecross.stub.jdchain.JDChainStub;
 import com.webank.wecross.stub.jdchain.config.JDChainStubFactory;
 import java.util.HashMap;
@@ -70,6 +72,14 @@ public class StubsFactory {
                                 JDChainStubFactory.getJDChainStub(
                                         network, stub, stubPath, stubConfig);
                         stubMap.put(stub, jdChainStub);
+                        break;
+                    }
+                case ConfigInfo.STUB_TYPE_FABRIC:
+                    {
+                        FabricStub fabricStub =
+                                FabricStubFactory.getFabricStub(
+                                        network, stub, stubPath, stubConfig);
+                        stubMap.put(stub, fabricStub);
                         break;
                     }
                 default:

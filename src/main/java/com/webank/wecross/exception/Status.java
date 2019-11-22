@@ -30,4 +30,9 @@ public class Status {
     public static final int JDCHAIN_METHOD_NOTSUPPORT = 3006;
     public static final int JDCHAIN_PARAMETER_INVALIDATE = 3007;
     public static final int JDCHAIN_GETDATA_ERROR = 3008;
+
+    // FABRIC
+    public static final int FABRIC_HAS_NO_NAME = 4001;
+    public static final int FABRIC_INVOKE_CHAINCODE_FAIL = 4002;
+    public static final int FABRIC_NOTSUPPORT_CHAINCODE_LANGUAGE = 4003;
 }

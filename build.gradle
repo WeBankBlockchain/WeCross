@@ -59,6 +59,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.1.4.RELEASE'
 
     compile 'javassist:javassist:3.12.1.GA'
+    
+    compile "org.hyperledger.fabric-sdk-java:fabric-sdk-java:1.4.4"
 }
 
 sourceSets {
