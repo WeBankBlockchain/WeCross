@@ -1,18 +1,18 @@
 package com.webank.wecross.stub.bcos;
 
-import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.proof.BlockHeaderProof;
 import com.webank.wecross.proof.MerkleProof;
 import com.webank.wecross.proof.PathProof;
 import com.webank.wecross.proof.RootProof;
 import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.utils.WeCrossType;
 
 public class BCOSTransactionResponse extends TransactionResponse {
     private BlockHeaderProof blockHeader;
     private MerkleProof[] proofs;
 
     public BCOSTransactionResponse() {
-        super.setType(ConfigInfo.TRANSACTION_RSP_TYPE_BCOS);
+        super.setType(WeCrossType.TRANSACTION_RSP_TYPE_BCOS);
     }
 
     @Override

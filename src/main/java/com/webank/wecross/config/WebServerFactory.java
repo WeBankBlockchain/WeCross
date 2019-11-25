@@ -1,6 +1,7 @@
 package com.webank.wecross.config;
 
 import com.moandjiezana.toml.Toml;
+import com.webank.wecross.utils.WeCrossDefault;
 import java.net.InetAddress;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ public class WebServerFactory {
             if (address == null || port == null) {
                 String errorMessage =
                         "Something wrong with [server] item, please check "
-                                + ConfigInfo.MAIN_CONFIG_FILE;
+                                + WeCrossDefault.MAIN_CONFIG_FILE;
                 logger.error(errorMessage);
             }
 

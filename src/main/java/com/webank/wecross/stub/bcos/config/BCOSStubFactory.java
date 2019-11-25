@@ -1,11 +1,11 @@
 package com.webank.wecross.stub.bcos.config;
 
-import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.bcos.BCOSResource;
 import com.webank.wecross.stub.bcos.BCOSStub;
+import com.webank.wecross.utils.WeCrossType;
 import java.util.List;
 import java.util.Map;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -65,13 +65,9 @@ public class BCOSStubFactory {
         if (resources == null) {
             String warnMessage = "\"resources\" of" + stubName + "  not found.";
             logger.warn(warnMessage);
-
-            return BCOSStubFactory.initBCOSStub(
-                    networkName, stubName, stubPath, account, channelService, null);
-        } else {
-            return BCOSStubFactory.initBCOSStub(
-                    networkName, stubName, stubPath, account, channelService, resources);
         }
+        return BCOSStubFactory.initBCOSStub(
+                networkName, stubName, stubPath, account, channelService, resources);
     }
 
     public static BCOSStub initBCOSStub(
@@ -100,7 +96,7 @@ public class BCOSStubFactory {
         bcosStub.setResources(bcosResources);
 
         for (Resource resource : bcosResources.values()) {
-            if (resource.getType().equals(ConfigInfo.RESOURCE_TYPE_BCOS_CONTRACT)) {
+            if (resource.getType().equals(WeCrossType.RESOURCE_TYPE_BCOS_CONTRACT)) {
                 ((BCOSResource) resource)
                         .init(
                                 web3Sdk.getBcosService(),

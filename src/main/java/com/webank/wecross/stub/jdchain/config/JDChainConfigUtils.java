@@ -1,12 +1,12 @@
 package com.webank.wecross.stub.jdchain.config;
 
-import com.webank.wecross.config.ConfigInfo;
-import com.webank.wecross.config.ConfigUtils;
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.jdchain.JDChainContractResource;
+import com.webank.wecross.utils.ConfigUtils;
+import com.webank.wecross.utils.WeCrossType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,7 +74,7 @@ public class JDChainConfigUtils {
             }
 
             //  handle contract resource
-            if (type.equalsIgnoreCase(ConfigInfo.RESOURCE_TYPE_JDCHAIN_CONTRACT)) {
+            if (type.equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_JDCHAIN_CONTRACT)) {
                 String name = resource.get("name");
                 if (name == null) {
                     String errorMessage =

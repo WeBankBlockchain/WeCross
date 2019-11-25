@@ -1,9 +1,9 @@
 package com.webank.wecross.stub.bcos;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.core.HashUtils;
 import com.webank.wecross.exception.Status;
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.proof.BlockHeaderProof;
 import com.webank.wecross.proof.MerkleProof;
 import com.webank.wecross.resource.EventCallback;
@@ -13,11 +13,16 @@ import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
-import org.fisco.bcos.channel.client.CallContract;
-import org.fisco.bcos.channel.client.CallResult;
+import com.webank.wecross.stub.bcos.contract.CallContract;
+import com.webank.wecross.stub.bcos.contract.CallResult;
+import com.webank.wecross.utils.CommonUtils;
+import com.webank.wecross.utils.WeCrossType;
+import java.util.ArrayList;
+import java.util.List;
 import org.fisco.bcos.channel.client.ReceiptEncoder;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.client.TransactionResource;
+import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.abi.datatypes.Utf8String;
 import org.fisco.bcos.web3j.abi.datatypes.generated.Int256;
@@ -48,19 +53,56 @@ public class BCOSContractResource extends BCOSResource {
         }
     }
 
-    private Type<?>[] javaType2BCOSType(Object[] args) throws Exception {
+    private Type<?>[] javaType2BCOSType(Object[] args) throws WeCrossException {
         Type<?>[] data = new Type[args.length];
 
         int i = 0;
         for (Object obj : args) {
-            if (obj instanceof String) {
-                Utf8String utf8String = new Utf8String((String) obj);
-                data[i++] = utf8String;
-            } else if (obj instanceof Integer) {
-                Int256 int256 = new Int256((Integer) obj);
-                data[i++] = int256;
-            } else {
-                throw new Exception("Unspport type");
+            switch (CommonUtils.getTypeEnum(obj)) {
+                case Int:
+                    {
+                        data[i++] = new Int256((Integer) obj);
+                        break;
+                    }
+                case String:
+                    {
+                        data[i++] = new Utf8String((String) obj);
+                        break;
+                    }
+                case IntArray:
+                    {
+                        List<Int256> list = new ArrayList<>();
+                        if (obj.getClass().equals(ArrayList.class)) {
+                            for (int value : (List<Integer>) obj) {
+                                list.add(new Int256(value));
+                            }
+                        } else {
+                            for (int value : (int[]) obj) {
+                                list.add(new Int256(value));
+                            }
+                        }
+                        data[i++] = new DynamicArray<Int256>(list);
+                        break;
+                    }
+                case StringArray:
+                    {
+                        List<Utf8String> list = new ArrayList<>();
+                        if (obj.getClass().equals(ArrayList.class)) {
+                            for (String value : (List<String>) obj) {
+                                list.add(new Utf8String(value));
+                            }
+                        } else {
+                            for (String value : (String[]) obj) {
+                                list.add(new Utf8String(value));
+                            }
+                        }
+                        data[i++] = new DynamicArray<Utf8String>(list);
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
             }
         }
 
@@ -69,7 +111,7 @@ public class BCOSContractResource extends BCOSResource {
 
     @Override
     public String getType() {
-        return ConfigInfo.RESOURCE_TYPE_BCOS_CONTRACT;
+        return WeCrossType.RESOURCE_TYPE_BCOS_CONTRACT;
     }
 
     @Override
@@ -93,30 +135,29 @@ public class BCOSContractResource extends BCOSResource {
         BCOSTransactionResponse bcosTransactionResponse = new BCOSTransactionResponse();
 
         try {
+            Type<?>[] args = javaType2BCOSType(request.getArgs());
             TransactionReceipt transactionReceipt =
-                    callContract.sendTransaction(
-                            contractAddress,
-                            request.getMethod(),
-                            javaType2BCOSType(request.getArgs()));
+                    callContract.sendTransaction(contractAddress, request.getMethod(), args);
+            logger.debug("sendTransaction: {}, {}, {}", contractAddress, request.getMethod(), args);
 
-            if (transactionReceipt == null) {
-                bcosTransactionResponse.setErrorCode(Status.RPC_ERROR);
-                bcosTransactionResponse.setErrorMessage("error in RPC");
-            } else {
+            // status: 0x00 - 0x1a, errorCode: 0 - 26
+            String status = transactionReceipt.getStatus();
+            Integer errorCode = Integer.valueOf(status.substring(2), 16);
+            if (errorCode == 0) {
+                bcosTransactionResponse =
+                        generateResponseWithProof(
+                                transactionReceipt); // query proof, verify and set to response
 
-                // status: 0x00 - 0x1a, errorCode: 0 - 26
-                String status = transactionReceipt.getStatus();
-                Integer errorCode = Integer.valueOf(status.substring(2), 16);
-                if (errorCode == 0) {
-                    bcosTransactionResponse =
-                            generateResponseWithProof(
-                                    transactionReceipt); // query proof, verify and set to response
-                    bcosTransactionResponse.setResult(
-                            new Object[] {transactionReceipt.getOutput()});
-                }
-                bcosTransactionResponse.setErrorCode(errorCode);
-                bcosTransactionResponse.setErrorMessage(transactionReceipt.getMessage());
+                List<Object> result =
+                        callContract.decode(transactionReceipt.getOutput(), request.getRetTypes());
+                bcosTransactionResponse.setResult(result.toArray());
             }
+            bcosTransactionResponse.setErrorCode(errorCode);
+            bcosTransactionResponse.setErrorMessage(transactionReceipt.getMessage());
+
+        } catch (WeCrossException e) {
+            bcosTransactionResponse.setErrorCode(e.getErrorCode());
+            bcosTransactionResponse.setErrorMessage(e.getMessage());
         } catch (Exception e) {
             bcosTransactionResponse.setErrorCode(Status.INTERNAL_ERROR);
             bcosTransactionResponse.setErrorMessage(e.getMessage());
@@ -135,20 +176,22 @@ public class BCOSContractResource extends BCOSResource {
         BCOSTransactionResponse bcosTransactionResponse = new BCOSTransactionResponse();
 
         try {
-            CallResult callResult =
-                    callContract.call(
-                            contractAddress,
-                            request.getMethod(),
-                            javaType2BCOSType(request.getArgs()));
-
+            Type<?>[] args = javaType2BCOSType(request.getArgs());
+            CallResult callResult = callContract.call(contractAddress, request.getMethod(), args);
+            logger.debug("call: {}, {}, {}", contractAddress, request.getMethod(), args);
             String status = callResult.getStatus();
             Integer errorCode = Integer.valueOf(status.substring(2), 16);
             if (errorCode == 0) {
-                bcosTransactionResponse.setResult(new Object[] {callResult.getOutput()});
+                List<Object> result =
+                        callContract.decode(callResult.getOutput(), request.getRetTypes());
+                bcosTransactionResponse.setResult(result.toArray());
             }
             bcosTransactionResponse.setErrorCode(errorCode);
             bcosTransactionResponse.setErrorMessage(callResult.getMessage());
 
+        } catch (WeCrossException e) {
+            bcosTransactionResponse.setErrorCode(e.getErrorCode());
+            bcosTransactionResponse.setErrorMessage(e.getMessage());
         } catch (Exception e) {
             bcosTransactionResponse.setErrorCode(Status.INTERNAL_ERROR);
             bcosTransactionResponse.setErrorMessage(e.getMessage());

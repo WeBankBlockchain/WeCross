@@ -40,7 +40,7 @@ public interface Resource {
     String getPathAsString();
 
     @JsonIgnore
-    public Set<Peer> getPeers();
+    Set<Peer> getPeers();
 
-    public void setPeers(Set<Peer> peers);
+    void setPeers(Set<Peer> peers);
 }

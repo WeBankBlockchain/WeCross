@@ -1,13 +1,13 @@
 package com.webank.wecross.network.config;
 
 import com.moandjiezana.toml.Toml;
-import com.webank.wecross.config.ConfigInfo;
-import com.webank.wecross.config.ConfigUtils;
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.Network;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.config.StubsFactory;
+import com.webank.wecross.utils.ConfigUtils;
+import com.webank.wecross.utils.WeCrossDefault;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Resource;
@@ -33,7 +33,7 @@ public class NetworksFactory {
             if (network == null) {
                 String errorMessage =
                         "\"network\" in [common] item  not found, please check "
-                                + ConfigInfo.MAIN_CONFIG_FILE;
+                                + WeCrossDefault.MAIN_CONFIG_FILE;
                 logger.error(errorMessage);
                 System.exit(1);
             }
@@ -42,7 +42,7 @@ public class NetworksFactory {
             if (visible == null) {
                 String errorMessage =
                         "\"visible\" in [common] item  not found, please check "
-                                + ConfigInfo.MAIN_CONFIG_FILE;
+                                + WeCrossDefault.MAIN_CONFIG_FILE;
                 logger.error(errorMessage);
                 System.exit(1);
             }
@@ -51,7 +51,7 @@ public class NetworksFactory {
             if (stubsPath == null) {
                 String errorMessage =
                         "\"path\" in [stubs] item  not found, please check "
-                                + ConfigInfo.MAIN_CONFIG_FILE;
+                                + WeCrossDefault.MAIN_CONFIG_FILE;
                 throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
             }
 

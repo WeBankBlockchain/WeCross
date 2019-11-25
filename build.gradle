@@ -48,7 +48,7 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.1.4.RELEASE'
 
     // FISCO BCOS
-    compile 'org.fisco-bcos:web3sdk:2.2.0.111800-SNAPSHOT'
+    compile 'org.fisco-bcos:web3sdk:2.2.0.1123-SNAPSHOT'
 
     // JDChain
     compile 'com.jd.blockchain:sdk-pack:1.1.0.RELEASE'

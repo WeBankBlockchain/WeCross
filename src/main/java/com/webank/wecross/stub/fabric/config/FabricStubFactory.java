@@ -23,7 +23,7 @@ public class FabricStubFactory {
                     "Something wrong in [[fabricServices]] item, please check " + stubPath;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
-        FabricConfig fabricConfig = FabricConfigUtil.getFabricService(stubPath, fabricServiceMaps);
+        FabricConfig fabricConfig = FabricConfigUtils.getFabricService(stubPath, fabricServiceMaps);
 
         @SuppressWarnings("unchecked")
         Map<String, Map<String, String>> peersMaps =
@@ -34,7 +34,7 @@ public class FabricStubFactory {
         }
 
         Map<String, FabricPeerConfig> fabricPeerMap =
-                FabricConfigUtil.getPeerConfig(stubPath, peersMaps);
+                FabricConfigUtils.getPeerConfig(stubPath, peersMaps);
 
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> resources =
