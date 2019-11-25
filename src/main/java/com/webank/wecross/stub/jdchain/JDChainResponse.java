@@ -1,10 +1,10 @@
 package com.webank.wecross.stub.jdchain;
 
-import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.utils.WeCrossType;
 
 public class JDChainResponse extends TransactionResponse {
     public JDChainResponse() {
-        super.setType(ConfigInfo.TRANSACTION_RSP_TYPE_JDCHAIN);
+        super.setType(WeCrossType.TRANSACTION_RSP_TYPE_JDCHAIN);
     }
 }

@@ -1,11 +1,11 @@
 package com.webank.wecross.stub.remote;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.p2p.engine.P2PResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.stub.bcos.BCOSTransactionResponse;
 import com.webank.wecross.stub.jdchain.JDChainResponse;
+import com.webank.wecross.utils.WeCrossType;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 
 public class RemoteTransactionResponseCallback extends RemoteSemaphoreCallback {
@@ -22,14 +22,14 @@ public class RemoteTransactionResponseCallback extends RemoteSemaphoreCallback {
                                 content, new TypeReference<P2PResponse<TransactionResponse>>() {});
 
         switch (normalResponse.getData().getType()) {
-            case ConfigInfo.TRANSACTION_RSP_TYPE_BCOS:
+            case WeCrossType.TRANSACTION_RSP_TYPE_BCOS:
                 {
                     return ObjectMapperFactory.getObjectMapper()
                             .readValue(
                                     content,
                                     new TypeReference<P2PResponse<BCOSTransactionResponse>>() {});
                 }
-            case ConfigInfo.TRANSACTION_RSP_TYPE_JDCHAIN:
+            case WeCrossType.TRANSACTION_RSP_TYPE_JDCHAIN:
                 {
                     return ObjectMapperFactory.getObjectMapper()
                             .readValue(

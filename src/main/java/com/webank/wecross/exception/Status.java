@@ -4,16 +4,15 @@ public class Status {
 
     // reserved code 1-48
     public static final int SUCCESS = 0;
-    public static final int RPC_ERROR = 49;
-    public static final int INTERNAL_ERROR = 50;
+    public static final int INTERNAL_ERROR = 49;
     public static final int FIELD_MISSING = 100;
     public static final int NONSENSE_CALL = 101;
+    public static final int UNSUPPORTED_TYPE = 102;
 
     // configuration
     public static final int UNEXPECTED_CONFIG = 1001;
     public static final int ILLEGAL_SYMBOL = 1002;
-    public static final int FILE_NOT_EXISTS = 1003;
-    public static final int DIR_NOT_EXISTS = 1004;
+    public static final int DIR_NOT_EXISTS = 1003;
 
     // http
     public static final int VERSION_ERROR = 2001;
@@ -32,7 +31,5 @@ public class Status {
     public static final int JDCHAIN_GETDATA_ERROR = 3008;
 
     // FABRIC
-    public static final int FABRIC_HAS_NO_NAME = 4001;
-    public static final int FABRIC_INVOKE_CHAINCODE_FAIL = 4002;
-    public static final int FABRIC_NOTSUPPORT_CHAINCODE_LANGUAGE = 4003;
+    public static final int FABRIC_INVOKE_CHAINCODE_FAIL = 4001;
 }

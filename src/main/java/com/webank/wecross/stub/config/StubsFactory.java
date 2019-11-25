@@ -1,8 +1,6 @@
 package com.webank.wecross.stub.config;
 
 import com.moandjiezana.toml.Toml;
-import com.webank.wecross.config.ConfigInfo;
-import com.webank.wecross.config.ConfigUtils;
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.Stub;
@@ -12,6 +10,8 @@ import com.webank.wecross.stub.fabric.FabricStub;
 import com.webank.wecross.stub.fabric.config.FabricStubFactory;
 import com.webank.wecross.stub.jdchain.JDChainStub;
 import com.webank.wecross.stub.jdchain.config.JDChainStubFactory;
+import com.webank.wecross.utils.ConfigUtils;
+import com.webank.wecross.utils.WeCrossType;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -59,14 +59,14 @@ public class StubsFactory {
             Map<String, Object> stubConfig = stubToml.toMap();
 
             switch (type) {
-                case ConfigInfo.STUB_TYPE_BCOS:
+                case WeCrossType.STUB_TYPE_BCOS:
                     {
                         BCOSStub bcosStub =
                                 BCOSStubFactory.getBcosStub(network, stub, stubPath, stubConfig);
                         stubMap.put(stub, bcosStub);
                         break;
                     }
-                case ConfigInfo.STUB_TYPE_JDCHAIN:
+                case WeCrossType.STUB_TYPE_JDCHAIN:
                     {
                         JDChainStub jdChainStub =
                                 JDChainStubFactory.getJDChainStub(
@@ -74,7 +74,7 @@ public class StubsFactory {
                         stubMap.put(stub, jdChainStub);
                         break;
                     }
-                case ConfigInfo.STUB_TYPE_FABRIC:
+                case WeCrossType.STUB_TYPE_FABRIC:
                     {
                         FabricStub fabricStub =
                                 FabricStubFactory.getFabricStub(

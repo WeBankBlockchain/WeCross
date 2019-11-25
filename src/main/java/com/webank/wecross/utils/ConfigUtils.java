@@ -1,4 +1,4 @@
-package com.webank.wecross.config;
+package com.webank.wecross.utils;
 
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.exception.Status;
@@ -19,7 +19,7 @@ public class ConfigUtils {
     private static Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
 
     public static void checkPath(String path) throws WeCrossException {
-        String templateUrl = ConfigInfo.TEMPLATE_URL + path.replace('.', '/');
+        String templateUrl = WeCrossDefault.TEMPLATE_URL + path.replace('.', '/');
 
         try {
             new URL(templateUrl);
@@ -69,7 +69,7 @@ public class ConfigUtils {
 
         String stubsDir[] = dir.list();
         for (String stub : stubsDir) {
-            String stubPath = thisPath + "/" + stub + "/" + ConfigInfo.STUB_CONFIG_FILE;
+            String stubPath = thisPath + "/" + stub + "/" + WeCrossDefault.STUB_CONFIG_FILE;
             result.put(stub, stubPath);
         }
 

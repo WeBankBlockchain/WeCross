@@ -5,6 +5,7 @@ import java.util.Arrays;
 public class TransactionRequest {
 
     private String sig;
+    private String retTypes[];
     private String method;
     private Object args[];
 
@@ -16,19 +17,16 @@ public class TransactionRequest {
         this.sig = sig;
     }
 
-    public String getMethod() {
-        return method;
+    public String[] getRetTypes() {
+        return retTypes;
     }
 
-    @Override
-    public String toString() {
-        return "TransactionRequest [sig="
-                + sig
-                + ", method="
-                + method
-                + ", args="
-                + Arrays.toString(args)
-                + "]";
+    public void setRetTypes(String[] retTypes) {
+        this.retTypes = retTypes;
+    }
+
+    public String getMethod() {
+        return method;
     }
 
     public void setMethod(String method) {
@@ -41,5 +39,21 @@ public class TransactionRequest {
 
     public void setArgs(Object args[]) {
         this.args = args;
+    }
+
+    @Override
+    public String toString() {
+        return "TransactionRequest{"
+                + "sig='"
+                + sig
+                + '\''
+                + ", retTypes="
+                + Arrays.toString(retTypes)
+                + ", method='"
+                + method
+                + '\''
+                + ", args="
+                + Arrays.toString(args)
+                + '}';
     }
 }
