@@ -43,6 +43,8 @@ public class ConfigUtils {
     }
 
     public static Map<String, String> getStubsDir(String stubsPath) throws WeCrossException {
+        Map<String, String> result = new HashMap<>();
+
         File dir;
         try {
             PathMatchingResourcePatternResolver resolver =
@@ -50,8 +52,9 @@ public class ConfigUtils {
             dir = resolver.getResource(stubsPath).getFile();
             // dir = new File(ConfigUtils.class.getClassLoader().getResource(stubsPath).getFile());
         } catch (Exception e) {
-            String errorMessage = "Directory: " + stubsPath + " not exists";
-            throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+            logger.debug("Local stubs: " + stubsPath + "is empty");
+            // throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+            return result;
         }
 
         if (!dir.isDirectory()) {
@@ -63,7 +66,7 @@ public class ConfigUtils {
         if (stubsPath.endsWith("/")) {
             thisPath = stubsPath.substring(0, stubsPath.length() - 1);
         }
-        Map<String, String> result = new HashMap<>();
+
         String stubsDir[] = dir.list();
         for (String stub : stubsDir) {
             String stubPath = thisPath + "/" + stub + "/" + ConfigInfo.STUB_CONFIG_FILE;
