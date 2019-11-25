@@ -1,5 +1,6 @@
 package com.webank.wecross.stub.fabric.config;
 
+import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Path;
@@ -40,8 +41,23 @@ public class FabricStubConfig {
         }
         fabricStub.setFabricConns(fabricConns);
         String prefix = networkName + "." + stubName;
-        Map<String, Resource> fabricResource = initFabricResources(prefix, resources);
-        fabricStub.setResources(fabricResource);
+        Map<String, Resource> fabricResources = initFabricResources(prefix, resources);
+        fabricStub.setResources(fabricResources);
+
+        for (Resource resource : fabricResources.values()) {
+            if (resource.getType().equals(ConfigInfo.RESOURCE_TYPE_FABRIC_CONTRACT)) {
+                String name = resource.getPath().getResource();
+                String pathStr = resource.getPathAsString();
+                FabricConn fabricConn = fabricConns.get(name);
+                if (fabricConn == null) {
+                    logger.error("path:{} name:{} not exist in fabricConns", pathStr, name);
+                    return null;
+                }
+
+                ((FabricContractResource) resource).init(fabricConn);
+            }
+        }
+
         return fabricStub;
     }
 
