@@ -12,9 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-public class FabricConfigUtil {
+public class FabricConfigUtils {
 
-    private static Logger logger = LoggerFactory.getLogger(FabricConfigUtil.class);
+    private static Logger logger = LoggerFactory.getLogger(FabricConfigUtils.class);
 
     public static String getPath(String fileName) throws IOException {
 

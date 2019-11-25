@@ -1,9 +1,9 @@
 package com.webank.wecross.stub.remote;
 
-import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.ChainState;
 import com.webank.wecross.stub.Stub;
+import com.webank.wecross.utils.WeCrossType;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ public class RemoteStub implements Stub {
 
     @Override
     public String getType() {
-        return ConfigInfo.STUB_TYPE_REMOTE;
+        return WeCrossType.STUB_TYPE_REMOTE;
     }
 
     @Override

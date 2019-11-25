@@ -1,12 +1,13 @@
 package com.webank.wecross.stub.bcos.config;
 
-import com.webank.wecross.config.ConfigInfo;
-import com.webank.wecross.config.ConfigUtils;
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.bcos.BCOSContractResource;
+import com.webank.wecross.utils.ConfigUtils;
+import com.webank.wecross.utils.WeCrossDefault;
+import com.webank.wecross.utils.WeCrossType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +53,7 @@ public class BCOSConfigUtils {
 
         Integer timeout = ((Long) channelServiceConfig.get("timeout")).intValue();
         if (timeout == null) {
-            timeout = ConfigInfo.DEFAULT_TIME_OUT;
+            timeout = WeCrossDefault.DEFAULT_TIME_OUT;
         }
 
         Integer groupId = ((Long) channelServiceConfig.get("groupId")).intValue();
@@ -130,7 +131,7 @@ public class BCOSConfigUtils {
             }
 
             //  handle contract resource
-            if (type.equalsIgnoreCase(ConfigInfo.RESOURCE_TYPE_BCOS_CONTRACT)) {
+            if (type.equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_BCOS_CONTRACT)) {
                 String name = resource.get("name");
                 if (name == null) {
                     String errorMessage =

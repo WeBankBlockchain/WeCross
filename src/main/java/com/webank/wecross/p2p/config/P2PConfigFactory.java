@@ -1,9 +1,9 @@
 package com.webank.wecross.p2p.config;
 
 import com.moandjiezana.toml.Toml;
-import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.utils.WeCrossDefault;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
@@ -32,7 +32,7 @@ public class P2PConfigFactory {
             if (p2pMap == null) {
                 String errorMessage =
                         "Something wrong in [p2p] item, please check "
-                                + ConfigInfo.MAIN_CONFIG_FILE;
+                                + WeCrossDefault.MAIN_CONFIG_FILE;
                 throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
             }
             p2PConfig = getP2PConfig(p2pMap);
@@ -51,7 +51,7 @@ public class P2PConfigFactory {
         if (listenIP == null) {
             String errorMessage =
                     "\"listenIP\" in [p2p] item  not found, please check "
-                            + ConfigInfo.MAIN_CONFIG_FILE;
+                            + WeCrossDefault.MAIN_CONFIG_FILE;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
@@ -59,7 +59,7 @@ public class P2PConfigFactory {
         if (peers == null) {
             String errorMessage =
                     "\"peers\" in [p2p] item  not found, please check "
-                            + ConfigInfo.MAIN_CONFIG_FILE;
+                            + WeCrossDefault.MAIN_CONFIG_FILE;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
@@ -67,7 +67,7 @@ public class P2PConfigFactory {
         if (listenPort == null) {
             String errorMessage =
                     "\"listenPort\" in [p2p] item  not found, please check "
-                            + ConfigInfo.MAIN_CONFIG_FILE;
+                            + WeCrossDefault.MAIN_CONFIG_FILE;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
@@ -75,7 +75,7 @@ public class P2PConfigFactory {
         if (caCertPath == null) {
             String errorMessage =
                     "\"caCert\" in [p2p] item  not found, please check "
-                            + ConfigInfo.MAIN_CONFIG_FILE;
+                            + WeCrossDefault.MAIN_CONFIG_FILE;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
@@ -83,7 +83,7 @@ public class P2PConfigFactory {
         if (sslCertPath == null) {
             String errorMessage =
                     "\"sslCert\" in [p2p] item  not found, please check "
-                            + ConfigInfo.MAIN_CONFIG_FILE;
+                            + WeCrossDefault.MAIN_CONFIG_FILE;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
@@ -91,7 +91,7 @@ public class P2PConfigFactory {
         if (sslKeyPath == null) {
             String errorMessage =
                     "\"sslKey\" in [p2p] item  not found, please check "
-                            + ConfigInfo.MAIN_CONFIG_FILE;
+                            + WeCrossDefault.MAIN_CONFIG_FILE;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 

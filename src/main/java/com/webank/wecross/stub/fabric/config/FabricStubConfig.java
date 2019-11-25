@@ -1,6 +1,5 @@
 package com.webank.wecross.stub.fabric.config;
 
-import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Path;
@@ -8,7 +7,8 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.fabric.FabricConn;
 import com.webank.wecross.stub.fabric.FabricContractResource;
 import com.webank.wecross.stub.fabric.FabricStub;
-import java.net.URL;
+import com.webank.wecross.utils.ConfigUtils;
+import com.webank.wecross.utils.WeCrossType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +45,7 @@ public class FabricStubConfig {
         fabricStub.setResources(fabricResources);
 
         for (Resource resource : fabricResources.values()) {
-            if (resource.getType().equals(ConfigInfo.RESOURCE_TYPE_FABRIC_CONTRACT)) {
+            if (resource.getType().equals(WeCrossType.RESOURCE_TYPE_FABRIC_CONTRACT)) {
                 String name = resource.getPath().getResource();
                 String pathStr = resource.getPathAsString();
                 FabricConn fabricConn = fabricConns.get(name);
@@ -143,18 +143,18 @@ public class FabricStubConfig {
         for (Map<String, Object> resource : resources) {
             String resourceName = (String) resource.get("name");
             FabricContractResource fabricContractResource = new FabricContractResource();
+
+            // set path
             String stringPath = prefix + "." + resourceName;
-            String templateUrl = "http://127.0.0.1:8080/" + stringPath.replace('.', '/');
             try {
-                new URL(templateUrl);
-            } catch (Exception e) {
-                throw new WeCrossException(Status.ILLEGAL_SYMBOL, "Invalid path: " + stringPath);
-            }
-            try {
+                ConfigUtils.checkPath(stringPath);
                 fabricContractResource.setPath(Path.decode(stringPath));
-            } catch (Exception e) {
-                throw new WeCrossException(Status.INTERNAL_ERROR, e.getMessage());
+            } catch (WeCrossException e1) {
+                throw e1;
+            } catch (Exception e2) {
+                throw new WeCrossException(Status.INTERNAL_ERROR, e2.getMessage());
             }
+
             fabricResources.put(resourceName, fabricContractResource);
         }
         return fabricResources;

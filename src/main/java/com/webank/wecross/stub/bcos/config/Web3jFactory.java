@@ -1,6 +1,6 @@
 package com.webank.wecross.stub.bcos.config;
 
-import com.webank.wecross.config.ConfigUtils;
+import com.webank.wecross.utils.ConfigUtils;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;

@@ -1,11 +1,11 @@
 package com.webank.wecross.stub.jdchain.config;
 
-import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.jdchain.JDChainResource;
 import com.webank.wecross.stub.jdchain.JDChainStub;
+import com.webank.wecross.utils.WeCrossType;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -75,7 +75,7 @@ public class JDChainStubFactory {
         jdChainStub.setResources(jdChainResources);
 
         for (Resource resource : jdChainResources.values()) {
-            if (resource.getType().equals(ConfigInfo.RESOURCE_TYPE_JDCHAIN_CONTRACT)) {
+            if (resource.getType().equals(WeCrossType.RESOURCE_TYPE_JDCHAIN_CONTRACT)) {
                 ((JDChainResource) resource)
                         .init(
                                 jdChainSdk.getAdminKey(),

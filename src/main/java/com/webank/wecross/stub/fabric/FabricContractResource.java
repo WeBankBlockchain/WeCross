@@ -11,6 +11,7 @@ import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.utils.WeCrossType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -75,6 +76,21 @@ public class FabricContractResource extends FabricResource {
         return super.setData(request);
     }
 
+    private TransactionResponse checkRetTypes(String retTypes[]) {
+        TransactionResponse transactionResponse = new FabricResponse();
+        if (retTypes != null) {
+            if (retTypes.length == 1 && !retTypes[0].equals("String") || retTypes.length > 1) {
+                transactionResponse.setErrorCode(Status.UNSUPPORTED_TYPE);
+                transactionResponse.setErrorMessage(
+                        "Unsupported return type for "
+                                + WeCrossType.RESOURCE_TYPE_FABRIC_CONTRACT
+                                + ": "
+                                + retTypes[0]);
+            }
+        }
+        return transactionResponse;
+    }
+
     private String[] getParamterList(TransactionRequest request) {
         String[] paramterList = null;
         if (request.getArgs().length == 0) {
@@ -92,7 +108,11 @@ public class FabricContractResource extends FabricResource {
     @Override
     public TransactionResponse call(TransactionRequest request) {
 
-        TransactionResponse transactionResponse = new FabricResponse();
+        TransactionResponse transactionResponse = checkRetTypes(request.getRetTypes());
+        if (transactionResponse.getErrorCode() != 0) {
+            return transactionResponse;
+        }
+
         QueryByChaincodeRequest queryRequest = fabricConn.getHfClient().newQueryProposalRequest();
         queryRequest.setChaincodeID(fabricConn.getChaincodeID());
         queryRequest.setFcn(request.getMethod());
@@ -144,7 +164,11 @@ public class FabricContractResource extends FabricResource {
     @Override
     public TransactionResponse sendTransaction(TransactionRequest request) {
 
-        TransactionResponse transactionResponse = new FabricResponse();
+        TransactionResponse transactionResponse = checkRetTypes(request.getRetTypes());
+        if (transactionResponse.getErrorCode() != 0) {
+            return transactionResponse;
+        }
+
         TransactionProposalRequest transactionProposalRequest =
                 fabricConn.getHfClient().newTransactionProposalRequest();
         transactionProposalRequest.setChaincodeID(fabricConn.getChaincodeID());

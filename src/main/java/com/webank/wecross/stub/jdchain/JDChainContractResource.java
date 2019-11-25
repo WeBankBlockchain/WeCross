@@ -9,9 +9,9 @@ import com.jd.blockchain.ledger.OperationResult;
 import com.jd.blockchain.ledger.PreparedTransaction;
 import com.jd.blockchain.ledger.TransactionTemplate;
 import com.jd.blockchain.sdk.BlockchainService;
-import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.core.HashUtils;
 import com.webank.wecross.exception.Status;
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.restserver.request.GetDataRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
@@ -19,6 +19,7 @@ import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.utils.WeCrossType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.SecureRandom;
@@ -53,9 +54,39 @@ public class JDChainContractResource extends JDChainResource {
         this.contractAddress = contractAddress;
     }
 
+    private String getJDTypeSpecification(String retTypes) throws WeCrossException {
+        switch (retTypes) {
+            case "Int":
+                {
+                    return "java.lang.Integer";
+                }
+            case "String":
+                {
+                    return "java.lang.String";
+                }
+            case "IntArray":
+                {
+                    return "[Ljava.lang.Integer";
+                }
+            case "StringArray":
+                {
+                    return "[Ljava.lang.String";
+                }
+            default:
+                {
+                    throw new WeCrossException(
+                            Status.UNSUPPORTED_TYPE,
+                            "Unsupported return type for "
+                                    + WeCrossType.RESOURCE_TYPE_JDCHAIN_CONTRACT
+                                    + ": "
+                                    + retTypes);
+                }
+        }
+    }
+
     @Override
     public String getType() {
-        return ConfigInfo.RESOURCE_TYPE_JDCHAIN_CONTRACT;
+        return WeCrossType.RESOURCE_TYPE_JDCHAIN_CONTRACT;
     }
 
     @Override
@@ -138,7 +169,7 @@ public class JDChainContractResource extends JDChainResource {
         return ptx.commit();
     }
 
-    private CtClass dynamicGenerateClass(TransactionRequest request) {
+    private CtClass dynamicGenerateClass(TransactionRequest request) throws WeCrossException {
         ClassPool pool = ClassPool.getDefault();
         String classname =
                 "com.jd.chain.contract.Class" + UUID.randomUUID().toString().replaceAll("-", "");
@@ -160,7 +191,12 @@ public class JDChainContractResource extends JDChainResource {
                 }
             }
         }
-        String returnType = "java.lang.String";
+        String retTypes[] = request.getRetTypes();
+        String returnType = null;
+        if (retTypes != null && retTypes.length != 0) {
+            returnType = getJDTypeSpecification(retTypes[0]);
+        }
+
         CtMethod ctMethod = null;
         try {
             ctMethod =
@@ -200,7 +236,6 @@ public class JDChainContractResource extends JDChainResource {
     @SuppressWarnings("unchecked")
     @Override
     public TransactionResponse sendTransaction(TransactionRequest request) {
-
         logger.debug(
                 "request parameter:{} now connection to gateway size:{}",
                 request.toString(),
@@ -216,13 +251,15 @@ public class JDChainContractResource extends JDChainResource {
         SecureRandom secureRandom = new SecureRandom();
         Integer randNum = secureRandom.nextInt(channelCount);
         for (int index = 0; index < channelCount; ++index) {
-
-            CtClass ctClass = dynamicGenerateClass(request);
-            if (ctClass == null) {
+            CtClass ctClass;
+            try {
+                ctClass = dynamicGenerateClass(request);
+            } catch (WeCrossException e) {
                 response.setErrorCode(Status.JDCHAIN_GENERATE_CLASS_ERROR);
-                response.setErrorMessage("generate class failed");
+                response.setErrorMessage("Generate class failed: " + e.getMessage());
                 return response;
             }
+
             Integer useIndex = (randNum + index) % channelCount;
             BlockchainService blockChainService = blockchainService.get(useIndex);
             logger.debug(

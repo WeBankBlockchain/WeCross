@@ -1,6 +1,5 @@
 package com.webank.wecross.resource;
 
-import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.core.HashUtils;
 import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.restserver.request.GetDataRequest;
@@ -9,6 +8,7 @@ import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.utils.WeCrossType;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ public class TestResource implements Resource {
 
     @Override
     public String getType() {
-        return ConfigInfo.RESOURCE_TYPE_TEST;
+        return WeCrossType.RESOURCE_TYPE_TEST;
     }
 
     @Override
