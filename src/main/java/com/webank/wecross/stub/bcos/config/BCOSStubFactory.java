@@ -1,8 +1,10 @@
 package com.webank.wecross.stub.bcos.config;
 
+import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.stub.bcos.BCOSResource;
 import com.webank.wecross.stub.bcos.BCOSStub;
 import java.util.List;
 import java.util.Map;
@@ -96,6 +98,16 @@ public class BCOSStubFactory {
         Map<String, Resource> bcosResources =
                 BCOSConfigUtils.getBcosResources(prefix, stubPath, resources, web3Sdk.getWeb3());
         bcosStub.setResources(bcosResources);
+
+        for (Resource resource : bcosResources.values()) {
+            if (resource.getType().equals(ConfigInfo.RESOURCE_TYPE_BCOS_CONTRACT)) {
+                ((BCOSResource) resource)
+                        .init(
+                                web3Sdk.getBcosService(),
+                                web3Sdk.getWeb3(),
+                                web3Sdk.getCredentials());
+            }
+        }
 
         logger.debug("Init {}.{} finished", networkName, stubName);
         return bcosStub;

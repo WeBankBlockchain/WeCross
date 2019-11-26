@@ -1,8 +1,10 @@
 package com.webank.wecross.stub.jdchain.config;
 
+import com.webank.wecross.config.ConfigInfo;
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.stub.jdchain.JDChainResource;
 import com.webank.wecross.stub.jdchain.JDChainStub;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +73,16 @@ public class JDChainStubFactory {
         Map<String, Resource> jdChainResources =
                 JDChainConfigUtils.getJdChainResources(prefix, stubPath, resources);
         jdChainStub.setResources(jdChainResources);
+
+        for (Resource resource : jdChainResources.values()) {
+            if (resource.getType().equals(ConfigInfo.RESOURCE_TYPE_JDCHAIN_CONTRACT)) {
+                ((JDChainResource) resource)
+                        .init(
+                                jdChainSdk.getAdminKey(),
+                                jdChainSdk.getLedgerHash(),
+                                jdChainSdk.getBlockchainService());
+            }
+        }
 
         return jdChainStub;
     }
