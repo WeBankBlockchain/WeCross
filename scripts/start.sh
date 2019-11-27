@@ -11,10 +11,10 @@ function run_wecross() {
         nohup java -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
     elif [ "$(uname -s | grep MINGW | wc -l)" != "0" ]; then
         # Windows
-        nohup java -cp 'apps/*;lib/*;conf' com.webank.wecross.Service >start.out 2>&1 &
+        nohup java -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
     else
         # GNU/Linux
-        nohup java -cp 'apps/*:lib/*:conf' com.webank.wecross.Service >start.out 2>&1 &
+        nohup java -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
     fi
 }
 
