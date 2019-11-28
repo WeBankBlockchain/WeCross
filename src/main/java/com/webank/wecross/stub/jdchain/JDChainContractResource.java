@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jd.blockchain.contract.Contract;
 import com.jd.blockchain.contract.ContractEvent;
 import com.jd.blockchain.ledger.BlockchainKeypair;
+import com.jd.blockchain.ledger.BytesValueEncoding;
 import com.jd.blockchain.ledger.KVDataEntry;
 import com.jd.blockchain.ledger.OperationResult;
 import com.jd.blockchain.ledger.PreparedTransaction;
@@ -325,8 +326,7 @@ public class JDChainContractResource extends JDChainResource {
                             OperationResult[] operationResult = txResponse.getOperationResults();
                             for (int j = 0; j < operationResult.length; j++) {
                                 OperationResult result = operationResult[j];
-                                byte[] value = result.getResult().getValue().toBytes();
-                                resultList.add(new String(value));
+                                resultList.add(BytesValueEncoding.decode(result.getResult()));
                             }
                             response.setResult(resultList.toArray());
 
