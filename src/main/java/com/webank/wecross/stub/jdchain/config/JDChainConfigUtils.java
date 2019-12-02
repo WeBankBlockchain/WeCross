@@ -82,6 +82,12 @@ public class JDChainConfigUtils {
                     throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
                 }
 
+                if (jdChainResources.keySet().contains(name)) {
+                    String errorMessage =
+                            name + " in [[resources]] item  is repeated, please check " + stubPath;
+                    throw new WeCrossException(Status.REPEATED_KEY, errorMessage);
+                }
+
                 String contractAddress = resource.get("contractAddress");
                 if (contractAddress == null) {
                     String errorMessage =

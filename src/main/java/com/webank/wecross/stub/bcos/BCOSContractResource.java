@@ -144,9 +144,14 @@ public class BCOSContractResource extends BCOSResource {
             String status = transactionReceipt.getStatus();
             Integer errorCode = Integer.valueOf(status.substring(2), 16);
             if (errorCode == 0) {
-                bcosTransactionResponse =
-                        generateResponseWithProof(
-                                transactionReceipt); // query proof, verify and set to response
+                try {
+                    bcosTransactionResponse =
+                            generateResponseWithProof(
+                                    transactionReceipt); // query proof, verify and set to response
+                } catch (Exception e) {
+                    throw new WeCrossException(
+                            Status.INTERNAL_ERROR, "Error in Merkle proof: " + e.getMessage());
+                }
 
                 List<Object> result =
                         callContract.decode(transactionReceipt.getOutput(), request.getRetTypes());
