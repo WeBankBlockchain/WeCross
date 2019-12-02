@@ -139,6 +139,12 @@ public class BCOSConfigUtils {
                     throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
                 }
 
+                if (bcosResources.keySet().contains(name)) {
+                    String errorMessage =
+                            name + " in [[resources]] item  is repeated, please check " + stubPath;
+                    throw new WeCrossException(Status.REPEATED_KEY, errorMessage);
+                }
+
                 String contractAddress = resource.get("contractAddress");
                 if (contractAddress == null) {
                     String errorMessage =
