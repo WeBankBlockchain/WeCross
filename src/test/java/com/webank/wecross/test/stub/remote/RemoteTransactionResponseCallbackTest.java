@@ -29,5 +29,6 @@ public class RemoteTransactionResponseCallbackTest {
                 (BCOSTransactionResponse) response.getData();
         Assert.assertTrue(bcosTransactionResponse.getErrorCode().equals(0));
         Assert.assertNotEquals(0, bcosTransactionResponse.getProofs().length);
+        Assert.assertTrue(bcosTransactionResponse.verify());
     }
 }

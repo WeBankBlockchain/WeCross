@@ -36,6 +36,12 @@ public class MerkleProof extends PathProof {
 
     @Override
     public boolean verify() {
+        // Verify leaf
+        if (!this.leaf.verifyProof()) {
+            return false;
+        }
+
+        // Verify path
         String proofRoot = Merkle.calculateMerkleRoot(this.path, this.leaf.getProof());
         logger.debug("verify proof, root:{}, proofRoof:{}", this.root, proofRoot);
         return root.equals(proofRoot);
