@@ -36,12 +36,12 @@ public class FabricStubConfig {
         Map<String, FabricConn> fabricConns = new HashMap<String, FabricConn>();
         for (Map<String, Object> resource : resources) {
             FabricConn fabricConn =
-                    getFabricConfig(networkName, stubName, fabricConfig, fabricPeerMap, resource);
+                    getFabricConfig(stubName, fabricConfig, fabricPeerMap, resource);
             fabricConns.put(fabricConn.getName(), fabricConn);
         }
         fabricStub.setFabricConns(fabricConns);
         String prefix = networkName + "." + stubName;
-        Map<String, Resource> fabricResources = initFabricResources(prefix, resources);
+        Map<String, Resource> fabricResources = initFabricResources(stubName, prefix, resources);
         fabricStub.setResources(fabricResources);
 
         for (Resource resource : fabricResources.values()) {
@@ -62,7 +62,6 @@ public class FabricStubConfig {
     }
 
     private FabricConn getFabricConfig(
-            String networkName,
             String stubName,
             FabricConfig fabricConfig,
             Map<String, FabricPeerConfig> fabricPeerMap,
@@ -135,7 +134,8 @@ public class FabricStubConfig {
     }
 
     public Map<String, Resource> initFabricResources(
-            String prefix, List<Map<String, Object>> resources) throws WeCrossException {
+            String stubPath, String prefix, List<Map<String, Object>> resources)
+            throws WeCrossException {
         if (resources == null) {
             return null;
         }
@@ -143,7 +143,13 @@ public class FabricStubConfig {
         for (Map<String, Object> resource : resources) {
             String resourceName = (String) resource.get("name");
             FabricContractResource fabricContractResource = new FabricContractResource();
-
+            if (fabricResources.keySet().contains(resourceName)) {
+                String errorMessage =
+                        resourceName
+                                + " in [[resources]] item  is repeated, please check "
+                                + stubPath;
+                throw new WeCrossException(Status.REPEATED_KEY, errorMessage);
+            }
             // set path
             String stringPath = prefix + "." + resourceName;
             try {

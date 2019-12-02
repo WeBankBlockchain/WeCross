@@ -13,6 +13,7 @@ public class Status {
     public static final int UNEXPECTED_CONFIG = 1001;
     public static final int ILLEGAL_SYMBOL = 1002;
     public static final int DIR_NOT_EXISTS = 1003;
+    public static final int REPEATED_KEY = 1004;
 
     // http
     public static final int VERSION_ERROR = 2001;
