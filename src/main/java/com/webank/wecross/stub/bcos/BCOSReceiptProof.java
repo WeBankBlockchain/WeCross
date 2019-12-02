@@ -10,7 +10,6 @@ import org.fisco.bcos.web3j.rlp.RlpString;
 import org.fisco.bcos.web3j.utils.Numeric;
 
 public class BCOSReceiptProof extends LeafProof {
-    private String index;
 
     public BCOSReceiptProof(TransactionReceipt receipt) {
         index = receipt.getTransactionIndexRaw();
@@ -18,7 +17,7 @@ public class BCOSReceiptProof extends LeafProof {
 
         BigInteger indexValue = Numeric.toBigInt(index);
         byte[] byteIndex = RlpEncoder.encode(RlpString.create(indexValue));
-        proof = Hash.sha3(Numeric.toHexString(byteIndex) + leaf.substring(2));
+        proof = Numeric.toHexString(byteIndex) + leaf.substring(2);
     }
 
     public String getIndex() {
