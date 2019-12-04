@@ -30,7 +30,8 @@ public class P2PMessageCallback<T> {
         }
 
         P2PResponse<Object> p2PResponse =
-                ObjectMapperFactory.getObjectMapper().readValue(content, typeReference);
+                (P2PResponse<Object>)
+                        ObjectMapperFactory.getObjectMapper().readValue(content, typeReference);
         return p2PResponse;
     }
 
