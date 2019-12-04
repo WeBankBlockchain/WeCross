@@ -21,7 +21,7 @@ public class RemoteTransactionResponseCallbackTest {
 
         RemoteTransactionResponseCallback callback = new RemoteTransactionResponseCallback();
 
-        P2PResponse<Object> response = callback.parseContent(content);
+        P2PResponse<?> response = callback.parseContent(content);
 
         Assert.assertTrue(response.getResult().equals(0));
 

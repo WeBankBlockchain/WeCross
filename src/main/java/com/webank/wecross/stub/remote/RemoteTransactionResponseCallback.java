@@ -15,7 +15,7 @@ public class RemoteTransactionResponseCallback extends RemoteSemaphoreCallback {
     }
 
     @Override
-    public P2PResponse<Object> parseContent(String content) throws Exception {
+    public P2PResponse<?> parseContent(String content) throws Exception {
         P2PResponse<TransactionResponse> normalResponse =
                 ObjectMapperFactory.getObjectMapper()
                         .readValue(
