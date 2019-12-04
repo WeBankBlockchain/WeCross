@@ -57,6 +57,10 @@ public class JDChainContractResource extends JDChainResource {
 
     private String getJDTypeSpecification(String retTypes) throws WeCrossException {
         switch (retTypes) {
+            case "":
+                {
+                    return "java.lang.Void";
+                }
             case "Int":
                 {
                     return "java.lang.Integer";
@@ -193,7 +197,7 @@ public class JDChainContractResource extends JDChainResource {
             }
         }
         String retTypes[] = request.getRetTypes();
-        String returnType = null;
+        String returnType = "java.lang.Void";
         if (retTypes != null && retTypes.length != 0) {
             returnType = getJDTypeSpecification(retTypes[0]);
         }
