@@ -7,6 +7,7 @@
   ],
   "result": [],
   "type": "NORMAL",
+  "encryptType": "NORMAL",
   "blockHeader": {
     "blockNumber": 37,
     "hash": "0xdf36de2068bbe7e3fa505159af87886fbd0bf8c17cb9e42cb482de780bfe3630",

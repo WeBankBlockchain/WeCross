@@ -27,6 +27,7 @@ import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.abi.datatypes.Utf8String;
 import org.fisco.bcos.web3j.abi.datatypes.generated.Int256;
 import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Hash;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
@@ -132,7 +133,7 @@ public class BCOSContractResource extends BCOSResource {
 
     @Override
     public TransactionResponse sendTransaction(TransactionRequest request) {
-        BCOSTransactionResponse bcosTransactionResponse = new BCOSTransactionResponse();
+        BCOSTransactionResponse bcosTransactionResponse = newBCOSTransactionResponse();
 
         try {
             Type<?>[] args = javaType2BCOSType(request.getArgs());
@@ -178,7 +179,7 @@ public class BCOSContractResource extends BCOSResource {
 
     @Override
     public TransactionResponse call(TransactionRequest request) {
-        BCOSTransactionResponse bcosTransactionResponse = new BCOSTransactionResponse();
+        BCOSTransactionResponse bcosTransactionResponse = newBCOSTransactionResponse();
 
         try {
             Type<?>[] args = javaType2BCOSType(request.getArgs());
@@ -310,7 +311,7 @@ public class BCOSContractResource extends BCOSResource {
                 getTransactionReceiptProof(
                         transactionReceipt.getTransactionHash(), block.getReceiptsRoot());
 
-        BCOSTransactionResponse bcosTransactionResponse = new BCOSTransactionResponse();
+        BCOSTransactionResponse bcosTransactionResponse = newBCOSTransactionResponse();
         bcosTransactionResponse.setBlockHeader(headerProof);
         bcosTransactionResponse.setProofs(new MerkleProof[] {txProof, receiptsProof});
 
@@ -325,5 +326,14 @@ public class BCOSContractResource extends BCOSResource {
 
     public void setWeb3(Web3j web3) {
         this.web3 = web3;
+    }
+
+    private BCOSTransactionResponse newBCOSTransactionResponse() {
+        BCOSTransactionResponse response = new BCOSTransactionResponse();
+        boolean isGuomi = EncryptType.encryptType == 1; // get SDK global config, maybe modify later
+        if (isGuomi) {
+            response.setEncryptType(WeCrossType.ENCRYPT_TYPE_GUOMI);
+        }
+        return response;
     }
 }

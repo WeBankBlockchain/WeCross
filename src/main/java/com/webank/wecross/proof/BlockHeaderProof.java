@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BlockHeaderProof implements RootProof {
+public class BlockHeaderProof extends RootProof {
     private BigInteger blockNumber;
     private String hash;
     private Set<String> roots = new HashSet<>();

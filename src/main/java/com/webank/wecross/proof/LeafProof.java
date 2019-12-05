@@ -5,7 +5,7 @@ import org.fisco.bcos.web3j.rlp.RlpEncoder;
 import org.fisco.bcos.web3j.rlp.RlpString;
 import org.fisco.bcos.web3j.utils.Numeric;
 
-public class LeafProof {
+public class LeafProof extends Proof {
     protected String index;
     protected String leaf;
     protected String proof;
