@@ -2,7 +2,11 @@ package com.webank.wecross.restserver.response;
 
 import com.webank.wecross.proof.PathProof;
 import com.webank.wecross.proof.ProofConfig;
+import com.webank.wecross.proof.ProofTools;
 import com.webank.wecross.proof.RootProof;
+import com.webank.wecross.stub.bcos.BCOSGuomiProofTools;
+import com.webank.wecross.stub.bcos.BCOSProofTools;
+import com.webank.wecross.utils.WeCrossType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +35,7 @@ public class TransactionResponse {
     private List<String> extraHashes;
     private Object result[];
     private String type = "";
+    private String encryptType = WeCrossType.ENCRYPT_TYPE_NORMAL;
 
     public Integer getErrorCode() {
         return errorCode;
@@ -73,6 +78,8 @@ public class TransactionResponse {
     }
 
     public boolean verify() {
+        beforeVerify();
+
         try {
 
             if (!ProofConfig.supportSPV(getType())) {
@@ -154,5 +161,53 @@ public class TransactionResponse {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getEncryptType() {
+        return encryptType;
+    }
+
+    public void setEncryptType(String encryptType) {
+        this.encryptType = encryptType;
+    }
+
+    private void beforeVerify() {
+        configProofTools();
+    }
+
+    private void configProofTools() {
+        ProofTools proofTools = newProofTools();
+
+        if (getBlockHeader() != null) {
+            getBlockHeader().setProofTools(proofTools);
+        }
+
+        if (getProofs() != null) {
+            for (PathProof proof : getProofs()) {
+                proof.setProofTools(proofTools);
+            }
+        }
+    }
+
+    private ProofTools newProofTools() {
+        ProofTools proofTools = null;
+        switch (getType()) {
+            case WeCrossType.TRANSACTION_RSP_TYPE_BCOS:
+                {
+                    switch (getEncryptType()) {
+                        case WeCrossType.ENCRYPT_TYPE_GUOMI:
+                            proofTools = new BCOSGuomiProofTools();
+
+                        case WeCrossType.ENCRYPT_TYPE_NORMAL:
+                        default:
+                            proofTools = new BCOSProofTools();
+                    }
+                }
+                break;
+
+            default:
+                break;
+        }
+        return proofTools;
     }
 }

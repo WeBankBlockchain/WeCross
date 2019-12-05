@@ -1,5 +1,5 @@
 package com.webank.wecross.proof;
 
-public interface RootProof {
-    boolean verifyRoot(String root);
+public abstract class RootProof extends Proof {
+    public abstract boolean verifyRoot(String root);
 }
