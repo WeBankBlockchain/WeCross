@@ -73,7 +73,7 @@ public class RemoteResource implements Resource {
 
                     RemoteSemaphoreCallback callback =
                             new RemoteSemaphoreCallback(
-                                    new TypeReference<P2PResponse<SetDataResponse>>() {});
+                                    new TypeReference<P2PResponse<GetDataResponse>>() {});
                     GetDataResponse response =
                             (GetDataResponse) sendRemote(peerToSend, p2pReq, callback);
 
