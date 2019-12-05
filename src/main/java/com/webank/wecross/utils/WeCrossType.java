@@ -19,4 +19,8 @@ public class WeCrossType {
     public static final String TRANSACTION_RSP_TYPE_BCOS = TRANSACTION_RSP_TYPE_NORMAL;
     public static final String TRANSACTION_RSP_TYPE_JDCHAIN = "JDCHAIN";
     public static final String TRANSACTION_RSP_TYPE_FABRIC = "FABRIC";
+
+    // encrypt type
+    public static final String ENCRYPT_TYPE_NORMAL = "NORMAL";
+    public static final String ENCRYPT_TYPE_GUOMI = "GUOMI";
 }
