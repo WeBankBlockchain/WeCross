@@ -35,7 +35,7 @@ public class TransactionResponse {
     private List<String> extraHashes;
     private Object result[];
     private String type = "";
-    private String encryptType = WeCrossType.ENCRYPT_TYPE_NORMAL;
+    private String encryptType = "";
 
     public Integer getErrorCode() {
         return errorCode;
@@ -197,10 +197,12 @@ public class TransactionResponse {
                     switch (getEncryptType()) {
                         case WeCrossType.ENCRYPT_TYPE_GUOMI:
                             proofTools = new BCOSGuomiProofTools();
+                            break;
 
                         case WeCrossType.ENCRYPT_TYPE_NORMAL:
                         default:
                             proofTools = new BCOSProofTools();
+                            break;
                     }
                 }
                 break;
