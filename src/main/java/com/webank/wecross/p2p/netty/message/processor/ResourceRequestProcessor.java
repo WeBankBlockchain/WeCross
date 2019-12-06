@@ -76,7 +76,7 @@ public class ResourceRequestProcessor implements Processor {
             String method = p2PMessage.getMethod();
             String r[] = method.split("/");
 
-            P2PResponse<Object> p2PResponse = null;
+            P2PResponse<Object> p2PResponse = new P2PResponse<>();
             if (r.length == 1) {
                 /** method */
                 p2PResponse = handlePeer(r[0], content);
@@ -85,7 +85,6 @@ public class ResourceRequestProcessor implements Processor {
                 p2PResponse = handleRemote(r[0], r[1], r[2], r[3], content);
             } else {
                 // invalid paramter method
-                p2PResponse.setData(null);
                 p2PResponse.setMessage(" invalid method paramter format");
                 p2PResponse.setResult(Status.INTERNAL_ERROR);
                 p2PResponse.setSeq(p2PMessage.getSeq());
