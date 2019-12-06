@@ -13,6 +13,7 @@ import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.utils.WeCrossType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -78,14 +79,15 @@ public class FabricContractResource extends FabricResource {
 
     private TransactionResponse checkRetTypes(String retTypes[]) {
         TransactionResponse transactionResponse = new FabricResponse();
-        if (retTypes != null) {
-            if (retTypes.length == 1 && !retTypes[0].equals("String") || retTypes.length > 1) {
+        if (retTypes != null && retTypes.length != 0) {
+            if (retTypes.length > 1
+                    || !retTypes[0].trim().equals("String") && !retTypes[0].trim().equals("")) {
                 transactionResponse.setErrorCode(Status.UNSUPPORTED_TYPE);
                 transactionResponse.setErrorMessage(
                         "Unsupported return type for "
                                 + WeCrossType.RESOURCE_TYPE_FABRIC_CONTRACT
                                 + ": "
-                                + retTypes[0]);
+                                + Arrays.toString(retTypes));
             }
         }
         return transactionResponse;

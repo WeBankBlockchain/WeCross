@@ -19,7 +19,8 @@ class RemoteSemaphoreCallback extends P2PMessageCallback {
             semaphore.acquire(1);
 
         } catch (InterruptedException e) {
-            logger.error("error:", e);
+            logger.error("error: {}", e.getMessage());
+            Thread.currentThread().interrupt();
         }
     }
 

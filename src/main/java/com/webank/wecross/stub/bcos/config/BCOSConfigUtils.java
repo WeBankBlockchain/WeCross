@@ -86,7 +86,7 @@ public class BCOSConfigUtils {
 
         @SuppressWarnings("unchecked")
         List<String> connectionsStr = (List<String>) channelServiceConfig.get("connectionsStr");
-        if (sslKeyPath == null) {
+        if (connectionsStr == null) {
             String errorMessage =
                     "\"connectionsStr\" in [channelService] item  not found, please check "
                             + stubPath;

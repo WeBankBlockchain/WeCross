@@ -1,5 +1,7 @@
 package com.webank.wecross.resource;
 
+import java.util.Objects;
+
 public class Path {
     private String network;
     private String chain;
@@ -43,10 +45,23 @@ public class Path {
         this.resource = resource;
     }
 
-    public boolean equals(Path path) {
-        return path.getNetwork().equals(this.network)
-                && path.getChain().equals(this.chain)
-                && path.getResource().equals(this.resource);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Path)) {
+            return false;
+        }
+        Path path = (Path) o;
+        return Objects.equals(getNetwork(), path.getNetwork())
+                && Objects.equals(getChain(), path.getChain())
+                && Objects.equals(getResource(), path.getResource());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getNetwork(), getChain(), getResource());
     }
 
     @Override

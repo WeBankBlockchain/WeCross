@@ -94,7 +94,7 @@ public class TransactionResponse {
             if (!hasLeaf) {
                 throw new Exception(
                         "leaf failed, no path can prove the leaf. paths:"
-                                + getProofs().toString()
+                                + Arrays.toString(getProofs())
                                 + ", leaf:"
                                 + hash);
             }
@@ -110,7 +110,7 @@ public class TransactionResponse {
                 if (!hasLeaf) {
                     throw new Exception(
                             "leaf failed, no path can prove the leaf. paths:"
-                                    + getProofs().toString()
+                                    + Arrays.toString(getProofs())
                                     + ", leaf:"
                                     + hash);
                 }

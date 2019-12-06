@@ -12,7 +12,7 @@
 ``` shell
 git clone https://github.com/WeBankFinTech/WeCross.git
 cd WeCross
-./gradlew build
+./gradlew assemble
 ```
 
 启动

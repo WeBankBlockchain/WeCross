@@ -45,7 +45,11 @@ dependencies {
     compile 'com.alibaba:fastjson:1.2.62'
     compile 'org.springframework.boot:spring-boot-starter-actuator:2.1.4.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-web:2.1.4.RELEASE'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.1.4.RELEASE'
+    compile 'org.springframework.boot:spring-boot-configuration-processor:2.1.4.RELEASE'
+
+    // Use JUnit test framework
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.1.4.RELEASE'
 
     // FISCO BCOS
     compile 'org.fisco-bcos:web3sdk:2.2.0.120400-SNAPSHOT'
@@ -54,12 +58,8 @@ dependencies {
     compile 'com.jd.blockchain:sdk-pack:1.1.0.RELEASE'
     compile 'com.jd.blockchain:crypto-pki:1.1.0.RELEASE'
 
-    // Use JUnit test framework
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.1.4.RELEASE'
-
+    // Fabric
     compile 'javassist:javassist:3.12.1.GA'
-    
     compile "org.hyperledger.fabric-sdk-java:fabric-sdk-java:1.4.4"
 }
 
