@@ -333,7 +333,10 @@ public class BCOSContractResource extends BCOSResource {
         boolean isGuomi = EncryptType.encryptType == 1; // get SDK global config, maybe modify later
         if (isGuomi) {
             response.setEncryptType(WeCrossType.ENCRYPT_TYPE_GUOMI);
+        } else {
+            response.setEncryptType(WeCrossType.ENCRYPT_TYPE_NORMAL);
         }
+
         return response;
     }
 }
