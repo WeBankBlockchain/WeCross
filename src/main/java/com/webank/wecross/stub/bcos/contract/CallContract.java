@@ -181,7 +181,11 @@ public class CallContract {
     private List<TypeReference<?>> getTypeReferenceList(String types[]) throws Exception {
         List<TypeReference<?>> result = new ArrayList<>();
         for (String type : types) {
-            switch (type) {
+            switch (type.trim()) {
+                case "":
+                    {
+                        break;
+                    }
                 case "Int":
                     {
                         result.add(new TypeReference<Int256>() {});
@@ -225,7 +229,11 @@ public class CallContract {
     }
 
     public Object type2Object(Type data, String javaType) throws Exception {
-        switch (javaType) {
+        switch (javaType.trim()) {
+            case "":
+                {
+                    return null;
+                }
             case "Int":
                 {
                     return ((BigInteger) data.getValue()).intValue();
