@@ -4,6 +4,7 @@ rm -f start.out
 
 APPS_FOLDER=$(pwd)/apps
 CLASS_PATH=$(pwd)'/apps/*:lib/*:conf'
+WINDS_CLASS_PATH=$(pwd)'/apps/*;lib/*;conf'
 
 function run_wecross() {
     if [ "$(uname)" == "Darwin" ]; then
@@ -11,7 +12,7 @@ function run_wecross() {
         nohup java -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
     elif [ "$(uname -s | grep MINGW | wc -l)" != "0" ]; then
         # Windows
-        nohup java -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
+        nohup java -cp ${WINDS_CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
     else
         # GNU/Linux
         nohup java -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
