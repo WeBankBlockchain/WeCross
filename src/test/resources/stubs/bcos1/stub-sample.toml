@@ -2,7 +2,7 @@
     stub = 'bcos1' # stub must be same with directory name
     type = 'BCOS'
 
-[guomi]
+[smCrypto]
     # boolean
     enable = false
 

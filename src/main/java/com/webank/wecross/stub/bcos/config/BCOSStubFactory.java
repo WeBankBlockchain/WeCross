@@ -22,19 +22,20 @@ public class BCOSStubFactory {
             throws WeCrossException {
 
         @SuppressWarnings("unchecked")
-        Map<String, Boolean> guomiMap = (Map<String, Boolean>) stubConfig.get("guomi");
+        Map<String, Boolean> guomiMap = (Map<String, Boolean>) stubConfig.get("smCrypto");
         if (guomiMap == null) {
-            String errorMessage = "Something wrong in [guomi] item, please check " + stubPath;
+            String errorMessage = "Something wrong in [smCrypto] item, please check " + stubPath;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
-        Boolean guomi = guomiMap.get("enable");
-        if (guomi == null) {
-            String errorMessage = "\"enable\" in [guomi] item  not found, please check " + stubPath;
+        Boolean smCrypto = guomiMap.get("enable");
+        if (smCrypto == null) {
+            String errorMessage =
+                    "\"enable\" in [smCrypto] item  not found, please check " + stubPath;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
-        EncryptType encryptType = guomi ? new EncryptType(1) : new EncryptType(0);
+        EncryptType encryptType = smCrypto ? new EncryptType(1) : new EncryptType(0);
 
         @SuppressWarnings("unchecked")
         Map<String, String> accountConfig = (Map<String, String>) stubConfig.get("account");
