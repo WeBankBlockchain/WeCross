@@ -15,7 +15,7 @@ public class NetworksFactoryTest {
     @Test
     public void produceNetworksTest() {
         try {
-            Toml toml = ConfigUtils.getToml(WeCrossDefault.MAIN_CONFIG_FILE);
+            Toml toml = ConfigUtils.getToml(WeCrossDefault.MAIN_CONFIG_TEST_FILE);
             String network = toml.getString("common.network");
             System.out.println(network);
 
@@ -27,6 +27,7 @@ public class NetworksFactoryTest {
 
         } catch (WeCrossException e) {
             System.out.println("Error in produceNetworksTest: " + e.getMessage());
+            Assert.fail();
         }
     }
 }

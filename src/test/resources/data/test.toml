@@ -1,0 +1,21 @@
+[common]
+    network = 'payment'
+    visible = true
+
+[stubs]
+    path = 'classpath:stubs'
+
+[server] # tomcat server
+    address = '127.0.0.1'
+    port = 8080
+
+[p2p]
+    listenIP = '0.0.0.0'
+    listenPort = 12346
+    caCert = ''
+    sslCert = ''
+    sslKey = ''
+    peers = []
+
+[test]
+    enableTestResource = true
