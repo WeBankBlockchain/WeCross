@@ -142,7 +142,7 @@ public class RestfulService {
             }
 
             switch (method) {
-                case "exists":
+                case "status":
                     {
                         if (resourceObj == null) {
                             restResponse.setData("not exists");

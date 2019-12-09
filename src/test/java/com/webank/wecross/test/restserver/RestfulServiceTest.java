@@ -50,12 +50,12 @@ public class RestfulServiceTest {
     }
 
     @Test
-    public void existTest() throws Exception {
+    public void statusTest() throws Exception {
         try {
 
             MvcResult rsp =
                     this.mockMvc
-                            .perform(get("/test-network/test-stub/test-resource/exists"))
+                            .perform(get("/test-network/test-stub/test-resource/status"))
                             .andDo(print())
                             .andExpect(status().isOk())
                             .andReturn();
