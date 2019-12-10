@@ -81,6 +81,9 @@ public class TransactionResponse {
         beforeVerify();
 
         try {
+            if (!errorCode.equals(0)) {
+                return true; // error no need to verify
+            }
 
             if (!ProofConfig.supportSPV(getType())) {
                 return true;
