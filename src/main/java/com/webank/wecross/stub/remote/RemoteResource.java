@@ -77,18 +77,8 @@ public class RemoteResource implements Resource {
                     GetDataResponse response =
                             (GetDataResponse) sendRemote(peerToSend, p2pReq, callback);
 
-                    if (response.getErrorCode() == 0) {
-                        return response;
-                    } else {
-                        throw new Exception(
-                                "{"
-                                        + peerToSend.toString()
-                                        + ", errorCode:"
-                                        + response.getErrorCode()
-                                        + ", msg:"
-                                        + response.getErrorMessage()
-                                        + "},");
-                    }
+                    return response;
+
                 } catch (Exception e) {
                     errorHistory +=
                             "{"
@@ -127,18 +117,8 @@ public class RemoteResource implements Resource {
                     SetDataResponse response =
                             (SetDataResponse) sendRemote(peerToSend, p2pReq, callback);
 
-                    if (response.getErrorCode() == 0) {
-                        return response;
-                    } else {
-                        throw new Exception(
-                                "{"
-                                        + peerToSend.toString()
-                                        + ", errorCode:"
-                                        + response.getErrorCode()
-                                        + ", msg:"
-                                        + response.getErrorMessage()
-                                        + "},");
-                    }
+                    return response;
+
                 } catch (Exception e) {
                     errorHistory +=
                             "{"
@@ -176,18 +156,8 @@ public class RemoteResource implements Resource {
                     TransactionResponse response =
                             (TransactionResponse) sendRemote(peerToSend, p2pReq, callback);
 
-                    if (response.getErrorCode() == 0) {
-                        return response;
-                    } else {
-                        throw new Exception(
-                                "{"
-                                        + peerToSend.toString()
-                                        + ", errorCode:"
-                                        + response.getErrorCode()
-                                        + ", msg:"
-                                        + response.getErrorMessage()
-                                        + "},");
-                    }
+                    return response;
+
                 } catch (Exception e) {
                     errorHistory +=
                             "{"
@@ -230,18 +200,7 @@ public class RemoteResource implements Resource {
                         throw new Exception("Verify response proof failed. response:" + response);
                     }
 
-                    if (response.getErrorCode() == 0) {
-                        return response;
-                    } else {
-                        throw new Exception(
-                                "{"
-                                        + peerToSend.toString()
-                                        + ", errorCode:"
-                                        + response.getErrorCode()
-                                        + ", msg:"
-                                        + response.getErrorMessage()
-                                        + "}");
-                    }
+                    return response;
                 } catch (Exception e) {
                     errorHistory +=
                             "{"
