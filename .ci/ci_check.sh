@@ -24,7 +24,7 @@ cd -
 
 #generate crt file
 expect <<EOF
-spawn bash ./scripts/get_bcos_account.sh
+spawn bash ./scripts/create_bcos_account.sh
 expect "Password"
 send "123456\r"
 expect "Password"
@@ -34,16 +34,20 @@ EOF
 
 rm accounts/*.public.*
 cd accounts
+# shellcheck disable=SC2012
+# shellcheck disable=SC2035
 pem_file=$(ls *.pem | awk -F'.' '{print $0}')
+# shellcheck disable=SC2012
+# shellcheck disable=SC2035
 p12_file=$(ls *.p12 | awk -F'.' '{print $0}')
 cd -
 
 cp src/test/resources/wecross-sample.toml src/test/resources/wecross.toml
-cp src/test/resources/stubs/bcos1/stub-sample.toml src/test/resources/stubs/bcos1/stub.toml
+cp src/test/resources/stubs/bcos/stub-sample.toml src/test/resources/stubs/bcos/stub.toml
 
 #generate wecross cert
-bash ./scripts/build_cert.sh -c -d ./ca
-bash ./scripts/build_cert.sh -n -D ./ca -d ./ca/node
+bash ./scripts/create_cert.sh -c -d ./ca
+bash ./scripts/create_cert.sh -n -D ./ca -d ./ca/node
 mkdir -p ./src/test/resources/p2p
 cp ./ca/ca.crt ./src/test/resources/p2p/
 cp ./ca/node/node.crt ./src/test/resources/p2p/
@@ -53,16 +57,16 @@ cp ./ca/node/node.nodeid ./src/test/resources/p2p/
 #configure wecross
 if [ "$(uname)" == "Darwin" ]; then
     # Mac
-    sed -i "" "s/0x8827cca7f0f38b861b62dae6d711efe92a1e3602/${hello_address}/g" src/test/resources/stubs/bcos1/stub.toml
-    sed -i "" "s/0xa1ca07c7ff567183c889e1ad5f4dcd37716831ca.pem/${pem_file}/g" src/test/resources/stubs/bcos1/stub.toml
+    sed -i "" "s/0x8827cca7f0f38b861b62dae6d711efe92a1e3602/${hello_address}/g" src/test/resources/stubs/bcos/stub.toml
+    sed -i "" "s/0xa1ca07c7ff567183c889e1ad5f4dcd37716831ca.pem/${pem_file}/g" src/test/resources/stubs/bcos/stub.toml
 else
     # Other
-    sed -i "s/0x8827cca7f0f38b861b62dae6d711efe92a1e3602/${hello_address}/g" src/test/resources/stubs/bcos1/stub.toml
-    sed -i "s/0xa1ca07c7ff567183c889e1ad5f4dcd37716831ca.pem/${pem_file}/g" src/test/resources/stubs/bcos1/stub.toml
+    sed -i "s/0x8827cca7f0f38b861b62dae6d711efe92a1e3602/${hello_address}/g" src/test/resources/stubs/bcos/stub.toml
+    sed -i "s/0xa1ca07c7ff567183c889e1ad5f4dcd37716831ca.pem/${pem_file}/g" src/test/resources/stubs/bcos/stub.toml
 fi
 
-cp accounts/* src/test/resources/stubs/bcos1/
-cp nodes/127.0.0.1/sdk/* src/test/resources/stubs/bcos1/
+cp accounts/* src/test/resources/stubs/bcos/
+cp nodes/127.0.0.1/sdk/* src/test/resources/stubs/bcos/
 
 rm -rf accounts
 
