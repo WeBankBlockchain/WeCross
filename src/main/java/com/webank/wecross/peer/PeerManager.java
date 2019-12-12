@@ -46,15 +46,17 @@ public class PeerManager {
                 new Runnable() {
                     @Override
                     public void run() {
-                        while (true) {
+                        boolean running = true;
+                        while (running) {
                             try {
                                 workLoop();
                                 Thread.sleep(timeInterval);
                             } catch (Exception e) {
                                 logger.error("Startup error: " + e);
-                                System.exit(-1);
+                                running = false;
                             }
                         }
+                        System.exit(-1);
                     }
                 };
 
