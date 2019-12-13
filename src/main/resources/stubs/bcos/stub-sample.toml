@@ -28,4 +28,4 @@
 [[resources]]
     name = 'FirstTomlContract'
     type = 'BCOS_CONTRACT'
-    contractAddress = '0x584ecb848dd84499639fbe2581bfb8a8774b485c
+    contractAddress = '0x584ecb848dd84499639fbe2581bfb8a8774b485c'
