@@ -24,7 +24,7 @@ if [ ! -z ${wecross_pid} ]; then
     echo -e "\033[31mWeCross is running, pid is ${wecross_pid} \033[0m"
     exit 0
 else
-    echo -e "\033[32mWeCross for wecross to start ... \033[0m"
+    echo -e "\033[32mWait for wecross to start ... \033[0m"
     run_wecross
     sleep 10
 fi
