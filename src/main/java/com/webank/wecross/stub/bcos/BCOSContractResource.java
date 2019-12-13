@@ -30,6 +30,7 @@ import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Hash;
 import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.channel.StatusCode;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -143,8 +144,7 @@ public class BCOSContractResource extends BCOSResource {
 
             // status: 0x00 - 0x1a, errorCode: 0 - 26
             String status = transactionReceipt.getStatus();
-            Integer errorCode = Integer.valueOf(status.substring(2), 16);
-            if (errorCode == 0) {
+            if (transactionReceipt.isStatusOK()) {
                 try {
                     bcosTransactionResponse =
                             generateResponseWithProof(
@@ -157,10 +157,19 @@ public class BCOSContractResource extends BCOSResource {
                 List<Object> result =
                         callContract.decode(transactionReceipt.getOutput(), request.getRetTypes());
                 bcosTransactionResponse.setResult(result.toArray());
-            }
-            bcosTransactionResponse.setErrorCode(errorCode);
-            bcosTransactionResponse.setErrorMessage(transactionReceipt.getMessage());
+                bcosTransactionResponse.setErrorCode(Status.SUCCESS);
+            } else {
+                try {
+                    Integer errorCode = Integer.valueOf(status.substring(2), 16);
+                    bcosTransactionResponse.setErrorCode(errorCode);
+                } catch (Exception e) {
+                    bcosTransactionResponse.setErrorCode(Status.INTERNAL_ERROR);
+                }
 
+                bcosTransactionResponse.setErrorMessage(
+                        StatusCode.getStatusMessage(
+                                transactionReceipt.getStatus(), transactionReceipt.getMessage()));
+            }
         } catch (WeCrossException e) {
             bcosTransactionResponse.setErrorCode(e.getErrorCode());
             bcosTransactionResponse.setErrorMessage(e.getMessage());
