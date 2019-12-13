@@ -138,7 +138,7 @@ create_bcos_stub()
 [[resources]]
     name = 'FirstTomlContract'
     type = 'BCOS_CONTRACT'
-    contractAddress = '0x584ecb848dd84499639fbe2581bfb8a8774b485c
+    contractAddress = '0x584ecb848dd84499639fbe2581bfb8a8774b485c'
 EOF
 
     echo -e "\033[32mCreate ${1}/${2}/stub.toml successfully \033[0m"
