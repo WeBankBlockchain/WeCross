@@ -16,11 +16,11 @@ help()
     echo "$1"
     cat << EOF
 Usage:
-    -i [Network ID] [IP] [Port] [Port]     Init wecross project by wecross network id, ip, rpc_port and p2p_port, e.g: payment 127.0.0.1 11100 11200
-    -f [Network ID] [File]                 Init wecross project by wecross network id and ip&ports file. file should be splited by line "ip rpc_port p2p_port" e.g: 127.0.0.1 11100 11200
+    -i [Network ID] [IP] [Port] [Port]     Init wecross project by wecross network id, ip, rpc_port and p2p_port, e.g: payment 127.0.0.1 8250 25500
+    -f [Network ID] [File]                 Init wecross project by wecross network id and ip&ports file. file should be splited by line "ip rpc_port p2p_port" e.g: 127.0.0.1 8250 25500
     -h                                     Call for help
 e.g
-    bash $0 -i payment 127.0.0.1 11100 11200
+    bash $0 -i payment 127.0.0.1 8250 25500
 EOF
 exit 0
 }

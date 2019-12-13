@@ -7,15 +7,15 @@
 
 [server] # tomcat server
     address = '127.0.0.1'
-    port = 8080
+    port = 8250
 
 [p2p]
     listenIP = '0.0.0.0'
-    listenPort = 12346
+    listenPort = 25500
     caCert = 'classpath:p2p/ca.crt'
     sslCert = 'classpath:p2p/node.crt'
     sslKey = 'classpath:p2p/node.key'
-    peers = ['127.0.0.1:12345','127.0.0.1:12347']
+    peers = ['127.0.0.1:25501','127.0.0.1:25502']
 
 [test]
     enableTestResource = false
