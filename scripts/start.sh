@@ -6,7 +6,8 @@ APPS_FOLDER=$(pwd)/apps
 CLASS_PATH=$(pwd)'/apps/*:lib/*:conf'
 WINDS_CLASS_PATH=$(pwd)'/apps/*;lib/*;conf'
 
-function run_wecross() {
+run_wecross() 
+{
     if [ "$(uname)" == "Darwin" ]; then
         # Mac
         nohup java -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
@@ -19,15 +20,30 @@ function run_wecross() {
     fi
 }
 
+waiting_for_start()
+{
+    echo -e "\033[32mWeCross booting up ..\033[0m\c"
+    try_times=20
+    i=0
+    while [ $i -lt ${try_times} ]
+    do
+        sleep 1
+        [ ! -z "$(grep PeerManager start.out)" ] && break
+        echo -e "\033[32m.\033[0m\c"
+        ((i=i+1))
+    done
+    echo ""
+}
+
 wecross_pid=$(ps -ef | grep com.webank.wecross.Service | grep ${APPS_FOLDER} | grep -v grep | awk '{print $2}')
 if [ ! -z ${wecross_pid} ]; then
     echo -e "\033[31mWeCross is running, pid is ${wecross_pid} \033[0m"
     exit 0
 else
-    echo -e "\033[32mWait for wecross to start ... \033[0m"
     run_wecross
-    sleep 10
 fi
+
+waiting_for_start
 
 wecross_pid=$(ps -ef | grep com.webank.wecross.Service | grep ${APPS_FOLDER} | grep -v grep | awk '{print $2}')
 if [ -z ${wecross_pid} ]; then
