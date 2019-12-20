@@ -70,7 +70,7 @@ check_env()
 
 parse_command()
 {
-while getopts "o:n:l:i:f:zTh" option;do
+while getopts "o:n:l:f:zTh" option;do
     # shellcheck disable=SC2220
     case ${option} in
     o)
