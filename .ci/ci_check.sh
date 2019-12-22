@@ -22,24 +22,15 @@ EOF
 hello_address=$(grep 'HelloWorld' deploylog.txt | awk '{print $5}')
 cd -
 
-#generate crt file
-expect <<EOF
-spawn bash ./scripts/create_bcos_account.sh
-expect "Password"
-send "123456\r"
-expect "Password"
-send "123456\r"
-expect eof
-EOF
+curl -LO https://raw.githubusercontent.com/FISCO-BCOS/web3sdk/master/tools/get_account.sh
 
-rm accounts/*.public.*
+bash get_account.sh
+
 cd accounts
 # shellcheck disable=SC2012
 # shellcheck disable=SC2035
 pem_file=$(ls *.pem | awk -F'.' '{print $0}')
-# shellcheck disable=SC2012
-# shellcheck disable=SC2035
-p12_file=$(ls *.p12 | awk -F'.' '{print $0}')
+
 cd -
 
 cp src/test/resources/wecross-sample.toml src/test/resources/wecross.toml
