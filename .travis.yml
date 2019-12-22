@@ -3,14 +3,6 @@ branches:
     only:
         - /.*/
 
-addons:
-    apt:
-        packages:
-            - expect
-    homebrew:
-        packages:
-            - expect
-
 matrix:
     fast_finish: true
     include:
