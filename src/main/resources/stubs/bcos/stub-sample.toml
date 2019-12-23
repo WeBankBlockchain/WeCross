@@ -21,7 +21,7 @@
 
 # resources is a list
 [[resources]]
-    # name cannot be repeated
+    # name must be unique
     name = 'HelloWorldContract'
     type = 'BCOS_CONTRACT'
     contractAddress = '0x8827cca7f0f38b861b62dae6d711efe92a1e3602'
