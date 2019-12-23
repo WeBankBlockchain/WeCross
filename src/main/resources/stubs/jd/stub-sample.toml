@@ -16,7 +16,7 @@
 
 # resources is a list
 [[resources]]
-    # name cannot be repeated
+    # name must be unique
     name = 'HelloWorldContract'
     type = 'JDCHAIN_CONTRACT'
     contractAddress = '0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a'

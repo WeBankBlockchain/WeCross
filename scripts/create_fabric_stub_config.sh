@@ -5,7 +5,8 @@ set -e
 p12=0
 need_help=1
 root_dir=
-stub_name=fabricchain
+conf_dir=
+stub_name=fabric
 
 # shellcheck disable=SC2120
 help()
@@ -13,18 +14,19 @@ help()
     echo "$1"
     cat << EOF
 Usage:
-    -r  [Root Dir]        [Required]    specify the stubs root dir
-    -n  [stub name]       [Required]    specify the name of stub
-    -h  Call for help
+    -r  <root dir>        [Required]    specify the stubs root dir
+    -o  <stub name>       [Required]    specify the name of stub
+    -d  <conf path>       [Required]    specify the path of conf dir
+    -h  call for help
 e.g
-    bash $0 -r stubs -n fabricchain
+    bash $0 -r stubs -o fabric -d conf
 EOF
     exit 0
 }
 
 parse_params()
 {
-while getopts "r:n:h" option;do
+while getopts "r:o:d:h" option;do
     # shellcheck disable=SC2220
     case ${option} in
     r)
@@ -32,10 +34,15 @@ while getopts "r:n:h" option;do
         need_help=0
         root_dir=$OPTARG
     ;;
-    n)
+    o)
         # shellcheck disable=SC2034
         need_help=0
         stub_name=$OPTARG
+    ;;
+    d)
+        # shellcheck disable=SC2034
+        need_help=0
+        conf_dir=$OPTARG
     ;;
     h)  help;;
     esac
@@ -44,23 +51,23 @@ done
 
 create_fabric_stub()
 {
-    mkdir -p conf/"${root_dir}"/"${stub_name}"
+    mkdir -p "${conf_dir}"/"${root_dir}"/"${stub_name}"
 
-   cat << EOF > conf/"${root_dir}"/"${stub_name}"/stub.toml
+    cat << EOF > "${conf_dir}"/"${root_dir}"/"${stub_name}"/stub.toml
 [common]
     stub = '${stub_name}' # stub must be same with directory name
     type = 'FABRIC'
 
 # fabricServices is a list
 [fabricServices]
-     channelName = 'mychannel'
-     orgName = 'Org1'
-     mspId = 'Org1MSP'
-     orgUserName = 'Admin'
-     orgUserKeyFile = 'classpath:/${root_dir}/${stub_name}/orgUserKeyFile'
-     orgUserCertFile = 'classpath:/${root_dir}/${stub_name}/orgUserCertFile'
-     ordererTlsCaFile = 'classpath:/${root_dir}/${stub_name}/ordererTlsCaFile'
-     ordererAddress = 'grpcs://127.0.0.1:7050'
+    channelName = 'mychannel'
+    orgName = 'Org1'
+    mspId = 'Org1MSP'
+    orgUserName = 'Admin'
+    orgUserKeyFile = 'classpath:/${root_dir}/${stub_name}/orgUserKeyFile'
+    orgUserCertFile = 'classpath:/${root_dir}/${stub_name}/orgUserCertFile'
+    ordererTlsCaFile = 'classpath:/${root_dir}/${stub_name}/ordererTlsCaFile'
+    ordererAddress = 'grpcs://127.0.0.1:7050'
 
 [peers]
     [peers.org1]
@@ -72,7 +79,7 @@ create_fabric_stub()
 
 # resources is a list
 [[resources]]
-    # name cannot be repeated
+    # name must be unique
     name = 'HelloWorldContract'
     type = 'FABRIC_CONTRACT'
     chainCodeName = 'mycc'
@@ -80,7 +87,7 @@ create_fabric_stub()
     peers=['org1','org2']
 EOF
 
-    echo -e "\033[32m[INFO] Create ${root_dir}/${stub_name}/stub.toml successfully \033[0m"
+    echo -e "\033[32m[INFO] Create ${conf_dir}/${root_dir}/${stub_name}/stub.toml successfully \033[0m"
 }
 
 print_help()
