@@ -13,7 +13,8 @@ ip_param=
 ip_file=
 enable_test_resource="false"
 make_tar=0
-router_output=wecross
+router_output=routers
+temp_dir=thisisauniquedirbecauseofnamedwecross2333
 
 LOG_INFO()
 {
@@ -33,13 +34,13 @@ help()
     echo "$1"
     cat << EOF
 Usage:
-    -n  [Network id]                [Required] Set network ID
-    -l  [ip:rpc-port:p2p-port]      [Optional] "ip:rpc-port:p2p-port" e.g:"127.0.0.1:8250:25500"
-    -f  [ip list file]              [Optional] split by line, every line should be "ip:rpc-port:p2p-port". eg "127.0.0.1:8250:25500"
-    -o  [Output dir]                Default ./${router_output}/
-    -z  [Generate tar packet]       Default no
-    -T  [Enable test mode]          Default no. Enable test resource.
-    -h  Help
+    -n  <network id>                [Required]   set network ID
+    -l  <ip:rpc-port:p2p-port>      [Optional]   "ip:rpc-port:p2p-port" e.g:"127.0.0.1:8250:25500"
+    -f  <ip list file>              [Optional]   split by line, every line should be "ip:rpc-port:p2p-port". eg "127.0.0.1:8250:25500"
+    -o  <output dir>                [Optional]   default ./${router_output}/
+    -z  <generate tar packet>       [Optional]   default no
+    -T  <enable test mode>          [Optional]   default no. Enable test resource.
+    -h  call for help
 e.g
     bash $0 -n payment -l 127.0.0.1:8250:25500
     bash $0 -n payment -f ipfile
@@ -52,9 +53,9 @@ check_env()
     # shellcheck disable=SC2143
     # shellcheck disable=SC2236
     [ ! -z "$(openssl version | grep 1.0.2)" ] || [ ! -z "$(openssl version | grep 1.1)" ] || [ ! -z "$(openssl version | grep reSSL)" ] || {
-        LOG_ERROR "please install openssl!"
+        LOG_ERROR "Please install openssl!"
         #echo "download openssl from https://www.openssl.org."
-        LOG_INFO "use \"openssl version\" command to check."
+        LOG_INFO "Use \"openssl version\" command to check."
         exit 1
     }
     if [ ! -z "$(openssl version | grep reSSL)" ];then
@@ -147,9 +148,9 @@ gen_crt()
     num=${3}
 
     # get ca.crt
-    bash ${scripts_dir}/create_cert.sh -c -d ${output}/ca
+    bash ${scripts_dir}/create_cert.sh -c -d ${output}/ca 2>/dev/null
     # get node.crt by number
-    bash ${scripts_dir}/create_cert.sh -n -C ${num} -D ${output}/ca -d ${output}
+    bash ${scripts_dir}/create_cert.sh -n -C ${num} -D ${output}/ca -d ${output} 2>/dev/null
 
     mv cert.cnf ${output}/
     echo "================================================================"
@@ -160,7 +161,8 @@ gen_one_wecross()
 {
     #default execute dir: ../WeCross
     cert_dir=${1}
-    output=${router_output}/${2}-${3}-${4}   
+    output=${router_output}/${2}-${3}-${4}
+    target=${2}-${3}-${4}
 
     cp -r WeCross/dist "${output}"
     cp -r ${cert_dir} "${output}"/conf/p2p
@@ -168,10 +170,12 @@ gen_one_wecross()
     LOG_INFO "Create ${output} successfully"
 
     if [ ${make_tar} -eq 1 ];then
-        tar -czf "${output}".tar.gz "${output}"
+        cd "${router_output}"
+        tar -czf "${target}".tar.gz "${target}"
+        cp "${target}".tar.gz ../
+        cd ..
         LOG_INFO "Create ${output}.tar.gz  successfully"
     fi
-
 }
 
 gen_conf()
@@ -208,7 +212,9 @@ parse_ip_file()
         ip_array[counter]=$(echo "${line}" | awk -F ':' '{print $1}')
         rpc_port_array[counter]=$(echo "${line}" | awk -F ':' '{print $2}')
         p2p_port_array[counter]=$(echo "${line}" | awk -F ':' '{print $3}')
-        if [ -z "${ip_array[counter]}" -o -z "${rpc_port_array[counter]}" -o -z "${p2p_port_array[counter]}" ];then
+        if [ -z "${ip_array[counter]}" ] && [ -z "${rpc_port_array[counter]}" ] && [ -z "${p2p_port_array[counter]}" ];then
+            ((--counter))
+        elif [ -z "${ip_array[counter]}" ] || [  -z "${rpc_port_array[counter]}" ] || [ -z "${p2p_port_array[counter]}" ];then
             LOG_ERROR "Please check ${1} format! e.g:\n127.0.0.1:8250:25500\n127.0.0.1:8251:25501\n127.0.0.2:8252:25502"
             exit 1
         fi
@@ -238,6 +244,7 @@ gen_wecross_tars()
 main()
 {
     check_params
+    mkdir -p ${temp_dir} && cd ${temp_dir}
 
     if [ ${use_file} -eq 0 ];then
         ip_rpc_p2p=(${ip_param//:/ })
@@ -245,23 +252,21 @@ main()
         gen_crt WeCross/scripts $router_output/cert/ 1
         gen_one_wecross $router_output/cert/node0 "${ip_rpc_p2p[0]}" "${ip_rpc_p2p[1]}" "${ip_rpc_p2p[2]}"
     elif [ ${use_file} -eq 1 ];then
-        parse_ip_file "${ip_file}"
+        parse_ip_file ../"${ip_file}"
         build_project
         gen_crt WeCross/scripts $router_output/cert/ ${counter}
         gen_wecross_tars $router_output/cert/node
     else
         help
     fi
+    rm -rf "${router_output}"/cert
+    cp -r "${router_output}" ../
+    cd .. && rm -rf ${temp_dir}
 }
 
 print_result()
 {
-echo "================================================================"
-LOG_INFO "Execute the following command to get WeCross console"
-echo " bash <(curl -s https://raw.githubusercontent.com/FISCO-BCOS/console/master/tools/download_console.sh   ####### TODO:change to wecross url ####### )"
-echo "================================================================"
 LOG_INFO "All completed. WeCross routers are generated in: ${router_output}/"
-tree ${router_output} -L 1 -n
 }
 
 check_env

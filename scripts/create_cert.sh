@@ -47,11 +47,14 @@ LOG_FALT()
     exit 1
 }
 
-check_env() {
+check_env()
+{
+    # shellcheck disable=SC2143
+    # shellcheck disable=SC2236
     [ ! -z "$(openssl version | grep 1.0.2)" ] || [ ! -z "$(openssl version | grep 1.1)" ] || [ ! -z "$(openssl version | grep reSSL)" ] || {
-        echo "please install openssl!"
+        LOG_ERROR "Please install openssl!"
         #echo "download openssl from https://www.openssl.org."
-        echo "use \"openssl version\" command to check."
+        LOG_INFO "Use \"openssl version\" command to check."
         exit 1
     }
     if [ ! -z "$(openssl version | grep reSSL)" ];then
@@ -153,7 +156,7 @@ gen_chain_cert() {
     openssl req -new -x509 -days 3650 -subj "/CN=fisco-bcos/O=fisco-bcos/OU=chain" -key $chaindir/ca.key -out $chaindir/ca.crt
     cp "cert.cnf" $chaindir 2> /dev/null
 
-    LOG_INFO "build ca cert successful!"
+    LOG_INFO "Build ca cert successful!"
 }
 
 gen_cert_secp256k1() {
@@ -173,14 +176,14 @@ gen_cert_secp256k1() {
 
 gen_node_cert() {
     if [ "" == "$(openssl ecparam -list_curves 2>&1 | grep secp256k1)" ]; then
-        LOG_FALT "openssl don't support secp256k1, please upgrade openssl!"
+        LOG_FALT "Openssl don't support secp256k1, please upgrade openssl!"
     fi
 
     local capath="${1}"
     local ndpath="${2}"
     local node="${3}"
 
-    LOG_INFO " generate key for ${node}"
+    LOG_INFO "Generate key for ${node}"
 
     dir_must_exists "$capath"
     file_must_exists "$capath/ca.key"
@@ -194,12 +197,11 @@ gen_node_cert() {
     gen_cert_secp256k1 "$capath" "$ndpath" "node"
     #nodeid is pubkey
     openssl ec -in $ndpath/node.key -text -noout | sed -n '7,11p' | tr -d ": \n" | awk '{print substr($0,3);}' | cat >$ndpath/node.nodeid
-    LOG_INFO " ${node} is: $(cat $ndpath/node.nodeid)"
     # openssl x509 -serial -noout -in $ndpath/node.crt | awk -F= '{print $2}' | cat >$ndpath/node.serial
     cp $capath/ca.crt $ndpath
     # cd $ndpath
 
-    LOG_INFO "build ${node} cert successful!"
+    LOG_INFO "Build ${node} cert successful!"
 }
 
 gen_rsa_node_cert() {
@@ -223,7 +225,7 @@ gen_rsa_node_cert() {
     cp $capath/ca.crt $capath/cert.cnf $ndpath/
     rm -f $ndpath/node.csr
 
-    LOG_INFO "build ${node} cert successful!"
+    LOG_INFO "Build ${node} cert successful!"
 }
 
 gen_all_node_cert() {
