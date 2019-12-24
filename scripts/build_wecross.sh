@@ -188,7 +188,7 @@ gen_conf()
 [stubs]
     path = 'classpath:stubs'
 
-[server] # tomcat server
+[server] # rpc ip & port
     address = '${2}'
     port = ${3}
 
