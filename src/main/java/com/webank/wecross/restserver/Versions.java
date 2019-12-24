@@ -4,8 +4,10 @@ public class Versions {
 
     private static final String versionList[] = {
         "0.0", // no longer supported
-        "0.1", "0.2", // current version
+        "0.1", "0.2", "1.0-RC1",
     };
+
+    public static String currentVersion = "1.0-RC1";
 
     private static String oldestVersion = "0.1";
 

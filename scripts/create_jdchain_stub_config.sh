@@ -4,8 +4,8 @@ set -e
 
 p12=0
 need_help=1
-root_dir=
-conf_dir=
+root_dir=stubs
+conf_dir=conf
 stub_name=jd
 
 # shellcheck disable=SC2120
@@ -14,19 +14,21 @@ help()
     echo "$1"
     cat << EOF
 Usage:
-    -r  <root dir>        [Required]    specify the stubs root dir
-    -o  <stub name>       [Required]    specify the name of stub
-    -d  <conf path>       [Required]    specify the path of conf dir
+    -n  <stub name>       [Required]    specify the name of stub
+    -r  <root dir>        [Optional]    specify the stubs root dir, default is stubs
+    -c  <conf path>       [Optional]    specify the path of conf dir, default is conf
     -h  call for help
 e.g
-    bash $0 -r stubs -o jd -d conf
+    bash $0 -n jd
+    bash $0 -n jd -r stubs
+    bash $0 -n jd -r stubs -c conf
 EOF
     exit 0
 }
 
 parse_params()
 {
-while getopts "r:o:d:h" option;do
+while getopts "r:n:c:h" option;do
     # shellcheck disable=SC2220
     case ${option} in
     r)
@@ -34,12 +36,12 @@ while getopts "r:o:d:h" option;do
         need_help=0
         root_dir=$OPTARG
     ;;
-    o)
+    n)
         # shellcheck disable=SC2034
         need_help=0
         stub_name=$OPTARG
     ;;
-    d)
+    c)
         # shellcheck disable=SC2034
         need_help=0
         conf_dir=$OPTARG

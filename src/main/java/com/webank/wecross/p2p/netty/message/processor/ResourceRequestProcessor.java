@@ -16,6 +16,7 @@ import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.peer.PeerSeqMessageData;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.restserver.request.GetDataRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
@@ -119,7 +120,7 @@ public class ResourceRequestProcessor implements Processor {
     public P2PResponse<Object> handlePeer(String method, String p2pRequestString) {
 
         P2PResponse<Object> response = new P2PResponse<Object>();
-        response.setVersion("0.2");
+        response.setVersion(Versions.currentVersion);
         response.setResult(Status.SUCCESS);
 
         logger.debug("request string: {}", p2pRequestString);
@@ -259,7 +260,7 @@ public class ResourceRequestProcessor implements Processor {
         path.setResource(resource);
 
         P2PResponse<Object> p2pResponse = new P2PResponse<Object>();
-        p2pResponse.setVersion("0.2");
+        p2pResponse.setVersion(Versions.currentVersion);
         p2pResponse.setResult(Status.SUCCESS);
 
         logger.debug("request string: {}", p2pRequestString);
