@@ -46,7 +46,7 @@ public class RestfulService {
     @RequestMapping(value = "/list", method = RequestMethod.POST)
     public RestResponse<ResourceResponse> handleList(@RequestBody String restRequestString) {
         RestResponse<ResourceResponse> restResponse = new RestResponse<>();
-        restResponse.setVersion("0.2");
+        restResponse.setVersion(Versions.currentVersion);
         restResponse.setResult(Status.SUCCESS);
 
         logger.debug("request string: {}", restRequestString);
@@ -80,7 +80,7 @@ public class RestfulService {
         RestResponse<StateResponse> restResponse = new RestResponse<StateResponse>();
 
         StateResponse stateResponse = host.getState(new StateRequest());
-        restResponse.setVersion("0.2");
+        restResponse.setVersion(Versions.currentVersion);
         restResponse.setResult(Status.SUCCESS);
         restResponse.setData(stateResponse);
 
@@ -130,7 +130,7 @@ public class RestfulService {
         path.setResource(resource);
 
         RestResponse<Object> restResponse = new RestResponse<Object>();
-        restResponse.setVersion("0.2");
+        restResponse.setVersion(Versions.currentVersion);
         restResponse.setResult(Status.SUCCESS);
 
         logger.debug("request string: {}", restRequestString);

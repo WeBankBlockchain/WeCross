@@ -174,7 +174,7 @@ gen_one_wecross()
         tar -czf "${target}".tar.gz "${target}"
         cp "${target}".tar.gz ../
         cd ..
-        LOG_INFO "Create ${output}.tar.gz  successfully"
+        LOG_INFO "Create ${output}.tar.gz successfully"
     fi
 }
 

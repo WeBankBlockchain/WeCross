@@ -12,6 +12,7 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.resource.TestResource;
+import com.webank.wecross.restserver.Versions;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -141,7 +142,7 @@ public class PeerManager {
         P2PMessage<Object> msg = new P2PMessage<>();
         msg.newSeq();
         msg.setData(null);
-        msg.setVersion("0.2");
+        msg.setVersion(Versions.currentVersion);
         msg.setMethod("requestSeq");
 
         PeerSeqCallback callback = new PeerSeqCallback();
@@ -173,7 +174,7 @@ public class PeerManager {
         }
 
         msg.setData(null);
-        msg.setVersion("0.2");
+        msg.setVersion(Versions.currentVersion);
         msg.setMethod("requestPeerInfo");
 
         PeerInfoCallback callback = new PeerInfoCallback();

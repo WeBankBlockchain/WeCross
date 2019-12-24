@@ -3,6 +3,7 @@ package com.webank.wecross.peer;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.restserver.Versions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -75,7 +76,7 @@ public class SyncPeerMessageHandler {
     private void handleRequestSeq(Peer peer, P2PMessage msg) {
         PeerSeqMessageData data = peerManager.handleRequestSeq();
         P2PMessage<PeerSeqMessageData> rspMsg = new P2PMessage<>();
-        rspMsg.setVersion("0.2");
+        rspMsg.setVersion(Versions.currentVersion);
         rspMsg.setSeq(msg.getSeq());
         rspMsg.setMethod("com/webank/wecross/peer/seq");
         rspMsg.setData(data);
@@ -90,7 +91,7 @@ public class SyncPeerMessageHandler {
     private void handleRequestPeerInfo(Peer peer, P2PMessage msg) {
         PeerInfoMessageData data = peerManager.handleRequestPeerInfo();
         P2PMessage<PeerInfoMessageData> rspMsg = new P2PMessage<>();
-        rspMsg.setVersion("0.2");
+        rspMsg.setVersion(Versions.currentVersion);
         rspMsg.setSeq(msg.getSeq());
         rspMsg.setMethod("com/webank/wecross/peer/peerInfo");
         rspMsg.setData(data);
