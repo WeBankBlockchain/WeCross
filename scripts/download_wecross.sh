@@ -37,7 +37,6 @@ while getopts "sh" option;do
     # shellcheck disable=SC2220
     case ${option} in
     s)
-        echo "parse"
         enable_build_from_resource=1
     ;;
     h)  help;;
@@ -79,7 +78,7 @@ download_wecross_pkg()
 
     latest_wecross=WeCross.tar.gz
     latest_wecross_checksum_file=WeCross.tar.gz.md5
-    LOG_INFO "Latest release: ${latest_wecross}"
+    LOG_INFO "Latest release: ${compatibility_version}"
 
 
     # in case network is broken
@@ -90,11 +89,12 @@ download_wecross_pkg()
 
     if [ ! -e ${latest_wecross} ] || [ -z "$(md5sum -c ${latest_wecross_checksum_file}|grep OK)" ];then
         LOG_INFO "Download from: https://github.com/WeBankFinTech/WeCross/releases/download/${compatibility_version}/${latest_wecross}"
-        curl -LO https://github.com/WeBankFinTech/WeCross/releases/download/${compatibility_version}/${latest_wecross}
+        curl -C - -LO https://github.com/WeBankFinTech/WeCross/releases/download/${compatibility_version}/${latest_wecross}
 
 
         if [ -z "$(md5sum -c ${latest_wecross_checksum_file}|grep OK)" ];then
             LOG_ERROR "Download WeCross package failed! URL: https://github.com/WeBankFinTech/WeCross/releases/download/${compatibility_version}/${latest_wecross}"
+            rm -f ${latest_wecross}
             exit 1
         fi
 
@@ -126,6 +126,9 @@ build_from_source()
         exit 1
     fi
     cd ..
+    mv WeCross WeCross-Source
+    mv WeCross-Source/dist WeCross
+    rm -rf WeCross-Source
 }
 
 main()
