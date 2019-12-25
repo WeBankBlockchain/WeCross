@@ -29,6 +29,14 @@ bash start.sh
 
 更全面的操作请参考[快速入门](https://wecross.readthedocs.io/zh_CN/dev/docs/tutorial/index.html)。
 
+## 源码编译
+
+```shell
+./gradlew assemble
+```
+
+如果编译成功，将在当前目录生成一个dist目录。
+
 ## 技术文档
 
 [WeCross 在线文档](https://wecross.readthedocs.io/zh_CN/latest/)
