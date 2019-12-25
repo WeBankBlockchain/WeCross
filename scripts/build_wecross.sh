@@ -122,37 +122,10 @@ check_params()
         exit 1
     fi
 
-    if [ -d WeCross ]; then
-        LOG_ERROR "The dir WeCross/ exists. Please remove the dir."
-        exit 1
-    fi
-
     if [ ${ca} -eq 1 ] && [ ! -f "${ca_dir}"/ca.crt ]; then
         LOG_ERROR " Flie ${ca_dir}/ca.crt doesn't exist. Please check the ca path."
         exit 1
     fi
-}
-
-build_project()
-{
-    if [ -d WeCross/dist ];then
-        return
-    fi
-
-    git clone https://github.com/WeBankFinTech/WeCross.git
-    cd WeCross
-    ./gradlew assemble 2>&1 | tee output.log
-    # shellcheck disable=SC2046
-    # shellcheck disable=SC2006
-    if [ `grep -c "BUILD SUCCESSFUL" output.log` -eq '0' ]; then
-        LOG_ERROR "Build Wecross project failed"
-        LOG_INFO "See output.log for details"
-        mv output.log ../output.log
-        cd ..
-        exit 1
-    fi
-    cd ..
-    echo "================================================================"
 }
 
 gen_crt()
@@ -182,7 +155,13 @@ gen_one_wecross()
     output=${router_output}/${2}-${3}-${4}
     target=${2}-${3}-${4}
 
-    cp -r WeCross/dist "${output}"
+    mkdir -p "${output}/"
+    chmod u+x *.sh
+    cp -r *.sh "${output}/"
+    cp -r apps "${output}/"
+    cp -r lib "${output}/"
+
+    mkdir -p "${output}"/conf
     cp -r "${cert_dir}" "${output}"/conf/p2p
     gen_conf "${output}"/conf/wecross.toml "${2}" "${3}" "${4}" "${5}"
     LOG_INFO "Create ${output} successfully"
@@ -262,23 +241,18 @@ gen_wecross_tars()
 main()
 {
     check_params
-    # mkdir -p ${temp_dir} && cd ${temp_dir}
 
     if [ ${use_file} -eq 0 ];then
         ip_rpc_p2p=(${ip_param//:/ })
-        build_project
-        gen_crt WeCross/scripts "$router_output"/cert/ 1
+        gen_crt ./ "$router_output"/cert/ 1
         gen_one_wecross "$router_output"/cert/node0 "${ip_rpc_p2p[0]}" "${ip_rpc_p2p[1]}" "${ip_rpc_p2p[2]}"
     elif [ ${use_file} -eq 1 ];then
         parse_ip_file "${ip_file}"
-        build_project
-        gen_crt WeCross/scripts "$router_output"/cert/ ${counter}
+        gen_crt ./ "$router_output"/cert/ ${counter}
         gen_wecross_tars "$router_output"/cert/node
     else
         help
     fi
-    rm -rf "$router_output"/cert/node*
-    rm -rf WeCross
 }
 
 print_result()
