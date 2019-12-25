@@ -11,10 +11,11 @@ peers_array=
 use_file=
 ip_param=
 ip_file=
+ca_dir=
+ca=0
 enable_test_resource="false"
 make_tar=0
 router_output=routers
-temp_dir=thisisauniquedirbecauseofnamedwecross2333
 
 LOG_INFO()
 {
@@ -37,6 +38,7 @@ Usage:
     -n  <network id>                [Required]   set network ID
     -l  <ip:rpc-port:p2p-port>      [Optional]   "ip:rpc-port:p2p-port" e.g:"127.0.0.1:8250:25500"
     -f  <ip list file>              [Optional]   split by line, every line should be "ip:rpc-port:p2p-port". eg "127.0.0.1:8250:25500"
+    -c  <ca dir>                    [Optional]   dir of existing ca
     -o  <output dir>                [Optional]   default ./${router_output}/
     -z  <generate tar packet>       [Optional]   default no
     -T  <enable test mode>          [Optional]   default no. Enable test resource.
@@ -58,12 +60,15 @@ check_env()
         LOG_INFO "Use \"openssl version\" command to check."
         exit 1
     }
+
     if [ ! -z "$(openssl version | grep reSSL)" ];then
         export PATH="/usr/local/opt/openssl/bin:$PATH"
     fi
+
     if [ "$(uname)" == "Darwin" ];then
         macOS="macOS"
     fi
+    
     if [ "$(uname -m)" != "x86_64" ];then
         x86_64_arch="false"
     fi
@@ -71,7 +76,7 @@ check_env()
 
 parse_command()
 {
-while getopts "o:n:l:f:zTh" option;do
+while getopts "o:n:l:f:c:zTh" option;do
     # shellcheck disable=SC2220
     case ${option} in
     o)
@@ -87,6 +92,10 @@ while getopts "o:n:l:f:zTh" option;do
     f)
         use_file=1
         ip_file=$OPTARG
+    ;;
+    c)
+        ca=1
+        ca_dir=$OPTARG
     ;;
     z)
         make_tar=1
@@ -113,8 +122,13 @@ check_params()
         exit 1
     fi
 
-    if [ -d ${router_output} ]; then
-        LOG_ERROR "The dir \"${router_output}/\" exists. Please remove the dir."
+    if [ -d WeCross ]; then
+        LOG_ERROR "The dir WeCross/ exists. Please remove the dir."
+        exit 1
+    fi
+
+    if [ ${ca} -eq 1 ] && [ ! -f "${ca_dir}"/ca.crt ]; then
+        LOG_ERROR " Flie ${ca_dir}/ca.crt doesn't exist. Please check the ca path."
         exit 1
     fi
 }
@@ -147,12 +161,16 @@ gen_crt()
     output=${2}/
     num=${3}
 
+    if [ ${ca} -eq 0 ];then
+        bash "${scripts_dir}"/create_cert.sh -c -d "${output}" 2>/dev/null
+        ca_dir=${output}
+    fi
     # get ca.crt
-    bash ${scripts_dir}/create_cert.sh -c -d ${output}/ca 2>/dev/null
-    # get node.crt by number
-    bash ${scripts_dir}/create_cert.sh -n -C ${num} -D ${output}/ca -d ${output} 2>/dev/null
 
-    mv cert.cnf ${output}/
+    # get node.crt by number
+    bash "${scripts_dir}"/create_cert.sh -n -C "${num}" -D "${ca_dir}" -d "${output}" 2>/dev/null
+
+    rm -f cert.cnf
     echo "================================================================"
 }
 
@@ -165,14 +183,14 @@ gen_one_wecross()
     target=${2}-${3}-${4}
 
     cp -r WeCross/dist "${output}"
-    cp -r ${cert_dir} "${output}"/conf/p2p
+    cp -r "${cert_dir}" "${output}"/conf/p2p
     gen_conf "${output}"/conf/wecross.toml "${2}" "${3}" "${4}" "${5}"
     LOG_INFO "Create ${output} successfully"
 
     if [ ${make_tar} -eq 1 ];then
         cd "${router_output}"
         tar -czf "${target}".tar.gz "${target}"
-        cp "${target}".tar.gz ../
+        # cp "${target}".tar.gz ../
         cd ..
         LOG_INFO "Create ${output}.tar.gz successfully"
     fi
@@ -244,24 +262,23 @@ gen_wecross_tars()
 main()
 {
     check_params
-    mkdir -p ${temp_dir} && cd ${temp_dir}
+    # mkdir -p ${temp_dir} && cd ${temp_dir}
 
     if [ ${use_file} -eq 0 ];then
         ip_rpc_p2p=(${ip_param//:/ })
         build_project
-        gen_crt WeCross/scripts $router_output/cert/ 1
-        gen_one_wecross $router_output/cert/node0 "${ip_rpc_p2p[0]}" "${ip_rpc_p2p[1]}" "${ip_rpc_p2p[2]}"
+        gen_crt WeCross/scripts "$router_output"/cert/ 1
+        gen_one_wecross "$router_output"/cert/node0 "${ip_rpc_p2p[0]}" "${ip_rpc_p2p[1]}" "${ip_rpc_p2p[2]}"
     elif [ ${use_file} -eq 1 ];then
-        parse_ip_file ../"${ip_file}"
+        parse_ip_file "${ip_file}"
         build_project
-        gen_crt WeCross/scripts $router_output/cert/ ${counter}
-        gen_wecross_tars $router_output/cert/node
+        gen_crt WeCross/scripts "$router_output"/cert/ ${counter}
+        gen_wecross_tars "$router_output"/cert/node
     else
         help
     fi
-    rm -rf "${router_output}"/cert
-    cp -r "${router_output}" ../
-    cd .. && rm -rf ${temp_dir}
+    rm -rf "$router_output"/cert/node*
+    rm -rf WeCross
 }
 
 print_result()
@@ -269,8 +286,8 @@ print_result()
 LOG_INFO "All completed. WeCross routers are generated in: ${router_output}/"
 }
 
-check_env
 # shellcheck disable=SC2068
 parse_command $@
+check_env
 main
 print_result
