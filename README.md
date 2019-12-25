@@ -1,26 +1,33 @@
 ![](./docs/images/menu_logo_wecross.svg)
 
-**WeCross** 是由微众银行主导开发的安全、通用、高扩展性的开源跨链平台。
+**WeCross** 是由微众银行自主研发并完全开源的分布式商业区块链跨链协作平台。该平台能解决业界主流的区块链产品间接口不互通、无法协作的问题，以及区块链系统无法平行扩展、计算能力和存储容量存在瓶颈等问题。WeCross作为未来分布式商业区块链互联的基础架构，秉承公众联盟链多方参与、共享资源、智能协同和价值整合的理念，致力于促进跨行业、机构和地域的跨区块链价值交换和商业合作，实现了高效、通用和安全的区块链跨链协作机制。
 
 [![CodeFactor](https://www.codefactor.io/repository/github/webankfintech/wecross/badge)](https://www.codefactor.io/repository/github/webankfintech/wecross) [![Build Status](https://travis-ci.org/WeBankFinTech/WeCross.svg?branch=dev)](https://travis-ci.org/WeBankFinTech/WeCross) [![codecov](https://codecov.io/gh/WeBankFinTech/WeCross/branch/dev/graph/badge.svg)](https://codecov.io/gh/WeBankFinTech/WeCross) [![Latest release](https://img.shields.io/github/release/WeBankFinTech/WeCross.svg)](https://github.com/WeBankFinTech/WeCross/releases/latest)
 [![Maven Central](https://img.shields.io/maven-central/v/com.webank.wecross/wecross-client.svg?label=Maven%20Central)]() ![](https://img.shields.io/github/license/WeBankFinTech/WeCross) 
 
 ## 快速开始
 
-下载编译
+下载
 
 ``` shell
-git clone https://github.com/WeBankFinTech/WeCross.git
+bash <(curl -s https://raw.githubusercontent.com/WeBankFinTech/WeCross/release-0.2/scripts/download_wecross.sh)
+```
+
+生成
+
+``` shell
 cd WeCross
-./gradlew assemble
+bash build_wecross.sh -n payment -l 127.0.0.1:8250:25500 -T
 ```
 
 启动
 
 ``` shell
-cd dist
+cd wecross/127.0.0.1-8250-25500/
 bash start.sh
 ```
+
+更全面的操作请参考[快速入门](https://wecross.readthedocs.io/zh_CN/dev/docs/tutorial/index.html)。
 
 ## 技术文档
 
