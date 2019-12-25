@@ -82,9 +82,15 @@ create_fabric_stub()
 # resources is a list
 [[resources]]
     # name must be unique
-    name = 'HelloWorldContract'
+    name = 'HelloWeCross'
     type = 'FABRIC_CONTRACT'
     chainCodeName = 'mycc'
+    chainLanguage = "go"
+    peers=['org1','org2']
+[[resources]]
+    name = 'HelloWorld'
+    type = 'FABRIC_CONTRACT'
+    chainCodeName = 'mygg'
     chainLanguage = "go"
     peers=['org1','org2']
 EOF

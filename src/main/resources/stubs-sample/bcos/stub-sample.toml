@@ -22,10 +22,10 @@
 # resources is a list
 [[resources]]
     # name must be unique
-    name = 'HelloWorldContract'
+    name = 'HelloWeCross'
     type = 'BCOS_CONTRACT'
     contractAddress = '0x8827cca7f0f38b861b62dae6d711efe92a1e3602'
 [[resources]]
-    name = 'FirstTomlContract'
+    name = 'HelloWorld'
     type = 'BCOS_CONTRACT'
     contractAddress = '0x584ecb848dd84499639fbe2581bfb8a8774b485c'
