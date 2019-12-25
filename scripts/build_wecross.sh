@@ -156,8 +156,8 @@ gen_one_wecross()
     target=${2}-${3}-${4}
 
     mkdir -p "${output}/"
-    chmod u+x *.sh
-    cp -r *.sh "${output}/"
+    chmod u+x ./*.sh
+    cp -r ./*.sh "${output}/"
     cp -r apps "${output}/"
     cp -r lib "${output}/"
 
