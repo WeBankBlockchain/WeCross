@@ -127,11 +127,11 @@ create_bcos_stub()
 # resources is a list
 [[resources]]
     # name must be unique
-    name = 'HelloWorldContract'
+    name = 'HelloWeCross'
     type = 'BCOS_CONTRACT'
     contractAddress = ''
 [[resources]]
-    name = 'FirstTomlContract'
+    name = 'HelloWorld'
     type = 'BCOS_CONTRACT'
     contractAddress = ''
 EOF

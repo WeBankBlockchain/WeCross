@@ -75,11 +75,11 @@ create_jd_stub()
 # resources is a list
 [[resources]]
     # name must be unique
-    name = 'HelloWorldContract'
+    name = 'HelloWeCross'
     type = 'JDCHAIN_CONTRACT'
     contractAddress = ''
 [[resources]]
-    name = 'FirstTomlContract'
+    name = 'HelloWorld'
     type = 'JDCHAIN_CONTRACT'
     contractAddress = ''
 EOF

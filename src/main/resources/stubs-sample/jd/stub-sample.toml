@@ -17,10 +17,10 @@
 # resources is a list
 [[resources]]
     # name must be unique
-    name = 'HelloWorldContract'
+    name = 'HelloWeCross'
     type = 'JDCHAIN_CONTRACT'
     contractAddress = '0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a'
 [[resources]]
-    name = 'FirstTomlContract'
+    name = 'HelloWorld'
     type = 'JDCHAIN_CONTRACT'
     contractAddress = '0x38735ad749aebd9d6e9c7350ae00c28c8903dc7a'
