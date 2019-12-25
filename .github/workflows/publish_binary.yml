@@ -1,0 +1,42 @@
+name: Publish binaries
+
+on:
+  release:
+    types: [prereleased, published, created]
+
+jobs:
+  build:
+    name: Publish binaries
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew assemble
+    - name: Download needs
+      run: curl -LO https://raw.githubusercontent.com/FISCO-BCOS/console/master/tools/get_account.sh && chmod u+x get_account.sh && bash get_account.sh -h && cp get_account.sh dist/
+    - name: Pack
+      run: mv dist WeCross && tar -zcvf WeCross.tar.gz WeCross
+    - name: Checksum
+      run: md5sum WeCross.tar.gz > WeCross.tar.gz.md5
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: WeCross.tar.gz
+        asset_name: WeCross.tar.gz
+        tag: ${{ github.ref }}
+        overwrite: true
+
+    - name: Upload checksum to release
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: WeCross.tar.gz.md5
+        asset_name: WeCross.tar.gz.md5
+        tag: ${{ github.ref }}
+        overwrite: true
