@@ -15,7 +15,8 @@ ca_dir=
 ca=0
 enable_test_resource="false"
 make_tar=0
-router_output=routers
+router_output=$(pwd)/routers
+wecross_dir=$(dirname $(pwd)/${0})/
 
 LOG_INFO()
 {
@@ -156,10 +157,10 @@ gen_one_wecross()
     target=${2}-${3}-${4}
 
     mkdir -p "${output}/"
-    chmod u+x ./*.sh
-    cp -r ./*.sh "${output}/"
-    cp -r apps "${output}/"
-    cp -r lib "${output}/"
+    chmod u+x ${wecross_dir}./*.sh
+    cp -r ${wecross_dir}./*.sh "${output}/"
+    cp -r ${wecross_dir}/apps "${output}/"
+    cp -r ${wecross_dir}/lib "${output}/"
 
     mkdir -p "${output}"/conf
     cp -r "${cert_dir}" "${output}"/conf/p2p
@@ -244,11 +245,11 @@ main()
 
     if [ ${use_file} -eq 0 ];then
         ip_rpc_p2p=(${ip_param//:/ })
-        gen_crt ./ "$router_output"/cert/ 1
+        gen_crt ${wecross_dir} "$router_output"/cert/ 1
         gen_one_wecross "$router_output"/cert/node0 "${ip_rpc_p2p[0]}" "${ip_rpc_p2p[1]}" "${ip_rpc_p2p[2]}"
     elif [ ${use_file} -eq 1 ];then
         parse_ip_file "${ip_file}"
-        gen_crt ./ "$router_output"/cert/ ${counter}
+        gen_crt ${wecross_dir} "$router_output"/cert/ ${counter}
         gen_wecross_tars "$router_output"/cert/node
     else
         help
