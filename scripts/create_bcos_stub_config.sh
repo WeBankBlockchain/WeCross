@@ -11,6 +11,18 @@ pem_file=
 p12_file=
 stub_name=bcos
 
+LOG_INFO()
+{
+    local content=${1}
+    echo -e "\033[32m[INFO] ${content}\033[0m"
+}
+
+LOG_ERROR()
+{
+    local content=${1}
+    echo -e "\033[31m[ERROR] ${content}\033[0m"
+}
+
 # shellcheck disable=SC2120
 help()
 {
@@ -65,7 +77,16 @@ done
 gen_bcos_account()
 {
     mkdir -p "${conf_dir}"/"${root_dir}"/"${stub_name}"
-    curl -LO https://raw.githubusercontent.com/FISCO-BCOS/web3sdk/master/tools/get_account.sh
+
+    if [ ! -e "get_account.sh" ]; then
+        curl -LO https://raw.githubusercontent.com/FISCO-BCOS/web3sdk/master/tools/get_account.sh
+    fi
+    
+    if [ -d accounts/ ];then
+        LOG_ERROR "accounts/ exists. Please remove the dir."
+        exit 1
+    fi
+
     # shellcheck disable=SC1009
     if [ ${p12} -eq 1 ];then
         expect <<EOF
@@ -79,7 +100,8 @@ EOF
         cd accounts
         # shellcheck disable=SC2035
         # shellcheck disable=SC2012
-        p12_file=$(ls *.p12 | awk -F'.' '{print $0}')
+        rm *.public.*
+        p12_file=$(echo ./*.p12 | awk -F'.' '{print $0}')
         cd ..
         cp accounts/"${p12_file}" "${conf_dir}"/"${root_dir}"/"${stub_name}"
     else
@@ -87,12 +109,12 @@ EOF
         cd accounts
         # shellcheck disable=SC2035
         # shellcheck disable=SC2012
-        pem_file=$(ls *.pem | awk -F'.' '{print $0}')
+        rm *.public.*
+        pem_file=$(echo ./*.pem | awk -F'.' '{print $0}')
         cd ..
         cp accounts/"${pem_file}" "${conf_dir}"/"${root_dir}"/"${stub_name}"
     fi
     rm -rf accounts
-    rm get_account.sh
 }
 
 create_bcos_stub()
