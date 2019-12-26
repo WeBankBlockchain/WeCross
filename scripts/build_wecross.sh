@@ -123,8 +123,13 @@ check_params()
         exit 1
     fi
 
+    if [ -d ${router_output} ]; then
+        LOG_ERROR "Output dir: ${router_output} exists. Please remove the dir."
+        exit 1
+    fi
+
     if [ ${ca} -eq 1 ] && [ ! -f "${ca_dir}"/ca.crt ]; then
-        LOG_ERROR " Flie ${ca_dir}/ca.crt doesn't exist. Please check the ca path."
+        LOG_ERROR "Flie ${ca_dir}/ca.crt doesn't exist. Please check the ca path."
         exit 1
     fi
 }
@@ -162,7 +167,7 @@ gen_one_wecross()
     cp -r ${wecross_dir}/apps "${output}/"
     cp -r ${wecross_dir}/lib "${output}/"
 
-    mkdir -p "${output}"/conf
+    cp -r "${wecross_dir}/conf" "${output}/conf"
     cp -r "${cert_dir}" "${output}"/conf/p2p
     gen_conf "${output}"/conf/wecross.toml "${2}" "${3}" "${4}" "${5}"
     LOG_INFO "Create ${output} successfully"
