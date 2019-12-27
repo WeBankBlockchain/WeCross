@@ -1,0 +1,56 @@
+{
+  "version": "1",
+  "seq": 100,
+  "result": 0,
+  "message": null,
+  "data": {
+    "errorCode": 0,
+    "errorMessage": "success",
+    "hash": "0x34c49a5baaea7cd50c5820c151b54a7f1fa7ef44489ca4a457f4e999fd3b6c60",
+    "extraHashes": [
+      "0x80a7972c0aa6900a273622f518bd4fc3f60d325f84db7b9a5043da8c84f1195a"
+    ],
+    "result": [],
+    "type": "NORMAL",
+    "encryptType": "GUOMI",
+    "blockHeader": {
+      "blockNumber": 37,
+      "hash": "0x4540545fc8f4ce950fffff49b087821e0195509aab780d40ebb980532b4feea8",
+      "roots": [
+        "0xd4f77784af75969d4f3e0c63ae39ff98558d463eb5e50ad946bed34562b3b959",
+        "0xfef359e108c7eb63ce813558437b97399f7d7568b23401cec65fb5c9c3832e4b",
+        "0xf0b50585258d92d1704c91182932e51dc7b02c8c7ffa99c8b9768facf29e3793"
+      ]
+    },
+    "proofs": [
+      {
+        "root": "0xd4f77784af75969d4f3e0c63ae39ff98558d463eb5e50ad946bed34562b3b959",
+        "path": [
+          {
+            "left": [],
+            "right": []
+          }
+        ],
+        "leaf": {
+          "index": "0x0",
+          "leaf": "0x34c49a5baaea7cd50c5820c151b54a7f1fa7ef44489ca4a457f4e999fd3b6c60",
+          "proof": "0x8034c49a5baaea7cd50c5820c151b54a7f1fa7ef44489ca4a457f4e999fd3b6c60"
+        }
+      },
+      {
+        "root": "0xfef359e108c7eb63ce813558437b97399f7d7568b23401cec65fb5c9c3832e4b",
+        "path": [
+          {
+            "left": [],
+            "right": []
+          }
+        ],
+        "leaf": {
+          "index": "0x0",
+          "leaf": "0x80a7972c0aa6900a273622f518bd4fc3f60d325f84db7b9a5043da8c84f1195a",
+          "proof": "0x8080a7972c0aa6900a273622f518bd4fc3f60d325f84db7b9a5043da8c84f1195a"
+        }
+      }
+    ]
+  }
+}

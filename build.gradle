@@ -1,0 +1,114 @@
+plugins {
+    id 'com.github.sherter.google-java-format' version '0.8'
+}
+
+// Apply the java-library plugin to add support for Java Library
+apply plugin: 'maven'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'java'
+//apply plugin: 'war'
+apply plugin: 'jacoco'
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+    // Use jcenter for resolving your dependencies.
+    // You can declare any Maven/Ivy/file repository here.
+    jcenter()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url 'https://dl.bintray.com/ethereum/maven/' }
+}
+
+googleJavaFormat {
+    options style: 'AOSP'
+    source = sourceSets*.allJava
+    include '**/*.java'
+    exclude '**/temp/*.java'
+}
+
+verifyGoogleJavaFormat {
+    source = sourceSets*.allJava
+    include '**/*.java'
+    exclude '**/temp/*.java'
+}
+
+configurations.all {
+    exclude module: 'slf4j-log4j12'
+    exclude module: "spring-boot-starter-logging"
+    exclude module: "log4j-to-slf4j"
+}
+
+dependencies {
+    // This dependency is exported to consumers, that is to say found on their compile classpath.
+    compile 'com.moandjiezana.toml:toml4j:0.7.2'
+    compile 'org.apache.logging.log4j:log4j-web:2.7'
+    compile 'com.alibaba:fastjson:1.2.62'
+    compile 'org.springframework.boot:spring-boot-starter-actuator:2.1.4.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-web:2.1.4.RELEASE'
+    compile 'org.springframework.boot:spring-boot-configuration-processor:2.1.4.RELEASE'
+
+    // Use JUnit test framework
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.1.4.RELEASE'
+
+    // FISCO BCOS
+    compile 'org.fisco-bcos:web3sdk:2.2.0.120400-SNAPSHOT'
+
+    // JDChain
+    compile 'com.jd.blockchain:sdk-pack:1.1.0.RELEASE'
+    compile 'com.jd.blockchain:crypto-pki:1.1.0.RELEASE'
+
+    // Fabric
+    compile 'javassist:javassist:3.12.1.GA'
+    compile "org.hyperledger.fabric-sdk-java:fabric-sdk-java:1.4.4"
+}
+
+sourceSets {
+    main {
+        resources {
+            exclude '/*'
+        }
+    }
+}
+
+jar {
+    destinationDir file('dist/apps')
+    archiveName project.name + '.jar'
+
+    manifest {
+        attributes(
+                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+                'Main-Class': 'com.webank.wecross.Application'
+        )
+    }
+
+    doLast {
+        copy {
+            from file('src/main/resources/')
+            into 'dist/conf'
+        }
+        copy {
+            from configurations.runtime
+            into 'dist/lib'
+        }
+        copy {
+            from file('.').listFiles().findAll { File f -> (f.name.endsWith('.sh') || f.name.endsWith('.env')) }
+            into 'dist'
+        }
+        copy {
+            from file('scripts/')
+            into 'dist'
+        }
+    }
+}
+
+test {
+    testLogging.showStandardStreams = true
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled false
+    }
+}

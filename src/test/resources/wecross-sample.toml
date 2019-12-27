@@ -1,0 +1,21 @@
+[common]
+    network = 'payment'
+    visible = true
+
+[stubs]
+    path = 'classpath:stubs'
+
+[server]
+    address = '127.0.0.1'
+    port = 8250
+
+[p2p]
+    listenIP = '0.0.0.0'
+    listenPort = 25500
+    caCert = 'classpath:p2p/ca.crt'
+    sslCert = 'classpath:p2p/node.crt'
+    sslKey = 'classpath:p2p/node.key'
+    peers = ['127.0.0.1:25501','127.0.0.1:25502']
+
+[test]
+    enableTestResource = true
