@@ -73,7 +73,7 @@ download_wecross_pkg()
 
     LOG_INFO "Checking latest release"
     if [ -z "${compatibility_version}" ];then
-        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross/releases | grep "tag_name"|awk -F '\"' '{print $4}')
+        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross/releases/latest | grep "tag_name"|awk -F '\"' '{print $4}')
     fi
 
     latest_wecross=WeCross.tar.gz
