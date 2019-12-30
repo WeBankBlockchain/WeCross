@@ -101,7 +101,7 @@ EOF
         # shellcheck disable=SC2035
         # shellcheck disable=SC2012
         rm -f *.public.*
-        p12_file=$(echo ./*.p12 | awk -F'.' '{print $0}')
+        p12_file=$(echo *.p12 | awk -F'.' '{print $0}')
         cd ..
         cp accounts/"${p12_file}" "${conf_dir}"/"${root_dir}"/"${stub_name}"
     else
@@ -110,7 +110,7 @@ EOF
         # shellcheck disable=SC2035
         # shellcheck disable=SC2012
         rm  -f *.public.*
-        pem_file=$(echo ./*.pem | awk -F'.' '{print $0}')
+        pem_file=$(echo *.pem | awk -F'.' '{print $0}')
         cd ..
         cp accounts/"${pem_file}" "${conf_dir}"/"${root_dir}"/"${stub_name}"
     fi
