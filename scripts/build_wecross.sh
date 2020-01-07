@@ -3,7 +3,7 @@
 set -e
 
 counter=0
-network=
+zone=
 ip_array=
 rpc_port_array=
 p2p_port_array=
@@ -36,7 +36,7 @@ help()
     echo "$1"
     cat << EOF
 Usage:
-    -n  <network id>                [Required]   set network ID
+    -n  <zone id>                   [Required]   set zone ID
     -l  <ip:rpc-port:p2p-port>      [Optional]   "ip:rpc-port:p2p-port" e.g:"127.0.0.1:8250:25500"
     -f  <ip list file>              [Optional]   split by line, every line should be "ip:rpc-port:p2p-port". eg "127.0.0.1:8250:25500"
     -c  <ca dir>                    [Optional]   dir of existing ca
@@ -84,7 +84,7 @@ while getopts "o:n:l:f:c:zTh" option;do
         router_output=$OPTARG
     ;;
     n)
-        network=$OPTARG
+        zone=$OPTARG
     ;;
     l)
         use_file=0
@@ -111,8 +111,8 @@ done
 
 check_params()
 {
-    if [ -z "${network}" ];then
-        LOG_ERROR "Please set [Network id]"
+    if [ -z "${zone}" ];then
+        LOG_ERROR "Please set [zone id]"
         help
         exit 1
     fi
@@ -185,7 +185,7 @@ gen_conf()
 {
     cat << EOF > "${1}"
 [common]
-    network = '${network}'
+    network = '${zone}'
     visible = true
 
 [stubs]
