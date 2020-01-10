@@ -1,0 +1,21 @@
+name: Upload scripts
+# upload scripts to release on push to master: WeCross latest download resources
+on:
+  push:
+    branches:
+    - master
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Upload download_wecross.sh
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: scripts/download_wecross.sh
+        asset_name: download_wecross.sh
+        tag: resources
+        overwrite: true
