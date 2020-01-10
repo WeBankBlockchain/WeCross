@@ -10,7 +10,7 @@
 下载
 
 ``` shell
-bash <(curl -s https://raw.githubusercontent.com/WeBankFinTech/WeCross/master/scripts/download_wecross.sh)
+bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross.sh)
 ```
 
 生成
