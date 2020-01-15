@@ -215,20 +215,34 @@ public class FabricContractResource extends FabricResource {
                 try {
                     BlockEvent.TransactionEvent transactionEvent =
                             carfuture.get(transactionTimeout, TimeUnit.MILLISECONDS);
-                    BlockchainInfo channelInfo = fabricConn.getChannel().queryBlockchainInfo();
-                    transactionResponse.setHash(
-                            Hex.encodeHexString(channelInfo.getCurrentBlockHash()));
-                    transactionResponse.setErrorCode(0);
+                    if (transactionEvent.isValid()) {
+                        BlockchainInfo channelInfo = fabricConn.getChannel().queryBlockchainInfo();
+                        transactionResponse.setHash(
+                                Hex.encodeHexString(channelInfo.getCurrentBlockHash()));
+                        transactionResponse.setErrorCode(0);
 
-                    logger.info(
-                            "Wait event return: "
-                                    + transactionEvent.getChannelId()
-                                    + " "
-                                    + transactionEvent.getTransactionID()
-                                    + " "
-                                    + transactionEvent.getType()
-                                    + " "
-                                    + transactionEvent.getValidationCode());
+                        logger.info(
+                                "Wait event success: "
+                                        + transactionEvent.getChannelId()
+                                        + " "
+                                        + transactionEvent.getTransactionID()
+                                        + " "
+                                        + transactionEvent.getType()
+                                        + " "
+                                        + transactionEvent.getValidationCode());
+                    } else {
+                        transactionResponse.setErrorCode(Status.FABRIC_COMMIT_CHAINCODE_FAIL);
+                        logger.info(
+                                "Wait event failed: "
+                                        + transactionEvent.getChannelId()
+                                        + " "
+                                        + transactionEvent.getTransactionID()
+                                        + " "
+                                        + transactionEvent.getType()
+                                        + " "
+                                        + transactionEvent.getValidationCode());
+                    }
+
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
                     logger.error(
                             "query failed method:{} chainname:{}",

@@ -33,4 +33,5 @@ public class Status {
 
     // FABRIC
     public static final int FABRIC_INVOKE_CHAINCODE_FAIL = 4001;
+    public static final int FABRIC_COMMIT_CHAINCODE_FAIL = 4002;
 }
