@@ -31,8 +31,8 @@ public class StubsFactory {
             try {
                 stubToml = ConfigUtils.getToml(stubPath);
             } catch (WeCrossException e) {
-                logger.warn(e.getMessage());
-                continue;
+                String errorMessage = "Parse " + stubPath + " failed";
+                throw new WeCrossException(Status.UNEXPECTED_CONFIG, errorMessage);
             }
 
             String stubName = stubToml.getString("common.stub");

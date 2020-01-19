@@ -1,8 +1,9 @@
 package com.webank.wecross.stub.fabric.config;
 
+import static com.webank.wecross.utils.ConfigUtils.fileIsExists;
+
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -16,7 +17,11 @@ public class FabricConfigUtils {
 
     private static Logger logger = LoggerFactory.getLogger(FabricConfigUtils.class);
 
-    public static String getPath(String fileName) throws IOException {
+    public static String getPath(String fileName) throws Exception {
+        if (!fileIsExists(fileName)) {
+            String errorMessage = "File: " + fileName + " is not exists";
+            throw new Exception(errorMessage);
+        }
 
         if (fileName.indexOf("classpath:") != 0) {
             return fileName;
@@ -76,7 +81,7 @@ public class FabricConfigUtils {
         }
         try {
             fabricConfig.setOrgUserKeyFile(getPath(orgUserKeyFile));
-        } catch (IOException e) {
+        } catch (Exception e) {
             String errorMessage =
                     "\"orgUserKeyFile\" in [[fabricServices]] can not find absolute path"
                             + orgUserKeyFile;
@@ -92,7 +97,7 @@ public class FabricConfigUtils {
         }
         try {
             fabricConfig.setOrgUserCertFile(getPath(orgUserCertFile));
-        } catch (IOException e) {
+        } catch (Exception e) {
             String errorMessage =
                     "\"orgUserKeyFile\" in [[fabricServices]] can not find absolute path "
                             + orgUserCertFile;
@@ -108,7 +113,7 @@ public class FabricConfigUtils {
         }
         try {
             fabricConfig.setOrdererTlsCaFile(getPath(ordererTlsCaFile));
-        } catch (IOException e) {
+        } catch (Exception e) {
             String errorMessage =
                     "\"orgUserKeyFile\" in [[fabricServices]] can not find absolute path "
                             + ordererTlsCaFile;
@@ -143,7 +148,7 @@ public class FabricConfigUtils {
 
             try {
                 fabricConfig.setPeerTlsCaFile(getPath(peerTlsCaFile));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 String errorMessage =
                         "\"ordererAddress\" in [[fabricServices]] can not find absolute path "
                                 + peerTlsCaFile;

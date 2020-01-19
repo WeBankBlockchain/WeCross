@@ -70,10 +70,26 @@ public class ConfigUtils {
         String stubsDir[] = dir.list();
         for (String stub : stubsDir) {
             String stubPath = thisPath + "/" + stub + "/" + WeCrossDefault.STUB_CONFIG_FILE;
+            if (!fileIsExists(stubPath)) {
+                String errorMessage = "Stub configuration file: " + stubPath + " is not exists";
+                throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+            }
             result.put(stub, stubPath);
         }
 
         logger.info("Stub config files: {}", result);
         return result;
+    }
+
+    // Check if the file exists or not
+    public static boolean fileIsExists(String path) {
+        try {
+            PathMatchingResourcePatternResolver resolver_temp =
+                    new PathMatchingResourcePatternResolver();
+            resolver_temp.getResource(path).getFile();
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 }

@@ -1,5 +1,7 @@
 package com.webank.wecross.p2p.config;
 
+import static com.webank.wecross.utils.ConfigUtils.fileIsExists;
+
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
@@ -55,6 +57,7 @@ public class P2PConfigFactory {
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
+        @SuppressWarnings("unchecked")
         List<String> peers = (List<String>) p2pMap.get("peers");
         if (peers == null) {
             String errorMessage =
@@ -63,8 +66,11 @@ public class P2PConfigFactory {
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
 
-        Integer listenPort = ((Long) p2pMap.get("listenPort")).intValue();
-        if (listenPort == null) {
+        Long listenPort_temp = (Long) p2pMap.get("listenPort");
+        Integer listenPort;
+        if (listenPort_temp != null) {
+            listenPort = listenPort_temp.intValue();
+        } else {
             String errorMessage =
                     "\"listenPort\" in [p2p] item  not found, please check "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
@@ -78,6 +84,10 @@ public class P2PConfigFactory {
                             + WeCrossDefault.MAIN_CONFIG_FILE;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
+        if (!fileIsExists(caCertPath)) {
+            String errorMessage = "File: " + caCertPath + " is not exists";
+            throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+        }
 
         String sslCertPath = (String) p2pMap.get("sslCert");
         if (sslCertPath == null) {
@@ -86,6 +96,10 @@ public class P2PConfigFactory {
                             + WeCrossDefault.MAIN_CONFIG_FILE;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
+        if (!fileIsExists(sslCertPath)) {
+            String errorMessage = "File: " + sslCertPath + " is not exists";
+            throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+        }
 
         String sslKeyPath = (String) p2pMap.get("sslKey");
         if (sslKeyPath == null) {
@@ -93,6 +107,10 @@ public class P2PConfigFactory {
                     "\"sslKey\" in [p2p] item  not found, please check "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+        }
+        if (!fileIsExists(sslKeyPath)) {
+            String errorMessage = "File: " + sslKeyPath + " is not exists";
+            throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
         }
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();

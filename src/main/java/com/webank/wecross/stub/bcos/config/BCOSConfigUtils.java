@@ -1,5 +1,7 @@
 package com.webank.wecross.stub.bcos.config;
 
+import static com.webank.wecross.utils.ConfigUtils.fileIsExists;
+
 import com.webank.wecross.exception.Status;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Path;
@@ -51,13 +53,19 @@ public class BCOSConfigUtils {
     public static ChannelService getBcosChannelService(
             String stubPath, Map<String, Object> channelServiceConfig) throws WeCrossException {
 
-        Integer timeout = ((Long) channelServiceConfig.get("timeout")).intValue();
-        if (timeout == null) {
+        Long timeout_temp = (Long) channelServiceConfig.get("timeout");
+        Integer timeout;
+        if (timeout_temp != null) {
+            timeout = timeout_temp.intValue();
+        } else {
             timeout = WeCrossDefault.DEFAULT_TIME_OUT;
         }
 
-        Integer groupId = ((Long) channelServiceConfig.get("groupId")).intValue();
-        if (groupId == null) {
+        Long groupId_temp = (Long) channelServiceConfig.get("groupId");
+        Integer groupId;
+        if (groupId_temp != null) {
+            groupId = groupId_temp.intValue();
+        } else {
             String errorMessage =
                     "\"groupId\" in [channelService] item  not found, please check " + stubPath;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
@@ -69,6 +77,10 @@ public class BCOSConfigUtils {
                     "\"caCert\" in [channelService] item  not found, please check " + stubPath;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
+        if (!fileIsExists(caCertPath)) {
+            String errorMessage = "File: " + caCertPath + " is not exists";
+            throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+        }
 
         String sslCertPath = (String) channelServiceConfig.get("sslCert");
         if (sslCertPath == null) {
@@ -76,12 +88,20 @@ public class BCOSConfigUtils {
                     "\"sslCert\" in [channelService] item  not found, please check " + stubPath;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
         }
+        if (!fileIsExists(sslCertPath)) {
+            String errorMessage = "File: " + sslCertPath + " is not exists";
+            throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+        }
 
         String sslKeyPath = (String) channelServiceConfig.get("sslKey");
         if (sslKeyPath == null) {
             String errorMessage =
                     "\"sslKey\" in [channelService] item  not found, please check " + stubPath;
             throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+        }
+        if (!fileIsExists(sslKeyPath)) {
+            String errorMessage = "File: " + sslKeyPath + " is not exists";
+            throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
         }
 
         @SuppressWarnings("unchecked")
