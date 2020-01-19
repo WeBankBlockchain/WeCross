@@ -22,16 +22,21 @@ public class WebServerFactory {
     public TomcatServletWebServerFactory servletWebServerFactory() {
         TomcatServletWebServerFactory tomcatServletWebServerFactory =
                 new TomcatServletWebServerFactory();
-        try {
-            String address = toml.getString("server.address");
-            Integer port = toml.getLong("server.port").intValue();
-            if (address == null || port == null) {
-                String errorMessage =
-                        "Something wrong with [server] item, please check "
-                                + WeCrossDefault.MAIN_CONFIG_FILE;
-                logger.error(errorMessage);
-            }
 
+        String address = toml.getString("server.address");
+        Long port_temp = toml.getLong("server.port");
+        Integer port = null;
+        if (address == null || port_temp == null) {
+            String errorMessage =
+                    "Something wrong with [server] item, please check [address] or [port] in"
+                            + WeCrossDefault.MAIN_CONFIG_FILE;
+            logger.error(errorMessage);
+            System.exit(1);
+        } else {
+            port = port_temp.intValue();
+        }
+
+        try {
             tomcatServletWebServerFactory.setAddress(InetAddress.getByName(address));
             tomcatServletWebServerFactory.setPort(port);
 
