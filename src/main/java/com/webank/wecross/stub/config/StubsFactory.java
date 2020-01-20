@@ -1,7 +1,8 @@
 package com.webank.wecross.stub.config;
 
 import com.moandjiezana.toml.Toml;
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.common.WeCrossType;
+import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.bcos.BCOSStub;
@@ -11,7 +12,6 @@ import com.webank.wecross.stub.fabric.config.FabricStubFactory;
 import com.webank.wecross.stub.jdchain.JDChainStub;
 import com.webank.wecross.stub.jdchain.config.JDChainStubFactory;
 import com.webank.wecross.utils.ConfigUtils;
-import com.webank.wecross.utils.WeCrossType;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -32,28 +32,28 @@ public class StubsFactory {
                 stubToml = ConfigUtils.getToml(stubPath);
             } catch (WeCrossException e) {
                 String errorMessage = "Parse " + stubPath + " failed";
-                throw new WeCrossException(Status.UNEXPECTED_CONFIG, errorMessage);
+                throw new WeCrossException(ErrorCode.UNEXPECTED_CONFIG, errorMessage);
             }
 
             String stubName = stubToml.getString("common.stub");
             if (stubName == null) {
                 String errorMessage =
                         "\"stub\" in [common] item  not found, please check " + stubPath;
-                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+                throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
             }
 
             if (!stub.equals(stubName)) {
                 String errorMessage =
                         "\"stub\" in [common] item  must be same with directory name, please check "
                                 + stubPath;
-                throw new WeCrossException(Status.UNEXPECTED_CONFIG, errorMessage);
+                throw new WeCrossException(ErrorCode.UNEXPECTED_CONFIG, errorMessage);
             }
 
             String type = stubToml.getString("common.type");
             if (type == null) {
                 String errorMessage =
                         "\"type\" in [common] item  not found, please check " + stubPath;
-                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+                throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
             }
 
             Map<String, Object> stubConfig = stubToml.toMap();
@@ -85,7 +85,7 @@ public class StubsFactory {
                 default:
                     {
                         String errorMessage = "Undefined stub type: " + type;
-                        throw new WeCrossException(Status.UNEXPECTED_CONFIG, errorMessage);
+                        throw new WeCrossException(ErrorCode.UNEXPECTED_CONFIG, errorMessage);
                     }
             }
         }

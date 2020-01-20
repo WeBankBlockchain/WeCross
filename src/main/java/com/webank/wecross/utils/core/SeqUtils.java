@@ -1,4 +1,4 @@
-package com.webank.wecross.core;
+package com.webank.wecross.utils.core;
 
 import java.security.SecureRandom;
 

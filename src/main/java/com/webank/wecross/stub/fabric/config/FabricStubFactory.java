@@ -1,6 +1,6 @@
 package com.webank.wecross.stub.fabric.config;
 
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.fabric.FabricStub;
 import java.util.List;
@@ -21,7 +21,7 @@ public class FabricStubFactory {
         if (fabricServiceMaps == null) {
             String errorMessage =
                     "Something wrong in [[fabricServices]] item, please check " + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
         FabricConfig fabricConfig = FabricConfigUtils.getFabricService(stubPath, fabricServiceMaps);
 
@@ -30,7 +30,7 @@ public class FabricStubFactory {
                 (Map<String, Map<String, String>>) stubConfig.get("peers");
         if (peersMaps == null) {
             String errorMessage = "Something wrong in [[peers]] item, please check " + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         Map<String, FabricPeerConfig> fabricPeerMap =

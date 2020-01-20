@@ -1,9 +1,9 @@
 package com.webank.wecross.config;
 
 import com.moandjiezana.toml.Toml;
+import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.utils.ConfigUtils;
-import com.webank.wecross.utils.WeCrossDefault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;

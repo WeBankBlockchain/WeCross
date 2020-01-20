@@ -1,7 +1,8 @@
 package com.webank.wecross.utils;
 
 import com.moandjiezana.toml.Toml;
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.common.WeCrossDefault;
+import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import java.io.File;
 import java.net.URL;
@@ -24,7 +25,7 @@ public class ConfigUtils {
         try {
             new URL(templateUrl);
         } catch (Exception e) {
-            throw new WeCrossException(Status.ILLEGAL_SYMBOL, "Invalid path: " + path);
+            throw new WeCrossException(ErrorCode.ILLEGAL_SYMBOL, "Invalid path: " + path);
         }
     }
 
@@ -37,7 +38,7 @@ public class ConfigUtils {
             return new Toml().read(encryptedSecret);
         } catch (Exception e) {
             throw new WeCrossException(
-                    Status.INTERNAL_ERROR,
+                    ErrorCode.INTERNAL_ERROR,
                     "Something wrong with parse " + fileName + ": " + e.getMessage());
         }
     }
@@ -53,13 +54,13 @@ public class ConfigUtils {
             // dir = new File(ConfigUtils.class.getClassLoader().getResource(stubsPath).getFile());
         } catch (Exception e) {
             logger.debug("Local stubs: " + stubsPath + "is empty");
-            // throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+            // throw new WeCrossException(ResourceQueryStatus.DIR_NOT_EXISTS, errorMessage);
             return result;
         }
 
         if (!dir.isDirectory()) {
             String errorMessage = stubsPath + " is not a valid directory";
-            throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+            throw new WeCrossException(ErrorCode.DIR_NOT_EXISTS, errorMessage);
         }
 
         String thisPath = stubsPath;
@@ -72,7 +73,7 @@ public class ConfigUtils {
             String stubPath = thisPath + "/" + stub + "/" + WeCrossDefault.STUB_CONFIG_FILE;
             if (!fileIsExists(stubPath)) {
                 String errorMessage = "Stub configuration file: " + stubPath + " is not exists";
-                throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+                throw new WeCrossException(ErrorCode.DIR_NOT_EXISTS, errorMessage);
             }
             result.put(stub, stubPath);
         }

@@ -1,5 +1,6 @@
 package com.webank.wecross.stub.fabric;
 
+import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
@@ -10,7 +11,6 @@ import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
-import com.webank.wecross.utils.WeCrossType;
 import java.util.Set;
 
 public class FabricResource implements Resource {

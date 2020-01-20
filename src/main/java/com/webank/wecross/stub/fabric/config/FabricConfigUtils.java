@@ -2,7 +2,7 @@ package com.webank.wecross.stub.fabric.config;
 
 import static com.webank.wecross.utils.ConfigUtils.fileIsExists;
 
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,7 +43,7 @@ public class FabricConfigUtils {
             String errorMessage =
                     "\"channelName\" in [[fabricServices]] item  not found, please check "
                             + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
         fabricConfig.setChannelName(channelName);
 
@@ -51,7 +51,7 @@ public class FabricConfigUtils {
         if (orgName == null) {
             String errorMessage =
                     "\"orgName\" in [[fabricServices]] item  not found, please check " + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
         fabricConfig.setOrgName(orgName);
 
@@ -59,7 +59,7 @@ public class FabricConfigUtils {
         if (mspId == null) {
             String errorMessage =
                     "\"mspId\" in [[fabricServices]] item  not found, please check " + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
         fabricConfig.setMspId(mspId);
 
@@ -68,7 +68,7 @@ public class FabricConfigUtils {
             String errorMessage =
                     "\"orgUserName\" in [[fabricServices]] item  not found, please check "
                             + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
         fabricConfig.setOrgUserName(orgUserName);
 
@@ -77,7 +77,7 @@ public class FabricConfigUtils {
             String errorMessage =
                     "\"orgUserKeyFile\" in [[fabricServices]] item  not found, please check "
                             + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
         try {
             fabricConfig.setOrgUserKeyFile(getPath(orgUserKeyFile));
@@ -85,7 +85,7 @@ public class FabricConfigUtils {
             String errorMessage =
                     "\"orgUserKeyFile\" in [[fabricServices]] can not find absolute path"
                             + orgUserKeyFile;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         String orgUserCertFile = fabricServiceMaps.get("orgUserCertFile");
@@ -93,7 +93,7 @@ public class FabricConfigUtils {
             String errorMessage =
                     "\"orgUserCertFile\" in [[fabricServices]] item  not found, please check"
                             + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
         try {
             fabricConfig.setOrgUserCertFile(getPath(orgUserCertFile));
@@ -101,7 +101,7 @@ public class FabricConfigUtils {
             String errorMessage =
                     "\"orgUserKeyFile\" in [[fabricServices]] can not find absolute path "
                             + orgUserCertFile;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         String ordererTlsCaFile = fabricServiceMaps.get("ordererTlsCaFile");
@@ -109,7 +109,7 @@ public class FabricConfigUtils {
             String errorMessage =
                     "\"ordererTlsCaFile\" in [[fabricServices]] item  not found, please check "
                             + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
         try {
             fabricConfig.setOrdererTlsCaFile(getPath(ordererTlsCaFile));
@@ -117,7 +117,7 @@ public class FabricConfigUtils {
             String errorMessage =
                     "\"orgUserKeyFile\" in [[fabricServices]] can not find absolute path "
                             + ordererTlsCaFile;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         String ordererAddress = fabricServiceMaps.get("ordererAddress");
@@ -125,7 +125,7 @@ public class FabricConfigUtils {
             String errorMessage =
                     "\"ordererAddress\" in [[fabricServices]] item  not found, please check "
                             + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
         fabricConfig.setOrdererAddress(ordererAddress);
 
@@ -143,7 +143,7 @@ public class FabricConfigUtils {
             if (peerTlsCaFile == null) {
                 String errorMessage =
                         "\"peerTlsCaFile\" in [[peers]] item  not found, please check " + stubPath;
-                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+                throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
             }
 
             try {
@@ -152,14 +152,14 @@ public class FabricConfigUtils {
                 String errorMessage =
                         "\"ordererAddress\" in [[fabricServices]] can not find absolute path "
                                 + peerTlsCaFile;
-                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+                throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
             }
 
             String peerAddress = value.get("peerAddress");
             if (peerAddress == null) {
                 String errorMessage =
                         "\"peerAddress\" in [[peers]] item  not found, please check " + stubPath;
-                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+                throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
             }
             fabricConfig.setPeerAddress(peerAddress);
             fabricMap.put(key, fabricConfig);

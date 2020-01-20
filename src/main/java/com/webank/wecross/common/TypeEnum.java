@@ -1,4 +1,4 @@
-package com.webank.wecross.utils;
+package com.webank.wecross.common;
 
 public enum TypeEnum {
     Int,

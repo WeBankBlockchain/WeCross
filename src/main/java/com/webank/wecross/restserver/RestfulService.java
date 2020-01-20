@@ -2,7 +2,8 @@ package com.webank.wecross.restserver;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.common.QueryStatus;
+import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.network.NetworkManager;
@@ -47,7 +48,8 @@ public class RestfulService {
     public RestResponse<ResourceResponse> handleList(@RequestBody String restRequestString) {
         RestResponse<ResourceResponse> restResponse = new RestResponse<>();
         restResponse.setVersion(Versions.currentVersion);
-        restResponse.setResult(Status.SUCCESS);
+        restResponse.setResult(QueryStatus.SUCCESS);
+        restResponse.setMessage(QueryStatus.getStatusMessage(QueryStatus.SUCCESS));
 
         logger.debug("request string: {}", restRequestString);
 
@@ -65,11 +67,11 @@ public class RestfulService {
             restResponse.setData(resourceResponse);
         } catch (WeCrossException e) {
             logger.warn("Process request error: {}", e.getMessage());
-            restResponse.setResult(e.getErrorCode());
+            restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error: {}", e.getMessage());
-            restResponse.setResult(Status.INTERNAL_ERROR);
+            restResponse.setResult(QueryStatus.INTERNAL_ERROR);
             restResponse.setMessage(e.getMessage());
         }
         return restResponse;
@@ -81,7 +83,8 @@ public class RestfulService {
 
         StateResponse stateResponse = host.getState(new StateRequest());
         restResponse.setVersion(Versions.currentVersion);
-        restResponse.setResult(Status.SUCCESS);
+        restResponse.setResult(QueryStatus.SUCCESS);
+        restResponse.setMessage(QueryStatus.getStatusMessage(QueryStatus.SUCCESS));
         restResponse.setData(stateResponse);
 
         return restResponse;
@@ -131,7 +134,8 @@ public class RestfulService {
 
         RestResponse<Object> restResponse = new RestResponse<Object>();
         restResponse.setVersion(Versions.currentVersion);
-        restResponse.setResult(Status.SUCCESS);
+        restResponse.setResult(QueryStatus.SUCCESS);
+        restResponse.setMessage(QueryStatus.getStatusMessage(QueryStatus.SUCCESS));
 
         logger.debug("request string: {}", restRequestString);
 
@@ -154,7 +158,8 @@ public class RestfulService {
                 case "getData":
                     {
                         if (resourceObj == null) {
-                            throw new WeCrossException(Status.RESOURCE_ERROR, "Resource not found");
+                            throw new WeCrossException(
+                                    ErrorCode.RESOURCE_ERROR, "Resource not found");
                         }
                         RestRequest<GetDataRequest> restRequest =
                                 objectMapper.readValue(
@@ -172,7 +177,8 @@ public class RestfulService {
                 case "setData":
                     {
                         if (resourceObj == null) {
-                            throw new WeCrossException(Status.RESOURCE_ERROR, "Resource not found");
+                            throw new WeCrossException(
+                                    ErrorCode.RESOURCE_ERROR, "Resource not found");
                         }
                         RestRequest<SetDataRequest> restRequest =
                                 objectMapper.readValue(
@@ -191,7 +197,8 @@ public class RestfulService {
                 case "call":
                     {
                         if (resourceObj == null) {
-                            throw new WeCrossException(Status.RESOURCE_ERROR, "Resource not found");
+                            throw new WeCrossException(
+                                    ErrorCode.RESOURCE_ERROR, "Resource not found");
                         }
                         RestRequest<TransactionRequest> restRequest =
                                 objectMapper.readValue(
@@ -211,7 +218,8 @@ public class RestfulService {
                 case "sendTransaction":
                     {
                         if (resourceObj == null) {
-                            throw new WeCrossException(Status.RESOURCE_ERROR, "Resource not found");
+                            throw new WeCrossException(
+                                    ErrorCode.RESOURCE_ERROR, "Resource not found");
                         }
                         RestRequest<TransactionRequest> restRequest =
                                 objectMapper.readValue(
@@ -232,18 +240,18 @@ public class RestfulService {
                 default:
                     {
                         logger.warn("Unsupported method: {}", method);
-                        restResponse.setResult(Status.METHOD_ERROR);
+                        restResponse.setResult(QueryStatus.METHOD_ERROR);
                         restResponse.setMessage("Unsupported method: " + method);
                         break;
                     }
             }
         } catch (WeCrossException e) {
             logger.warn("Process request error: {}", e.getMessage());
-            restResponse.setResult(e.getErrorCode());
+            restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error:", e);
-            restResponse.setResult(Status.INTERNAL_ERROR);
+            restResponse.setResult(QueryStatus.INTERNAL_ERROR);
             restResponse.setMessage(e.getLocalizedMessage());
         }
 

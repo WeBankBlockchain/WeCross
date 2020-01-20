@@ -1,7 +1,7 @@
 package com.webank.wecross.p2p.netty.message.processor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.common.QueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
@@ -87,7 +87,7 @@ public class ResourceRequestProcessor implements Processor {
             } else {
                 // invalid paramter method
                 p2PResponse.setMessage(" invalid method paramter format");
-                p2PResponse.setResult(Status.INTERNAL_ERROR);
+                p2PResponse.setResult(QueryStatus.INTERNAL_ERROR);
                 p2PResponse.setSeq(p2PMessage.getSeq());
                 p2PResponse.setVersion(p2PMessage.getVersion());
 
@@ -121,7 +121,8 @@ public class ResourceRequestProcessor implements Processor {
 
         P2PResponse<Object> response = new P2PResponse<Object>();
         response.setVersion(Versions.currentVersion);
-        response.setResult(Status.SUCCESS);
+        response.setResult(QueryStatus.SUCCESS);
+        response.setMessage(QueryStatus.getStatusMessage(QueryStatus.SUCCESS));
 
         logger.debug("request string: {}", p2pRequestString);
 
@@ -141,8 +142,8 @@ public class ResourceRequestProcessor implements Processor {
                                 (PeerSeqMessageData)
                                         peerManager.onRestfulPeerMessage(method, p2pRequest);
 
-                        response.setResult(Status.SUCCESS);
-                        response.setMessage("request " + method + " method success");
+                        response.setResult(QueryStatus.SUCCESS);
+                        response.setMessage("request " + method + " success");
                         response.setSeq(p2pRequest.getSeq());
                         response.setData(data);
                         break;
@@ -162,13 +163,14 @@ public class ResourceRequestProcessor implements Processor {
                                 (PeerInfoMessageData)
                                         peerManager.onRestfulPeerMessage(method, p2pRequest);
 
-                        response.setResult(Status.SUCCESS);
-                        response.setMessage("request " + method + " method success");
+                        response.setResult(QueryStatus.SUCCESS);
+                        response.setMessage("request " + method + " success");
                         response.setSeq(p2pRequest.getSeq());
                         response.setData(data);
                         break;
                     }
                 case "seq":
+                case "peerInfo":
                     {
                         logger.debug("request method: " + method);
                         P2PMessage<PeerSeqMessageData> p2pRequest =
@@ -182,43 +184,19 @@ public class ResourceRequestProcessor implements Processor {
 
                         peerManager.onRestfulPeerMessage(method, p2pRequest);
 
-                        response.setResult(Status.SUCCESS);
-                        response.setMessage("request " + method + " method success");
-                        response.setSeq(p2pRequest.getSeq());
-                        response.setData(null);
-                        break;
-                    }
-                case "peerInfo":
-                    {
-                        logger.debug("request method: " + method);
-                        P2PMessage<PeerInfoMessageData> p2pRequest =
-                                ObjectMapperFactory.getObjectMapper()
-                                        .readValue(
-                                                p2pRequestString,
-                                                new TypeReference<
-                                                        P2PMessage<PeerInfoMessageData>>() {});
-
-                        p2pRequest.checkP2PMessage(method);
-
-                        peerManager.onRestfulPeerMessage(method, p2pRequest);
-
-                        response.setResult(Status.SUCCESS);
-                        response.setMessage("request " + method + " method success");
+                        response.setResult(QueryStatus.SUCCESS);
+                        response.setMessage("request " + method + " success");
                         response.setSeq(p2pRequest.getSeq());
                         response.setData(null);
                         break;
                     }
                 case "requestChainState":
-                    {
-                        logger.debug("request method: " + method);
-                        response.setMessage("request " + method + " method success");
-                        break;
-                    }
 
                 case "chainState":
                     {
                         logger.debug("request method: " + method);
-                        response.setMessage("request " + method + " method success");
+                        response.setResult(QueryStatus.SUCCESS);
+                        response.setMessage("request " + method + " success");
                         break;
                     }
 
@@ -230,7 +208,7 @@ public class ResourceRequestProcessor implements Processor {
                                         .readValue(
                                                 p2pRequestString,
                                                 new TypeReference<P2PMessage<Object>>() {});
-                        response.setResult(Status.METHOD_ERROR);
+                        response.setResult(QueryStatus.METHOD_ERROR);
                         response.setSeq(p2pRequest.getSeq());
                         response.setMessage("Unsupported method: " + method);
                         break;
@@ -239,12 +217,12 @@ public class ResourceRequestProcessor implements Processor {
 
         } catch (WeCrossException e) {
             logger.warn("Process request error: {}", e.getMessage());
-            response.setResult(e.getErrorCode());
+            response.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error:", e);
 
-            response.setResult(Status.INTERNAL_ERROR);
+            response.setResult(QueryStatus.INTERNAL_ERROR);
             response.setMessage(e.getMessage());
         }
 
@@ -261,7 +239,8 @@ public class ResourceRequestProcessor implements Processor {
 
         P2PResponse<Object> p2pResponse = new P2PResponse<Object>();
         p2pResponse.setVersion(Versions.currentVersion);
-        p2pResponse.setResult(Status.SUCCESS);
+        p2pResponse.setResult(QueryStatus.SUCCESS);
+        p2pResponse.setMessage(QueryStatus.getStatusMessage(QueryStatus.SUCCESS));
 
         logger.debug("request string: {}", p2pRequestString);
 
@@ -358,7 +337,7 @@ public class ResourceRequestProcessor implements Processor {
                                                 p2pRequestString,
                                                 new TypeReference<P2PMessage<Object>>() {});
                         logger.warn("Unsupported method: {}", method);
-                        p2pResponse.setResult(Status.METHOD_ERROR);
+                        p2pResponse.setResult(QueryStatus.METHOD_ERROR);
                         p2pResponse.setMessage("Unsupported method: " + method);
                         p2pResponse.setSeq(p2pRequest.getSeq());
                         break;
@@ -366,12 +345,12 @@ public class ResourceRequestProcessor implements Processor {
             }
         } catch (WeCrossException e) {
             logger.warn("Process request error: {}", e.getMessage());
-            p2pResponse.setResult(e.getErrorCode());
+            p2pResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             p2pResponse.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error:", e);
 
-            p2pResponse.setResult(Status.INTERNAL_ERROR);
+            p2pResponse.setResult(QueryStatus.INTERNAL_ERROR);
             p2pResponse.setMessage(e.getLocalizedMessage());
         }
 

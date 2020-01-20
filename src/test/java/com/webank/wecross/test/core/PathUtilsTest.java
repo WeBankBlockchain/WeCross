@@ -1,6 +1,6 @@
 package com.webank.wecross.test.core;
 
-import com.webank.wecross.core.PathUtils;
+import com.webank.wecross.utils.core.PathUtils;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -7,7 +7,7 @@ import com.jd.blockchain.crypto.PubKey;
 import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.jd.blockchain.sdk.client.GatewayServiceFactory;
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +58,7 @@ public class JDChainSdkFactory {
             return jdChainSdk;
 
         } catch (Exception e) {
-            throw new WeCrossException(Status.INTERNAL_ERROR, e.getMessage());
+            throw new WeCrossException(ErrorCode.INTERNAL_ERROR, e.getMessage());
         }
     }
 

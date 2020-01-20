@@ -1,11 +1,11 @@
 package com.webank.wecross.stub.bcos;
 
+import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.proof.BlockHeaderProof;
 import com.webank.wecross.proof.MerkleProof;
 import com.webank.wecross.proof.PathProof;
 import com.webank.wecross.proof.RootProof;
 import com.webank.wecross.restserver.response.TransactionResponse;
-import com.webank.wecross.utils.WeCrossType;
 
 public class BCOSTransactionResponse extends TransactionResponse {
     private BlockHeaderProof blockHeader;

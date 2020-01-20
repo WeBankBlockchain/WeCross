@@ -2,14 +2,14 @@ package com.webank.wecross.stub.bcos.config;
 
 import static com.webank.wecross.utils.ConfigUtils.fileIsExists;
 
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.common.WeCrossDefault;
+import com.webank.wecross.common.WeCrossType;
+import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.bcos.BCOSContractResource;
 import com.webank.wecross.utils.ConfigUtils;
-import com.webank.wecross.utils.WeCrossDefault;
-import com.webank.wecross.utils.WeCrossType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +31,7 @@ public class BCOSConfigUtils {
         if (accountFile == null) {
             String errorMessage =
                     "\"accountFile\" in [account] item  not found, please check " + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         if (accountFile.contains(".pem")) {
@@ -41,12 +41,12 @@ public class BCOSConfigUtils {
             if (password == null) {
                 String errorMessage =
                         "\"password\" in [account] item  not found, please check " + stubPath;
-                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+                throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
             }
             return new Account(accountFile, password);
         } else {
             String errorMessage = "Unsupported account file";
-            throw new WeCrossException(Status.UNEXPECTED_CONFIG, errorMessage);
+            throw new WeCrossException(ErrorCode.UNEXPECTED_CONFIG, errorMessage);
         }
     }
 
@@ -68,40 +68,40 @@ public class BCOSConfigUtils {
         } else {
             String errorMessage =
                     "\"groupId\" in [channelService] item  not found, please check " + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         String caCertPath = (String) channelServiceConfig.get("caCert");
         if (caCertPath == null) {
             String errorMessage =
                     "\"caCert\" in [channelService] item  not found, please check " + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
         if (!fileIsExists(caCertPath)) {
             String errorMessage = "File: " + caCertPath + " is not exists";
-            throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+            throw new WeCrossException(ErrorCode.DIR_NOT_EXISTS, errorMessage);
         }
 
         String sslCertPath = (String) channelServiceConfig.get("sslCert");
         if (sslCertPath == null) {
             String errorMessage =
                     "\"sslCert\" in [channelService] item  not found, please check " + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
         if (!fileIsExists(sslCertPath)) {
             String errorMessage = "File: " + sslCertPath + " is not exists";
-            throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+            throw new WeCrossException(ErrorCode.DIR_NOT_EXISTS, errorMessage);
         }
 
         String sslKeyPath = (String) channelServiceConfig.get("sslKey");
         if (sslKeyPath == null) {
             String errorMessage =
                     "\"sslKey\" in [channelService] item  not found, please check " + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
         if (!fileIsExists(sslKeyPath)) {
             String errorMessage = "File: " + sslKeyPath + " is not exists";
-            throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+            throw new WeCrossException(ErrorCode.DIR_NOT_EXISTS, errorMessage);
         }
 
         @SuppressWarnings("unchecked")
@@ -110,7 +110,7 @@ public class BCOSConfigUtils {
             String errorMessage =
                     "\"connectionsStr\" in [channelService] item  not found, please check "
                             + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         List<ChannelConnections> allChannelConnections = new ArrayList<>();
@@ -147,7 +147,7 @@ public class BCOSConfigUtils {
             if (type == null) {
                 String errorMessage =
                         "\"type\" in [[resources]] item  not found, please check " + stubPath;
-                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+                throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
             }
 
             //  handle contract resource
@@ -156,13 +156,13 @@ public class BCOSConfigUtils {
                 if (name == null) {
                     String errorMessage =
                             "\"name\" in [[resources]] item  not found, please check " + stubPath;
-                    throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+                    throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
                 }
 
                 if (bcosResources.keySet().contains(name)) {
                     String errorMessage =
                             name + " in [[resources]] item  is repeated, please check " + stubPath;
-                    throw new WeCrossException(Status.REPEATED_KEY, errorMessage);
+                    throw new WeCrossException(ErrorCode.REPEATED_KEY, errorMessage);
                 }
 
                 String contractAddress = resource.get("contractAddress");
@@ -170,7 +170,7 @@ public class BCOSConfigUtils {
                     String errorMessage =
                             "\"contractAddress\" in [[resources]] item  not found, please check "
                                     + stubPath;
-                    throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+                    throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
                 }
 
                 BCOSContractResource bcosContractResource = new BCOSContractResource();
@@ -185,7 +185,7 @@ public class BCOSConfigUtils {
                 } catch (WeCrossException we) {
                     throw we;
                 } catch (Exception e) {
-                    throw new WeCrossException(Status.INTERNAL_ERROR, e.getMessage());
+                    throw new WeCrossException(ErrorCode.INTERNAL_ERROR, e.getMessage());
                 }
 
                 bcosResources.put(name, bcosContractResource);
@@ -195,7 +195,7 @@ public class BCOSConfigUtils {
                 continue;
             } else {
                 String errorMessage = "Undefined bcos resource type: " + type;
-                throw new WeCrossException(Status.UNEXPECTED_CONFIG, errorMessage);
+                throw new WeCrossException(ErrorCode.UNEXPECTED_CONFIG, errorMessage);
             }
         }
         return bcosResources;

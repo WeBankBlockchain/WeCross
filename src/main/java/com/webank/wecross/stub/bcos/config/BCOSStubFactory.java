@@ -1,11 +1,11 @@
 package com.webank.wecross.stub.bcos.config;
 
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.common.WeCrossType;
+import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.bcos.BCOSResource;
 import com.webank.wecross.stub.bcos.BCOSStub;
-import com.webank.wecross.utils.WeCrossType;
 import java.util.List;
 import java.util.Map;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -25,14 +25,14 @@ public class BCOSStubFactory {
         Map<String, Boolean> guomiMap = (Map<String, Boolean>) stubConfig.get("smCrypto");
         if (guomiMap == null) {
             String errorMessage = "Something wrong in [smCrypto] item, please check " + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         Boolean smCrypto = guomiMap.get("enable");
         if (smCrypto == null) {
             String errorMessage =
                     "\"enable\" in [smCrypto] item  not found, please check " + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         EncryptType encryptType = smCrypto ? new EncryptType(1) : new EncryptType(0);
@@ -41,7 +41,7 @@ public class BCOSStubFactory {
         Map<String, String> accountConfig = (Map<String, String>) stubConfig.get("account");
         if (accountConfig == null) {
             String errorMessage = "Something wrong in [account] item, please check " + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         Account account = BCOSConfigUtils.getBcosAccount(stubPath, accountConfig);
@@ -53,7 +53,7 @@ public class BCOSStubFactory {
         if (channelServiceConfig == null) {
             String errorMessage =
                     "Something wrong in [channelService] item, please check " + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         ChannelService channelService =

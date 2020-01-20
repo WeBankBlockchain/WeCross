@@ -1,9 +1,9 @@
 package com.webank.wecross.test.resource;
 
-import com.webank.wecross.core.HashUtils;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.TestResource;
+import com.webank.wecross.utils.core.HashUtils;
 import org.junit.Assert;
 import org.junit.Test;
 

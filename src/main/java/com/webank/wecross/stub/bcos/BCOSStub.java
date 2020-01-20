@@ -1,9 +1,9 @@
 package com.webank.wecross.stub.bcos;
 
+import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.ChainState;
 import com.webank.wecross.stub.Stub;
-import com.webank.wecross.utils.WeCrossType;
 import java.util.Map;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.web3j.crypto.Credentials;

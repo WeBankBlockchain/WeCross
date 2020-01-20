@@ -1,11 +1,11 @@
 package com.webank.wecross.stub.jdchain.config;
 
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.common.WeCrossType;
+import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.jdchain.JDChainResource;
 import com.webank.wecross.stub.jdchain.JDChainStub;
-import com.webank.wecross.utils.WeCrossType;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ public class JDChainStubFactory {
         if (jdChainServiceMaps == null) {
             String errorMessage =
                     "Something wrong in [[jdServices]] item, please check " + stubPath;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         @SuppressWarnings("unchecked")
@@ -65,7 +65,7 @@ public class JDChainStubFactory {
             jdChainStub.setLedgerHash(jdChainSdk.getLedgerHash());
             jdChainStub.setBlockchainService(jdChainSdk.getBlockchainService());
         } catch (Exception e) {
-            throw new WeCrossException(Status.INTERNAL_ERROR, e.getMessage());
+            throw new WeCrossException(ErrorCode.INTERNAL_ERROR, e.getMessage());
         }
 
         // init jdchain resources
