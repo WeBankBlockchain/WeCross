@@ -1,7 +1,7 @@
 package com.webank.wecross.config;
 
 import com.moandjiezana.toml.Toml;
-import com.webank.wecross.utils.WeCrossDefault;
+import com.webank.wecross.common.WeCrossDefault;
 import java.net.InetAddress;
 import javax.annotation.Resource;
 import org.slf4j.Logger;

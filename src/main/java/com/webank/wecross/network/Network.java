@@ -1,10 +1,10 @@
 package com.webank.wecross.network;
 
-import com.webank.wecross.core.PathUtils;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.remote.RemoteStub;
+import com.webank.wecross.utils.core.PathUtils;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

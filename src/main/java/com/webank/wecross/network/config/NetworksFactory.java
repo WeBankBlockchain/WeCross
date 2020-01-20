@@ -1,13 +1,13 @@
 package com.webank.wecross.network.config;
 
 import com.moandjiezana.toml.Toml;
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.common.WeCrossDefault;
+import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.Network;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.config.StubsFactory;
 import com.webank.wecross.utils.ConfigUtils;
-import com.webank.wecross.utils.WeCrossDefault;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Resource;
@@ -52,7 +52,7 @@ public class NetworksFactory {
                 String errorMessage =
                         "\"path\" in [stubs] item  not found, please check "
                                 + WeCrossDefault.MAIN_CONFIG_FILE;
-                throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+                throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
             }
 
             Map<String, String> stubsDir = ConfigUtils.getStubsDir(stubsPath);

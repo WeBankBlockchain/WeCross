@@ -1,4 +1,4 @@
-package com.webank.wecross.core;
+package com.webank.wecross.utils.core;
 
 public class PathUtils {
     public static String toPureName(String name) {

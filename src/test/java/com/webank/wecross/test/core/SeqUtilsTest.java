@@ -1,6 +1,6 @@
 package com.webank.wecross.test.core;
 
-import com.webank.wecross.core.SeqUtils;
+import com.webank.wecross.utils.core.SeqUtils;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Assert;

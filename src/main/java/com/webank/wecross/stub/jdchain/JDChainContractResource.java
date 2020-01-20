@@ -10,8 +10,9 @@ import com.jd.blockchain.ledger.OperationResult;
 import com.jd.blockchain.ledger.PreparedTransaction;
 import com.jd.blockchain.ledger.TransactionTemplate;
 import com.jd.blockchain.sdk.BlockchainService;
-import com.webank.wecross.core.HashUtils;
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.common.ResourceQueryStatus;
+import com.webank.wecross.common.WeCrossType;
+import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.restserver.request.GetDataRequest;
@@ -20,7 +21,7 @@ import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
-import com.webank.wecross.utils.WeCrossType;
+import com.webank.wecross.utils.core.HashUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.SecureRandom;
@@ -80,7 +81,7 @@ public class JDChainContractResource extends JDChainResource {
             default:
                 {
                     throw new WeCrossException(
-                            Status.UNSUPPORTED_TYPE,
+                            ErrorCode.UNSUPPORTED_TYPE,
                             "Unsupported return type for "
                                     + WeCrossType.RESOURCE_TYPE_JDCHAIN_CONTRACT
                                     + ": "
@@ -101,7 +102,7 @@ public class JDChainContractResource extends JDChainResource {
         if (splitKey.length != 2) {
             logger.error(
                     "input {} is invalidate should have two elements split by |", request.getKey());
-            response.setErrorCode(Status.JDCHAIN_PARAMETER_INVALIDATE);
+            response.setErrorCode(ResourceQueryStatus.JDCHAIN_PARAMETER_INVALIDATE);
             response.setErrorMessage(
                     "input:"
                             + request.getKey()
@@ -115,7 +116,7 @@ public class JDChainContractResource extends JDChainResource {
         int channelCount = blockchainService.size();
         if (channelCount == 0) {
             logger.error("input {} block chain service count is zero", request.getKey());
-            response.setErrorCode(Status.JDCHAIN_CONNECTION_COUNRT_ERROR);
+            response.setErrorCode(ResourceQueryStatus.JDCHAIN_CONNECTION_COUNRT_ERROR);
             response.setErrorMessage(
                     "input:" + request.getKey() + "blockk chain service count is zero");
             return response;
@@ -134,7 +135,7 @@ public class JDChainContractResource extends JDChainResource {
             }
             if (kvDataEntries == null || kvDataEntries.length == 0) {
                 logger.error("get data error userID:{} address:{}", userID, address);
-                response.setErrorCode(Status.JDCHAIN_GETDATA_ERROR);
+                response.setErrorCode(ResourceQueryStatus.JDCHAIN_GETDATA_ERROR);
                 response.setErrorMessage("get data failed key:" + request.getKey());
                 return response;
             }
@@ -153,7 +154,7 @@ public class JDChainContractResource extends JDChainResource {
         }
 
         logger.error("get data error userID:{} address:{}", userID, address);
-        response.setErrorCode(Status.JDCHAIN_GETDATA_ERROR);
+        response.setErrorCode(ResourceQueryStatus.JDCHAIN_GETDATA_ERROR);
         response.setErrorMessage("get data failed key:" + request.getKey());
         return response;
     }
@@ -161,7 +162,7 @@ public class JDChainContractResource extends JDChainResource {
     @Override
     public SetDataResponse setData(SetDataRequest request) {
         SetDataResponse setDataResponse = new SetDataResponse();
-        setDataResponse.setErrorCode(Status.NONSENSE_CALL);
+        setDataResponse.setErrorCode(ResourceQueryStatus.NONSENSE_CALL);
         setDataResponse.setErrorMessage("Not supported by JDCHAIN_CONTRACT");
         return setDataResponse;
     }
@@ -248,7 +249,7 @@ public class JDChainContractResource extends JDChainResource {
         JDChainResponse response = new JDChainResponse();
         int channelCount = blockchainService.size();
         if (channelCount == 0) {
-            response.setErrorCode(Status.JDCHAIN_CONNECTION_COUNRT_ERROR);
+            response.setErrorCode(ResourceQueryStatus.JDCHAIN_CONNECTION_COUNRT_ERROR);
             response.setErrorMessage("has no gate way to connect");
             return response;
         }
@@ -260,7 +261,7 @@ public class JDChainContractResource extends JDChainResource {
             try {
                 ctClass = dynamicGenerateClass(request);
             } catch (WeCrossException e) {
-                response.setErrorCode(Status.JDCHAIN_GENERATE_CLASS_ERROR);
+                response.setErrorCode(ResourceQueryStatus.JDCHAIN_GENERATE_CLASS_ERROR);
                 response.setErrorMessage("Generate class failed: " + e.getMessage());
                 return response;
             }
@@ -288,18 +289,18 @@ public class JDChainContractResource extends JDChainResource {
                             method.invoke(contractObject, request.getArgs());
 
                         } catch (IllegalAccessException e) {
-                            response.setErrorCode(Status.JDCHAIN_INVOKE_METHOD_ERROR);
+                            response.setErrorCode(ResourceQueryStatus.JDCHAIN_INVOKE_METHOD_ERROR);
                             logger.error("invoke method failed:{}", request.getMethod());
                             response.setErrorMessage("invoke method failed");
                             return response;
 
                         } catch (IllegalArgumentException e) {
-                            response.setErrorCode(Status.JDCHAIN_INVOKE_METHOD_ERROR);
+                            response.setErrorCode(ResourceQueryStatus.JDCHAIN_INVOKE_METHOD_ERROR);
                             logger.error("invoke method failed:{}", request.getMethod());
                             response.setErrorMessage("invoke method failed");
                             return response;
                         } catch (InvocationTargetException e) {
-                            response.setErrorCode(Status.JDCHAIN_INVOKE_METHOD_ERROR);
+                            response.setErrorCode(ResourceQueryStatus.JDCHAIN_INVOKE_METHOD_ERROR);
                             logger.error("invoke method failed:{}", request.getMethod());
                             response.setErrorMessage("invoke method failed");
                             return response;
@@ -341,7 +342,7 @@ public class JDChainContractResource extends JDChainResource {
 
                             return response;
                         } else {
-                            response.setErrorCode(Status.JDCHAIN_COMMIT_ERROR);
+                            response.setErrorCode(ResourceQueryStatus.JDCHAIN_COMMIT_ERROR);
                             logger.error("invoke method failed:{}", request.getMethod());
                             response.setErrorMessage("invoke method failed");
                             return response;
@@ -349,7 +350,7 @@ public class JDChainContractResource extends JDChainResource {
                     }
                 }
             } catch (CannotCompileException e) {
-                response.setErrorCode(Status.JDCHAIN_GENERATE_COMPILE_ERROR);
+                response.setErrorCode(ResourceQueryStatus.JDCHAIN_GENERATE_COMPILE_ERROR);
                 response.setErrorMessage("can not cpmpile");
                 return response;
             }
@@ -360,7 +361,7 @@ public class JDChainContractResource extends JDChainResource {
     @Override
     public TransactionResponse call(TransactionRequest request) {
         JDChainResponse response = new JDChainResponse();
-        response.setErrorCode(Status.JDCHAIN_METHOD_NOTSUPPORT);
+        response.setErrorCode(ResourceQueryStatus.NONSENSE_CALL);
         response.setErrorMessage("call method not supported");
         return response;
     }

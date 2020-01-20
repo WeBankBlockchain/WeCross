@@ -1,6 +1,6 @@
 package com.webank.wecross.test.core;
 
-import com.webank.wecross.core.HashUtils;
+import com.webank.wecross.utils.core.HashUtils;
 import org.junit.Assert;
 import org.junit.Test;
 

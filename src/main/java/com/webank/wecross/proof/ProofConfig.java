@@ -1,6 +1,6 @@
 package com.webank.wecross.proof;
 
-import com.webank.wecross.utils.WeCrossType;
+import com.webank.wecross.common.WeCrossType;
 
 public class ProofConfig {
     public static boolean supportSPV(String type) {

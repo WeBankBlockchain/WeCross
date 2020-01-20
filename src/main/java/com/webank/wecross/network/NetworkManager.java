@@ -1,6 +1,5 @@
 package com.webank.wecross.network;
 
-import com.webank.wecross.core.PathUtils;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.peer.PeerResources;
@@ -13,6 +12,7 @@ import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.remote.RemoteResource;
+import com.webank.wecross.utils.core.PathUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

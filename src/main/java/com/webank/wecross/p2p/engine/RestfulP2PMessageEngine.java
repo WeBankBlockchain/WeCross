@@ -1,6 +1,6 @@
 package com.webank.wecross.p2p.engine;
 
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.common.QueryStatus;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
@@ -38,7 +38,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
             request.setContent(ObjectMapperFactory.getObjectMapper().writeValueAsString(msg));
         } catch (Exception e) {
             logger.error(" P2PMessage to json error: {}", e);
-            executeCallback(callback, Status.INTERNAL_ERROR, e.getMessage(), null);
+            executeCallback(callback, QueryStatus.INTERNAL_ERROR, e.getMessage(), null);
             return;
         }
 
@@ -63,19 +63,22 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
                                     P2PResponse<Object> p2PResponse =
                                             callback.parseContent(content);
                                     /** remote execute return not ok */
-                                    if (p2PResponse.getResult() != Status.SUCCESS) {
+                                    if (p2PResponse.getResult() != QueryStatus.SUCCESS) {
                                         throw new IOException(p2PResponse.getMessage());
                                     }
 
                                     executeCallback(
                                             callback,
-                                            Status.SUCCESS,
-                                            response.getErrorMessage(),
+                                            QueryStatus.SUCCESS,
+                                            QueryStatus.getStatusMessage(QueryStatus.SUCCESS),
                                             p2PResponse.toP2PMessage("restfulP2PMessageResponse"));
 
                                 } catch (Exception e) {
                                     executeCallback(
-                                            callback, Status.INTERNAL_ERROR, e.getMessage(), null);
+                                            callback,
+                                            QueryStatus.INTERNAL_ERROR,
+                                            e.getMessage(),
+                                            null);
                                     logger.error(" error : {}", e.getMessage());
                                 }
                             }

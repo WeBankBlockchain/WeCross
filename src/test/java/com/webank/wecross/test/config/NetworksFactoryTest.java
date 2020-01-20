@@ -1,11 +1,11 @@
 package com.webank.wecross.test.config;
 
 import com.moandjiezana.toml.Toml;
+import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.Network;
 import com.webank.wecross.network.config.NetworksFactory;
 import com.webank.wecross.utils.ConfigUtils;
-import com.webank.wecross.utils.WeCrossDefault;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;

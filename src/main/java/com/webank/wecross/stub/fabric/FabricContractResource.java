@@ -1,8 +1,8 @@
 package com.webank.wecross.stub.fabric;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.webank.wecross.core.HashUtils;
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.common.ResourceQueryStatus;
+import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.restserver.request.GetDataRequest;
@@ -11,7 +11,7 @@ import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
-import com.webank.wecross.utils.WeCrossType;
+import com.webank.wecross.utils.core.HashUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -82,7 +82,7 @@ public class FabricContractResource extends FabricResource {
         if (retTypes != null && retTypes.length != 0) {
             if (retTypes.length > 1
                     || !retTypes[0].trim().equals("String") && !retTypes[0].trim().equals("")) {
-                transactionResponse.setErrorCode(Status.UNSUPPORTED_TYPE);
+                transactionResponse.setErrorCode(ResourceQueryStatus.UNSUPPORTED_TYPE);
                 transactionResponse.setErrorMessage(
                         "Unsupported return type for "
                                 + WeCrossType.RESOURCE_TYPE_FABRIC_CONTRACT
@@ -144,7 +144,7 @@ public class FabricContractResource extends FabricResource {
                     "query failed method:{} chainname:{}",
                     request.getMethod(),
                     fabricConn.getChainCodeName());
-            transactionResponse.setErrorCode(Status.FABRIC_INVOKE_CHAINCODE_FAIL);
+            transactionResponse.setErrorCode(ResourceQueryStatus.FABRIC_INVOKE_CHAINCODE_FAIL);
         }
         return transactionResponse;
     }
@@ -231,7 +231,8 @@ public class FabricContractResource extends FabricResource {
                                         + " "
                                         + transactionEvent.getValidationCode());
                     } else {
-                        transactionResponse.setErrorCode(Status.FABRIC_COMMIT_CHAINCODE_FAIL);
+                        transactionResponse.setErrorCode(
+                                ResourceQueryStatus.FABRIC_COMMIT_CHAINCODE_FAIL);
                         logger.info(
                                 "Wait event failed: "
                                         + transactionEvent.getChannelId()
@@ -248,11 +249,12 @@ public class FabricContractResource extends FabricResource {
                             "query failed method:{} chainname:{}",
                             request.getMethod(),
                             fabricConn.getChainCodeName());
-                    transactionResponse.setErrorCode(Status.FABRIC_INVOKE_CHAINCODE_FAIL);
+                    transactionResponse.setErrorCode(
+                            ResourceQueryStatus.FABRIC_INVOKE_CHAINCODE_FAIL);
                     return transactionResponse;
                 }
             } else {
-                transactionResponse.setErrorCode(Status.FABRIC_INVOKE_CHAINCODE_FAIL);
+                transactionResponse.setErrorCode(ResourceQueryStatus.FABRIC_INVOKE_CHAINCODE_FAIL);
                 return transactionResponse;
             }
         } catch (ProposalException e) {
@@ -260,13 +262,13 @@ public class FabricContractResource extends FabricResource {
                     "query failed method:{} chainname:{}",
                     request.getMethod(),
                     fabricConn.getChainCodeName());
-            transactionResponse.setErrorCode(Status.FABRIC_INVOKE_CHAINCODE_FAIL);
+            transactionResponse.setErrorCode(ResourceQueryStatus.FABRIC_INVOKE_CHAINCODE_FAIL);
         } catch (InvalidArgumentException e) {
             logger.error(
                     "query failed method:{} chainname:{}",
                     request.getMethod(),
                     fabricConn.getChainCodeName());
-            transactionResponse.setErrorCode(Status.FABRIC_INVOKE_CHAINCODE_FAIL);
+            transactionResponse.setErrorCode(ResourceQueryStatus.FABRIC_INVOKE_CHAINCODE_FAIL);
         }
         return transactionResponse;
     }

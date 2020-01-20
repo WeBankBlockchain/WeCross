@@ -1,8 +1,9 @@
 package com.webank.wecross.stub.bcos;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.webank.wecross.core.HashUtils;
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.common.ResourceQueryStatus;
+import com.webank.wecross.common.WeCrossType;
+import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.proof.BlockHeaderProof;
 import com.webank.wecross.proof.MerkleProof;
@@ -16,7 +17,7 @@ import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.stub.bcos.contract.CallContract;
 import com.webank.wecross.stub.bcos.contract.CallResult;
 import com.webank.wecross.utils.CommonUtils;
-import com.webank.wecross.utils.WeCrossType;
+import com.webank.wecross.utils.core.HashUtils;
 import java.util.ArrayList;
 import java.util.List;
 import org.fisco.bcos.channel.client.ReceiptEncoder;
@@ -119,7 +120,7 @@ public class BCOSContractResource extends BCOSResource {
     @Override
     public GetDataResponse getData(GetDataRequest request) {
         GetDataResponse getDataResponse = new GetDataResponse();
-        getDataResponse.setErrorCode(Status.NONSENSE_CALL);
+        getDataResponse.setErrorCode(ResourceQueryStatus.NONSENSE_CALL);
         getDataResponse.setErrorMessage("Not supported by BCOS_CONTRACT");
         return getDataResponse;
     }
@@ -127,7 +128,7 @@ public class BCOSContractResource extends BCOSResource {
     @Override
     public SetDataResponse setData(SetDataRequest request) {
         SetDataResponse setDataResponse = new SetDataResponse();
-        setDataResponse.setErrorCode(Status.NONSENSE_CALL);
+        setDataResponse.setErrorCode(ResourceQueryStatus.NONSENSE_CALL);
         setDataResponse.setErrorMessage("Not supported by BCOS_CONTRACT");
         return setDataResponse;
     }
@@ -151,19 +152,19 @@ public class BCOSContractResource extends BCOSResource {
                                     transactionReceipt); // query proof, verify and set to response
                 } catch (Exception e) {
                     throw new WeCrossException(
-                            Status.INTERNAL_ERROR, "Error in Merkle proof: " + e.getMessage());
+                            ErrorCode.INTERNAL_ERROR, "Error in Merkle proof: " + e.getMessage());
                 }
 
                 List<Object> result =
                         callContract.decode(transactionReceipt.getOutput(), request.getRetTypes());
                 bcosTransactionResponse.setResult(result.toArray());
-                bcosTransactionResponse.setErrorCode(Status.SUCCESS);
+                bcosTransactionResponse.setErrorCode(ResourceQueryStatus.SUCCESS);
             } else {
                 try {
                     Integer errorCode = Integer.valueOf(status.substring(2), 16);
                     bcosTransactionResponse.setErrorCode(errorCode);
                 } catch (Exception e) {
-                    bcosTransactionResponse.setErrorCode(Status.INTERNAL_ERROR);
+                    bcosTransactionResponse.setErrorCode(ResourceQueryStatus.INTERNAL_ERROR);
                 }
 
                 bcosTransactionResponse.setErrorMessage(
@@ -174,7 +175,7 @@ public class BCOSContractResource extends BCOSResource {
             bcosTransactionResponse.setErrorCode(e.getErrorCode());
             bcosTransactionResponse.setErrorMessage(e.getMessage());
         } catch (Exception e) {
-            bcosTransactionResponse.setErrorCode(Status.INTERNAL_ERROR);
+            bcosTransactionResponse.setErrorCode(ResourceQueryStatus.INTERNAL_ERROR);
             bcosTransactionResponse.setErrorMessage(e.getMessage());
         }
 
@@ -208,7 +209,7 @@ public class BCOSContractResource extends BCOSResource {
             bcosTransactionResponse.setErrorCode(e.getErrorCode());
             bcosTransactionResponse.setErrorMessage(e.getMessage());
         } catch (Exception e) {
-            bcosTransactionResponse.setErrorCode(Status.INTERNAL_ERROR);
+            bcosTransactionResponse.setErrorCode(ResourceQueryStatus.INTERNAL_ERROR);
             bcosTransactionResponse.setErrorMessage(e.getMessage());
         }
 

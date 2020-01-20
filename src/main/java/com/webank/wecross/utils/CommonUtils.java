@@ -1,6 +1,7 @@
 package com.webank.wecross.utils;
 
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.common.TypeEnum;
+import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import java.util.ArrayList;
 
@@ -36,12 +37,12 @@ public class CommonUtils {
                     return TypeEnum.StringArray;
                 } catch (Exception e2) {
                     throw new WeCrossException(
-                            Status.UNSUPPORTED_TYPE, "Unsupported type :" + thisClass.getName());
+                            ErrorCode.UNSUPPORTED_TYPE, "Unsupported type :" + thisClass.getName());
                 }
             }
         } else {
             throw new WeCrossException(
-                    Status.UNSUPPORTED_TYPE, "Unsupported type :" + thisClass.getName());
+                    ErrorCode.UNSUPPORTED_TYPE, "Unsupported type :" + thisClass.getName());
         }
     }
 }

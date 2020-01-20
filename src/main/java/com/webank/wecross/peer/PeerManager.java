@@ -2,7 +2,6 @@ package com.webank.wecross.peer;
 
 import static com.webank.wecross.resource.ResourceInfo.isEqualInfos;
 
-import com.webank.wecross.core.SeqUtils;
 import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
@@ -13,6 +12,7 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.restserver.Versions;
+import com.webank.wecross.utils.core.SeqUtils;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

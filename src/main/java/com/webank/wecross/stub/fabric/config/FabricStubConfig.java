@@ -1,6 +1,7 @@
 package com.webank.wecross.stub.fabric.config;
 
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.common.WeCrossType;
+import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
@@ -8,7 +9,6 @@ import com.webank.wecross.stub.fabric.FabricConn;
 import com.webank.wecross.stub.fabric.FabricContractResource;
 import com.webank.wecross.stub.fabric.FabricStub;
 import com.webank.wecross.utils.ConfigUtils;
-import com.webank.wecross.utils.WeCrossType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,28 +72,28 @@ public class FabricStubConfig {
         if (name == null) {
             String errorMessage =
                     "\"name\" in [[resource]] item  not found, please check " + stubName;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         String type = (String) resource.get("type");
         if (type == null) {
             String errorMessage =
                     "\"type\" in [[resource]] item  not found, please check " + stubName;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         String chainCodeName = (String) resource.get("chainCodeName");
         if (chainCodeName == null) {
             String errorMessage =
                     "\"chainCodeName\" in [[resource]] item  not found, please check " + stubName;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         String chainLanguage = (String) resource.get("chainLanguage");
         if (chainLanguage == null) {
             String errorMessage =
                     "\"chainLanguage\" in [[resource]] item  not found, please check " + stubName;
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         @SuppressWarnings("unchecked")
@@ -128,7 +128,7 @@ public class FabricStubConfig {
             String errorMessage =
                     "\"chainLanguage\" in [[resource]] not support chaincode language "
                             + fabricConn.getChainLanguage();
-            throw new WeCrossException(Status.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
         return fabricConn;
     }
@@ -148,7 +148,7 @@ public class FabricStubConfig {
                         resourceName
                                 + " in [[resources]] item  is repeated, please check "
                                 + stubPath;
-                throw new WeCrossException(Status.REPEATED_KEY, errorMessage);
+                throw new WeCrossException(ErrorCode.REPEATED_KEY, errorMessage);
             }
             // set path
             String stringPath = prefix + "." + resourceName;
@@ -158,7 +158,7 @@ public class FabricStubConfig {
             } catch (WeCrossException e1) {
                 throw e1;
             } catch (Exception e2) {
-                throw new WeCrossException(Status.INTERNAL_ERROR, e2.getMessage());
+                throw new WeCrossException(ErrorCode.INTERNAL_ERROR, e2.getMessage());
             }
 
             fabricResources.put(resourceName, fabricContractResource);
