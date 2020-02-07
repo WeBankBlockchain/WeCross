@@ -90,23 +90,6 @@ public class RestfulService {
         return restResponse;
     }
 
-    @RequestMapping(value = "/{network}/{method}")
-    public RestResponse<Object> handleNetwork(
-            @PathVariable("network") String network, @PathVariable("method") String method) {
-        //
-        return null;
-    }
-
-    @RequestMapping(value = "/{network}/{stub}/{method}")
-    public RestResponse<Object> handleStub(
-            @PathVariable("network") String network,
-            @PathVariable("stub") String stub,
-            @PathVariable("method") String method) {
-        // getState
-        // getBlockHeader
-        return null;
-    }
-
     @RequestMapping(value = "/{network}/{stub}/{resource}/{method}", method = RequestMethod.GET)
     public RestResponse<Object> handleResource(
             @PathVariable("network") String network,

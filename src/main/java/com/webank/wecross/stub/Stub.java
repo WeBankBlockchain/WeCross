@@ -8,12 +8,11 @@ import java.util.Set;
 import org.slf4j.Logger;
 
 public interface Stub {
-
     public String getType();
 
-    public ChainState getChainState();
+    public int getBlockNumber();
 
-    public void updateChainstate();
+    public BlockHeader getBlockHeader(int blockNumber);
 
     default Resource getResource(Path path) throws Exception {
         getLogger().trace("get resource: {}", path.getResource());
