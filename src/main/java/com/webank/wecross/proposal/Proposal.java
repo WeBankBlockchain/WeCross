@@ -12,6 +12,8 @@ public abstract class Proposal {
     // Interface
     public abstract byte[] getBytesToSign();
 
+    public abstract byte[] getBytes();
+
     public abstract void sendSignedPayload(byte[] signBytes) throws Exception;
 
     public abstract void loadBytes(byte[] proposalBytes) throws Exception;

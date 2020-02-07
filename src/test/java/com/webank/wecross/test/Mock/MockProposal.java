@@ -13,6 +13,11 @@ public class MockProposal extends Proposal {
         return null;
     }
 
+    @Override
+    public byte[] getBytes() {
+        return new byte[0];
+    }
+
     public MockProposal(int seq, Long deadline) {
         super(seq);
         forceDeadline(deadline);

@@ -1,4 +1,4 @@
-package com.webank.wecross.test.Proposal;
+package com.webank.wecross.test.proposal;
 
 import com.webank.wecross.proposal.ProposalPool;
 import com.webank.wecross.test.Mock.MockProposal;
