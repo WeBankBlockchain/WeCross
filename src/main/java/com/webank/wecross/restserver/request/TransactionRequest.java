@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 public class TransactionRequest {
 
+    private int seq = 0;
     private String sig;
     private String retTypes[];
     private String method;
@@ -55,5 +56,13 @@ public class TransactionRequest {
                 + ", args="
                 + Arrays.toString(args)
                 + '}';
+    }
+
+    public int getSeq() {
+        return seq;
+    }
+
+    public void setSeq(int seq) {
+        this.seq = seq;
     }
 }
