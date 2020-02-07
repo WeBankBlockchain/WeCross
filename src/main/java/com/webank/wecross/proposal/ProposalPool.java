@@ -43,10 +43,7 @@ public class ProposalPool {
         }
     }
 
-    public void sendSignedPayload(int seq, String signature) throws Exception {
-        if (signature.isEmpty()) {
-            throw new Exception("Invalid signature");
-        }
+    public void sendSignedPayload(int seq, byte[] signBytes) throws Exception {
 
         lock.writeLock().lock();
         Proposal proposal;
@@ -67,7 +64,7 @@ public class ProposalPool {
             throw new Exception("Proposal is not exist in proposal pool: " + name);
         }
 
-        proposal.sendSignedPayload(signature);
+        proposal.sendSignedPayload(signBytes);
     }
 
     public int size() {

@@ -1,10 +1,16 @@
 package com.webank.wecross.test.Mock;
 
 import com.webank.wecross.proposal.Proposal;
+import com.webank.wecross.restserver.request.TransactionRequest;
 
 public class MockProposal extends Proposal {
     public MockProposal(int seq) {
         super(seq);
+    }
+
+    @Override
+    public byte[] getBytesToSign() {
+        return null;
     }
 
     public MockProposal(int seq, Long deadline) {
@@ -13,7 +19,15 @@ public class MockProposal extends Proposal {
     }
 
     @Override
-    public void sendSignedPayload(String signature) throws Exception {
+    public void sendSignedPayload(byte[] signBytes) throws Exception {
         return;
+    }
+
+    @Override
+    public void loadBytes(byte[] proposalBytes) throws Exception {}
+
+    @Override
+    public Boolean isEqualsRequest(TransactionRequest request) throws Exception {
+        return null;
     }
 }
