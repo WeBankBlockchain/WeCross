@@ -56,7 +56,7 @@ public class BCOSContractResource extends BCOSResource {
         }
     }
 
-    private Type<?>[] javaType2BCOSType(Object[] args) throws WeCrossException {
+    public static Type<?>[] javaType2BCOSType(Object[] args) throws WeCrossException {
         Type<?>[] data = new Type[args.length];
 
         int i = 0;
