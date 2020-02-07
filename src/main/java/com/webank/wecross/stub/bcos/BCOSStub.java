@@ -2,7 +2,7 @@ package com.webank.wecross.stub.bcos;
 
 import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.stub.ChainState;
+import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.Stub;
 import java.util.Map;
 import org.fisco.bcos.channel.client.Service;
@@ -11,9 +11,7 @@ import org.fisco.bcos.web3j.protocol.Web3j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// @org.springframework.stereotype.Service("BCOSStub")
 public class BCOSStub implements Stub {
-
     private Service bcosService;
 
     private Web3j web3;
@@ -21,8 +19,6 @@ public class BCOSStub implements Stub {
     private Credentials credentials;
 
     private Map<String, Resource> resources;
-
-    private ChainState chainState;
 
     private Logger logger = LoggerFactory.getLogger(BCOSStub.class);
 
@@ -32,13 +28,15 @@ public class BCOSStub implements Stub {
     }
 
     @Override
-    public ChainState getChainState() {
-        return chainState;
+    public int getBlockNumber() {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
     @Override
-    public void updateChainstate() {
-        // get state from chain and update chainState
+    public BlockHeader getBlockHeader(int blockNumber) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     public Service getBcosService() {
@@ -77,9 +75,5 @@ public class BCOSStub implements Stub {
 
     public void setResources(Map<String, Resource> resources) {
         this.resources = resources;
-    }
-
-    public void setChainState(ChainState chainState) {
-        this.chainState = chainState;
     }
 }

@@ -5,7 +5,7 @@ import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.stub.ChainState;
+import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.jdchain.config.JDChainSdk;
 import java.util.ArrayList;
@@ -21,9 +21,20 @@ public class JDChainStub implements Stub {
     private HashDigest ledgerHash;
     private List<BlockchainService> blockchainService = new ArrayList<BlockchainService>();
     private Map<String, Resource> resources = new HashMap<String, Resource>();
-    private ChainState chainState;
 
     private Logger logger = LoggerFactory.getLogger(JDChainSdk.class);
+
+    @Override
+    public int getBlockNumber() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public BlockHeader getBlockHeader(int blockNumber) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public Map<String, Resource> getResources() {
@@ -66,19 +77,5 @@ public class JDChainStub implements Stub {
     @Override
     public String getType() {
         return WeCrossType.STUB_TYPE_JDCHAIN;
-    }
-
-    @Override
-    public ChainState getChainState() {
-        return chainState;
-    }
-
-    @Override
-    public void updateChainstate() {
-        // get state from chain and update chainState
-    }
-
-    public void setChainState(ChainState chainState) {
-        this.chainState = chainState;
     }
 }

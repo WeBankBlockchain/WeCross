@@ -1,8 +1,9 @@
 package com.webank.wecross.stub.remote;
 
 import com.webank.wecross.common.WeCrossType;
+import com.webank.wecross.peer.StubSyncManager;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.stub.ChainState;
+import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.Stub;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,11 +13,11 @@ import org.slf4j.LoggerFactory;
 public class RemoteStub implements Stub {
 
     private Logger logger = LoggerFactory.getLogger(RemoteStub.class);
-    private ChainState chainState;
     private Map<String, Resource> resources;
+    private String path;
+    StubSyncManager stubSyncManager;
 
     public RemoteStub() {
-        this.chainState = new ChainState();
         this.resources = new HashMap<>();
     }
 
@@ -26,13 +27,13 @@ public class RemoteStub implements Stub {
     }
 
     @Override
-    public ChainState getChainState() {
-        return chainState;
+    public int getBlockNumber() {
+        return stubSyncManager.getBlockNumber(path);
     }
 
     @Override
-    public void updateChainstate() {
-        // query state from peer and update chainState
+    public BlockHeader getBlockHeader(int blockNumber) {
+        return stubSyncManager.getBlockHeader(path, blockNumber);
     }
 
     @Override
@@ -47,5 +48,13 @@ public class RemoteStub implements Stub {
 
     public void setResources(Map<String, Resource> resources) {
         this.resources = resources;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 }

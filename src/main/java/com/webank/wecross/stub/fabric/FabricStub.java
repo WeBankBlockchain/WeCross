@@ -2,7 +2,7 @@ package com.webank.wecross.stub.fabric;
 
 import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.stub.ChainState;
+import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.Stub;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,12 +15,6 @@ public class FabricStub implements Stub {
 
     private Map<String, FabricConn> fabricConns = new HashMap<String, FabricConn>();
     private Map<String, Resource> resources = new HashMap<String, Resource>();
-    private ChainState chainState;
-
-    @Override
-    public ChainState getChainState() {
-        return chainState;
-    }
 
     @Override
     public String getType() {
@@ -28,7 +22,16 @@ public class FabricStub implements Stub {
     }
 
     @Override
-    public void updateChainstate() {}
+    public int getBlockNumber() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public BlockHeader getBlockHeader(int blockNumber) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public Map<String, Resource> getResources() {
