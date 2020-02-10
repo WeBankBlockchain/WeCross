@@ -34,6 +34,7 @@ public class FabricConn {
     private String chainCodeName;
     private String chainLanguage;
     private ChaincodeID chaincodeID;
+    private long proposalWaitTime;
 
     private org.hyperledger.fabric.sdk.TransactionRequest.Type chainCodeType;
 
@@ -99,5 +100,13 @@ public class FabricConn {
 
     public void setChaincodeID(ChaincodeID chaincodeID) {
         this.chaincodeID = chaincodeID;
+    }
+
+    public long getProposalWaitTime() {
+        return proposalWaitTime;
+    }
+
+    public void setProposalWaitTime(long proposalWaitTime) {
+        this.proposalWaitTime = proposalWaitTime;
     }
 }

@@ -29,7 +29,7 @@ public class FabricProposalFactory implements ProposalFactory {
         transactionProposalRequest.setFcn(request.getMethod());
         String[] paramterList = getParamterList(request);
         transactionProposalRequest.setArgs(paramterList);
-        transactionProposalRequest.setProposalWaitTime(120000);
+        transactionProposalRequest.setProposalWaitTime(fabricConn.getProposalWaitTime());
 
         org.hyperledger.fabric.sdk.TransactionRequest proposalRequest = transactionProposalRequest;
 
