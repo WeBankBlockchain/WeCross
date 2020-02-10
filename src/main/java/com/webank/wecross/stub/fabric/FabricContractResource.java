@@ -93,7 +93,7 @@ public class FabricContractResource extends FabricResource {
         return transactionResponse;
     }
 
-    private String[] getParamterList(TransactionRequest request) {
+    public static String[] getParamterList(TransactionRequest request) {
         String[] paramterList = null;
         if (request.getArgs().length == 0) {
             paramterList = new String[] {};
@@ -178,7 +178,7 @@ public class FabricContractResource extends FabricResource {
         transactionProposalRequest.setFcn(request.getMethod());
         String[] paramterList = getParamterList(request);
         transactionProposalRequest.setArgs(paramterList);
-        transactionProposalRequest.setProposalWaitTime(120000);
+        transactionProposalRequest.setProposalWaitTime(fabricConn.getProposalWaitTime());
         List<ProposalResponse> successful = new LinkedList<>();
         List<ProposalResponse> failed = new LinkedList<>();
         List<Object> resultList = new ArrayList<Object>();

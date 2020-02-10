@@ -14,13 +14,8 @@ import org.fisco.bcos.web3j.crypto.ExtendedTransactionEncoder;
 import org.fisco.bcos.web3j.utils.Numeric;
 
 public class BCOSProposal extends Proposal {
-    private ExtendedRawTransaction proposalTransaction;
+    private ExtendedRawTransaction innerBCOSTransaction;
     private byte[] proposalBytes;
-
-    public BCOSProposal(int seq, byte[] proposalBytes) throws Exception {
-        super(seq);
-        loadBytes(proposalBytes);
-    }
 
     public BCOSProposal(int seq) {
         super(seq);
@@ -36,32 +31,36 @@ public class BCOSProposal extends Proposal {
         return proposalBytes;
     }
 
+    public ExtendedRawTransaction getInnerBCOSTransaction() {
+        return this.innerBCOSTransaction;
+    }
+
     @Override
     public void sendSignedPayload(byte[] signBytes) throws Exception {}
 
     @Override
     public void loadBytes(byte[] proposalBytes) throws Exception {
         this.proposalBytes = proposalBytes;
-        proposalTransaction = ExtendedTransactionDecoderV2.decode(proposalBytes);
+        innerBCOSTransaction = ExtendedTransactionDecoderV2.decode(proposalBytes);
     }
 
     @Override
     public Boolean isEqualsRequest(TransactionRequest request) throws Exception {
-        if (proposalTransaction == null) {
+        if (innerBCOSTransaction == null) {
             throw new Exception("BCOS proposal " + this.getSeq() + " has not been loaded");
         }
 
-        String requestData = encodeRequest(request);
-        String data = proposalTransaction.getData();
+        String requestData = encodeRequestToInputData(request);
+        String data = innerBCOSTransaction.getData();
         return requestData.equals(data);
     }
 
-    public void setProposalTransaction(ExtendedRawTransaction proposalTransaction) {
-        this.proposalTransaction = proposalTransaction;
-        this.proposalBytes = ExtendedTransactionEncoder.encode(proposalTransaction);
+    public void load(ExtendedRawTransaction innerBCOSTransaction) {
+        this.innerBCOSTransaction = innerBCOSTransaction;
+        this.proposalBytes = ExtendedTransactionEncoder.encode(innerBCOSTransaction);
     }
 
-    public static String encodeRequest(TransactionRequest request) throws Exception {
+    public static String encodeRequestToInputData(TransactionRequest request) throws Exception {
         String functionName = request.getMethod();
         Type<?>[] args = BCOSContractResource.javaType2BCOSType(request.getArgs());
         final Function function =

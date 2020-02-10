@@ -25,12 +25,12 @@ public class BCOSProposalFactory implements ProposalFactory {
 
     @Override
     public Proposal build(TransactionRequest request) throws Exception {
-        String data = BCOSProposal.encodeRequest(request);
+        String data = BCOSProposal.encodeRequestToInputData(request);
         BCOSProposal proposal = new BCOSProposal(request.getSeq());
         ExtendedRawTransaction rawTransaction =
                 transactionManager.createTransaction(
                         gasPrice, gasLimit, contractAddress, data, value, null);
-        proposal.setProposalTransaction(rawTransaction);
+        proposal.load(rawTransaction);
         return proposal;
     }
 }
