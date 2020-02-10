@@ -17,11 +17,6 @@ public class BCOSProposal extends Proposal {
     private ExtendedRawTransaction innerBCOSTransaction;
     private byte[] proposalBytes;
 
-    public BCOSProposal(int seq, byte[] proposalBytes) throws Exception {
-        super(seq);
-        loadBytes(proposalBytes);
-    }
-
     public BCOSProposal(int seq) {
         super(seq);
     }

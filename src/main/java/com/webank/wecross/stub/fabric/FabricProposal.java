@@ -66,7 +66,6 @@ public class FabricProposal extends Proposal {
         transactionProposalRequest.setFcn(request.getMethod());
         String[] paramterList = getParamterList(request);
         transactionProposalRequest.setArgs(paramterList);
-        transactionProposalRequest.setProposalWaitTime(120000);
 
         // From Fabric 1.4 ProposalBuilder
         List<ByteString> allArgs = new ArrayList<>();
