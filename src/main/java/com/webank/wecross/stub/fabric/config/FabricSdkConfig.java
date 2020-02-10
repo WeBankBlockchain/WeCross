@@ -26,7 +26,7 @@ public class FabricSdkConfig {
         this.fabricConfig = fabricConfig;
     }
 
-    FabricSdk initFabricStub() {
+    public FabricSdk initFabricStub() {
         FabricSdk fabricSdk = new FabricSdk();
         try {
 

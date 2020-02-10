@@ -30,7 +30,7 @@ public class BCOSProposalFactory implements ProposalFactory {
         ExtendedRawTransaction rawTransaction =
                 transactionManager.createTransaction(
                         gasPrice, gasLimit, contractAddress, data, value, null);
-        proposal.setProposalTransaction(rawTransaction);
+        proposal.load(rawTransaction);
         return proposal;
     }
 }

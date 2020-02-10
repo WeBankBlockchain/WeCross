@@ -6,6 +6,9 @@ import com.webank.wecross.stub.bcos.BCOSProposal;
 import com.webank.wecross.stub.bcos.BCOSProposalFactory;
 import com.webank.wecross.test.Mock.MockTransactionRequest;
 import com.webank.wecross.test.Mock.web3j.MockWeb3j;
+import java.util.Arrays;
+import org.fisco.bcos.web3j.crypto.ExtendedRawTransaction;
+import org.fisco.bcos.web3j.crypto.ExtendedTransactionEncoder;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,7 +27,14 @@ public class BCOSProposalTest {
         proposalB.loadBytes(bytesA);
 
         byte[] bytesB = proposalB.getBytes();
-        Assert.assertEquals(bytesA, bytesB);
+        Assert.assertTrue(Arrays.equals(bytesA, bytesB));
+
+        ExtendedRawTransaction innerBCOSTransactionA =
+                ((BCOSProposal) proposalA).getInnerBCOSTransaction();
+        ExtendedRawTransaction innerBCOSTransactionB = proposalB.getInnerBCOSTransaction();
+        bytesA = ExtendedTransactionEncoder.encode(innerBCOSTransactionA);
+        bytesB = ExtendedTransactionEncoder.encode(innerBCOSTransactionB);
+        Assert.assertTrue(Arrays.equals(bytesA, bytesB));
 
         Assert.assertTrue(proposalB.isEqualsRequest(req));
     }
