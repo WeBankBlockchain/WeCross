@@ -51,7 +51,7 @@ public class BCOSProposal extends Proposal {
             throw new Exception("BCOS proposal " + this.getSeq() + " has not been loaded");
         }
 
-        String requestData = encodeRequest(request);
+        String requestData = encodeRequestToInputData(request);
         String data = proposalTransaction.getData();
         return requestData.equals(data);
     }
@@ -61,7 +61,7 @@ public class BCOSProposal extends Proposal {
         this.proposalBytes = ExtendedTransactionEncoder.encode(proposalTransaction);
     }
 
-    public static String encodeRequest(TransactionRequest request) throws Exception {
+    public static String encodeRequestToInputData(TransactionRequest request) throws Exception {
         String functionName = request.getMethod();
         Type<?>[] args = BCOSContractResource.javaType2BCOSType(request.getArgs());
         final Function function =

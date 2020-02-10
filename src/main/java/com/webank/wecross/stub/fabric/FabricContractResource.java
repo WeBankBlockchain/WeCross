@@ -93,7 +93,7 @@ public class FabricContractResource extends FabricResource {
         return transactionResponse;
     }
 
-    private String[] getParamterList(TransactionRequest request) {
+    public static String[] getParamterList(TransactionRequest request) {
         String[] paramterList = null;
         if (request.getArgs().length == 0) {
             paramterList = new String[] {};
