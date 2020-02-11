@@ -1,7 +1,7 @@
 package com.webank.wecross.test.Mock.fabric;
 
-import com.webank.wecross.stub.fabric.config.FabricConfig;
-import com.webank.wecross.stub.fabric.config.FabricUser;
+import com.webank.wecross.stub.fabric.FabricConfig;
+import com.webank.wecross.stub.fabric.FabricUser;
 import java.security.PrivateKey;
 import org.hyperledger.fabric.sdk.Enrollment;
 
