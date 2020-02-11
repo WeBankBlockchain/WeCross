@@ -7,7 +7,7 @@ import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.Stub;
-import com.webank.wecross.stub.jdchain.config.JDChainSdk;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

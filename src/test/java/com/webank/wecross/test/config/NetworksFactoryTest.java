@@ -2,9 +2,9 @@ package com.webank.wecross.test.config;
 
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
+import com.webank.wecross.config.NetworksFactory;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.Network;
-import com.webank.wecross.network.config.NetworksFactory;
 import com.webank.wecross.utils.ConfigUtils;
 import java.util.Map;
 import org.junit.Assert;
@@ -22,7 +22,7 @@ public class NetworksFactoryTest {
             NetworksFactory mock = new NetworksFactory();
             mock.setToml(toml);
 
-            Map<String, Network> networkMap = mock.produceNetworks();
+            Map<String, Network> networkMap = mock.readNetworksConfig();
             Assert.assertTrue(networkMap.containsKey(network));
 
         } catch (WeCrossException e) {
