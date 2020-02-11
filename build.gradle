@@ -39,10 +39,8 @@ configurations.all {
 }
 
 dependencies {
-    // This dependency is exported to consumers, that is to say found on their compile classpath.
     compile 'com.moandjiezana.toml:toml4j:0.7.2'
     compile 'org.apache.logging.log4j:log4j-web:2.7'
-    compile 'com.alibaba:fastjson:1.2.62'
     compile 'org.springframework.boot:spring-boot-starter-actuator:2.1.4.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-web:2.1.4.RELEASE'
     compile 'org.springframework.boot:spring-boot-configuration-processor:2.1.4.RELEASE'

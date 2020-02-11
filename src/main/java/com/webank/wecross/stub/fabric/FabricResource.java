@@ -1,6 +1,5 @@
 package com.webank.wecross.stub.fabric;
 
-import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
@@ -19,7 +18,7 @@ public class FabricResource implements Resource {
 
     @Override
     public String getType() {
-        return WeCrossType.RESOURCE_TYPE_FABRIC_CONTRACT;
+        return "FABRIC_RESOURCES";
     }
 
     @Override
@@ -80,6 +79,11 @@ public class FabricResource implements Resource {
 
     @Override
     public String getChecksum() {
+        return null;
+    }
+
+    @Override
+    public String getContractAddress() {
         return null;
     }
 }

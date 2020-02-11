@@ -243,6 +243,11 @@ public class RemoteResource implements Resource {
         return checksum;
     }
 
+    @Override
+    public String getContractAddress() {
+        return null;
+    }
+
     public void setChecksum(String checksum) {
         this.checksum = checksum;
     }

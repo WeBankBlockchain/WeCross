@@ -5,6 +5,7 @@ import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.routine.htlc.HTLCResource;
 import com.webank.wecross.utils.ConfigUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,6 +66,19 @@ public class JDChainConfigUtils {
         Map<String, Resource> jdChainResources = new HashMap<>();
 
         for (Map<String, String> resource : resources) {
+            String name = resource.get("name");
+            if (name == null) {
+                String errorMessage =
+                        "\"name\" in [[resources]] item  not found, please check " + stubPath;
+                throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+            }
+
+            if (jdChainResources.keySet().contains(name)) {
+                String errorMessage =
+                        name + " in [[resources]] item  is repeated, please check " + stubPath;
+                throw new WeCrossException(ErrorCode.REPEATED_KEY, errorMessage);
+            }
+
             String type = resource.get("type");
             if (type == null) {
                 String errorMessage =
@@ -74,51 +88,49 @@ public class JDChainConfigUtils {
 
             //  handle contract resource
             if (type.equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_JDCHAIN_CONTRACT)) {
-                String name = resource.get("name");
-                if (name == null) {
-                    String errorMessage =
-                            "\"name\" in [[resources]] item  not found, please check " + stubPath;
-                    throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
-                }
-
-                if (jdChainResources.keySet().contains(name)) {
-                    String errorMessage =
-                            name + " in [[resources]] item  is repeated, please check " + stubPath;
-                    throw new WeCrossException(ErrorCode.REPEATED_KEY, errorMessage);
-                }
-
-                String contractAddress = resource.get("contractAddress");
-                if (contractAddress == null) {
-                    String errorMessage =
-                            "\"contractAddress\" in [[resources]] item  not found, please check "
-                                    + stubPath;
-                    throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
-                }
-
-                JDChainContractResource jdChainContractResource = new JDChainContractResource();
-                jdChainContractResource.setContractAddress(contractAddress);
-
-                // set path
-                String stringPath = prefix + "." + name;
-                try {
-                    ConfigUtils.checkPath(stringPath);
-                    jdChainContractResource.setPath(Path.decode(stringPath));
-                } catch (WeCrossException we) {
-                    throw we;
-                } catch (Exception e) {
-                    throw new WeCrossException(ErrorCode.INTERNAL_ERROR, e.getMessage());
-                }
-
+                JDChainContractResource jdChainContractResource =
+                        initJDChainContractResource(name, resource, prefix, stubPath);
                 jdChainResources.put(name, jdChainContractResource);
 
-            } else if (type.equals("assets")) {
-                // To be defined
-                continue;
+            } else if (type.equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_HTLC_CONTRACT)) {
+                JDChainContractResource jdChainContractResource =
+                        initJDChainContractResource(name, resource, prefix, stubPath);
+                HTLCResource htlcResource = new HTLCResource(jdChainContractResource);
+                jdChainResources.put(name, htlcResource);
+
             } else {
                 String errorMessage = "Undefined jdchain resource type: " + type;
                 throw new WeCrossException(ErrorCode.UNEXPECTED_CONFIG, errorMessage);
             }
         }
         return jdChainResources;
+    }
+
+    private static JDChainContractResource initJDChainContractResource(
+            String name, Map<String, String> resource, String prefix, String stubPath)
+            throws WeCrossException {
+
+        String contractAddress = resource.get("contractAddress");
+        if (contractAddress == null) {
+            String errorMessage =
+                    "\"contractAddress\" in [[resources]] item  not found, please check "
+                            + stubPath;
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+        }
+
+        JDChainContractResource jdChainContractResource = new JDChainContractResource();
+        jdChainContractResource.setContractAddress(contractAddress);
+
+        // set path
+        String stringPath = prefix + "." + name;
+        try {
+            ConfigUtils.checkPath(stringPath);
+            jdChainContractResource.setPath(Path.decode(stringPath));
+        } catch (WeCrossException we) {
+            throw we;
+        } catch (Exception e) {
+            throw new WeCrossException(ErrorCode.INTERNAL_ERROR, e.getMessage());
+        }
+        return jdChainContractResource;
     }
 }

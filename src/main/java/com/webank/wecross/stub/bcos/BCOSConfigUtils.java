@@ -8,6 +8,7 @@ import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.routine.htlc.HTLCResource;
 import com.webank.wecross.utils.ConfigUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -141,6 +142,18 @@ public class BCOSConfigUtils {
         Map<String, Resource> bcosResources = new HashMap<>();
 
         for (Map<String, String> resource : resources) {
+            String name = resource.get("name");
+            if (name == null) {
+                String errorMessage =
+                        "\"name\" in [[resources]] item  not found, please check " + stubPath;
+                throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+            }
+
+            if (bcosResources.keySet().contains(name)) {
+                String errorMessage =
+                        name + " in [[resources]] item  is repeated, please check " + stubPath;
+                throw new WeCrossException(ErrorCode.REPEATED_KEY, errorMessage);
+            }
 
             String type = resource.get("type");
             if (type == null) {
@@ -151,52 +164,48 @@ public class BCOSConfigUtils {
 
             //  handle contract resource
             if (type.equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_BCOS_CONTRACT)) {
-                String name = resource.get("name");
-                if (name == null) {
-                    String errorMessage =
-                            "\"name\" in [[resources]] item  not found, please check " + stubPath;
-                    throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
-                }
-
-                if (bcosResources.keySet().contains(name)) {
-                    String errorMessage =
-                            name + " in [[resources]] item  is repeated, please check " + stubPath;
-                    throw new WeCrossException(ErrorCode.REPEATED_KEY, errorMessage);
-                }
-
-                String contractAddress = resource.get("contractAddress");
-                if (contractAddress == null) {
-                    String errorMessage =
-                            "\"contractAddress\" in [[resources]] item  not found, please check "
-                                    + stubPath;
-                    throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
-                }
-
-                BCOSContractResource bcosContractResource = new BCOSContractResource();
-                bcosContractResource.setContractAddress(contractAddress);
-                bcosContractResource.setWeb3(web3);
-
-                // check and set
-                String stringPath = prefix + "." + name;
-                try {
-                    ConfigUtils.checkPath(stringPath);
-                    bcosContractResource.setPath(Path.decode(stringPath));
-                } catch (WeCrossException we) {
-                    throw we;
-                } catch (Exception e) {
-                    throw new WeCrossException(ErrorCode.INTERNAL_ERROR, e.getMessage());
-                }
-
+                BCOSContractResource bcosContractResource =
+                        initBCOSContractResource(name, resource, prefix, stubPath, web3);
                 bcosResources.put(name, bcosContractResource);
-
-            } else if (type.equals("another")) {
-                // To be defined
-                continue;
+            } else if (type.equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_HTLC_CONTRACT)) {
+                BCOSContractResource bcosContractResource =
+                        initBCOSContractResource(name, resource, prefix, stubPath, web3);
+                HTLCResource htlcResource = new HTLCResource(bcosContractResource);
+                bcosResources.put(name, htlcResource);
             } else {
                 String errorMessage = "Undefined bcos resource type: " + type;
                 throw new WeCrossException(ErrorCode.UNEXPECTED_CONFIG, errorMessage);
             }
         }
         return bcosResources;
+    }
+
+    private static BCOSContractResource initBCOSContractResource(
+            String name, Map<String, String> resource, String prefix, String stubPath, Web3j web3)
+            throws WeCrossException {
+        String contractAddress = resource.get("contractAddress");
+        if (contractAddress == null) {
+            String errorMessage =
+                    "\"contractAddress\" in [[resources]] item  not found, please check "
+                            + stubPath;
+            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+        }
+
+        BCOSContractResource bcosContractResource = new BCOSContractResource();
+        bcosContractResource.setContractAddress(contractAddress);
+        bcosContractResource.setWeb3(web3);
+
+        // check and set
+        String stringPath = prefix + "." + name;
+        try {
+            ConfigUtils.checkPath(stringPath);
+            bcosContractResource.setPath(Path.decode(stringPath));
+        } catch (WeCrossException we) {
+            throw we;
+        } catch (Exception e) {
+            throw new WeCrossException(ErrorCode.INTERNAL_ERROR, e.getMessage());
+        }
+
+        return bcosContractResource;
     }
 }

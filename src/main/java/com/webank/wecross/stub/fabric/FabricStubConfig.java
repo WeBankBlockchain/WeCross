@@ -6,6 +6,7 @@ import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.routine.htlc.HTLCResource;
 import com.webank.wecross.utils.ConfigUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,9 +43,10 @@ public class FabricStubConfig {
         Map<String, Resource> fabricResources = initFabricResources(stubName, prefix, resources);
         fabricStub.setResources(fabricResources);
 
-        for (Resource resource : fabricResources.values()) {
-            if (resource.getType().equals(WeCrossType.RESOURCE_TYPE_FABRIC_CONTRACT)) {
-                String name = resource.getPath().getResource();
+        for (String name : fabricResources.keySet()) {
+            Resource resource = fabricResources.get(name);
+            String type = resource.getType();
+            if (type.equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_FABRIC_CONTRACT)) {
                 String pathStr = resource.getPathAsString();
                 FabricConn fabricConn = fabricConns.get(name);
                 if (fabricConn == null) {
@@ -53,6 +55,17 @@ public class FabricStubConfig {
                 }
 
                 ((FabricContractResource) resource).init(fabricConn);
+            } else if (type.equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_HTLC_CONTRACT)) {
+                String pathStr = resource.getPathAsString();
+                FabricConn fabricConn = fabricConns.get(name);
+                if (fabricConn == null) {
+                    logger.error("path:{} name:{} not exist in fabricConns", pathStr, name);
+                    return null;
+                }
+
+                ((FabricContractResource) resource).init(fabricConn);
+                HTLCResource htlcResource = new HTLCResource(resource);
+                fabricResources.put(name, htlcResource);
             }
         }
 
@@ -147,7 +160,9 @@ public class FabricStubConfig {
         Map<String, Resource> fabricResources = new HashMap<String, Resource>();
         for (Map<String, Object> resource : resources) {
             String resourceName = (String) resource.get("name");
+            String type = (String) resource.get("type");
             FabricContractResource fabricContractResource = new FabricContractResource();
+            fabricContractResource.setType(type);
             if (fabricResources.keySet().contains(resourceName)) {
                 String errorMessage =
                         resourceName
@@ -165,7 +180,6 @@ public class FabricStubConfig {
             } catch (Exception e2) {
                 throw new WeCrossException(ErrorCode.INTERNAL_ERROR, e2.getMessage());
             }
-
             fabricResources.put(resourceName, fabricContractResource);
         }
         return fabricResources;

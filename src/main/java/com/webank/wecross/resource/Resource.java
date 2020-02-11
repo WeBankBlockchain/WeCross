@@ -32,6 +32,9 @@ public interface Resource {
     String getChecksum();
 
     @JsonIgnore
+    String getContractAddress();
+
+    @JsonIgnore
     Path getPath();
 
     void setPath(Path path);
