@@ -130,4 +130,9 @@ public class JDChainResource implements Resource {
     public String getChecksum() {
         return null;
     }
+
+    @Override
+    public String getContractAddress() {
+        return null;
+    }
 }

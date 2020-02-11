@@ -13,6 +13,7 @@ public class WeCrossType {
     public static final String RESOURCE_TYPE_JDCHAIN_CONTRACT = "JDCHAIN_CONTRACT";
     public static final String RESOURCE_TYPE_TEST = "TEST_RESOURCE";
     public static final String RESOURCE_TYPE_FABRIC_CONTRACT = "FABRIC_CONTRACT";
+    public static final String RESOURCE_TYPE_HTLC_CONTRACT = "HTLC_CONTRACT";
 
     // transaction response message type
     public static final String TRANSACTION_RSP_TYPE_NORMAL = "NORMAL";

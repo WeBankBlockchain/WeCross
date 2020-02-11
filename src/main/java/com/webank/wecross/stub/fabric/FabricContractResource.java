@@ -37,6 +37,12 @@ public class FabricContractResource extends FabricResource {
 
     private Logger logger = LoggerFactory.getLogger(FabricContractResource.class);
 
+    @JsonIgnore private String type;
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     @JsonIgnore boolean hasInit = false;
 
     public FabricConn getFabricConn() {
@@ -64,7 +70,7 @@ public class FabricContractResource extends FabricResource {
 
     @Override
     public String getType() {
-        return super.getType();
+        return type;
     }
 
     @Override
