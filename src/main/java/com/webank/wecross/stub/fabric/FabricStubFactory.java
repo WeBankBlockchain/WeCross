@@ -2,7 +2,6 @@ package com.webank.wecross.stub.fabric;
 
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
-
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;

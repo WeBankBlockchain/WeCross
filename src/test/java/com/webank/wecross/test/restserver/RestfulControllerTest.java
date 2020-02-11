@@ -5,8 +5,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.webank.wecross.host.WeCrossHost;
+import com.webank.wecross.network.NetworkManager;
+import com.webank.wecross.resource.Path;
+import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.TestResource;
+import com.webank.wecross.restserver.RestfulController;
+import com.webank.wecross.restserver.response.GetDataResponse;
+import com.webank.wecross.restserver.response.ResourceResponse;
+import com.webank.wecross.restserver.response.SetDataResponse;
+import com.webank.wecross.restserver.response.TransactionResponse;
 import java.util.ArrayList;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -23,33 +32,20 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.webank.wecross.host.WeCrossHost;
-import com.webank.wecross.network.NetworkManager;
-import com.webank.wecross.resource.Path;
-import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.TestResource;
-import com.webank.wecross.restserver.RestfulController;
-import com.webank.wecross.restserver.response.GetDataResponse;
-import com.webank.wecross.restserver.response.ResourceResponse;
-import com.webank.wecross.restserver.response.SetDataResponse;
-import com.webank.wecross.restserver.response.TransactionResponse;
-import com.webank.wecross.stub.bcos.contract.CallResult;
-
 // To run with: gradle test --tests RestfulServiceTest
 
 @RunWith(SpringRunner.class)
-//@SpringBootTest
+// @SpringBootTest
 @WebMvcTest(RestfulController.class)
-//@AutoConfigureMockMvc
-//@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class })
-//@ContextConfiguration(classes=RestfulServiceTestConfig.class)
+// @AutoConfigureMockMvc
+// @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class })
+// @ContextConfiguration(classes=RestfulServiceTestConfig.class)
 public class RestfulControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
-    
+    @Autowired private MockMvc mockMvc;
+
     @MockBean(name = "newWeCrossHost")
     private WeCrossHost weCrossHost;
-    
+
     @Test
     public void okTest() throws Exception {
         try {
@@ -73,7 +69,7 @@ public class RestfulControllerTest {
     @Test
     public void statusTest() throws Exception {
         try {
-        	Mockito.when(weCrossHost.getResource(Mockito.any())).thenReturn(new TestResource());
+            Mockito.when(weCrossHost.getResource(Mockito.any())).thenReturn(new TestResource());
 
             MvcResult rsp =
                     this.mockMvc
@@ -96,16 +92,16 @@ public class RestfulControllerTest {
     @Test
     public void listTest() throws Exception {
         try {
-        	ResourceResponse resourceResponse = new ResourceResponse();
-        	resourceResponse.setErrorCode(0);
-        	resourceResponse.setErrorMessage("");
-        	resourceResponse.setResources(new ArrayList<Resource>());
-        	
-        	NetworkManager mockNetworkManager = Mockito.mock(NetworkManager.class);
-        	Mockito.when(mockNetworkManager.list(Mockito.any())).thenReturn(resourceResponse);
-        	
-        	Mockito.when(weCrossHost.getNetworkManager()).thenReturn(mockNetworkManager);
-        	
+            ResourceResponse resourceResponse = new ResourceResponse();
+            resourceResponse.setErrorCode(0);
+            resourceResponse.setErrorMessage("");
+            resourceResponse.setResources(new ArrayList<Resource>());
+
+            NetworkManager mockNetworkManager = Mockito.mock(NetworkManager.class);
+            Mockito.when(mockNetworkManager.list(Mockito.any())).thenReturn(resourceResponse);
+
+            Mockito.when(weCrossHost.getNetworkManager()).thenReturn(mockNetworkManager);
+
             String json =
                     "{\n"
                             + "\"version\":\"1\",\n"
@@ -140,15 +136,15 @@ public class RestfulControllerTest {
     @Test
     public void setDataTest() throws Exception {
         try {
-        	SetDataResponse setDataResponse = new SetDataResponse();
-        	setDataResponse.setErrorCode(0);
-        	setDataResponse.setErrorMessage("setData test resource success");
-        	
-        	Resource resource = Mockito.mock(Resource.class);
-        	Mockito.when(resource.setData(Mockito.any())).thenReturn(setDataResponse);
-        	
-        	Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
-        	
+            SetDataResponse setDataResponse = new SetDataResponse();
+            setDataResponse.setErrorCode(0);
+            setDataResponse.setErrorMessage("setData test resource success");
+
+            Resource resource = Mockito.mock(Resource.class);
+            Mockito.when(resource.setData(Mockito.any())).thenReturn(setDataResponse);
+
+            Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
+
             String json =
                     "{\n"
                             + "\"version\":\"1\",\n"
@@ -184,15 +180,15 @@ public class RestfulControllerTest {
     @Test
     public void getDataTest() throws Exception {
         try {
-        	GetDataResponse getDataResponse = new GetDataResponse();
-        	getDataResponse.setErrorCode(0);
-        	getDataResponse.setErrorMessage("getData test resource success");
-        	
-        	Resource resource = Mockito.mock(Resource.class);
-        	Mockito.when(resource.getData(Mockito.any())).thenReturn(getDataResponse);
-        	
-        	Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
-        	
+            GetDataResponse getDataResponse = new GetDataResponse();
+            getDataResponse.setErrorCode(0);
+            getDataResponse.setErrorMessage("getData test resource success");
+
+            Resource resource = Mockito.mock(Resource.class);
+            Mockito.when(resource.getData(Mockito.any())).thenReturn(getDataResponse);
+
+            Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
+
             String json =
                     "{\n"
                             + "\"version\":\"1\",\n"
@@ -227,16 +223,16 @@ public class RestfulControllerTest {
     @Test
     public void callTest() throws Exception {
         try {
-        	TransactionResponse transactionResponse = new TransactionResponse();
-        	transactionResponse.setErrorCode(0);
-        	transactionResponse.setErrorMessage("call test resource success");
-        	transactionResponse.setHash("010157f4");
-        	
-        	Resource resource = Mockito.mock(Resource.class);
-        	Mockito.when(resource.call(Mockito.any())).thenReturn(transactionResponse);
-        	
-        	Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
-        	
+            TransactionResponse transactionResponse = new TransactionResponse();
+            transactionResponse.setErrorCode(0);
+            transactionResponse.setErrorMessage("call test resource success");
+            transactionResponse.setHash("010157f4");
+
+            Resource resource = Mockito.mock(Resource.class);
+            Mockito.when(resource.call(Mockito.any())).thenReturn(transactionResponse);
+
+            Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
+
             String json =
                     "{\n"
                             + "\"version\":\"1\",\n"
@@ -273,16 +269,16 @@ public class RestfulControllerTest {
     @Test
     public void sendTransactionTest() throws Exception {
         try {
-        	TransactionResponse transactionResponse = new TransactionResponse();
-        	transactionResponse.setErrorCode(0);
-        	transactionResponse.setErrorMessage("sendTransaction test resource success");
-        	transactionResponse.setHash("010157f4");
-        	
-        	Resource resource = Mockito.mock(Resource.class);
-        	Mockito.when(resource.sendTransaction(Mockito.any())).thenReturn(transactionResponse);
-        	
-        	Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
-        	
+            TransactionResponse transactionResponse = new TransactionResponse();
+            transactionResponse.setErrorCode(0);
+            transactionResponse.setErrorMessage("sendTransaction test resource success");
+            transactionResponse.setHash("010157f4");
+
+            Resource resource = Mockito.mock(Resource.class);
+            Mockito.when(resource.sendTransaction(Mockito.any())).thenReturn(transactionResponse);
+
+            Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
+
             String json =
                     "{\n"
                             + "\"version\":\"1\",\n"
@@ -354,7 +350,7 @@ public class RestfulControllerTest {
 
     @Before
     public void beforeTest() {
-    	//mockMvc = MockMvcBuilders.standaloneSetup(RestfulController.class).build();
+        // mockMvc = MockMvcBuilders.standaloneSetup(RestfulController.class).build();
         System.out.println("------------------------Test begin------------------------");
     }
 

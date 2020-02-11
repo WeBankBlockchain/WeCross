@@ -7,7 +7,6 @@ import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.p2p.P2PConfig;
-
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;

@@ -2,7 +2,6 @@ package com.webank.wecross.stub.bcos;
 
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
-
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.crypto.Credentials;

@@ -4,7 +4,6 @@ import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
-
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
