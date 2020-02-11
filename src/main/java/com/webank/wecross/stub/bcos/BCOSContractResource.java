@@ -47,16 +47,18 @@ public class BCOSContractResource extends BCOSResource {
     @JsonIgnore private Web3j web3;
     @JsonIgnore private String contractAddress;
     private CallContract callContract;
+    private BCOSProposalFactory proposalFactory;
     private String checksum;
 
     public void init(Service service, Web3j web3j, Credentials credentials) {
         if (!isInit) {
             callContract = new CallContract(credentials, web3j);
+            proposalFactory = new BCOSProposalFactory(contractAddress, web3j, credentials);
             isInit = true;
         }
     }
 
-    private Type<?>[] javaType2BCOSType(Object[] args) throws WeCrossException {
+    public static Type<?>[] javaType2BCOSType(Object[] args) throws WeCrossException {
         Type<?>[] data = new Type[args.length];
 
         int i = 0;

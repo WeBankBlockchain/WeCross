@@ -1,5 +1,6 @@
 package com.webank.wecross.stub.fabric;
 
+import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
@@ -93,6 +94,12 @@ public class FabricStubConfig {
             throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
         }
 
+        Long proposalWaitTimeTmp = (Long) resource.get("proposalWaitTime");
+        long proposalWaitTime = WeCrossDefault.DEFAULT_PROPOSAL_WAIT_TIME;
+        if (proposalWaitTimeTmp != null) {
+            proposalWaitTime = proposalWaitTimeTmp.longValue();
+        }
+
         @SuppressWarnings("unchecked")
         List<String> peerList = (List<String>) resource.get("peers");
         List<FabricPeerConfig> fabricPeerConfigs = new ArrayList<FabricPeerConfig>();
@@ -114,6 +121,7 @@ public class FabricStubConfig {
         fabricConn.setChainLanguage(chainLanguage);
         ChaincodeID chaincodeID = ChaincodeID.newBuilder().setName(chainCodeName).build();
         fabricConn.setChaincodeID(chaincodeID);
+        fabricConn.setProposalWaitTime(proposalWaitTime);
 
         if (fabricConn.getChainLanguage().toLowerCase().equals("go")) {
             fabricConn.setChainCodeType(org.hyperledger.fabric.sdk.TransactionRequest.Type.GO_LANG);
