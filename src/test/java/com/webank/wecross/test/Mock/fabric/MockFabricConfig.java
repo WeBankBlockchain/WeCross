@@ -1,7 +1,7 @@
 package com.webank.wecross.test.Mock.fabric;
 
-import com.webank.wecross.stub.fabric.config.FabricConfig;
-import com.webank.wecross.stub.fabric.config.FabricPeerConfig;
+import com.webank.wecross.stub.fabric.FabricConfig;
+import com.webank.wecross.stub.fabric.FabricPeerConfig;
 import java.util.LinkedList;
 import java.util.List;
 

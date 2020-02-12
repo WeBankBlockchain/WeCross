@@ -1,6 +1,6 @@
 package com.webank.wecross.p2p.netty;
 
-import com.webank.wecross.p2p.config.P2PConfig;
+import com.webank.wecross.p2p.P2PConfig;
 import com.webank.wecross.p2p.netty.channel.handler.ChannelHandlerCallBack;
 import com.webank.wecross.p2p.netty.message.MessageCallBack;
 import com.webank.wecross.p2p.netty.message.MessageType;

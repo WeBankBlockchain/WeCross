@@ -2,10 +2,10 @@ package com.webank.wecross.test.Mock.fabric;
 
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.stub.fabric.FabricConfig;
 import com.webank.wecross.stub.fabric.FabricConn;
-import com.webank.wecross.stub.fabric.config.FabricConfig;
-import com.webank.wecross.stub.fabric.config.FabricSdk;
-import com.webank.wecross.stub.fabric.config.FabricSdkConfig;
+import com.webank.wecross.stub.fabric.FabricSdk;
+import com.webank.wecross.stub.fabric.FabricSdkConfig;
 import org.hyperledger.fabric.sdk.ChaincodeID;
 
 public class MockFabricConn extends FabricConn {
