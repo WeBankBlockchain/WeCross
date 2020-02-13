@@ -1,7 +1,7 @@
 package com.webank.wecross.network;
 
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.peer.PeerResources;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
@@ -216,7 +216,7 @@ public class NetworkManager {
 
             peerResource.loggingInvalidResources();
 
-            Map<String, Set<Peer>> resource2Peers = peerResource.getResource2Peers();
+            Map<String, Set<PeerInfo>> resource2Peers = peerResource.getResource2Peers();
             Map<String, String> resource2Checksum = peerResource.getResource2Checksum();
 
             Set<String> currentResources = getAllNetworkStubResourceName(false);
@@ -246,7 +246,7 @@ public class NetworkManager {
             logger.debug("Add new remote resources " + resources2Add);
             for (String resource : resources2Add) {
                 try {
-                    Set<Peer> newPeers = resource2Peers.get(resource);
+                    Set<PeerInfo> newPeers = resource2Peers.get(resource);
                     String checksum = resource2Checksum.get(resource);
                     Resource newResource = new RemoteResource(newPeers, 1, p2pEngine);
                     ((RemoteResource) newResource).setChecksum(checksum);
@@ -261,7 +261,7 @@ public class NetworkManager {
             logger.debug("Update remote resources " + resources2Update);
             for (String resource : resources2Update) {
                 try {
-                    Set<Peer> newPeers = resource2Peers.get(resource);
+                    Set<PeerInfo> newPeers = resource2Peers.get(resource);
                     String checksum = resource2Checksum.get(resource);
                     Resource resource2Update = getResource(Path.decode(resource));
                     resource2Update.setPeers(newPeers);

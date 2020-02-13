@@ -3,7 +3,8 @@ package com.webank.wecross.test.stub.remote;
 import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.p2p.netty.common.Node;
+import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.TestResource;
@@ -127,7 +128,7 @@ public class RemoteResourceExceptionTest {
 
     @Test
     public void remoteResourceGetDataTest() throws Exception {
-        Peer peer = new Peer();
+        PeerInfo peer = new PeerInfo(new Node("", "", 0));
         Resource resource = new RemoteResource(peer, 1, p2pEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 
@@ -147,7 +148,7 @@ public class RemoteResourceExceptionTest {
 
     @Test
     public void remoteResourceSetDataTest() throws Exception {
-        Peer peer = new Peer();
+        PeerInfo peer = new PeerInfo(new Node("", "", 0));
         Resource resource = new RemoteResource(peer, 1, p2pEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 
@@ -168,7 +169,7 @@ public class RemoteResourceExceptionTest {
 
     @Test
     public void remoteResourceCallTest() throws Exception {
-        Peer peer = new Peer();
+        PeerInfo peer = new PeerInfo(new Node("", "", 0));
         Resource resource = new RemoteResource(peer, 1, p2pEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 
@@ -189,7 +190,7 @@ public class RemoteResourceExceptionTest {
 
     @Test
     public void remoteResourceSendTransactionTest() throws Exception {
-        Peer peer = new Peer();
+        PeerInfo peer = new PeerInfo(new Node("", "", 0));
         Resource resource = new RemoteResource(peer, 1, p2pEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 

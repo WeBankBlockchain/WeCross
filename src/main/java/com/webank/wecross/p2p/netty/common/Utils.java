@@ -41,23 +41,4 @@ public class Utils {
     public static boolean validPort(Integer port) {
         return port.intValue() > 0 && port.intValue() <= 65535;
     }
-
-    /**
-     * get peer ip, port from channel connect context
-     *
-     * @param context
-     * @return
-     */
-    public static Host channelContextPeerHost(ChannelHandlerContext context) {
-
-        if (null == context) {
-            return null;
-        }
-
-        String host =
-                ((SocketChannel) context.channel()).remoteAddress().getAddress().getHostAddress();
-        Integer port = ((SocketChannel) context.channel()).remoteAddress().getPort();
-
-        return new Host(host, port);
-    }
 }

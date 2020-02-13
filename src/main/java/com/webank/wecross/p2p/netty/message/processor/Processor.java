@@ -1,5 +1,6 @@
 package com.webank.wecross.p2p.netty.message.processor;
 
+import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.p2p.netty.message.proto.Message;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -19,5 +20,5 @@ public interface Processor {
      * @param ctx
      * @param message
      */
-    void process(ChannelHandlerContext ctx, Message message);
+    void process(ChannelHandlerContext ctx, Node node, Message message);
 }

@@ -2,7 +2,6 @@ package com.webank.wecross.peer;
 
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.restserver.Versions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,7 @@ public class SyncPeerMessageHandler {
         threadPool.initialize();
     }
 
-    public void onPeerMessage(Peer peer, String method, P2PMessage msg) {
+    public void onPeerMessage(PeerInfo peer, String method, P2PMessage msg) {
         threadPool.execute(
                 new Runnable() {
                     @Override
@@ -43,7 +42,7 @@ public class SyncPeerMessageHandler {
                 });
     }
 
-    private void handlePeerMessage(Peer peer, String method, P2PMessage msg) throws Exception {
+    private void handlePeerMessage(PeerInfo peer, String method, P2PMessage msg) throws Exception {
         logger.trace("Receive peer message peer:{}, method:{}, msg:{}", peer, method, msg);
         switch (method) {
             case "requestSeq":
@@ -73,7 +72,7 @@ public class SyncPeerMessageHandler {
         }
     }
 
-    private void handleRequestSeq(Peer peer, P2PMessage msg) {
+    private void handleRequestSeq(PeerInfo peer, P2PMessage msg) {
         PeerSeqMessageData data = peerManager.handleRequestSeq();
         P2PMessage<PeerSeqMessageData> rspMsg = new P2PMessage<>();
         rspMsg.setVersion(Versions.currentVersion);
@@ -84,11 +83,11 @@ public class SyncPeerMessageHandler {
         p2pEngine.asyncSendMessage(peer, rspMsg, new PeerDoNothingCallback());
     }
 
-    private void handleSeq(Peer peer, P2PMessage msg) {
+    private void handleSeq(PeerInfo peer, P2PMessage msg) {
         peerManager.handleSeq(peer, msg);
     }
 
-    private void handleRequestPeerInfo(Peer peer, P2PMessage msg) {
+    private void handleRequestPeerInfo(PeerInfo peer, P2PMessage msg) {
         PeerInfoMessageData data = peerManager.handleRequestPeerInfo();
         P2PMessage<PeerInfoMessageData> rspMsg = new P2PMessage<>();
         rspMsg.setVersion(Versions.currentVersion);
@@ -98,7 +97,7 @@ public class SyncPeerMessageHandler {
         p2pEngine.asyncSendMessage(peer, rspMsg, new PeerDoNothingCallback());
     }
 
-    private void handlePeerInfo(Peer peer, P2PMessage msg) {
+    private void handlePeerInfo(PeerInfo peer, P2PMessage msg) {
         peerManager.handlePeerInfo(peer, msg);
     }
 

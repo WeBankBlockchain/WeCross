@@ -1,7 +1,7 @@
 package com.webank.wecross.resource;
 
 import com.webank.wecross.common.WeCrossType;
-import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.restserver.request.GetDataRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
@@ -106,10 +106,10 @@ public class TestResource implements Resource {
     }
 
     @Override
-    public Set<Peer> getPeers() {
+    public Set<PeerInfo> getPeers() {
         return null;
     }
 
     @Override
-    public void setPeers(Set<Peer> peers) {}
+    public void setPeers(Set<PeerInfo> peers) {}
 }

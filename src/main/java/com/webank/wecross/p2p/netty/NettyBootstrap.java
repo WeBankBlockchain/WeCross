@@ -1,11 +1,12 @@
 package com.webank.wecross.p2p.netty;
 
+import com.webank.wecross.p2p.MessageType;
 import com.webank.wecross.p2p.P2PConfig;
 import com.webank.wecross.p2p.netty.channel.handler.ChannelHandler;
 import com.webank.wecross.p2p.netty.channel.handler.ChannelHandlerCallBack;
-import com.webank.wecross.p2p.netty.common.Host;
+import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.p2p.netty.common.Utils;
-import com.webank.wecross.p2p.netty.message.MessageType;
+import com.webank.wecross.p2p.netty.message.MessageCallBack;
 import com.webank.wecross.p2p.netty.message.proto.Message;
 import com.webank.wecross.p2p.netty.message.serialize.MessageSerializer;
 import io.netty.bootstrap.Bootstrap;
@@ -29,6 +30,8 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.AttributeKey;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -41,10 +44,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /** init P2P service */
-@Component
-public class Initializer {
+public class NettyBootstrap {
 
-    private static final Logger logger = LoggerFactory.getLogger(Initializer.class);
+    private static final Logger logger = LoggerFactory.getLogger(NettyBootstrap.class);
 
     /** Maximum message length of p2p message, default 64MB */
     private static final Integer maxP2PMessageLength = 64 * 1024 * 1024;
@@ -57,9 +59,19 @@ public class Initializer {
     /** ssl handle shake timeout default 10000 ms */
     private static final Integer handShakeTimeoutMS = 10000;
 
-    private ChannelHandlerCallBack channelHandlerCallBack;
-    private Connections connections;
-    private P2PConfig config;
+    private ChannelHandlerCallBack channelHandlerCallBack = new ChannelHandlerCallBack();
+    private Connections connections = new Connections();
+    private P2PConfig config = new P2PConfig();
+    
+    private MessageCallBack messageCallBack;
+    
+    public MessageCallBack getMessageCallBack() {
+		return messageCallBack;
+	}
+
+	public void setMessageCallBack(MessageCallBack messageCallBack) {
+		this.messageCallBack = messageCallBack;
+	}
 
     public P2PConfig getConfig() {
         return config;
@@ -145,6 +157,7 @@ public class Initializer {
      * @throws IOException
      */
     public void start() throws ExecutionException, InterruptedException, IOException {
+    	channelHandlerCallBack.setCallBack(messageCallBack);
 
         logger.info(" initialize, config: {}", getConfig());
 
@@ -273,7 +286,7 @@ public class Initializer {
 
     /** list all connected nodes */
     public void listConnectedNodes() {
-        Map<Host, String> host2NodeID = getConnections().getHost2NodeID();
+        Map<Node, String> host2NodeID = getConnections().getHost2NodeID();
         synchronized (host2NodeID) {
             host2NodeID.forEach(
                     (host, nodeID) -> {
@@ -284,7 +297,6 @@ public class Initializer {
 
     /** send heartbeat message to all active nodes */
     public void heartBeat() {
-
         List<ChannelHandlerContext> channelHandlers = getConnections().activeChannelHandlers();
         channelHandlers.forEach(
                 (ctx) -> {
@@ -293,9 +305,11 @@ public class Initializer {
                     ByteBuf byteBuf = ctx.alloc().buffer();
                     serializer.serialize(message, byteBuf);
                     ctx.writeAndFlush(byteBuf);
+                    
+                    Node node = (Node) ctx.channel().attr(AttributeKey.valueOf("node"));
 
                     logger.trace(
-                            " send heartbeat message to {} ", Utils.channelContextPeerHost(ctx));
+                            " send heartbeat message to {} ", node);
                 });
     }
 

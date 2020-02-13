@@ -1,8 +1,7 @@
 package com.webank.wecross.p2p.netty;
 
 import com.webank.wecross.p2p.netty.channel.handler.ChannelHandlerCallBack;
-import com.webank.wecross.p2p.netty.common.Host;
-import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.p2p.netty.common.Utils;
 import com.webank.wecross.p2p.netty.message.proto.Message;
 import com.webank.wecross.p2p.netty.message.serialize.MessageSerializer;
@@ -27,27 +26,19 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /** P2P service */
 public class P2PService {
-
     private static Logger logger = LoggerFactory.getLogger(P2PService.class);
 
     private Timer timer = new HashedWheelTimer();
-
-    private Initializer initializer;
-
-    private Connections connections;
-
+    private NettyBootstrap nettyBootstrap;
     private SeqMapper seqMapper;
-
     private ThreadPoolTaskExecutor threadPool;
 
-    private ChannelHandlerCallBack channelHandlerCallBack;
-
-    public Initializer getInitializer() {
-        return initializer;
+    public NettyBootstrap getInitializer() {
+        return nettyBootstrap;
     }
 
-    public void setInitializer(Initializer initializer) {
-        this.initializer = initializer;
+    public void setInitializer(NettyBootstrap initializer) {
+        this.nettyBootstrap = initializer;
     }
 
     public SeqMapper getSeqMapper() {
@@ -59,11 +50,7 @@ public class P2PService {
     }
 
     public Connections getConnections() {
-        return connections;
-    }
-
-    public void setConnections(Connections connections) {
-        this.connections = connections;
+        return nettyBootstrap.getConnections();
     }
 
     public ThreadPoolTaskExecutor getThreadPool() {
@@ -75,11 +62,7 @@ public class P2PService {
     }
 
     public ChannelHandlerCallBack getChannelHandlerCallBack() {
-        return channelHandlerCallBack;
-    }
-
-    public void setChannelHandlerCallBack(ChannelHandlerCallBack channelHandlerCallBack) {
-        this.channelHandlerCallBack = channelHandlerCallBack;
+        return nettyBootstrap.getChannelHandlerCallBack();
     }
 
     /**
@@ -90,16 +73,16 @@ public class P2PService {
      * @throws InterruptedException
      */
     public void start() throws IOException, ExecutionException, InterruptedException {
-        initializer.start();
+        nettyBootstrap.start();
         logger.info(" start p2p service end.");
     }
 
     /**
-     * @param peer
+     * @param node
      * @param request
      * @return
      */
-    public Response sendRequest(Peer peer, Request request) {
+    public Response sendRequest(Node node, Request request) {
 
         class Callback extends ResponseCallBack {
             public transient Response response;
@@ -122,7 +105,7 @@ public class P2PService {
         }
 
         Callback callback = new Callback();
-        asyncSendRequest(peer, request, callback);
+        asyncSendRequest(node, request, callback);
 
         try {
             callback.semaphore.acquire(1);
@@ -134,18 +117,17 @@ public class P2PService {
     }
 
     /**
-     * @param peer
+     * @param node
      * @param request
      * @param callback
      */
-    public void asyncSendRequest(Peer peer, Request request, ResponseCallBack callback) {
-
+    public void asyncSendRequest(Node node, Request request, ResponseCallBack callback) {
         Message message = Message.builder(request.getType(), request.getContent());
 
         callback.setMessage(message);
         callback.setSeqMapper(getSeqMapper());
 
-        String nodeID = peer.getNodeID();
+        String nodeID = node.getNodeID();
 
         logger.debug(
                 " request content, node: {}, seq: {}, type: {}, timeout: {}, content: {}",
@@ -193,15 +175,9 @@ public class P2PService {
             serializer.serialize(message, byteBuf);
             ctx.writeAndFlush(byteBuf);
 
-            Host host = Utils.channelContextPeerHost(ctx);
-
-            logger.debug(" send request, host: {}, seq: {}", host, message.getSeq());
+            logger.debug(" send request, host: {}, seq: {}", node, message.getSeq());
         } else {
             callback.sendFailed(StatusCode.UNREACHABLE, "node unreachable");
         }
-    }
-
-    public Set<Peer> getConnectedPeers() {
-        return getConnections().getPeers();
     }
 }

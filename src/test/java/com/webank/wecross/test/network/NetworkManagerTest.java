@@ -2,7 +2,7 @@ package com.webank.wecross.test.network;
 
 import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.peer.PeerResources;
 import com.webank.wecross.resource.Path;
@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NetworkManagerTest {
-    private Peer mockPeer = new Peer();
+    private PeerInfo mockPeer = new PeerInfo(new Node());
 
     private P2PMessageEngine p2pEngine = null;
 
@@ -92,7 +92,7 @@ public class NetworkManagerTest {
 
         Set<PeerInfo> activePeers = new HashSet<>();
         PeerResources peerResources = new PeerResources(activePeers);
-        PeerInfo peer0 = new PeerInfo(new Peer("peer0"));
+        PeerInfo peer0 = new PeerInfo(new Node("peer0", "", 0));
         activePeers.add(peer0);
         Set<ResourceInfo> activeResourceInfos = new HashSet<>();
         for (int i = 0; i < 3; i++) {
@@ -106,7 +106,7 @@ public class NetworkManagerTest {
         peer0.setResources(100, activeResourceInfos);
         Assert.assertEquals(5, networkManager.getAllNetworkStubResourceName(false).size());
 
-        PeerInfo peer1 = new PeerInfo(new Peer("peer1"));
+        PeerInfo peer1 = new PeerInfo(new Node("peer1", "", 0));
         activePeers.add(peer1);
         Set<ResourceInfo> newResourceInfos = new HashSet<>();
         for (int i = 0; i < 4; i++) {
@@ -160,13 +160,13 @@ public class NetworkManagerTest {
         resourceInfo0Mock.setPath("network.stub.resource0");
         resourceInfo0Mock.setChecksum("666666"); // checksum is not the same as resourceInfo0
 
-        PeerInfo info0 = new PeerInfo(new Peer("peer0"));
+        PeerInfo info0 = new PeerInfo(new Node("peer0", "", 0));
         Set<ResourceInfo> resourceInfos0 = new HashSet<>();
         resourceInfos0.add(resourceInfo0);
         resourceInfos0.add(resourceInfo1);
         info0.setResourceInfos(resourceInfos0);
 
-        PeerInfo info1 = new PeerInfo(new Peer("peer1"));
+        PeerInfo info1 = new PeerInfo(new Node("peer1", "", 0));
         Set<ResourceInfo> resourceInfos1 = new HashSet<>();
         resourceInfos1.add(resourceInfo2);
         resourceInfos1.add(resourceInfo0Mock);

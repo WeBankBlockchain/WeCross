@@ -1,12 +1,13 @@
 package com.webank.wecross.p2p.netty.message;
 
+import com.webank.wecross.p2p.HeartBeatProcessor;
+import com.webank.wecross.p2p.MessageType;
+import com.webank.wecross.p2p.ResourceRequestProcessor;
+import com.webank.wecross.p2p.ResourceResponseProcessor;
 import com.webank.wecross.p2p.netty.SeqMapper;
-import com.webank.wecross.p2p.netty.common.Host;
+import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.p2p.netty.common.Utils;
-import com.webank.wecross.p2p.netty.message.processor.HeartBeatProcessor;
 import com.webank.wecross.p2p.netty.message.processor.Processor;
-import com.webank.wecross.p2p.netty.message.processor.ResourceRequestProcessor;
-import com.webank.wecross.p2p.netty.message.processor.ResourceResponseProcessor;
 import com.webank.wecross.p2p.netty.message.proto.Message;
 import com.webank.wecross.p2p.netty.message.serialize.MessageSerializer;
 import io.netty.buffer.ByteBuf;
@@ -15,15 +16,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-@Component
 public class MessageCallBack {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageCallBack.class);
 
     /** MessageType => Processor */
     private Map<Short, Processor> messageToProcessor = new ConcurrentHashMap<Short, Processor>() {};
+    private Processor connectProcessor;
 
     private SeqMapper seqMapper;
 
@@ -58,9 +58,20 @@ public class MessageCallBack {
     public ResourceRequestProcessor getResourceRequestProcessor() {
         return (ResourceRequestProcessor) messageToProcessor.get(MessageType.RESOURCE_REQUEST);
     }
+    
+    public void onConnect(ChannelHandlerContext ctx, Node node) {
+    	if(connectProcessor != null) {
+    		connectProcessor.process(ctx, node, null);
+    	}
+    }
+    
+    public void onDisconnect(ChannelHandlerContext ctx, Node node) {
+    	if(connectProcessor != null) {
+    		connectProcessor.process(ctx, node, null);
+    	}
+    }
 
-    public void onMessage(ChannelHandlerContext ctx, ByteBuf byteBuf) {
-        Host host = Utils.channelContextPeerHost(ctx);
+    public void onMessage(ChannelHandlerContext ctx, Node node, ByteBuf byteBuf) {
         Integer hashCode = System.identityHashCode(ctx);
 
         try {
@@ -72,23 +83,23 @@ public class MessageCallBack {
                     " receive message seq: {}, type: {}, host: {}, ctx: {}",
                     message.getSeq(),
                     message.getType(),
-                    host,
+                    node,
                     hashCode);
 
             Processor processor = getProcessor(message.getType());
             if (processor != null) {
-                processor.process(ctx, message);
+                processor.process(ctx, node, message);
             } else {
                 logger.error(
                         " unrecognized message, type: {}, seq: {}, host: {}, ctx: {} ",
                         message.getType(),
                         message.getSeq(),
-                        host,
+                        node,
                         hashCode);
             }
 
         } catch (Exception e) {
-            logger.error(" invalid message, host: {}, ctx: {}, e: {}", host, hashCode, e);
+            logger.error(" invalid message, host: {}, ctx: {}, e: {}", node, hashCode, e);
 
         } finally {
             byteBuf.release();

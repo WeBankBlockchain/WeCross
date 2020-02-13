@@ -1,7 +1,8 @@
-package com.webank.wecross.p2p.netty.message.processor;
+package com.webank.wecross.p2p;
 
-import com.webank.wecross.p2p.netty.common.Host;
+import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.p2p.netty.common.Utils;
+import com.webank.wecross.p2p.netty.message.processor.Processor;
 import com.webank.wecross.p2p.netty.message.proto.Message;
 import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
@@ -19,9 +20,8 @@ public class HeartBeatProcessor implements Processor {
     }
 
     @Override
-    public void process(ChannelHandlerContext ctx, Message message) {
-        Host host = Utils.channelContextPeerHost(ctx);
+    public void process(ChannelHandlerContext ctx, Node node, Message message) {
         // log with do nothing
-        logger.trace(" receive heartbeat, host: {}, seq: {}", host, message.getSeq());
+        logger.trace(" receive heartbeat, host: {}, seq: {}", node, message.getSeq());
     }
 }

@@ -1,6 +1,6 @@
 package com.webank.wecross.peer;
 
-import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.resource.ResourceInfo;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +16,7 @@ public class PeerResources {
     private Map<String, Map<String, Set<PeerInfo>>> path2Checksum2PeerInfos = new HashMap<>();
 
     private Map<String, String> resource2Checksum = new HashMap<>();
-    private Map<String, Set<Peer>> resource2Peers = new HashMap<>();
+    private Map<String, Set<PeerInfo>> resource2Peers = new HashMap<>();
     private boolean hasMyselfResource = false;
     private boolean dirty = true;
 
@@ -26,7 +26,7 @@ public class PeerResources {
 
     public void updateMyselfResources(Map<String, ResourceInfo> resourceInfoMap) {
         if (resourceInfoMap != null) {
-            PeerInfo myself = new PeerInfo(new Peer("myself"));
+            PeerInfo myself = new PeerInfo(new Node());
 
             Set<ResourceInfo> resourceInfos = new HashSet<>();
             for (ResourceInfo info : resourceInfoMap.values()) {
@@ -88,7 +88,7 @@ public class PeerResources {
                 resource2Checksum.put(path, subEntry.getKey());
 
                 // update resource2Peers
-                Set<Peer> peers = resource2Peers.get(path);
+                Set<PeerInfo> peers = resource2Peers.get(path);
                 if (peers == null) {
                     peers = new HashSet<>();
                 }
@@ -98,7 +98,7 @@ public class PeerResources {
                 }
 
                 for (PeerInfo peerInfo : subEntry.getValue()) {
-                    peers.add(peerInfo.getPeer());
+                    peers.add(peerInfo);
                 }
 
                 resource2Peers.put(path, peers);
@@ -144,7 +144,7 @@ public class PeerResources {
         return resource2Checksum;
     }
 
-    public Map<String, Set<Peer>> getResource2Peers() {
+    public Map<String, Set<PeerInfo>> getResource2Peers() {
         if (dirty) {
             parse();
         }

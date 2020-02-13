@@ -1,17 +1,19 @@
 package com.webank.wecross.p2p.netty.channel.handler;
 
 import com.webank.wecross.p2p.netty.Connections;
-import com.webank.wecross.p2p.netty.common.Host;
+import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.p2p.netty.common.Utils;
 import com.webank.wecross.p2p.netty.message.MessageCallBack;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.AttributeKey;
 import java.security.Principal;
 import java.security.PublicKey;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.security.cert.X509Certificate;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -60,7 +62,7 @@ public class ChannelHandlerCallBack {
         return sb.toString();
     }
 
-    public PublicKey fetchCertificate(ChannelHandlerContext ctx) throws SSLPeerUnverifiedException {
+    private PublicKey fetchCertificate(ChannelHandlerContext ctx) throws SSLPeerUnverifiedException {
         SslHandler sslhandler = (SslHandler) ctx.channel().pipeline().get(SslHandler.class);
 
         logger.info(String.valueOf(ctx.channel().pipeline().names()));
@@ -85,43 +87,85 @@ public class ChannelHandlerCallBack {
 
         return publicKey;
     }
+    
+    /**
+     * get peer ip, port from channel connect context
+     *
+     * @param context
+     * @return
+     * @throws SSLPeerUnverifiedException 
+     */
+    public Node channelContext2Node(ChannelHandlerContext context) throws SSLPeerUnverifiedException {
+        if (null == context) {
+            return null;
+        }
+
+        String nodeID = bytesToHex(fetchCertificate(context).getEncoded()).substring(48);
+        String host =
+                ((SocketChannel) context.channel()).remoteAddress().getAddress().getHostAddress();
+        Integer port = ((SocketChannel) context.channel()).remoteAddress().getPort();
+
+        return new Node(nodeID, host, port);
+    }
 
     public void onConnect(ChannelHandlerContext ctx, boolean connectToServer)
             throws SSLPeerUnverifiedException {
-
-        Host host = Utils.channelContextPeerHost(ctx);
-
-        // peer node ssl pub
-        String nodeID = bytesToHex(fetchCertificate(ctx).getEncoded()).substring(48);
+        Node node = channelContext2Node(ctx);
 
         // set nodeID to channel attribute map
-        ctx.channel().attr(AttributeKey.valueOf("NodeID")).set(nodeID);
+        ctx.channel().attr(AttributeKey.valueOf("node")).set(node);
+        ctx.channel().attr(AttributeKey.valueOf("NodeID")).set(node.getNodeID());
 
-        getConnections().addChannelHandler(nodeID, ctx, connectToServer);
+        getConnections().addChannelHandler(node, ctx, connectToServer);
 
         logger.info(
-                " host {} connect success, nodeID: {}, ctx: {}",
-                host,
-                nodeID,
+                " node {} connect success, nodeID: {}, ctx: {}",
+                node,
+                node.getNodeID(),
                 System.identityHashCode(ctx));
+        
+        if(threadPool == null) {
+        	callBack.onConnect(ctx, node);
+        }
+        else {
+        	threadPool.execute(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onConnect(ctx, node);
+                        }
+                    });
+        }
     }
 
     public void onDisconnect(ChannelHandlerContext ctx) {
-        Host host = Utils.channelContextPeerHost(ctx);
+        Node node = (Node) ctx.channel().attr(AttributeKey.valueOf("node"));
 
-        String nodeID = (String) ctx.channel().attr(AttributeKey.valueOf("NodeID")).get();
-        if (null != nodeID) {
-            getConnections().removeChannelHandler(nodeID, ctx);
+        if (null != node.getNodeID()) {
+            getConnections().removeChannelHandler(node, ctx);
             logger.info(
                     " disconnect, host: {}, nodeID: {}, ctx: {}",
-                    host,
-                    nodeID,
+                    node,
+                    node.getNodeID(),
                     System.identityHashCode(ctx));
         } else {
             logger.warn(
                     " disconnect, nodeID null handshake not success, host: {}, ctx: {}",
-                    host,
+                    node,
                     System.identityHashCode(ctx));
+        }
+        
+        if(threadPool == null) {
+        	callBack.onDisconnect(ctx, node);
+        }
+        else {
+        	threadPool.execute(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            callBack.onDisconnect(ctx, node);
+                        }
+                    });
         }
     }
 
@@ -129,14 +173,16 @@ public class ChannelHandlerCallBack {
         /*
          use thread pool first onMessage may block
         */
+    	Node node = (Node) ctx.channel().attr(AttributeKey.valueOf("node"));
+    	
         if (threadPool == null) {
-            callBack.onMessage(ctx, message);
+            callBack.onMessage(ctx, node, message);
         } else {
             threadPool.execute(
                     new Runnable() {
                         @Override
                         public void run() {
-                            callBack.onMessage(ctx, message);
+                            callBack.onMessage(ctx, node, message);
                         }
                     });
         }

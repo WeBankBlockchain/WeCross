@@ -2,6 +2,8 @@ package com.webank.wecross.host;
 
 import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
+import com.webank.wecross.p2p.netty.common.Node;
+import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
@@ -45,7 +47,7 @@ public class WeCrossHost {
     }
 
     public Object onRestfulPeerMessage(String method, P2PMessage msg) {
-        return peerManager.onRestfulPeerMessage(method, msg);
+        return peerManager.onRestfulPeerMessage(new PeerInfo(new Node()), method, msg);
     }
 
     public void setNetworkManager(NetworkManager networkManager) {

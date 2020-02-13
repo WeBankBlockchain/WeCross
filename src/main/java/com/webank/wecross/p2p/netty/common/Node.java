@@ -2,22 +2,26 @@ package com.webank.wecross.p2p.netty.common;
 
 import java.util.Objects;
 
-public class Host {
-
+public class Node {
+	private String nodeID;
     private String host;
     private Integer port;
 
-    public Host() {}
-
-    public Host(String host, Integer port) {
+    public Node() {}
+    
+    public Node(String nodeID, String host, Integer port) {
+    	this.setNodeID(nodeID);
         this.host = host;
         this.port = port;
     }
+    
+	public String getNodeID() {
+		return nodeID;
+	}
 
-    public Host(String host, Integer port, String nodeId) {
-        this.host = host;
-        this.port = port;
-    }
+	public void setNodeID(String nodeID) {
+		this.nodeID = nodeID;
+	}
 
     public String getHost() {
         return host;
@@ -43,17 +47,18 @@ public class Host {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Host peerHost = (Host) o;
-        return Objects.equals(host, peerHost.host) && Objects.equals(port, peerHost.port);
+        Node peerHost = (Node) o;
+        
+        return Objects.equals(nodeID, peerHost.nodeID) && Objects.equals(host, peerHost.host) && Objects.equals(port, peerHost.port);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(host, port);
+        return Objects.hash(nodeID, host, port);
     }
 
     @Override
     public String toString() {
-        return "[" + "host='" + host + '\'' + ", port=" + port + ']';
+        return "[" + "nodeID=" + nodeID + ", host='" + host + '\'' + ", port=" + port + ']';
     }
 }

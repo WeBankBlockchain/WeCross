@@ -2,13 +2,14 @@ package com.webank.wecross.p2p;
 
 import com.webank.wecross.p2p.engine.P2PResponse;
 import com.webank.wecross.p2p.netty.P2PService;
-import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.peer.PeerInfo;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public abstract class P2PMessageEngine {
     public abstract <T> void asyncSendMessage(
-            Peer peer, P2PMessage<T> msg, P2PMessageCallback callback);
+    		PeerInfo peer, P2PMessage<T> msg, P2PMessageCallback<?> callback);
 
     private P2PService p2PService;
 

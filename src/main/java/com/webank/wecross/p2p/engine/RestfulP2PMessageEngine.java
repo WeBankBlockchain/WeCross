@@ -1,15 +1,16 @@
 package com.webank.wecross.p2p.engine;
 
 import com.webank.wecross.common.QueryStatus;
+import com.webank.wecross.p2p.MessageType;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.netty.common.Peer;
-import com.webank.wecross.p2p.netty.message.MessageType;
 import com.webank.wecross.p2p.netty.request.Request;
 import com.webank.wecross.p2p.netty.response.Response;
 import com.webank.wecross.p2p.netty.response.ResponseCallBack;
 import com.webank.wecross.p2p.netty.response.StatusCode;
+import com.webank.wecross.peer.PeerInfo;
+
 import java.io.IOException;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
@@ -19,7 +20,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
     private Logger logger = LoggerFactory.getLogger(RestfulP2PMessageEngine.class);
 
     @Override
-    public <T> void asyncSendMessage(Peer peer, P2PMessage<T> msg, P2PMessageCallback callback) {
+    public <T> void asyncSendMessage(PeerInfo peer, P2PMessage<T> msg, P2PMessageCallback<?> callback) {
 
         // check parameters
         try {
@@ -45,7 +46,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
         // send request by p2p network
         getP2PService()
                 .asyncSendRequest(
-                        peer,
+                        peer.getNode(),
                         request,
                         new ResponseCallBack() {
                             @Override

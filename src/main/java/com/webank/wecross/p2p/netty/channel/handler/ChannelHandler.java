@@ -1,12 +1,15 @@
 package com.webank.wecross.p2p.netty.channel.handler;
 
-import com.webank.wecross.p2p.netty.common.Host;
+import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.p2p.netty.common.Utils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.ssl.SslHandshakeCompletionEvent;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.util.AttributeKey;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +33,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-        Host host = Utils.channelContextPeerHost(ctx);
+    	Node node = (Node) ctx.channel().attr(AttributeKey.valueOf("node"));
         int hashCode = System.identityHashCode(ctx);
 
         if (evt instanceof IdleStateEvent) {
@@ -42,7 +45,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                     logger.error(
                             " disconnect, event:{} host:{} ctx:{}, long time inactive",
                             e.state(),
-                            host,
+                            node,
                             hashCode);
                     channelInactive(ctx);
                     ctx.disconnect();
@@ -52,39 +55,37 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                     break;
             }
         } else if (evt instanceof SslHandshakeCompletionEvent) {
-            logger.info(" handshake success, host: {}, ctx: {}", host, hashCode);
+            logger.info(" handshake success, host: {}, ctx: {}", node, hashCode);
             // ssl handshake success.
             try {
                 getChannelHandlerCallBack().onConnect(ctx, getConnectToServer());
             } catch (Exception e) {
                 logger.error(
                         " disconnect, host: {}, ctx: {}, error: {}",
-                        host,
+                        node,
                         hashCode,
                         e.getMessage());
                 ctx.disconnect();
                 ctx.close();
             }
         } else {
-            logger.info(" host: {}, ctx: {}, evt: {}", host, hashCode, evt);
+            logger.info(" host: {}, ctx: {}, evt: {}", node, hashCode, evt);
         }
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        Host host = Utils.channelContextPeerHost(ctx);
-        logger.info(" channel active: {}, ctx: {}", host, System.identityHashCode(ctx));
+        // logger.info(" channel active: {}, ctx: {}", node, System.identityHashCode(ctx));
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        Host host = Utils.channelContextPeerHost(ctx);
         try {
-            logger.info(" channel inactive: {}", host);
+            // logger.info(" channel inactive: {}", host);
 
             getChannelHandlerCallBack().onDisconnect(ctx);
         } catch (Exception e) {
-            logger.error("host: {}, ctx: {}, error: {}", host, System.identityHashCode(ctx), e);
+            // logger.error("host: {}, ctx: {}, error: {}", host, System.identityHashCode(ctx), e);
         }
     }
 
@@ -98,9 +99,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-
-        Host host = Utils.channelContextPeerHost(ctx);
-        logger.error(" caugth exception, e: {}, host: {}", cause, host);
+        logger.error(" caugth exception, e: {}, node: {}:{}", cause,
+        		((SocketChannel) ctx.channel()).remoteAddress().getAddress().getHostAddress(),
+        		((SocketChannel) ctx.channel()).remoteAddress().getPort());
 
         ctx.disconnect();
         ctx.close();

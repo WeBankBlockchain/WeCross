@@ -1,7 +1,7 @@
 package com.webank.wecross.stub.fabric;
 
 import com.webank.wecross.common.WeCrossType;
-import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
@@ -71,12 +71,12 @@ public class FabricResource implements Resource {
     }
 
     @Override
-    public Set<Peer> getPeers() {
+    public Set<PeerInfo> getPeers() {
         return null;
     }
 
     @Override
-    public void setPeers(Set<Peer> peers) {}
+    public void setPeers(Set<PeerInfo> peers) {}
 
     @Override
     public String getChecksum() {

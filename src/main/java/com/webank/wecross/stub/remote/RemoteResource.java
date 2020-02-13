@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.engine.P2PResponse;
-import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
@@ -28,29 +28,29 @@ public class RemoteResource implements Resource {
     private Logger logger = LoggerFactory.getLogger(RemoteResource.class);
     private P2PMessageEngine p2pEngine;
     private int distance; // How many jumps to local stub
-    private Set<Peer> peers;
+    private Set<PeerInfo> peers;
     private Path path;
     private String checksum;
 
-    public RemoteResource(Set<Peer> peers, int distance, P2PMessageEngine p2pEngine) {
+    public RemoteResource(Set<PeerInfo> peers, int distance, P2PMessageEngine p2pEngine) {
         setPeers(peers);
         this.distance = distance;
         this.p2pEngine = p2pEngine;
     }
 
-    public RemoteResource(Peer peer, int distance, P2PMessageEngine p2pEngine) {
-        Set<Peer> peers = new HashSet<>();
+    public RemoteResource(PeerInfo peer, int distance, P2PMessageEngine p2pEngine) {
+        Set<PeerInfo> peers = new HashSet<>();
         peers.add(peer);
         setPeers(peers);
         this.distance = distance;
         this.p2pEngine = p2pEngine;
     }
 
-    public Set<Peer> getPeers() {
+    public Set<PeerInfo> getPeers() {
         return peers;
     }
 
-    public void setPeers(Set<Peer> peers) {
+    public void setPeers(Set<PeerInfo> peers) {
         this.peers = peers;
     }
 
@@ -62,9 +62,9 @@ public class RemoteResource implements Resource {
     @Override
     public GetDataResponse getData(GetDataRequest request) {
         try {
-            List<Peer> peerList = getRandPeerList();
+            List<PeerInfo> peerList = getRandPeerList();
             String errorHistory = "[";
-            for (Peer peerToSend : peerList) {
+            for (PeerInfo peerToSend : peerList) {
                 try {
                     P2PMessage<GetDataRequest> p2pReq = new P2PMessage<>();
                     p2pReq.setVersion(Versions.currentVersion);
@@ -102,9 +102,9 @@ public class RemoteResource implements Resource {
     @Override
     public SetDataResponse setData(SetDataRequest request) {
         try {
-            List<Peer> peerList = getRandPeerList();
+            List<PeerInfo> peerList = getRandPeerList();
             String errorHistory = "[";
-            for (Peer peerToSend : peerList) {
+            for (PeerInfo peerToSend : peerList) {
                 try {
                     P2PMessage<SetDataRequest> p2pReq = new P2PMessage<>();
                     p2pReq.setVersion(Versions.currentVersion);
@@ -142,9 +142,9 @@ public class RemoteResource implements Resource {
     @Override
     public TransactionResponse call(TransactionRequest request) {
         try {
-            List<Peer> peerList = getRandPeerList();
+            List<PeerInfo> peerList = getRandPeerList();
             String errorHistory = "[";
-            for (Peer peerToSend : peerList) {
+            for (PeerInfo peerToSend : peerList) {
                 try {
                     P2PMessage<TransactionRequest> p2pReq = new P2PMessage<>();
                     p2pReq.setVersion(Versions.currentVersion);
@@ -182,9 +182,9 @@ public class RemoteResource implements Resource {
     public TransactionResponse sendTransaction(TransactionRequest request) {
 
         try {
-            List<Peer> peerList = getRandPeerList();
+            List<PeerInfo> peerList = getRandPeerList();
             String errorHistory = "[";
-            for (Peer peerToSend : peerList) {
+            for (PeerInfo peerToSend : peerList) {
                 try {
                     P2PMessage<TransactionRequest> p2pReq = new P2PMessage<>();
                     p2pReq.setVersion(Versions.currentVersion);
@@ -266,20 +266,20 @@ public class RemoteResource implements Resource {
         this.distance = distance;
     }
 
-    private List<Peer> getRandPeerList() throws Exception {
+    private List<PeerInfo> getRandPeerList() throws Exception {
         if (peers == null || peers.isEmpty()) {
             throw new Exception("Peers of the resource is empty");
         }
 
-        List<Peer> peerList = new ArrayList<>(peers);
+        List<PeerInfo> peerList = new ArrayList<>(peers);
         Collections.shuffle(peerList);
         return peerList;
     }
 
-    private Object sendRemote(Peer peer, P2PMessage request, RemoteSemaphoreCallback callback)
+    private Object sendRemote(PeerInfo peer, P2PMessage request, RemoteSemaphoreCallback callback)
             throws Exception {
         try {
-            callback.setPeer(peer);
+            callback.setPeerInfo(peer);
 
             logger.info(
                     "Request remote resource: method:{}, data:{}",

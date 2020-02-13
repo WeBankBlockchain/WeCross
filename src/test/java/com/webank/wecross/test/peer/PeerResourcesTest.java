@@ -1,7 +1,7 @@
 package com.webank.wecross.test.peer;
 
 import com.webank.wecross.network.NetworkManager;
-import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.peer.PeerResources;
 import com.webank.wecross.resource.Path;
@@ -36,13 +36,13 @@ public class PeerResourcesTest {
         resourceInfo0Mock.setPath("network.stub.resource0");
         resourceInfo0Mock.setChecksum("666666"); // checksum is not the same as resourceInfo0
 
-        PeerInfo info0 = new PeerInfo(new Peer("peer0"));
+        PeerInfo info0 = new PeerInfo(new Node("peer0", "", 0));
         Set<ResourceInfo> resourceInfos0 = new HashSet<>();
         resourceInfos0.add(resourceInfo0);
         resourceInfos0.add(resourceInfo1);
         info0.setResourceInfos(resourceInfos0);
 
-        PeerInfo info1 = new PeerInfo(new Peer("peer1"));
+        PeerInfo info1 = new PeerInfo(new Node("peer1", "", 0));
         Set<ResourceInfo> resourceInfos1 = new HashSet<>();
         resourceInfos1.add(resourceInfo2);
         resourceInfos1.add(resourceInfo0Mock);

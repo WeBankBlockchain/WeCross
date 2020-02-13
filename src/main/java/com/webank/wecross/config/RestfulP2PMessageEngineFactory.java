@@ -19,7 +19,6 @@ public class RestfulP2PMessageEngineFactory {
 
     @Bean
     public P2PMessageEngine newRestfulP2PMessageEngine() {
-
         // Init engine
         logger.info("New RestfulP2PMessageEngine");
         RestfulP2PMessageEngine engineInstance = new RestfulP2PMessageEngine();
