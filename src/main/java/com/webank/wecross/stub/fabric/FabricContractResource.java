@@ -6,6 +6,7 @@ import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.restserver.request.GetDataRequest;
+import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
@@ -99,18 +100,26 @@ public class FabricContractResource extends FabricResource {
         return transactionResponse;
     }
 
-    public static String[] getParamterList(TransactionRequest request) {
+    public static String[] getParamterList(Object[] args) {
         String[] paramterList = null;
-        if (request.getArgs().length == 0) {
+        if (args.length == 0) {
             paramterList = new String[] {};
         } else {
-            paramterList = new String[request.getArgs().length];
-            for (int i = 0; i < request.getArgs().length; i++) {
-                paramterList[i] = String.valueOf(request.getArgs()[i]);
+            paramterList = new String[args.length];
+            for (int i = 0; i < args.length; i++) {
+                paramterList[i] = String.valueOf(args[i]);
             }
         }
 
         return paramterList;
+    }
+
+    public static String[] getParamterList(TransactionRequest request) {
+        return getParamterList(request.getArgs());
+    }
+
+    public static String[] getParamterList(ProposalRequest request) {
+        return getParamterList(request.getArgs());
     }
 
     @Override

@@ -10,9 +10,11 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.restserver.request.GetDataRequest;
+import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
+import com.webank.wecross.restserver.response.ProposalResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import java.util.ArrayList;
@@ -137,6 +139,16 @@ public class RemoteResource implements Resource {
             response.setErrorMessage("Call remote resource exception: " + e.getLocalizedMessage());
             return response;
         }
+    }
+
+    @Override
+    public ProposalResponse callProposal(ProposalRequest request) {
+        return null;
+    }
+
+    @Override
+    public ProposalResponse sendTransactionProposal(ProposalRequest request) {
+        return null;
     }
 
     @Override

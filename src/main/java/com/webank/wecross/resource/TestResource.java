@@ -3,9 +3,11 @@ package com.webank.wecross.resource;
 import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.p2p.netty.common.Peer;
 import com.webank.wecross.restserver.request.GetDataRequest;
+import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
+import com.webank.wecross.restserver.response.ProposalResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.utils.core.HashUtils;
@@ -41,6 +43,16 @@ public class TestResource implements Resource {
         response.setErrorCode(0);
         response.setErrorMessage("setData test resource success");
         return response;
+    }
+
+    @Override
+    public ProposalResponse callProposal(ProposalRequest request) {
+        return null;
+    }
+
+    @Override
+    public ProposalResponse sendTransactionProposal(ProposalRequest request) {
+        return null;
     }
 
     @Override

@@ -7,11 +7,14 @@ import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.proof.BlockHeaderProof;
 import com.webank.wecross.proof.MerkleProof;
+import com.webank.wecross.proposal.Proposal;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.restserver.request.GetDataRequest;
+import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
+import com.webank.wecross.restserver.response.ProposalResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.stub.bcos.contract.CallContract;
@@ -29,7 +32,10 @@ import org.fisco.bcos.web3j.abi.datatypes.Utf8String;
 import org.fisco.bcos.web3j.abi.datatypes.generated.Int256;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.web3j.crypto.ExtendedRawTransaction;
+import org.fisco.bcos.web3j.crypto.ExtendedTransactionEncoder;
 import org.fisco.bcos.web3j.crypto.Hash;
+import org.fisco.bcos.web3j.crypto.Sign;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
@@ -42,6 +48,8 @@ import org.slf4j.LoggerFactory;
 
 public class BCOSContractResource extends BCOSResource {
     private Logger logger = LoggerFactory.getLogger(BCOSContractResource.class);
+
+    private static final String PROPOSAL_CRYPTOSUITE = WeCrossType.BCOS_SHA3_256_SECP256K1;
 
     private Boolean isInit = false;
     @JsonIgnore private Web3j web3;
@@ -136,42 +144,49 @@ public class BCOSContractResource extends BCOSResource {
     }
 
     @Override
-    public TransactionResponse sendTransaction(TransactionRequest request) {
-        BCOSTransactionResponse bcosTransactionResponse = newBCOSTransactionResponse();
-
+    public ProposalResponse callProposal(ProposalRequest request) {
+        ProposalResponse response = new ProposalResponse();
+        response.setSeq(request.getSeq());
+        response.setCryptoSuite(PROPOSAL_CRYPTOSUITE);
         try {
-            Type<?>[] args = javaType2BCOSType(request.getArgs());
-            TransactionReceipt transactionReceipt =
-                    callContract.sendTransaction(contractAddress, request.getMethod(), args);
-            logger.debug("sendTransaction: {}, {}, {}", contractAddress, request.getMethod(), args);
+            byte[] bytesToSign = generateProposalSignBytes(request);
+            response.setErrorCode(0);
+            response.setProposalToSign(bytesToSign);
+        } catch (Exception e) {
+            response.setErrorCode(-1);
+            response.setProposalToSign(new byte[] {});
+            response.setErrorMessage("Call proposal error: " + e.getMessage());
+        }
 
-            // status: 0x00 - 0x1a, errorCode: 0 - 26
-            String status = transactionReceipt.getStatus();
-            if (transactionReceipt.isStatusOK()) {
-                try {
-                    bcosTransactionResponse =
-                            generateResponseWithProof(
-                                    transactionReceipt); // query proof, verify and set to response
-                } catch (Exception e) {
-                    throw new WeCrossException(
-                            ErrorCode.INTERNAL_ERROR, "Error in Merkle proof: " + e.getMessage());
-                }
+        return response;
+    }
 
-                List<Object> result =
-                        callContract.decode(transactionReceipt.getOutput(), request.getRetTypes());
-                bcosTransactionResponse.setResult(result.toArray());
-                bcosTransactionResponse.setErrorCode(ResourceQueryStatus.SUCCESS);
+    @Override
+    public ProposalResponse sendTransactionProposal(ProposalRequest request) {
+        ProposalResponse response = new ProposalResponse();
+        response.setSeq(request.getSeq());
+        response.setCryptoSuite(PROPOSAL_CRYPTOSUITE);
+        try {
+            byte[] bytesToSign = generateProposalSignBytes(request);
+            response.setErrorCode(0);
+            response.setProposalToSign(bytesToSign);
+        } catch (Exception e) {
+            response.setErrorCode(-1);
+            response.setProposalToSign(new byte[] {});
+            response.setErrorMessage("Call proposal error: " + e.getMessage());
+        }
+
+        return response;
+    }
+
+    @Override
+    public TransactionResponse call(TransactionRequest request) {
+        TransactionResponse bcosTransactionResponse = newBCOSTransactionResponse();
+        try {
+            if (request.getSig() == null || request.getSig().length == 0) {
+                bcosTransactionResponse = callWithRouterSign(request);
             } else {
-                try {
-                    Integer errorCode = Integer.valueOf(status.substring(2), 16);
-                    bcosTransactionResponse.setErrorCode(errorCode);
-                } catch (Exception e) {
-                    bcosTransactionResponse.setErrorCode(ResourceQueryStatus.INTERNAL_ERROR);
-                }
-
-                bcosTransactionResponse.setErrorMessage(
-                        StatusCode.getStatusMessage(
-                                transactionReceipt.getStatus(), transactionReceipt.getMessage()));
+                bcosTransactionResponse = callWithUserSign(request);
             }
         } catch (WeCrossException e) {
             bcosTransactionResponse.setErrorCode(e.getErrorCode());
@@ -181,41 +196,31 @@ public class BCOSContractResource extends BCOSResource {
             bcosTransactionResponse.setErrorMessage(e.getMessage());
         }
 
+        return bcosTransactionResponse;
+    }
+
+    @Override
+    public TransactionResponse sendTransaction(TransactionRequest request) {
+        TransactionResponse bcosTransactionResponse = newBCOSTransactionResponse();
+        try {
+            if (request.getSig() == null || request.getSig().length == 0) {
+                bcosTransactionResponse = sendTransactionWithRouterSign(request);
+            } else {
+                bcosTransactionResponse = sendTransactionWithUserSign(request);
+            }
+        } catch (WeCrossException e) {
+            bcosTransactionResponse.setErrorCode(e.getErrorCode());
+            bcosTransactionResponse.setErrorMessage(e.getMessage());
+        } catch (Exception e) {
+            bcosTransactionResponse.setErrorCode(ResourceQueryStatus.INTERNAL_ERROR);
+            bcosTransactionResponse.setErrorMessage(e.getMessage());
+        }
         return bcosTransactionResponse;
     }
 
     @Override
     public TransactionRequest createRequest() {
         return new BCOSRequest();
-    }
-
-    @Override
-    public TransactionResponse call(TransactionRequest request) {
-        BCOSTransactionResponse bcosTransactionResponse = newBCOSTransactionResponse();
-
-        try {
-            Type<?>[] args = javaType2BCOSType(request.getArgs());
-            CallResult callResult = callContract.call(contractAddress, request.getMethod(), args);
-            logger.debug("call: {}, {}, {}", contractAddress, request.getMethod(), args);
-            String status = callResult.getStatus();
-            Integer errorCode = Integer.valueOf(status.substring(2), 16);
-            if (errorCode == 0) {
-                List<Object> result =
-                        callContract.decode(callResult.getOutput(), request.getRetTypes());
-                bcosTransactionResponse.setResult(result.toArray());
-            }
-            bcosTransactionResponse.setErrorCode(errorCode);
-            bcosTransactionResponse.setErrorMessage(callResult.getMessage());
-
-        } catch (WeCrossException e) {
-            bcosTransactionResponse.setErrorCode(e.getErrorCode());
-            bcosTransactionResponse.setErrorMessage(e.getMessage());
-        } catch (Exception e) {
-            bcosTransactionResponse.setErrorCode(ResourceQueryStatus.INTERNAL_ERROR);
-            bcosTransactionResponse.setErrorMessage(e.getMessage());
-        }
-
-        return bcosTransactionResponse;
     }
 
     @Override
@@ -351,5 +356,108 @@ public class BCOSContractResource extends BCOSResource {
         }
 
         return response;
+    }
+
+    private byte[] generateProposalSignBytes(ProposalRequest request) throws Exception {
+        Proposal proposal = proposalFactory.build(request);
+        return proposal.getBytesToSign();
+    }
+
+    private TransactionResponse callWithUserSign(TransactionRequest request) throws Exception {
+
+        byte[] proposalBytes = request.getProposalBytes();
+        BCOSProposal proposal = proposalFactory.buildFromBytes(proposalBytes);
+
+        if (!proposal.isEqualsRequest(request)) {
+            throw new WeCrossException(
+                    ResourceQueryStatus.INVALID_PROPOSAL_BYTES,
+                    "Proposal bytes is not belongs to this request");
+        }
+
+        // BCOS 2.2 has no read protection
+        // upgrade here to send user's account after BCOS has verification
+        return callWithRouterSign(request);
+    }
+
+    private TransactionResponse callWithRouterSign(TransactionRequest request)
+            throws Exception, WeCrossException {
+        BCOSTransactionResponse bcosTransactionResponse = newBCOSTransactionResponse();
+
+        Type<?>[] args = javaType2BCOSType(request.getArgs());
+        CallResult callResult = callContract.call(contractAddress, request.getMethod(), args);
+        logger.debug("call: {}, {}, {}", contractAddress, request.getMethod(), args);
+        String status = callResult.getStatus();
+        Integer errorCode = Integer.valueOf(status.substring(2), 16);
+        if (errorCode == 0) {
+            List<Object> result =
+                    callContract.decode(callResult.getOutput(), request.getRetTypes());
+            bcosTransactionResponse.setResult(result.toArray());
+        }
+        bcosTransactionResponse.setErrorCode(errorCode);
+        bcosTransactionResponse.setErrorMessage(callResult.getMessage());
+
+        return bcosTransactionResponse;
+    }
+
+    private TransactionResponse sendTransactionWithUserSign(TransactionRequest request)
+            throws Exception {
+        BCOSTransactionResponse bcosTransactionResponse = newBCOSTransactionResponse();
+        byte[] proposalBytes = request.getProposalBytes();
+        BCOSProposal proposal = proposalFactory.buildFromBytes(proposalBytes);
+
+        if (!proposal.isEqualsRequest(request)) {
+            throw new WeCrossException(
+                    ResourceQueryStatus.INVALID_PROPOSAL_BYTES,
+                    "Proposal bytes is not belongs to this request");
+        }
+
+        Sign.SignatureData signatureData = BCOSSignatureEncoder.decode(request.getSig());
+        ExtendedRawTransaction tx = proposal.getInnerBCOSTransaction();
+        byte[] signedTransactionBytes = ExtendedTransactionEncoder.encode(tx, signatureData);
+
+        callContract.sendTransaction(contractAddress, signedTransactionBytes);
+
+        return bcosTransactionResponse;
+    }
+
+    private TransactionResponse sendTransactionWithRouterSign(TransactionRequest request)
+            throws Exception, WeCrossException {
+        BCOSTransactionResponse bcosTransactionResponse = newBCOSTransactionResponse();
+
+        Type<?>[] args = javaType2BCOSType(request.getArgs());
+        TransactionReceipt transactionReceipt =
+                callContract.sendTransaction(contractAddress, request.getMethod(), args);
+        logger.debug("sendTransaction: {}, {}, {}", contractAddress, request.getMethod(), args);
+
+        // status: 0x00 - 0x1a, errorCode: 0 - 26
+        String status = transactionReceipt.getStatus();
+        if (transactionReceipt.isStatusOK()) {
+            try {
+                bcosTransactionResponse =
+                        generateResponseWithProof(
+                                transactionReceipt); // query proof, verify and set to response
+            } catch (Exception e) {
+                throw new WeCrossException(
+                        ErrorCode.INTERNAL_ERROR, "Error in Merkle proof: " + e.getMessage());
+            }
+
+            List<Object> result =
+                    callContract.decode(transactionReceipt.getOutput(), request.getRetTypes());
+            bcosTransactionResponse.setResult(result.toArray());
+            bcosTransactionResponse.setErrorCode(ResourceQueryStatus.SUCCESS);
+        } else {
+            try {
+                Integer errorCode = Integer.valueOf(status.substring(2), 16);
+                bcosTransactionResponse.setErrorCode(errorCode);
+            } catch (Exception e) {
+                bcosTransactionResponse.setErrorCode(ResourceQueryStatus.INTERNAL_ERROR);
+            }
+
+            bcosTransactionResponse.setErrorMessage(
+                    StatusCode.getStatusMessage(
+                            transactionReceipt.getStatus(), transactionReceipt.getMessage()));
+        }
+
+        return bcosTransactionResponse;
     }
 }

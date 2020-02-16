@@ -2,7 +2,6 @@ package com.webank.wecross.test.stub.fabric;
 
 import com.webank.wecross.proposal.Proposal;
 import com.webank.wecross.proposal.ProposalFactory;
-import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.stub.fabric.FabricProposal;
 import com.webank.wecross.stub.fabric.FabricProposalFactory;
 import com.webank.wecross.test.Mock.MockTransactionRequest;
@@ -16,9 +15,9 @@ public class FabricProposalTest {
     public void AllTest() throws Exception {
         ProposalFactory factory = new FabricProposalFactory(new MockFabricConn());
 
-        TransactionRequest req = new MockTransactionRequest();
+        MockTransactionRequest req = new MockTransactionRequest();
 
-        Proposal proposalA = factory.build(req);
+        Proposal proposalA = factory.build(req.toProposalPrequest());
         Assert.assertTrue(proposalA.isEqualsRequest(req));
 
         byte[] bytesA = proposalA.getBytes();

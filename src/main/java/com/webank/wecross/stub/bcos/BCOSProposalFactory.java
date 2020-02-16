@@ -1,8 +1,7 @@
 package com.webank.wecross.stub.bcos;
 
-import com.webank.wecross.proposal.Proposal;
 import com.webank.wecross.proposal.ProposalFactory;
-import com.webank.wecross.restserver.request.TransactionRequest;
+import com.webank.wecross.restserver.request.ProposalRequest;
 import java.math.BigInteger;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ExtendedRawTransaction;
@@ -24,13 +23,19 @@ public class BCOSProposalFactory implements ProposalFactory {
     }
 
     @Override
-    public Proposal build(TransactionRequest request) throws Exception {
+    public BCOSProposal build(ProposalRequest request) throws Exception {
         String data = BCOSProposal.encodeRequestToInputData(request);
         BCOSProposal proposal = new BCOSProposal(request.getSeq());
         ExtendedRawTransaction rawTransaction =
                 transactionManager.createTransaction(
                         gasPrice, gasLimit, contractAddress, data, value, null);
         proposal.load(rawTransaction);
+        return proposal;
+    }
+
+    public BCOSProposal buildFromBytes(byte[] proposalBytes) throws Exception {
+        BCOSProposal proposal = new BCOSProposal(0);
+        proposal.loadBytes(proposalBytes);
         return proposal;
     }
 }

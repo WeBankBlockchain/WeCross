@@ -24,7 +24,7 @@ public class NetworksFactory {
     @Resource(name = "produceToml")
     Toml toml;
 
-    @Bean
+    @Bean(name = "produceNetworks")
     public Map<String, Network> readNetworksConfig() {
         Map<String, Network> result = new HashMap<>();
 
