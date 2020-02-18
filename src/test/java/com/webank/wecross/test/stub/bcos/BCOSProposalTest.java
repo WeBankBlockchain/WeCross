@@ -1,7 +1,6 @@
 package com.webank.wecross.test.stub.bcos;
 
 import com.webank.wecross.proposal.Proposal;
-import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.stub.bcos.BCOSProposal;
 import com.webank.wecross.stub.bcos.BCOSProposalFactory;
 import com.webank.wecross.test.Mock.MockTransactionRequest;
@@ -16,9 +15,9 @@ public class BCOSProposalTest {
     @Test
     public void allTest() throws Exception {
         BCOSProposalFactory factory = new BCOSProposalFactory("0xaaabbbccc", new MockWeb3j(), null);
-        TransactionRequest req = new MockTransactionRequest();
+        MockTransactionRequest req = new MockTransactionRequest();
 
-        Proposal proposalA = factory.build(req);
+        Proposal proposalA = factory.build(req.toProposalPrequest());
         Assert.assertTrue(proposalA.isEqualsRequest(req));
 
         byte[] bytesA = proposalA.getBytes();

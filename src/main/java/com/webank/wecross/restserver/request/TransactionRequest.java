@@ -5,16 +5,17 @@ import java.util.Arrays;
 public class TransactionRequest {
 
     private int seq = 0;
-    private String sig;
+    private byte[] sig;
+    private byte[] proposalBytes;
     private String retTypes[];
     private String method;
     private Object args[];
 
-    public String getSig() {
+    public byte[] getSig() {
         return sig;
     }
 
-    public void setSig(String sig) {
+    public void setSig(byte[] sig) {
         this.sig = sig;
     }
 
@@ -64,5 +65,13 @@ public class TransactionRequest {
 
     public void setSeq(int seq) {
         this.seq = seq;
+    }
+
+    public byte[] getProposalBytes() {
+        return proposalBytes;
+    }
+
+    public void setProposalBytes(byte[] proposalBytes) {
+        this.proposalBytes = proposalBytes;
     }
 }

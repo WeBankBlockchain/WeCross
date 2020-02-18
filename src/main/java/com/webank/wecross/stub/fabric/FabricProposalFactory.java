@@ -2,9 +2,8 @@ package com.webank.wecross.stub.fabric;
 
 import static com.webank.wecross.stub.fabric.FabricContractResource.getParamterList;
 
-import com.webank.wecross.proposal.Proposal;
 import com.webank.wecross.proposal.ProposalFactory;
-import com.webank.wecross.restserver.request.TransactionRequest;
+import com.webank.wecross.restserver.request.ProposalRequest;
 import org.hyperledger.fabric.sdk.Channel;
 import org.hyperledger.fabric.sdk.HFClient;
 import org.hyperledger.fabric.sdk.TransactionProposalRequest;
@@ -20,7 +19,7 @@ public class FabricProposalFactory implements ProposalFactory {
     }
 
     @Override
-    public Proposal build(TransactionRequest request) throws Exception {
+    public FabricProposal build(ProposalRequest request) throws Exception {
         // Build inner fabric proposal struct
         TransactionProposalRequest transactionProposalRequest =
                 fabricConn.getHfClient().newTransactionProposalRequest();

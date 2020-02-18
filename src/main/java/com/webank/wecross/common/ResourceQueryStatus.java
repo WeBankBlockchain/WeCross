@@ -6,6 +6,7 @@ public class ResourceQueryStatus {
     public static final int INTERNAL_ERROR = 1000;
     public static final int UNSUPPORTED_TYPE = 1001;
     public static final int NONSENSE_CALL = 1002;
+    public static final int INVALID_PROPOSAL_BYTES = 1003;
 
     // Fabric
     public static final int FABRIC_INVOKE_CHAINCODE_FAIL = 3001;

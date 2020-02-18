@@ -17,6 +17,7 @@ import org.fisco.bcos.web3j.abi.datatypes.StaticArray;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.abi.datatypes.Utf8String;
 import org.fisco.bcos.web3j.abi.datatypes.generated.Int256;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint160;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
@@ -24,6 +25,7 @@ import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameterName;
 import org.fisco.bcos.web3j.protocol.core.methods.request.Transaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Call;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.utils.Numeric;
 
 public class CallContract {
 
@@ -39,6 +41,10 @@ public class CallContract {
     }
 
     public CallResult call(String contractAddress, String funcName, Type... args) {
+        return call(contractAddress, credentials.getAddress(), funcName, args);
+    }
+
+    public CallResult call(String contractAddress, String account, String funcName, Type... args) {
         final Function function =
                 new Function(
                         funcName,
@@ -50,7 +56,7 @@ public class CallContract {
             ethCall =
                     web3j.call(
                                     Transaction.createEthCallTransaction(
-                                            credentials.getAddress(), contractAddress, data),
+                                            account, contractAddress, data),
                                     DefaultBlockParameterName.LATEST)
                             .send();
         } catch (Exception e) {
@@ -113,6 +119,25 @@ public class CallContract {
                     new ExecuteTransaction(contractAddress, web3j, credentials, gasPrice, gasLimit);
             transactionReceipt = executeTransaction.send(function);
 
+            String status = transactionReceipt.getStatus();
+            transactionReceipt.setMessage(StatusCode.getStatusMessage(status));
+
+        } catch (Exception e) {
+            transactionReceipt.setStatus(StatusCode.ExceptionCatched);
+            transactionReceipt.setMessage(e.getMessage());
+            transactionReceipt.setOutput("0x");
+        }
+        return transactionReceipt;
+    }
+
+    public TransactionReceipt sendTransaction(
+            String contractAddress, byte[] signedTransactionBytes) {
+        String signedTransaction = Numeric.toHexString(signedTransactionBytes);
+        ExecuteTransaction executeTransaction =
+                new ExecuteTransaction(contractAddress, web3j, credentials, gasPrice, gasLimit);
+        TransactionReceipt transactionReceipt = new TransactionReceipt();
+        try {
+            transactionReceipt = executeTransaction.sendSignedTransaction(signedTransaction);
             String status = transactionReceipt.getStatus();
             transactionReceipt.setMessage(StatusCode.getStatusMessage(status));
 
@@ -191,6 +216,11 @@ public class CallContract {
                         result.add(new TypeReference<Int256>() {});
                         break;
                     }
+                case "Address":
+                    {
+                        result.add(new TypeReference<Uint160>() {});
+                        break;
+                    }
                 case "String":
                     {
                         result.add(new TypeReference<Utf8String>() {});
@@ -237,6 +267,10 @@ public class CallContract {
             case "Int":
                 {
                     return ((BigInteger) data.getValue()).intValue();
+                }
+            case "Address":
+                {
+                    return ((BigInteger) data.getValue()).toString(16);
                 }
             case "String":
                 {

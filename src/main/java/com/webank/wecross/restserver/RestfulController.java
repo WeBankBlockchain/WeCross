@@ -10,10 +10,12 @@ import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.request.GetDataRequest;
+import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.ResourceRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
+import com.webank.wecross.restserver.response.ProposalResponse;
 import com.webank.wecross.restserver.response.ResourceResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
@@ -174,6 +176,47 @@ public class RestfulController {
                                 (SetDataResponse) resourceObj.setData(setDataRequest);
 
                         restResponse.setData(setDataResponse);
+                        break;
+                    }
+                case "callProposal":
+                    {
+                        if (resourceObj == null) {
+                            throw new WeCrossException(
+                                    ErrorCode.RESOURCE_ERROR, "Resource not found");
+                        }
+                        RestRequest<ProposalRequest> restRequest =
+                                objectMapper.readValue(
+                                        restRequestString,
+                                        new TypeReference<RestRequest<ProposalRequest>>() {});
+
+                        restRequest.checkRestRequest(path.toString(), method);
+
+                        ProposalRequest proposalRequest = (ProposalRequest) restRequest.getData();
+                        ProposalResponse proposalResponse =
+                                (ProposalResponse) resourceObj.callProposal(proposalRequest);
+
+                        restResponse.setData(proposalResponse);
+                        break;
+                    }
+                case "sendTransactionProposal":
+                    {
+                        if (resourceObj == null) {
+                            throw new WeCrossException(
+                                    ErrorCode.RESOURCE_ERROR, "Resource not found");
+                        }
+                        RestRequest<ProposalRequest> restRequest =
+                                objectMapper.readValue(
+                                        restRequestString,
+                                        new TypeReference<RestRequest<ProposalRequest>>() {});
+
+                        restRequest.checkRestRequest(path.toString(), method);
+
+                        ProposalRequest proposalRequest = (ProposalRequest) restRequest.getData();
+                        ProposalResponse proposalResponse =
+                                (ProposalResponse)
+                                        resourceObj.sendTransactionProposal(proposalRequest);
+
+                        restResponse.setData(proposalResponse);
                         break;
                     }
                 case "call":
