@@ -8,17 +8,17 @@
     orgName = 'Org1'
     mspId = 'Org1MSP'
     orgUserName = 'Admin'
-    orgUserKeyFile = 'classpath:/stub/fabric/orgUserKeyFile'
-    orgUserCertFile = 'classpath:/stub/fabric/orgUserCertFile'
-    ordererTlsCaFile = 'classpath:/stub/fabric/ordererTlsCaFile'
+    orgUserKeyFile = 'classpath:/stubs/fabric/orgUserKeyFile'
+    orgUserCertFile = 'classpath:/stubs/fabric/orgUserCertFile'
+    ordererTlsCaFile = 'classpath:/stubs/fabric/ordererTlsCaFile'
     ordererAddress = 'grpcs://127.0.0.1:7050'
 
 [peers]
     [peers.org1]
-        peerTlsCaFile = 'classpath:/stub/fabric/peerOrg1CertFile'
+        peerTlsCaFile = 'classpath:/stubs/fabric/peerOrg1CertFile'
         peerAddress = 'grpcs://127.0.0.1:7051'
     [peers.org2]
-         peerTlsCaFile = 'classpath:/stub/fabric/peerOrg2CertFile'
+         peerTlsCaFile = 'classpath:/stubs/fabric/peerOrg2CertFile'
          peerAddress = 'grpcs://127.0.0.1:9051'
 
 # resources is a list
