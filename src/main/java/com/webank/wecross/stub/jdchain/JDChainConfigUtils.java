@@ -5,7 +5,7 @@ import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.routine.htlc.HTLCResource;
+import com.webank.wecross.routine.htlc.AssetHTLCResource;
 import com.webank.wecross.utils.ConfigUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -92,12 +92,12 @@ public class JDChainConfigUtils {
                         initJDChainContractResource(name, resource, prefix, stubPath);
                 jdChainResources.put(name, jdChainContractResource);
 
-            } else if (type.equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_HTLC_CONTRACT)) {
+            } else if (type.equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_ASSET_HTLC_CONTRACT)) {
                 JDChainContractResource jdChainContractResource =
                         initJDChainContractResource(name, resource, prefix, stubPath);
-                HTLCResource htlcResource = new HTLCResource(jdChainContractResource);
-                jdChainResources.put(name, htlcResource);
-
+                AssetHTLCResource assetHtlcResource =
+                        new AssetHTLCResource(jdChainContractResource);
+                jdChainResources.put(name, assetHtlcResource);
             } else {
                 String errorMessage = "Undefined jdchain resource type: " + type;
                 throw new WeCrossException(ErrorCode.UNEXPECTED_CONFIG, errorMessage);

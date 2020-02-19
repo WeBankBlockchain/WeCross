@@ -21,7 +21,8 @@ public class ResourceQueryStatus {
     public static final int JDCHAIN_PARAMETER_INVALIDATE = 4006;
     public static final int JDCHAIN_GETDATA_ERROR = 4007;
 
-    // HTLC
-    public static final int HTLC_REQUEST_ERROR = 5001;
-    public static final int HTLC_VERIFY_LOCK_ERROR = 5002;
+    // AssetHTLC
+    public static final int ASSET_HTLC_REQUEST_ERROR = 5001;
+    public static final int ASSET_HTLC_VERIFY_LOCK_ERROR = 5002;
+    public static final int ASSET_HTLC_NO_PERMISSION = 5003;
 }

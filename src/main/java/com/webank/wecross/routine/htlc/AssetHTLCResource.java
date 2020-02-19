@@ -20,19 +20,19 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HTLCResource implements Resource {
+public class AssetHTLCResource implements Resource {
 
-    private Logger logger = LoggerFactory.getLogger(HTLCResource.class);
+    private Logger logger = LoggerFactory.getLogger(AssetHTLCResource.class);
 
     private Resource originResource;
 
-    public HTLCResource(Resource originResource) {
+    public AssetHTLCResource(Resource originResource) {
         this.originResource = originResource;
     }
 
     @Override
     public String getType() {
-        return WeCrossType.RESOURCE_TYPE_HTLC_CONTRACT;
+        return WeCrossType.RESOURCE_TYPE_ASSET_HTLC_CONTRACT;
     }
 
     @Override
@@ -57,14 +57,23 @@ public class HTLCResource implements Resource {
 
     @Override
     public TransactionResponse call(TransactionRequest request) {
-        return originResource.call(request);
+        TransactionRequest newRequest;
+        try {
+            newRequest = handleCallRequest(request);
+        } catch (WeCrossException e) {
+            TransactionResponse transactionResponse = new TransactionResponse();
+            transactionResponse.setErrorCode(e.getErrorCode());
+            transactionResponse.setErrorMessage(e.getMessage());
+            return transactionResponse;
+        }
+        return originResource.call(newRequest);
     }
 
     @Override
     public TransactionResponse sendTransaction(TransactionRequest request) {
         TransactionRequest newRequest;
         try {
-            newRequest = handleRequest(request);
+            newRequest = handleSendTransactionRequest(request);
         } catch (WeCrossException e) {
             TransactionResponse transactionResponse = new TransactionResponse();
             transactionResponse.setErrorCode(e.getErrorCode());
@@ -128,21 +137,26 @@ public class HTLCResource implements Resource {
         return null;
     }
 
-    private TransactionRequest handleRequest(TransactionRequest request) throws WeCrossException {
+    public TransactionRequest handleSendTransactionRequest(TransactionRequest request)
+            throws WeCrossException {
         if (request.getMethod().equals("unlock")) {
             Object[] args = request.getArgs();
             if (args == null || args.length < 2) {
                 logger.error("format of request is error in sendTransaction for unlock");
                 throw new WeCrossException(
-                        ResourceQueryStatus.HTLC_REQUEST_ERROR,
+                        ResourceQueryStatus.ASSET_HTLC_REQUEST_ERROR,
                         "hash of lock transaction not found");
             }
             String transactionHash = (String) args[0];
 
+            AssetHTLC assetHTLC = new AssetHTLC();
             // Verify that the asset is locked
-            if (!HTLC.verifyLock(transactionHash)) {
+            if (!assetHTLC
+                    .verifyLock(originResource, transactionHash)
+                    .trim()
+                    .equalsIgnoreCase("true")) {
                 throw new WeCrossException(
-                        ResourceQueryStatus.HTLC_VERIFY_LOCK_ERROR,
+                        ResourceQueryStatus.ASSET_HTLC_VERIFY_LOCK_ERROR,
                         "verify transaction of lock failed");
             }
 
@@ -151,6 +165,18 @@ public class HTLCResource implements Resource {
         }
 
         logger.info("HTLCRequest: {}", request.toString());
+        return request;
+    }
+
+    public TransactionRequest handleCallRequest(TransactionRequest request)
+            throws WeCrossException {
+        if (request.getMethod().equals("getSecret")) {
+            if (request.getFromP2P()) {
+                throw new WeCrossException(
+                        ResourceQueryStatus.ASSET_HTLC_NO_PERMISSION,
+                        "cannot call getSecret by rpc interface");
+            }
+        }
         return request;
     }
 }

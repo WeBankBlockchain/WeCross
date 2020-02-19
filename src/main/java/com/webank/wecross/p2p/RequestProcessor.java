@@ -350,6 +350,7 @@ public class RequestProcessor implements Processor {
 
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) p2pRequest.getData();
+                        transactionRequest.setFromP2P(true);
                         TransactionResponse transactionResponse =
                                 (TransactionResponse) resourceObj.call(transactionRequest);
 
@@ -370,6 +371,7 @@ public class RequestProcessor implements Processor {
 
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) p2pRequest.getData();
+                        transactionRequest.setFromP2P(true);
                         TransactionResponse transactionResponse =
                                 (TransactionResponse)
                                         resourceObj.sendTransaction(transactionRequest);
