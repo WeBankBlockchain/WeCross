@@ -1,28 +1,47 @@
 package com.webank.wecross.routine.htlc;
 
-public class HTLC {
+import com.webank.wecross.resource.Resource;
+import java.math.BigInteger;
 
-    public static boolean lock(String ipath, String hash) {
-        return false;
-    }
+public interface HTLC {
+    String lock(Resource htlcResource, String h) throws Exception;
 
-    public static boolean unlock(String ipath, String hash) {
-        return false;
-    }
+    String unlock(Resource selfHTLCResource, Resource counterpartyHTLCResource, String h, String s)
+            throws Exception;
 
-    public static boolean timeout(String ipath, String hash) {
-        return false;
-    }
+    String rollback(Resource htlcResource, String h) throws Exception;
 
-    public static boolean verifyLock(String transactionHash) {
-        return false;
-    }
+    String verifyLock(Resource htlcResource, String transactionHash);
 
-    public static boolean verifyUnlock(String transactionHash) {
-        return false;
-    }
+    String verifyUnlock(Resource htlcResource, String transactionHash);
 
-    public static boolean verifyTimeout(String transactionHash) {
-        return false;
-    }
+    String getCounterpartyHTLCIpath(Resource htlcResource) throws Exception;
+
+    String getTask(Resource htlcResource) throws Exception;
+
+    String deleteTask(Resource htlcResource, String h) throws Exception;
+
+    String getSecret(Resource htlcResource, String h) throws Exception;
+
+    BigInteger getSelfTimelock(Resource htlcResource, String h) throws Exception;
+
+    BigInteger getCounterpartyTimelock(Resource htlcResource, String h) throws Exception;
+
+    boolean getSelfLockStatus(Resource htlcResource, String h) throws Exception;
+
+    boolean getCounterpartyLockStatus(Resource htlcResource, String h) throws Exception;
+
+    boolean getSelfUnlockStatus(Resource htlcResource, String h) throws Exception;
+
+    boolean getCounterpartyUnlockStatus(Resource htlcResource, String h) throws Exception;
+
+    boolean getSelfRollbackStatus(Resource htlcResource, String h) throws Exception;
+
+    boolean getCounterpartyRollbackStatus(Resource htlcResource, String h) throws Exception;
+
+    void setCounterpartyLockStatus(Resource htlcResource, String h) throws Exception;
+
+    void setCounterpartyUnlockStatus(Resource htlcResource, String h) throws Exception;
+
+    void setCounterpartyRollbackStatus(Resource htlcResource, String h) throws Exception;
 }

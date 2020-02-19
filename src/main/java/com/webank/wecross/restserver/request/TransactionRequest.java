@@ -10,6 +10,22 @@ public class TransactionRequest {
     private String retTypes[];
     private String method;
     private Object args[];
+    private boolean fromP2P;
+
+    public TransactionRequest() {}
+
+    public TransactionRequest(String[] retTypes, String method, Object[] args) {
+        this.retTypes = retTypes;
+        this.method = method;
+        this.args = args;
+    }
+
+    public TransactionRequest(String[] retTypes, String method, Object[] args, boolean fromP2P) {
+        this.retTypes = retTypes;
+        this.method = method;
+        this.args = args;
+        this.fromP2P = fromP2P;
+    }
 
     public byte[] getSig() {
         return sig;
@@ -43,12 +59,23 @@ public class TransactionRequest {
         this.args = args;
     }
 
+    public boolean getFromP2P() {
+        return fromP2P;
+    }
+
+    public void setFromP2P(boolean fromP2P) {
+        this.fromP2P = fromP2P;
+    }
+
     @Override
     public String toString() {
         return "TransactionRequest{"
-                + "sig='"
-                + sig
-                + '\''
+                + "seq="
+                + seq
+                + ", sig="
+                + Arrays.toString(sig)
+                + ", proposalBytes="
+                + Arrays.toString(proposalBytes)
                 + ", retTypes="
                 + Arrays.toString(retTypes)
                 + ", method='"
@@ -56,6 +83,8 @@ public class TransactionRequest {
                 + '\''
                 + ", args="
                 + Arrays.toString(args)
+                + ", fromP2P="
+                + fromP2P
                 + '}';
     }
 
