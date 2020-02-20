@@ -4,10 +4,11 @@ import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
-import com.webank.wecross.network.Network;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.StubsFactory;
 import com.webank.wecross.utils.ConfigUtils;
+import com.webank.wecross.zone.Zone;
+
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Resource;
@@ -25,8 +26,8 @@ public class NetworksFactory {
     Toml toml;
 
     @Bean
-    public Map<String, Network> readNetworksConfig() {
-        Map<String, Network> result = new HashMap<>();
+    public Map<String, Zone> readNetworksConfig() {
+        Map<String, Zone> result = new HashMap<>();
 
         try {
             String network = toml.getString("common.network");
@@ -57,7 +58,7 @@ public class NetworksFactory {
 
             Map<String, String> stubsDir = ConfigUtils.getStubsDir(stubsPath);
             Map<String, Stub> stubsBean = StubsFactory.getStubs(network, stubsDir);
-            Network networkBean = new Network();
+            Zone networkBean = new Zone();
             if (stubsBean != null) {
                 // init network bean
                 networkBean.setStubs(stubsBean);

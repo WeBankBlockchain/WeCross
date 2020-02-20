@@ -3,10 +3,8 @@ package com.webank.wecross.p2p;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.wecross.common.QueryStatus;
 import com.webank.wecross.exception.WeCrossException;
-import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.engine.P2PResponse;
 import com.webank.wecross.p2p.netty.common.Node;
-import com.webank.wecross.p2p.netty.common.Utils;
 import com.webank.wecross.p2p.netty.message.processor.Processor;
 import com.webank.wecross.p2p.netty.message.proto.Message;
 import com.webank.wecross.p2p.netty.message.serialize.MessageSerializer;
@@ -23,20 +21,20 @@ import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.zone.ZoneManager;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ResourceRequestProcessor implements Processor {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceRequestProcessor.class);
 
     private PeerManager peerManager;
-    private NetworkManager networkManager;
+    private ZoneManager zoneManager;
 
     public PeerManager getPeerManager() {
         return peerManager;
@@ -46,12 +44,12 @@ public class ResourceRequestProcessor implements Processor {
         this.peerManager = peerManager;
     }
 
-    public NetworkManager getNetworkManager() {
-        return networkManager;
+    public ZoneManager getZoneManager() {
+        return zoneManager;
     }
 
-    public void setNetworkManager(NetworkManager networkManager) {
-        this.networkManager = networkManager;
+    public void setZoneManager(ZoneManager networkManager) {
+        this.zoneManager = networkManager;
     }
 
     @Override
@@ -246,7 +244,7 @@ public class ResourceRequestProcessor implements Processor {
         logger.debug("request string: {}", p2pRequestString);
 
         try {
-            Resource resourceObj = networkManager.getResource(path);
+            Resource resourceObj = zoneManager.getResource(path);
             if (resourceObj == null) {
                 logger.warn("Unable to find resource: {}.{}.{}", network, stub, resource);
 

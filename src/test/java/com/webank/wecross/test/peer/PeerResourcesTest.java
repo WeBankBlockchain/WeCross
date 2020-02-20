@@ -1,6 +1,5 @@
 package com.webank.wecross.test.peer;
 
-import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.peer.PeerResources;
@@ -8,6 +7,8 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.resource.TestResource;
+import com.webank.wecross.zone.ZoneManager;
+
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Assert;
@@ -76,11 +77,21 @@ public class PeerResourcesTest {
     @Test
     public void hasMyselfTest() throws Exception {
         PeerResources peerResources = newMockPeerInfo();
-        NetworkManager networkManager = new NetworkManager();
+        ZoneManager networkManager = new ZoneManager();
+        
+        ResourceInfo resourceInfo = new ResourceInfo();
+        resourceInfo.setPath("network.stub.resource1");
+        resourceInfo.setDistance(1);
+        
+        Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
+        resources.add(resourceInfo);
+        networkManager.addRemoteResources(new PeerInfo(new Node("", "", 0)), resources);
 
+        /*
         Resource resource = new TestResource();
         resource.setPath(Path.decode("network.stub.resource1"));
         networkManager.addResource(resource);
+        */
         peerResources.updateMyselfResources(networkManager.getAllNetworkStubResourceInfo(true));
 
         peerResources.loggingInvalidResources();

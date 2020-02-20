@@ -1,4 +1,4 @@
-package com.webank.wecross.network;
+package com.webank.wecross.zone;
 
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.peer.PeerInfo;
@@ -12,6 +12,7 @@ import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.remote.RemoteResource;
+import com.webank.wecross.stub.remote.RemoteStub;
 import com.webank.wecross.utils.core.PathUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,11 +25,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NetworkManager {
-
-    private Map<String, Network> networks = new HashMap<>();
+public class ZoneManager {
+    private Map<String, Zone> zones = new HashMap<>();
+    private Map<String, Integer> referenceMap;
     private int seq = 1;
-    private Logger logger = LoggerFactory.getLogger(NetworkManager.class);
+    private Logger logger = LoggerFactory.getLogger(ZoneManager.class);
     private P2PMessageEngine p2pEngine;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -43,7 +44,7 @@ public class NetworkManager {
     public Resource getResource(Path path) {
         lock.readLock().lock();
         try {
-            Network network = getNetwork(path);
+            Zone network = getNetwork(path);
 
             if (network != null) {
                 Stub stub = network.getStub(path);
@@ -63,12 +64,13 @@ public class NetworkManager {
         return null;
     }
 
+    /*
     public void addResource(Resource resource) throws Exception {
         lock.writeLock().lock();
         try {
             logger.trace("Add resource path:{}", resource.getPath());
             String networkName = resource.getPath().getNetwork();
-            networks.putIfAbsent(networkName, new Network());
+            networks.putIfAbsent(networkName, new Zone());
             networks.get(networkName).addResource(resource);
         } finally {
             lock.writeLock().unlock();
@@ -79,7 +81,7 @@ public class NetworkManager {
         lock.writeLock().lock();
         try {
             logger.trace("Remove resource ignore:{} path:{}", ignoreLocal, path);
-            Network network = getNetwork(path);
+            Zone network = getNetwork(path);
             if (network != null) {
                 network.removeResource(path, ignoreLocal);
 
@@ -100,8 +102,9 @@ public class NetworkManager {
             lock.writeLock().unlock();
         }
     }
+    */
 
-    public Network getNetwork(Path path) {
+    public Zone getNetwork(Path path) {
         lock.readLock().lock();
         try {
             return getNetwork(path.getNetwork());
@@ -110,23 +113,23 @@ public class NetworkManager {
         }
     }
 
-    public Network getNetwork(String name) {
+    public Zone getNetwork(String name) {
         lock.readLock().lock();
         try {
             logger.trace("get network: {}", name);
-            Network network = networks.get(name);
+            Zone network = zones.get(name);
             return network;
         } finally {
             lock.readLock().unlock();
         }
     }
 
-    public Map<String, Network> getNetworks() {
-        return networks;
+    public Map<String, Zone> getNetworks() {
+        return zones;
     }
 
-    public void setNetworks(Map<String, Network> networks) {
-        this.networks = networks;
+    public void setNetworks(Map<String, Zone> networks) {
+        this.zones = networks;
     }
 
     public int getSeq() {
@@ -136,9 +139,8 @@ public class NetworkManager {
     public void setSeq(int seq) {
         this.seq = seq;
     }
-
+    
     public Map<String, ResourceInfo> getAllNetworkStubResourceInfo(boolean ignoreRemote) {
-
         lock.readLock().lock();
         try {
             Set<Path> resourcePaths = getAllNetworkStubResourcePath(ignoreRemote);
@@ -172,17 +174,18 @@ public class NetworkManager {
         try {
             Set<String> ret = new HashSet<>();
 
-            for (Map.Entry<String, Network> entry : networks.entrySet()) {
-                String networkName = PathUtils.toPureName(entry.getKey());
-                Set<String> allStubResourceName =
-                        entry.getValue().getAllStubResourceName(ignoreRemote);
-
-                if (allStubResourceName == null) {
-                    return null;
-                }
-
-                for (String stubResourceName : allStubResourceName) {
-                    ret.add(networkName + "." + stubResourceName);
+            for (Map.Entry<String, Zone> zoneEntry : zones.entrySet()) {
+                String networkName = PathUtils.toPureName(zoneEntry.getKey());
+                
+                for(Map.Entry<String, Stub> stubEntry: zoneEntry.getValue().getStubs().entrySet()) {
+                	String stubName = PathUtils.toPureName(stubEntry.getKey());
+                	
+                	for (Map.Entry<String, Resource> resourceEntry : stubEntry.getValue().getResources().entrySet()) {
+                        if (resourceEntry.getValue().getDistance() == 0 || !ignoreRemote) {
+                        	String resourceName = PathUtils.toPureName(resourceEntry.getKey());
+                            ret.add(networkName + "." + stubName + "." + resourceName);
+                        }
+                    }
                 }
             }
             return ret;
@@ -208,6 +211,101 @@ public class NetworkManager {
         return null;
     }
 
+    public void addRemoteResources(PeerInfo peer, Set<ResourceInfo> resources) {
+    	lock.writeLock().lock();
+    	try {
+    		for(ResourceInfo resourceInfo: resources) {
+    			Path path;
+    			try {
+					path = Path.decode(resourceInfo.getPath());
+				} catch (Exception e) {
+					logger.error("Parse path error: {} {}", resourceInfo.getPath(), e);
+					continue;
+				}
+    			
+    			Zone zone = zones.get(path.getNetwork());
+    			if(zone == null) {
+    				zone = new Zone();
+    				zones.put(path.getNetwork(), zone);
+    			}
+    			
+				Stub stub = zone.getStubs().get(path.getChain());
+				if(stub == null) {
+					stub = new RemoteStub();
+					zone.getStubs().put(path.getChain(), stub);
+				}
+				
+				Resource resource = stub.getResources().get(path.getResource());
+				if(resource == null) {
+					resource = stub.getResources().put(path.getResource(), new RemoteResource(peer, resourceInfo.getDistance(), p2pEngine));
+				}
+				else {
+					resource.getPeers().add(peer);
+				}
+    		}
+    	}
+    	finally {
+            lock.writeLock().unlock();
+        }
+    }
+    
+    public void removeRemoteResources(PeerInfo peer, Set<ResourceInfo> resources) {
+    	lock.writeLock().lock();
+    	try {
+    		for(ResourceInfo resourceInfo: resources) {
+    			Path path;
+    			try {
+					path = Path.decode(resourceInfo.getPath());
+				} catch (Exception e) {
+					logger.error("Parse path error: {} {}", resourceInfo.getPath(), e);
+					continue;
+				}
+    			
+    			Zone zone = zones.get(path.getNetwork());
+    			if(zone == null) {
+    				// zone not exists, bug?
+    				logger.error("Zone not exists! Peer: {} Path: {}", peer, path);
+    				continue;
+    			}
+    			
+				Stub stub = zone.getStub(path.getChain());
+				if(stub == null) {
+					// stub not exists, bug?
+					logger.error("Stub not exists! Peer: {} Path: {}", peer, path);
+					continue;
+				}
+				
+				Resource resource = stub.getResources().get(path.getResource());
+				
+				if(resource == null) {
+					// resource not exists, bug?
+					logger.error("Resource not exists! Peer: {} Path: {}", peer, path);
+					continue;
+				}
+				
+				if(!resource.getPeers().remove(peer)) {
+					logger.error("Remote resource doesn't contain such peer: {} path: {}", peer, path);
+					continue;
+				}
+				
+				if(resource.getPeers().isEmpty()) {
+					stub.getResources().remove(path.getResource());
+				}
+				
+				if(stub.getResources().isEmpty()) {
+					zone.getStubs().remove(path.getChain());
+				}
+				
+				if(zone.getStubs().isEmpty()) {
+					zones.remove(path.getNetwork());
+				}
+    		}
+    	} finally {
+            lock.writeLock().unlock();
+        }
+    }
+    
+    /*
     public void updateActivePeerNetwork(PeerResources peerResource) {
         lock.writeLock().lock();
         try {
@@ -281,6 +379,7 @@ public class NetworkManager {
             lock.writeLock().unlock();
         }
     }
+    */
 
     public List<Resource> getAllResources(boolean ignoreRemote) throws Exception {
         lock.readLock().lock();

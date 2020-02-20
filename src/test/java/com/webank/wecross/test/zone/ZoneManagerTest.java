@@ -1,6 +1,5 @@
-package com.webank.wecross.test.network;
+package com.webank.wecross.test.zone;
 
-import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.peer.PeerInfo;
@@ -9,78 +8,194 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.resource.TestResource;
+import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.remote.RemoteResource;
 import com.webank.wecross.test.peer.PeerResourcesTest;
+import com.webank.wecross.zone.Zone;
+import com.webank.wecross.zone.ZoneManager;
+
+import javafx.scene.input.ZoomEvent;
+
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NetworkManagerTest {
+public class ZoneManagerTest {
     private PeerInfo mockPeer = new PeerInfo(new Node());
 
     private P2PMessageEngine p2pEngine = null;
 
-    private Logger logger = LoggerFactory.getLogger(NetworkManagerTest.class);
+    private Logger logger = LoggerFactory.getLogger(ZoneManagerTest.class);
 
     @Test
-    public void resourceAddAndRemoveTest() throws Exception {
-        NetworkManager networkManager = new NetworkManager();
-        // Add test some are local
+    public void addRemoteResourcesTest() throws Exception {
+        ZoneManager zoneManager = Mockito.spy(ZoneManager.class);
+        
+        PeerInfo peer = new PeerInfo(new Node("aaa", "127.0.0.1", 100));
+        
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
-                RemoteResource resource = new RemoteResource(mockPeer, 1, p2pEngine);
-                resource.setPath(Path.decode("payment.bcos" + i + ".contract" + j));
-                resource.setDistance(i); // i == 0, set it as local resource
-                networkManager.addResource(resource);
+                ResourceInfo resourceInfo = new ResourceInfo();
+                resourceInfo.setPath("payment.bcos" + i + ".contract" + j);
+                resourceInfo.setDistance(i); // i == 0, set it as local resource
+                
+                Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
+                resources.add(resourceInfo);
+                zoneManager.addRemoteResources(peer, resources);
             }
         }
 
-        Set<String> allResources = networkManager.getAllNetworkStubResourceName(false);
+        Set<String> allResources = zoneManager.getAllNetworkStubResourceName(false);
         System.out.println(allResources);
         Assert.assertEquals(12, allResources.size());
 
-        Set<String> allLocalResources = networkManager.getAllNetworkStubResourceName(true);
+        Set<String> allLocalResources = zoneManager.getAllNetworkStubResourceName(true);
         System.out.println(allLocalResources);
         Assert.assertEquals(4, allLocalResources.size());
-
-        // Update route test
-        for (int i = 1; i < 3; i++) {
+        
+        //test for wrong path
+        ResourceInfo resourceInfo = new ResourceInfo();
+        resourceInfo.setPath("payment.bcos");
+        resourceInfo.setDistance(0); // i == 0, set it as local resource
+        
+        Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
+        resources.add(resourceInfo);
+        zoneManager.addRemoteResources(peer, resources);
+        
+        Set<String> allResources2 = zoneManager.getAllNetworkStubResourceName(false);
+        System.out.println(allResources2);
+        Assert.assertEquals(12, allResources2.size());
+        
+        //test for different peer
+        ResourceInfo resourceInfo2 = new ResourceInfo();
+        resourceInfo2.setPath("payment.bcos0.contract0");
+        resourceInfo2.setDistance(0); // i == 0, set it as local resource
+        
+        PeerInfo peer2 = new PeerInfo(new Node("bbb", "127.0.0.1", 100));
+        
+        Set<ResourceInfo> resources2 = new HashSet<ResourceInfo>();
+        resources2.add(resourceInfo2);
+        zoneManager.addRemoteResources(peer2, resources2);
+        
+        Set<String> allResources3 = zoneManager.getAllNetworkStubResourceName(false);
+        System.out.println(allResources3);
+        Assert.assertEquals(12, allResources3.size());
+        
+        Resource resource2 = zoneManager.getResource(Path.decode("payment.bcos0.contract0"));
+        Assert.assertEquals(2, resource2.getPeers().size());
+    }
+    
+    @Test
+    public void removeRemoteResourcesTest() throws Exception {
+    	ZoneManager zoneManager = Mockito.spy(ZoneManager.class);
+        
+        PeerInfo peer = new PeerInfo(new Node("aaa", "127.0.0.1", 100));
+        
+        for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
-                RemoteResource resource = new RemoteResource(mockPeer, 1, p2pEngine);
-                resource.setPath(Path.decode("payment.bcos" + i + ".contract" + j));
-                resource.setDistance(i - 1); // i == 0, set it as local resource
-                networkManager.addResource(resource);
+                ResourceInfo resourceInfo = new ResourceInfo();
+                resourceInfo.setPath("payment.bcos" + i + ".contract" + j);
+                resourceInfo.setDistance(i); // i == 0, set it as local resource
+                
+                Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
+                resources.add(resourceInfo);
+                zoneManager.addRemoteResources(peer, resources);
             }
         }
-
-        allResources = networkManager.getAllNetworkStubResourceName(false);
-        System.out.println(allResources);
+        
+        Set<String> allResources = zoneManager.getAllNetworkStubResourceName(false);
         Assert.assertEquals(12, allResources.size());
-
-        allLocalResources = networkManager.getAllNetworkStubResourceName(true);
-        System.out.println(allLocalResources);
-        Assert.assertEquals(8, allLocalResources.size());
-
-        // Remove test
-        int resourcesSize = allResources.size();
-        for (String pathName : allResources) {
-            networkManager.removeResource(Path.decode(pathName));
-            resourcesSize--;
-            Set<String> currentResources = networkManager.getAllNetworkStubResourceName(false);
-            Assert.assertEquals(currentResources.size(), resourcesSize);
+        
+        ResourceInfo removeResource = new ResourceInfo();
+        removeResource.setPath("payment.bcos0.contract0");
+        removeResource.setDistance(0);
+        
+        Set<ResourceInfo> removeResources = new HashSet<ResourceInfo>();
+        removeResources.add(removeResource);
+        
+        zoneManager.removeRemoteResources(peer, removeResources);
+        
+        allResources = zoneManager.getAllNetworkStubResourceName(false);
+        Assert.assertEquals(11, allResources.size());
+        
+        ResourceInfo resourceInfo2 = new ResourceInfo();
+        resourceInfo2.setPath("payment.bcos1.contract1");
+        resourceInfo2.setDistance(0); // i == 0, set it as local resource
+        
+        PeerInfo peer2 = new PeerInfo(new Node("bbb", "127.0.0.1", 100));
+        
+        Set<ResourceInfo> resources2 = new HashSet<ResourceInfo>();
+        resources2.add(resourceInfo2);
+        zoneManager.addRemoteResources(peer2, resources2);
+        
+        removeResource.setPath("payment.bcos1.contract1");
+        zoneManager.removeRemoteResources(peer2, removeResources);
+        
+        allResources = zoneManager.getAllNetworkStubResourceName(false);
+        Assert.assertEquals(11, allResources.size());
+        
+        Resource resource = zoneManager.getResource(Path.decode("payment.bcos1.contract1"));
+        Assert.assertEquals(1, resource.getPeers().size());
+        Assert.assertTrue(resource.getPeers().contains(peer));
+        Assert.assertFalse(resource.getPeers().contains(peer2));
+     
+        for (int j = 0; j < 4; j++) {
+	        ResourceInfo resourceInfo = new ResourceInfo();
+	        resourceInfo.setPath("payment.bcos2" + ".contract" + j);
+	        resourceInfo.setDistance(2); // i == 0, set it as local resource
+	        
+	        Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
+	        resources.add(resourceInfo);
+	        zoneManager.removeRemoteResources(peer, resources);
         }
+        
+        Zone zone = zoneManager.getNetwork("payment");
+        Stub stub = zone.getStub("bcos2");
+        Assert.assertNull(stub);
+        
+        //fatal test
+        ResourceInfo resourceInfo = new ResourceInfo();
+        resourceInfo.setPath("payment.bcos2.aaa");
+        resourceInfo.setDistance(2);
+        
+        Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
+    	resources.add(resourceInfo);
+        zoneManager.removeRemoteResources(peer2, resources);
+        
+        resourceInfo.setPath("payment.bcos1.contract0");
+        zoneManager.removeRemoteResources(peer2, resources);
+        
+        resourceInfo.setPath("payment.bcos1.abc");
+        zoneManager.removeRemoteResources(peer2, resources);
+        
+        resourceInfo.setPath("payment1.bcos4.abc");
+        zoneManager.removeRemoteResources(peer2, resources);
+        
+        resourceInfo.setPath("payment.abc");
+        zoneManager.removeRemoteResources(peer2, resources);
+        
+        for(Map.Entry<String, ResourceInfo> entry: zoneManager.getAllNetworkStubResourceInfo(false).entrySet()) {
+        	resources = new HashSet<ResourceInfo>();
+        	resources.add(entry.getValue());
+        	zoneManager.removeRemoteResources(peer, resources);
+        }
+        
+        Assert.assertEquals(0, zoneManager.getNetworks().size());
     }
 
+    /*
     @Test
     public void resourceUpdatePeerNetworkTest() throws Exception {
-        NetworkManager networkManager = new NetworkManager();
+        ZoneManager networkManager = new ZoneManager();
 
         for (int i = 0; i < 2; i++) {
             RemoteResource resource = new RemoteResource(mockPeer, 1, p2pEngine);
@@ -180,7 +295,7 @@ public class NetworkManagerTest {
 
     @Test
     public void updateActivePeerNetworkTest() throws Exception {
-        NetworkManager networkManager = new NetworkManager();
+        ZoneManager networkManager = new ZoneManager();
         PeerResources peerResources = PeerResourcesTest.newMockPeerInfo();
 
         Resource localResource = new TestResource();
@@ -199,7 +314,7 @@ public class NetworkManagerTest {
     @Test
     public void addAndRemoveConcurrentTest() {
         try {
-            NetworkManager networkManager = new NetworkManager();
+            ZoneManager networkManager = new ZoneManager();
             Set<Thread> threads = new HashSet<>();
             for (int i = 0; i < 8; i++) {
                 Runnable runnable =
@@ -233,7 +348,7 @@ public class NetworkManagerTest {
         }
     }
 
-    private void addSomeTestResources(NetworkManager networkManager, int num) throws Exception {
+    private void addSomeTestResources(ZoneManager networkManager, int num) throws Exception {
         try {
             logger.info("Add resource");
             List<Integer> idList = new ArrayList<>();
@@ -260,7 +375,7 @@ public class NetworkManagerTest {
         }
     }
 
-    private void removeSomeTestResources(NetworkManager networkManager, int num) throws Exception {
+    private void removeSomeTestResources(ZoneManager networkManager, int num) throws Exception {
 
         logger.info("Remove resource");
         List<Integer> idList = new ArrayList<>();
@@ -280,4 +395,5 @@ public class NetworkManagerTest {
             networkManager.removeResource(path);
         }
     }
+    */
 }

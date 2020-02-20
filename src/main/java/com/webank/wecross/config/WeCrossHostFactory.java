@@ -2,8 +2,9 @@ package com.webank.wecross.config;
 
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.host.WeCrossHost;
-import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.peer.PeerManager;
+import com.webank.wecross.zone.ZoneManager;
+
 import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 public class WeCrossHostFactory {
 
     @Resource(name = "newNetworkManager")
-    NetworkManager networkManager;
+    ZoneManager networkManager;
 
     @Resource(name = "newPeerManager")
     PeerManager peerManager;
@@ -25,16 +26,7 @@ public class WeCrossHostFactory {
         WeCrossHost host = new WeCrossHost();
         host.setNetworkManager(networkManager);
         host.setPeerManager(peerManager);
-        host.setEnableTestResource(enableTestResource());
         host.start();
         return host;
-    }
-
-    private boolean enableTestResource() {
-        try {
-            return toml.getBoolean("test.enableTestResource");
-        } catch (Exception e) {
-            return false;
-        }
     }
 }

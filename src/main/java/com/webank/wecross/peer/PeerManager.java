@@ -2,7 +2,6 @@ package com.webank.wecross.peer;
 
 import static com.webank.wecross.resource.ResourceInfo.isEqualInfos;
 
-import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.netty.P2PService;
@@ -13,6 +12,8 @@ import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.utils.core.SeqUtils;
+import com.webank.wecross.zone.ZoneManager;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -23,18 +24,12 @@ import org.slf4j.LoggerFactory;
 public class PeerManager {
     Logger logger = LoggerFactory.getLogger(PeerManager.class);
 
-    private NetworkManager networkManager;
-
+    private ZoneManager zoneManager;
     private P2PMessageEngine p2pEngine;
-
     private Map<Node, PeerInfo> peerInfos = new HashMap<Node, PeerInfo>(); // peer
-
     private int seq = 1; // Seq of the host
-
     private SyncPeerMessageHandler messageHandler;
-
     private P2PService p2PService;
-
     private long peerActiveTimeout;
 
     private Map<String, ResourceInfo> activeResources = new HashMap<>();
@@ -66,15 +61,15 @@ public class PeerManager {
     }
 
     public void newSeq() {
-        seq = this.seq = SeqUtils.newSeq();
+        this.seq = SeqUtils.newSeq();
     }
 
     public int getSeq() {
         return seq;
     }
 
-    public NetworkManager getNetworkManager() {
-        return this.networkManager;
+    public ZoneManager getZoneManager() {
+        return this.zoneManager;
     }
 
     public int peerSize() {
@@ -89,12 +84,23 @@ public class PeerManager {
         }
     }
 
-    public synchronized void updatePeerInfo(PeerInfo peerInfo) {
-        peerInfos.put(peerInfo.getNode(), peerInfo);
+    public synchronized PeerInfo addPeerInfo(Node node) {
+    	PeerInfo peerInfo = new PeerInfo(node);
+        peerInfos.put(node, peerInfo);
+        
+        return peerInfo;
     }
 
     public synchronized void removePeerInfo(Node node) {
+    	PeerInfo peerInfo = peerInfos.get(node);
+    	if(peerInfo == null) {
+    		logger.error("Peer not exists, bug?");
+    		return;
+    	}
+    	
+    	zoneManager.removeRemoteResources(peerInfo, peerInfo.getResourceInfos());
         peerInfos.remove(node);
+        
     }
 
     public synchronized void clearPeerInfos() {
@@ -102,10 +108,6 @@ public class PeerManager {
     }
 
     public synchronized void notePeerActive(PeerInfo peer) {
-        PeerInfo peerInfo = getPeerInfo(peer.getNode());
-        if (peerInfo == null) {
-            updatePeerInfo(peer);
-        }
         peer.noteAlive();
     }
 
@@ -116,7 +118,7 @@ public class PeerManager {
         return peerInfos.get(node).getSeq() != currentSeq;
     }
 
-    public Object onRestfulPeerMessage(PeerInfo peer, String method, P2PMessage msg) {
+    public Object onRestfulPeerMessage(PeerInfo peer, String method, P2PMessage<?> msg) {
         switch (method) {
             case "requestSeq":
                 {
@@ -191,7 +193,7 @@ public class PeerManager {
         return data;
     }
 
-    public void handleSeq(PeerInfo peer, P2PMessage msg) {
+    public void handleSeq(PeerInfo peer, P2PMessage<PeerSeqMessageData> msg) {
         logger.info("Receive peer seq from peer:{}", peer);
         notePeerActive(peer);
 
@@ -208,8 +210,11 @@ public class PeerManager {
     }
 
     public PeerInfoMessageData handleRequestPeerInfo() {
+    	
+    	Map<String, ResourceInfo> resources = zoneManager.getAllNetworkStubResourceInfo(true);
+    	
         Set<ResourceInfo> activeResourceSet = new HashSet<>();
-        for (ResourceInfo activeResource : activeResources.values()) {
+        for (ResourceInfo activeResource : resources.values()) {
             activeResourceSet.add(activeResource);
         }
 
@@ -222,25 +227,29 @@ public class PeerManager {
         return data;
     }
 
-    public void handlePeerInfo(PeerInfo peer, P2PMessage msg) {
+    public void handlePeerInfo(PeerInfo peer, P2PMessage<PeerInfoMessageData> msg) {
         logger.info("Receive peer info from {}", peer);
         notePeerActive(peer);
 
         PeerInfoMessageData data = (PeerInfoMessageData) msg.getData();
         if (data != null && msg.getMethod().equals("peerInfo")) {
-            int currentSeq = data.getSeq();
-            if (hasPeerChanged(peer.getNode(), currentSeq)) {
+            int newSeq = data.getSeq();
+            if (hasPeerChanged(peer.getNode(), newSeq)) {
                 // compare and update
-                Set<ResourceInfo> currentResources = data.getResources();
+                Set<ResourceInfo> newResources = data.getResources();
                 logger.info(
                         "Update peerInfo from {}, seq:{}, resource:{}",
                         peer,
-                        currentSeq,
-                        currentResources);
+                        newSeq,
+                        newResources);
 
-                peer.setResources(currentSeq, currentResources);
+                //update zonemanager
+                zoneManager.removeRemoteResources(peer, peer.getResourceInfos());
+                peer.setResources(newSeq, newResources);
+                peer.setSeq(newSeq);
+                zoneManager.addRemoteResources(peer, newResources);
             } else {
-                logger.info("Peer info not changed, seq:{}", currentSeq);
+                logger.info("Peer info not changed, seq:{}", newSeq);
             }
         } else {
             logger.warn("Receive unrecognized seq message from peer:" + peer);
@@ -264,7 +273,7 @@ public class PeerManager {
         }
 
         // Add myself Resource Info
-        Set<ResourceInfo> resourceInfos = new HashSet<>();
+        Set<ResourceInfo> resourceInfos = new HashSet<ResourceInfo>();
 
         return new PeerResources(activeInfos);
     }
@@ -294,10 +303,11 @@ public class PeerManager {
         }
     }
 
-    public void setNetworkManager(NetworkManager networkManager) {
-        this.networkManager = networkManager;
+    public void setZoneManager(ZoneManager networkManager) {
+        this.zoneManager = networkManager;
     }
 
+    /*
     public void syncWithPeerNetworks() {
         // Update peers' resource into networks
         PeerResources activePeers = this.getActivePeerResources();
@@ -313,6 +323,7 @@ public class PeerManager {
         logger.info("Current active local resources:" + activeLocalResources);
         this.setActiveResourceInfos(activeLocalResources);
     }
+    */
 
     private void workLoop() {
         try {
@@ -321,28 +332,6 @@ public class PeerManager {
             broadcastSeqRequest();
         } catch (Exception e) {
             logger.warn("workloop exception: {}", e);
-        }
-    }
-
-    public void addMockResources() {
-        try {
-            Thread.sleep(10);
-            Long timestamp = System.currentTimeMillis();
-            logger.info("Add test resource");
-            Path path =
-                    Path.decode(
-                            "test-network"
-                                    + ((timestamp / 1000) % 10)
-                                    + ".test-stub"
-                                    + ((timestamp / 100) % 100)
-                                    + ".test-resource"
-                                    + timestamp % 100);
-            Resource resource = new TestResource();
-            resource.setPath(path);
-            networkManager.addResource(resource);
-
-        } catch (Exception e) {
-            logger.warn("Add test resource exception " + e);
         }
     }
 

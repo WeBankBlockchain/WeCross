@@ -8,7 +8,14 @@ import com.webank.wecross.p2p.ResourceResponseProcessor;
 import com.webank.wecross.p2p.netty.NettyBootstrap;
 import com.webank.wecross.p2p.netty.P2PService;
 import com.webank.wecross.p2p.netty.SeqMapper;
+import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.p2p.netty.message.MessageCallBack;
+import com.webank.wecross.p2p.netty.message.processor.Processor;
+import com.webank.wecross.p2p.netty.message.proto.Message;
+import com.webank.wecross.peer.PeerManager;
+import com.webank.wecross.zone.ZoneManager;
+
+import io.netty.channel.ChannelHandlerContext;
 
 import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
@@ -30,11 +37,36 @@ public class P2PServerConfig {
     @Resource
     P2PConfig p2PConfig;
     @Resource
+    PeerManager peerManager;
+    @Resource
+    ZoneManager zoneManager;
+    @Resource
     SeqMapper seqMapper;
     @Resource
     MessageCallBack messageCallBack;
     @Resource
-    NettyBootstrap nettyBootstrap; 
+    NettyBootstrap nettyBootstrap;
+    
+    @Bean
+    public HeartBeatProcessor newHeartBeatProcessor() {
+    	return new HeartBeatProcessor();
+    }
+    
+    @Bean
+    public ResourceResponseProcessor newResourceResponseProcessor() {
+    	ResourceResponseProcessor resourceResponseProcessor = new ResourceResponseProcessor();
+    	resourceResponseProcessor.setSeqMapper(seqMapper);
+    	return resourceResponseProcessor;
+    }
+    
+    @Bean
+    public ResourceRequestProcessor newResourceRequestProcessor() {
+    	ResourceRequestProcessor resourceRequestProcessor = new ResourceRequestProcessor();
+    	resourceRequestProcessor.setPeerManager(peerManager);
+    	resourceRequestProcessor.setZoneManager(zoneManager);
+    	
+    	return resourceRequestProcessor;
+    }
     
     @Bean
     public ThreadPoolTaskExecutor newThreadPoolTaskExecutor() {
@@ -53,14 +85,43 @@ public class P2PServerConfig {
     @Bean
     public MessageCallBack newMessageCallBack() {
 
-        MessageCallBack callBack = new MessageCallBack();
-        callBack.setSeqMapper(seqMapper);
+        MessageCallBack callback = new MessageCallBack();
+        callback.setSeqMapper(seqMapper);
 
-        callBack.setProcessor(MessageType.HEARTBEAT, heartBeatProcessor);
-        callBack.setProcessor(MessageType.RESOURCE_REQUEST, resourceRequestProcessor);
-        callBack.setProcessor(MessageType.RESOURCE_RESPONSE, resourceResponseProcessor);
+        callback.setProcessor(MessageType.HEARTBEAT, heartBeatProcessor);
+        callback.setProcessor(MessageType.RESOURCE_REQUEST, resourceRequestProcessor);
+        callback.setProcessor(MessageType.RESOURCE_RESPONSE, resourceResponseProcessor);
+        
+        callback.setProcessor(MessageCallBack.ON_CONNECT, new Processor() {
+			@Override
+			public String name() {
+				return "ConnectProcessor";
+			}
 
-        return callBack;
+			@Override
+			public void process(ChannelHandlerContext ctx, Node node, Message message) {
+				_peerManager.addPeerInfo(node);
+			}
+        	
+			PeerManager _peerManager = peerManager;
+        });
+        
+        callback.setProcessor(MessageCallBack.ON_DISCONNECT, new Processor() {
+
+			@Override
+			public String name() {
+				return "DisconnectProcessor";
+			}
+
+			@Override
+			public void process(ChannelHandlerContext ctx, Node node, Message message) {
+				_peerManager.removePeerInfo(node);
+			}
+        	
+			PeerManager _peerManager = peerManager;
+        });
+
+        return callback;
     }
 
     @Bean
@@ -75,10 +136,9 @@ public class P2PServerConfig {
     @Bean
     public P2PService newP2PService() {
         P2PService p2pService = new P2PService();
-        // p2PService.setThreadPool(threadPoolTaskExecutor);
+        p2pService.setThreadPool(threadPoolTaskExecutor);
         p2pService.setInitializer(nettyBootstrap);
         p2pService.setSeqMapper(seqMapper);
-        resourceResponseProcessor.setSeqMapper(seqMapper);
 
         return p2pService;
     }

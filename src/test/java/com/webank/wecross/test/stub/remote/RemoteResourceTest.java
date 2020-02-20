@@ -1,12 +1,12 @@
 package com.webank.wecross.test.stub.remote;
 
-import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.restserver.request.GetDataRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
@@ -18,6 +18,11 @@ import com.webank.wecross.stub.remote.RemoteResource;
 import com.webank.wecross.test.Mock.MockNetworkManagerFactory;
 import com.webank.wecross.test.Mock.MockP2PMessageEngineFactory;
 import com.webank.wecross.test.Mock.P2PEngineMessageFilter;
+import com.webank.wecross.zone.ZoneManager;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -102,7 +107,7 @@ public class RemoteResourceTest {
     }
 
     private P2PMessageEngine p2pEngine;
-    private NetworkManager networkManager;
+    private ZoneManager networkManager;
 
     public RemoteResourceTest() {
         p2pEngine =
@@ -111,10 +116,14 @@ public class RemoteResourceTest {
         networkManager = MockNetworkManagerFactory.newMockNteworkManager(p2pEngine);
 
         try {
-            Path path = Path.decode("test-network.test-stub.test-local-resource");
-            Resource resource = new TestResource();
-            resource.setPath(path);
-            networkManager.addResource(resource);
+            ResourceInfo resourceInfo = new ResourceInfo();
+            resourceInfo.setPath("test-network.test-stub.test-local-resource");
+            resourceInfo.setDistance(1);
+            
+            Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
+            resources.add(resourceInfo);
+            
+            networkManager.addRemoteResources(new PeerInfo(new Node("","",0)), resources);
         } catch (Exception e) {
             Assert.assertTrue("Add test resource exception: " + e, false);
         }

@@ -1,6 +1,5 @@
 package com.webank.wecross.test.peer;
 
-import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.netty.P2PService;
@@ -9,12 +8,17 @@ import com.webank.wecross.peer.PeerInfo;
 import com.webank.wecross.peer.PeerInfoMessageData;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.peer.PeerSeqMessageData;
+import com.webank.wecross.resource.Path;
+import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
+import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.test.Mock.MockNetworkManagerFactory;
 import com.webank.wecross.test.Mock.MockP2PMessageEngineFactory;
 import com.webank.wecross.test.Mock.MockP2PService;
 import com.webank.wecross.test.Mock.MockPeerManagerFactory;
 import com.webank.wecross.test.Mock.P2PEngineMessageFilter;
+import com.webank.wecross.zone.ZoneManager;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -98,7 +102,7 @@ public class PeerManagerTest {
     public PeerManager newMockPeerManager() {
         P2PMessageEngine p2pEngine =
                 MockP2PMessageEngineFactory.newMockP2PMessageEngine(new PeerTestEngineFilter());
-        NetworkManager networkManager = MockNetworkManagerFactory.newMockNteworkManager(p2pEngine);
+        ZoneManager networkManager = MockNetworkManagerFactory.newMockNteworkManager(p2pEngine);
         P2PService p2pService = new MockP2PService();
         ((MockP2PService) p2pService).addPeer(new PeerInfo(new Node("abcdefg000000", "", 0)));
         ((MockP2PService) p2pService).addPeer(new PeerInfo(new Node("abcdefg111111", "", 0)));
@@ -132,15 +136,14 @@ public class PeerManagerTest {
         Assert.assertEquals(0, peerManager.peerSize());
 
         // check all syncing
-        PeerInfo peerInfo = new PeerInfo(new Node("1111111111111111", "", 0));
-        peerManager.updatePeerInfo(peerInfo);
+        PeerInfo peerInfo = peerManager.addPeerInfo(new Node("1111111111111111", "", 0));
 
         peerManager.broadcastPeerInfoRequest();
         Thread.sleep(500); // waiting for syncing
-        peerManager.syncWithPeerNetworks();
+        //peerManager.syncWithPeerNetworks();
 
         Map<String, ResourceInfo> resources =
-                peerManager.getNetworkManager().getAllNetworkStubResourceInfo(false);
+                peerManager.getZoneManager().getAllNetworkStubResourceInfo(false);
         System.out.println(resources);
 
         Assert.assertTrue(0 < resources.size());
@@ -166,15 +169,14 @@ public class PeerManagerTest {
         Assert.assertEquals(0, peerManager.peerSize());
 
         // check all syncing
-        PeerInfo peerInfo = new PeerInfo(new Node("1111111111111111", "", 0));
-        peerManager.updatePeerInfo(peerInfo);
+        PeerInfo peerInfo = peerManager.addPeerInfo(new Node("1111111111111111", "", 0));
 
         peerManager.broadcastSeqRequest();
         Thread.sleep(500); // waiting for syncing
-        peerManager.syncWithPeerNetworks();
+        //peerManager.syncWithPeerNetworks();
 
         Map<String, ResourceInfo> resources =
-                peerManager.getNetworkManager().getAllNetworkStubResourceInfo(false);
+                peerManager.getZoneManager().getAllNetworkStubResourceInfo(false);
         System.out.println(resources);
 
         Assert.assertTrue(0 < resources.size());
@@ -204,10 +206,22 @@ public class PeerManagerTest {
     @Test
     public void handleRequestPeerInfoTest() {
         PeerManager peerManager = newMockPeerManager();
+        
+        PeerInfo peerInfo = new PeerInfo(new Node("", "", 0));
 
         for (int i = 1; i <= 10; i++) {
-            peerManager.addMockResources();
-            peerManager.syncWithPeerNetworks();
+        	try {
+        		ResourceInfo resoourInfo = new ResourceInfo();
+        		resoourInfo.setPath(String.valueOf(i) + "." + String.valueOf(i) + "." + String.valueOf(i));
+        		
+        		Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
+        		resources.add(resoourInfo);
+        		peerManager.getZoneManager().addRemoteResources(peerInfo, resources);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+            //peerManager.addMockResources();
+            // peerManager.syncWithPeerNetworks();
             P2PMessage<Object> request = new P2PMessage<>();
             PeerInfoMessageData data =
                     (PeerInfoMessageData)

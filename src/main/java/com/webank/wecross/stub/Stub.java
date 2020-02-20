@@ -19,15 +19,20 @@ public interface Stub {
         return getResources().get(path.getResource());
     }
 
-    default void addResource(Resource resource) throws Exception {
+    // return if resource exists
+    default boolean addResource(Resource resource) throws Exception {
         String name = resource.getPath().getResource();
         Resource currentResource = getResources().get(name);
         if (currentResource == null) {
             getResources().put(name, resource);
+            
+            return false;
         } else {
             if (currentResource.getDistance() > resource.getDistance()) {
                 getResources().put(name, resource); // Update to shorter path resource
             }
+            
+            return true;
         }
     }
 
@@ -46,20 +51,6 @@ public interface Stub {
     }
 
     public Map<String, Resource> getResources();
-
-    default Set<String> getAllResourceName(boolean ignoreRemote) {
-        Set<String> names = new HashSet<>();
-        if (getResources() == null) {
-            return names;
-        }
-
-        for (Resource resource : getResources().values()) {
-            if (resource.getDistance() == 0 || !ignoreRemote) {
-                names.add(resource.getPath().getResource());
-            }
-        }
-        return names;
-    }
 
     Logger getLogger();
 }

@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-@Component
 public class ResourceResponseProcessor implements Processor {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceResponseProcessor.class);
@@ -34,9 +33,7 @@ public class ResourceResponseProcessor implements Processor {
 
     @Override
     public void process(ChannelHandlerContext ctx, Node node, Message message) {
-
         try {
-
             String content = new String(message.getData(), "utf-8");
             logger.info(" source response, message: {}, content: {}", message, content);
 

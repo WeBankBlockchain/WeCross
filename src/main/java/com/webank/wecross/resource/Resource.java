@@ -28,9 +28,9 @@ public interface Resource {
     TransactionRequest createRequest();
 
     int getDistance(); // 0 local, > 0 remote
-
+    
     String getChecksum();
-
+    
     @JsonIgnore
     Path getPath();
 
