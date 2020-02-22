@@ -5,13 +5,13 @@ import com.webank.wecross.resource.ResourceInfo;
 import java.util.HashSet;
 import java.util.Set;
 
-public class PeerInfo {
+public class Peer {
 	Node node;
     private int seq = 1;
     private Set<ResourceInfo> resourceInfos = new HashSet<>();
     private long lastActiveTimestamp = System.currentTimeMillis();
 
-    public PeerInfo(Node node) {
+    public Peer(Node node) {
         this.node = node;
     }
     

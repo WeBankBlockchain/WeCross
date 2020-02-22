@@ -18,9 +18,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class NetworksFactory {
+public class ZonesConfig {
 
-    private Logger logger = LoggerFactory.getLogger(NetworksFactory.class);
+    private Logger logger = LoggerFactory.getLogger(ZonesConfig.class);
 
     @Resource(name = "produceToml")
     Toml toml;

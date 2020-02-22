@@ -2,15 +2,8 @@ package com.webank.wecross.peer;
 
 import static com.webank.wecross.resource.ResourceInfo.isEqualInfos;
 
-import com.webank.wecross.p2p.P2PMessage;
-import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.netty.P2PService;
 import com.webank.wecross.p2p.netty.common.Node;
-import com.webank.wecross.resource.Path;
-import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
-import com.webank.wecross.resource.TestResource;
-import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.utils.core.SeqUtils;
 import com.webank.wecross.zone.ZoneManager;
 
@@ -25,7 +18,7 @@ public class PeerManager {
     Logger logger = LoggerFactory.getLogger(PeerManager.class);
 
     private ZoneManager zoneManager;
-    private Map<Node, PeerInfo> peerInfos = new HashMap<Node, PeerInfo>(); // peer
+    private Map<Node, Peer> peerInfos = new HashMap<Node, Peer>(); // peer
     private int seq = 1; // Seq of the host
     private long peerActiveTimeout;
 
@@ -47,7 +40,7 @@ public class PeerManager {
         return peerInfos.size();
     }
 
-    public synchronized PeerInfo getPeerInfo(Node node) {
+    public synchronized Peer getPeerInfo(Node node) {
         if (peerInfos.containsKey(node)) {
             return peerInfos.get(node);
         } else {
@@ -55,15 +48,15 @@ public class PeerManager {
         }
     }
 
-    public synchronized PeerInfo addPeerInfo(Node node) {
-    	PeerInfo peerInfo = new PeerInfo(node);
+    public synchronized Peer addPeerInfo(Node node) {
+    	Peer peerInfo = new Peer(node);
         peerInfos.put(node, peerInfo);
         
         return peerInfo;
     }
 
     public synchronized void removePeerInfo(Node node) {
-    	PeerInfo peerInfo = peerInfos.get(node);
+    	Peer peerInfo = peerInfos.get(node);
     	if(peerInfo == null) {
     		logger.error("Peer not exists, bug?");
     		return;
@@ -78,7 +71,7 @@ public class PeerManager {
         peerInfos.clear();
     }
 
-    public synchronized void notePeerActive(PeerInfo peer) {
+    public synchronized void notePeerActive(Peer peer) {
         peer.noteAlive();
     }
 
@@ -95,13 +88,13 @@ public class PeerManager {
         return data;
     }
 
-    public void setPeerInfos(Map<Node, PeerInfo> peerInfos) {
+    public void setPeerInfos(Map<Node, Peer> peerInfos) {
         this.peerInfos = peerInfos;
     }
 
     public synchronized PeerResources getActivePeerResources() {
-        Set<PeerInfo> activeInfos = new HashSet<>();
-        for (PeerInfo peerInfo : peerInfos.values()) {
+        Set<Peer> activeInfos = new HashSet<>();
+        for (Peer peerInfo : peerInfos.values()) {
             if (!peerInfo.isTimeout(peerActiveTimeout)) {
                 activeInfos.add(peerInfo);
             }

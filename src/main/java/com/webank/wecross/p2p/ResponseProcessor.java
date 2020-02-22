@@ -10,7 +10,6 @@ import com.webank.wecross.p2p.netty.response.StatusCode;
 import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 public class ResponseProcessor implements Processor {
 

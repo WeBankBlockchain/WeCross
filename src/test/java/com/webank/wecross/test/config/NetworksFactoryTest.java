@@ -2,7 +2,7 @@ package com.webank.wecross.test.config;
 
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
-import com.webank.wecross.config.NetworksFactory;
+import com.webank.wecross.config.ZonesConfig;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.utils.ConfigUtils;
 import com.webank.wecross.zone.Zone;
@@ -20,7 +20,7 @@ public class NetworksFactoryTest {
             String network = toml.getString("common.network");
             System.out.println(network);
 
-            NetworksFactory mock = new NetworksFactory();
+            ZonesConfig mock = new ZonesConfig();
             mock.setToml(toml);
 
             Map<String, Zone> networkMap = mock.readNetworksConfig();

@@ -17,8 +17,7 @@ public class WeCrossHost {
     private ZoneManager zoneManager;
     private P2PService p2pService;
 
-    public void start() {
-        /** start netty p2p service */
+	public void start() {
         try {
         	p2pService.start();
         } catch (Exception e) {
@@ -35,13 +34,21 @@ public class WeCrossHost {
         return zoneManager.getState(request);
     }
 
-    public void setNetworkManager(ZoneManager networkManager) {
+    public void setZoneManager(ZoneManager networkManager) {
         this.zoneManager = networkManager;
     }
 
-    public ZoneManager getNetworkManager() {
+    public ZoneManager getZoneManager() {
         return this.zoneManager;
     }
+    
+    public P2PService getP2pService() {
+		return p2pService;
+	}
+
+	public void setP2pService(P2PService p2pService) {
+		this.p2pService = p2pService;
+	}
 
     public void syncAllState() {}
 }

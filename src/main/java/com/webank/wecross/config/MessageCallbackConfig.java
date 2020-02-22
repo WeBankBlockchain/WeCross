@@ -2,11 +2,8 @@ package com.webank.wecross.config;
 
 import com.webank.wecross.p2p.HeartBeatProcessor;
 import com.webank.wecross.p2p.MessageType;
-import com.webank.wecross.p2p.P2PConfig;
 import com.webank.wecross.p2p.RequestProcessor;
 import com.webank.wecross.p2p.ResponseProcessor;
-import com.webank.wecross.p2p.netty.NettyBootstrap;
-import com.webank.wecross.p2p.netty.P2PService;
 import com.webank.wecross.p2p.netty.SeqMapper;
 import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.p2p.netty.message.MessageCallBack;
@@ -20,7 +17,6 @@ import io.netty.channel.ChannelHandlerContext;
 import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
 public class MessageCallbackConfig {

@@ -62,7 +62,7 @@ public class RestfulController {
             restRequest.checkRestRequest("", "list");
 
             ResourceRequest resourceRequest = restRequest.getData();
-            ZoneManager networkManager = host.getNetworkManager();
+            ZoneManager networkManager = host.getZoneManager();
             ResourceResponse resourceResponse = networkManager.list(resourceRequest);
             restResponse.setData(resourceResponse);
         } catch (WeCrossException e) {

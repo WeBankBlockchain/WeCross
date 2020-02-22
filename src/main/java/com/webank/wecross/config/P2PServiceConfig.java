@@ -21,12 +21,6 @@ public class P2PServiceConfig {
 	NettyBootstrap nettyBootstrap;
 
 	@Resource
-	P2PConfig p2PConfig;
-
-	@Resource
-	MessageCallBack messageCallBack;
-	
-	@Resource
     SeqMapper seqMapper;
 	
 	@Bean
@@ -42,15 +36,6 @@ public class P2PServiceConfig {
         threadPool.initialize();
         return threadPool;
     }
-
-	@Bean
-	public NettyBootstrap newNettyBootstrap() {
-		NettyBootstrap bootstrap = new NettyBootstrap();
-		bootstrap.setConfig(p2PConfig);
-		bootstrap.setMessageCallBack(messageCallBack);
-
-		return bootstrap;
-	}
 
 	@Bean
 	public P2PService newP2PService() {

@@ -8,7 +8,7 @@ import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.p2p.netty.message.processor.Processor;
 import com.webank.wecross.p2p.netty.message.proto.Message;
 import com.webank.wecross.p2p.netty.message.serialize.MessageSerializer;
-import com.webank.wecross.peer.PeerInfo;
+import com.webank.wecross.peer.Peer;
 import com.webank.wecross.peer.PeerInfoMessageData;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.peer.PeerSeqMessageData;
@@ -68,7 +68,7 @@ public class RequestProcessor implements Processor {
 
     @Override
     public String name() {
-        return "SourceRequest";
+        return "RequestProcessor";
     }
 
     @Override
@@ -88,7 +88,7 @@ public class RequestProcessor implements Processor {
             String method = p2PMessage.getMethod();
             String r[] = method.split("/");
             
-            PeerInfo peerInfo = peerManager.getPeerInfo(node);
+            Peer peerInfo = peerManager.getPeerInfo(node);
 
             P2PResponse<Object> p2PResponse = new P2PResponse<>();
             if (r.length == 1) {
@@ -130,7 +130,7 @@ public class RequestProcessor implements Processor {
         }
     }
 
-    public P2PResponse<Object> onStatusMessage(PeerInfo peerInfo, String method, String p2pRequestString) {
+    public P2PResponse<Object> onStatusMessage(Peer peerInfo, String method, String p2pRequestString) {
 
         P2PResponse<Object> response = new P2PResponse<Object>();
         response.setVersion(Versions.currentVersion);

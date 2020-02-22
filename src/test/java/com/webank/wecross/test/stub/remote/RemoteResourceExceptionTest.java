@@ -3,7 +3,7 @@ package com.webank.wecross.test.stub.remote;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.netty.common.Node;
-import com.webank.wecross.peer.PeerInfo;
+import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
@@ -129,7 +129,7 @@ public class RemoteResourceExceptionTest {
             Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
             resources.add(resourceInfo);
             
-            networkManager.addRemoteResources(new PeerInfo(new Node("","",0)), resources);
+            networkManager.addRemoteResources(new Peer(new Node("","",0)), resources);
         } catch (Exception e) {
             Assert.assertTrue("Add test resource exception: " + e, false);
         }
@@ -137,7 +137,7 @@ public class RemoteResourceExceptionTest {
 
     @Test
     public void remoteResourceGetDataTest() throws Exception {
-        PeerInfo peer = new PeerInfo(new Node("", "", 0));
+        Peer peer = new Peer(new Node("", "", 0));
         Resource resource = new RemoteResource(peer, 1, p2pEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 
@@ -157,7 +157,7 @@ public class RemoteResourceExceptionTest {
 
     @Test
     public void remoteResourceSetDataTest() throws Exception {
-        PeerInfo peer = new PeerInfo(new Node("", "", 0));
+        Peer peer = new Peer(new Node("", "", 0));
         Resource resource = new RemoteResource(peer, 1, p2pEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 
@@ -178,7 +178,7 @@ public class RemoteResourceExceptionTest {
 
     @Test
     public void remoteResourceCallTest() throws Exception {
-        PeerInfo peer = new PeerInfo(new Node("", "", 0));
+        Peer peer = new Peer(new Node("", "", 0));
         Resource resource = new RemoteResource(peer, 1, p2pEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 
@@ -199,7 +199,7 @@ public class RemoteResourceExceptionTest {
 
     @Test
     public void remoteResourceSendTransactionTest() throws Exception {
-        PeerInfo peer = new PeerInfo(new Node("", "", 0));
+        Peer peer = new Peer(new Node("", "", 0));
         Resource resource = new RemoteResource(peer, 1, p2pEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 

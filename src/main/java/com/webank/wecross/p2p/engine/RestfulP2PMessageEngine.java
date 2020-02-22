@@ -9,7 +9,7 @@ import com.webank.wecross.p2p.netty.request.Request;
 import com.webank.wecross.p2p.netty.response.Response;
 import com.webank.wecross.p2p.netty.response.ResponseCallBack;
 import com.webank.wecross.p2p.netty.response.StatusCode;
-import com.webank.wecross.peer.PeerInfo;
+import com.webank.wecross.peer.Peer;
 
 import java.io.IOException;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
@@ -20,7 +20,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
     private Logger logger = LoggerFactory.getLogger(RestfulP2PMessageEngine.class);
 
     @Override
-    public <T> void asyncSendMessage(PeerInfo peer, P2PMessage<T> msg, P2PMessageCallback<?> callback) {
+    public <T> void asyncSendMessage(Peer peer, P2PMessage<T> msg, P2PMessageCallback<?> callback) {
 
         // check parameters
         try {

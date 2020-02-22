@@ -2,7 +2,7 @@ package com.webank.wecross.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.webank.wecross.peer.PeerInfo;
+import com.webank.wecross.peer.Peer;
 import com.webank.wecross.restserver.request.GetDataRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
@@ -40,7 +40,7 @@ public interface Resource {
     String getPathAsString();
 
     @JsonIgnore
-    Set<PeerInfo> getPeers();
+    Set<Peer> getPeers();
 
-    void setPeers(Set<PeerInfo> peers);
+    void setPeers(Set<Peer> peers);
 }

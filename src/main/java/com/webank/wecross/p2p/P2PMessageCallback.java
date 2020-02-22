@@ -3,17 +3,17 @@ package com.webank.wecross.p2p;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.wecross.p2p.engine.P2PResponse;
-import com.webank.wecross.peer.PeerInfo;
+import com.webank.wecross.peer.Peer;
 
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 
 public abstract class P2PMessageCallback<T> {
-    private TypeReference typeReference;
+    private TypeReference<?> typeReference;
     protected int status;
     protected String message;
     protected P2PMessage<T> data;
 
-    private PeerInfo peer;
+    private Peer peer;
 
     public void execute() {
         this.onResponse(status, message, data);
@@ -41,15 +41,15 @@ public abstract class P2PMessageCallback<T> {
         return this.status;
     }
 
-    public void setData(P2PMessage msg) {
+    public void setData(P2PMessage<T> msg) {
         this.data = msg;
     }
 
-    public void setTypeReference(TypeReference typeReference) {
+    public void setTypeReference(TypeReference<?> typeReference) {
         this.typeReference = typeReference;
     }
 
-    public TypeReference getTypeReference() {
+    public TypeReference<?> getTypeReference() {
         return typeReference;
     }
 
@@ -63,12 +63,12 @@ public abstract class P2PMessageCallback<T> {
     }
 
     @JsonIgnore
-    public PeerInfo getPeer() {
+    public Peer getPeer() {
         return peer;
     }
 
     @JsonIgnore
-    public void setPeerInfo(PeerInfo peer) {
+    public void setPeerInfo(Peer peer) {
         this.peer = peer;
     }
 }

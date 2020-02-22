@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class TomlFactory {
+public class TomlConfig {
 
-    private Logger logger = LoggerFactory.getLogger(TomlFactory.class);
+    private Logger logger = LoggerFactory.getLogger(TomlConfig.class);
 
     @Bean
     public Toml produceToml() {

@@ -1,7 +1,7 @@
 package com.webank.wecross.zone;
 
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.peer.PeerInfo;
+import com.webank.wecross.peer.Peer;
 import com.webank.wecross.peer.PeerResources;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
@@ -211,7 +211,7 @@ public class ZoneManager {
         return null;
     }
 
-    public void addRemoteResources(PeerInfo peer, Set<ResourceInfo> resources) {
+    public void addRemoteResources(Peer peer, Set<ResourceInfo> resources) {
     	lock.writeLock().lock();
     	try {
     		for(ResourceInfo resourceInfo: resources) {
@@ -249,7 +249,7 @@ public class ZoneManager {
         }
     }
     
-    public void removeRemoteResources(PeerInfo peer, Set<ResourceInfo> resources) {
+    public void removeRemoteResources(Peer peer, Set<ResourceInfo> resources) {
     	lock.writeLock().lock();
     	try {
     		for(ResourceInfo resourceInfo: resources) {

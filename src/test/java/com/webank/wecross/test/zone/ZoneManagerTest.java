@@ -2,7 +2,7 @@ package com.webank.wecross.test.zone;
 
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.netty.common.Node;
-import com.webank.wecross.peer.PeerInfo;
+import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ZoneManagerTest {
-    private PeerInfo mockPeer = new PeerInfo(new Node());
+    private Peer mockPeer = new Peer(new Node());
 
     private P2PMessageEngine p2pEngine = null;
 
@@ -30,7 +30,7 @@ public class ZoneManagerTest {
     public void addRemoteResourcesTest() throws Exception {
         ZoneManager zoneManager = Mockito.spy(ZoneManager.class);
         
-        PeerInfo peer = new PeerInfo(new Node("aaa", "127.0.0.1", 100));
+        Peer peer = new Peer(new Node("aaa", "127.0.0.1", 100));
         
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
@@ -70,7 +70,7 @@ public class ZoneManagerTest {
         resourceInfo2.setPath("payment.bcos0.contract0");
         resourceInfo2.setDistance(0); // i == 0, set it as local resource
         
-        PeerInfo peer2 = new PeerInfo(new Node("bbb", "127.0.0.1", 100));
+        Peer peer2 = new Peer(new Node("bbb", "127.0.0.1", 100));
         
         Set<ResourceInfo> resources2 = new HashSet<ResourceInfo>();
         resources2.add(resourceInfo2);
@@ -88,7 +88,7 @@ public class ZoneManagerTest {
     public void removeRemoteResourcesTest() throws Exception {
     	ZoneManager zoneManager = Mockito.spy(ZoneManager.class);
         
-        PeerInfo peer = new PeerInfo(new Node("aaa", "127.0.0.1", 100));
+        Peer peer = new Peer(new Node("aaa", "127.0.0.1", 100));
         
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
@@ -121,7 +121,7 @@ public class ZoneManagerTest {
         resourceInfo2.setPath("payment.bcos1.contract1");
         resourceInfo2.setDistance(0); // i == 0, set it as local resource
         
-        PeerInfo peer2 = new PeerInfo(new Node("bbb", "127.0.0.1", 100));
+        Peer peer2 = new Peer(new Node("bbb", "127.0.0.1", 100));
         
         Set<ResourceInfo> resources2 = new HashSet<ResourceInfo>();
         resources2.add(resourceInfo2);

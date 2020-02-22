@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ZoneManagerFactory {
+public class ZoneManagerConfig {
     @Resource(name = "zoneConfig")
     private Map<String, Zone> networks;
 

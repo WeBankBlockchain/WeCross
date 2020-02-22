@@ -11,9 +11,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class WebServerFactory {
+public class WebServerConfig {
 
-    private static Logger logger = LoggerFactory.getLogger(WebServerFactory.class);
+    private static Logger logger = LoggerFactory.getLogger(WebServerConfig.class);
 
     @Resource(name = "produceToml")
     Toml toml;
