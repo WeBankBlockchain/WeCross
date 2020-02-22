@@ -15,9 +15,6 @@ public class WeCrossHostFactory {
     @Resource(name = "newNetworkManager")
     ZoneManager networkManager;
 
-    @Resource(name = "newPeerManager")
-    PeerManager peerManager;
-
     @Resource(name = "produceToml")
     Toml toml;
 
@@ -25,7 +22,6 @@ public class WeCrossHostFactory {
     public WeCrossHost newWeCrossHost() {
         WeCrossHost host = new WeCrossHost();
         host.setNetworkManager(networkManager);
-        host.setPeerManager(peerManager);
         host.start();
         return host;
     }

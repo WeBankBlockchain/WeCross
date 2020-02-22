@@ -14,6 +14,7 @@ import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.peer.PeerSeqMessageData;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.restserver.request.GetDataRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
@@ -25,18 +26,23 @@ import com.webank.wecross.zone.ZoneManager;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ResourceRequestProcessor implements Processor {
-
-    private static final Logger logger = LoggerFactory.getLogger(ResourceRequestProcessor.class);
+public class RequestProcessor implements Processor {
+    private static final Logger logger = LoggerFactory.getLogger(RequestProcessor.class);
 
     private PeerManager peerManager;
     private ZoneManager zoneManager;
+    private P2PMessageEngine p2pEngine;
 
-    public PeerManager getPeerManager() {
+	public PeerManager getPeerManager() {
         return peerManager;
     }
 
@@ -51,6 +57,14 @@ public class ResourceRequestProcessor implements Processor {
     public void setZoneManager(ZoneManager networkManager) {
         this.zoneManager = networkManager;
     }
+    
+    public P2PMessageEngine getP2pEngine() {
+		return p2pEngine;
+	}
+
+	public void setP2pEngine(P2PMessageEngine p2pEngine) {
+		this.p2pEngine = p2pEngine;
+	}
 
     @Override
     public String name() {
@@ -68,7 +82,7 @@ public class ResourceRequestProcessor implements Processor {
                     message.getSeq(),
                     content);
 
-            P2PMessage p2PMessage =
+            P2PMessage<?> p2PMessage =
                     ObjectMapperFactory.getObjectMapper().readValue(content, P2PMessage.class);
 
             String method = p2PMessage.getMethod();
@@ -79,10 +93,10 @@ public class ResourceRequestProcessor implements Processor {
             P2PResponse<Object> p2PResponse = new P2PResponse<>();
             if (r.length == 1) {
                 /** method */
-                p2PResponse = handlePeer(peerInfo, r[0], content);
+                p2PResponse = onStatusMessage(peerInfo, r[0], content);
             } else if (r.length == 4) {
                 /** network/stub/resource/method */
-                p2PResponse = handleRemote(r[0], r[1], r[2], r[3], content);
+                p2PResponse = onResourceMessage(r[0], r[1], r[2], r[3], content);
             } else {
                 // invalid paramter method
                 p2PResponse.setMessage(" invalid method paramter format");
@@ -116,7 +130,7 @@ public class ResourceRequestProcessor implements Processor {
         }
     }
 
-    public P2PResponse<Object> handlePeer(PeerInfo peerInfo, String method, String p2pRequestString) {
+    public P2PResponse<Object> onStatusMessage(PeerInfo peerInfo, String method, String p2pRequestString) {
 
         P2PResponse<Object> response = new P2PResponse<Object>();
         response.setVersion(Versions.currentVersion);
@@ -137,9 +151,9 @@ public class ResourceRequestProcessor implements Processor {
                                                 new TypeReference<P2PMessage<Object>>() {});
 
                         p2pRequest.checkP2PMessage(method);
-                        PeerSeqMessageData data =
-                                (PeerSeqMessageData)
-                                        peerManager.onRestfulPeerMessage(peerInfo, method, p2pRequest);
+                        
+                        PeerSeqMessageData data = new PeerSeqMessageData();
+                        data.setSeq(peerManager.getSeq());
 
                         response.setResult(QueryStatus.SUCCESS);
                         response.setMessage("request " + method + " success");
@@ -158,9 +172,17 @@ public class ResourceRequestProcessor implements Processor {
 
                         p2pRequest.checkP2PMessage(method);
 
-                        PeerInfoMessageData data =
-                                (PeerInfoMessageData)
-                                        peerManager.onRestfulPeerMessage(peerInfo, method, p2pRequest);
+                        Map<String, ResourceInfo> resources = zoneManager.getAllNetworkStubResourceInfo(true);
+                    	
+                        Set<ResourceInfo> activeResourceSet = new HashSet<>();
+                        for (ResourceInfo activeResource : resources.values()) {
+                            activeResourceSet.add(activeResource);
+                        }
+
+                        logger.info("Receive request peer info");
+                        PeerInfoMessageData data = new PeerInfoMessageData();
+                        data.setSeq(peerManager.getSeq());
+                        data.setResources(activeResourceSet);
 
                         response.setResult(QueryStatus.SUCCESS);
                         response.setMessage("request " + method + " success");
@@ -169,36 +191,64 @@ public class ResourceRequestProcessor implements Processor {
                         break;
                     }
                 case "seq":
-                case "peerInfo":
-                    {
-                        logger.debug("request method: " + method);
-                        P2PMessage<PeerSeqMessageData> p2pRequest =
-                                ObjectMapperFactory.getObjectMapper()
-                                        .readValue(
-                                                p2pRequestString,
-                                                new TypeReference<
-                                                        P2PMessage<PeerSeqMessageData>>() {});
+                {
+                	logger.info("Receive peer seq from peer:{}", peerInfo);
+                	 P2PMessage<Object> p2pRequest =
+                             ObjectMapperFactory.getObjectMapper()
+                                     .readValue(
+                                             p2pRequestString,
+                                             new TypeReference<P2PMessage<Object>>() {});
 
-                        p2pRequest.checkP2PMessage(method);
+                    PeerSeqMessageData data = (PeerSeqMessageData) p2pRequest.getData();
+                    if (data != null && p2pRequest.getMethod().equals("seq")) {
+                        int currentSeq = data.getSeq();
+                        if (peerManager.hasPeerChanged(peerInfo.getNode(), currentSeq)) {
+                        	P2PMessage<Object> msg = new P2PMessage<>();
+                            msg.newSeq();
 
-                        peerManager.onRestfulPeerMessage(peerInfo, method, p2pRequest);
+                            msg.setData(null);
+                            msg.setVersion(Versions.currentVersion);
+                            msg.setMethod("requestPeerInfo");
 
-                        response.setResult(QueryStatus.SUCCESS);
-                        response.setMessage("request " + method + " success");
-                        response.setSeq(p2pRequest.getSeq());
-                        response.setData(null);
-                        break;
+                            logger.info("Request peer info, peer:{}, seq:{}", peerInfo, msg.getSeq());
+                            p2pEngine.asyncSendMessage(peerInfo, msg, new P2PMessageCallback<PeerInfoMessageData>() {
+								@Override
+								public void onResponse(int status, String message, P2PMessage<PeerInfoMessageData> msg) {
+									logger.info("Receive peer info from {}", peerInfo);
+
+							        PeerInfoMessageData data = (PeerInfoMessageData) msg.getData();
+							        if (data != null && msg.getMethod().equals("peerInfo")) {
+							            int newSeq = data.getSeq();
+							            if (peerManager.hasPeerChanged(peerInfo.getNode(), newSeq)) {
+							                // compare and update
+							                Set<ResourceInfo> newResources = data.getResources();
+							                logger.info(
+							                        "Update peerInfo from {}, seq:{}, resource:{}",
+							                        peerInfo,
+							                        newSeq,
+							                        newResources);
+
+							                //update zonemanager
+							                zoneManager.removeRemoteResources(peerInfo, peerInfo.getResourceInfos());
+							                peerInfo.setResources(newSeq, newResources);
+							                peerInfo.setSeq(newSeq);
+							                zoneManager.addRemoteResources(peerInfo, newResources);
+							            } else {
+							                logger.info("Peer info not changed, seq:{}", newSeq);
+							            }
+							        } else {
+							            logger.warn("Receive unrecognized seq message from peer:" + peerInfo);
+							        }
+								}
+                            	
+                            });
+                        }
+                    } else {
+                        logger.warn("Receive unrecognized seq message from peer:" + peerInfo);
                     }
-                case "requestChainState":
-
-                case "chainState":
-                    {
-                        logger.debug("request method: " + method);
-                        response.setResult(QueryStatus.SUCCESS);
-                        response.setMessage("request " + method + " success");
-                        break;
-                    }
-
+                    
+                	break;
+                }
                 default:
                     {
                         logger.debug("request method: " + method);
@@ -229,7 +279,7 @@ public class ResourceRequestProcessor implements Processor {
         return response;
     }
 
-    public P2PResponse<Object> handleRemote(
+    public P2PResponse<Object> onResourceMessage(
             String network, String stub, String resource, String method, String p2pRequestString) {
         Path path = new Path();
         path.setNetwork(network);

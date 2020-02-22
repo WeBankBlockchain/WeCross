@@ -7,7 +7,7 @@ import com.webank.wecross.peer.PeerInfo;
 
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 
-public class P2PMessageCallback<T> {
+public abstract class P2PMessageCallback<T> {
     private TypeReference typeReference;
     protected int status;
     protected String message;
@@ -19,7 +19,7 @@ public class P2PMessageCallback<T> {
         this.onResponse(status, message, data);
     }
 
-    public void onResponse(int status, String message, P2PMessage msg) {}
+    public abstract void onResponse(int status, String message, P2PMessage<T> msg);
 
     public void setStatus(int status) {
         this.status = status;

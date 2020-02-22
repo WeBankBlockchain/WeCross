@@ -3,24 +3,14 @@ package com.webank.wecross.test.zone;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.peer.PeerInfo;
-import com.webank.wecross.peer.PeerResources;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
-import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.stub.Stub;
-import com.webank.wecross.stub.remote.RemoteResource;
-import com.webank.wecross.test.peer.PeerResourcesTest;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
 
-import javafx.scene.input.ZoomEvent;
-
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.junit.Assert;

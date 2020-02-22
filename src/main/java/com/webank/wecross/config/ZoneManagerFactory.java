@@ -10,19 +10,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class NetworkManagerFactory {
-    @Resource(name = "produceNetworks")
+public class ZoneManagerFactory {
+    @Resource(name = "zoneConfig")
     private Map<String, Zone> networks;
 
-    @Resource(name = "newP2PMessageEngine")
+    @Resource
     private P2PMessageEngine p2pEngine;
 
     @Bean
     public ZoneManager newNetworkManager() {
-        ZoneManager networkManager = new ZoneManager();
-        networkManager.setNetworks(networks);
-        networkManager.setP2pEngine(p2pEngine);
-        return networkManager;
+        ZoneManager zoneManager = new ZoneManager();
+        zoneManager.setNetworks(networks);
+        zoneManager.setP2pEngine(p2pEngine);
+        return zoneManager;
     }
 
     public Map<String, Zone> getNetworks() {
