@@ -3,12 +3,8 @@ package com.webank.wecross.test.peer;
 import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.peer.PeerResources;
-import com.webank.wecross.resource.Path;
-import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
-import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.zone.ZoneManager;
-
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Assert;
@@ -78,11 +74,11 @@ public class PeerResourcesTest {
     public void hasMyselfTest() throws Exception {
         PeerResources peerResources = newMockPeerInfo();
         ZoneManager zoneManager = new ZoneManager();
-        
+
         ResourceInfo resourceInfo = new ResourceInfo();
         resourceInfo.setPath("network.stub.resource1");
         resourceInfo.setDistance(1);
-        
+
         Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
         resources.add(resourceInfo);
         zoneManager.addRemoteResources(new Peer(new Node("", "", 0)), resources);
