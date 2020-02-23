@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +21,7 @@ public class ZoneManagerTest {
 
     @Test
     public void addRemoteResourcesTest() throws Exception {
-        ZoneManager zoneManager = Mockito.spy(ZoneManager.class);
+        ZoneManager zoneManager = new ZoneManager();
 
         Peer peer = new Peer(new Node("aaa", "127.0.0.1", 100));
 
@@ -80,7 +79,7 @@ public class ZoneManagerTest {
 
     @Test
     public void removeRemoteResourcesTest() throws Exception {
-        ZoneManager zoneManager = Mockito.spy(ZoneManager.class);
+        ZoneManager zoneManager = new ZoneManager();
 
         Peer peer = new Peer(new Node("aaa", "127.0.0.1", 100));
 

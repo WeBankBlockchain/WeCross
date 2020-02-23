@@ -5,7 +5,6 @@ import static com.webank.wecross.resource.ResourceInfo.isEqualInfos;
 import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.utils.core.SeqUtils;
-import com.webank.wecross.zone.ZoneManager;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -17,7 +16,6 @@ import org.slf4j.LoggerFactory;
 public class PeerManager {
     Logger logger = LoggerFactory.getLogger(PeerManager.class);
 
-    private ZoneManager zoneManager;
     private Map<Node, Peer> peerInfos = new ConcurrentHashMap<Node, Peer>(); // peer
     private int seq = 1; // Seq of the host
     private long peerActiveTimeout;
@@ -30,10 +28,6 @@ public class PeerManager {
 
     public int getSeq() {
         return seq;
-    }
-
-    public ZoneManager getZoneManager() {
-        return this.zoneManager;
     }
 
     public int peerSize() {
@@ -66,7 +60,6 @@ public class PeerManager {
             return;
         }
 
-        zoneManager.removeRemoteResources(peerInfo, peerInfo.getResourceInfos());
         peerInfos.remove(node);
     }
 
@@ -119,9 +112,5 @@ public class PeerManager {
             logger.info(
                     "Update active resources newSeq:{}, resource:{}", seq, this.activeResources);
         }
-    }
-
-    public void setZoneManager(ZoneManager networkManager) {
-        this.zoneManager = networkManager;
     }
 }

@@ -1,95 +1,18 @@
 package com.webank.wecross.test.peer;
 
-/*
+import com.webank.wecross.p2p.netty.common.Node;
+import com.webank.wecross.peer.PeerManager;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class PeerManagerTest {
     private Logger logger = LoggerFactory.getLogger(PeerManagerTest.class);
 
-    class PeerTestEngineFilter extends P2PEngineMessageFilter {
-
-        @Override
-        public P2PMessage handle1(P2PMessage msg) {
-            String method = msg.getMethod();
-            switch (method) {
-                case "requestSeq":
-                    return handleRequestSeq(msg);
-                case "seq":
-                    return handleSeq(msg);
-                case "requestPeerInfo":
-                    return handleRequestPeerInfo(msg);
-                case "peerInfo":
-                    return handlePeerInfo(msg);
-                default:
-                    Assert.assertTrue("Unsupported method" + method, false);
-            }
-
-            return null;
-        }
-
-        @Override
-        public P2PMessage handle4(P2PMessage msg) {
-            Assert.assertTrue("Unsupported method" + msg.getMethod(), false);
-            return null;
-        }
-
-        private P2PMessage handleRequestSeq(P2PMessage msg) {
-            Assert.assertEquals("requestSeq", msg.getMethod());
-            Assert.assertNotEquals(0, msg.getSeq());
-
-            PeerSeqMessageData data = new PeerSeqMessageData();
-            data.setSeq(12345);
-            P2PMessage<PeerSeqMessageData> response = new P2PMessage<>();
-            response.setData(data);
-
-            return response;
-        }
-
-        private P2PMessage handleSeq(P2PMessage msg) {
-            Assert.assertEquals("seq", msg.getMethod());
-            return null;
-        }
-
-        private P2PMessage handleRequestPeerInfo(P2PMessage msg) {
-            Assert.assertEquals("requestPeerInfo", msg.getMethod());
-            Assert.assertNotEquals(0, msg.getSeq());
-
-            Set<ResourceInfo> activeResources = new HashSet<>();
-            activeResources.add(new ResourceInfo("network.stub.resource0"));
-            activeResources.add(new ResourceInfo("network.stub.resource1"));
-            activeResources.add(new ResourceInfo("network.stub.resource2"));
-
-            PeerInfoMessageData data = new PeerInfoMessageData();
-            data.setSeq(12345);
-            data.setResources(activeResources);
-
-            P2PMessage<PeerInfoMessageData> response = new P2PMessage<>();
-            response.setData(data);
-
-            return response;
-        }
-
-        private P2PMessage handlePeerInfo(P2PMessage msg) {
-            Assert.assertEquals("peerInfo", msg.getMethod());
-            return null;
-        }
-    }
-
-    public PeerManager newMockPeerManager() {
-        P2PMessageEngine p2pEngine =
-                MockP2PMessageEngineFactory.newMockP2PMessageEngine(new PeerTestEngineFilter());
-        ZoneManager networkManager = MockNetworkManagerFactory.newMockNteworkManager(p2pEngine);
-        P2PService p2pService = new MockP2PService();
-        ((MockP2PService) p2pService).addPeer(new Peer(new Node("abcdefg000000", "", 0)));
-        ((MockP2PService) p2pService).addPeer(new Peer(new Node("abcdefg111111", "", 0)));
-        PeerManager peerManager =
-                MockPeerManagerFactory.newMockPeerManager(networkManager, p2pService, p2pEngine);
-        // peerManager.maintainPeerConnections();
-
-        return peerManager;
-    }
-
     @Test
     public void seqTest() {
-        PeerManager peerManager = newMockPeerManager();
+        PeerManager peerManager = new PeerManager();
 
         for (int i = 0; i < 100; i++) {
             int prevSeq = peerManager.getSeq();
@@ -102,106 +25,21 @@ public class PeerManagerTest {
     }
 
     @Test
-    public void syncByRequestPeerInfo() throws Exception {
-        PeerManager peerManager = newMockPeerManager();
+    public void testPeerInfo() {
+        PeerManager peerManager = new PeerManager();
 
-        // Remove mock peers
-        peerManager.clearPeerInfos();
-        Assert.assertEquals(0, peerManager.peerSize());
+        peerManager.addPeerInfo(new Node("node1", "127.0.0.1", 8888));
+        peerManager.addPeerInfo(new Node("node2", "127.0.0.1", 8889));
+        peerManager.addPeerInfo(new Node("node3", "127.0.0.1", 8890));
 
-        // check all syncing
-        Peer peerInfo = peerManager.addPeerInfo(new Node("1111111111111111", "", 0));
+        Assert.assertEquals(3, peerManager.getPeerInfos().size());
+        Assert.assertNull(peerManager.getPeerInfo(new Node("node3", "127.0.0.1", 8811)));
 
-        Thread.sleep(500); // waiting for syncing
-        //peerManager.syncWithPeerNetworks();
+        peerManager.removePeerInfo(new Node("node2", "127.0.0.1", 8889));
+        peerManager.removePeerInfo(new Node("node1", "117.0.0.1", 8889));
 
-        Map<String, ResourceInfo> resources =
-                peerManager.getZoneManager().getAllNetworkStubResourceInfo(false);
-        System.out.println(resources);
-
-        Assert.assertTrue(0 < resources.size());
-
-        Set<String> paths = new HashSet<>();
-        for (ResourceInfo info : resources.values()) {
-            paths.add(info.getPath());
-        }
-
-        Assert.assertTrue(paths.contains("network.stub.resource0"));
-        Assert.assertTrue(paths.contains("network.stub.resource1"));
-        Assert.assertTrue(paths.contains("network.stub.resource2"));
-
-        peerManager.clearPeerInfos();
-    }
-
-    @Test
-    public void syncByRequestSeq() throws Exception {
-        PeerManager peerManager = newMockPeerManager();
-
-        // Remove mock peers
-        peerManager.clearPeerInfos();
-        Assert.assertEquals(0, peerManager.peerSize());
-
-        // check all syncing
-        Peer peerInfo = peerManager.addPeerInfo(new Node("1111111111111111", "", 0));
-
-        Thread.sleep(500); // waiting for syncing
-        //peerManager.syncWithPeerNetworks();
-
-        Map<String, ResourceInfo> resources =
-                peerManager.getZoneManager().getAllNetworkStubResourceInfo(false);
-        System.out.println(resources);
-
-        Assert.assertTrue(0 < resources.size());
-
-        Set<String> paths = new HashSet<>();
-        for (ResourceInfo info : resources.values()) {
-            paths.add(info.getPath());
-        }
-
-        Assert.assertTrue(paths.contains("network.stub.resource0"));
-        Assert.assertTrue(paths.contains("network.stub.resource1"));
-        Assert.assertTrue(paths.contains("network.stub.resource2"));
-
-        peerManager.clearPeerInfos();
-    }
-
-    @Test
-    public void handleRequestSeqTest() {
-        PeerManager peerManager = newMockPeerManager();
-        P2PMessage<Object> request = new P2PMessage<>();
-        PeerSeqMessageData data =
-                (PeerSeqMessageData) peerManager.onRestfulPeerMessage(new Peer(new Node("", "", 0)), "requestSeq", request);
-
-        Assert.assertNotEquals(0, data.getSeq());
-    }
-
-    @Test
-    public void handleRequestPeerInfoTest() {
-        PeerManager peerManager = newMockPeerManager();
-
-        Peer peerInfo = new Peer(new Node("", "", 0));
-
-        for (int i = 1; i <= 10; i++) {
-        	try {
-        		ResourceInfo resoourInfo = new ResourceInfo();
-        		resoourInfo.setPath(String.valueOf(i) + "." + String.valueOf(i) + "." + String.valueOf(i));
-
-        		Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
-        		resources.add(resoourInfo);
-        		peerManager.getZoneManager().addRemoteResources(peerInfo, resources);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-            //peerManager.addMockResources();
-            // peerManager.syncWithPeerNetworks();
-            P2PMessage<Object> request = new P2PMessage<>();
-            PeerInfoMessageData data =
-                    (PeerInfoMessageData)
-                            peerManager.onRestfulPeerMessage(new Peer(new Node("", "", 0)), "requestPeerInfo", request);
-
-            Assert.assertNotEquals(0, data.getSeq());
-            Assert.assertEquals(i, data.getResources().size());
-        }
+        Assert.assertEquals(2, peerManager.peerSize());
+        Assert.assertNull(peerManager.getPeerInfo(new Node("node2", "127.0.0.1", 8889)));
+        Assert.assertNotNull(peerManager.getPeerInfo(new Node("node1", "127.0.0.1", 8888)));
     }
 }
-*/

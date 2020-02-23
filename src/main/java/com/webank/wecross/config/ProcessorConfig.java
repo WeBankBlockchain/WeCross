@@ -51,6 +51,7 @@ public class ProcessorConfig {
     DisconnectProcessor newDisconnectProcessor() {
         DisconnectProcessor disconnectProcessor = new DisconnectProcessor();
         disconnectProcessor.setPeerManager(peerManager);
+        disconnectProcessor.setZoneManager(zoneManager);
 
         return disconnectProcessor;
     }
