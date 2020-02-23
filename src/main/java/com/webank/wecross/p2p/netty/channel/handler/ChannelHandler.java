@@ -8,7 +8,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.ssl.SslHandshakeCompletionEvent;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.AttributeKey;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-    	Node node = (Node)(ctx.channel().attr(AttributeKey.valueOf("node")).get());
+        Node node = (Node) (ctx.channel().attr(AttributeKey.valueOf("node")).get());
         int hashCode = System.identityHashCode(ctx);
 
         if (evt instanceof IdleStateEvent) {
@@ -59,11 +58,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
             try {
                 getChannelHandlerCallBack().onConnect(ctx, getConnectToServer());
             } catch (Exception e) {
-                logger.error(
-                        " disconnect, host: {}, ctx: {}, error:",
-                        node,
-                        hashCode,
-                        e);
+                logger.error(" disconnect, host: {}, ctx: {}, error:", node, hashCode, e);
                 ctx.disconnect();
                 ctx.close();
             }
@@ -98,9 +93,11 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        logger.error(" caugth exception, e: {}, node: {}:{}", cause,
-        		((SocketChannel) ctx.channel()).remoteAddress().getAddress().getHostAddress(),
-        		((SocketChannel) ctx.channel()).remoteAddress().getPort());
+        logger.error(
+                " caugth exception, e: {}, node: {}:{}",
+                cause,
+                ((SocketChannel) ctx.channel()).remoteAddress().getAddress().getHostAddress(),
+                ((SocketChannel) ctx.channel()).remoteAddress().getPort());
 
         ctx.disconnect();
         ctx.close();

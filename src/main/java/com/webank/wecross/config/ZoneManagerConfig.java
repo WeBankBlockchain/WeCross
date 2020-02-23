@@ -2,7 +2,6 @@ package com.webank.wecross.config;
 
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
-
 import java.util.Map;
 import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;

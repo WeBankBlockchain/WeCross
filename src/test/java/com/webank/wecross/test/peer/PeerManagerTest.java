@@ -1,32 +1,5 @@
 package com.webank.wecross.test.peer;
 
-import com.webank.wecross.p2p.P2PMessage;
-import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.netty.P2PService;
-import com.webank.wecross.p2p.netty.common.Node;
-import com.webank.wecross.peer.Peer;
-import com.webank.wecross.peer.PeerInfoMessageData;
-import com.webank.wecross.peer.PeerManager;
-import com.webank.wecross.peer.PeerSeqMessageData;
-import com.webank.wecross.resource.Path;
-import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.ResourceInfo;
-import com.webank.wecross.resource.TestResource;
-import com.webank.wecross.test.Mock.MockNetworkManagerFactory;
-import com.webank.wecross.test.Mock.MockP2PMessageEngineFactory;
-import com.webank.wecross.test.Mock.MockP2PService;
-import com.webank.wecross.test.Mock.MockPeerManagerFactory;
-import com.webank.wecross.test.Mock.P2PEngineMessageFilter;
-import com.webank.wecross.zone.ZoneManager;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /*
 public class PeerManagerTest {
     private Logger logger = LoggerFactory.getLogger(PeerManagerTest.class);
@@ -205,14 +178,14 @@ public class PeerManagerTest {
     @Test
     public void handleRequestPeerInfoTest() {
         PeerManager peerManager = newMockPeerManager();
-        
+
         Peer peerInfo = new Peer(new Node("", "", 0));
 
         for (int i = 1; i <= 10; i++) {
         	try {
         		ResourceInfo resoourInfo = new ResourceInfo();
         		resoourInfo.setPath(String.valueOf(i) + "." + String.valueOf(i) + "." + String.valueOf(i));
-        		
+
         		Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
         		resources.add(resoourInfo);
         		peerManager.getZoneManager().addRemoteResources(peerInfo, resources);

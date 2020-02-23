@@ -8,7 +8,6 @@ import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -24,15 +23,15 @@ public class ZoneManagerTest {
     @Test
     public void addRemoteResourcesTest() throws Exception {
         ZoneManager zoneManager = Mockito.spy(ZoneManager.class);
-        
+
         Peer peer = new Peer(new Node("aaa", "127.0.0.1", 100));
-        
+
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
                 ResourceInfo resourceInfo = new ResourceInfo();
                 resourceInfo.setPath("payment.bcos" + i + ".contract" + j);
                 resourceInfo.setDistance(i); // i == 0, set it as local resource
-                
+
                 Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
                 resources.add(resourceInfo);
                 zoneManager.addRemoteResources(peer, resources);
@@ -46,134 +45,135 @@ public class ZoneManagerTest {
         Set<String> allLocalResources = zoneManager.getAllResourceName(true);
         System.out.println(allLocalResources);
         Assert.assertEquals(4, allLocalResources.size());
-        
-        //test for wrong path
+
+        // test for wrong path
         ResourceInfo resourceInfo = new ResourceInfo();
         resourceInfo.setPath("payment.bcos");
         resourceInfo.setDistance(0); // i == 0, set it as local resource
-        
+
         Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
         resources.add(resourceInfo);
         zoneManager.addRemoteResources(peer, resources);
-        
+
         Set<String> allResources2 = zoneManager.getAllResourceName(false);
         System.out.println(allResources2);
         Assert.assertEquals(12, allResources2.size());
-        
-        //test for different peer
+
+        // test for different peer
         ResourceInfo resourceInfo2 = new ResourceInfo();
         resourceInfo2.setPath("payment.bcos0.contract0");
         resourceInfo2.setDistance(0); // i == 0, set it as local resource
-        
+
         Peer peer2 = new Peer(new Node("bbb", "127.0.0.1", 100));
-        
+
         Set<ResourceInfo> resources2 = new HashSet<ResourceInfo>();
         resources2.add(resourceInfo2);
         zoneManager.addRemoteResources(peer2, resources2);
-        
+
         Set<String> allResources3 = zoneManager.getAllResourceName(false);
         System.out.println(allResources3);
         Assert.assertEquals(12, allResources3.size());
-        
+
         Resource resource2 = zoneManager.getResource(Path.decode("payment.bcos0.contract0"));
         Assert.assertEquals(2, resource2.getPeers().size());
     }
-    
+
     @Test
     public void removeRemoteResourcesTest() throws Exception {
-    	ZoneManager zoneManager = Mockito.spy(ZoneManager.class);
-        
+        ZoneManager zoneManager = Mockito.spy(ZoneManager.class);
+
         Peer peer = new Peer(new Node("aaa", "127.0.0.1", 100));
-        
+
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
                 ResourceInfo resourceInfo = new ResourceInfo();
                 resourceInfo.setPath("payment.bcos" + i + ".contract" + j);
                 resourceInfo.setDistance(i); // i == 0, set it as local resource
-                
+
                 Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
                 resources.add(resourceInfo);
                 zoneManager.addRemoteResources(peer, resources);
             }
         }
-        
+
         Set<String> allResources = zoneManager.getAllResourceName(false);
         Assert.assertEquals(12, allResources.size());
-        
+
         ResourceInfo removeResource = new ResourceInfo();
         removeResource.setPath("payment.bcos0.contract0");
         removeResource.setDistance(0);
-        
+
         Set<ResourceInfo> removeResources = new HashSet<ResourceInfo>();
         removeResources.add(removeResource);
-        
+
         zoneManager.removeRemoteResources(peer, removeResources);
-        
+
         allResources = zoneManager.getAllResourceName(false);
         Assert.assertEquals(11, allResources.size());
-        
+
         ResourceInfo resourceInfo2 = new ResourceInfo();
         resourceInfo2.setPath("payment.bcos1.contract1");
         resourceInfo2.setDistance(0); // i == 0, set it as local resource
-        
+
         Peer peer2 = new Peer(new Node("bbb", "127.0.0.1", 100));
-        
+
         Set<ResourceInfo> resources2 = new HashSet<ResourceInfo>();
         resources2.add(resourceInfo2);
         zoneManager.addRemoteResources(peer2, resources2);
-        
+
         removeResource.setPath("payment.bcos1.contract1");
         zoneManager.removeRemoteResources(peer2, removeResources);
-        
+
         allResources = zoneManager.getAllResourceName(false);
         Assert.assertEquals(11, allResources.size());
-        
+
         Resource resource = zoneManager.getResource(Path.decode("payment.bcos1.contract1"));
         Assert.assertEquals(1, resource.getPeers().size());
         Assert.assertTrue(resource.getPeers().contains(peer));
         Assert.assertFalse(resource.getPeers().contains(peer2));
-     
+
         for (int j = 0; j < 4; j++) {
-	        ResourceInfo resourceInfo = new ResourceInfo();
-	        resourceInfo.setPath("payment.bcos2" + ".contract" + j);
-	        resourceInfo.setDistance(2); // i == 0, set it as local resource
-	        
-	        Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
-	        resources.add(resourceInfo);
-	        zoneManager.removeRemoteResources(peer, resources);
+            ResourceInfo resourceInfo = new ResourceInfo();
+            resourceInfo.setPath("payment.bcos2" + ".contract" + j);
+            resourceInfo.setDistance(2); // i == 0, set it as local resource
+
+            Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
+            resources.add(resourceInfo);
+            zoneManager.removeRemoteResources(peer, resources);
         }
-        
+
         Zone zone = zoneManager.getZone("payment");
         Stub stub = zone.getStub("bcos2");
         Assert.assertNull(stub);
-        
-        //fatal test
+
+        // fatal test
         ResourceInfo resourceInfo = new ResourceInfo();
         resourceInfo.setPath("payment.bcos2.aaa");
         resourceInfo.setDistance(2);
-        
+
         Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
-    	resources.add(resourceInfo);
+        resources.add(resourceInfo);
         zoneManager.removeRemoteResources(peer2, resources);
-        
+
         resourceInfo.setPath("payment.bcos1.contract0");
         zoneManager.removeRemoteResources(peer2, resources);
-        
+
         resourceInfo.setPath("payment.bcos1.abc");
         zoneManager.removeRemoteResources(peer2, resources);
-        
+
         resourceInfo.setPath("payment1.bcos4.abc");
         zoneManager.removeRemoteResources(peer2, resources);
-        
+
         resourceInfo.setPath("payment.abc");
         zoneManager.removeRemoteResources(peer2, resources);
-        
-        for(Map.Entry<String, ResourceInfo> entry: zoneManager.getAllResourceInfo(false).entrySet()) {
-        	resources = new HashSet<ResourceInfo>();
-        	resources.add(entry.getValue());
-        	zoneManager.removeRemoteResources(peer, resources);
+
+        for (Map.Entry<String, ResourceInfo> entry :
+                zoneManager.getAllResourceInfo(false).entrySet()) {
+            resources = new HashSet<ResourceInfo>();
+            resources.add(entry.getValue());
+            zoneManager.removeRemoteResources(peer, resources);
         }
-        
+
         Assert.assertEquals(0, zoneManager.getZones().size());
     }
 

@@ -27,17 +27,17 @@ public class P2PService {
     private static Logger logger = LoggerFactory.getLogger(P2PService.class);
 
     private Timer timer = new HashedWheelTimer();
-	private NettyBootstrap nettyBootstrap;
+    private NettyBootstrap nettyBootstrap;
     private SeqMapper seqMapper;
     private ThreadPoolTaskExecutor threadPool;
-    
-    public Timer getTimer() {
-		return timer;
-	}
 
-	public void setTimer(Timer timer) {
-		this.timer = timer;
-	}
+    public Timer getTimer() {
+        return timer;
+    }
+
+    public void setTimer(Timer timer) {
+        this.timer = timer;
+    }
 
     public NettyBootstrap getInitializer() {
         return nettyBootstrap;

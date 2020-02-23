@@ -15,7 +15,6 @@ import com.webank.wecross.restserver.response.ResourceResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
-
 import java.util.ArrayList;
 import org.junit.After;
 import org.junit.AfterClass;

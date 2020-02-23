@@ -1,14 +1,9 @@
 package com.webank.wecross.test.proposal;
 
-import com.webank.wecross.proposal.ProposalPool;
-import com.webank.wecross.test.Mock.MockProposal;
-import org.junit.Assert;
-import org.junit.Test;
-
 public class ProposalPoolTest {
 
-	// ProposalPool
-	/*
+    // ProposalPool
+    /*
     @Test
     public void basicTest() throws Exception {
         ProposalPool pool = new ProposalPool();

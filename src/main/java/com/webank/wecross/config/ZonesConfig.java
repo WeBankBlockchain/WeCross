@@ -8,7 +8,6 @@ import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.StubsFactory;
 import com.webank.wecross.utils.ConfigUtils;
 import com.webank.wecross.zone.Zone;
-
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Resource;

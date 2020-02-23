@@ -1,7 +1,5 @@
 package com.webank.wecross.p2p.netty.common;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.socket.SocketChannel;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

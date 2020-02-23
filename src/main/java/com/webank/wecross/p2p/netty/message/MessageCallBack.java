@@ -13,8 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MessageCallBack {
-	static public final Short ON_CONNECT = -100;
-	static public final Short ON_DISCONNECT = -101;
+    public static final Short ON_CONNECT = -100;
+    public static final Short ON_DISCONNECT = -101;
 
     private static final Logger logger = LoggerFactory.getLogger(MessageCallBack.class);
 
@@ -30,11 +30,11 @@ public class MessageCallBack {
     public void setSeqMapper(SeqMapper seqMapper) {
         this.seqMapper = seqMapper;
     }
-    
+
     public Map<Short, Processor> getMessageToProcessor() {
         return messageToProcessor;
     }
-    
+
     public Processor getProcessor(Short type) {
         return messageToProcessor.get(type);
     }
@@ -44,19 +44,19 @@ public class MessageCallBack {
     }
 
     public void onConnect(ChannelHandlerContext ctx, Node node) {
-    	Processor processor = getProcessor(ON_CONNECT);
-    	
-    	if(processor != null) {
-    		processor.process(ctx, node, null);
-    	}
+        Processor processor = getProcessor(ON_CONNECT);
+
+        if (processor != null) {
+            processor.process(ctx, node, null);
+        }
     }
-    
+
     public void onDisconnect(ChannelHandlerContext ctx, Node node) {
-    	Processor processor = getProcessor(ON_DISCONNECT);
-    	
-    	if(processor != null) {
-    		processor.process(ctx, node, null);
-    	}
+        Processor processor = getProcessor(ON_DISCONNECT);
+
+        if (processor != null) {
+            processor.process(ctx, node, null);
+        }
     }
 
     public void onMessage(ChannelHandlerContext ctx, Node node, ByteBuf byteBuf) {

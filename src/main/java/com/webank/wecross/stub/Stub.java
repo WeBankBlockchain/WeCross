@@ -2,9 +2,7 @@ package com.webank.wecross.stub;
 
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import org.slf4j.Logger;
 
 public interface Stub {
@@ -25,13 +23,13 @@ public interface Stub {
         Resource currentResource = getResources().get(name);
         if (currentResource == null) {
             getResources().put(name, resource);
-            
+
             return false;
         } else {
             if (currentResource.getDistance() > resource.getDistance()) {
                 getResources().put(name, resource); // Update to shorter path resource
             }
-            
+
             return true;
         }
     }

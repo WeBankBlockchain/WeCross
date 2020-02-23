@@ -3,7 +3,6 @@ package com.webank.wecross.test.Mock;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
-
 import java.util.HashMap;
 import java.util.Map;
 

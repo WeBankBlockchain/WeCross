@@ -8,32 +8,23 @@ import com.webank.wecross.p2p.RequestProcessor;
 import com.webank.wecross.p2p.ResponseProcessor;
 import com.webank.wecross.p2p.netty.SeqMapper;
 import com.webank.wecross.p2p.netty.message.MessageCallBack;
-import com.webank.wecross.peer.PeerManager;
-import com.webank.wecross.zone.ZoneManager;
-
 import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MessageCallbackConfig {
-    @Resource
-    HeartBeatProcessor heartBeatProcessor;
-    
-    @Resource
-    ResponseProcessor resourceResponseProcessor;
-    
-    @Resource
-    RequestProcessor resourceRequestProcessor;
-    
-    @Resource
-    ConnectProcessor connectProcessor;
-    
-    @Resource
-    DisconnectProcessor disconnectProcessor;
-    
-    @Resource
-    SeqMapper seqMapper;
+    @Resource HeartBeatProcessor heartBeatProcessor;
+
+    @Resource ResponseProcessor resourceResponseProcessor;
+
+    @Resource RequestProcessor resourceRequestProcessor;
+
+    @Resource ConnectProcessor connectProcessor;
+
+    @Resource DisconnectProcessor disconnectProcessor;
+
+    @Resource SeqMapper seqMapper;
 
     @Bean
     public MessageCallBack newMessageCallBack() {

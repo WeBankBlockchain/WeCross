@@ -25,8 +25,8 @@ public class P2PConfigConfig {
 
     @Bean
     public P2PConfig newP2PConfig() throws WeCrossException {
-    	logger.info("initializing p2p config...");
-    	
+        logger.info("initializing p2p config...");
+
         P2PConfig p2PConfig = null;
         try {
             Map<String, Object> wecrossMap = toml.toMap();

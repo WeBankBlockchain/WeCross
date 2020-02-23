@@ -14,8 +14,7 @@ public class RestfulP2PMessageEngineConfig {
 
     private Logger logger = LoggerFactory.getLogger(RestfulP2PMessageEngineConfig.class);
 
-    @Resource
-    P2PService p2PService;
+    @Resource P2PService p2PService;
 
     @Bean
     public P2PMessageEngine newRestfulP2PMessageEngine() {

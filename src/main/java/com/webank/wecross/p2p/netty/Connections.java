@@ -97,11 +97,15 @@ public class Connections {
      * @param ctx
      * @return
      */
-    public void addChannelHandler(
-            Node node, ChannelHandlerContext ctx, boolean connectToServer) {
+    public void addChannelHandler(Node node, ChannelHandlerContext ctx, boolean connectToServer) {
         int hashCode = System.identityHashCode(ctx);
 
-        logger.info("add channel handler, node: {}, host: {}, ctx: {}, active: {}", node.getNodeID(), node, hashCode, ctx.channel().isActive());
+        logger.info(
+                "add channel handler, node: {}, host: {}, ctx: {}, active: {}",
+                node.getNodeID(),
+                node,
+                hashCode,
+                ctx.channel().isActive());
 
         ChannelHandlerContext oldCtx = null;
         synchronized (nodeID2ChannelHandler) {
@@ -135,7 +139,8 @@ public class Connections {
                 }
             }
 
-            throw new UnsupportedOperationException(" existing connection, node : " + node.getNodeID());
+            throw new UnsupportedOperationException(
+                    " existing connection, node : " + node.getNodeID());
         }
     }
 
@@ -159,7 +164,11 @@ public class Connections {
     public void removeChannelHandler(Node node, ChannelHandlerContext ctx) {
         int hashCode = System.identityHashCode(ctx);
 
-        logger.info(" remove channel handler, host: {}, node: {}, ctx: {}", node, node.getNodeID(), hashCode);
+        logger.info(
+                " remove channel handler, host: {}, node: {}, ctx: {}",
+                node,
+                node.getNodeID(),
+                hashCode);
 
         ChannelHandlerContext oldCtx = null;
         synchronized (nodeID2ChannelHandler) {

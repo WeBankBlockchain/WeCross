@@ -53,8 +53,7 @@ public class PeerResources {
                 String path = resourceInfo.getPath();
                 String checksum = resourceInfo.getChecksum();
 
-                Map<String, Set<Peer>> theChecksum2PeerInfos =
-                        path2Checksum2PeerInfos.get(path);
+                Map<String, Set<Peer>> theChecksum2PeerInfos = path2Checksum2PeerInfos.get(path);
                 if (theChecksum2PeerInfos == null) {
                     theChecksum2PeerInfos = new HashMap<>();
                 }
@@ -72,8 +71,7 @@ public class PeerResources {
         }
 
         // parse resource2Checksum and resource2Peers
-        for (Map.Entry<String, Map<String, Set<Peer>>> entry :
-                path2Checksum2PeerInfos.entrySet()) {
+        for (Map.Entry<String, Map<String, Set<Peer>>> entry : path2Checksum2PeerInfos.entrySet()) {
             String path = entry.getKey();
             Map<String, Set<Peer>> checksum2PeerInfos = entry.getValue();
             if (checksum2PeerInfos.size() > 1) {
@@ -114,8 +112,7 @@ public class PeerResources {
             parse();
         }
 
-        for (Map.Entry<String, Map<String, Set<Peer>>> entry :
-                path2Checksum2PeerInfos.entrySet()) {
+        for (Map.Entry<String, Map<String, Set<Peer>>> entry : path2Checksum2PeerInfos.entrySet()) {
             if (entry.getValue().size() > 1) {
                 // same path has not unique checksum
 

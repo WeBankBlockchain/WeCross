@@ -2,15 +2,13 @@ package com.webank.wecross.config;
 
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.zone.ZoneManager;
-
 import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class PeerManagerConfig {
-    @Resource
-    private ZoneManager zoneManager;
+    @Resource private ZoneManager zoneManager;
 
     private long peerActiveTimeout = 17000; // 17s
 

@@ -5,7 +5,6 @@ import com.webank.wecross.p2p.P2PConfig;
 import com.webank.wecross.p2p.netty.channel.handler.ChannelHandler;
 import com.webank.wecross.p2p.netty.channel.handler.ChannelHandlerCallBack;
 import com.webank.wecross.p2p.netty.common.Node;
-import com.webank.wecross.p2p.netty.common.Utils;
 import com.webank.wecross.p2p.netty.message.MessageCallBack;
 import com.webank.wecross.p2p.netty.message.proto.Message;
 import com.webank.wecross.p2p.netty.message.serialize.MessageSerializer;
@@ -31,7 +30,6 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AttributeKey;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +39,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 /** init P2P service */
 public class NettyBootstrap {
@@ -62,16 +59,16 @@ public class NettyBootstrap {
     private ChannelHandlerCallBack channelHandlerCallBack = new ChannelHandlerCallBack();
     private Connections connections = new Connections();
     private P2PConfig config;
-    
-    private MessageCallBack messageCallBack;
-    
-    public MessageCallBack getMessageCallBack() {
-		return messageCallBack;
-	}
 
-	public void setMessageCallBack(MessageCallBack messageCallBack) {
-		this.messageCallBack = messageCallBack;
-	}
+    private MessageCallBack messageCallBack;
+
+    public MessageCallBack getMessageCallBack() {
+        return messageCallBack;
+    }
+
+    public void setMessageCallBack(MessageCallBack messageCallBack) {
+        this.messageCallBack = messageCallBack;
+    }
 
     public P2PConfig getConfig() {
         return config;
@@ -157,8 +154,8 @@ public class NettyBootstrap {
      * @throws IOException
      */
     public void start() throws ExecutionException, InterruptedException, IOException {
-    	channelHandlerCallBack.setCallBack(messageCallBack);
-    	channelHandlerCallBack.setConnections(connections);
+        channelHandlerCallBack.setCallBack(messageCallBack);
+        channelHandlerCallBack.setConnections(connections);
 
         logger.info(" initialize, config: {}", getConfig());
 
@@ -306,11 +303,10 @@ public class NettyBootstrap {
                     ByteBuf byteBuf = ctx.alloc().buffer();
                     serializer.serialize(message, byteBuf);
                     ctx.writeAndFlush(byteBuf);
-                    
+
                     Node node = (Node) ctx.channel().attr(AttributeKey.valueOf("node")).get();
 
-                    logger.trace(
-                            " send heartbeat message to {} ", node);
+                    logger.trace(" send heartbeat message to {} ", node);
                 });
     }
 

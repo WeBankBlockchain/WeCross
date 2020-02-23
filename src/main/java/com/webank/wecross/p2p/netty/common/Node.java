@@ -3,29 +3,29 @@ package com.webank.wecross.p2p.netty.common;
 import java.util.Objects;
 
 public class Node {
-	private String nodeID;
+    private String nodeID;
     private String host;
     private Integer port;
 
     public Node() {}
-    
+
     public Node(String nodeID, String host, Integer port) {
-    	this.setNodeID(nodeID);
+        this.setNodeID(nodeID);
         this.host = host;
         this.port = port;
     }
-    
-    public String getIPPort() {
-    	return host + ":" + String.valueOf(port);
-    }
-    
-	public String getNodeID() {
-		return nodeID;
-	}
 
-	public void setNodeID(String nodeID) {
-		this.nodeID = nodeID;
-	}
+    public String getIPPort() {
+        return host + ":" + String.valueOf(port);
+    }
+
+    public String getNodeID() {
+        return nodeID;
+    }
+
+    public void setNodeID(String nodeID) {
+        this.nodeID = nodeID;
+    }
 
     public String getHost() {
         return host;
@@ -52,8 +52,10 @@ public class Node {
             return false;
         }
         Node peerHost = (Node) o;
-        
-        return Objects.equals(nodeID, peerHost.nodeID) && Objects.equals(host, peerHost.host) && Objects.equals(port, peerHost.port);
+
+        return Objects.equals(nodeID, peerHost.nodeID)
+                && Objects.equals(host, peerHost.host)
+                && Objects.equals(port, peerHost.port);
     }
 
     @Override

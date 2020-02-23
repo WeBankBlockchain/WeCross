@@ -2,7 +2,6 @@ package com.webank.wecross.p2p.netty.channel.handler;
 
 import com.webank.wecross.p2p.netty.Connections;
 import com.webank.wecross.p2p.netty.common.Node;
-import com.webank.wecross.p2p.netty.common.Utils;
 import com.webank.wecross.p2p.netty.message.MessageCallBack;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -13,7 +12,6 @@ import java.security.Principal;
 import java.security.PublicKey;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.security.cert.X509Certificate;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -62,7 +60,8 @@ public class ChannelHandlerCallBack {
         return sb.toString();
     }
 
-    private PublicKey fetchCertificate(ChannelHandlerContext ctx) throws SSLPeerUnverifiedException {
+    private PublicKey fetchCertificate(ChannelHandlerContext ctx)
+            throws SSLPeerUnverifiedException {
         SslHandler sslhandler = (SslHandler) ctx.channel().pipeline().get(SslHandler.class);
 
         logger.info(String.valueOf(ctx.channel().pipeline().names()));
@@ -87,15 +86,16 @@ public class ChannelHandlerCallBack {
 
         return publicKey;
     }
-    
+
     /**
      * get peer ip, port from channel connect context
      *
      * @param context
      * @return
-     * @throws SSLPeerUnverifiedException 
+     * @throws SSLPeerUnverifiedException
      */
-    public Node channelContext2Node(ChannelHandlerContext context) throws SSLPeerUnverifiedException {
+    public Node channelContext2Node(ChannelHandlerContext context)
+            throws SSLPeerUnverifiedException {
         if (null == context) {
             return null;
         }
@@ -124,12 +124,11 @@ public class ChannelHandlerCallBack {
                 node,
                 node.getNodeID(),
                 System.identityHashCode(ctx));
-        
-        if(threadPool == null) {
-        	callBack.onConnect(ctx, node);
-        }
-        else {
-        	threadPool.execute(
+
+        if (threadPool == null) {
+            callBack.onConnect(ctx, node);
+        } else {
+            threadPool.execute(
                     new Runnable() {
                         @Override
                         public void run() {
@@ -155,12 +154,11 @@ public class ChannelHandlerCallBack {
                     node,
                     System.identityHashCode(ctx));
         }
-        
-        if(threadPool == null) {
-        	callBack.onDisconnect(ctx, node);
-        }
-        else {
-        	threadPool.execute(
+
+        if (threadPool == null) {
+            callBack.onDisconnect(ctx, node);
+        } else {
+            threadPool.execute(
                     new Runnable() {
                         @Override
                         public void run() {
@@ -174,8 +172,8 @@ public class ChannelHandlerCallBack {
         /*
          use thread pool first onMessage may block
         */
-    	Node node = (Node) (ctx.channel().attr(AttributeKey.valueOf("node")).get());
-    	
+        Node node = (Node) (ctx.channel().attr(AttributeKey.valueOf("node")).get());
+
         if (threadPool == null) {
             callBack.onMessage(ctx, node, message);
         } else {

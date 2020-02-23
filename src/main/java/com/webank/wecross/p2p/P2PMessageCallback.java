@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.wecross.p2p.engine.P2PResponse;
 import com.webank.wecross.peer.Peer;
-
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 
 public abstract class P2PMessageCallback<T> {

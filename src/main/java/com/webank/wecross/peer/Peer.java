@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Peer {
-	Node node;
+    Node node;
     private int seq = 1;
     private Set<ResourceInfo> resourceInfos = new HashSet<>();
     private long lastActiveTimestamp = System.currentTimeMillis();
@@ -14,14 +14,14 @@ public class Peer {
     public Peer(Node node) {
         this.node = node;
     }
-    
-    public Node getNode() {
-		return node;
-	}
 
-	public void setNode(Node node) {
-		this.node = node;
-	}
+    public Node getNode() {
+        return node;
+    }
+
+    public void setNode(Node node) {
+        this.node = node;
+    }
 
     public int getSeq() {
         return seq;

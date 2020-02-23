@@ -11,7 +11,6 @@ import com.webank.wecross.p2p.netty.response.Response;
 import com.webank.wecross.p2p.netty.response.ResponseCallBack;
 import com.webank.wecross.p2p.netty.response.StatusCode;
 import com.webank.wecross.peer.Peer;
-
 import java.io.IOException;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
@@ -19,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 public class RestfulP2PMessageEngine extends P2PMessageEngine {
     private Logger logger = LoggerFactory.getLogger(RestfulP2PMessageEngine.class);
-    
+
     private P2PService p2PService;
 
     public P2PService getP2PService() {
@@ -65,35 +64,36 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
 
                                 logger.info(" receive response: {}", response);
 
-                                if(callback != null) {
-	                                String content = response.getContent();
-	                                try {
-	                                    /** send request failed or request transfer failed */
-	                                    if (response.getErrorCode() != StatusCode.SUCCESS) {
-	                                        throw new IOException(response.getErrorMessage());
-	                                    }
-	
-	                                    P2PResponse<Object> p2PResponse =
-	                                            callback.parseContent(content);
-	                                    /** remote execute return not ok */
-	                                    if (p2PResponse.getResult() != QueryStatus.SUCCESS) {
-	                                        throw new IOException(p2PResponse.getMessage());
-	                                    }
-	
-	                                    executeCallback(
-	                                            callback,
-	                                            QueryStatus.SUCCESS,
-	                                            QueryStatus.getStatusMessage(QueryStatus.SUCCESS),
-	                                            p2PResponse.toP2PMessage("restfulP2PMessageResponse"));
-	
-	                                } catch (Exception e) {
-	                                    executeCallback(
-	                                            callback,
-	                                            QueryStatus.INTERNAL_ERROR,
-	                                            e.getMessage(),
-	                                            null);
-	                                    logger.error(" error : {}", e.getMessage());
-	                                }
+                                if (callback != null) {
+                                    String content = response.getContent();
+                                    try {
+                                        /** send request failed or request transfer failed */
+                                        if (response.getErrorCode() != StatusCode.SUCCESS) {
+                                            throw new IOException(response.getErrorMessage());
+                                        }
+
+                                        P2PResponse<Object> p2PResponse =
+                                                callback.parseContent(content);
+                                        /** remote execute return not ok */
+                                        if (p2PResponse.getResult() != QueryStatus.SUCCESS) {
+                                            throw new IOException(p2PResponse.getMessage());
+                                        }
+
+                                        executeCallback(
+                                                callback,
+                                                QueryStatus.SUCCESS,
+                                                QueryStatus.getStatusMessage(QueryStatus.SUCCESS),
+                                                p2PResponse.toP2PMessage(
+                                                        "restfulP2PMessageResponse"));
+
+                                    } catch (Exception e) {
+                                        executeCallback(
+                                                callback,
+                                                QueryStatus.INTERNAL_ERROR,
+                                                e.getMessage(),
+                                                null);
+                                        logger.error(" error : {}", e.getMessage());
+                                    }
                                 }
                             }
                         });

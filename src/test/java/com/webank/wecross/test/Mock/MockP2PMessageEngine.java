@@ -4,7 +4,6 @@ import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.peer.Peer;
-
 import org.junit.Assert;
 
 public class MockP2PMessageEngine extends P2PMessageEngine {
