@@ -1,6 +1,5 @@
 package com.webank.wecross.stub.fabric;
 
-import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
