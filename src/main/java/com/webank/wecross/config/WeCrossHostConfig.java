@@ -21,6 +21,9 @@ public class WeCrossHostConfig {
     P2PService p2pService;
     
     @Resource
+    PeerManager peerManager;
+    
+    @Resource
     P2PMessageEngine p2pMessageEngine;
 
     @Resource(name = "produceToml")
@@ -31,9 +34,11 @@ public class WeCrossHostConfig {
         WeCrossHost host = new WeCrossHost();
         host.setZoneManager(zoneManager);
         host.setP2pService(p2pService);
+        host.setPeerManager(peerManager);
         
         // set the p2p engine here to avoid circular reference
-        zoneManager.setP2pEngine(p2pMessageEngine);
+        zoneManager.setP2PEngine(p2pMessageEngine);
+        
         host.start();
         return host;
     }

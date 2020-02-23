@@ -24,9 +24,11 @@ public abstract class P2PMessageEngine {
     }
 
     protected void checkCallback(P2PMessageCallback callback) throws Exception {
-        if (callback.getPeer() == null) {
-            throw new Exception("callback from peer has not set");
-        }
+    	if(callback != null) {
+	        if (callback.getPeer() == null) {
+	            throw new Exception("callback from peer has not set");
+	        }
+    	}
     }
 
     protected <T> void checkHttpResponse(ResponseEntity<P2PResponse<T>> response) throws Exception {
@@ -46,9 +48,11 @@ public abstract class P2PMessageEngine {
 
     protected void executeCallback(
             P2PMessageCallback callback, int status, String message, P2PMessage data) {
-        callback.setStatus(status);
-        callback.setMessage(message);
-        callback.setData(data);
-        callback.execute();
+    	if(callback != null) {
+	        callback.setStatus(status);
+	        callback.setMessage(message);
+	        callback.setData(data);
+	        callback.execute();
+    	}
     }
 }

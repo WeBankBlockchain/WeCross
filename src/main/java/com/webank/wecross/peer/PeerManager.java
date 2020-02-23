@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +20,7 @@ public class PeerManager {
     Logger logger = LoggerFactory.getLogger(PeerManager.class);
 
     private ZoneManager zoneManager;
-    private Map<Node, Peer> peerInfos = new HashMap<Node, Peer>(); // peer
+    private Map<Node, Peer> peerInfos = new ConcurrentHashMap<Node, Peer>(); // peer
     private int seq = 1; // Seq of the host
     private long peerActiveTimeout;
 
@@ -38,6 +40,10 @@ public class PeerManager {
 
     public int peerSize() {
         return peerInfos.size();
+    }
+    
+    public Map<Node, Peer> getPeerInfos() {
+    	return peerInfos;
     }
 
     public synchronized Peer getPeerInfo(Node node) {
@@ -80,12 +86,6 @@ public class PeerManager {
             return true;
         }
         return peerInfos.get(node).getSeq() != currentSeq;
-    }
-
-    public PeerSeqMessageData handleRequestSeq() {
-        PeerSeqMessageData data = new PeerSeqMessageData();
-        data.setSeq(seq);
-        return data;
     }
 
     public void setPeerInfos(Map<Node, Peer> peerInfos) {

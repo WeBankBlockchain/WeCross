@@ -279,7 +279,7 @@ public class RemoteResource implements Resource {
     private Object sendRemote(Peer peer, P2PMessage request, RemoteSemaphoreCallback callback)
             throws Exception {
         try {
-            callback.setPeerInfo(peer);
+            callback.setPeer(peer);
 
             logger.info(
                     "Request remote resource: method:{}, data:{}",

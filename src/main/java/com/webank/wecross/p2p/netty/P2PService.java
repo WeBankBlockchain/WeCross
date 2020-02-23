@@ -2,7 +2,6 @@ package com.webank.wecross.p2p.netty;
 
 import com.webank.wecross.p2p.netty.channel.handler.ChannelHandlerCallBack;
 import com.webank.wecross.p2p.netty.common.Node;
-import com.webank.wecross.p2p.netty.common.Utils;
 import com.webank.wecross.p2p.netty.message.proto.Message;
 import com.webank.wecross.p2p.netty.message.serialize.MessageSerializer;
 import com.webank.wecross.p2p.netty.request.Request;
@@ -16,7 +15,6 @@ import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
 import java.io.IOException;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -29,9 +27,17 @@ public class P2PService {
     private static Logger logger = LoggerFactory.getLogger(P2PService.class);
 
     private Timer timer = new HashedWheelTimer();
-    private NettyBootstrap nettyBootstrap;
+	private NettyBootstrap nettyBootstrap;
     private SeqMapper seqMapper;
     private ThreadPoolTaskExecutor threadPool;
+    
+    public Timer getTimer() {
+		return timer;
+	}
+
+	public void setTimer(Timer timer) {
+		this.timer = timer;
+	}
 
     public NettyBootstrap getInitializer() {
         return nettyBootstrap;

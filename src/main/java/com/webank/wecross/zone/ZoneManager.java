@@ -29,7 +29,7 @@ public class ZoneManager {
     private int seq = 1;
     private Logger logger = LoggerFactory.getLogger(ZoneManager.class);
     private P2PMessageEngine p2pEngine;
-    private ReadWriteLock lock = new ReentrantReadWriteLock();
+	private ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public StateResponse getState(StateRequest request) {
 
@@ -98,7 +98,16 @@ public class ZoneManager {
         this.seq = seq;
     }
     
-    public Map<String, ResourceInfo> getAllNetworkStubResourceInfo(boolean ignoreRemote) {
+    public Map<String, Stub> getAllStubInfo(boolean ignoreLocal) {
+    	lock.readLock().lock();
+    	/*
+    	try {
+    	}
+    	*/
+    	return null;
+    }
+    
+    public Map<String, ResourceInfo> getAllResourceInfo(boolean ignoreRemote) {
         lock.readLock().lock();
         try {
             Set<Path> resourcePaths = getAllNetworkStubResourcePath(ignoreRemote);
@@ -127,7 +136,7 @@ public class ZoneManager {
         return null;
     }
 
-    public Set<String> getAllNetworkStubResourceName(boolean ignoreRemote) {
+    public Set<String> getAllResourceName(boolean ignoreRemote) {
         lock.readLock().lock();
         try {
             Set<String> ret = new HashSet<>();
@@ -155,7 +164,7 @@ public class ZoneManager {
     public Set<Path> getAllNetworkStubResourcePath(boolean ignoreRemote) {
         lock.readLock().lock();
         try {
-            Set<String> resourcesString = getAllNetworkStubResourceName(ignoreRemote);
+            Set<String> resourcesString = getAllResourceName(ignoreRemote);
             Set<Path> ret = new HashSet<>();
             for (String str : resourcesString) {
                 ret.add(Path.decode(str));
@@ -263,82 +272,6 @@ public class ZoneManager {
         }
     }
     
-    /*
-    public void updateActivePeerNetwork(PeerResources peerResource) {
-        lock.writeLock().lock();
-        try {
-            Map<String, ResourceInfo> myselfResourceInfo = getAllNetworkStubResourceInfo(true);
-            peerResource.updateMyselfResources(myselfResourceInfo);
-
-            peerResource.loggingInvalidResources();
-
-            Map<String, Set<PeerInfo>> resource2Peers = peerResource.getResource2Peers();
-            Map<String, String> resource2Checksum = peerResource.getResource2Checksum();
-
-            Set<String> currentResources = getAllNetworkStubResourceName(false);
-            logger.debug("Old resources:{}", currentResources);
-
-            Set<String> resources2Add = new HashSet<>(resource2Peers.keySet());
-            resources2Add.removeAll(currentResources);
-
-            Set<String> resources2Remove = new HashSet<>(currentResources);
-            resources2Remove.removeAll(resource2Peers.keySet());
-
-            Set<String> resources2Update = new HashSet<>(currentResources);
-            resources2Update.removeAll(resources2Remove);
-
-            // Delete inactive remote resources
-            logger.debug("Remove inactive remote resources " + resources2Remove);
-            for (String resource : resources2Remove) {
-                try {
-                    removeResource(Path.decode(resource), true);
-                } catch (Exception e) {
-                    logger.error(
-                            "Remove resource exception: resource:{}, exception:{}", resource, e);
-                }
-            }
-
-            // Add new remote resources
-            logger.debug("Add new remote resources " + resources2Add);
-            for (String resource : resources2Add) {
-                try {
-                    Set<PeerInfo> newPeers = resource2Peers.get(resource);
-                    String checksum = resource2Checksum.get(resource);
-                    Resource newResource = new RemoteResource(newPeers, 1, p2pEngine);
-                    ((RemoteResource) newResource).setChecksum(checksum);
-                    newResource.setPath(Path.decode(resource));
-                    addResource(newResource);
-                } catch (Exception e) {
-                    logger.error("Add resource exception: resource:{}, exception:{}", resource, e);
-                }
-            }
-
-            // Update peer to resources
-            logger.debug("Update remote resources " + resources2Update);
-            for (String resource : resources2Update) {
-                try {
-                    Set<PeerInfo> newPeers = resource2Peers.get(resource);
-                    String checksum = resource2Checksum.get(resource);
-                    Resource resource2Update = getResource(Path.decode(resource));
-                    resource2Update.setPeers(newPeers);
-
-                    if (resource2Update.getDistance() > 1) {
-                        ((RemoteResource) resource2Update).setChecksum(checksum);
-                    }
-
-                } catch (Exception e) {
-                    logger.error(
-                            "Update remote resources exception: resource:{}, exception:{}",
-                            resource,
-                            e);
-                }
-            }
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-    */
-
     public List<Resource> getAllResources(boolean ignoreRemote) throws Exception {
         lock.readLock().lock();
         try {
@@ -375,8 +308,12 @@ public class ZoneManager {
             lock.readLock().unlock();
         }
     }
+    
+    public P2PMessageEngine getP2PEngine() {
+		return p2pEngine;
+	}
 
-    public void setP2pEngine(P2PMessageEngine p2pEngine) {
+    public void setP2PEngine(P2PMessageEngine p2pEngine) {
         this.p2pEngine = p2pEngine;
     }
 }

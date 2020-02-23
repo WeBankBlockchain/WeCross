@@ -68,7 +68,7 @@ public abstract class P2PMessageCallback<T> {
     }
 
     @JsonIgnore
-    public void setPeerInfo(Peer peer) {
+    public void setPeer(Peer peer) {
         this.peer = peer;
     }
 }

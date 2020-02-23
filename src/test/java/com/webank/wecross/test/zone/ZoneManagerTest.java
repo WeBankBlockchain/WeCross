@@ -1,6 +1,5 @@
 package com.webank.wecross.test.zone;
 
-import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Path;
@@ -20,10 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ZoneManagerTest {
-    private Peer mockPeer = new Peer(new Node());
-
-    private P2PMessageEngine p2pEngine = null;
-
     private Logger logger = LoggerFactory.getLogger(ZoneManagerTest.class);
 
     @Test
@@ -44,11 +39,11 @@ public class ZoneManagerTest {
             }
         }
 
-        Set<String> allResources = zoneManager.getAllNetworkStubResourceName(false);
+        Set<String> allResources = zoneManager.getAllResourceName(false);
         System.out.println(allResources);
         Assert.assertEquals(12, allResources.size());
 
-        Set<String> allLocalResources = zoneManager.getAllNetworkStubResourceName(true);
+        Set<String> allLocalResources = zoneManager.getAllResourceName(true);
         System.out.println(allLocalResources);
         Assert.assertEquals(4, allLocalResources.size());
         
@@ -61,7 +56,7 @@ public class ZoneManagerTest {
         resources.add(resourceInfo);
         zoneManager.addRemoteResources(peer, resources);
         
-        Set<String> allResources2 = zoneManager.getAllNetworkStubResourceName(false);
+        Set<String> allResources2 = zoneManager.getAllResourceName(false);
         System.out.println(allResources2);
         Assert.assertEquals(12, allResources2.size());
         
@@ -76,7 +71,7 @@ public class ZoneManagerTest {
         resources2.add(resourceInfo2);
         zoneManager.addRemoteResources(peer2, resources2);
         
-        Set<String> allResources3 = zoneManager.getAllNetworkStubResourceName(false);
+        Set<String> allResources3 = zoneManager.getAllResourceName(false);
         System.out.println(allResources3);
         Assert.assertEquals(12, allResources3.size());
         
@@ -102,7 +97,7 @@ public class ZoneManagerTest {
             }
         }
         
-        Set<String> allResources = zoneManager.getAllNetworkStubResourceName(false);
+        Set<String> allResources = zoneManager.getAllResourceName(false);
         Assert.assertEquals(12, allResources.size());
         
         ResourceInfo removeResource = new ResourceInfo();
@@ -114,7 +109,7 @@ public class ZoneManagerTest {
         
         zoneManager.removeRemoteResources(peer, removeResources);
         
-        allResources = zoneManager.getAllNetworkStubResourceName(false);
+        allResources = zoneManager.getAllResourceName(false);
         Assert.assertEquals(11, allResources.size());
         
         ResourceInfo resourceInfo2 = new ResourceInfo();
@@ -130,7 +125,7 @@ public class ZoneManagerTest {
         removeResource.setPath("payment.bcos1.contract1");
         zoneManager.removeRemoteResources(peer2, removeResources);
         
-        allResources = zoneManager.getAllNetworkStubResourceName(false);
+        allResources = zoneManager.getAllResourceName(false);
         Assert.assertEquals(11, allResources.size());
         
         Resource resource = zoneManager.getResource(Path.decode("payment.bcos1.contract1"));
@@ -173,7 +168,7 @@ public class ZoneManagerTest {
         resourceInfo.setPath("payment.abc");
         zoneManager.removeRemoteResources(peer2, resources);
         
-        for(Map.Entry<String, ResourceInfo> entry: zoneManager.getAllNetworkStubResourceInfo(false).entrySet()) {
+        for(Map.Entry<String, ResourceInfo> entry: zoneManager.getAllResourceInfo(false).entrySet()) {
         	resources = new HashSet<ResourceInfo>();
         	resources.add(entry.getValue());
         	zoneManager.removeRemoteResources(peer, resources);

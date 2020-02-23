@@ -7,6 +7,8 @@ import org.junit.Test;
 
 public class ProposalPoolTest {
 
+	// ProposalPool
+	/*
     @Test
     public void basicTest() throws Exception {
         ProposalPool pool = new ProposalPool();
@@ -76,4 +78,5 @@ public class ProposalPoolTest {
             Assert.assertTrue(false); // Assert never comes here
         }
     }
+    */
 }

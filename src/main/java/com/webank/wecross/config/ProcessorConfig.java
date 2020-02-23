@@ -4,7 +4,6 @@ import javax.annotation.Resource;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 
 import com.webank.wecross.p2p.ConnectProcessor;
 import com.webank.wecross.p2p.DisconnectProcessor;

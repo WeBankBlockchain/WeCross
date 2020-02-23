@@ -1,7 +1,9 @@
 package com.webank.wecross.test.stub.remote;
 
 import com.webank.wecross.p2p.P2PMessage;
+import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
+import com.webank.wecross.p2p.engine.RestfulP2PMessageEngine;
 import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Path;
@@ -25,121 +27,49 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 public class RemoteResourceTest {
-
-    class RemoteResourceEngineFilter extends P2PEngineMessageFilter {
-
-        @Override
-        public P2PMessage handle1(P2PMessage msg) {
-            Assert.assertNotEquals(null, msg);
-            Assert.assertTrue("Unsupported method: " + msg.getMethod(), false);
-            return null;
-        }
-
-        @Override
-        public P2PMessage handle4(P2PMessage msg) {
-            Assert.assertNotEquals(null, msg);
-
-            try {
-                String r[] = msg.getMethod().split("/");
-                Path path = new Path();
-                path.setNetwork(r[0]);
-                path.setChain(r[1]);
-                path.setResource(r[2]);
-
-                Resource resource = networkManager.getResource(path);
-
-                switch (r[3]) {
-                    case "getData":
-                        return handleGetData(resource, msg);
-                    case "setData":
-                        return handleSetData(resource, msg);
-                    case "call":
-                        return handleCall(resource, msg);
-                    case "sendTransaction":
-                        return handleSendTransaction(resource, msg);
-                    default:
-                        Assert.assertTrue("Unsupported method: " + msg.getMethod(), false);
-                }
-
-            } catch (Exception e) {
-                Assert.assertTrue(msg.getMethod() + " exception: " + e, false);
-            }
-            return msg;
-        }
-
-        private P2PMessage handleGetData(Resource resource, P2PMessage msg) {
-            GetDataResponse responseData = resource.getData((GetDataRequest) msg.getData());
-            P2PMessage<GetDataResponse> response = new P2PMessage<>();
-            response.setData(responseData);
-            response.setSeq(msg.getSeq());
-            return response;
-        }
-
-        private P2PMessage handleSetData(Resource resource, P2PMessage msg) {
-            SetDataResponse responseData = resource.setData((SetDataRequest) msg.getData());
-            P2PMessage<SetDataResponse> response = new P2PMessage<>();
-            response.setData(responseData);
-            response.setSeq(msg.getSeq());
-            return response;
-        }
-
-        private P2PMessage handleCall(Resource resource, P2PMessage msg) {
-            TransactionResponse responseData = resource.call((TransactionRequest) msg.getData());
-            P2PMessage<TransactionResponse> response = new P2PMessage<>();
-            response.setData(responseData);
-            response.setSeq(msg.getSeq());
-
-            return response;
-        }
-
-        private P2PMessage handleSendTransaction(Resource resource, P2PMessage msg) {
-            TransactionResponse responseData =
-                    resource.sendTransaction((TransactionRequest) msg.getData());
-
-            P2PMessage<TransactionResponse> response = new P2PMessage<>();
-            response.setData(responseData);
-            response.setSeq(msg.getSeq());
-
-            return response;
-        }
-    }
-
-    private P2PMessageEngine p2pEngine;
-    private ZoneManager networkManager;
-
-    public RemoteResourceTest() {
-        p2pEngine =
-                MockP2PMessageEngineFactory.newMockP2PMessageEngine(
-                        new RemoteResourceEngineFilter());
-        networkManager = MockNetworkManagerFactory.newMockNteworkManager(p2pEngine);
-
-        try {
-            ResourceInfo resourceInfo = new ResourceInfo();
-            resourceInfo.setPath("test-network.test-stub.test-local-resource");
-            resourceInfo.setDistance(1);
-            
-            Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
-            resources.add(resourceInfo);
-            
-            networkManager.addRemoteResources(new Peer(new Node("","",0)), resources);
-        } catch (Exception e) {
-            Assert.assertTrue("Add test resource exception: " + e, false);
-        }
-    }
-
     @Test
     public void remoteResourceGetDataTest() throws Exception {
         Peer peer = new Peer(new Node("", "", 0));
-        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pEngine);
+        P2PMessageEngine p2pMessageEngine = Mockito.spy(RestfulP2PMessageEngine.class);
+    	Mockito.doAnswer(new Answer<Object>() {
+			@Override
+			public Object answer(InvocationOnMock invocation) throws Throwable {
+				Peer argPeer = invocation.getArgument(0);
+				Assert.assertEquals(peer, argPeer);
+				
+				P2PMessage<GetDataRequest> argMessage = invocation.getArgument(1);
+				Assert.assertEquals("test-network/test-stub/test-local-resource/getData", argMessage.getMethod());
+				Assert.assertEquals("mockKey", argMessage.getData().getKey());
+				
+				P2PMessageCallback<GetDataResponse> callback = invocation.getArgument(2);
+				P2PMessage<GetDataResponse> response = new P2PMessage<GetDataResponse>();
+				response.setSeq(argMessage.getSeq());
+				response.setMethod(argMessage.getMethod());
+				response.setVersion(argMessage.getVersion());
+				response.setData(new GetDataResponse());
+				response.getData().setErrorCode(0);
+				response.getData().setErrorMessage("getData test resource success");
+				response.getData().setValue(argMessage.getData().toString());
+				
+				callback.onResponse(0, "getData test resource success", response);
+				
+				return null;
+			}
+		}).when(p2pMessageEngine).asyncSendMessage(Mockito.any(), Mockito.any(), Mockito.any());
+        
+        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pMessageEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 
         GetDataRequest request = new GetDataRequest();
         request.setKey("mockKey");
 
         GetDataResponse response = resource.getData(request);
-        Assert.assertEquals(new Integer(0), response.getErrorCode());
+        Assert.assertEquals(Integer.valueOf(0), response.getErrorCode());
         Assert.assertTrue(response.getErrorMessage().contains("getData test resource success"));
         Assert.assertEquals(request.toString(), response.getValue());
         System.out.println(response.getErrorMessage());
@@ -148,15 +78,42 @@ public class RemoteResourceTest {
     @Test
     public void remoteResourceSetDataTest() throws Exception {
         Peer peer = new Peer(new Node("", "", 0));
-        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pEngine);
+        P2PMessageEngine p2pMessageEngine = Mockito.spy(RestfulP2PMessageEngine.class);
+    	Mockito.doAnswer(new Answer<Object>() {
+			@Override
+			public Object answer(InvocationOnMock invocation) throws Throwable {
+				Peer argPeer = invocation.getArgument(0);
+				Assert.assertEquals(peer, argPeer);
+				
+				P2PMessage<SetDataRequest> argMessage = invocation.getArgument(1);
+				Assert.assertEquals("test-network/test-stub/test-local-resource/setData", argMessage.getMethod());
+				Assert.assertEquals("mockKey", argMessage.getData().getKey());
+				Assert.assertEquals("mockValue", argMessage.getData().getValue());
+				
+				P2PMessageCallback<SetDataResponse> callback = invocation.getArgument(2);
+				P2PMessage<SetDataResponse> response = new P2PMessage<SetDataResponse>();
+				response.setSeq(argMessage.getSeq());
+				response.setMethod(argMessage.getMethod());
+				response.setVersion(argMessage.getVersion());
+				response.setData(new SetDataResponse());
+				response.getData().setErrorCode(0);
+				response.getData().setErrorMessage("setData test resource success");
+				
+				callback.onResponse(0, "sendTransaction test resource success", response);
+				
+				return null;
+			}
+		}).when(p2pMessageEngine).asyncSendMessage(Mockito.any(), Mockito.any(), Mockito.any());
+        
+        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pMessageEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 
         SetDataRequest request = new SetDataRequest();
         request.setKey("mockKey");
-        request.setKey("mockValue");
+        request.setValue("mockValue");
 
         SetDataResponse response = resource.setData(request);
-        Assert.assertEquals(new Integer(0), response.getErrorCode());
+        Assert.assertEquals(Integer.valueOf(0), response.getErrorCode());
         Assert.assertTrue(response.getErrorMessage().contains("setData test resource success"));
         System.out.println(response.getErrorMessage());
     }
@@ -164,15 +121,43 @@ public class RemoteResourceTest {
     @Test
     public void remoteResourceCallTest() throws Exception {
         Peer peer = new Peer(new Node("", "", 0));
-        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pEngine);
+    	
+    	P2PMessageEngine p2pMessageEngine = Mockito.spy(RestfulP2PMessageEngine.class);
+    	Mockito.doAnswer(new Answer<Object>() {
+			@Override
+			public Object answer(InvocationOnMock invocation) throws Throwable {
+				Peer argPeer = invocation.getArgument(0);
+				Assert.assertEquals(peer, argPeer);
+				
+				P2PMessage<TransactionRequest> argMessage = invocation.getArgument(1);
+				Assert.assertEquals("test-network/test-stub/test-local-resource/call", argMessage.getMethod());
+				Assert.assertArrayEquals(new String[] {"123", "aacbb"}, argMessage.getData().getArgs());
+				
+				P2PMessageCallback<TransactionResponse> callback = invocation.getArgument(2);
+				P2PMessage<TransactionResponse> response = new P2PMessage<TransactionResponse>();
+				response.setSeq(argMessage.getSeq());
+				response.setMethod(argMessage.getMethod());
+				response.setVersion(argMessage.getVersion());
+				response.setData(new TransactionResponse());
+				response.getData().setErrorCode(0);
+				response.getData().setErrorMessage("call test resource success");
+				response.getData().setResult( new Object[] {argMessage.getData()} );
+				
+				callback.onResponse(0, "sendTransaction test resource success", response);
+				
+				return null;
+			}
+		}).when(p2pMessageEngine).asyncSendMessage(Mockito.any(), Mockito.any(), Mockito.any());
+        
+        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pMessageEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 
         TransactionRequest request = new TransactionRequest();
         request.setMethod("get");
-        request.setArgs(new String[] {"123", "aabb"});
+        request.setArgs(new String[] {"123", "aacbb"});
 
         TransactionResponse response = resource.call(request);
-        Assert.assertEquals(new Integer(0), response.getErrorCode());
+        Assert.assertEquals(Integer.valueOf(0), response.getErrorCode());
         Assert.assertTrue(response.getErrorMessage().contains("call test resource success"));
         Assert.assertEquals(request, response.getResult()[0]);
         System.out.println(response.getErrorMessage());
@@ -180,8 +165,36 @@ public class RemoteResourceTest {
 
     @Test
     public void remoteResourceSendTransactionTest() throws Exception {
-        Peer peer = new Peer(new Node("", "", 0));
-        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pEngine);
+    	Peer peer = new Peer(new Node("", "", 0));
+    	
+    	P2PMessageEngine p2pMessageEngine = Mockito.spy(RestfulP2PMessageEngine.class);
+    	Mockito.doAnswer(new Answer<Object>() {
+			@Override
+			public Object answer(InvocationOnMock invocation) throws Throwable {
+				Peer argPeer = invocation.getArgument(0);
+				Assert.assertEquals(peer, argPeer);
+				
+				P2PMessage<TransactionRequest> argMessage = invocation.getArgument(1);
+				Assert.assertEquals("test-network/test-stub/test-local-resource/sendTransaction", argMessage.getMethod());
+				Assert.assertArrayEquals(new String[] {"123", "aabb"}, argMessage.getData().getArgs());
+				
+				P2PMessageCallback<TransactionResponse> callback = invocation.getArgument(2);
+				P2PMessage<TransactionResponse> response = new P2PMessage<TransactionResponse>();
+				response.setSeq(argMessage.getSeq());
+				response.setMethod(argMessage.getMethod());
+				response.setVersion(argMessage.getVersion());
+				response.setData(new TransactionResponse());
+				response.getData().setErrorCode(0);
+				response.getData().setErrorMessage("sendTransaction test resource success");
+				response.getData().setResult( new Object[] {argMessage.getData()} );
+				
+				callback.onResponse(0, "sendTransaction test resource success", response);
+				
+				return null;
+			}
+		}).when(p2pMessageEngine).asyncSendMessage(Mockito.any(), Mockito.any(), Mockito.any());
+    	
+        com.webank.wecross.resource.Resource resource = new RemoteResource(peer, 1, p2pMessageEngine);
         resource.setPath(Path.decode("test-network.test-stub.test-local-resource"));
 
         TransactionRequest request = new TransactionRequest();
@@ -189,7 +202,7 @@ public class RemoteResourceTest {
         request.setArgs(new String[] {"123", "aabb"});
 
         TransactionResponse response = resource.sendTransaction(request);
-        Assert.assertEquals(new Integer(0), response.getErrorCode());
+        Assert.assertEquals(Integer.valueOf(0), response.getErrorCode());
         Assert.assertTrue(
                 response.getErrorMessage().contains("sendTransaction test resource success"));
         Assert.assertEquals(request, response.getResult()[0]);

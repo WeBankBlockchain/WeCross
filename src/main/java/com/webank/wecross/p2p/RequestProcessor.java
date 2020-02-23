@@ -108,23 +108,25 @@ public class RequestProcessor implements Processor {
                         " invalid method parameter, seq: {}, method: {}", message.getSeq(), method);
             }
 
+            if(p2PResponse.getData() != null) {
             String responseContent =
                     ObjectMapperFactory.getObjectMapper().writeValueAsString(p2PResponse);
 
-            // send response
-            message.setType(MessageType.RESOURCE_RESPONSE);
-            message.setData(responseContent.getBytes());
-
-            MessageSerializer serializer = new MessageSerializer();
-            ByteBuf byteBuf = ctx.alloc().buffer();
-            serializer.serialize(message, byteBuf);
-            ctx.writeAndFlush(byteBuf);
-
-            logger.info(
-                    " resource request, host: {}, seq: {}, response content: {}",
-                    node,
-                    message.getSeq(),
-                    responseContent);
+	            // send response
+	            message.setType(MessageType.RESOURCE_RESPONSE);
+	            message.setData(responseContent.getBytes());
+	
+	            MessageSerializer serializer = new MessageSerializer();
+	            ByteBuf byteBuf = ctx.alloc().buffer();
+	            serializer.serialize(message, byteBuf);
+	            ctx.writeAndFlush(byteBuf);
+	
+	            logger.info(
+	                    " resource request, host: {}, seq: {}, response content: {}",
+	                    node,
+	                    message.getSeq(),
+	                    responseContent);
+            }
         } catch (Exception e) {
             logger.error(" invalid format, host: {}, e: {}", node, e);
         }
@@ -141,26 +143,6 @@ public class RequestProcessor implements Processor {
 
         try {
             switch (method) {
-                case "requestSeq":
-                    {
-                        logger.debug("request method: " + method);
-                        P2PMessage<Object> p2pRequest =
-                                ObjectMapperFactory.getObjectMapper()
-                                        .readValue(
-                                                p2pRequestString,
-                                                new TypeReference<P2PMessage<Object>>() {});
-
-                        p2pRequest.checkP2PMessage(method);
-                        
-                        PeerSeqMessageData data = new PeerSeqMessageData();
-                        data.setSeq(peerManager.getSeq());
-
-                        response.setResult(QueryStatus.SUCCESS);
-                        response.setMessage("request " + method + " success");
-                        response.setSeq(p2pRequest.getSeq());
-                        response.setData(data);
-                        break;
-                    }
                 case "requestPeerInfo":
                     {
                         logger.debug("request method: " + method);
@@ -172,7 +154,7 @@ public class RequestProcessor implements Processor {
 
                         p2pRequest.checkP2PMessage(method);
 
-                        Map<String, ResourceInfo> resources = zoneManager.getAllNetworkStubResourceInfo(true);
+                        Map<String, ResourceInfo> resources = zoneManager.getAllResourceInfo(true);
                     	
                         Set<ResourceInfo> activeResourceSet = new HashSet<>();
                         for (ResourceInfo activeResource : resources.values()) {
@@ -193,11 +175,11 @@ public class RequestProcessor implements Processor {
                 case "seq":
                 {
                 	logger.info("Receive peer seq from peer:{}", peerInfo);
-                	 P2PMessage<Object> p2pRequest =
+                	 P2PMessage<PeerSeqMessageData> p2pRequest =
                              ObjectMapperFactory.getObjectMapper()
                                      .readValue(
                                              p2pRequestString,
-                                             new TypeReference<P2PMessage<Object>>() {});
+                                             new TypeReference<P2PMessage<PeerSeqMessageData>>() {});
 
                     PeerSeqMessageData data = (PeerSeqMessageData) p2pRequest.getData();
                     if (data != null && p2pRequest.getMethod().equals("seq")) {

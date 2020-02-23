@@ -12,7 +12,7 @@ public class MockNetworkManagerFactory {
         ZoneManager manager = new ZoneManager();
         Map<String, Zone> networks = new HashMap<>();
         manager.setZones(networks);
-        manager.setP2pEngine(p2pEngine);
+        manager.setP2PEngine(p2pEngine);
         return manager;
     }
 }

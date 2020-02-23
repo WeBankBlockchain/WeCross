@@ -77,7 +77,7 @@ public class PeerResourcesTest {
     @Test
     public void hasMyselfTest() throws Exception {
         PeerResources peerResources = newMockPeerInfo();
-        ZoneManager networkManager = new ZoneManager();
+        ZoneManager zoneManager = new ZoneManager();
         
         ResourceInfo resourceInfo = new ResourceInfo();
         resourceInfo.setPath("network.stub.resource1");
@@ -85,14 +85,14 @@ public class PeerResourcesTest {
         
         Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
         resources.add(resourceInfo);
-        networkManager.addRemoteResources(new Peer(new Node("", "", 0)), resources);
+        zoneManager.addRemoteResources(new Peer(new Node("", "", 0)), resources);
 
         /*
         Resource resource = new TestResource();
         resource.setPath(Path.decode("network.stub.resource1"));
         networkManager.addResource(resource);
         */
-        peerResources.updateMyselfResources(networkManager.getAllNetworkStubResourceInfo(true));
+        peerResources.updateMyselfResources(zoneManager.getAllResourceInfo(true));
 
         peerResources.loggingInvalidResources();
 
