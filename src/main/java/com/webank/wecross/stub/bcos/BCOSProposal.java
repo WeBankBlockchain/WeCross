@@ -1,6 +1,7 @@
 package com.webank.wecross.stub.bcos;
 
 import com.webank.wecross.proposal.Proposal;
+import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.utils.ExtendedTransactionDecoderV2;
 import java.util.Arrays;
@@ -61,12 +62,19 @@ public class BCOSProposal extends Proposal {
     }
 
     public static String encodeRequestToInputData(TransactionRequest request) throws Exception {
-        String functionName = request.getMethod();
-        Type<?>[] args = BCOSContractResource.javaType2BCOSType(request.getArgs());
+        return encodeRequestToInputData(request.getMethod(), request.getArgs());
+    }
+
+    public static String encodeRequestToInputData(ProposalRequest request) throws Exception {
+        return encodeRequestToInputData(request.getMethod(), request.getArgs());
+    }
+
+    public static String encodeRequestToInputData(String method, Object[] args) throws Exception {
+        Type<?>[] typeArgs = BCOSContractResource.javaType2BCOSType(args);
         final Function function =
                 new Function(
-                        functionName,
-                        Arrays.<Type>asList(args),
+                        method,
+                        Arrays.<Type>asList(typeArgs),
                         Collections.<TypeReference<?>>emptyList());
 
         String data = FunctionEncoder.encode(function);

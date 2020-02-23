@@ -6,6 +6,7 @@ public class ResourceQueryStatus {
     public static final int INTERNAL_ERROR = 1000;
     public static final int UNSUPPORTED_TYPE = 1001;
     public static final int NONSENSE_CALL = 1002;
+    public static final int INVALID_PROPOSAL_BYTES = 1003;
 
     // Fabric
     public static final int FABRIC_INVOKE_CHAINCODE_FAIL = 3001;
@@ -19,4 +20,8 @@ public class ResourceQueryStatus {
     public static final int JDCHAIN_GENERATE_COMPILE_ERROR = 4005;
     public static final int JDCHAIN_PARAMETER_INVALIDATE = 4006;
     public static final int JDCHAIN_GETDATA_ERROR = 4007;
+
+    // HTLC
+    public static final int HTLC_REQUEST_ERROR = 5001;
+    public static final int HTLC_VERIFY_LOCK_ERROR = 5002;
 }

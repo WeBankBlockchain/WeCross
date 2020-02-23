@@ -20,22 +20,10 @@ public class WebServerConfig {
 
     @Bean
     public TomcatServletWebServerFactory servletWebServerFactory() {
+        String address = getAddress();
+        int port = getPort();
         TomcatServletWebServerFactory tomcatServletWebServerFactory =
                 new TomcatServletWebServerFactory();
-
-        String address = toml.getString("server.address");
-        Long port_temp = toml.getLong("server.port");
-        Integer port = null;
-        if (address == null || port_temp == null) {
-            String errorMessage =
-                    "Something wrong with [server] item, please check [address] or [port] in"
-                            + WeCrossDefault.MAIN_CONFIG_FILE;
-            logger.error(errorMessage);
-            System.exit(1);
-        } else {
-            port = port_temp.intValue();
-        }
-
         try {
             tomcatServletWebServerFactory.setAddress(InetAddress.getByName(address));
             tomcatServletWebServerFactory.setPort(port);
@@ -45,5 +33,29 @@ public class WebServerConfig {
             System.exit(1);
         }
         return tomcatServletWebServerFactory;
+    }
+
+    private String getAddress() {
+        String address = toml.getString("server.address");
+        if (address == null) {
+            String errorMessage =
+                    "Something wrong with [server] item, please check [address] in"
+                            + WeCrossDefault.MAIN_CONFIG_FILE;
+            logger.error(errorMessage);
+            System.exit(1);
+        }
+        return address;
+    }
+
+    private int getPort() {
+        Long port_temp = toml.getLong("server.port");
+        if (port_temp == null) {
+            String errorMessage =
+                    "Something wrong with [server] item, please check [port] in"
+                            + WeCrossDefault.MAIN_CONFIG_FILE;
+            logger.error(errorMessage);
+            System.exit(1);
+        }
+        return port_temp.intValue();
     }
 }

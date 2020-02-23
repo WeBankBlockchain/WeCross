@@ -6,9 +6,11 @@ import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.request.GetDataRequest;
+import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
+import com.webank.wecross.restserver.response.ProposalResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import java.util.Set;
@@ -19,7 +21,7 @@ public class FabricResource implements Resource {
 
     @Override
     public String getType() {
-        return WeCrossType.RESOURCE_TYPE_FABRIC_CONTRACT;
+        return "FABRIC_RESOURCES";
     }
 
     @Override
@@ -29,6 +31,16 @@ public class FabricResource implements Resource {
 
     @Override
     public SetDataResponse setData(SetDataRequest request) {
+        return null;
+    }
+
+    @Override
+    public ProposalResponse callProposal(ProposalRequest request) {
+        return null;
+    }
+
+    @Override
+    public ProposalResponse sendTransactionProposal(ProposalRequest request) {
         return null;
     }
 
@@ -80,6 +92,11 @@ public class FabricResource implements Resource {
 
     @Override
     public String getChecksum() {
+        return null;
+    }
+
+    @Override
+    public String getContractAddress() {
         return null;
     }
 }
