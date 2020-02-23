@@ -15,6 +15,10 @@ public class Node {
         this.port = port;
     }
     
+    public String getIPPort() {
+    	return host + ":" + String.valueOf(port);
+    }
+    
 	public String getNodeID() {
 		return nodeID;
 	}

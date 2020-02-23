@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.webank.wecross.p2p.P2PConfig;
 import com.webank.wecross.p2p.netty.NettyBootstrap;
 import com.webank.wecross.p2p.netty.P2PService;

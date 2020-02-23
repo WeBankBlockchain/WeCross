@@ -116,6 +116,7 @@ public class ChannelHandlerCallBack {
         ctx.channel().attr(AttributeKey.valueOf("node")).set(node);
         ctx.channel().attr(AttributeKey.valueOf("NodeID")).set(node.getNodeID());
 
+        logger.info("add new connections: {}", node);
         getConnections().addChannelHandler(node, ctx, connectToServer);
 
         logger.info(
@@ -173,7 +174,7 @@ public class ChannelHandlerCallBack {
         /*
          use thread pool first onMessage may block
         */
-    	Node node = (Node) ctx.channel().attr(AttributeKey.valueOf("node"));
+    	Node node = (Node) (ctx.channel().attr(AttributeKey.valueOf("node")).get());
     	
         if (threadPool == null) {
             callBack.onMessage(ctx, node, message);

@@ -61,7 +61,7 @@ public class NettyBootstrap {
 
     private ChannelHandlerCallBack channelHandlerCallBack = new ChannelHandlerCallBack();
     private Connections connections = new Connections();
-    private P2PConfig config = new P2PConfig();
+    private P2PConfig config;
     
     private MessageCallBack messageCallBack;
     
@@ -158,6 +158,7 @@ public class NettyBootstrap {
      */
     public void start() throws ExecutionException, InterruptedException, IOException {
     	channelHandlerCallBack.setCallBack(messageCallBack);
+    	channelHandlerCallBack.setConnections(connections);
 
         logger.info(" initialize, config: {}", getConfig());
 
@@ -286,7 +287,7 @@ public class NettyBootstrap {
 
     /** list all connected nodes */
     public void listConnectedNodes() {
-        Map<Node, String> host2NodeID = getConnections().getHost2NodeID();
+        Map<String, String> host2NodeID = getConnections().getHost2NodeID();
         synchronized (host2NodeID) {
             host2NodeID.forEach(
                     (host, nodeID) -> {
@@ -306,7 +307,7 @@ public class NettyBootstrap {
                     serializer.serialize(message, byteBuf);
                     ctx.writeAndFlush(byteBuf);
                     
-                    Node node = (Node) ctx.channel().attr(AttributeKey.valueOf("node"));
+                    Node node = (Node) ctx.channel().attr(AttributeKey.valueOf("node")).get();
 
                     logger.trace(
                             " send heartbeat message to {} ", node);

@@ -2,7 +2,6 @@ package com.webank.wecross.zone;
 
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.peer.Peer;
-import com.webank.wecross.peer.PeerResources;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
@@ -27,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 public class ZoneManager {
     private Map<String, Zone> zones = new HashMap<>();
-    private Map<String, Integer> referenceMap;
     private int seq = 1;
     private Logger logger = LoggerFactory.getLogger(ZoneManager.class);
     private P2PMessageEngine p2pEngine;
@@ -44,7 +42,7 @@ public class ZoneManager {
     public Resource getResource(Path path) {
         lock.readLock().lock();
         try {
-            Zone network = getNetwork(path);
+            Zone network = getZone(path);
 
             if (network != null) {
                 Stub stub = network.getStub(path);
@@ -64,56 +62,16 @@ public class ZoneManager {
         return null;
     }
 
-    /*
-    public void addResource(Resource resource) throws Exception {
-        lock.writeLock().lock();
-        try {
-            logger.trace("Add resource path:{}", resource.getPath());
-            String networkName = resource.getPath().getNetwork();
-            networks.putIfAbsent(networkName, new Zone());
-            networks.get(networkName).addResource(resource);
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    public void removeResource(Path path, boolean ignoreLocal) throws Exception {
-        lock.writeLock().lock();
-        try {
-            logger.trace("Remove resource ignore:{} path:{}", ignoreLocal, path);
-            Zone network = getNetwork(path);
-            if (network != null) {
-                network.removeResource(path, ignoreLocal);
-
-                if (network.isEmpty()) {
-                    networks.remove(path.getNetwork());
-                }
-            }
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    public void removeResource(Path path) throws Exception {
-        lock.writeLock().lock();
-        try {
-            removeResource(path, false);
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-    */
-
-    public Zone getNetwork(Path path) {
+    public Zone getZone(Path path) {
         lock.readLock().lock();
         try {
-            return getNetwork(path.getNetwork());
+            return getZone(path.getNetwork());
         } finally {
             lock.readLock().unlock();
         }
     }
 
-    public Zone getNetwork(String name) {
+    public Zone getZone(String name) {
         lock.readLock().lock();
         try {
             logger.trace("get network: {}", name);
@@ -124,11 +82,11 @@ public class ZoneManager {
         }
     }
 
-    public Map<String, Zone> getNetworks() {
+    public Map<String, Zone> getZones() {
         return zones;
     }
 
-    public void setNetworks(Map<String, Zone> networks) {
+    public void setZones(Map<String, Zone> networks) {
         this.zones = networks;
     }
 

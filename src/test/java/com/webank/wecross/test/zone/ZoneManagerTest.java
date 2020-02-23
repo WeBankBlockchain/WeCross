@@ -148,7 +148,7 @@ public class ZoneManagerTest {
 	        zoneManager.removeRemoteResources(peer, resources);
         }
         
-        Zone zone = zoneManager.getNetwork("payment");
+        Zone zone = zoneManager.getZone("payment");
         Stub stub = zone.getStub("bcos2");
         Assert.assertNull(stub);
         
@@ -179,7 +179,7 @@ public class ZoneManagerTest {
         	zoneManager.removeRemoteResources(peer, resources);
         }
         
-        Assert.assertEquals(0, zoneManager.getNetworks().size());
+        Assert.assertEquals(0, zoneManager.getZones().size());
     }
 
     /*

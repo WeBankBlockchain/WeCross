@@ -5,6 +5,7 @@ import com.webank.wecross.p2p.MessageType;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
+import com.webank.wecross.p2p.netty.P2PService;
 import com.webank.wecross.p2p.netty.request.Request;
 import com.webank.wecross.p2p.netty.response.Response;
 import com.webank.wecross.p2p.netty.response.ResponseCallBack;
@@ -18,6 +19,16 @@ import org.slf4j.LoggerFactory;
 
 public class RestfulP2PMessageEngine extends P2PMessageEngine {
     private Logger logger = LoggerFactory.getLogger(RestfulP2PMessageEngine.class);
+    
+    private P2PService p2PService;
+
+    public P2PService getP2PService() {
+        return p2PService;
+    }
+
+    public void setP2PService(P2PService p2PService) {
+        this.p2PService = p2PService;
+    }
 
     @Override
     public <T> void asyncSendMessage(Peer peer, P2PMessage<T> msg, P2PMessageCallback<?> callback) {

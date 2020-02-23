@@ -11,16 +11,6 @@ public abstract class P2PMessageEngine {
     public abstract <T> void asyncSendMessage(
     		Peer peer, P2PMessage<T> msg, P2PMessageCallback<?> callback);
 
-    private P2PService p2PService;
-
-    public P2PService getP2PService() {
-        return p2PService;
-    }
-
-    public void setP2PService(P2PService p2PService) {
-        this.p2PService = p2PService;
-    }
-
     protected <T> void checkP2PMessage(P2PMessage<T> msg) throws Exception {
         if (msg.getVersion().isEmpty()) {
             throw new Exception("message version is empty");

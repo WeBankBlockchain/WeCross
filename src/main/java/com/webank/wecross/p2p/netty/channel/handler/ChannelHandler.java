@@ -1,7 +1,6 @@
 package com.webank.wecross.p2p.netty.channel.handler;
 
 import com.webank.wecross.p2p.netty.common.Node;
-import com.webank.wecross.p2p.netty.common.Utils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -33,7 +32,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-    	Node node = (Node) ctx.channel().attr(AttributeKey.valueOf("node"));
+    	Node node = (Node)(ctx.channel().attr(AttributeKey.valueOf("node")).get());
         int hashCode = System.identityHashCode(ctx);
 
         if (evt instanceof IdleStateEvent) {
@@ -61,10 +60,10 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 getChannelHandlerCallBack().onConnect(ctx, getConnectToServer());
             } catch (Exception e) {
                 logger.error(
-                        " disconnect, host: {}, ctx: {}, error: {}",
+                        " disconnect, host: {}, ctx: {}, error:",
                         node,
                         hashCode,
-                        e.getMessage());
+                        e);
                 ctx.disconnect();
                 ctx.close();
             }

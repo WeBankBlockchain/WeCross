@@ -29,7 +29,7 @@ public class Connections {
     /** nodeID => ChannelHandlerContext */
     private Map<String, ChannelHandlerContext> nodeID2ChannelHandler = new HashMap<>();
     /** Peer Host => nodeID */
-    private Map<Node, String> host2NodeID = new HashMap<>();
+    private Map<String, String> host2NodeID = new HashMap<>();
 
     public Map<String, ChannelHandlerContext> getNodeID2ChannelHandler() {
         return nodeID2ChannelHandler;
@@ -39,11 +39,11 @@ public class Connections {
         this.nodeID2ChannelHandler = nodeID2ChannelHandler;
     }
 
-    public Map<Node, String> getHost2NodeID() {
+    public Map<String, String> getHost2NodeID() {
         return host2NodeID;
     }
 
-    public void setHost2NodeID(Map<Node, String> host2NodeID) {
+    public void setHost2NodeID(Map<String, String> host2NodeID) {
         this.host2NodeID = host2NodeID;
     }
 
@@ -53,12 +53,11 @@ public class Connections {
      * @return
      */
     public Set<Node> shouldConnectNodes() {
-
         Set<Node> hostSet = new HashSet<>();
         Set<Node> configuredPeers = getConfiguredPeers();
         for (Node host : configuredPeers) {
             synchronized (host2NodeID) {
-                if (host2NodeID.containsKey(host)) {
+                if (host2NodeID.containsKey(host.getIPPort())) {
                     continue;
                 }
             }
@@ -102,7 +101,7 @@ public class Connections {
             Node node, ChannelHandlerContext ctx, boolean connectToServer) {
         int hashCode = System.identityHashCode(ctx);
 
-        logger.info(" add channel handler, node: {}, host: {}, ctx: {}", node.getNodeID(), node, hashCode);
+        logger.info("add channel handler, node: {}, host: {}, ctx: {}, active: {}", node.getNodeID(), node, hashCode, ctx.channel().isActive());
 
         ChannelHandlerContext oldCtx = null;
         synchronized (nodeID2ChannelHandler) {
@@ -112,7 +111,7 @@ public class Connections {
                 nodeID2ChannelHandler.put(node.getNodeID(), ctx);
 
                 synchronized (host2NodeID) {
-                    host2NodeID.put(node, node.getNodeID());
+                    host2NodeID.put(node.getIPPort(), node.getNodeID());
                 }
             }
         }
@@ -121,10 +120,10 @@ public class Connections {
             logger.info(" connection exist, host: {}, node: {} ", node, node.getNodeID());
             if (connectToServer) {
                 synchronized (host2NodeID) {
-                    for (Map.Entry<Node, String> entry : host2NodeID.entrySet()) {
+                    for (Map.Entry<String, String> entry : host2NodeID.entrySet()) {
                         if (entry.getValue().equals(node.getNodeID())) {
                             host2NodeID.remove(entry.getKey());
-                            host2NodeID.put(node, node.getNodeID());
+                            host2NodeID.put(node.getIPPort(), node.getNodeID());
                             logger.info(
                                     " update, last host: {}, host: {}, node: {} ",
                                     entry.getKey(),
@@ -174,7 +173,7 @@ public class Connections {
 
         if (oldCtx != null && oldCtx == ctx) {
             synchronized (host2NodeID) {
-                for (Map.Entry<Node, String> entry : host2NodeID.entrySet()) {
+                for (Map.Entry<String, String> entry : host2NodeID.entrySet()) {
                     if (entry.getValue().equals(node.getNodeID())) {
                         logger.info(
                                 " remove host info, host: {}, node: {} ",
