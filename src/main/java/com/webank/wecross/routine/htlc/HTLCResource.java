@@ -123,6 +123,11 @@ public class HTLCResource implements Resource {
         originResource.setPeers(peers);
     }
 
+    @Override
+    public String getCryptoSuite() {
+        return null;
+    }
+
     private TransactionRequest handleRequest(TransactionRequest request) throws WeCrossException {
         if (request.getMethod().equals("unlock")) {
             Object[] args = request.getArgs();

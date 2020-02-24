@@ -4,6 +4,8 @@ public class ProposalRequest {
     private int seq;
     private String method;
     private Object args[];
+    private byte[] extraData;
+    private byte[] extraSig;
 
     public ProposalRequest() {}
 
@@ -35,5 +37,21 @@ public class ProposalRequest {
 
     public void setArgs(Object args[]) {
         this.args = args;
+    }
+
+    public byte[] getExtraData() {
+        return extraData;
+    }
+
+    public void setExtraData(byte[] extraData) {
+        this.extraData = extraData;
+    }
+
+    public byte[] getExtraSig() {
+        return extraSig;
+    }
+
+    public void setExtraSig(byte[] extraSig) {
+        this.extraSig = extraSig;
     }
 }

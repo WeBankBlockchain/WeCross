@@ -56,7 +56,7 @@
 ## 项目贡献
 
 - 点亮我们的小星星(点击项目左上方Star按钮)。
-- 提交代码(Pull requests)，参考我们的[代码贡献流程](CONTRIBUTING_CN.md)。
+- 提交代码(Pull requests)，参考我们的[代码贡献流程](CONTRIBUTING.md)。
 - [提问和提交BUG](https://github.com/WeBankFinTech/WeCross/issues)。
 
 ## 社区

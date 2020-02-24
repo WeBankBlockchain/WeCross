@@ -5,6 +5,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.protobuf.ByteString;
 import com.webank.wecross.proposal.Proposal;
+import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +60,26 @@ public class FabricProposal extends Proposal {
         return givenInput.equals(originInput);
     }
 
+    @Override
+    public Boolean isEqualsRequest(ProposalRequest request) throws Exception {
+        org.hyperledger.fabric.protos.peer.Chaincode.ChaincodeInput givenInput =
+                encodeRequestToInputData(request);
+        org.hyperledger.fabric.protos.peer.Chaincode.ChaincodeInput originInput =
+                getProposalInput(innerFabricProposal);
+
+        return givenInput.equals(originInput);
+    }
+
+    private org.hyperledger.fabric.protos.peer.Chaincode.ChaincodeInput encodeRequestToInputData(
+            ProposalRequest request) throws Exception {
+        TransactionProposalRequest transactionProposalRequest =
+                TransactionProposalRequest.newInstance(null);
+        transactionProposalRequest.setFcn(request.getMethod());
+        String[] paramterList = getParamterList(request);
+        transactionProposalRequest.setArgs(paramterList);
+        return encodeRequestToInputData(transactionProposalRequest);
+    }
+
     private org.hyperledger.fabric.protos.peer.Chaincode.ChaincodeInput encodeRequestToInputData(
             TransactionRequest request) throws Exception {
         TransactionProposalRequest transactionProposalRequest =
@@ -66,6 +87,11 @@ public class FabricProposal extends Proposal {
         transactionProposalRequest.setFcn(request.getMethod());
         String[] paramterList = getParamterList(request);
         transactionProposalRequest.setArgs(paramterList);
+        return encodeRequestToInputData(transactionProposalRequest);
+    }
+
+    private org.hyperledger.fabric.protos.peer.Chaincode.ChaincodeInput encodeRequestToInputData(
+            TransactionProposalRequest transactionProposalRequest) throws Exception {
 
         // From Fabric 1.4 ProposalBuilder
         List<ByteString> allArgs = new ArrayList<>();

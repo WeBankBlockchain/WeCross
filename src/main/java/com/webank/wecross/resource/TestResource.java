@@ -129,4 +129,9 @@ public class TestResource implements Resource {
 
     @Override
     public void setPeers(Set<Peer> peers) {}
+
+    @Override
+    public String getCryptoSuite() {
+        return "TEST";
+    }
 }
