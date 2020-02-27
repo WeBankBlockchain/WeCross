@@ -1,7 +1,6 @@
 package com.webank.wecross.stub.remote;
 
 import com.webank.wecross.common.WeCrossType;
-import com.webank.wecross.peer.StubSyncManager;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.Stub;
@@ -15,7 +14,6 @@ public class RemoteStub implements Stub {
     private Logger logger = LoggerFactory.getLogger(RemoteStub.class);
     private Map<String, Resource> resources;
     private String path;
-    StubSyncManager stubSyncManager;
 
     public RemoteStub() {
         this.resources = new HashMap<>();
@@ -28,12 +26,12 @@ public class RemoteStub implements Stub {
 
     @Override
     public int getBlockNumber() {
-        return stubSyncManager.getBlockNumber(path);
+        return 0;
     }
 
     @Override
     public BlockHeader getBlockHeader(int blockNumber) {
-        return stubSyncManager.getBlockHeader(path, blockNumber);
+        return null;
     }
 
     @Override

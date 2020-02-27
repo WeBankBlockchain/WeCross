@@ -3,11 +3,11 @@ package com.webank.wecross.p2p;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.wecross.p2p.engine.P2PResponse;
-import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.peer.Peer;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 
-public class P2PMessageCallback<T> {
-    private TypeReference typeReference;
+public abstract class P2PMessageCallback<T> {
+    private TypeReference<?> typeReference;
     protected int status;
     protected String message;
     protected P2PMessage<T> data;
@@ -18,7 +18,7 @@ public class P2PMessageCallback<T> {
         this.onResponse(status, message, data);
     }
 
-    public void onResponse(int status, String message, P2PMessage msg) {}
+    public abstract void onResponse(int status, String message, P2PMessage<T> msg);
 
     public void setStatus(int status) {
         this.status = status;
@@ -40,15 +40,15 @@ public class P2PMessageCallback<T> {
         return this.status;
     }
 
-    public void setData(P2PMessage msg) {
+    public void setData(P2PMessage<T> msg) {
         this.data = msg;
     }
 
-    public void setTypeReference(TypeReference typeReference) {
+    public void setTypeReference(TypeReference<?> typeReference) {
         this.typeReference = typeReference;
     }
 
-    public TypeReference getTypeReference() {
+    public TypeReference<?> getTypeReference() {
         return typeReference;
     }
 

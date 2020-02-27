@@ -1,6 +1,6 @@
 package com.webank.wecross.p2p;
 
-import com.webank.wecross.p2p.netty.common.Host;
+import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.p2p.netty.common.Utils;
 import java.security.InvalidParameterException;
 import java.util.HashSet;
@@ -97,7 +97,7 @@ public class P2PConfig {
      * @return invalid host format return null otherwise return Host object
      * @throws InvalidParameterException
      */
-    public Host toHost(String host) throws InvalidParameterException {
+    public Node toHost(String host) throws InvalidParameterException {
 
         try {
             // "127.0.0.1:1111"
@@ -109,21 +109,21 @@ public class P2PConfig {
                 throw new IllegalArgumentException(" invalid host format : " + host);
             }
 
-            return new Host(IP, port);
+            return new Node("", IP, port);
 
         } catch (Exception e) {
             throw new IllegalArgumentException(" invalid host format : " + host);
         }
     }
 
-    public Set<Host> getConnectPeers() {
-        Set<Host> hostSet = new HashSet<Host>();
+    public Set<Node> getConnectPeers() {
+        Set<Node> hostSet = new HashSet<Node>();
         if (null == peers) {
             return hostSet;
         }
 
         for (String peer : peers) {
-            Host host = toHost(peer);
+            Node host = toHost(peer);
             logger.info(" => connect peer ip : {}", host);
             hostSet.add(host);
         }

@@ -6,7 +6,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.webank.wecross.host.WeCrossHost;
-import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.TestResource;
@@ -15,6 +14,7 @@ import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.ResourceResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.zone.ZoneManager;
 import java.util.ArrayList;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -97,10 +97,10 @@ public class RestfulControllerTest {
             resourceResponse.setErrorMessage("");
             resourceResponse.setResources(new ArrayList<Resource>());
 
-            NetworkManager mockNetworkManager = Mockito.mock(NetworkManager.class);
+            ZoneManager mockNetworkManager = Mockito.mock(ZoneManager.class);
             Mockito.when(mockNetworkManager.list(Mockito.any())).thenReturn(resourceResponse);
 
-            Mockito.when(weCrossHost.getNetworkManager()).thenReturn(mockNetworkManager);
+            Mockito.when(weCrossHost.getZoneManager()).thenReturn(mockNetworkManager);
 
             String json =
                     "{\n"

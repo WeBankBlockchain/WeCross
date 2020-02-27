@@ -1,12 +1,8 @@
 package com.webank.wecross.p2p.netty.message;
 
 import com.webank.wecross.p2p.netty.SeqMapper;
-import com.webank.wecross.p2p.netty.common.Host;
-import com.webank.wecross.p2p.netty.common.Utils;
-import com.webank.wecross.p2p.netty.message.processor.HeartBeatProcessor;
+import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.p2p.netty.message.processor.Processor;
-import com.webank.wecross.p2p.netty.message.processor.ResourceRequestProcessor;
-import com.webank.wecross.p2p.netty.message.processor.ResourceResponseProcessor;
 import com.webank.wecross.p2p.netty.message.proto.Message;
 import com.webank.wecross.p2p.netty.message.serialize.MessageSerializer;
 import io.netty.buffer.ByteBuf;
@@ -15,10 +11,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-@Component
 public class MessageCallBack {
+    public static final Short ON_CONNECT = -100;
+    public static final Short ON_DISCONNECT = -101;
 
     private static final Logger logger = LoggerFactory.getLogger(MessageCallBack.class);
 
@@ -47,20 +43,23 @@ public class MessageCallBack {
         this.messageToProcessor.put(type, processor);
     }
 
-    public HeartBeatProcessor getHeartBeatProcessor() {
-        return (HeartBeatProcessor) messageToProcessor.get(MessageType.HEARTBEAT);
+    public void onConnect(ChannelHandlerContext ctx, Node node) {
+        Processor processor = getProcessor(ON_CONNECT);
+
+        if (processor != null) {
+            processor.process(ctx, node, null);
+        }
     }
 
-    public ResourceResponseProcessor getResourceResponseProcessor() {
-        return (ResourceResponseProcessor) messageToProcessor.get(MessageType.RESOURCE_RESPONSE);
+    public void onDisconnect(ChannelHandlerContext ctx, Node node) {
+        Processor processor = getProcessor(ON_DISCONNECT);
+
+        if (processor != null) {
+            processor.process(ctx, node, null);
+        }
     }
 
-    public ResourceRequestProcessor getResourceRequestProcessor() {
-        return (ResourceRequestProcessor) messageToProcessor.get(MessageType.RESOURCE_REQUEST);
-    }
-
-    public void onMessage(ChannelHandlerContext ctx, ByteBuf byteBuf) {
-        Host host = Utils.channelContextPeerHost(ctx);
+    public void onMessage(ChannelHandlerContext ctx, Node node, ByteBuf byteBuf) {
         Integer hashCode = System.identityHashCode(ctx);
 
         try {
@@ -72,23 +71,23 @@ public class MessageCallBack {
                     " receive message seq: {}, type: {}, host: {}, ctx: {}",
                     message.getSeq(),
                     message.getType(),
-                    host,
+                    node,
                     hashCode);
 
             Processor processor = getProcessor(message.getType());
             if (processor != null) {
-                processor.process(ctx, message);
+                processor.process(ctx, node, message);
             } else {
                 logger.error(
                         " unrecognized message, type: {}, seq: {}, host: {}, ctx: {} ",
                         message.getType(),
                         message.getSeq(),
-                        host,
+                        node,
                         hashCode);
             }
 
         } catch (Exception e) {
-            logger.error(" invalid message, host: {}, ctx: {}, e: {}", host, hashCode, e);
+            logger.error(" invalid message, host: {}, ctx: {}, e: {}", node, hashCode, e);
 
         } finally {
             byteBuf.release();

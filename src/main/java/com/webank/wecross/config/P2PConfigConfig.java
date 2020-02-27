@@ -17,15 +17,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 @Configuration
-public class P2PConfigFactory {
-
-    private static Logger logger = LoggerFactory.getLogger(P2PConfigFactory.class);
+public class P2PConfigConfig {
+    private static Logger logger = LoggerFactory.getLogger(P2PConfigConfig.class);
 
     @Resource(name = "produceToml")
     Toml toml;
 
     @Bean
-    public P2PConfig readP2PConfig() throws WeCrossException {
+    public P2PConfig newP2PConfig() throws WeCrossException {
+        logger.info("initializing p2p config...");
+
         P2PConfig p2PConfig = null;
         try {
             Map<String, Object> wecrossMap = toml.toMap();

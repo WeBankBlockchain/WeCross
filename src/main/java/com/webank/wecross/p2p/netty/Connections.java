@@ -1,8 +1,6 @@
 package com.webank.wecross.p2p.netty;
 
-import com.webank.wecross.p2p.netty.common.Host;
-import com.webank.wecross.p2p.netty.common.Peer;
-import com.webank.wecross.p2p.netty.common.Utils;
+import com.webank.wecross.p2p.netty.common.Node;
 import io.netty.channel.ChannelHandlerContext;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,28 +10,26 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-@Component
 public class Connections {
 
     private static final Logger logger = LoggerFactory.getLogger(Connections.class);
 
-    public Set<Host> getConfiguredPeers() {
+    public Set<Node> getConfiguredPeers() {
         return configuredPeers;
     }
 
-    public void setConfiguredPeers(Set<Host> configuredPeers) {
+    public void setConfiguredPeers(Set<Node> configuredPeers) {
         this.configuredPeers = configuredPeers;
     }
 
     /** all Peers should connect */
-    private Set<Host> configuredPeers;
+    private Set<Node> configuredPeers;
 
     /** nodeID => ChannelHandlerContext */
     private Map<String, ChannelHandlerContext> nodeID2ChannelHandler = new HashMap<>();
     /** Peer Host => nodeID */
-    private Map<Host, String> host2NodeID = new HashMap<>();
+    private Map<String, String> host2NodeID = new HashMap<>();
 
     public Map<String, ChannelHandlerContext> getNodeID2ChannelHandler() {
         return nodeID2ChannelHandler;
@@ -43,11 +39,11 @@ public class Connections {
         this.nodeID2ChannelHandler = nodeID2ChannelHandler;
     }
 
-    public Map<Host, String> getHost2NodeID() {
+    public Map<String, String> getHost2NodeID() {
         return host2NodeID;
     }
 
-    public void setHost2NodeID(Map<Host, String> host2NodeID) {
+    public void setHost2NodeID(Map<String, String> host2NodeID) {
         this.host2NodeID = host2NodeID;
     }
 
@@ -56,13 +52,12 @@ public class Connections {
      *
      * @return
      */
-    public Set<Host> shouldConnectNodes() {
-
-        Set<Host> hostSet = new HashSet<>();
-        Set<Host> configuredPeers = getConfiguredPeers();
-        for (Host host : configuredPeers) {
+    public Set<Node> shouldConnectNodes() {
+        Set<Node> hostSet = new HashSet<>();
+        Set<Node> configuredPeers = getConfiguredPeers();
+        for (Node host : configuredPeers) {
             synchronized (host2NodeID) {
-                if (host2NodeID.containsKey(host)) {
+                if (host2NodeID.containsKey(host.getIPPort())) {
                     continue;
                 }
             }
@@ -102,46 +97,50 @@ public class Connections {
      * @param ctx
      * @return
      */
-    public void addChannelHandler(
-            String nodeID, ChannelHandlerContext ctx, boolean connectToServer) {
-        Host host = Utils.channelContextPeerHost(ctx);
+    public void addChannelHandler(Node node, ChannelHandlerContext ctx, boolean connectToServer) {
         int hashCode = System.identityHashCode(ctx);
 
-        logger.info(" add channel handler, node: {}, host: {}, ctx: {}", nodeID, host, hashCode);
+        logger.info(
+                "add channel handler, node: {}, host: {}, ctx: {}, active: {}",
+                node.getNodeID(),
+                node,
+                hashCode,
+                ctx.channel().isActive());
 
         ChannelHandlerContext oldCtx = null;
         synchronized (nodeID2ChannelHandler) {
-            oldCtx = nodeID2ChannelHandler.get(nodeID);
+            oldCtx = nodeID2ChannelHandler.get(node.getNodeID());
 
             if (oldCtx == null) {
-                nodeID2ChannelHandler.put(nodeID, ctx);
+                nodeID2ChannelHandler.put(node.getNodeID(), ctx);
 
                 synchronized (host2NodeID) {
-                    host2NodeID.put(host, nodeID);
+                    host2NodeID.put(node.getIPPort(), node.getNodeID());
                 }
             }
         }
 
         if (oldCtx != null) {
-            logger.info(" connection exist, host: {}, node: {} ", host, nodeID);
+            logger.info(" connection exist, host: {}, node: {} ", node, node.getNodeID());
             if (connectToServer) {
                 synchronized (host2NodeID) {
-                    for (Map.Entry<Host, String> entry : host2NodeID.entrySet()) {
-                        if (entry.getValue().equals(nodeID)) {
+                    for (Map.Entry<String, String> entry : host2NodeID.entrySet()) {
+                        if (entry.getValue().equals(node.getNodeID())) {
                             host2NodeID.remove(entry.getKey());
-                            host2NodeID.put(host, nodeID);
+                            host2NodeID.put(node.getIPPort(), node.getNodeID());
                             logger.info(
                                     " update, last host: {}, host: {}, node: {} ",
                                     entry.getKey(),
-                                    host,
-                                    nodeID);
+                                    node,
+                                    node.getNodeID());
                             break;
                         }
                     }
                 }
             }
 
-            throw new UnsupportedOperationException(" existing connection, node : " + nodeID);
+            throw new UnsupportedOperationException(
+                    " existing connection, node : " + node.getNodeID());
         }
     }
 
@@ -162,26 +161,29 @@ public class Connections {
      * @param nodeID
      * @param ctx
      */
-    public void removeChannelHandler(String nodeID, ChannelHandlerContext ctx) {
-        Host host = Utils.channelContextPeerHost(ctx);
+    public void removeChannelHandler(Node node, ChannelHandlerContext ctx) {
         int hashCode = System.identityHashCode(ctx);
 
-        logger.info(" remove channel handler, host: {}, node: {}, ctx: {}", host, nodeID, hashCode);
+        logger.info(
+                " remove channel handler, host: {}, node: {}, ctx: {}",
+                node,
+                node.getNodeID(),
+                hashCode);
 
         ChannelHandlerContext oldCtx = null;
         synchronized (nodeID2ChannelHandler) {
-            oldCtx = nodeID2ChannelHandler.get(nodeID);
+            oldCtx = nodeID2ChannelHandler.get(node.getNodeID());
 
             if (oldCtx != null && oldCtx == ctx) {
-                nodeID2ChannelHandler.remove(nodeID);
-                logger.info(" remove channel handler, node: {}", nodeID);
+                nodeID2ChannelHandler.remove(node.getNodeID());
+                logger.info(" remove channel handler, node: {}", node.getNodeID());
             }
         }
 
         if (oldCtx != null && oldCtx == ctx) {
             synchronized (host2NodeID) {
-                for (Map.Entry<Host, String> entry : host2NodeID.entrySet()) {
-                    if (entry.getValue().equals(nodeID)) {
+                for (Map.Entry<String, String> entry : host2NodeID.entrySet()) {
+                    if (entry.getValue().equals(node.getNodeID())) {
                         logger.info(
                                 " remove host info, host: {}, node: {} ",
                                 entry.getKey(),
@@ -196,21 +198,9 @@ public class Connections {
         if (oldCtx == null) {
             logger.warn(
                     " channel handler not exist, host: {}, node: {}, ctx: {}",
-                    host,
-                    nodeID,
+                    node,
+                    node.getNodeID(),
                     hashCode);
         }
-    }
-
-    public Set<Peer> getPeers() {
-        Set<Peer> setPeer = new HashSet<Peer>();
-        synchronized (nodeID2ChannelHandler) {
-            for (Map.Entry<String, ChannelHandlerContext> entry :
-                    nodeID2ChannelHandler.entrySet()) {
-                setPeer.add(new Peer(entry.getKey()));
-            }
-        }
-
-        return setPeer;
     }
 }

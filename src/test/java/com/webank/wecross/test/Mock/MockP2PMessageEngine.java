@@ -3,7 +3,7 @@ package com.webank.wecross.test.Mock;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.peer.Peer;
 import org.junit.Assert;
 
 public class MockP2PMessageEngine extends P2PMessageEngine {
@@ -14,7 +14,7 @@ public class MockP2PMessageEngine extends P2PMessageEngine {
         this.filter = filter;
     }
 
-    public <T> void asyncSendMessage(Peer peer, P2PMessage<T> msg, P2PMessageCallback callback) {
+    public <T> void asyncSendMessage(Peer peer, P2PMessage<T> msg, P2PMessageCallback<?> callback) {
         try {
             Assert.assertNotEquals(null, filter); // Please set filter beforehand
 

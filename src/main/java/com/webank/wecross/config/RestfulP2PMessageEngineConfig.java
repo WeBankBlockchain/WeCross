@@ -10,16 +10,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class RestfulP2PMessageEngineFactory {
+public class RestfulP2PMessageEngineConfig {
 
-    private Logger logger = LoggerFactory.getLogger(RestfulP2PMessageEngineFactory.class);
+    private Logger logger = LoggerFactory.getLogger(RestfulP2PMessageEngineConfig.class);
 
-    @Resource(name = "newP2PService")
-    P2PService p2PService;
+    @Resource P2PService p2PService;
 
     @Bean
     public P2PMessageEngine newRestfulP2PMessageEngine() {
-
         // Init engine
         logger.info("New RestfulP2PMessageEngine");
         RestfulP2PMessageEngine engineInstance = new RestfulP2PMessageEngine();

@@ -1,6 +1,8 @@
-package com.webank.wecross.p2p.netty.message.processor;
+package com.webank.wecross.p2p;
 
 import com.webank.wecross.p2p.netty.SeqMapper;
+import com.webank.wecross.p2p.netty.common.Node;
+import com.webank.wecross.p2p.netty.message.processor.Processor;
 import com.webank.wecross.p2p.netty.message.proto.Message;
 import com.webank.wecross.p2p.netty.response.Response;
 import com.webank.wecross.p2p.netty.response.ResponseCallBack;
@@ -8,12 +10,10 @@ import com.webank.wecross.p2p.netty.response.StatusCode;
 import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-@Component
-public class ResourceResponseProcessor implements Processor {
+public class ResponseProcessor implements Processor {
 
-    private static final Logger logger = LoggerFactory.getLogger(ResourceResponseProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(ResponseProcessor.class);
 
     @Override
     public String name() {
@@ -31,10 +31,8 @@ public class ResourceResponseProcessor implements Processor {
     }
 
     @Override
-    public void process(ChannelHandlerContext ctx, Message message) {
-
+    public void process(ChannelHandlerContext ctx, Node node, Message message) {
         try {
-
             String content = new String(message.getData(), "utf-8");
             logger.info(" source response, message: {}, content: {}", message, content);
 

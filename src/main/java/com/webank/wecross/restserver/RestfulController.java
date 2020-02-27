@@ -6,7 +6,6 @@ import com.webank.wecross.common.QueryStatus;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
-import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.request.GetDataRequest;
@@ -21,6 +20,7 @@ import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
+import com.webank.wecross.zone.ZoneManager;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +63,7 @@ public class RestfulController {
             restRequest.checkRestRequest("", "list");
 
             ResourceRequest resourceRequest = restRequest.getData();
-            NetworkManager networkManager = host.getNetworkManager();
+            ZoneManager networkManager = host.getZoneManager();
             ResourceResponse resourceResponse = networkManager.list(resourceRequest);
             restResponse.setData(resourceResponse);
         } catch (WeCrossException e) {

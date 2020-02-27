@@ -1,80 +1,103 @@
 package com.webank.wecross.host;
 
-import com.webank.wecross.network.NetworkManager;
 import com.webank.wecross.p2p.P2PMessage;
+import com.webank.wecross.p2p.netty.P2PService;
+import com.webank.wecross.peer.Peer;
 import com.webank.wecross.peer.PeerManager;
+import com.webank.wecross.peer.PeerSeqMessageData;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.TestResource;
+import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
+import com.webank.wecross.zone.ZoneManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WeCrossHost {
-
     private Logger logger = LoggerFactory.getLogger(WeCrossHost.class);
 
-    private NetworkManager networkManager;
+    private ZoneManager zoneManager;
     private PeerManager peerManager;
+    private P2PService p2pService;
 
-    private boolean enableTestResource = false;
+    Thread mainLoopThread;
 
     public void start() {
-        /** start netty p2p service */
         try {
-            if (enableTestResource) {
-                addTestResources();
-            }
-            // start p2p first
-            peerManager.getP2PService().start();
-            // start peer manager
-            peerManager.start();
+            p2pService.start();
+
+            // start main loop
+            mainLoopThread =
+                    new Thread(
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    mainLoop();
+                                }
+                            });
+            mainLoopThread.run();
         } catch (Exception e) {
             logger.error("Startup host error: {}", e);
             System.exit(-1);
         }
     }
 
+    public void mainLoop() {
+        while (true) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                logger.error("Thread exception", e);
+            }
+
+            int seq = zoneManager.getSeq();
+
+            PeerSeqMessageData peerSeqMessageData = new PeerSeqMessageData();
+            peerSeqMessageData.setSeq(seq);
+
+            P2PMessage<Object> msg = new P2PMessage<>();
+            msg.newSeq();
+            msg.setData(peerSeqMessageData);
+            msg.setVersion(Versions.currentVersion);
+            msg.setMethod("seq");
+
+            for (Peer peer : peerManager.getPeerInfos().values()) {
+                logger.debug("Send peer seq, to peer:{}, seq:{}", peer, msg.getSeq());
+                zoneManager.getP2PEngine().asyncSendMessage(peer, msg, null);
+            }
+        }
+    }
+
     public Resource getResource(Path path) throws Exception {
-        return networkManager.getResource(path);
+        return zoneManager.getResource(path);
     }
 
     public StateResponse getState(StateRequest request) {
-        return networkManager.getState(request);
+        return zoneManager.getState(request);
     }
 
-    public Object onRestfulPeerMessage(String method, P2PMessage msg) {
-        return peerManager.onRestfulPeerMessage(method, msg);
+    public void setZoneManager(ZoneManager networkManager) {
+        this.zoneManager = networkManager;
     }
 
-    public void setNetworkManager(NetworkManager networkManager) {
-        this.networkManager = networkManager;
+    public ZoneManager getZoneManager() {
+        return this.zoneManager;
     }
 
-    public NetworkManager getNetworkManager() {
-        return this.networkManager;
+    public PeerManager getPeerManager() {
+        return peerManager;
     }
 
     public void setPeerManager(PeerManager peerManager) {
         this.peerManager = peerManager;
     }
 
-    public void syncAllState() {}
-
-    public void addTestResources() {
-        try {
-            logger.info("Add test resource");
-            Path path = Path.decode("test-network.test-stub.test-resource");
-            Resource resource = new TestResource();
-            resource.setPath(path);
-            networkManager.addResource(resource);
-        } catch (Exception e) {
-            logger.warn("Add test resource exception " + e);
-        }
+    public P2PService getP2pService() {
+        return p2pService;
     }
 
-    public void setEnableTestResource(boolean enableTestResource) {
-        this.enableTestResource = enableTestResource;
+    public void setP2pService(P2PService p2pService) {
+        this.p2pService = p2pService;
     }
 }

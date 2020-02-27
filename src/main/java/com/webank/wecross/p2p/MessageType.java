@@ -1,4 +1,4 @@
-package com.webank.wecross.p2p.netty.message;
+package com.webank.wecross.p2p;
 
 /** message type for p2p message communication with each other */
 public interface MessageType {
