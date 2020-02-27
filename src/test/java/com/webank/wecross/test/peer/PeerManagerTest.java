@@ -28,18 +28,18 @@ public class PeerManagerTest {
     public void testPeerInfo() {
         PeerManager peerManager = new PeerManager();
 
-        peerManager.addPeerInfo(new Node("node1", "127.0.0.1", 8888));
-        peerManager.addPeerInfo(new Node("node2", "127.0.0.1", 8889));
-        peerManager.addPeerInfo(new Node("node3", "127.0.0.1", 8890));
+        peerManager.addPeerInfo(new Node("node1", "", 8888));
+        peerManager.addPeerInfo(new Node("node2", "", 8889));
+        peerManager.addPeerInfo(new Node("node3", "", 8890));
 
         Assert.assertEquals(3, peerManager.getPeerInfos().size());
-        Assert.assertNull(peerManager.getPeerInfo(new Node("node3", "127.0.0.1", 8811)));
+        Assert.assertNull(peerManager.getPeerInfo(new Node("node3", "", 8811)));
 
-        peerManager.removePeerInfo(new Node("node2", "127.0.0.1", 8889));
-        peerManager.removePeerInfo(new Node("node1", "117.0.0.1", 8889));
+        peerManager.removePeerInfo(new Node("node2", "", 8889));
+        peerManager.removePeerInfo(new Node("node1", "", 8889));
 
         Assert.assertEquals(2, peerManager.peerSize());
-        Assert.assertNull(peerManager.getPeerInfo(new Node("node2", "127.0.0.1", 8889)));
-        Assert.assertNotNull(peerManager.getPeerInfo(new Node("node1", "127.0.0.1", 8888)));
+        Assert.assertNull(peerManager.getPeerInfo(new Node("node2", "", 8889)));
+        Assert.assertNotNull(peerManager.getPeerInfo(new Node("node1", "", 8888)));
     }
 }
