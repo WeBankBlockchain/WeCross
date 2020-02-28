@@ -290,7 +290,7 @@ public class FabricContractResource extends FabricResource {
 
     @Override
     public String getCryptoSuite() {
-        return WeCrossType.CRYPTO_SUITE_BC_SECP256R1;
+        return WeCrossType.CRYPTO_SUITE_FABRIC_BC_SECP256R1;
     }
 
     private TransactionResponse buildTransactionResponse(String retTypes[]) {
