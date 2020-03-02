@@ -90,6 +90,11 @@ public class FabricResource implements Resource {
     public void setPeers(Set<Peer> peers) {}
 
     @Override
+    public String getCryptoSuite() {
+        return null;
+    }
+
+    @Override
     public String getChecksum() {
         return null;
     }

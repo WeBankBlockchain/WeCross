@@ -91,6 +91,11 @@ public class JDChainResource implements Resource {
     public void setPeers(Set<Peer> peers) {}
 
     @Override
+    public String getCryptoSuite() {
+        return null;
+    }
+
+    @Override
     public String getType() {
         return "JD_RESOURCE";
     }

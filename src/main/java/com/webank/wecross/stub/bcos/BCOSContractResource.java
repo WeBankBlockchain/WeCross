@@ -49,8 +49,6 @@ import org.slf4j.LoggerFactory;
 public class BCOSContractResource extends BCOSResource {
     private Logger logger = LoggerFactory.getLogger(BCOSContractResource.class);
 
-    private static final String PROPOSAL_CRYPTOSUITE = WeCrossType.BCOS_SHA3_256_SECP256K1;
-
     private Boolean isInit = false;
     @JsonIgnore private Web3j web3;
     @JsonIgnore private String contractAddress;
@@ -147,7 +145,7 @@ public class BCOSContractResource extends BCOSResource {
     public ProposalResponse callProposal(ProposalRequest request) {
         ProposalResponse response = new ProposalResponse();
         response.setSeq(request.getSeq());
-        response.setCryptoSuite(PROPOSAL_CRYPTOSUITE);
+        response.setCryptoSuite(getCryptoSuite());
         try {
             byte[] bytesToSign = generateProposalSignBytes(request);
             response.setErrorCode(0);
@@ -165,7 +163,7 @@ public class BCOSContractResource extends BCOSResource {
     public ProposalResponse sendTransactionProposal(ProposalRequest request) {
         ProposalResponse response = new ProposalResponse();
         response.setSeq(request.getSeq());
-        response.setCryptoSuite(PROPOSAL_CRYPTOSUITE);
+        response.setCryptoSuite(getCryptoSuite());
         try {
             byte[] bytesToSign = generateProposalSignBytes(request);
             response.setErrorCode(0);
@@ -247,6 +245,18 @@ public class BCOSContractResource extends BCOSResource {
             logger.error("Caculate checksum exception: " + e);
         }
         return null;
+    }
+
+    @Override
+    public String getCryptoSuite() {
+        switch (EncryptType.encryptType) {
+            case EncryptType.ECDSA_TYPE:
+                return WeCrossType.CRYPTO_SUITE_BCOS_SHA3_256_SECP256K1;
+            case EncryptType.SM2_TYPE:
+                return WeCrossType.CRYPTO_SUITE_BCOS_SM2_SM3;
+            default:
+                return null;
+        }
     }
 
     private MerkleProof getTransactionProof(String transactionHash, String txRoot)

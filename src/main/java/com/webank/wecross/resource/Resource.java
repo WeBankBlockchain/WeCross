@@ -52,4 +52,7 @@ public interface Resource {
     Set<Peer> getPeers();
 
     void setPeers(Set<Peer> peers);
+
+    @JsonProperty("cryptoSuite")
+    String getCryptoSuite();
 }
