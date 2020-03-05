@@ -1,6 +1,7 @@
 package com.webank.wecross.test.Mock;
 
 import com.webank.wecross.proposal.Proposal;
+import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 
 public class MockProposal extends Proposal {
@@ -33,6 +34,11 @@ public class MockProposal extends Proposal {
 
     @Override
     public Boolean isEqualsRequest(TransactionRequest request) throws Exception {
+        return null;
+    }
+
+    @Override
+    public Boolean isEqualsRequest(ProposalRequest request) throws Exception {
         return null;
     }
 }

@@ -139,6 +139,17 @@ public class RestfulController {
                         }
                         break;
                     }
+
+                case "info":
+                    {
+                        if (resourceObj == null) {
+                            throw new WeCrossException(
+                                    ErrorCode.RESOURCE_ERROR, "Resource not found");
+                        } else {
+                            restResponse.setData(resourceObj);
+                        }
+                        break;
+                    }
                 case "getData":
                     {
                         if (resourceObj == null) {

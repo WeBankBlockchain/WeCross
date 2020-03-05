@@ -56,6 +56,17 @@ public class BCOSProposal extends Proposal {
         return requestData.equals(data);
     }
 
+    @Override
+    public Boolean isEqualsRequest(ProposalRequest request) throws Exception {
+        if (innerBCOSTransaction == null) {
+            throw new Exception("BCOS proposal " + this.getSeq() + " has not been loaded");
+        }
+
+        String requestData = encodeRequestToInputData(request);
+        String data = innerBCOSTransaction.getData();
+        return requestData.equals(data);
+    }
+
     public void load(ExtendedRawTransaction innerBCOSTransaction) {
         this.innerBCOSTransaction = innerBCOSTransaction;
         this.proposalBytes = ExtendedTransactionEncoder.encode(innerBCOSTransaction);

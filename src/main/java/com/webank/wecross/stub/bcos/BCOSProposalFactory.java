@@ -33,6 +33,7 @@ public class BCOSProposalFactory implements ProposalFactory {
         return proposal;
     }
 
+    @Override
     public BCOSProposal buildFromBytes(byte[] proposalBytes) throws Exception {
         BCOSProposal proposal = new BCOSProposal(0);
         proposal.loadBytes(proposalBytes);

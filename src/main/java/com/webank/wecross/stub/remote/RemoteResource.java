@@ -57,6 +57,11 @@ public class RemoteResource implements Resource {
     }
 
     @Override
+    public String getCryptoSuite() {
+        return null;
+    }
+
+    @Override
     public String getType() {
         return "REMOTE_RESOURCE";
     }
