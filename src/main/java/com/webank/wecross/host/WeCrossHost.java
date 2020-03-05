@@ -36,7 +36,7 @@ public class WeCrossHost {
                                     mainLoop();
                                 }
                             });
-            mainLoopThread.run();
+            mainLoopThread.start();
         } catch (Exception e) {
             logger.error("Startup host error: {}", e);
             System.exit(-1);

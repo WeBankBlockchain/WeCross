@@ -7,7 +7,7 @@ import java.util.Set;
 
 public class Peer {
     Node node;
-    private int seq = 1;
+    private int seq = 0;
     private Set<ResourceInfo> resourceInfos = new HashSet<>();
     private long lastActiveTimestamp = System.currentTimeMillis();
 
