@@ -1,5 +1,6 @@
 package com.webank.wecross.host;
 
+import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.netty.P2PService;
 import com.webank.wecross.peer.Peer;
@@ -8,9 +9,15 @@ import com.webank.wecross.peer.PeerSeqMessageData;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.Versions;
+import com.webank.wecross.routine.htlc.AssetHTLC;
+import com.webank.wecross.routine.htlc.HTLCResourcePair;
+import com.webank.wecross.routine.htlc.HTLCTaskFactory;
+import com.webank.wecross.routine.task.TaskManager;
 import com.webank.wecross.stub.StateRequest;
 import com.webank.wecross.stub.StateResponse;
 import com.webank.wecross.zone.ZoneManager;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,10 +27,15 @@ public class WeCrossHost {
     private ZoneManager zoneManager;
     private PeerManager peerManager;
     private P2PService p2pService;
+    private List<HTLCResourcePair> htlcResourcePairs = new ArrayList<>();
 
     Thread mainLoopThread;
 
     public void start() {
+        /** start htlc service */
+        runHTLCService();
+
+        /** start netty p2p service */
         try {
             p2pService.start();
 
@@ -65,6 +77,28 @@ public class WeCrossHost {
             for (Peer peer : peerManager.getPeerInfos().values()) {
                 logger.debug("Send peer seq, to peer:{}, seq:{}", peer, msg.getSeq());
                 zoneManager.getP2PEngine().asyncSendMessage(peer, msg, null);
+            }
+        }
+    }
+
+    public void runHTLCService() {
+        HTLCTaskFactory htlcTaskFactory = new HTLCTaskFactory();
+        TaskManager taskManager = new TaskManager(htlcTaskFactory);
+        taskManager.registerTasks(htlcResourcePairs);
+        taskManager.start();
+    }
+
+    public void findHTLCResourcePairs() throws Exception {
+        List<Resource> resources = zoneManager.getAllResources(true);
+        for (Resource resource : resources) {
+            if (resource.getType().equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_ASSET_HTLC_CONTRACT)
+                    && resource.getDistance() == 0) {
+                AssetHTLC assetHTLC = new AssetHTLC();
+                String counterpartyHTLCIpath = assetHTLC.getCounterpartyHTLCIpath(resource);
+                Resource counterpartyHTLCResource =
+                        zoneManager.getResource(Path.decode(counterpartyHTLCIpath));
+                htlcResourcePairs.add(
+                        new HTLCResourcePair(assetHTLC, resource, counterpartyHTLCResource));
             }
         }
     }

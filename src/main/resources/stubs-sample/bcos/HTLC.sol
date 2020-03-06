@@ -1,244 +1,734 @@
 pragma solidity ^0.4.25;
-pragma experimental ABIEncoderV2;
-
-import "./BAC001.sol";
-import "./HTLCStorage.sol";
 
 contract HTLC {
 
-    struct LockContract {
+    struct ContractData {
         string secret;
-        int timelock;
+        address sender;
+        address receiver;
+        uint amount;
+        uint timelock; // UNIX timestamp seconds - locked UNTIL this time
         bool locked;
         bool unlocked;
-        bool timeouted;
+        bool rolledback;
     }
 
-    address storageAddress;
+    // to lock and unlock counterparty
+    string counterpartyHTLCIpath;
+    address counterpartyHTLCAddress;
 
-    string storageIpath;
+    // recode if you're the initiator
+    mapping(string => bool) htlcRoles;
 
-    // to lock and unlock other
-    string otherHTLCIpath;
+    // initiator is the one who initiates the htlc transaction
+    mapping(string => ContractData) initiators;
 
-    // bac001 asset contract address
-    address assetContract;
+    // participant is the one who makes the deal with initiator
+    mapping(string => ContractData) participants;
 
-    HTLCStorage htlcStorage = new HTLCStorage();
+    // record all unfinished tasks
+    uint head = 0;        // point to the current task to be performed
+    uint tail = 0;        // point to the next position for added task
+    string[] taskQueue;
 
-    mapping (string => address[]) permissionLists;
+    /* to be defined*/
+    // function lock(string _hash) external returns (string);
+    // function unlock(string _hash) external returns (string);
+    // function rollback(string _hash) external returns (string);
 
-    mapping (string => LockContract) contracts;
-
-    modifier contractExists(string _hash) {
-        require(haveContract(_hash), "contractExists: the hash should exist");
-        _;
-    }
-
-    modifier hashMatched(string _hash, string _secret) {
-        require(sha256(abi.encodePacked(htlcStorage.stringToBytes32(_secret))) == htlcStorage.stringToBytes32(_hash), "the hash should not exist");
-        _;
-    }
-    modifier unlockable(string _hash) {
-        require(contracts[_hash].timeouted == false, "timeoutable: already timeouted");
-        require(uint(contracts[_hash].timelock) > now, "unlockable: timelock time must be in the future");
-        _;
-    }
-    modifier timeoutable(string _hash) {
-        require(contracts[_hash].unlocked == false, "timeoutable: already unlocked");
-        require(uint(contracts[_hash].timelock)  <= now, "timeoutable: timelock not yet passed");
-        _;
-    }
-    modifier getSecretable(string _hash) {
-        require(havaPermission(_hash, msg.sender), "getSecretable: have no permission");
-        _;
-    }
-
-    function initHTLC(
-        string _storageAddress,
-        string _storageIpath,
-        string _otherHTLCIpath,
-        string _assetContract
+    function setCounterpartyHTLCInfo(
+        string _counterpartyHTLCIpath,
+        string _counterpartyHTLCAddress
     )
-    external
+    internal
     {
-        storageAddress = htlcStorage.stringToAddress(_storageAddress);
-        storageIpath = _storageIpath;
-        otherHTLCIpath = _otherHTLCIpath;
-        htlcStorage = HTLCStorage(storageAddress);
-        assetContract = htlcStorage.stringToAddress(_assetContract);
+        counterpartyHTLCIpath = _counterpartyHTLCIpath;
+        counterpartyHTLCAddress = stringToAddress(_counterpartyHTLCAddress);
     }
 
-    function setSecret(string _hash, string _secret)
-    hashMatched(_hash, _secret)
+    function getCounterpartyHTLCIpath()
+    external
+    view
+    returns (string)
+    {
+        return counterpartyHTLCIpath;
+    }
+
+    function getCounterpartyHTLCAddress()
+    external
+    view
+    returns (string)
+    {
+        return addressToString(counterpartyHTLCAddress);
+    }
+
+    function setRole(
+        string _hash,
+        string _role
+    )
     external
     returns (string)
     {
-        if (haveContract(_hash))
-        {
-           return contracts[_hash].secret;
+        if(hasContract(_hash)) {
+            return "role exists";
         }
-        contracts[_hash] = LockContract(
+
+        if(sameString(_role, "true")) {
+           htlcRoles[_hash] = true;
+        } else {
+           htlcRoles[_hash] = false;
+        }
+        return "success";
+    }
+
+    function addInitiator(
+        string _hash,
+        string _secret,
+        string _sender,
+        string _receiver,
+        string _amount,
+        string _timelock
+    )
+    external
+    returns (string)
+    {
+        if (hasInitiator(_hash)) {
+            return "initiator exists";
+        }
+
+        initiators[_hash] = ContractData(
             _secret,
-            0,
+            stringToAddress(_sender),
+            stringToAddress(_receiver),
+            stringToUint(_amount),
+            stringToUint(_timelock),
             false,
             false,
             false
         );
-        return _secret;
+        return "success";
     }
 
-    function setPermissionList(string _hash, string[] _authorizees)
-    public
-    returns (uint)
+    function addParticipant(
+        string _hash,
+        string _sender,
+        string _receiver,
+        string _amount,
+        string _timelock
+    )
+    external
+    returns (string)
     {
-        if (permissionLists[_hash].length != 0)
-            revert("Hash exists");
-
-        uint len =  _authorizees.length;
-        address[] memory authorizees = new address[](len + 1);
-        for(uint i = 0; i < len; i++) {
-            authorizees[i] = htlcStorage.stringToAddress(_authorizees[i]);
+        if (hasParticipant(_hash)) {
+            return "participant exists";
         }
-        authorizees[len] = msg.sender;
 
-        permissionLists[_hash] = authorizees;
-
-        return permissionLists[_hash].length;
+        participants[_hash] = ContractData(
+            "null",
+            stringToAddress(_sender),
+            stringToAddress(_receiver),
+            stringToUint(_amount),
+            stringToUint(_timelock),
+            false,
+            false,
+            false
+        );
+        return "success";
     }
 
-    function getStorageIpath()
+
+    function addTask(string _hash)
+    external
+    returns (string)
+    {
+        if(!hasContract(_hash)) {
+            return "task not exists";
+        }
+
+        tail = tail + 1;
+        taskQueue.push(_hash);
+        return "success";
+    }
+
+    function getTask()
     external
     view
     returns (string)
     {
-        return storageIpath;
+        if(head == tail) {
+            return ("null");
+        }
+        else {
+            return (taskQueue[uint(head)]);
+        }
     }
 
-    function getOtherHTLCIpath()
+    function deleteTask(string _hash)
     external
-    view
     returns (string)
     {
-        return otherHTLCIpath;
+        if(head == tail || !sameString(taskQueue[head], _hash)) {
+            return "invalid operation";
+        }
+        head = head + 1;
+        return "success";
     }
 
+    function getTaskIndex()
+    external
+    view
+    returns (uint, uint)
+    {
+        return (head, tail);
+    }
 
     function getSecret(string _hash)
-    getSecretable(_hash)
     external
     view
-    returns (string secret)
+    returns (string)
     {
-        secret = contracts[_hash].secret;
+        if(htlcRoles[_hash]) {
+            return initiators[_hash].secret;
+        } else {
+            return participants[_hash].secret;
+        }
     }
 
-    function lock(string _hash)
-    contractExists(_hash)
-    external
-    returns (int)
+    function setSecret(string _hash, string _secret)
+    internal
     {
-        // hava locked
-        if (contracts[_hash].locked)
-        {
-           return htlcStorage.getAmont(_hash);
+        if(!htlcRoles[_hash]) {
+            participants[_hash].secret = _secret;
         }
-
-        int amount = htlcStorage.getAmont(_hash);
-        address sender = htlcStorage.getSender(_hash);
-        int timelock = htlcStorage.getTimelock(_hash);
-
-        if (BAC001(assetContract).allowance(sender, address(this)) < uint(amount))
-        {
-            revert("Insufficient authorized assets");
-        }
-
-        if(uint(timelock) <= now)
-        {
-            revert("Illegal timelock");
-        }
-
-        // This htlc contract becomes the temporary owner of the assets
-        BAC001(assetContract).sendFrom(sender, address(this), uint(amount),"");
-
-        contracts[_hash].timelock = timelock;
-        contracts[_hash].locked = true;
-
-        htlcStorage.setSelfLocked(_hash);
-
-        return amount;
     }
 
-
-    function unlock(string _hash, string _secret)
-    external
-    contractExists(_hash)
-    hashMatched(_hash, _secret)
-    unlockable(_hash)
-    returns (int)
+    function getSender(string _hash)
+    internal
+    view
+    returns (address)
     {
-        // hava unlocked
-        if(contracts[_hash].unlocked) {
-            return htlcStorage.getAmont(_hash);
+        if(htlcRoles[_hash]) {
+            return initiators[_hash].sender;
+        } else {
+            return participants[_hash].sender;
         }
-
-        address receiver = htlcStorage.getReceiver(_hash);
-        int amount = htlcStorage.getAmont(_hash);
-
-        contracts[_hash].secret = _secret;
-        contracts[_hash].unlocked = true;
-
-
-        htlcStorage.setSelfUnlocked(_hash);
-
-        // transfer from htlc contract to receiver
-        BAC001(assetContract).send(receiver, uint(amount),"");
-        return amount;
     }
 
-
-    function timeout(string _hash)
-    external
-    contractExists(_hash)
-    timeoutable(_hash)
-    returns (int)
+    function getReceiver(string _hash)
+    internal
+    view
+    returns (address)
     {
-        // hava timeouted
-        if(contracts[_hash].timeouted) {
-            return htlcStorage.getAmont(_hash);
+        if(htlcRoles[_hash]) {
+            return initiators[_hash].receiver;
+        } else {
+            return participants[_hash].receiver;
         }
-
-        address sender = htlcStorage.getSender(_hash);
-        int amount = htlcStorage.getAmont(_hash);
-
-        contracts[_hash].timeouted = true;
-
-        // transfer from htlc contract to sender
-        BAC001(assetContract).send(sender, uint(amount),"");
-        return amount;
     }
 
-    function haveContract(string _hash)
+    function getAmount(string _hash)
+    internal
+    view
+    returns (uint)
+    {
+        if(htlcRoles[_hash]) {
+            return initiators[_hash].amount;
+        } else {
+            return participants[_hash].amount;
+        }
+    }
+
+    function getTimelock(string _hash)
+    internal
+    view
+    returns (uint)
+    {
+        if(htlcRoles[_hash]) {
+            return initiators[_hash].timelock;
+        } else {
+            return participants[_hash].timelock;
+        }
+    }
+
+    function getLockStatus(string _hash)
     internal
     view
     returns (bool)
     {
-        return (bytes(contracts[_hash].secret).length > 0);
+        if(htlcRoles[_hash]) {
+            return initiators[_hash].locked;
+        } else {
+            return participants[_hash].locked;
+        }
     }
 
-    function havaPermission(string _hash, address _caller)
+    function getUnlockStatus(string _hash)
     internal
     view
     returns (bool)
     {
-        address[] storage list = permissionLists[_hash];
-        uint len = list.length;
-        for(uint i = 0; i < len; i++) {
-            if(list[i] == _caller) {
-                return true;
+        if(htlcRoles[_hash]) {
+            return initiators[_hash].unlocked;
+        } else {
+            return participants[_hash].unlocked;
+        }
+    }
+
+    function getRollbackStatus(string _hash)
+    internal
+    view
+    returns (bool)
+    {
+        if(htlcRoles[_hash]) {
+            return initiators[_hash].rolledback;
+        } else {
+            return participants[_hash].rolledback;
+        }
+    }
+
+    function setLockStatus(string _hash)
+    internal
+    {
+        if(htlcRoles[_hash]) {
+            initiators[_hash].locked = true;
+        } else {
+            participants[_hash].locked = true;
+        }
+    }
+
+    function setUnlockStatus(string _hash)
+    internal
+    {
+        if(htlcRoles[_hash]) {
+            initiators[_hash].unlocked = true;
+        } else {
+            participants[_hash].unlocked = true;
+        }
+    }
+
+    function setRollbackStatus(string _hash)
+    internal
+    {
+        if(htlcRoles[_hash]) {
+            initiators[_hash].rolledback = true;
+        } else {
+            participants[_hash].rolledback = true;
+        }
+    }
+
+    // these following functions are just for HTLC scheduler
+    function getSelfSender(string _hash)
+    external
+    view
+    returns (string)
+    {
+        if(htlcRoles[_hash]) {
+            return addressToString(initiators[_hash].sender);
+        } else {
+            return addressToString(participants[_hash].sender);
+        }
+    }
+
+    function getCounterpartySender(string _hash)
+    external
+    view
+    returns (string)
+    {
+        if(!htlcRoles[_hash]) {
+            return addressToString(initiators[_hash].sender);
+        } else {
+            return addressToString(participants[_hash].sender);
+        }
+    }
+
+    function getSelfReceiver(string _hash)
+    external
+    view
+    returns (string)
+    {
+        if(htlcRoles[_hash]) {
+            return addressToString(initiators[_hash].receiver);
+        } else {
+            return addressToString(participants[_hash].receiver);
+        }
+    }
+
+    function getCounterpartyReceiver(string _hash)
+    external
+    view
+    returns (string)
+    {
+        if(!htlcRoles[_hash]) {
+            return addressToString(initiators[_hash].receiver);
+        } else {
+            return addressToString(participants[_hash].receiver);
+        }
+    }
+
+    function getSelfAmount(string _hash)
+    external
+    view
+    returns (string)
+    {
+        if(htlcRoles[_hash]) {
+            return uintToString(initiators[_hash].amount);
+        } else {
+            return uintToString(participants[_hash].amount);
+        }
+    }
+
+    function getCounterpartyAmount(string _hash)
+    external
+    view
+    returns (string)
+    {
+        if(!htlcRoles[_hash]) {
+            return uintToString(initiators[_hash].amount);
+        } else {
+            return uintToString(participants[_hash].amount);
+        }
+    }
+
+    function getSelfTimelock(string _hash)
+    external
+    view
+    returns (string)
+    {
+        if(htlcRoles[_hash]) {
+            return uintToString(initiators[_hash].timelock);
+        } else {
+            return uintToString(participants[_hash].timelock);
+        }
+    }
+
+    function getCounterpartyTimelock(string _hash)
+    external
+    view
+    returns (string)
+    {
+        if(!htlcRoles[_hash]) {
+            return uintToString(initiators[_hash].timelock);
+        } else {
+            return uintToString(participants[_hash].timelock);
+        }
+    }
+
+    function getSelfLockStatus(string _hash)
+    external
+    view
+    returns (string)
+    {
+        if(htlcRoles[_hash]) {
+            if(initiators[_hash].locked) {
+                return "true";
+            } else {
+                return "false";
+            }
+        } else {
+            if(participants[_hash].locked) {
+                return "true";
+            } else {
+                return "false";
             }
         }
+    }
 
-        return false;
+    function getCounterpartyLockStatus(string _hash)
+    external
+    view
+    returns (string)
+    {
+        if(!htlcRoles[_hash]) {
+            if(initiators[_hash].locked) {
+                return "true";
+            } else {
+                return "false";
+            }
+        } else {
+            if(participants[_hash].locked) {
+                return "true";
+            } else {
+                return "false";
+            }
+        }
+    }
+
+    function getSelfUnlockStatus(string _hash)
+    external
+    view
+    returns (string)
+    {
+        if(htlcRoles[_hash]) {
+            if(initiators[_hash].unlocked) {
+                return "true";
+            } else {
+                return "false";
+            }
+        } else {
+            if(participants[_hash].unlocked) {
+                return "true";
+            } else {
+                return "false";
+            }
+        }
+    }
+
+    function getCounterpartyUnlockStatus(string _hash)
+    external
+    view
+    returns (string)
+    {
+        if(!htlcRoles[_hash]) {
+            if(initiators[_hash].unlocked) {
+                return "true";
+            } else {
+                return "false";
+            }
+        } else {
+            if(participants[_hash].unlocked) {
+                return "true";
+            } else {
+                return "false";
+            }
+        }
+    }
+
+    function getSelfRollbackStatus(string _hash)
+    external
+    view
+    returns (string)
+    {
+        if(htlcRoles[_hash]) {
+            if(initiators[_hash].rolledback) {
+                return "true";
+            } else {
+                return "false";
+            }
+        } else {
+            if(participants[_hash].rolledback) {
+                return "true";
+            } else {
+                return "false";
+            }
+        }
+    }
+
+    function getCounterpartyRollbackStatus(string _hash)
+    external
+    view
+    returns (string)
+    {
+        if(!htlcRoles[_hash]) {
+            if(initiators[_hash].rolledback) {
+                return "true";
+            } else {
+                return "false";
+            }
+        } else {
+            if(participants[_hash].rolledback) {
+                return "true";
+            } else {
+                return "false";
+            }
+        }
+    }
+
+    function setCounterpartyLockStatus(string _hash)
+    external
+    {
+        if(!htlcRoles[_hash]) {
+            initiators[_hash].locked = true;
+        } else {
+            participants[_hash].locked = true;
+        }
+    }
+
+    function setCounterpartyUnlockStatus(string _hash)
+    external
+    {
+        if(!htlcRoles[_hash]) {
+            initiators[_hash].unlocked = true;
+        } else {
+            participants[_hash].unlocked = true;
+        }
+    }
+
+    function setCounterpartyRollbackStatus(string _hash)
+    external
+    {
+        if(!htlcRoles[_hash]) {
+            initiators[_hash].rolledback = true;
+        } else {
+            participants[_hash].rolledback = true;
+        }
+    }
+
+    // these are utilities
+    function hasContract(string _hash)
+    internal
+    view
+    returns (bool)
+    {
+        return (initiators[_hash].sender != address(0)) &&
+               (participants[_hash].sender != address(0));
+    }
+
+    function hasInitiator(string _hash)
+    internal
+    view
+    returns (bool)
+    {
+        return (initiators[_hash].sender != address(0));
+    }
+
+    function hasParticipant(string _hash)
+    internal
+    view
+    returns (bool)
+    {
+        return (participants[_hash].sender != address(0));
+    }
+
+    function rightTimelock(string _t0, string _t1)
+    internal
+    view
+    returns (bool)
+    {
+        uint t0 = stringToUint(_t0);
+        uint t1 = stringToUint(_t1);
+        return t0 > (t1 + 3600) && t1 > (now + 3600);
+    }
+
+    function sameString(string a, string b)
+    internal
+    pure
+    returns (bool)
+    {
+        return keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b));
+    }
+
+    function stringToBytes32(string _source)
+    internal
+    pure
+    returns (bytes32 result)
+    {
+        bytes memory tempEmptyString = bytes(_source);
+        if (tempEmptyString.length == 0) {
+            return 0x0;
+        }
+
+        assembly {
+            result := mload(add(_source, 32))
+        }
+    }
+
+    function bytes32ToString(bytes32 _source)
+    internal
+    pure
+    returns (string)
+    {
+
+       bytes memory result = new bytes(_source.length);
+
+       for(uint i = 0; i < _source.length; i++) {
+
+           result[i] = _source[i];
+       }
+
+       return string(result);
+    }
+
+    function stringToAddress(string _address)
+    internal
+    pure
+    returns (address)
+    {
+        bytes memory temp = bytes(_address);
+        uint160 result = 0;
+        uint160 b1;
+        uint160 b2;
+        for (uint i = 2; i < 2 + 2 * 20; i += 2) {
+            result *= 256;
+            b1 = uint160(uint8(temp[i]));
+            b2 = uint160(uint8(temp[i + 1]));
+            if ((b1 >= 97) && (b1 <= 102)) {
+                b1 -= 87;
+            } else if ((b1 >= 65) && (b1 <= 70)) {
+                b1 -= 55;
+            } else if ((b1 >= 48) && (b1 <= 57)) {
+            b1 -= 48;
+            }
+
+            if ((b2 >= 97) && (b2 <= 102)) {
+                b2 -= 87;
+            } else if ((b2 >= 65) && (b2 <= 70)) {
+                b2 -= 55;
+            } else if ((b2 >= 48) && (b2 <= 57)) {
+                b2 -= 48;
+            }
+            result += (b1 * 16 + b2);
+        }
+        return address(result);
+    }
+
+    function addressToString(address _address)
+    internal
+    pure
+    returns (string)
+    {
+        bytes memory result = new bytes(40);
+        for (uint i = 0; i < 20; i++) {
+            byte temp = byte(uint8(uint(_address) / (2 ** (8 * (19 - i)))));
+            byte b1 = byte(uint8(temp) / 16);
+            byte b2 = byte(uint8(temp) - 16 * uint8(b1));
+            result[2 * i] = convert(b1);
+            result[2 * i + 1] = convert(b2);
+        }
+        return string(abi.encodePacked("0x", string(result)));
+    }
+
+    function convert(byte _byte)
+    private
+    pure
+    returns (byte)
+    {
+        if (_byte < 10) {
+            return byte(uint8(_byte) + 0x30);
+        } else {
+            return byte(uint8(_byte) + 0x57);
+        }
+    }
+
+    function uintToString(uint _value)
+    internal
+    pure
+    returns (string)
+    {
+        bytes32 result;
+        if (_value == 0) {
+            return "0";
+        } else {
+            while (_value > 0) {
+                result = bytes32(uint(result) / (2 ** 8));
+                result |= bytes32(((_value % 10) + 48) * 2 ** (8 * 31));
+                _value /= 10;
+            }
+        }
+        return bytes32ToString(result);
+    }
+
+    function stringToUint(string _s)
+    internal
+    pure
+    returns (uint)
+    {
+        bytes memory b = bytes(_s);
+        uint result = 0;
+        for (uint i = 0; i < b.length; i++) {
+            if (b[i] >= 48 && b[i] <= 57) {
+                result = result * 10 + (uint(b[i]) - 48);
+            }
+        }
+        return result;
     }
 }

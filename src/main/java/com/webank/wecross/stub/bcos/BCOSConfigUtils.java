@@ -8,7 +8,7 @@ import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.routine.htlc.HTLCResource;
+import com.webank.wecross.routine.htlc.AssetHTLCResource;
 import com.webank.wecross.utils.ConfigUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -167,11 +167,11 @@ public class BCOSConfigUtils {
                 BCOSContractResource bcosContractResource =
                         initBCOSContractResource(name, resource, prefix, stubPath, web3);
                 bcosResources.put(name, bcosContractResource);
-            } else if (type.equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_HTLC_CONTRACT)) {
+            } else if (type.equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_ASSET_HTLC_CONTRACT)) {
                 BCOSContractResource bcosContractResource =
                         initBCOSContractResource(name, resource, prefix, stubPath, web3);
-                HTLCResource htlcResource = new HTLCResource(bcosContractResource);
-                bcosResources.put(name, htlcResource);
+                AssetHTLCResource assetHtlcResource = new AssetHTLCResource(bcosContractResource);
+                bcosResources.put(name, assetHtlcResource);
             } else {
                 String errorMessage = "Undefined bcos resource type: " + type;
                 throw new WeCrossException(ErrorCode.UNEXPECTED_CONFIG, errorMessage);

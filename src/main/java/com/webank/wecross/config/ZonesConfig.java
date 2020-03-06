@@ -27,7 +27,6 @@ public class ZonesConfig {
     @Bean(name = "zoneConfig")
     public Map<String, Zone> readNetworksConfig() {
         Map<String, Zone> result = new HashMap<>();
-
         try {
             String network = toml.getString("common.network");
             if (network == null) {
