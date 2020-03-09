@@ -1,5 +1,7 @@
 package com.webank.wecross.host;
 
+import com.webank.wecross.chain.StateRequest;
+import com.webank.wecross.chain.StateResponse;
 import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.netty.P2PService;
@@ -13,8 +15,6 @@ import com.webank.wecross.routine.htlc.AssetHTLC;
 import com.webank.wecross.routine.htlc.HTLCResourcePair;
 import com.webank.wecross.routine.htlc.HTLCTaskFactory;
 import com.webank.wecross.routine.task.TaskManager;
-import com.webank.wecross.stub.StateRequest;
-import com.webank.wecross.stub.StateResponse;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.ArrayList;
 import java.util.List;

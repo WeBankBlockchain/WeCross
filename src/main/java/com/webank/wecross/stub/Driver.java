@@ -1,8 +1,8 @@
-package com.webank.wecross.driver;
+package com.webank.wecross.stub;
 
+import com.webank.wecross.chain.BlockHeader;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.TransactionResponse;
-import com.webank.wecross.stub.BlockHeader;
 
 public interface Driver {
 	/**
@@ -52,25 +52,25 @@ public interface Driver {
 	 * @param request the transaction request
 	 * @return the transaction response
 	 */
-	public TransactionResponse call(TransactionRequest request);
+	public TransactionResponse call(TransactionRequest request, Connection connection);
 	
 	/**
 	 * Send transaction to the interface of contract or chaincode
 	 * @param request the transaction request
 	 * @return the transaction response
 	 */
-	public TransactionResponse sendTransaction(TransactionRequest request);
+	public TransactionResponse sendTransaction(TransactionRequest request, Connection connection);
 
 	/**
 	 * Get block number
 	 * @return block number
 	 */
-	public long getBlockNumber();
+	public long getBlockNumber(Connection connection);
 	
 	/**
 	 * Get block header
 	 * @param number
 	 * @return BlockHeader
 	 */
-	public BlockHeader getBlockHeader(long number);
+	public BlockHeader getBlockHeader(long number, Connection connection);
 }

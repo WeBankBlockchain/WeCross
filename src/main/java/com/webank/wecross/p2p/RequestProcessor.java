@@ -302,41 +302,6 @@ public class RequestProcessor implements Processor {
             }
 
             switch (method) {
-                case "getData":
-                    {
-                        P2PMessage<GetDataRequest> p2pRequest =
-                                ObjectMapperFactory.getObjectMapper()
-                                        .readValue(
-                                                p2pRequestString,
-                                                new TypeReference<P2PMessage<GetDataRequest>>() {});
-
-                        p2pRequest.checkP2PMessage(method);
-
-                        GetDataRequest getDataRequest = p2pRequest.getData();
-                        GetDataResponse getDataResponse = resourceObj.getData(getDataRequest);
-
-                        p2pResponse.setData(getDataResponse);
-                        p2pResponse.setSeq(p2pRequest.getSeq());
-                        break;
-                    }
-                case "setData":
-                    {
-                        P2PMessage<SetDataRequest> p2pRequest =
-                                ObjectMapperFactory.getObjectMapper()
-                                        .readValue(
-                                                p2pRequestString,
-                                                new TypeReference<P2PMessage<SetDataRequest>>() {});
-
-                        p2pRequest.checkP2PMessage(method);
-
-                        SetDataRequest setDataRequest = (SetDataRequest) p2pRequest.getData();
-                        SetDataResponse setDataResponse =
-                                (SetDataResponse) resourceObj.setData(setDataRequest);
-
-                        p2pResponse.setData(setDataResponse);
-                        p2pResponse.setSeq(p2pRequest.getSeq());
-                        break;
-                    }
                 case "call":
                     {
                         P2PMessage<TransactionRequest> p2pRequest =

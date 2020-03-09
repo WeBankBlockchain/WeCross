@@ -1,11 +1,11 @@
-package com.webank.wecross.stub;
+package com.webank.wecross.chain;
 
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import java.util.Map;
 import org.slf4j.Logger;
 
-public interface Stub {
+public interface Chain {
     public String getType();
 
     public int getBlockNumber();
@@ -17,6 +17,7 @@ public interface Stub {
         return getResources().get(path.getResource());
     }
 
+    /*
     // return if resource exists
     default boolean addResource(Resource resource) throws Exception {
         String name = resource.getPath().getResource();
@@ -47,6 +48,7 @@ public interface Stub {
             getResources().remove(path.getResource());
         }
     }
+    */
 
     public Map<String, Resource> getResources();
 

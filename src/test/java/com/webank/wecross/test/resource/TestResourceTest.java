@@ -13,7 +13,7 @@ public class TestResourceTest {
     public void hashTest() {
         try {
             Resource resource = new TestResource();
-            resource.setPath(Path.decode("network.stub.resource"));
+            // resource.setPath(Path.decode("network.stub.resource"));
             String checksum = resource.getChecksum();
 
             Assert.assertEquals(HashUtils.sha256String("network.stub.resource"), checksum);

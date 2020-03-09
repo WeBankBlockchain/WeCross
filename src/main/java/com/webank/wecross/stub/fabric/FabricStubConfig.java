@@ -47,7 +47,10 @@ public class FabricStubConfig {
             Resource resource = fabricResources.get(name);
             String type = resource.getType();
             if (type.equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_FABRIC_CONTRACT)) {
-                String pathStr = resource.getPathAsString();
+            	
+                // String pathStr = resource.getPathAsString();
+            	String pathStr = "TODO path";
+                
                 FabricConn fabricConn = fabricConns.get(name);
                 if (fabricConn == null) {
                     logger.error("path:{} name:{} not exist in fabricConns", pathStr, name);
@@ -56,7 +59,9 @@ public class FabricStubConfig {
 
                 ((FabricContractResource) resource).init(fabricConn);
             } else if (type.equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_ASSET_HTLC_CONTRACT)) {
-                String pathStr = resource.getPathAsString();
+               // String pathStr = resource.getPathAsString();
+            	String pathStr = "TODO Path";
+            	
                 FabricConn fabricConn = fabricConns.get(name);
                 if (fabricConn == null) {
                     logger.error("path:{} name:{} not exist in fabricConns", pathStr, name);
@@ -174,7 +179,7 @@ public class FabricStubConfig {
             String stringPath = prefix + "." + resourceName;
             try {
                 ConfigUtils.checkPath(stringPath);
-                fabricContractResource.setPath(Path.decode(stringPath));
+                //fabricContractResource.setPath(Path.decode(stringPath)); TODO: set path
             } catch (WeCrossException e1) {
                 throw e1;
             } catch (Exception e2) {

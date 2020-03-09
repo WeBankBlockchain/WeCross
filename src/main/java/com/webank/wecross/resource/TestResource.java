@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // No reliable chain, just respond what you call
-public class TestResource implements Resource {
+public class TestResource extends Resource {
     private Logger logger = LoggerFactory.getLogger(TestResource.class);
 
     protected Path path;
@@ -25,34 +25,6 @@ public class TestResource implements Resource {
     @Override
     public String getType() {
         return WeCrossType.RESOURCE_TYPE_TEST;
-    }
-
-    @Override
-    public GetDataResponse getData(GetDataRequest request) {
-        GetDataResponse response = new GetDataResponse();
-        response.setErrorCode(0);
-        response.setErrorMessage("getData test resource success");
-        response.setValue(request.toString());
-        return response;
-    }
-
-    @Override
-    public SetDataResponse setData(SetDataRequest request) {
-
-        SetDataResponse response = new SetDataResponse();
-        response.setErrorCode(0);
-        response.setErrorMessage("setData test resource success");
-        return response;
-    }
-
-    @Override
-    public ProposalResponse callProposal(ProposalRequest request) {
-        return null;
-    }
-
-    @Override
-    public ProposalResponse sendTransactionProposal(ProposalRequest request) {
-        return null;
     }
 
     @Override
@@ -79,11 +51,6 @@ public class TestResource implements Resource {
     public void registerEventHandler(EventCallback callback) {}
 
     @Override
-    public TransactionRequest createRequest() {
-        return null;
-    }
-
-    @Override
     public int getDistance() {
         return 0;
     }
@@ -100,38 +67,5 @@ public class TestResource implements Resource {
             logger.error("Caculate checksum exception: " + e);
         }
         return null;
-    }
-
-    @Override
-    public String getContractAddress() {
-        return null;
-    }
-
-    @Override
-    public Path getPath() {
-        return this.path;
-    }
-
-    @Override
-    public void setPath(Path path) {
-        this.path = path;
-    }
-
-    @Override
-    public String getPathAsString() {
-        return path.toString();
-    }
-
-    @Override
-    public Set<Peer> getPeers() {
-        return null;
-    }
-
-    @Override
-    public void setPeers(Set<Peer> peers) {}
-
-    @Override
-    public String getCryptoSuite() {
-        return "TEST";
     }
 }

@@ -17,35 +17,11 @@ import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 
-public class BCOSResource implements Resource {
+public class BCOSResource extends Resource {
 
     protected Path path;
 
     public void init(Service service, Web3j web3j, Credentials credentials) {}
-
-    @Override
-    public GetDataResponse getData(GetDataRequest request) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public SetDataResponse setData(SetDataRequest request) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public ProposalResponse callProposal(ProposalRequest request) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public ProposalResponse sendTransactionProposal(ProposalRequest request) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
     @Override
     public TransactionResponse call(TransactionRequest request) {
@@ -66,12 +42,6 @@ public class BCOSResource implements Resource {
     }
 
     @Override
-    public TransactionRequest createRequest() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public int getDistance() {
         return 0;
     }
@@ -82,40 +52,7 @@ public class BCOSResource implements Resource {
     }
 
     @Override
-    public String getContractAddress() {
-        return null;
-    }
-
-    @Override
     public String getType() {
         return "BCOS_RESOURCE";
-    }
-
-    @Override
-    public Path getPath() {
-        return path;
-    }
-
-    @Override
-    public void setPath(Path path) {
-        this.path = path;
-    }
-
-    @Override
-    public String getPathAsString() {
-        return path.toString();
-    }
-
-    @Override
-    public Set<Peer> getPeers() {
-        return null;
-    }
-
-    @Override
-    public void setPeers(Set<Peer> peers) {}
-
-    @Override
-    public String getCryptoSuite() {
-        return null;
     }
 }

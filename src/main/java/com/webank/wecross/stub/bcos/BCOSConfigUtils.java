@@ -199,7 +199,7 @@ public class BCOSConfigUtils {
         String stringPath = prefix + "." + name;
         try {
             ConfigUtils.checkPath(stringPath);
-            bcosContractResource.setPath(Path.decode(stringPath));
+            // bcosContractResource.setPath(Path.decode(stringPath));
         } catch (WeCrossException we) {
             throw we;
         } catch (Exception e) {

@@ -14,33 +14,13 @@ import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import java.util.Set;
 
-public class FabricResource implements Resource {
+public class FabricResource extends Resource {
 
     protected Path path;
 
     @Override
     public String getType() {
         return "FABRIC_RESOURCES";
-    }
-
-    @Override
-    public GetDataResponse getData(GetDataRequest request) {
-        return null;
-    }
-
-    @Override
-    public SetDataResponse setData(SetDataRequest request) {
-        return null;
-    }
-
-    @Override
-    public ProposalResponse callProposal(ProposalRequest request) {
-        return null;
-    }
-
-    @Override
-    public ProposalResponse sendTransactionProposal(ProposalRequest request) {
-        return null;
     }
 
     @Override
@@ -57,50 +37,12 @@ public class FabricResource implements Resource {
     public void registerEventHandler(EventCallback callback) {}
 
     @Override
-    public TransactionRequest createRequest() {
-        return null;
-    }
-
-    @Override
     public int getDistance() {
         return 0;
     }
 
     @Override
-    public Path getPath() {
-        return path;
-    }
-
-    @Override
-    public void setPath(Path path) {
-        this.path = path;
-    }
-
-    @Override
-    public String getPathAsString() {
-        return path.toString();
-    }
-
-    @Override
-    public Set<Peer> getPeers() {
-        return null;
-    }
-
-    @Override
-    public void setPeers(Set<Peer> peers) {}
-
-    @Override
-    public String getCryptoSuite() {
-        return null;
-    }
-
-    @Override
     public String getChecksum() {
-        return null;
-    }
-
-    @Override
-    public String getContractAddress() {
         return null;
     }
 }

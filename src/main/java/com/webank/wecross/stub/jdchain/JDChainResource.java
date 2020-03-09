@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class JDChainResource implements Resource {
+public class JDChainResource extends Resource {
 
     private Boolean isInit = false;
     @JsonIgnore protected List<BlockchainKeypair> adminKey = new ArrayList<BlockchainKeypair>();
@@ -68,56 +68,8 @@ public class JDChainResource implements Resource {
     }
 
     @Override
-    public Path getPath() {
-        return path;
-    }
-
-    @Override
-    public void setPath(Path path) {
-        this.path = path;
-    }
-
-    @Override
-    public String getPathAsString() {
-        return path.toString();
-    }
-
-    @Override
-    public Set<Peer> getPeers() {
-        return null;
-    }
-
-    @Override
-    public void setPeers(Set<Peer> peers) {}
-
-    @Override
-    public String getCryptoSuite() {
-        return null;
-    }
-
-    @Override
     public String getType() {
         return "JD_RESOURCE";
-    }
-
-    @Override
-    public GetDataResponse getData(GetDataRequest request) {
-        return null;
-    }
-
-    @Override
-    public SetDataResponse setData(SetDataRequest request) {
-        return null;
-    }
-
-    @Override
-    public ProposalResponse callProposal(ProposalRequest request) {
-        return null;
-    }
-
-    @Override
-    public ProposalResponse sendTransactionProposal(ProposalRequest request) {
-        return null;
     }
 
     @Override
@@ -134,22 +86,12 @@ public class JDChainResource implements Resource {
     public void registerEventHandler(EventCallback callback) {}
 
     @Override
-    public TransactionRequest createRequest() {
-        return null;
-    }
-
-    @Override
     public int getDistance() {
         return 0;
     }
 
     @Override
     public String getChecksum() {
-        return null;
-    }
-
-    @Override
-    public String getContractAddress() {
         return null;
     }
 }

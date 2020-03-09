@@ -1,11 +1,11 @@
 package com.webank.wecross.config;
 
 import com.moandjiezana.toml.Toml;
+import com.webank.wecross.chain.Chain;
+import com.webank.wecross.chain.ChainFactory;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
-import com.webank.wecross.stub.Stub;
-import com.webank.wecross.stub.StubsFactory;
 import com.webank.wecross.utils.ConfigUtils;
 import com.webank.wecross.zone.Zone;
 import java.util.HashMap;
@@ -55,7 +55,7 @@ public class ZonesConfig {
             }
 
             Map<String, String> stubsDir = ConfigUtils.getStubsDir(stubsPath);
-            Map<String, Stub> stubsBean = StubsFactory.getStubs(network, stubsDir);
+            Map<String, Chain> stubsBean = ChainFactory.getStubs(network, stubsDir);
             Zone networkBean = new Zone();
             if (stubsBean != null) {
                 // init network bean

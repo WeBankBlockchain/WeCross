@@ -1,15 +1,16 @@
 package com.webank.wecross.stub.remote;
 
+import com.webank.wecross.chain.BlockHeader;
+import com.webank.wecross.chain.Chain;
 import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.stub.BlockHeader;
-import com.webank.wecross.stub.Stub;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RemoteStub implements Stub {
+public class RemoteStub implements Chain {
 
     private Logger logger = LoggerFactory.getLogger(RemoteStub.class);
     private Map<String, Resource> resources;

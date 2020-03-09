@@ -126,58 +126,6 @@ public class BCOSContractResource extends BCOSResource {
     }
 
     @Override
-    public GetDataResponse getData(GetDataRequest request) {
-        GetDataResponse getDataResponse = new GetDataResponse();
-        getDataResponse.setErrorCode(ResourceQueryStatus.NONSENSE_CALL);
-        getDataResponse.setErrorMessage("Not supported by BCOS_CONTRACT");
-        return getDataResponse;
-    }
-
-    @Override
-    public SetDataResponse setData(SetDataRequest request) {
-        SetDataResponse setDataResponse = new SetDataResponse();
-        setDataResponse.setErrorCode(ResourceQueryStatus.NONSENSE_CALL);
-        setDataResponse.setErrorMessage("Not supported by BCOS_CONTRACT");
-        return setDataResponse;
-    }
-
-    @Override
-    public ProposalResponse callProposal(ProposalRequest request) {
-        ProposalResponse response = new ProposalResponse();
-        response.setSeq(request.getSeq());
-        response.setCryptoSuite(getCryptoSuite());
-        try {
-            byte[] bytesToSign = generateProposalSignBytes(request);
-            response.setErrorCode(0);
-            response.setProposalToSign(bytesToSign);
-        } catch (Exception e) {
-            response.setErrorCode(-1);
-            response.setProposalToSign(new byte[] {});
-            response.setErrorMessage("Call proposal error: " + e.getMessage());
-        }
-
-        return response;
-    }
-
-    @Override
-    public ProposalResponse sendTransactionProposal(ProposalRequest request) {
-        ProposalResponse response = new ProposalResponse();
-        response.setSeq(request.getSeq());
-        response.setCryptoSuite(getCryptoSuite());
-        try {
-            byte[] bytesToSign = generateProposalSignBytes(request);
-            response.setErrorCode(0);
-            response.setProposalToSign(bytesToSign);
-        } catch (Exception e) {
-            response.setErrorCode(-1);
-            response.setProposalToSign(new byte[] {});
-            response.setErrorMessage("Call proposal error: " + e.getMessage());
-        }
-
-        return response;
-    }
-
-    @Override
     public TransactionResponse call(TransactionRequest request) {
         TransactionResponse bcosTransactionResponse = newBCOSTransactionResponse();
         try {
@@ -217,17 +165,7 @@ public class BCOSContractResource extends BCOSResource {
     }
 
     @Override
-    public TransactionRequest createRequest() {
-        return new BCOSRequest();
-    }
-
-    @Override
     public void registerEventHandler(EventCallback callback) {}
-
-    @Override
-    public String getContractAddress() {
-        return contractAddress;
-    }
 
     public void setContractAddress(String contractAddress) {
         this.contractAddress = contractAddress;
@@ -245,18 +183,6 @@ public class BCOSContractResource extends BCOSResource {
             logger.error("Caculate checksum exception: " + e);
         }
         return null;
-    }
-
-    @Override
-    public String getCryptoSuite() {
-        switch (EncryptType.encryptType) {
-            case EncryptType.ECDSA_TYPE:
-                return WeCrossType.CRYPTO_SUITE_BCOS_SHA3_256_SECP256K1;
-            case EncryptType.SM2_TYPE:
-                return WeCrossType.CRYPTO_SUITE_BCOS_SM2_SM3;
-            default:
-                return null;
-        }
     }
 
     private MerkleProof getTransactionProof(String transactionHash, String txRoot)

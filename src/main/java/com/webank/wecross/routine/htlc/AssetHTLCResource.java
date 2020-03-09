@@ -20,7 +20,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AssetHTLCResource implements Resource {
+public class AssetHTLCResource extends Resource {
 
     private Logger logger = LoggerFactory.getLogger(AssetHTLCResource.class);
 
@@ -33,26 +33,6 @@ public class AssetHTLCResource implements Resource {
     @Override
     public String getType() {
         return WeCrossType.RESOURCE_TYPE_ASSET_HTLC_CONTRACT;
-    }
-
-    @Override
-    public GetDataResponse getData(GetDataRequest request) {
-        return originResource.getData(request);
-    }
-
-    @Override
-    public SetDataResponse setData(SetDataRequest request) {
-        return originResource.setData(request);
-    }
-
-    @Override
-    public ProposalResponse callProposal(ProposalRequest request) {
-        return originResource.callProposal(request);
-    }
-
-    @Override
-    public ProposalResponse sendTransactionProposal(ProposalRequest request) {
-        return originResource.sendTransactionProposal(request);
     }
 
     @Override
@@ -88,11 +68,6 @@ public class AssetHTLCResource implements Resource {
     public void registerEventHandler(EventCallback callback) {}
 
     @Override
-    public TransactionRequest createRequest() {
-        return originResource.createRequest();
-    }
-
-    @Override
     public int getDistance() {
         return 0;
     }
@@ -100,41 +75,6 @@ public class AssetHTLCResource implements Resource {
     @Override
     public String getChecksum() {
         return originResource.getChecksum();
-    }
-
-    @Override
-    public String getContractAddress() {
-        return originResource.getContractAddress();
-    }
-
-    @Override
-    public Path getPath() {
-        return originResource.getPath();
-    }
-
-    @Override
-    public void setPath(Path path) {
-        originResource.setPath(path);
-    }
-
-    @Override
-    public String getPathAsString() {
-        return originResource.getPathAsString();
-    }
-
-    @Override
-    public Set<Peer> getPeers() {
-        return originResource.getPeers();
-    }
-
-    @Override
-    public void setPeers(Set<Peer> peers) {
-        originResource.setPeers(peers);
-    }
-
-    @Override
-    public String getCryptoSuite() {
-        return null;
     }
 
     public TransactionRequest handleSendTransactionRequest(TransactionRequest request)

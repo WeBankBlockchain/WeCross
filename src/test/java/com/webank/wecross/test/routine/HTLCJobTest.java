@@ -36,9 +36,9 @@ public class HTLCJobTest {
 
     private HTLCResourcePair getHTLCResourcePair() throws Exception {
         BCOSContractResource bcosContractResource1 = new BCOSContractResource();
-        bcosContractResource1.setPath(Path.decode("payment.bcos.test1"));
+        // bcosContractResource1.setPath(Path.decode("payment.bcos.test1"));
         BCOSContractResource bcosContractResource2 = new BCOSContractResource();
-        bcosContractResource2.setPath(Path.decode("payment.bcos.test2"));
+        // bcosContractResource2.setPath(Path.decode("payment.bcos.test2"));
         AssetHTLCResource assetHTLCResource1 = new AssetHTLCResource(bcosContractResource1);
         AssetHTLCResource assetHTLCResource2 = new AssetHTLCResource(bcosContractResource2);
         AssetHTLC assetHTLC = new AssetHTLC();

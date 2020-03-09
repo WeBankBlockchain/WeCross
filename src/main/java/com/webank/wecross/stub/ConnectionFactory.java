@@ -1,4 +1,4 @@
-package com.webank.wecross.driver;
+package com.webank.wecross.stub;
 
 public interface ConnectionFactory {
 	/**

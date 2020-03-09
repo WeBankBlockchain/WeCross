@@ -125,7 +125,7 @@ public class JDChainConfigUtils {
         String stringPath = prefix + "." + name;
         try {
             ConfigUtils.checkPath(stringPath);
-            jdChainContractResource.setPath(Path.decode(stringPath));
+            // jdChainContractResource.setPath(Path.decode(stringPath)); TODO: set path
         } catch (WeCrossException we) {
             throw we;
         } catch (Exception e) {

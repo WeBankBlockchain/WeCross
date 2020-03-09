@@ -1,3 +1,5 @@
+/*
+
 package com.webank.wecross.stub.remote;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -325,3 +327,4 @@ public class RemoteResource implements Resource {
         return callback.getResponseData();
     }
 }
+*/

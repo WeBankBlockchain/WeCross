@@ -4,6 +4,7 @@ import java.util.Map;
 
 public class ResourceInfo {
     private String path;
+    private String driverType;
     private int distance;
     private String checksum;
 
@@ -63,6 +64,14 @@ public class ResourceInfo {
     public String getPath() {
         return path;
     }
+    
+    public String getDriverType() {
+		return driverType;
+	}
+
+	public void setDriverType(String driverType) {
+		this.driverType = driverType;
+	}
 
     public void setDistance(int distance) {
         this.distance = distance;

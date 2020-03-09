@@ -1,9 +1,10 @@
 package com.webank.wecross.stub.bcos;
 
+import com.webank.wecross.chain.BlockHeader;
+import com.webank.wecross.chain.Chain;
 import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.stub.BlockHeader;
-import com.webank.wecross.stub.Stub;
+
 import java.util.Map;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -11,7 +12,7 @@ import org.fisco.bcos.web3j.protocol.Web3j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BCOSStub implements Stub {
+public class BCOSStub implements Chain {
     private Service bcosService;
 
     private Web3j web3;

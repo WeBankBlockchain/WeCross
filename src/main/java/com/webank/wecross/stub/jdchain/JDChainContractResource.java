@@ -48,11 +48,6 @@ public class JDChainContractResource extends JDChainResource {
     @JsonIgnore private String contractAddress;
     private String checksum;
 
-    @Override
-    public String getContractAddress() {
-        return contractAddress;
-    }
-
     public void setContractAddress(String contractAddress) {
         this.contractAddress = contractAddress;
     }
@@ -96,6 +91,7 @@ public class JDChainContractResource extends JDChainResource {
         return WeCrossType.RESOURCE_TYPE_JDCHAIN_CONTRACT;
     }
 
+    /*
     @Override
     public GetDataResponse getData(GetDataRequest request) {
         GetDataResponse response = new GetDataResponse();
@@ -167,6 +163,7 @@ public class JDChainContractResource extends JDChainResource {
         setDataResponse.setErrorMessage("Not supported by JDCHAIN_CONTRACT");
         return setDataResponse;
     }
+    */
 
     public com.jd.blockchain.ledger.TransactionResponse commit(
             TransactionTemplate txTpl, Integer index) {
@@ -370,10 +367,12 @@ public class JDChainContractResource extends JDChainResource {
     @Override
     public void registerEventHandler(EventCallback callback) {}
 
+    /*
     @Override
     public TransactionRequest createRequest() {
         return new JDChainRequest();
     }
+    */
 
     @Override
     public String getChecksum() {

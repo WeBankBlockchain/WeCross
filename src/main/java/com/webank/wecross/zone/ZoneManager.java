@@ -1,5 +1,8 @@
 package com.webank.wecross.zone;
 
+import com.webank.wecross.chain.StateRequest;
+import com.webank.wecross.chain.StateResponse;
+import com.webank.wecross.chain.Chain;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Path;
@@ -7,10 +10,8 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.restserver.request.ResourceRequest;
 import com.webank.wecross.restserver.response.ResourceResponse;
-import com.webank.wecross.stub.StateRequest;
-import com.webank.wecross.stub.StateResponse;
-import com.webank.wecross.stub.Stub;
-import com.webank.wecross.stub.remote.RemoteResource;
+import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.stub.remote.RemoteConnection;
 import com.webank.wecross.stub.remote.RemoteStub;
 import com.webank.wecross.utils.core.PathUtils;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public class ZoneManager {
     private Logger logger = LoggerFactory.getLogger(ZoneManager.class);
     private P2PMessageEngine p2pEngine;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
+    private StubManager stubManager;
 
     public StateResponse getState(StateRequest request) {
 
@@ -45,7 +47,7 @@ public class ZoneManager {
             Zone network = getZone(path);
 
             if (network != null) {
-                Stub stub = network.getStub(path);
+                Chain stub = network.getStub(path);
 
                 if (stub != null) {
                     Resource resource = stub.getResource(path);
@@ -98,7 +100,7 @@ public class ZoneManager {
         this.seq = seq;
     }
 
-    public Map<String, Stub> getAllStubInfo(boolean ignoreLocal) {
+    public Map<String, Chain> getAllStubInfo(boolean ignoreLocal) {
         lock.readLock().lock();
         /*
         try {
@@ -144,7 +146,7 @@ public class ZoneManager {
             for (Map.Entry<String, Zone> zoneEntry : zones.entrySet()) {
                 String networkName = PathUtils.toPureName(zoneEntry.getKey());
 
-                for (Map.Entry<String, Stub> stubEntry :
+                for (Map.Entry<String, Chain> stubEntry :
                         zoneEntry.getValue().getStubs().entrySet()) {
                     String stubName = PathUtils.toPureName(stubEntry.getKey());
 
@@ -198,23 +200,30 @@ public class ZoneManager {
                     zones.put(path.getNetwork(), zone);
                 }
 
-                Stub stub = zone.getStubs().get(path.getChain());
+                Chain stub = zone.getStubs().get(path.getChain());
                 if (stub == null) {
                     stub = new RemoteStub();
                     zone.getStubs().put(path.getChain(), stub);
                 }
 
+                RemoteConnection remoteConnection = new RemoteConnection();
+            	remoteConnection.setP2pEngine(p2pEngine);
+            	remoteConnection.setPeer(peer);
+            	remoteConnection.setPath(path.toURI());
                 Resource resource = stub.getResources().get(path.getResource());
                 if (resource == null) {
-                    resource =
+                	resource = new Resource();
+                	resource.setDriver(stubManager.getDriver(resourceInfo.getDriverType()));
+                    /*
                             stub.getResources()
                                     .put(
                                             path.getResource(),
                                             new RemoteResource(
                                                     peer, resourceInfo.getDistance(), p2pEngine));
-                } else {
-                    resource.getPeers().add(peer);
+                                                    */
                 }
+                
+                resource.addConnection(peer, remoteConnection);
             }
         } finally {
             lock.writeLock().unlock();
@@ -240,7 +249,7 @@ public class ZoneManager {
                     continue;
                 }
 
-                Stub stub = zone.getStub(path.getChain());
+                Chain stub = zone.getStub(path.getChain());
                 if (stub == null) {
                     // stub not exists, bug?
                     logger.error("Stub not exists! Peer: {} Path: {}", peer, path);
@@ -255,13 +264,9 @@ public class ZoneManager {
                     continue;
                 }
 
-                if (!resource.getPeers().remove(peer)) {
-                    logger.error(
-                            "Remote resource doesn't contain such peer: {} path: {}", peer, path);
-                    continue;
-                }
-
-                if (resource.getPeers().isEmpty()) {
+                resource.removeConnection(peer);
+                
+                if (resource.isConnectionEmpty()) {
                     stub.getResources().remove(path.getResource());
                 }
 
@@ -322,4 +327,12 @@ public class ZoneManager {
     public void setP2PEngine(P2PMessageEngine p2pEngine) {
         this.p2pEngine = p2pEngine;
     }
+
+	public StubManager getStubManager() {
+		return stubManager;
+	}
+
+	public void setStubManager(StubManager stubManager) {
+		this.stubManager = stubManager;
+	}
 }

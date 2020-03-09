@@ -138,16 +138,7 @@ public class FabricContractResource extends FabricResource {
         }
     }
 
-    @Override
-    public GetDataResponse getData(GetDataRequest request) {
-        return super.getData(request);
-    }
-
-    @Override
-    public SetDataResponse setData(SetDataRequest request) {
-        return super.setData(request);
-    }
-
+    /*
     @Override
     public com.webank.wecross.restserver.response.ProposalResponse callProposal(
             ProposalRequest request) {
@@ -192,6 +183,7 @@ public class FabricContractResource extends FabricResource {
             return response;
         }
     }
+    */
 
     @Override
     public TransactionResponse call(TransactionRequest request) {
@@ -250,31 +242,6 @@ public class FabricContractResource extends FabricResource {
     }
 
     @Override
-    public TransactionRequest createRequest() {
-        return super.createRequest();
-    }
-
-    @Override
-    public int getDistance() {
-        return super.getDistance();
-    }
-
-    @Override
-    public Path getPath() {
-        return super.getPath();
-    }
-
-    @Override
-    public void setPath(Path path) {
-        super.setPath(path);
-    }
-
-    @Override
-    public String getPathAsString() {
-        return super.getPathAsString();
-    }
-
-    @Override
     public String getChecksum() {
         try {
             if (checksum == null || checksum.equals("")) {
@@ -288,7 +255,7 @@ public class FabricContractResource extends FabricResource {
         return null;
     }
 
-    @Override
+    //@Override
     public String getCryptoSuite() {
         return WeCrossType.CRYPTO_SUITE_FABRIC_BC_SECP256R1;
     }

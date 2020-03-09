@@ -1,4 +1,4 @@
-package com.webank.wecross.stub;
+package com.webank.wecross.chain;
 
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossType;
@@ -16,13 +16,13 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StubsFactory {
+public class ChainFactory {
 
-    private static Logger logger = LoggerFactory.getLogger(StubsFactory.class);
+    private static Logger logger = LoggerFactory.getLogger(ChainFactory.class);
 
-    public static Map<String, Stub> getStubs(String network, Map<String, String> stubsDir)
+    public static Map<String, Chain> getStubs(String network, Map<String, String> stubsDir)
             throws WeCrossException {
-        Map<String, Stub> stubMap = new HashMap<>();
+        Map<String, Chain> stubMap = new HashMap<>();
 
         for (String stub : stubsDir.keySet()) {
             String stubPath = stubsDir.get(stub);

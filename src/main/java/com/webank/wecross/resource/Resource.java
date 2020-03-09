@@ -1,58 +1,83 @@
 package com.webank.wecross.resource;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import com.webank.wecross.peer.Peer;
-import com.webank.wecross.restserver.request.GetDataRequest;
-import com.webank.wecross.restserver.request.ProposalRequest;
-import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
-import com.webank.wecross.restserver.response.GetDataResponse;
-import com.webank.wecross.restserver.response.ProposalResponse;
-import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
-import java.util.Set;
+import com.webank.wecross.stub.Connection;
+import com.webank.wecross.stub.Driver;
 
-public interface Resource {
+public class Resource {
+	private Driver driver;
+	private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
+	private Random random = new Random();
+	
+	public void addConnection(Peer peer, Connection connection) {
+		connections.put(peer, connection);
+	}
+	
+	public void removeConnection(Peer peer) {
+		connections.remove(peer);
+	}
+	
+	public boolean isConnectionEmpty() {
+		return connections.isEmpty();
+	}
+	
+	private Connection chooseConnection() {
+		if(connections.size() == 1) {
+			return (Connection) connections.values().toArray()[0];
+		}
+		else {
+			int index = random.nextInt(connections.size());
+			return (Connection) connections.values().toArray()[index];
+		}
+	}
+	
+    public String getType() {
+    	return "Resource";
+    }
 
-    String getType();
+    public TransactionResponse call(TransactionRequest request) {
+    	return driver.call(request, chooseConnection());
+    }
 
-    GetDataResponse getData(GetDataRequest request);
+    public TransactionResponse sendTransaction(TransactionRequest request) {
+    	return driver.sendTransaction(request, chooseConnection());
+    }
 
-    SetDataResponse setData(SetDataRequest request);
+    public void registerEventHandler(EventCallback callback) {
+    	
+    }
 
-    ProposalResponse callProposal(ProposalRequest request);
+    // TransactionRequest createRequest();
 
-    ProposalResponse sendTransactionProposal(ProposalRequest request);
+    public int getDistance() {
+    	return 0;
+    }
 
-    TransactionResponse call(TransactionRequest request);
+    public String getChecksum() {
+    	return "";
+    }
+    
+    public Driver getDriver() {
+		return driver;
+	}
 
-    TransactionResponse sendTransaction(TransactionRequest request);
+	public void setDriver(Driver driver) {
+		this.driver = driver;
+	}
 
-    void registerEventHandler(EventCallback callback);
+	public Random getRandom() {
+		return random;
+	}
 
-    TransactionRequest createRequest();
-
-    int getDistance(); // 0 local, > 0 remote
-
-    String getChecksum();
-
-    @JsonIgnore
-    String getContractAddress();
-
-    @JsonIgnore
-    Path getPath();
-
-    void setPath(Path path);
-
-    @JsonProperty("path")
-    String getPathAsString();
-
-    @JsonIgnore
-    Set<Peer> getPeers();
-
-    void setPeers(Set<Peer> peers);
-
-    @JsonProperty("cryptoSuite")
-    String getCryptoSuite();
+	public void setRandom(Random random) {
+		this.random = random;
+	}
 }

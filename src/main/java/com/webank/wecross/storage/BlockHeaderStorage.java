@@ -1,6 +1,6 @@
 package com.webank.wecross.storage;
 
-import com.webank.wecross.stub.BlockHeader;
+import com.webank.wecross.chain.BlockHeader;
 
 // storage for one stub
 public interface BlockHeaderStorage {

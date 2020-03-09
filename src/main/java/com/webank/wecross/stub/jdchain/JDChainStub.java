@@ -3,10 +3,11 @@ package com.webank.wecross.stub.jdchain;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.sdk.BlockchainService;
+import com.webank.wecross.chain.BlockHeader;
+import com.webank.wecross.chain.Chain;
 import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.stub.BlockHeader;
-import com.webank.wecross.stub.Stub;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JDChainStub implements Stub {
+public class JDChainStub implements Chain {
 
     private List<BlockchainKeypair> adminKey = new ArrayList<BlockchainKeypair>();
     private HashDigest ledgerHash;
