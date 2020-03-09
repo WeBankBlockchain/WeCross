@@ -82,11 +82,6 @@ public class BCOSResource implements Resource {
     }
 
     @Override
-    public String getContractAddress() {
-        return null;
-    }
-
-    @Override
     public String getType() {
         return "BCOS_RESOURCE";
     }

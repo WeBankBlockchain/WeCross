@@ -68,9 +68,9 @@ contract BACHTLC is HTLC {
            return "success";
         }
 
-        if(sha256(abi.encodePacked(stringToBytes32(_secret))) != stringToBytes32(_hash))
+        if(!hashMatched(_hash, _secret))
         {
-           return "h and s not match";
+           return "hash not matched";
         }
 
         if (!getLockStatus(_hash))
@@ -135,4 +135,5 @@ contract BACHTLC is HTLC {
 
         return "success";
     }
+
 }

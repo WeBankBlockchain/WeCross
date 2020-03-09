@@ -103,11 +103,6 @@ public class AssetHTLCResource implements Resource {
     }
 
     @Override
-    public String getContractAddress() {
-        return originResource.getContractAddress();
-    }
-
-    @Override
     public Path getPath() {
         return originResource.getPath();
     }

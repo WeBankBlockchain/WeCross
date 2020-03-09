@@ -103,11 +103,6 @@ public class TestResource implements Resource {
     }
 
     @Override
-    public String getContractAddress() {
-        return null;
-    }
-
-    @Override
     public Path getPath() {
         return this.path;
     }

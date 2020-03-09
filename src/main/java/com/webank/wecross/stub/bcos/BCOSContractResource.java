@@ -224,7 +224,6 @@ public class BCOSContractResource extends BCOSResource {
     @Override
     public void registerEventHandler(EventCallback callback) {}
 
-    @Override
     public String getContractAddress() {
         return contractAddress;
     }
