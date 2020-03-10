@@ -42,7 +42,7 @@ public class StubManagerConfig {
 					Class<?> claz = Class.forName(metadataReader.getClassMetadata().getClassName());
 					StubFactory stubFactory = (StubFactory) claz.getDeclaredConstructor().newInstance();
 					
-					stubManager.addDriver(name, stubFactory.newDriver());
+					stubManager.addStubFactory(name, stubFactory);
 					
 					logger.info("Loaded stub {}", name);
 				}

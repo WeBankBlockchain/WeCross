@@ -2,13 +2,16 @@ package com.webank.wecross.config;
 
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.chain.Chain;
-import com.webank.wecross.chain.ChainFactory;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.stub.Connection;
+import com.webank.wecross.stub.StubFactory;
+import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.utils.ConfigUtils;
 import com.webank.wecross.zone.Zone;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
@@ -22,6 +25,9 @@ public class ZonesConfig {
 
     @Resource(name = "produceToml")
     Toml toml;
+    
+    @Resource
+    StubManager stubManager;
 
     @Bean(name = "zoneConfig")
     public Map<String, Zone> readNetworksConfig() {
@@ -54,7 +60,7 @@ public class ZonesConfig {
             }
 
             Map<String, String> stubsDir = ConfigUtils.getStubsDir(stubsPath);
-            Map<String, Chain> stubsBean = ChainFactory.getStubs(network, stubsDir);
+            Map<String, Chain> stubsBean = getChains(network, stubsDir);
             Zone networkBean = new Zone();
             if (stubsBean != null) {
                 // init network bean
@@ -72,6 +78,47 @@ public class ZonesConfig {
         }
 
         return result;
+    }
+    
+    public Map<String, Chain> getChains(String network, Map<String, String> stubsDir)
+            throws WeCrossException {
+        Map<String, Chain> stubMap = new HashMap<>();
+
+        for (String stub : stubsDir.keySet()) {
+            String stubPath = stubsDir.get(stub);
+            Toml stubToml;
+            try {
+                stubToml = ConfigUtils.getToml(stubPath);
+            } catch (WeCrossException e) {
+                String errorMessage = "Parse " + stubPath + " failed";
+                throw new WeCrossException(ErrorCode.UNEXPECTED_CONFIG, errorMessage);
+            }
+
+            String type = stubToml.getString("common.type");
+            if (type == null) {
+                String errorMessage =
+                        "\"type\" in [common] item  not found, please check " + stubPath;
+                throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+            }
+            
+            StubFactory stubFactory = stubManager.getStubFactory(type);
+            Connection connection = stubFactory.newConnection(stubPath);
+            List<String> resources = connection.getResources();
+            
+            Chain chain = new Chain();
+            for(String name: resources) {
+            	com.webank.wecross.resource.Resource resource = new com.webank.wecross.resource.Resource();
+            	resource.setDistance(0);
+            	resource.setDriver(stubFactory.newDriver());
+            	resource.addConnection(null, connection);
+            	resource.setType(type);
+            	chain.getResources().put(name, resource);
+            }
+            
+            stubMap.put(stub, chain);
+        }
+
+        return stubMap;
     }
 
     public Toml getToml() {

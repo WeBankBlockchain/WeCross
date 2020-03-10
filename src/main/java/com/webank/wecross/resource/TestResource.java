@@ -58,14 +58,13 @@ public class TestResource extends Resource {
     @Override
     public String getChecksum() {
         try {
-            if (checksum == null || checksum.equals("")) {
+            if (checksum == null || checksum.isEmpty()) {
                 checksum = HashUtils.sha256String(path.toString());
             }
-            return checksum;
 
         } catch (Exception e) {
             logger.error("Caculate checksum exception: " + e);
         }
-        return null;
+        return checksum;
     }
 }

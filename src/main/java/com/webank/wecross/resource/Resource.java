@@ -13,6 +13,7 @@ import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.Response;
 
 public class Resource {
+	private String type;
 	private Driver driver;
 	private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
 	private Random random = new Random();
@@ -40,10 +41,6 @@ public class Resource {
 		}
 	}
 	
-    public String getType() {
-    	return "Resource";
-    }
-
     public TransactionResponse call(TransactionRequest request) {
     	return driver.call(request, chooseConnection());
     }
@@ -64,6 +61,14 @@ public class Resource {
     public void registerEventHandler(EventCallback callback) {
     	
     }
+    
+    public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 
     public int getDistance() {
     	return distance;

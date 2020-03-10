@@ -12,6 +12,7 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.routine.htlc.AssetHTLC;
+import com.webank.wecross.routine.htlc.AssetHTLCResource;
 import com.webank.wecross.routine.htlc.HTLCResourcePair;
 import com.webank.wecross.routine.htlc.HTLCTaskFactory;
 import com.webank.wecross.routine.task.TaskManager;
@@ -91,8 +92,11 @@ public class WeCrossHost {
     public void findHTLCResourcePairs() throws Exception {
         List<Resource> resources = zoneManager.getAllResources(true);
         for (Resource resource : resources) {
+        	/*
             if (resource.getType().equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_ASSET_HTLC_CONTRACT)
                     && resource.getDistance() == 0) {
+            */
+            if(AssetHTLCResource.class.isInstance(resources) && resource.getDistance() == 0) {
                 AssetHTLC assetHTLC = new AssetHTLC();
                 String counterpartyHTLCIpath = assetHTLC.getCounterpartyHTLCIpath(resource);
                 Resource counterpartyHTLCResource =
@@ -108,7 +112,9 @@ public class WeCrossHost {
     }
 
     public StateResponse getState(StateRequest request) {
-        return zoneManager.getState(request);
+    	StateResponse response = new StateResponse();
+    	response.setSeq(zoneManager.getSeq());
+        return response;
     }
 
     public void setZoneManager(ZoneManager networkManager) {

@@ -21,6 +21,9 @@ import com.webank.wecross.restserver.response.ResourceResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
+
+import java.util.List;
+
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +67,18 @@ public class RestfulController {
 
             ResourceRequest resourceRequest = restRequest.getData();
             ZoneManager networkManager = host.getZoneManager();
-            ResourceResponse resourceResponse = networkManager.list(resourceRequest);
+            
+            ResourceResponse resourceResponse = new ResourceResponse();
+            try {
+                List<Resource> resources = networkManager.getAllResources(resourceRequest.isIgnoreRemote());
+                resourceResponse.setErrorCode(0);
+                resourceResponse.setErrorMessage("");
+                resourceResponse.setResources(resources);
+            } catch (Exception e) {
+                resourceResponse.setErrorCode(1);
+                resourceResponse.setErrorMessage("Unexpected error: " + e.getMessage());
+            }
+            
             restResponse.setData(resourceResponse);
         } catch (WeCrossException e) {
             logger.warn("Process request error: {}", e.getMessage());

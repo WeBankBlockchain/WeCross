@@ -1,5 +1,6 @@
 package com.webank.wecross.test.routine;
 
+/*
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.routine.htlc.AssetHTLC;
 import com.webank.wecross.routine.htlc.AssetHTLCResource;
@@ -45,3 +46,4 @@ public class HTLCJobTest {
         return new HTLCResourcePair(assetHTLC, assetHTLCResource1, assetHTLCResource2);
     }
 }
+*/

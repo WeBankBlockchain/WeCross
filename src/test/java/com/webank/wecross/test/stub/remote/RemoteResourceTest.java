@@ -1,5 +1,6 @@
 package com.webank.wecross.test.stub.remote;
 
+/*
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
 import com.webank.wecross.p2p.P2PMessageEngine;
@@ -13,7 +14,6 @@ import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
-import com.webank.wecross.stub.remote.RemoteResource;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -240,3 +240,4 @@ public class RemoteResourceTest {
         System.out.println(response.getErrorMessage());
     }
 }
+*/

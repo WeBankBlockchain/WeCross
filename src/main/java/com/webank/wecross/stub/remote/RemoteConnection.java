@@ -1,5 +1,7 @@
 package com.webank.wecross.stub.remote;
 
+import java.util.List;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
@@ -53,6 +55,11 @@ public class RemoteConnection implements Connection {
             response.setErrorMessage("Call remote resource exception: " + e.getMessage());
             return response;
         }
+	}
+	
+	@Override
+	public List<String> getResources() {
+		return null;
 	}
 	
 	public Peer getPeer() {

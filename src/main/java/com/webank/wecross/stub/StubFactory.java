@@ -2,8 +2,7 @@ package com.webank.wecross.stub;
 
 public interface StubFactory {
 	/**
-	 * create a driver with connection
-	 * @param connection
+	 * create a driver
 	 * @return
 	 */
 	public Driver newDriver();
@@ -12,5 +11,5 @@ public interface StubFactory {
 	 * create a connection
 	 * @return Connection
 	 */
-	public Connection newConnection();
+	public Connection newConnection(String path);
 }

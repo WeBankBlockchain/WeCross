@@ -92,15 +92,10 @@ public class RestfulControllerTest {
     @Test
     public void listTest() throws Exception {
         try {
-            ResourceResponse resourceResponse = new ResourceResponse();
-            resourceResponse.setErrorCode(0);
-            resourceResponse.setErrorMessage("");
-            resourceResponse.setResources(new ArrayList<Resource>());
+            ZoneManager mockZoneManager = Mockito.mock(ZoneManager.class);
+            Mockito.when(mockZoneManager.getAllResources(Mockito.anyBoolean())).thenReturn(new ArrayList<Resource>());
 
-            ZoneManager mockNetworkManager = Mockito.mock(ZoneManager.class);
-            Mockito.when(mockNetworkManager.list(Mockito.any())).thenReturn(resourceResponse);
-
-            Mockito.when(weCrossHost.getZoneManager()).thenReturn(mockNetworkManager);
+            Mockito.when(weCrossHost.getZoneManager()).thenReturn(mockZoneManager);
 
             String json =
                     "{\n"

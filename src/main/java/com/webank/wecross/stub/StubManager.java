@@ -1,15 +1,16 @@
 package com.webank.wecross.stub;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class StubManager {
-	private Map<String, Driver> drivers;
+	private Map<String, StubFactory> drivers = new HashMap<String, StubFactory>();
 	
-	public void addDriver(String driverType, Driver driver) {
-		drivers.put(driverType, driver);
+	public void addStubFactory(String type, StubFactory stubFactory) {
+		drivers.put(type, stubFactory);
 	}
 	
-	public Driver getDriver(String driverType) {
-		return drivers.get(driverType);
+	public StubFactory getStubFactory(String type) {
+		return drivers.get(type);
 	}
 }

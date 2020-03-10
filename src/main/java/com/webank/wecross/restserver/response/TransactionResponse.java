@@ -1,12 +1,8 @@
 package com.webank.wecross.restserver.response;
 
-import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.proof.PathProof;
 import com.webank.wecross.proof.ProofConfig;
-import com.webank.wecross.proof.ProofTools;
 import com.webank.wecross.proof.RootProof;
-import com.webank.wecross.stub.bcos.BCOSGuomiProofTools;
-import com.webank.wecross.stub.bcos.BCOSProofTools;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -78,7 +74,7 @@ public class TransactionResponse {
     }
 
     public boolean verify() {
-        beforeVerify();
+        // beforeVerify();
 
         try {
             if (!errorCode.equals(0)) {
@@ -174,9 +170,11 @@ public class TransactionResponse {
         this.encryptType = encryptType;
     }
 
+    /*
     private void beforeVerify() {
         configProofTools();
     }
+
 
     private void configProofTools() {
         ProofTools proofTools = newProofTools();
@@ -215,4 +213,5 @@ public class TransactionResponse {
         }
         return proofTools;
     }
+    */
 }

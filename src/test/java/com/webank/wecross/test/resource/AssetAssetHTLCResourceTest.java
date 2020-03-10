@@ -1,5 +1,6 @@
 package com.webank.wecross.test.resource;
 
+/*
 import com.webank.wecross.common.ResourceQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Path;
@@ -55,3 +56,4 @@ public class AssetAssetHTLCResourceTest {
         }
     }
 }
+*/
