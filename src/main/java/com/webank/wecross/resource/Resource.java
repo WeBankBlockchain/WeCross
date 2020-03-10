@@ -1,8 +1,6 @@
 package com.webank.wecross.resource;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -11,11 +9,14 @@ import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stub.Request;
+import com.webank.wecross.stub.Response;
 
 public class Resource {
 	private Driver driver;
 	private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
 	private Random random = new Random();
+	int distance = 0;
 	
 	public void addConnection(Peer peer, Connection connection) {
 		connections.put(peer, connection);
@@ -50,15 +51,26 @@ public class Resource {
     public TransactionResponse sendTransaction(TransactionRequest request) {
     	return driver.sendTransaction(request, chooseConnection());
     }
-
+    
+    public Response onRemoteTransaction(Request request) {
+    	TransactionRequest transactionRequest = driver.decodeTransactionRequest(request.getData());
+    	 
+    	// TODO: check request
+    	transactionRequest.getArgs();
+    	
+    	return chooseConnection().send(request);
+    }
+    
     public void registerEventHandler(EventCallback callback) {
     	
     }
 
-    // TransactionRequest createRequest();
-
     public int getDistance() {
-    	return 0;
+    	return distance;
+    }
+    
+    public void setDistance(int distance) {
+    	this.distance = distance;
     }
 
     public String getChecksum() {
@@ -71,13 +83,5 @@ public class Resource {
 
 	public void setDriver(Driver driver) {
 		this.driver = driver;
-	}
-
-	public Random getRandom() {
-		return random;
-	}
-
-	public void setRandom(Random random) {
-		this.random = random;
 	}
 }

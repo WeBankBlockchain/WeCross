@@ -6,7 +6,7 @@ import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
-import com.webank.wecross.p2p.P2PConfig;
+
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
@@ -17,17 +17,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 @Configuration
-public class P2PConfigConfig {
-    private static Logger logger = LoggerFactory.getLogger(P2PConfigConfig.class);
+public class ConfigReaderConfig {
+    private static Logger logger = LoggerFactory.getLogger(ConfigReaderConfig.class);
 
     @Resource(name = "produceToml")
     Toml toml;
 
     @Bean
-    public P2PConfig newP2PConfig() throws WeCrossException {
+    public WeCrossConfig newP2PConfig() throws WeCrossException {
         logger.info("initializing p2p config...");
 
-        P2PConfig p2PConfig = null;
+        WeCrossConfig p2PConfig = null;
         try {
             Map<String, Object> wecrossMap = toml.toMap();
 
@@ -48,8 +48,8 @@ public class P2PConfigConfig {
         return p2PConfig;
     }
 
-    public P2PConfig parseP2PConfig(Map<String, Object> p2pMap) throws WeCrossException {
-        P2PConfig p2PConfig = new P2PConfig();
+    public WeCrossConfig parseP2PConfig(Map<String, Object> p2pMap) throws WeCrossException {
+        WeCrossConfig p2PConfig = new WeCrossConfig();
 
         String listenIP = (String) p2pMap.get("listenIP");
         if (listenIP == null) {

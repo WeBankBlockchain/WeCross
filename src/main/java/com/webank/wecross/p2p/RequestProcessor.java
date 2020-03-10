@@ -22,6 +22,8 @@ import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.stub.Request;
+import com.webank.wecross.stub.Response;
 import com.webank.wecross.zone.ZoneManager;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -93,7 +95,7 @@ public class RequestProcessor implements Processor {
                 p2PResponse = onStatusMessage(peerInfo, r[0], content);
             } else if (r.length == 4) {
                 /** network/stub/resource/method */
-                p2PResponse = onResourceMessage(r[0], r[1], r[2], r[3], content);
+                p2PResponse = onTransactionMessage(r[0], r[1], r[2], r[3], content);
             } else {
                 // invalid paramter method
                 p2PResponse.setMessage(" invalid method paramter format");
@@ -279,11 +281,11 @@ public class RequestProcessor implements Processor {
         return response;
     }
 
-    public P2PResponse<Object> onResourceMessage(
-            String network, String stub, String resource, String method, String p2pRequestString) {
+    public P2PResponse<Object> onTransactionMessage(
+            String network, String chain, String resource, String method, String p2pRequestString) {
         Path path = new Path();
         path.setNetwork(network);
-        path.setChain(stub);
+        path.setChain(chain);
         path.setResource(resource);
 
         P2PResponse<Object> p2pResponse = new P2PResponse<Object>();
@@ -296,52 +298,34 @@ public class RequestProcessor implements Processor {
         try {
             Resource resourceObj = zoneManager.getResource(path);
             if (resourceObj == null) {
-                logger.warn("Unable to find resource: {}.{}.{}", network, stub, resource);
+                logger.warn("Unable to find resource: {}.{}.{}", network, chain, resource);
 
                 throw new Exception("Resource not found");
             }
 
             switch (method) {
-                case "call":
+                case "transaction":
                     {
-                        P2PMessage<TransactionRequest> p2pRequest =
+                        P2PMessage<Request> p2pRequest =
                                 ObjectMapperFactory.getObjectMapper()
                                         .readValue(
                                                 p2pRequestString,
                                                 new TypeReference<
-                                                        P2PMessage<TransactionRequest>>() {});
+                                                        P2PMessage<Request>>() {});
 
                         p2pRequest.checkP2PMessage(method);
-
-                        TransactionRequest transactionRequest =
-                                (TransactionRequest) p2pRequest.getData();
-                        transactionRequest.setFromP2P(true);
-                        TransactionResponse transactionResponse =
-                                (TransactionResponse) resourceObj.call(transactionRequest);
-
-                        p2pResponse.setData(transactionResponse);
-                        p2pResponse.setSeq(p2pRequest.getSeq());
-                        break;
-                    }
-                case "sendTransaction":
-                    {
-                        P2PMessage<TransactionRequest> p2pRequest =
+                        
+                        P2PMessage<Request> request =
                                 ObjectMapperFactory.getObjectMapper()
                                         .readValue(
                                                 p2pRequestString,
                                                 new TypeReference<
-                                                        P2PMessage<TransactionRequest>>() {});
+                                                        P2PMessage<Request>>() {});
 
-                        p2pRequest.checkP2PMessage(method);
+                        Response response =
+                                (Response) resourceObj.onRemoteTransaction(request.getData());
 
-                        TransactionRequest transactionRequest =
-                                (TransactionRequest) p2pRequest.getData();
-                        transactionRequest.setFromP2P(true);
-                        TransactionResponse transactionResponse =
-                                (TransactionResponse)
-                                        resourceObj.sendTransaction(transactionRequest);
-
-                        p2pResponse.setData(transactionResponse);
+                        p2pResponse.setData(response);
                         p2pResponse.setSeq(p2pRequest.getSeq());
                         break;
                     }

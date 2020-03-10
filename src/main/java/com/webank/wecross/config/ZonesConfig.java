@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ZonesConfig {
-
     private Logger logger = LoggerFactory.getLogger(ZonesConfig.class);
 
     @Resource(name = "produceToml")

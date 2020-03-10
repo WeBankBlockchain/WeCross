@@ -1,7 +1,7 @@
 package com.webank.wecross.p2p.netty;
 
+import com.webank.wecross.config.WeCrossConfig;
 import com.webank.wecross.p2p.MessageType;
-import com.webank.wecross.p2p.P2PConfig;
 import com.webank.wecross.p2p.netty.channel.handler.ChannelHandler;
 import com.webank.wecross.p2p.netty.channel.handler.ChannelHandlerCallBack;
 import com.webank.wecross.p2p.netty.common.Node;
@@ -58,7 +58,7 @@ public class NettyBootstrap {
 
     private ChannelHandlerCallBack channelHandlerCallBack = new ChannelHandlerCallBack();
     private Connections connections = new Connections();
-    private P2PConfig config;
+    private WeCrossConfig config;
 
     private MessageCallBack messageCallBack;
 
@@ -70,11 +70,11 @@ public class NettyBootstrap {
         this.messageCallBack = messageCallBack;
     }
 
-    public P2PConfig getConfig() {
+    public WeCrossConfig getConfig() {
         return config;
     }
 
-    public void setConfig(P2PConfig config) {
+    public void setConfig(WeCrossConfig config) {
         this.config = config;
     }
 
@@ -174,7 +174,7 @@ public class NettyBootstrap {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-        P2PConfig config = getConfig();
+        WeCrossConfig config = getConfig();
 
         SslContext sslCtx =
                 initSslContextForServer(
@@ -228,7 +228,7 @@ public class NettyBootstrap {
         bootstrap.group(workerGroup);
         bootstrap.channel(NioSocketChannel.class);
 
-        P2PConfig config = getConfig();
+        WeCrossConfig config = getConfig();
 
         SslContext sslCtx =
                 initSslContextForClient(

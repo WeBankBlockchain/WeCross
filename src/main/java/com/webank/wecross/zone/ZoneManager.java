@@ -213,14 +213,8 @@ public class ZoneManager {
                 Resource resource = stub.getResources().get(path.getResource());
                 if (resource == null) {
                 	resource = new Resource();
-                	resource.setDriver(stubManager.getDriver(resourceInfo.getDriverType()));
-                    /*
-                            stub.getResources()
-                                    .put(
-                                            path.getResource(),
-                                            new RemoteResource(
-                                                    peer, resourceInfo.getDistance(), p2pEngine));
-                                                    */
+                	resource.setDriver(stubManager.getDriver(resourceInfo.getStubType()));
+                	resource.setDistance(1);
                 }
                 
                 resource.addConnection(peer, remoteConnection);

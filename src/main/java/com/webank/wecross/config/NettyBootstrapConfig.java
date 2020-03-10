@@ -1,6 +1,5 @@
 package com.webank.wecross.config;
 
-import com.webank.wecross.p2p.P2PConfig;
 import com.webank.wecross.p2p.netty.NettyBootstrap;
 import com.webank.wecross.p2p.netty.message.MessageCallBack;
 import javax.annotation.Resource;
@@ -9,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class NettyBootstrapConfig {
-    @Resource P2PConfig p2pConfig;
+    @Resource WeCrossConfig p2pConfig;
 
     @Resource MessageCallBack messageCallBack;
 
