@@ -17,4 +17,5 @@ public class ErrorCode {
     public static final int RESOURCE_ERROR = 203;
     public static final int UNSUPPORTED_TYPE = 204;
     public static final int METHOD_ERROR = 205;
+    public static final int CRYPTO_SUITE_ERROR = 206;
 }

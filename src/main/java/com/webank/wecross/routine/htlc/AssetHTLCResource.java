@@ -8,11 +8,9 @@ import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.request.GetDataRequest;
-import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
-import com.webank.wecross.restserver.response.ProposalResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import java.util.Arrays;
@@ -46,12 +44,12 @@ public class AssetHTLCResource implements Resource {
     }
 
     @Override
-    public ProposalResponse callProposal(ProposalRequest request) {
+    public byte[] callProposal(TransactionRequest request) {
         return originResource.callProposal(request);
     }
 
     @Override
-    public ProposalResponse sendTransactionProposal(ProposalRequest request) {
+    public byte[] sendTransactionProposal(TransactionRequest request) {
         return originResource.sendTransactionProposal(request);
     }
 
@@ -166,7 +164,7 @@ public class AssetHTLCResource implements Resource {
     public TransactionRequest handleCallRequest(TransactionRequest request)
             throws WeCrossException {
         if (request.getMethod().equals("getSecret")) {
-            if (request.getFromP2P()) {
+            if (request.isFromP2P()) {
                 throw new WeCrossException(
                         ResourceQueryStatus.ASSET_HTLC_NO_PERMISSION,
                         "cannot call getSecret by rpc interface");

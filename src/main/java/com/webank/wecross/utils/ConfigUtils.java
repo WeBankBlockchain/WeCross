@@ -43,6 +43,10 @@ public class ConfigUtils {
         }
     }
 
+    public static Map<String, Object> getTomlMap(String fileName) throws WeCrossException {
+        return getToml(fileName).toMap();
+    }
+
     public static Map<String, String> getStubsDir(String stubsPath) throws WeCrossException {
         Map<String, String> result = new HashMap<>();
 
@@ -72,7 +76,7 @@ public class ConfigUtils {
         for (String stub : stubsDir) {
             String stubPath = thisPath + "/" + stub + "/" + WeCrossDefault.STUB_CONFIG_FILE;
             if (!fileIsExists(stubPath)) {
-                String errorMessage = "Stub configuration file: " + stubPath + " is not exists";
+                String errorMessage = "Stub configuration file: " + stubPath + " does not exist";
                 throw new WeCrossException(ErrorCode.DIR_NOT_EXISTS, errorMessage);
             }
             result.put(stub, stubPath);

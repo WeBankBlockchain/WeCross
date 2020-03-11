@@ -5,8 +5,9 @@ import java.util.Arrays;
 public class TransactionRequest {
 
     private int seq = 0;
-    private byte[] sig;
     private byte[] proposalBytes;
+    private byte[] sig;
+    private String accountName;
     private String retTypes[];
     private String method;
     private Object args[];
@@ -27,12 +28,36 @@ public class TransactionRequest {
         this.fromP2P = fromP2P;
     }
 
+    public int getSeq() {
+        return seq;
+    }
+
+    public void setSeq(int seq) {
+        this.seq = seq;
+    }
+
     public byte[] getSig() {
         return sig;
     }
 
     public void setSig(byte[] sig) {
         this.sig = sig;
+    }
+
+    public byte[] getProposalBytes() {
+        return proposalBytes;
+    }
+
+    public void setProposalBytes(byte[] proposalBytes) {
+        this.proposalBytes = proposalBytes;
+    }
+
+    public String getAccountName() {
+        return accountName;
+    }
+
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
     }
 
     public String[] getRetTypes() {
@@ -55,11 +80,11 @@ public class TransactionRequest {
         return args;
     }
 
-    public void setArgs(Object args[]) {
+    public void setArgs(Object[] args) {
         this.args = args;
     }
 
-    public boolean getFromP2P() {
+    public boolean isFromP2P() {
         return fromP2P;
     }
 
@@ -76,6 +101,9 @@ public class TransactionRequest {
                 + Arrays.toString(sig)
                 + ", proposalBytes="
                 + Arrays.toString(proposalBytes)
+                + ", accountName='"
+                + accountName
+                + '\''
                 + ", retTypes="
                 + Arrays.toString(retTypes)
                 + ", method='"
@@ -86,21 +114,5 @@ public class TransactionRequest {
                 + ", fromP2P="
                 + fromP2P
                 + '}';
-    }
-
-    public int getSeq() {
-        return seq;
-    }
-
-    public void setSeq(int seq) {
-        this.seq = seq;
-    }
-
-    public byte[] getProposalBytes() {
-        return proposalBytes;
-    }
-
-    public void setProposalBytes(byte[] proposalBytes) {
-        this.proposalBytes = proposalBytes;
     }
 }

@@ -3,11 +3,9 @@ package com.webank.wecross.resource;
 import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.restserver.request.GetDataRequest;
-import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
-import com.webank.wecross.restserver.response.ProposalResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.utils.core.HashUtils;
@@ -46,13 +44,13 @@ public class TestResource implements Resource {
     }
 
     @Override
-    public ProposalResponse callProposal(ProposalRequest request) {
-        return null;
+    public byte[] callProposal(TransactionRequest request) {
+        return new byte[0];
     }
 
     @Override
-    public ProposalResponse sendTransactionProposal(ProposalRequest request) {
-        return null;
+    public byte[] sendTransactionProposal(TransactionRequest request) {
+        return new byte[0];
     }
 
     @Override

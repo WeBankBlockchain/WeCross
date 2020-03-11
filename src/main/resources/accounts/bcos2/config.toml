@@ -1,0 +1,3 @@
+[account]
+    accountFile = '0x3ee57e528a28f0928b21c036c87c3f3a22090853.p12'
+    password = 'aabbcc'  # if you choose .p12, then password is required

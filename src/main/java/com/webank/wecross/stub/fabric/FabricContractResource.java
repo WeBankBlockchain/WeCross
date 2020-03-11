@@ -11,7 +11,6 @@ import com.webank.wecross.proposal.Proposal;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.restserver.request.GetDataRequest;
-import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
@@ -43,8 +42,6 @@ import org.hyperledger.fabric.sdk.EventHub;
 import org.hyperledger.fabric.sdk.Orderer;
 import org.hyperledger.fabric.sdk.Peer;
 import org.hyperledger.fabric.sdk.ProposalResponse;
-import org.hyperledger.fabric.sdk.QueryByChaincodeRequest;
-import org.hyperledger.fabric.sdk.TransactionProposalRequest;
 import org.hyperledger.fabric.sdk.transaction.TransactionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,47 +146,27 @@ public class FabricContractResource extends FabricResource {
     }
 
     @Override
-    public com.webank.wecross.restserver.response.ProposalResponse callProposal(
-            ProposalRequest request) {
-        com.webank.wecross.restserver.response.ProposalResponse response =
-                new com.webank.wecross.restserver.response.ProposalResponse();
-        response.setSeq(request.getSeq());
-        response.setCryptoSuite(getCryptoSuite());
+    public byte[] callProposal(TransactionRequest request) {
         try {
-            byte[] bytesToSign = generateEndorserProposalSignBytes(request);
+            return generateEndorserProposalSignBytes(request);
 
-            response.setErrorCode(0);
-            response.setProposalToSign(bytesToSign);
-            response.setType(WeCrossType.PROPOSAL_TYPE_PEER_PAYLODAD);
         } catch (Exception e) {
-            response.setErrorCode(-1);
-            response.setProposalToSign(new byte[] {});
-            response.setErrorMessage("Call proposal error: " + e.getMessage());
+            return null;
         }
-
-        return response;
     }
 
     @Override
-    public com.webank.wecross.restserver.response.ProposalResponse sendTransactionProposal(
-            ProposalRequest request) {
+    public byte[] sendTransactionProposal(TransactionRequest request) {
 
         try {
-            if (request.getExtraData() == null) {
-                return generateEndorserProposal(request);
+            if (request.getProposalBytes() == null) {
+                return generateEndorserProposalSignBytes(request);
             } else {
-                return generateOrdererProposal(request);
+                return generateOrdererProposalSignBytes(request);
             }
 
         } catch (Exception e) {
-            com.webank.wecross.restserver.response.ProposalResponse response =
-                    new com.webank.wecross.restserver.response.ProposalResponse();
-            response.setSeq(request.getSeq());
-            response.setCryptoSuite(getCryptoSuite());
-            response.setErrorCode(-1);
-            response.setProposalToSign(new byte[] {});
-            response.setErrorMessage("Call proposal error: " + e.getMessage());
-            return response;
+            return null;
         }
     }
 
@@ -198,11 +175,7 @@ public class FabricContractResource extends FabricResource {
 
         TransactionResponse transactionResponse = new FabricResponse();
         try {
-            if (request.getSig() == null || request.getSig().length == 0) {
-                transactionResponse = callWithRouterSign(request);
-            } else {
-                transactionResponse = callWithUserSign(request);
-            }
+            transactionResponse = callWithSign(request);
         } catch (Exception e) {
             String errorMsg =
                     "query failed method: "
@@ -223,12 +196,7 @@ public class FabricContractResource extends FabricResource {
 
         TransactionResponse transactionResponse = new FabricResponse();
         try {
-            if (request.getSig() == null || request.getSig().length == 0) {
-                transactionResponse = sendTransactionWithRouterSign(request);
-            } else {
-                transactionResponse = sendTransactionWithUserSign(request);
-            }
-
+            transactionResponse = sendTransactionWithSign(request);
         } catch (Exception e) {
             String errorMsg =
                     "query failed method: "
@@ -327,17 +295,13 @@ public class FabricContractResource extends FabricResource {
         return getParamterList(request.getArgs());
     }
 
-    public static String[] getParamterList(ProposalRequest request) {
-        return getParamterList(request.getArgs());
-    }
-
-    private TransactionResponse callWithUserSign(TransactionRequest request) throws Exception {
+    private TransactionResponse callWithSign(TransactionRequest request) throws Exception {
         TransactionResponse transactionResponse = buildTransactionResponse(request.getRetTypes());
         if (transactionResponse.getErrorCode() != 0) {
             return transactionResponse;
         }
 
-        byte[] proposalBytes = request.getProposalBytes();
+        byte[] proposalBytes = callProposal(request);
         FabricProposal proposal = proposalFactory.buildFromBytes(proposalBytes);
 
         if (!proposal.isEqualsRequest(request)) {
@@ -391,130 +355,7 @@ public class FabricContractResource extends FabricResource {
         return transactionResponse;
     }
 
-    private TransactionResponse callWithRouterSign(TransactionRequest request) throws Exception {
-        TransactionResponse transactionResponse = buildTransactionResponse(request.getRetTypes());
-        if (transactionResponse.getErrorCode() != 0) {
-            return transactionResponse;
-        }
-
-        QueryByChaincodeRequest queryRequest = fabricConn.getHfClient().newQueryProposalRequest();
-        queryRequest.setChaincodeID(fabricConn.getChaincodeID());
-        queryRequest.setFcn(request.getMethod());
-
-        String[] paramterList = getParamterList(request);
-        queryRequest.setArgs(paramterList);
-
-        ProposalResponse[] responses =
-                fabricConn
-                        .getChannel()
-                        .queryByChaincode(queryRequest)
-                        .toArray(new ProposalResponse[0]);
-        List<Object> resultList = new ArrayList<Object>();
-        if (responses.length > 0) {
-            resultList.add(
-                    responses[0].getProposalResponse().getResponse().getPayload().toStringUtf8());
-        }
-        transactionResponse.setErrorCode(0);
-        transactionResponse.setErrorMessage("");
-        transactionResponse.setResult(resultList.toArray());
-        return transactionResponse;
-    }
-
-    private TransactionResponse sendTransactionWithRouterSign(TransactionRequest request)
-            throws Exception {
-        TransactionResponse transactionResponse = buildTransactionResponse(request.getRetTypes());
-        if (transactionResponse.getErrorCode() != 0) {
-            return transactionResponse;
-        }
-
-        TransactionProposalRequest transactionProposalRequest =
-                fabricConn.getHfClient().newTransactionProposalRequest();
-        transactionProposalRequest.setChaincodeID(fabricConn.getChaincodeID());
-        transactionProposalRequest.setChaincodeLanguage(fabricConn.getChainCodeType());
-        transactionProposalRequest.setFcn(request.getMethod());
-        String[] paramterList = getParamterList(request);
-        transactionProposalRequest.setArgs(paramterList);
-        transactionProposalRequest.setProposalWaitTime(fabricConn.getProposalWaitTime());
-        List<ProposalResponse> successful = new LinkedList<>();
-        List<ProposalResponse> failed = new LinkedList<>();
-        List<Object> resultList = new ArrayList<Object>();
-
-        Collection<ProposalResponse> transactionPropResp =
-                fabricConn.getChannel().sendTransactionProposal(transactionProposalRequest);
-        Boolean result = true;
-        for (ProposalResponse response : transactionPropResp) {
-            if (response.getStatus() == ProposalResponse.Status.SUCCESS) {
-                logger.info(
-                        "[√] Got success response from peer:{} , payload:{}",
-                        response.getPeer().getName(),
-                        new String(response.getChaincodeActionResponsePayload()));
-                successful.add(response);
-                resultList.add(new String(response.getChaincodeActionResponsePayload()));
-            } else {
-                result = false;
-                String status = response.getStatus().toString();
-                logger.error(
-                        "[×] Got failed response from peer:{}, status:{}, error message:{}",
-                        response.getPeer().getName(),
-                        status,
-                        response.getMessage());
-                failed.add(response);
-            }
-        }
-        transactionResponse.setResult(resultList.toArray());
-        if (result) {
-            logger.info("Sending transaction to orderers...");
-            CompletableFuture<TransactionEvent> carfuture =
-                    fabricConn.getChannel().sendTransaction(successful);
-            long transactionTimeout = 5000;
-            try {
-                BlockEvent.TransactionEvent transactionEvent =
-                        carfuture.get(transactionTimeout, TimeUnit.MILLISECONDS);
-                if (transactionEvent.isValid()) {
-                    BlockchainInfo channelInfo = fabricConn.getChannel().queryBlockchainInfo();
-                    transactionResponse.setHash(
-                            Hex.encodeHexString(channelInfo.getCurrentBlockHash()));
-                    transactionResponse.setErrorCode(0);
-
-                    logger.info(
-                            "Wait event success: "
-                                    + transactionEvent.getChannelId()
-                                    + " "
-                                    + transactionEvent.getTransactionID()
-                                    + " "
-                                    + transactionEvent.getType()
-                                    + " "
-                                    + transactionEvent.getValidationCode());
-                } else {
-                    transactionResponse.setErrorCode(
-                            ResourceQueryStatus.FABRIC_COMMIT_CHAINCODE_FAIL);
-                    logger.info(
-                            "Wait event failed: "
-                                    + transactionEvent.getChannelId()
-                                    + " "
-                                    + transactionEvent.getTransactionID()
-                                    + " "
-                                    + transactionEvent.getType()
-                                    + " "
-                                    + transactionEvent.getValidationCode());
-                }
-
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                logger.error(
-                        "query failed method:{} chainname:{}",
-                        request.getMethod(),
-                        fabricConn.getChainCodeName());
-                transactionResponse.setErrorCode(ResourceQueryStatus.FABRIC_INVOKE_CHAINCODE_FAIL);
-                return transactionResponse;
-            }
-        } else {
-            transactionResponse.setErrorCode(ResourceQueryStatus.FABRIC_INVOKE_CHAINCODE_FAIL);
-            return transactionResponse;
-        }
-        return transactionResponse;
-    }
-
-    private TransactionResponse sendTransactionWithUserSign(TransactionRequest request)
+    private TransactionResponse sendTransactionWithSign(TransactionRequest request)
             throws Exception {
 
         logger.info("Sending transaction to orderers...");
@@ -534,52 +375,24 @@ public class FabricContractResource extends FabricResource {
         return transactionResponse;
     }
 
-    private com.webank.wecross.restserver.response.ProposalResponse generateEndorserProposal(
-            ProposalRequest request) throws Exception {
-        com.webank.wecross.restserver.response.ProposalResponse response =
-                new com.webank.wecross.restserver.response.ProposalResponse();
-        response.setSeq(request.getSeq());
-        response.setCryptoSuite(getCryptoSuite());
-
-        byte[] bytesToSign = generateEndorserProposalSignBytes(request);
-        response.setErrorCode(0);
-        response.setProposalToSign(bytesToSign);
-        response.setType(WeCrossType.PROPOSAL_TYPE_ENDORSER_PAYLODAD);
-        return response;
-    }
-
-    private com.webank.wecross.restserver.response.ProposalResponse generateOrdererProposal(
-            ProposalRequest request) throws Exception {
-        com.webank.wecross.restserver.response.ProposalResponse response =
-                new com.webank.wecross.restserver.response.ProposalResponse();
-        response.setSeq(request.getSeq());
-        response.setCryptoSuite(getCryptoSuite());
-
-        byte[] bytesToSign = generateOrdererProposalSignBytes(request);
-        response.setErrorCode(0);
-        response.setProposalToSign(bytesToSign);
-        response.setType(WeCrossType.PROPOSAL_TYPE_ORDERER_PAYLOAD);
-        return response;
-    }
-
-    private byte[] generateEndorserProposalSignBytes(ProposalRequest request) throws Exception {
+    private byte[] generateEndorserProposalSignBytes(TransactionRequest request) throws Exception {
 
         Proposal proposal = proposalFactory.build(request);
         return proposal.getBytesToSign();
     }
 
-    private byte[] generateOrdererProposalSignBytes(ProposalRequest request) throws Exception {
-        byte[] proposalBytes = request.getExtraData();
+    private byte[] generateOrdererProposalSignBytes(TransactionRequest request) throws Exception {
+        byte[] proposalBytes = request.getProposalBytes();
         FabricProposal proposal = proposalFactory.buildFromBytes(proposalBytes);
 
-        if (!proposal.isEqualsRequest(request)) {
-            throw new WeCrossException(
-                    ResourceQueryStatus.INVALID_PROPOSAL_BYTES,
-                    "Proposal bytes is not belongs to this request");
-        }
+        //        if (!proposal.isEqualsRequest(request)) {
+        //            throw new WeCrossException(
+        //                    ResourceQueryStatus.INVALID_PROPOSAL_BYTES,
+        //                    "Proposal bytes is not belongs to this request");
+        //        }
 
         Collection<ProposalResponse> transactionPropResp =
-                sendFabricProposalRequest(proposal, request.getExtraSig());
+                sendFabricProposalRequest(proposal, request.getSig());
 
         for (ProposalResponse response : transactionPropResp) {
             if (response.getStatus() == ProposalResponse.Status.SUCCESS) {
@@ -629,7 +442,7 @@ public class FabricContractResource extends FabricResource {
             return transactionResponse;
         }
 
-        byte[] payload = request.getProposalBytes();
+        byte[] payload = sendTransactionProposal(request);
         byte[] sign = request.getSig();
         final String proposalTransactionID = getTxIDFromProposalBytes(payload);
 

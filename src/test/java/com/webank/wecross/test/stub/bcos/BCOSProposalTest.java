@@ -17,7 +17,7 @@ public class BCOSProposalTest {
         BCOSProposalFactory factory = new BCOSProposalFactory("0xaaabbbccc", new MockWeb3j(), null);
         MockTransactionRequest req = new MockTransactionRequest();
 
-        Proposal proposalA = factory.build(req.toProposalPrequest());
+        Proposal proposalA = factory.build(req);
         Assert.assertTrue(proposalA.isEqualsRequest(req));
 
         byte[] bytesA = proposalA.getBytes();

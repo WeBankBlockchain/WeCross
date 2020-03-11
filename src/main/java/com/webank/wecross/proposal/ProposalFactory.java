@@ -1,9 +1,9 @@
 package com.webank.wecross.proposal;
 
-import com.webank.wecross.restserver.request.ProposalRequest;
+import com.webank.wecross.restserver.request.TransactionRequest;
 
 public interface ProposalFactory {
-    Proposal build(ProposalRequest request) throws Exception;
+    Proposal build(TransactionRequest request) throws Exception;
 
     Proposal buildFromBytes(byte[] proposalBytes) throws Exception;
 }

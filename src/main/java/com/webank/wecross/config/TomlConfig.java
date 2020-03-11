@@ -15,7 +15,7 @@ public class TomlConfig {
     private Logger logger = LoggerFactory.getLogger(TomlConfig.class);
 
     @Bean
-    public Toml produceToml() {
+    public Toml newToml() {
         Toml toml = new Toml();
         try {
             toml = ConfigUtils.getToml(WeCrossDefault.MAIN_CONFIG_FILE);

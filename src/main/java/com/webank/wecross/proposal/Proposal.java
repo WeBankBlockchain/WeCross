@@ -1,6 +1,5 @@
 package com.webank.wecross.proposal;
 
-import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 
 public abstract class Proposal {
@@ -20,8 +19,6 @@ public abstract class Proposal {
     public abstract void loadBytes(byte[] proposalBytes) throws Exception;
 
     public abstract Boolean isEqualsRequest(TransactionRequest request) throws Exception;
-
-    public abstract Boolean isEqualsRequest(ProposalRequest request) throws Exception;
 
     public int getSeq() {
         return seq;

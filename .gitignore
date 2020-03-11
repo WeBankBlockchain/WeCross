@@ -50,3 +50,4 @@ src/test/resources/wecross.toml
 *.pem
 *.crt
 *.key
+*_sk
