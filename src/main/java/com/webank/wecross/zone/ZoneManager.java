@@ -28,7 +28,7 @@ public class ZoneManager {
     private P2PMessageEngine p2pEngine;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
     private StubManager stubManager;
-    
+
     public Resource getResource(Path path) {
         lock.readLock().lock();
         try {
@@ -192,19 +192,20 @@ public class ZoneManager {
                 }
 
                 RemoteConnection remoteConnection = new RemoteConnection();
-            	remoteConnection.setP2pEngine(p2pEngine);
-            	remoteConnection.setPeer(peer);
-            	remoteConnection.setPath(path.toURI());
+                remoteConnection.setP2pEngine(p2pEngine);
+                remoteConnection.setPeer(peer);
+                remoteConnection.setPath(path.toURI());
                 Resource resource = chain.getResources().get(path.getResource());
                 if (resource == null) {
-                	resource = new Resource();
-                	resource.setDriver(stubManager.getStubFactory(resourceInfo.getStubType()).newDriver());
-                	resource.setDistance(resourceInfo.getDistance());
-                	chain.getResources().put(path.getResource(), resource);
+                    resource = new Resource();
+                    resource.setDriver(
+                            stubManager.getStubFactory(resourceInfo.getStubType()).newDriver());
+                    resource.setDistance(resourceInfo.getDistance());
+                    chain.getResources().put(path.getResource(), resource);
                 }
-                
+
                 resource.addConnection(peer, remoteConnection);
-                
+
                 seq.addAndGet(1);
             }
         } finally {
@@ -247,7 +248,7 @@ public class ZoneManager {
                 }
 
                 resource.removeConnection(peer);
-                
+
                 if (resource.isConnectionEmpty()) {
                     stub.getResources().remove(path.getResource());
                 }
@@ -259,7 +260,7 @@ public class ZoneManager {
                 if (zone.getStubs().isEmpty()) {
                     zones.remove(path.getNetwork());
                 }
-                
+
                 seq.addAndGet(1);
             }
         } finally {
@@ -292,11 +293,11 @@ public class ZoneManager {
         this.p2pEngine = p2pEngine;
     }
 
-	public StubManager getStubManager() {
-		return stubManager;
-	}
+    public StubManager getStubManager() {
+        return stubManager;
+    }
 
-	public void setStubManager(StubManager stubManager) {
-		this.stubManager = stubManager;
-	}
+    public void setStubManager(StubManager stubManager) {
+        this.stubManager = stubManager;
+    }
 }

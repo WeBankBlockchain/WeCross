@@ -7,11 +7,7 @@ import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
-import com.webank.wecross.restserver.request.GetDataRequest;
-import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
-import com.webank.wecross.restserver.response.GetDataResponse;
-import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.test.Mock.MockNetworkManagerFactory;
 import com.webank.wecross.test.Mock.MockP2PMessageEngineFactory;
@@ -21,7 +17,6 @@ import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class RemoteResourceExceptionTest {
 

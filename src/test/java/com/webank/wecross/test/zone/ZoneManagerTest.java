@@ -1,7 +1,9 @@
 package com.webank.wecross.test.zone;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import com.webank.wecross.chain.Chain;
-import com.webank.wecross.chain.StateRequest;
 import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Path;
@@ -11,10 +13,6 @@ import com.webank.wecross.stub.StubFactory;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,36 +26,36 @@ import org.slf4j.LoggerFactory;
 
 public class ZoneManagerTest {
     private Logger logger = LoggerFactory.getLogger(ZoneManagerTest.class);
-    
+
     @Test
     public void notExistsZone() throws Exception {
-    	ZoneManager zoneManager = new ZoneManager();
-    	assertNull(zoneManager.getResource(Path.decode("a.b.c")));
+        ZoneManager zoneManager = new ZoneManager();
+        assertNull(zoneManager.getResource(Path.decode("a.b.c")));
     }
-    
+
     @Test
     public void setZones() {
-    	Map<String, Zone> networks = new HashMap<String, Zone>();
-    	
-    	ZoneManager zoneManager = new ZoneManager();
-    	zoneManager.setZones(networks);
-    	
-    	assertEquals(networks, zoneManager.getZones());
+        Map<String, Zone> networks = new HashMap<String, Zone>();
+
+        ZoneManager zoneManager = new ZoneManager();
+        zoneManager.setZones(networks);
+
+        assertEquals(networks, zoneManager.getZones());
     }
 
     @Test
     public void addRemoteResourcesTest() throws Exception {
-    	StubFactory stubFactory = Mockito.spy(StubFactory.class);
-    	Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
-    	Mockito.when(stubFactory.newDriver()).thenReturn(null);
-    	
+        StubFactory stubFactory = Mockito.spy(StubFactory.class);
+        Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
+        Mockito.when(stubFactory.newDriver()).thenReturn(null);
+
         StubManager stubManager = Mockito.spy(StubManager.class);
         Mockito.when(stubManager.getStubFactory(Mockito.anyString())).thenReturn(stubFactory);
-        
-    	ZoneManager zoneManager = new ZoneManager();
-    	zoneManager.setStubManager(stubManager);
-    	
-    	assertEquals(stubManager, zoneManager.getStubManager());
+
+        ZoneManager zoneManager = new ZoneManager();
+        zoneManager.setStubManager(stubManager);
+
+        assertEquals(stubManager, zoneManager.getStubManager());
 
         Peer peer = new Peer(new Node("aaa", "127.0.0.1", 100));
 
@@ -77,10 +75,10 @@ public class ZoneManagerTest {
         Set<String> allResourcesName = zoneManager.getAllResourceName(false);
         System.out.println(allResourcesName);
         Assert.assertEquals(12, allResourcesName.size());
-        
+
         List<Resource> allResources = zoneManager.getAllResources(false);
         Assert.assertEquals(12, allResources.size());
-        
+
         Assert.assertEquals(13, zoneManager.getSeq());
 
         Set<String> allLocalResources = zoneManager.getAllResourceName(true);
@@ -122,13 +120,13 @@ public class ZoneManagerTest {
 
     @Test
     public void removeRemoteResourcesTest() throws Exception {
-    	StubFactory stubFactory = Mockito.spy(StubFactory.class);
-    	Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
-    	Mockito.when(stubFactory.newDriver()).thenReturn(null);
-    	
+        StubFactory stubFactory = Mockito.spy(StubFactory.class);
+        Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
+        Mockito.when(stubFactory.newDriver()).thenReturn(null);
+
         StubManager stubManager = Mockito.spy(StubManager.class);
         Mockito.when(stubManager.getStubFactory("test")).thenReturn(stubFactory);
-        
+
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setStubManager(stubManager);
 

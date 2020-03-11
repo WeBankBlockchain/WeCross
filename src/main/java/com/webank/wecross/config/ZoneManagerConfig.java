@@ -12,9 +12,8 @@ import org.springframework.context.annotation.Configuration;
 public class ZoneManagerConfig {
     @Resource(name = "zoneConfig")
     private Map<String, Zone> zones;
-    
-    @Resource
-    private StubManager stubManager;
+
+    @Resource private StubManager stubManager;
 
     @Bean
     public ZoneManager newZoneManager() {

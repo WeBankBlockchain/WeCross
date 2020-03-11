@@ -2,7 +2,6 @@ package com.webank.wecross.zone;
 
 import com.webank.wecross.chain.Chain;
 import com.webank.wecross.resource.Path;
-
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;

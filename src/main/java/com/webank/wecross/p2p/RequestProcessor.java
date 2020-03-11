@@ -16,12 +16,6 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.restserver.Versions;
-import com.webank.wecross.restserver.request.GetDataRequest;
-import com.webank.wecross.restserver.request.SetDataRequest;
-import com.webank.wecross.restserver.request.TransactionRequest;
-import com.webank.wecross.restserver.response.GetDataResponse;
-import com.webank.wecross.restserver.response.SetDataResponse;
-import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.zone.ZoneManager;
@@ -310,17 +304,15 @@ public class RequestProcessor implements Processor {
                                 ObjectMapperFactory.getObjectMapper()
                                         .readValue(
                                                 p2pRequestString,
-                                                new TypeReference<
-                                                        P2PMessage<Request>>() {});
+                                                new TypeReference<P2PMessage<Request>>() {});
 
                         p2pRequest.checkP2PMessage(method);
-                        
+
                         P2PMessage<Request> request =
                                 ObjectMapperFactory.getObjectMapper()
                                         .readValue(
                                                 p2pRequestString,
-                                                new TypeReference<
-                                                        P2PMessage<Request>>() {});
+                                                new TypeReference<P2PMessage<Request>>() {});
 
                         Response response =
                                 (Response) resourceObj.onRemoteTransaction(request.getData());

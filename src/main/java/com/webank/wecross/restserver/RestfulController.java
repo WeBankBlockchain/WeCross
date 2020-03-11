@@ -10,20 +10,12 @@ import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.restserver.request.GetDataRequest;
-import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.ResourceRequest;
-import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
-import com.webank.wecross.restserver.response.GetDataResponse;
-import com.webank.wecross.restserver.response.ProposalResponse;
 import com.webank.wecross.restserver.response.ResourceResponse;
-import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
-
 import java.util.List;
-
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,10 +59,11 @@ public class RestfulController {
 
             ResourceRequest resourceRequest = restRequest.getData();
             ZoneManager networkManager = host.getZoneManager();
-            
+
             ResourceResponse resourceResponse = new ResourceResponse();
             try {
-                List<Resource> resources = networkManager.getAllResources(resourceRequest.isIgnoreRemote());
+                List<Resource> resources =
+                        networkManager.getAllResources(resourceRequest.isIgnoreRemote());
                 resourceResponse.setErrorCode(0);
                 resourceResponse.setErrorMessage("");
                 resourceResponse.setResources(resources);
@@ -78,7 +71,7 @@ public class RestfulController {
                 resourceResponse.setErrorCode(1);
                 resourceResponse.setErrorMessage("Unexpected error: " + e.getMessage());
             }
-            
+
             restResponse.setData(resourceResponse);
         } catch (WeCrossException e) {
             logger.warn("Process request error: {}", e.getMessage());

@@ -25,9 +25,8 @@ public class ZonesConfig {
 
     @Resource(name = "produceToml")
     Toml toml;
-    
-    @Resource
-    StubManager stubManager;
+
+    @Resource StubManager stubManager;
 
     @Bean(name = "zoneConfig")
     public Map<String, Zone> readNetworksConfig() {
@@ -79,7 +78,7 @@ public class ZonesConfig {
 
         return result;
     }
-    
+
     public Map<String, Chain> getChains(String network, Map<String, String> stubsDir)
             throws WeCrossException {
         Map<String, Chain> stubMap = new HashMap<>();
@@ -100,21 +99,27 @@ public class ZonesConfig {
                         "\"type\" in [common] item  not found, please check " + stubPath;
                 throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
             }
-            
+
             StubFactory stubFactory = stubManager.getStubFactory(type);
+            if(stubFactory == null) {
+            	logger.error("Can not find stub type: {}", type);
+            	
+            	throw new WeCrossException(-1, "Cannot find stub type: " + type);
+            }
             Connection connection = stubFactory.newConnection(stubPath);
             List<String> resources = connection.getResources();
-            
+
             Chain chain = new Chain();
-            for(String name: resources) {
-            	com.webank.wecross.resource.Resource resource = new com.webank.wecross.resource.Resource();
-            	resource.setDistance(0);
-            	resource.setDriver(stubFactory.newDriver());
-            	resource.addConnection(null, connection);
-            	resource.setType(type);
-            	chain.getResources().put(name, resource);
+            for (String name : resources) {
+                com.webank.wecross.resource.Resource resource =
+                        new com.webank.wecross.resource.Resource();
+                resource.setDistance(0);
+                resource.setDriver(stubFactory.newDriver());
+                resource.addConnection(null, connection);
+                resource.setType(type);
+                chain.getResources().put(name, resource);
             }
-            
+
             stubMap.put(stub, chain);
         }
 

@@ -1,0 +1,46 @@
+package com.webank.wecross.stub.demostub;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.restserver.request.TransactionRequest;
+import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.stub.Connection;
+import com.webank.wecross.stub.Request;
+import com.webank.wecross.stub.Response;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
+
+public class DEMOConnection implements Connection {
+    private ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
+
+    @Override
+    public Response send(Request request) {
+        try {
+            TransactionRequest transactionRequest =
+                    mapper.readValue(request.getData(), TransactionRequest.class);
+
+            TransactionResponse transactionResponse = new TransactionResponse();
+            transactionResponse.setErrorCode(0);
+            transactionResponse.setResult(transactionRequest.getArgs());
+
+            Response response = new Response();
+            response.setData(mapper.writeValueAsBytes(transactionResponse));
+
+            return response;
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    public List<String> getResources() {
+        List<String> resources = new ArrayList<String>();
+        resources.add("demo");
+
+        return resources;
+    }
+}

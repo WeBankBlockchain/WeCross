@@ -10,9 +10,6 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.restserver.RestfulController;
-import com.webank.wecross.restserver.response.GetDataResponse;
-import com.webank.wecross.restserver.response.ResourceResponse;
-import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.ArrayList;
@@ -93,7 +90,8 @@ public class RestfulControllerTest {
     public void listTest() throws Exception {
         try {
             ZoneManager mockZoneManager = Mockito.mock(ZoneManager.class);
-            Mockito.when(mockZoneManager.getAllResources(Mockito.anyBoolean())).thenReturn(new ArrayList<Resource>());
+            Mockito.when(mockZoneManager.getAllResources(Mockito.anyBoolean()))
+                    .thenReturn(new ArrayList<Resource>());
 
             Mockito.when(weCrossHost.getZoneManager()).thenReturn(mockZoneManager);
 

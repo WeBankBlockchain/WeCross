@@ -1,17 +1,9 @@
 package com.webank.wecross.resource;
 
 import com.webank.wecross.common.WeCrossType;
-import com.webank.wecross.peer.Peer;
-import com.webank.wecross.restserver.request.GetDataRequest;
-import com.webank.wecross.restserver.request.ProposalRequest;
-import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
-import com.webank.wecross.restserver.response.GetDataResponse;
-import com.webank.wecross.restserver.response.ProposalResponse;
-import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.utils.core.HashUtils;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

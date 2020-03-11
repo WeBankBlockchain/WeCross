@@ -2,7 +2,6 @@ package com.webank.wecross.host;
 
 import com.webank.wecross.chain.StateRequest;
 import com.webank.wecross.chain.StateResponse;
-import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.netty.P2PService;
 import com.webank.wecross.peer.Peer;
@@ -92,11 +91,11 @@ public class WeCrossHost {
     public void findHTLCResourcePairs() throws Exception {
         List<Resource> resources = zoneManager.getAllResources(true);
         for (Resource resource : resources) {
-        	/*
+            /*
             if (resource.getType().equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_ASSET_HTLC_CONTRACT)
                     && resource.getDistance() == 0) {
             */
-            if(AssetHTLCResource.class.isInstance(resources) && resource.getDistance() == 0) {
+            if (AssetHTLCResource.class.isInstance(resources) && resource.getDistance() == 0) {
                 AssetHTLC assetHTLC = new AssetHTLC();
                 String counterpartyHTLCIpath = assetHTLC.getCounterpartyHTLCIpath(resource);
                 Resource counterpartyHTLCResource =
@@ -112,8 +111,8 @@ public class WeCrossHost {
     }
 
     public StateResponse getState(StateRequest request) {
-    	StateResponse response = new StateResponse();
-    	response.setSeq(zoneManager.getSeq());
+        StateResponse response = new StateResponse();
+        response.setSeq(zoneManager.getSeq());
         return response;
     }
 

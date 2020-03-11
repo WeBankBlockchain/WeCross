@@ -64,14 +64,14 @@ public class ResourceInfo {
     public String getPath() {
         return path;
     }
-    
-    public String getStubType() {
-		return stubType;
-	}
 
-	public void setStubType(String driverType) {
-		this.stubType = driverType;
-	}
+    public String getStubType() {
+        return stubType;
+    }
+
+    public void setStubType(String driverType) {
+        this.stubType = driverType;
+    }
 
     public void setDistance(int distance) {
         this.distance = distance;
