@@ -1,7 +1,8 @@
 package com.webank.wecross.chain;
 
-import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.stub.BlockHeader;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -11,10 +12,6 @@ public class Chain {
     private Logger logger = LoggerFactory.getLogger(Chain.class);
     private Map<String, Resource> resources = new HashMap<String, Resource>();
     private String path;
-
-    public String getType() {
-        return WeCrossType.STUB_TYPE_REMOTE;
-    }
 
     public int getBlockNumber() {
         return 0;

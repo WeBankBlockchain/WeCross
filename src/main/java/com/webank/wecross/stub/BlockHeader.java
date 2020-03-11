@@ -1,4 +1,4 @@
-package com.webank.wecross.chain;
+package com.webank.wecross.stub;
 
 public class BlockHeader {
     private int number;

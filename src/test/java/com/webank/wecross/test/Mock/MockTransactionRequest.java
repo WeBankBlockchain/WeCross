@@ -1,7 +1,7 @@
 package com.webank.wecross.test.Mock;
 
 import com.webank.wecross.restserver.request.ProposalRequest;
-import com.webank.wecross.restserver.request.TransactionRequest;
+import com.webank.wecross.stub.TransactionRequest;
 
 public class MockTransactionRequest extends TransactionRequest {
     public MockTransactionRequest() {

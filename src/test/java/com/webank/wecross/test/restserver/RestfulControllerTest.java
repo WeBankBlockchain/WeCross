@@ -10,7 +10,7 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.restserver.RestfulController;
-import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.ArrayList;
 import org.junit.After;

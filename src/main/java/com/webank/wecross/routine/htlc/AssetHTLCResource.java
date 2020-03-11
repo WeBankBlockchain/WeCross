@@ -5,8 +5,9 @@ import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.restserver.request.TransactionRequest;
-import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.stub.TransactionRequest;
+import com.webank.wecross.stub.TransactionResponse;
+
 import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

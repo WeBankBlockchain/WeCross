@@ -1,9 +1,5 @@
 package com.webank.wecross.stub;
 
-import com.webank.wecross.chain.BlockHeader;
-import com.webank.wecross.restserver.request.TransactionRequest;
-import com.webank.wecross.restserver.response.TransactionResponse;
-
 public interface Driver {
     /**
      * Encode an abrstract transaction request.
@@ -24,7 +20,7 @@ public interface Driver {
     /**
      * Encode an abrstract transaction resonse.
      *
-     * @param response the transaction response
+     * @param response the transaction responseh
      * @return the encoded transaction response binary data
      */
     public byte[] encodeTransactionResponse(TransactionResponse response);

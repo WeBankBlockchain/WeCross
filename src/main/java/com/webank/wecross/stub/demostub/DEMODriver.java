@@ -2,13 +2,14 @@ package com.webank.wecross.stub.demostub;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.wecross.chain.BlockHeader;
-import com.webank.wecross.restserver.request.TransactionRequest;
-import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.Response;
+import com.webank.wecross.stub.TransactionRequest;
+import com.webank.wecross.stub.TransactionResponse;
+
 import java.io.IOException;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 

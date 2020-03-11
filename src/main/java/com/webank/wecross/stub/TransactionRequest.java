@@ -1,4 +1,4 @@
-package com.webank.wecross.restserver.request;
+package com.webank.wecross.stub;
 
 import java.util.Arrays;
 

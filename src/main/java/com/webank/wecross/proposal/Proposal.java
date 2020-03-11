@@ -1,7 +1,7 @@
 package com.webank.wecross.proposal;
 
 import com.webank.wecross.restserver.request.ProposalRequest;
-import com.webank.wecross.restserver.request.TransactionRequest;
+import com.webank.wecross.stub.TransactionRequest;
 
 public abstract class Proposal {
     private int seq;

@@ -1,12 +1,14 @@
 package com.webank.wecross.resource;
 
 import com.webank.wecross.peer.Peer;
-import com.webank.wecross.restserver.request.TransactionRequest;
-import com.webank.wecross.restserver.response.TransactionResponse;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.Response;
+import com.webank.wecross.stub.TransactionRequest;
+import com.webank.wecross.stub.TransactionResponse;
+
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -15,7 +17,7 @@ public class Resource {
     private String type;
     private Driver driver;
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
-    private Random random = new Random();
+    private Random random = new SecureRandom();
     int distance = 0;
 
     public void addConnection(Peer peer, Connection connection) {

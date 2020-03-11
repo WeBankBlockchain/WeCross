@@ -1,8 +1,9 @@
 package com.webank.wecross.routine.htlc;
 
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.restserver.request.TransactionRequest;
-import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.stub.TransactionRequest;
+import com.webank.wecross.stub.TransactionResponse;
+
 import java.math.BigInteger;
 
 public class AssetHTLC implements HTLC {

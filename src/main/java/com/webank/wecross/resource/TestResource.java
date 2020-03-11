@@ -1,8 +1,8 @@
 package com.webank.wecross.resource;
 
 import com.webank.wecross.common.WeCrossType;
-import com.webank.wecross.restserver.request.TransactionRequest;
-import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.stub.TransactionRequest;
+import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.utils.core.HashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

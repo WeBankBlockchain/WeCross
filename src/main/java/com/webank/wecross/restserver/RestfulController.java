@@ -11,9 +11,9 @@ import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.request.ResourceRequest;
-import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.ResourceResponse;
-import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.stub.TransactionRequest;
+import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.List;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
@@ -146,7 +146,6 @@ public class RestfulController {
                         }
                         break;
                     }
-
                 case "info":
                     {
                         if (resourceObj == null) {

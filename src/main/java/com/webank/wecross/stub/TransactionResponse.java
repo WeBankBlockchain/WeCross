@@ -1,4 +1,4 @@
-package com.webank.wecross.restserver.response;
+package com.webank.wecross.stub;
 
 import com.webank.wecross.proof.PathProof;
 import com.webank.wecross.proof.ProofConfig;
