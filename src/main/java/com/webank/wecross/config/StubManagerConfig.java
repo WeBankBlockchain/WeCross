@@ -26,18 +26,21 @@ public class StubManagerConfig {
 
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
         try {
-        	/*
+            /*
             Resource[] resources =
                     resourcePatternResolver.getResources(
                             ClassUtils.convertClassNameToResourcePath("cn.webank.wecross.*"));
                             */
             Resource[] resources =
-                    resourcePatternResolver.getResources(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + ClassUtils.convertClassNameToResourcePath("com.webank") + "/**/*.class");
+                    resourcePatternResolver.getResources(
+                            ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
+                                    + ClassUtils.convertClassNameToResourcePath("com.webank")
+                                    + "/**/*.class");
             logger.debug("Total {} resources", resources.length);
 
             MetadataReaderFactory metadataReaderFabtFactory = new SimpleMetadataReaderFactory();
             for (Resource resource : resources) {
-            	logger.debug("Reading class: {}", resource.getURI().toString());
+                logger.debug("Reading class: {}", resource.getURI().toString());
                 MetadataReader metadataReader =
                         metadataReaderFabtFactory.getMetadataReader(resource);
                 if (metadataReader.getAnnotationMetadata().hasAnnotation(Stub.class.getName())) {

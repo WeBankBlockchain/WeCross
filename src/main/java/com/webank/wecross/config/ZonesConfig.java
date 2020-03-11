@@ -101,10 +101,10 @@ public class ZonesConfig {
             }
 
             StubFactory stubFactory = stubManager.getStubFactory(type);
-            if(stubFactory == null) {
-            	logger.error("Can not find stub type: {}", type);
-            	
-            	throw new WeCrossException(-1, "Cannot find stub type: " + type);
+            if (stubFactory == null) {
+                logger.error("Can not find stub type: {}", type);
+
+                throw new WeCrossException(-1, "Cannot find stub type: " + type);
             }
             Connection connection = stubFactory.newConnection(stubPath);
             List<String> resources = connection.getResources();
