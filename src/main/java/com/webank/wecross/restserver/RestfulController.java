@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.chain.StateRequest;
 import com.webank.wecross.chain.StateResponse;
 import com.webank.wecross.common.QueryStatus;
+import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
@@ -162,6 +163,7 @@ public class RestfulController {
                             throw new WeCrossException(
                                     ErrorCode.RESOURCE_ERROR, "Resource not found");
                         }
+
                         RestRequest<TransactionRequest> restRequest =
                                 objectMapper.readValue(
                                         restRequestString,
@@ -171,6 +173,7 @@ public class RestfulController {
 
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) restRequest.getData();
+
                         TransactionResponse transactionResponse =
                                 (TransactionResponse) resourceObj.call(transactionRequest);
 
@@ -192,6 +195,7 @@ public class RestfulController {
 
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) restRequest.getData();
+
                         TransactionResponse transactionResponse =
                                 (TransactionResponse)
                                         resourceObj.sendTransaction(transactionRequest);

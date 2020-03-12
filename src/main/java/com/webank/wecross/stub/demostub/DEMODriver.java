@@ -12,10 +12,11 @@ import com.webank.wecross.stub.TransactionResponse;
 
 import java.io.IOException;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
-
+ 
 public class DEMODriver implements Driver {
     private ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
 
+    @Override
     public byte[] encodeTransactionRequest(TransactionRequest request) {
         try {
             return mapper.writeValueAsBytes(request);

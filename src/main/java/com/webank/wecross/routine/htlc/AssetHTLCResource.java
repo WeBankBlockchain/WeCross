@@ -7,7 +7,6 @@ import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
-
 import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,7 +102,7 @@ public class AssetHTLCResource extends Resource {
     public TransactionRequest handleCallRequest(TransactionRequest request)
             throws WeCrossException {
         if (request.getMethod().equals("getSecret")) {
-            if (request.getFromP2P()) {
+            if (request.isFromP2P()) {
                 throw new WeCrossException(
                         ResourceQueryStatus.ASSET_HTLC_NO_PERMISSION,
                         "cannot call getSecret by rpc interface");

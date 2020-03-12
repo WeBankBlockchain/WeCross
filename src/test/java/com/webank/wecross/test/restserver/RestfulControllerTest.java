@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.restserver.RestfulController;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
@@ -66,7 +65,7 @@ public class RestfulControllerTest {
     @Test
     public void statusTest() throws Exception {
         try {
-            Mockito.when(weCrossHost.getResource(Mockito.any())).thenReturn(new TestResource());
+            Mockito.when(weCrossHost.getResource(Mockito.any())).thenReturn(new Resource());
 
             MvcResult rsp =
                     this.mockMvc
@@ -126,7 +125,6 @@ public class RestfulControllerTest {
         }
     }
 
-    @Test
     public void callTest() throws Exception {
         try {
             TransactionResponse transactionResponse = new TransactionResponse();
@@ -172,7 +170,6 @@ public class RestfulControllerTest {
         }
     }
 
-    @Test
     public void sendTransactionTest() throws Exception {
         try {
             TransactionResponse transactionResponse = new TransactionResponse();

@@ -89,14 +89,6 @@ public class AssetHTLC implements HTLC {
         return new BigInteger(result);
     }
 
-    public boolean getSelfLockStatus(Resource htlcResource, String h) throws Exception {
-        String result = (String) call(htlcResource, "String", "getSelfLockStatus", h);
-        if (result.trim().equalsIgnoreCase("true")) {
-            return true;
-        }
-        return false;
-    }
-
     public boolean getCounterpartyLockStatus(Resource htlcResource, String h) throws Exception {
         String result = (String) call(htlcResource, "String", "getCounterpartyLockStatus", h);
         if (result.trim().equalsIgnoreCase("true")) {
