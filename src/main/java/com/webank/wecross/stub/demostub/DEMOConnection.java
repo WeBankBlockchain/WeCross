@@ -10,10 +10,9 @@ import com.webank.wecross.stub.TransactionResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 
 public class DEMOConnection implements Connection {
-    private ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
+    private ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public Response send(Request request) {

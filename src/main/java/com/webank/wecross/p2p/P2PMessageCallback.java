@@ -2,15 +2,16 @@ package com.webank.wecross.p2p;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.p2p.engine.P2PResponse;
 import com.webank.wecross.peer.Peer;
-import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 
 public abstract class P2PMessageCallback<T> {
     private TypeReference<?> typeReference;
     protected int status;
     protected String message;
     protected P2PMessage<T> data;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     private Peer peer;
 
@@ -31,7 +32,7 @@ public abstract class P2PMessageCallback<T> {
 
         P2PResponse<Object> p2PResponse =
                 (P2PResponse<Object>)
-                        ObjectMapperFactory.getObjectMapper().readValue(content, typeReference);
+                objectMapper.readValue(content, typeReference);
         return p2PResponse;
     }
 

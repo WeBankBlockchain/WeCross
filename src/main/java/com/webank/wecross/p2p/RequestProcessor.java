@@ -1,6 +1,7 @@
 package com.webank.wecross.p2p;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.common.QueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.p2p.engine.P2PResponse;
@@ -24,7 +25,6 @@ import io.netty.channel.ChannelHandlerContext;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +34,7 @@ public class RequestProcessor implements Processor {
     private PeerManager peerManager;
     private ZoneManager zoneManager;
     private P2PMessageEngine p2pEngine;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     public PeerManager getPeerManager() {
         return peerManager;
@@ -76,7 +77,7 @@ public class RequestProcessor implements Processor {
                     content);
 
             P2PMessage<?> p2PMessage =
-                    ObjectMapperFactory.getObjectMapper().readValue(content, P2PMessage.class);
+            		objectMapper.readValue(content, P2PMessage.class);
 
             String method = p2PMessage.getMethod();
             String r[] = method.split("/");
@@ -103,7 +104,7 @@ public class RequestProcessor implements Processor {
 
             if (p2PResponse.getData() != null) {
                 String responseContent =
-                        ObjectMapperFactory.getObjectMapper().writeValueAsString(p2PResponse);
+                		objectMapper.writeValueAsString(p2PResponse);
 
                 // send response
                 message.setType(MessageType.RESOURCE_RESPONSE);
@@ -141,7 +142,7 @@ public class RequestProcessor implements Processor {
                     {
                         logger.debug("request method: " + method);
                         P2PMessage<Object> p2pRequest =
-                                ObjectMapperFactory.getObjectMapper()
+                        		objectMapper
                                         .readValue(
                                                 p2pRequestString,
                                                 new TypeReference<P2PMessage<Object>>() {});
@@ -170,7 +171,7 @@ public class RequestProcessor implements Processor {
                     {
                         logger.info("Receive peer seq from peer:{}", peerInfo);
                         P2PMessage<PeerSeqMessageData> p2pRequest =
-                                ObjectMapperFactory.getObjectMapper()
+                        		objectMapper
                                         .readValue(
                                                 p2pRequestString,
                                                 new TypeReference<
@@ -249,7 +250,7 @@ public class RequestProcessor implements Processor {
                     {
                         logger.debug("request method: " + method);
                         P2PMessage<Object> p2pRequest =
-                                ObjectMapperFactory.getObjectMapper()
+                        		objectMapper
                                         .readValue(
                                                 p2pRequestString,
                                                 new TypeReference<P2PMessage<Object>>() {});
@@ -301,7 +302,7 @@ public class RequestProcessor implements Processor {
                 case "transaction":
                     {
                         P2PMessage<Request> p2pRequest =
-                                ObjectMapperFactory.getObjectMapper()
+                        		objectMapper
                                         .readValue(
                                                 p2pRequestString,
                                                 new TypeReference<P2PMessage<Request>>() {});
@@ -309,7 +310,7 @@ public class RequestProcessor implements Processor {
                         p2pRequest.checkP2PMessage(method);
 
                         P2PMessage<Request> request =
-                                ObjectMapperFactory.getObjectMapper()
+                        		objectMapper
                                         .readValue(
                                                 p2pRequestString,
                                                 new TypeReference<P2PMessage<Request>>() {});
@@ -324,7 +325,7 @@ public class RequestProcessor implements Processor {
                 default:
                     {
                         P2PMessage<Object> p2pRequest =
-                                ObjectMapperFactory.getObjectMapper()
+                        		objectMapper
                                         .readValue(
                                                 p2pRequestString,
                                                 new TypeReference<P2PMessage<Object>>() {});

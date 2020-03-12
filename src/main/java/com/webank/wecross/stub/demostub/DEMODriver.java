@@ -11,10 +11,9 @@ import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 
 import java.io.IOException;
-import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
  
 public class DEMODriver implements Driver {
-    private ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
+    private ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public byte[] encodeTransactionRequest(TransactionRequest request) {

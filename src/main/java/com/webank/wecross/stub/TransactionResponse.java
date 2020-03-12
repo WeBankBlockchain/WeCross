@@ -1,8 +1,5 @@
 package com.webank.wecross.stub;
 
-import com.webank.wecross.proof.PathProof;
-import com.webank.wecross.proof.ProofConfig;
-import com.webank.wecross.proof.RootProof;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -65,79 +62,6 @@ public class TransactionResponse {
         this.result = result;
     }
 
-    public RootProof getBlockHeader() {
-        return null;
-    }
-
-    public PathProof[] getProofs() {
-        return new PathProof[] {};
-    }
-
-    public boolean verify() {
-        // beforeVerify();
-
-        try {
-            if (!errorCode.equals(0)) {
-                return true; // error no need to verify
-            }
-
-            if (!ProofConfig.supportSPV(getType())) {
-                return true;
-            }
-
-            // Verify leaf: hash (transaction hash)
-            boolean hasLeaf = false;
-            for (PathProof pathProof : getProofs()) {
-                hasLeaf |= pathProof.hasLeaf(hash);
-            }
-            if (!hasLeaf) {
-                throw new Exception(
-                        "leaf failed, no path can prove the leaf. paths:"
-                                + Arrays.toString(getProofs())
-                                + ", leaf:"
-                                + hash);
-            }
-
-            // Verify leaf: extraHashes (receipt hash and so on)
-            if (extraHashes != null) {
-                hasLeaf = false;
-                for (String extraHash : extraHashes) {
-                    for (PathProof pathProof : getProofs()) {
-                        hasLeaf |= pathProof.hasLeaf(extraHash);
-                    }
-                }
-                if (!hasLeaf) {
-                    throw new Exception(
-                            "leaf failed, no path can prove the leaf. paths:"
-                                    + Arrays.toString(getProofs())
-                                    + ", leaf:"
-                                    + hash);
-                }
-            }
-
-            // Verify path
-            for (PathProof pathProof : getProofs()) {
-                if (!pathProof.verify()) {
-                    throw new Exception("path failed, path:" + pathProof);
-                }
-            }
-
-            // Verify root
-            for (PathProof pathProof : getProofs()) {
-                if (!pathProof.verifyRoot(getBlockHeader())) {
-                    throw new Exception(
-                            "root failed, path:" + pathProof + ", blockHeader:" + getBlockHeader());
-                }
-            }
-
-        } catch (Exception e) {
-            logger.warn("Verify " + e);
-            return false;
-        }
-
-        logger.debug("Verify transaction response success, hash:{}", hash);
-        return true;
-    }
 
     public void setExtraHashes(List<String> extraHashes) {
         this.extraHashes = extraHashes;
@@ -174,7 +98,6 @@ public class TransactionResponse {
     private void beforeVerify() {
         configProofTools();
     }
-
 
     private void configProofTools() {
         ProofTools proofTools = newProofTools();

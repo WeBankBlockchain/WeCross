@@ -17,7 +17,6 @@ import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.List;
-import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +33,7 @@ public class RestfulController {
     private WeCrossHost host;
 
     private Logger logger = LoggerFactory.getLogger(RestfulController.class);
-    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @RequestMapping("/test")
     public String test() {
