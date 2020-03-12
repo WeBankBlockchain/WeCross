@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ZoneManagerConfig {
-    @Resource(name = "zoneConfig")
+    @Resource(name = "newZoneMap")
     private Map<String, Zone> zones;
 
     @Bean

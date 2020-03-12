@@ -4,8 +4,8 @@ contract HTLC {
 
     struct ContractData {
         string secret;
-        address sender;
-        address receiver;
+        string sender;
+        string receiver;
         uint amount;
         uint timelock; // UNIX timestamp seconds - locked UNTIL this time
         bool locked;
@@ -98,8 +98,8 @@ contract HTLC {
 
         initiators[_hash] = ContractData(
             _secret,
-            stringToAddress(_sender),
-            stringToAddress(_receiver),
+            _sender,
+            _receiver,
             stringToUint(_amount),
             stringToUint(_timelock),
             false,
@@ -125,8 +125,8 @@ contract HTLC {
 
         participants[_hash] = ContractData(
             "null",
-            stringToAddress(_sender),
-            stringToAddress(_receiver),
+            _sender,
+            _receiver,
             stringToUint(_amount),
             stringToUint(_timelock),
             false,
@@ -196,10 +196,15 @@ contract HTLC {
 
     function setSecret(string _hash, string _secret)
     internal
+    returns (string)
     {
+        if(!hashMatched(_hash, _secret)) {
+            return "hash not matched";
+        }
         if(!htlcRoles[_hash]) {
             participants[_hash].secret = _secret;
         }
+        return "seccess";
     }
 
     function getSender(string _hash)
@@ -208,9 +213,9 @@ contract HTLC {
     returns (address)
     {
         if(htlcRoles[_hash]) {
-            return initiators[_hash].sender;
+            return stringToAddress(initiators[_hash].sender);
         } else {
-            return participants[_hash].sender;
+            return stringToAddress(participants[_hash].sender);
         }
     }
 
@@ -220,9 +225,9 @@ contract HTLC {
     returns (address)
     {
         if(htlcRoles[_hash]) {
-            return initiators[_hash].receiver;
+            return stringToAddress(initiators[_hash].receiver);
         } else {
-            return participants[_hash].receiver;
+            return stringToAddress(participants[_hash].receiver);
         }
     }
 
@@ -316,81 +321,9 @@ contract HTLC {
         }
     }
 
-    // these following functions are just for HTLC scheduler
-    function getSelfSender(string _hash)
-    external
-    view
-    returns (string)
-    {
-        if(htlcRoles[_hash]) {
-            return addressToString(initiators[_hash].sender);
-        } else {
-            return addressToString(participants[_hash].sender);
-        }
-    }
-
-    function getCounterpartySender(string _hash)
-    external
-    view
-    returns (string)
-    {
-        if(!htlcRoles[_hash]) {
-            return addressToString(initiators[_hash].sender);
-        } else {
-            return addressToString(participants[_hash].sender);
-        }
-    }
-
-    function getSelfReceiver(string _hash)
-    external
-    view
-    returns (string)
-    {
-        if(htlcRoles[_hash]) {
-            return addressToString(initiators[_hash].receiver);
-        } else {
-            return addressToString(participants[_hash].receiver);
-        }
-    }
-
-    function getCounterpartyReceiver(string _hash)
-    external
-    view
-    returns (string)
-    {
-        if(!htlcRoles[_hash]) {
-            return addressToString(initiators[_hash].receiver);
-        } else {
-            return addressToString(participants[_hash].receiver);
-        }
-    }
-
-    function getSelfAmount(string _hash)
-    external
-    view
-    returns (string)
-    {
-        if(htlcRoles[_hash]) {
-            return uintToString(initiators[_hash].amount);
-        } else {
-            return uintToString(participants[_hash].amount);
-        }
-    }
-
-    function getCounterpartyAmount(string _hash)
-    external
-    view
-    returns (string)
-    {
-        if(!htlcRoles[_hash]) {
-            return uintToString(initiators[_hash].amount);
-        } else {
-            return uintToString(participants[_hash].amount);
-        }
-    }
-
+     // these following functions are just for HTLC scheduler
     function getSelfTimelock(string _hash)
-    external
+    public
     view
     returns (string)
     {
@@ -414,7 +347,7 @@ contract HTLC {
     }
 
     function getSelfLockStatus(string _hash)
-    external
+    public
     view
     returns (string)
     {
@@ -453,8 +386,18 @@ contract HTLC {
         }
     }
 
-    function getSelfUnlockStatus(string _hash)
+    function setCounterpartyLockStatus(string _hash)
     external
+    {
+        if(!htlcRoles[_hash]) {
+            initiators[_hash].locked = true;
+        } else {
+            participants[_hash].locked = true;
+        }
+    }
+
+    function getSelfUnlockStatus(string _hash)
+    public
     view
     returns (string)
     {
@@ -493,8 +436,18 @@ contract HTLC {
         }
     }
 
-    function getSelfRollbackStatus(string _hash)
+    function setCounterpartyUnlockStatus(string _hash)
     external
+    {
+        if(!htlcRoles[_hash]) {
+            initiators[_hash].unlocked = true;
+        } else {
+            participants[_hash].unlocked = true;
+        }
+    }
+
+    function getSelfRollbackStatus(string _hash)
+    public
     view
     returns (string)
     {
@@ -533,26 +486,6 @@ contract HTLC {
         }
     }
 
-    function setCounterpartyLockStatus(string _hash)
-    external
-    {
-        if(!htlcRoles[_hash]) {
-            initiators[_hash].locked = true;
-        } else {
-            participants[_hash].locked = true;
-        }
-    }
-
-    function setCounterpartyUnlockStatus(string _hash)
-    external
-    {
-        if(!htlcRoles[_hash]) {
-            initiators[_hash].unlocked = true;
-        } else {
-            participants[_hash].unlocked = true;
-        }
-    }
-
     function setCounterpartyRollbackStatus(string _hash)
     external
     {
@@ -569,8 +502,8 @@ contract HTLC {
     view
     returns (bool)
     {
-        return (initiators[_hash].sender != address(0)) &&
-               (participants[_hash].sender != address(0));
+        return (initiators[_hash].amount > 0 &&
+                participants[_hash].amount > 0);
     }
 
     function hasInitiator(string _hash)
@@ -578,7 +511,7 @@ contract HTLC {
     view
     returns (bool)
     {
-        return (initiators[_hash].sender != address(0));
+        return (initiators[_hash].amount > 0);
     }
 
     function hasParticipant(string _hash)
@@ -586,7 +519,7 @@ contract HTLC {
     view
     returns (bool)
     {
-        return (participants[_hash].sender != address(0));
+        return (participants[_hash].amount > 0);
     }
 
     function rightTimelock(string _t0, string _t1)
@@ -730,5 +663,46 @@ contract HTLC {
             }
         }
         return result;
+    }
+
+    function hashMatched(string _hash, string _secret)
+    public
+    pure
+    returns (bool)
+    {
+        bytes memory a  = abi.encodePacked(sha256(abi.encodePacked(_secret)));
+        bytes memory b  = hexStringToBytes(_hash);
+        return sha256(a) == sha256(b);
+    }
+
+    function hexStringToBytes(string s)
+    public
+    pure
+    returns (bytes)
+    {
+        bytes memory ss = bytes(s);
+        require(ss.length%2 == 0);
+        bytes memory r = new bytes(ss.length/2);
+        for (uint i=0; i<ss.length/2; ++i) {
+            r[i] = byte(fromHexChar(uint(ss[2*i])) * 16 +
+                        fromHexChar(uint(ss[2*i+1])));
+        }
+        return r;
+    }
+
+    function fromHexChar(uint c)
+    public
+    pure
+    returns (uint)
+    {
+        if (byte(c) >= byte('0') && byte(c) <= byte('9')) {
+            return c - uint(byte('0'));
+        }
+        if (byte(c) >= byte('a') && byte(c) <= byte('f')) {
+            return 10 + c - uint(byte('a'));
+        }
+        if (byte(c) >= byte('A') && byte(c) <= byte('F')) {
+            return 10 + c - uint(byte('A'));
+        }
     }
 }

@@ -1,7 +1,6 @@
 package com.webank.wecross.stub.bcos;
 
 import com.webank.wecross.proposal.Proposal;
-import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.utils.ExtendedTransactionDecoderV2;
 import java.util.Arrays;
@@ -56,27 +55,12 @@ public class BCOSProposal extends Proposal {
         return requestData.equals(data);
     }
 
-    @Override
-    public Boolean isEqualsRequest(ProposalRequest request) throws Exception {
-        if (innerBCOSTransaction == null) {
-            throw new Exception("BCOS proposal " + this.getSeq() + " has not been loaded");
-        }
-
-        String requestData = encodeRequestToInputData(request);
-        String data = innerBCOSTransaction.getData();
-        return requestData.equals(data);
-    }
-
     public void load(ExtendedRawTransaction innerBCOSTransaction) {
         this.innerBCOSTransaction = innerBCOSTransaction;
         this.proposalBytes = ExtendedTransactionEncoder.encode(innerBCOSTransaction);
     }
 
     public static String encodeRequestToInputData(TransactionRequest request) throws Exception {
-        return encodeRequestToInputData(request.getMethod(), request.getArgs());
-    }
-
-    public static String encodeRequestToInputData(ProposalRequest request) throws Exception {
         return encodeRequestToInputData(request.getMethod(), request.getArgs());
     }
 

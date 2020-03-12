@@ -48,7 +48,6 @@ public class JDChainContractResource extends JDChainResource {
     @JsonIgnore private String contractAddress;
     private String checksum;
 
-    @Override
     public String getContractAddress() {
         return contractAddress;
     }

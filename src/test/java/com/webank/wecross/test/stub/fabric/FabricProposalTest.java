@@ -17,7 +17,7 @@ public class FabricProposalTest {
 
         MockTransactionRequest req = new MockTransactionRequest();
 
-        Proposal proposalA = factory.build(req.toProposalPrequest());
+        Proposal proposalA = factory.build(req);
         Assert.assertTrue(proposalA.isEqualsRequest(req));
 
         byte[] bytesA = proposalA.getBytes();

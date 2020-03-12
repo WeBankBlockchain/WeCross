@@ -15,11 +15,11 @@ public class WebServerConfig {
 
     private static Logger logger = LoggerFactory.getLogger(WebServerConfig.class);
 
-    @Resource(name = "produceToml")
+    @Resource(name = "newToml")
     Toml toml;
 
     @Bean
-    public TomcatServletWebServerFactory servletWebServerFactory() {
+    public TomcatServletWebServerFactory newTomcatServletWebServerFactory() {
         String address = getAddress();
         int port = getPort();
         TomcatServletWebServerFactory tomcatServletWebServerFactory =

@@ -10,11 +10,9 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.restserver.request.GetDataRequest;
-import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
-import com.webank.wecross.restserver.response.ProposalResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
 import java.util.ArrayList;
@@ -147,13 +145,13 @@ public class RemoteResource implements Resource {
     }
 
     @Override
-    public ProposalResponse callProposal(ProposalRequest request) {
-        return null;
+    public byte[] callProposal(TransactionRequest request) {
+        return new byte[0];
     }
 
     @Override
-    public ProposalResponse sendTransactionProposal(ProposalRequest request) {
-        return null;
+    public byte[] sendTransactionProposal(TransactionRequest request) {
+        return new byte[0];
     }
 
     @Override
@@ -258,11 +256,6 @@ public class RemoteResource implements Resource {
     @Override
     public String getChecksum() {
         return checksum;
-    }
-
-    @Override
-    public String getContractAddress() {
-        return null;
     }
 
     public void setChecksum(String checksum) {

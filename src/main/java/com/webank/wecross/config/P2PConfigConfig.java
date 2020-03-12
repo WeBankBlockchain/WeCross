@@ -20,7 +20,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 public class P2PConfigConfig {
     private static Logger logger = LoggerFactory.getLogger(P2PConfigConfig.class);
 
-    @Resource(name = "produceToml")
+    @Resource(name = "newToml")
     Toml toml;
 
     @Bean

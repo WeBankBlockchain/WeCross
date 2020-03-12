@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.webank.wecross.account.Accounts;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
@@ -45,6 +46,9 @@ public class RestfulControllerTest {
 
     @MockBean(name = "newWeCrossHost")
     private WeCrossHost weCrossHost;
+
+    @MockBean(name = "newAccounts")
+    private Accounts accounts;
 
     @Test
     public void okTest() throws Exception {
@@ -220,7 +224,6 @@ public class RestfulControllerTest {
         }
     }
 
-    @Test
     public void callTest() throws Exception {
         try {
             TransactionResponse transactionResponse = new TransactionResponse();
@@ -266,7 +269,6 @@ public class RestfulControllerTest {
         }
     }
 
-    @Test
     public void sendTransactionTest() throws Exception {
         try {
             TransactionResponse transactionResponse = new TransactionResponse();

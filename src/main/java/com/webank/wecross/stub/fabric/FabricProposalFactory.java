@@ -4,7 +4,7 @@ import static com.webank.wecross.stub.fabric.FabricContractResource.getParamterL
 
 import com.google.protobuf.ByteString;
 import com.webank.wecross.proposal.ProposalFactory;
-import com.webank.wecross.restserver.request.ProposalRequest;
+import com.webank.wecross.restserver.request.TransactionRequest;
 import org.hyperledger.fabric.protos.common.Common;
 import org.hyperledger.fabric.protos.msp.Identities;
 import org.hyperledger.fabric.sdk.Channel;
@@ -26,7 +26,7 @@ public class FabricProposalFactory implements ProposalFactory {
     }
 
     @Override
-    public FabricProposal build(ProposalRequest request) throws Exception {
+    public FabricProposal build(TransactionRequest request) throws Exception {
         // Build inner fabric proposal struct
         TransactionProposalRequest transactionProposalRequest =
                 fabricConn.getHfClient().newTransactionProposalRequest();

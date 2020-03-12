@@ -27,8 +27,6 @@ public interface HTLC {
 
     BigInteger getCounterpartyTimelock(Resource htlcResource, String h) throws Exception;
 
-    boolean getSelfLockStatus(Resource htlcResource, String h) throws Exception;
-
     boolean getCounterpartyLockStatus(Resource htlcResource, String h) throws Exception;
 
     boolean getSelfUnlockStatus(Resource htlcResource, String h) throws Exception;

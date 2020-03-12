@@ -2,19 +2,20 @@ package com.webank.wecross.restserver;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.account.Account;
+import com.webank.wecross.account.Accounts;
 import com.webank.wecross.common.QueryStatus;
+import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.request.GetDataRequest;
-import com.webank.wecross.restserver.request.ProposalRequest;
 import com.webank.wecross.restserver.request.ResourceRequest;
 import com.webank.wecross.restserver.request.SetDataRequest;
 import com.webank.wecross.restserver.request.TransactionRequest;
 import com.webank.wecross.restserver.response.GetDataResponse;
-import com.webank.wecross.restserver.response.ProposalResponse;
 import com.webank.wecross.restserver.response.ResourceResponse;
 import com.webank.wecross.restserver.response.SetDataResponse;
 import com.webank.wecross.restserver.response.TransactionResponse;
@@ -36,6 +37,9 @@ public class RestfulController {
 
     @javax.annotation.Resource(name = "newWeCrossHost")
     private WeCrossHost host;
+
+    @javax.annotation.Resource(name = "newAccounts")
+    private Accounts accounts;
 
     private Logger logger = LoggerFactory.getLogger(RestfulController.class);
     private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
@@ -189,53 +193,13 @@ public class RestfulController {
                         restResponse.setData(setDataResponse);
                         break;
                     }
-                case "callProposal":
-                    {
-                        if (resourceObj == null) {
-                            throw new WeCrossException(
-                                    ErrorCode.RESOURCE_ERROR, "Resource not found");
-                        }
-                        RestRequest<ProposalRequest> restRequest =
-                                objectMapper.readValue(
-                                        restRequestString,
-                                        new TypeReference<RestRequest<ProposalRequest>>() {});
-
-                        restRequest.checkRestRequest(path.toString(), method);
-
-                        ProposalRequest proposalRequest = (ProposalRequest) restRequest.getData();
-                        ProposalResponse proposalResponse =
-                                (ProposalResponse) resourceObj.callProposal(proposalRequest);
-
-                        restResponse.setData(proposalResponse);
-                        break;
-                    }
-                case "sendTransactionProposal":
-                    {
-                        if (resourceObj == null) {
-                            throw new WeCrossException(
-                                    ErrorCode.RESOURCE_ERROR, "Resource not found");
-                        }
-                        RestRequest<ProposalRequest> restRequest =
-                                objectMapper.readValue(
-                                        restRequestString,
-                                        new TypeReference<RestRequest<ProposalRequest>>() {});
-
-                        restRequest.checkRestRequest(path.toString(), method);
-
-                        ProposalRequest proposalRequest = (ProposalRequest) restRequest.getData();
-                        ProposalResponse proposalResponse =
-                                (ProposalResponse)
-                                        resourceObj.sendTransactionProposal(proposalRequest);
-
-                        restResponse.setData(proposalResponse);
-                        break;
-                    }
                 case "call":
                     {
                         if (resourceObj == null) {
                             throw new WeCrossException(
                                     ErrorCode.RESOURCE_ERROR, "Resource not found");
                         }
+
                         RestRequest<TransactionRequest> restRequest =
                                 objectMapper.readValue(
                                         restRequestString,
@@ -245,6 +209,20 @@ public class RestfulController {
 
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) restRequest.getData();
+                        Account account = accounts.getAccount(transactionRequest.getAccountName());
+
+                        // get proposal and sign
+                        if (!account.getSignCryptoSuite().equals(resourceObj.getCryptoSuite())) {
+                            throw new WeCrossException(
+                                    ErrorCode.CRYPTO_SUITE_ERROR, "CryptoSuite does not match");
+                        }
+                        byte[] proposalBytes =
+                                account.reassembleProposal(
+                                        resourceObj.callProposal(transactionRequest),
+                                        WeCrossType.PROPOSAL_TYPE_PEER_PAYLODAD);
+                        byte[] sign = account.sign(proposalBytes);
+                        transactionRequest.setSig(sign);
+
                         TransactionResponse transactionResponse =
                                 (TransactionResponse) resourceObj.call(transactionRequest);
 
@@ -266,6 +244,29 @@ public class RestfulController {
 
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) restRequest.getData();
+                        Account account = accounts.getAccount(transactionRequest.getAccountName());
+
+                        // get proposal and sign
+                        if (!account.getSignCryptoSuite().equals(resourceObj.getCryptoSuite())) {
+                            throw new WeCrossException(
+                                    ErrorCode.CRYPTO_SUITE_ERROR, "CryptoSuite does not match");
+                        }
+                        byte[] proposalBytes =
+                                account.reassembleProposal(
+                                        resourceObj.sendTransactionProposal(transactionRequest),
+                                        WeCrossType.PROPOSAL_TYPE_ENDORSER_PAYLODAD);
+                        byte[] sign = account.sign(proposalBytes);
+                        if (!account.isProposalReady(WeCrossType.PROPOSAL_TYPE_ENDORSER_PAYLODAD)) {
+                            transactionRequest.setProposalBytes(proposalBytes);
+                            transactionRequest.setSig(sign);
+                            proposalBytes =
+                                    account.reassembleProposal(
+                                            resourceObj.sendTransactionProposal(transactionRequest),
+                                            WeCrossType.PROPOSAL_TYPE_ORDERER_PAYLOAD);
+                            sign = account.sign(proposalBytes);
+                        }
+                        transactionRequest.setSig(sign);
+
                         TransactionResponse transactionResponse =
                                 (TransactionResponse)
                                         resourceObj.sendTransaction(transactionRequest);
