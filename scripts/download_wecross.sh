@@ -83,6 +83,12 @@ download_wecross_pkg()
     if [ -z "${compatibility_version}" ];then
         compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross/releases/latest | grep "tag_name"|awk -F '\"' '{print $4}')
     fi
+
+    if [ -z "${compatibility_version}" ];then
+        LOG_ERROR "Pull latest release version failed. Please try again"
+        exit 1
+    fi
+
     LOG_INFO "Latest release: ${compatibility_version}"
 
     download_release_pkg ${github_url} ${cdn_url} ${compatibility_version} ${release_pkg} ${release_pkg_checksum_file}
