@@ -2,7 +2,6 @@ package com.webank.wecross.chain;
 
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.BlockHeader;
-
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;

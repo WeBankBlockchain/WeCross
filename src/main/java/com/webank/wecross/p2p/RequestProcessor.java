@@ -76,8 +76,7 @@ public class RequestProcessor implements Processor {
                     message.getSeq(),
                     content);
 
-            P2PMessage<?> p2PMessage =
-            		objectMapper.readValue(content, P2PMessage.class);
+            P2PMessage<?> p2PMessage = objectMapper.readValue(content, P2PMessage.class);
 
             String method = p2PMessage.getMethod();
             String r[] = method.split("/");
@@ -103,8 +102,7 @@ public class RequestProcessor implements Processor {
             }
 
             if (p2PResponse.getData() != null) {
-                String responseContent =
-                		objectMapper.writeValueAsString(p2PResponse);
+                String responseContent = objectMapper.writeValueAsString(p2PResponse);
 
                 // send response
                 message.setType(MessageType.RESOURCE_RESPONSE);
@@ -142,10 +140,9 @@ public class RequestProcessor implements Processor {
                     {
                         logger.debug("request method: " + method);
                         P2PMessage<Object> p2pRequest =
-                        		objectMapper
-                                        .readValue(
-                                                p2pRequestString,
-                                                new TypeReference<P2PMessage<Object>>() {});
+                                objectMapper.readValue(
+                                        p2pRequestString,
+                                        new TypeReference<P2PMessage<Object>>() {});
 
                         p2pRequest.checkP2PMessage(method);
 
@@ -171,11 +168,9 @@ public class RequestProcessor implements Processor {
                     {
                         logger.info("Receive peer seq from peer:{}", peerInfo);
                         P2PMessage<PeerSeqMessageData> p2pRequest =
-                        		objectMapper
-                                        .readValue(
-                                                p2pRequestString,
-                                                new TypeReference<
-                                                        P2PMessage<PeerSeqMessageData>>() {});
+                                objectMapper.readValue(
+                                        p2pRequestString,
+                                        new TypeReference<P2PMessage<PeerSeqMessageData>>() {});
 
                         PeerSeqMessageData data = (PeerSeqMessageData) p2pRequest.getData();
                         if (data != null && p2pRequest.getMethod().equals("seq")) {
@@ -250,10 +245,9 @@ public class RequestProcessor implements Processor {
                     {
                         logger.debug("request method: " + method);
                         P2PMessage<Object> p2pRequest =
-                        		objectMapper
-                                        .readValue(
-                                                p2pRequestString,
-                                                new TypeReference<P2PMessage<Object>>() {});
+                                objectMapper.readValue(
+                                        p2pRequestString,
+                                        new TypeReference<P2PMessage<Object>>() {});
                         response.setResult(QueryStatus.METHOD_ERROR);
                         response.setSeq(p2pRequest.getSeq());
                         response.setMessage("Unsupported method: " + method);
@@ -302,18 +296,16 @@ public class RequestProcessor implements Processor {
                 case "transaction":
                     {
                         P2PMessage<Request> p2pRequest =
-                        		objectMapper
-                                        .readValue(
-                                                p2pRequestString,
-                                                new TypeReference<P2PMessage<Request>>() {});
+                                objectMapper.readValue(
+                                        p2pRequestString,
+                                        new TypeReference<P2PMessage<Request>>() {});
 
                         p2pRequest.checkP2PMessage(method);
 
                         P2PMessage<Request> request =
-                        		objectMapper
-                                        .readValue(
-                                                p2pRequestString,
-                                                new TypeReference<P2PMessage<Request>>() {});
+                                objectMapper.readValue(
+                                        p2pRequestString,
+                                        new TypeReference<P2PMessage<Request>>() {});
 
                         Response response =
                                 (Response) resourceObj.onRemoteTransaction(request.getData());
@@ -325,10 +317,9 @@ public class RequestProcessor implements Processor {
                 default:
                     {
                         P2PMessage<Object> p2pRequest =
-                        		objectMapper
-                                        .readValue(
-                                                p2pRequestString,
-                                                new TypeReference<P2PMessage<Object>>() {});
+                                objectMapper.readValue(
+                                        p2pRequestString,
+                                        new TypeReference<P2PMessage<Object>>() {});
                         logger.warn("Unsupported method: {}", method);
                         p2pResponse.setResult(QueryStatus.METHOD_ERROR);
                         p2pResponse.setMessage("Unsupported method: " + method);

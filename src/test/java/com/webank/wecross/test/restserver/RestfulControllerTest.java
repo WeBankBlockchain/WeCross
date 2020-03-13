@@ -133,7 +133,8 @@ public class RestfulControllerTest {
             transactionResponse.setHash("010157f4");
 
             Resource resource = Mockito.mock(Resource.class);
-            Mockito.when(resource.call(Mockito.any())).thenReturn(transactionResponse);
+            Mockito.when(resource.call(Mockito.any(), Mockito.any()))
+                    .thenReturn(transactionResponse);
 
             Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
 
@@ -178,7 +179,8 @@ public class RestfulControllerTest {
             transactionResponse.setHash("010157f4");
 
             Resource resource = Mockito.mock(Resource.class);
-            Mockito.when(resource.sendTransaction(Mockito.any())).thenReturn(transactionResponse);
+            Mockito.when(resource.sendTransaction(Mockito.any(), Mockito.any()))
+                    .thenReturn(transactionResponse);
 
             Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
 

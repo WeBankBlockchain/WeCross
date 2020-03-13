@@ -2,10 +2,11 @@ package com.webank.wecross.restserver;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.account.Account;
+import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.chain.StateRequest;
 import com.webank.wecross.chain.StateResponse;
 import com.webank.wecross.common.QueryStatus;
-import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
@@ -34,6 +35,7 @@ public class RestfulController {
 
     private Logger logger = LoggerFactory.getLogger(RestfulController.class);
     private ObjectMapper objectMapper = new ObjectMapper();
+    private AccountManager accountManager;
 
     @RequestMapping("/test")
     public String test() {
@@ -173,8 +175,10 @@ public class RestfulController {
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) restRequest.getData();
 
+                        Account account = accountManager.getAccount(restRequest.getAccount());
+
                         TransactionResponse transactionResponse =
-                                (TransactionResponse) resourceObj.call(transactionRequest);
+                                (TransactionResponse) resourceObj.call(transactionRequest, account);
 
                         restResponse.setData(transactionResponse);
                         break;
@@ -195,9 +199,11 @@ public class RestfulController {
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) restRequest.getData();
 
+                        Account account = accountManager.getAccount(restRequest.getAccount());
+
                         TransactionResponse transactionResponse =
                                 (TransactionResponse)
-                                        resourceObj.sendTransaction(transactionRequest);
+                                        resourceObj.sendTransaction(transactionRequest, account);
 
                         restResponse.setData(transactionResponse);
                         break;
@@ -221,5 +227,13 @@ public class RestfulController {
         }
 
         return restResponse;
+    }
+
+    public AccountManager getAccountManager() {
+        return accountManager;
+    }
+
+    public void setAccountManager(AccountManager accountManager) {
+        this.accountManager = accountManager;
     }
 }

@@ -63,7 +63,8 @@ public class RemoteResourceExceptionTest {
         }
 
         private P2PMessage handleCall(Resource resource, P2PMessage msg) {
-            TransactionResponse responseData = resource.call((TransactionRequest) msg.getData());
+            TransactionResponse responseData =
+                    resource.call((TransactionRequest) msg.getData(), null);
             responseData.setErrorCode(1); // set error
             P2PMessage<TransactionResponse> response = new P2PMessage<>();
             response.setData(responseData);
@@ -73,7 +74,7 @@ public class RemoteResourceExceptionTest {
 
         private P2PMessage handleSendTransaction(Resource resource, P2PMessage msg) {
             TransactionResponse responseData =
-                    resource.sendTransaction((TransactionRequest) msg.getData());
+                    resource.sendTransaction((TransactionRequest) msg.getData(), null);
             responseData.setErrorCode(1); // set error
             P2PMessage<TransactionResponse> response = new P2PMessage<>();
             response.setData(responseData);

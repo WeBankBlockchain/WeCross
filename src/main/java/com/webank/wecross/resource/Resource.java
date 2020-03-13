@@ -1,5 +1,6 @@
 package com.webank.wecross.resource;
 
+import com.webank.wecross.account.Account;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
@@ -7,7 +8,7 @@ import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
-
+import com.webank.wecross.stub.WithAccount;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,19 +42,22 @@ public class Resource {
         }
     }
 
-    public TransactionResponse call(TransactionRequest request) {
-        return driver.call(request, chooseConnection());
+    public TransactionResponse call(TransactionRequest request, Account account) {
+        return driver.call(
+                new WithAccount<TransactionRequest>(request, account), chooseConnection());
     }
 
-    public TransactionResponse sendTransaction(TransactionRequest request) {
-        return driver.sendTransaction(request, chooseConnection());
+    public TransactionResponse sendTransaction(TransactionRequest request, Account account) {
+        return driver.sendTransaction(
+                new WithAccount<TransactionRequest>(request, account), chooseConnection());
     }
 
     public Response onRemoteTransaction(Request request) {
-        TransactionRequest transactionRequest = driver.decodeTransactionRequest(request.getData());
+        WithAccount<TransactionRequest> transactionRequest =
+                driver.decodeTransactionRequest(request.getData());
 
         // TODO: check request
-        transactionRequest.getArgs();
+        transactionRequest.getData().getArgs();
 
         return chooseConnection().send(request);
     }

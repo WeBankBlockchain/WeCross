@@ -62,7 +62,6 @@ public class TransactionResponse {
         this.result = result;
     }
 
-
     public void setExtraHashes(List<String> extraHashes) {
         this.extraHashes = extraHashes;
     }

@@ -26,11 +26,6 @@ public class StubManagerConfig {
 
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
         try {
-            /*
-            Resource[] resources =
-                    resourcePatternResolver.getResources(
-                            ClassUtils.convertClassNameToResourcePath("cn.webank.wecross.*"));
-                            */
             Resource[] resources =
                     resourcePatternResolver.getResources(
                             ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX

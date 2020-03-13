@@ -3,7 +3,6 @@ package com.webank.wecross.routine.htlc;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
-
 import java.math.BigInteger;
 
 public class AssetHTLC implements HTLC {
@@ -11,7 +10,7 @@ public class AssetHTLC implements HTLC {
     public String lock(Resource htlcResource, String h) throws Exception {
         TransactionRequest request =
                 new TransactionRequest(new String[] {"String"}, "lock", new Object[] {h});
-        TransactionResponse response = htlcResource.sendTransaction(request);
+        TransactionResponse response = htlcResource.sendTransaction(request, null); // TODO: fix it
         if (response.getErrorCode() != 0) {
             throw new Exception(
                     "ErrorCode: "
@@ -29,7 +28,8 @@ public class AssetHTLC implements HTLC {
         TransactionRequest request =
                 new TransactionRequest(
                         new String[] {"String"}, "unlock", new Object[] {transactionHash, h, s});
-        TransactionResponse response = otherHTLCResource.sendTransaction(request);
+        TransactionResponse response =
+                otherHTLCResource.sendTransaction(request, null); // TODO: fix it
         if (response.getErrorCode() != 0) {
             throw new Exception(
                     "ErrorCode: "
@@ -68,7 +68,7 @@ public class AssetHTLC implements HTLC {
         TransactionRequest request =
                 new TransactionRequest(
                         new String[] {"String"}, "getSecret", new Object[] {h}, false);
-        TransactionResponse response = htlcResource.call(request);
+        TransactionResponse response = htlcResource.call(request, null); // TODO: fix it
         if (response.getErrorCode() != 0) {
             throw new Exception(
                     "ErrorCode: "
@@ -144,7 +144,7 @@ public class AssetHTLC implements HTLC {
     private static Object call(Resource htlcResource, String retType, String method, Object... args)
             throws Exception {
         TransactionRequest request = new TransactionRequest(new String[] {retType}, method, args);
-        TransactionResponse response = htlcResource.call(request);
+        TransactionResponse response = htlcResource.call(request, null); // TODO: fix it
         if (response.getErrorCode() != 0) {
             throw new Exception(
                     "ErrorCode: "
@@ -158,7 +158,7 @@ public class AssetHTLC implements HTLC {
     private static Object sendTransaction(
             Resource htlcResource, String retType, String method, Object... args) throws Exception {
         TransactionRequest request = new TransactionRequest(new String[] {retType}, method, args);
-        TransactionResponse response = htlcResource.sendTransaction(request);
+        TransactionResponse response = htlcResource.sendTransaction(request, null); // TODO: fix it
         if (response.getErrorCode() != 0) {
             throw new Exception(
                     "ErrorCode: "

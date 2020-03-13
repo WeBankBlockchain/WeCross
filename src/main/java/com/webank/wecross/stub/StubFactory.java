@@ -1,5 +1,7 @@
 package com.webank.wecross.stub;
 
+import com.webank.wecross.account.Account;
+
 public interface StubFactory {
     /**
      * create a driver
@@ -14,4 +16,7 @@ public interface StubFactory {
      * @return Connection
      */
     public Connection newConnection(String path);
+
+    /** load account */
+    public Account newAccount(String path);
 }

@@ -1,5 +1,6 @@
 package com.webank.wecross.routine.htlc;
 
+import com.webank.wecross.account.Account;
 import com.webank.wecross.common.ResourceQueryStatus;
 import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.exception.WeCrossException;
@@ -27,7 +28,7 @@ public class AssetHTLCResource extends Resource {
     }
 
     @Override
-    public TransactionResponse call(TransactionRequest request) {
+    public TransactionResponse call(TransactionRequest request, Account account) {
         TransactionRequest newRequest;
         try {
             newRequest = handleCallRequest(request);
@@ -37,11 +38,11 @@ public class AssetHTLCResource extends Resource {
             transactionResponse.setErrorMessage(e.getMessage());
             return transactionResponse;
         }
-        return originResource.call(newRequest);
+        return originResource.call(newRequest, account);
     }
 
     @Override
-    public TransactionResponse sendTransaction(TransactionRequest request) {
+    public TransactionResponse sendTransaction(TransactionRequest request, Account account) {
         TransactionRequest newRequest;
         try {
             newRequest = handleSendTransactionRequest(request);
@@ -52,7 +53,7 @@ public class AssetHTLCResource extends Resource {
             return transactionResponse;
         }
 
-        return originResource.sendTransaction(newRequest);
+        return originResource.sendTransaction(newRequest, account);
     }
 
     @Override

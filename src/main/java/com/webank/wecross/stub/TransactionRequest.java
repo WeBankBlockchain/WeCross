@@ -3,11 +3,7 @@ package com.webank.wecross.stub;
 import java.util.Arrays;
 
 public class TransactionRequest {
-
     private int seq = 0;
-    private byte[] proposalBytes;
-    private byte[] sig;
-    private String accountName;
     private String retTypes[];
     private String method;
     private Object args[];
@@ -34,30 +30,6 @@ public class TransactionRequest {
 
     public void setSeq(int seq) {
         this.seq = seq;
-    }
-
-    public byte[] getSig() {
-        return sig;
-    }
-
-    public void setSig(byte[] sig) {
-        this.sig = sig;
-    }
-
-    public byte[] getProposalBytes() {
-        return proposalBytes;
-    }
-
-    public void setProposalBytes(byte[] proposalBytes) {
-        this.proposalBytes = proposalBytes;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
     }
 
     public String[] getRetTypes() {
@@ -97,12 +69,6 @@ public class TransactionRequest {
         return "TransactionRequest{"
                 + "seq="
                 + seq
-                + ", sig="
-                + Arrays.toString(sig)
-                + ", proposalBytes="
-                + Arrays.toString(proposalBytes)
-                + ", accountName='"
-                + accountName
                 + '\''
                 + ", retTypes="
                 + Arrays.toString(retTypes)

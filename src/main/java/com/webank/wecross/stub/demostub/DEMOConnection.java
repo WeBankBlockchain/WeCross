@@ -6,7 +6,6 @@ import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

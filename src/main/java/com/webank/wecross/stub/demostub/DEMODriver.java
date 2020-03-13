@@ -1,6 +1,7 @@
 package com.webank.wecross.stub.demostub;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.Connection;
@@ -9,14 +10,14 @@ import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
-
+import com.webank.wecross.stub.WithAccount;
 import java.io.IOException;
- 
+
 public class DEMODriver implements Driver {
     private ObjectMapper mapper = new ObjectMapper();
 
     @Override
-    public byte[] encodeTransactionRequest(TransactionRequest request) {
+    public byte[] encodeTransactionRequest(WithAccount<TransactionRequest> request) {
         try {
             return mapper.writeValueAsBytes(request);
         } catch (JsonProcessingException e) {
@@ -25,9 +26,9 @@ public class DEMODriver implements Driver {
     }
 
     @Override
-    public TransactionRequest decodeTransactionRequest(byte[] data) {
+    public WithAccount<TransactionRequest> decodeTransactionRequest(byte[] data) {
         try {
-            return mapper.readValue(data, TransactionRequest.class);
+            return mapper.readValue(data, new TypeReference<WithAccount<TransactionRequest>>() {});
         } catch (IOException e) {
             return null;
         }
@@ -70,7 +71,8 @@ public class DEMODriver implements Driver {
     }
 
     @Override
-    public TransactionResponse call(TransactionRequest request, Connection connection) {
+    public TransactionResponse call(
+            WithAccount<TransactionRequest> request, Connection connection) {
         byte[] data = encodeTransactionRequest(request);
 
         Request connectionRequest = new Request();
@@ -83,7 +85,8 @@ public class DEMODriver implements Driver {
     }
 
     @Override
-    public TransactionResponse sendTransaction(TransactionRequest request, Connection connection) {
+    public TransactionResponse sendTransaction(
+            WithAccount<TransactionRequest> request, Connection connection) {
         byte[] data = encodeTransactionRequest(request);
 
         Request connectionRequest = new Request();
