@@ -25,7 +25,7 @@ public class AccountManagerConfig {
     private Logger logger = LoggerFactory.getLogger(AccountManagerConfig.class);
 
     @Bean
-    public AccountManager newAccountManager() {
+    public AccountManager newAccountManager() throws IOException {
         String accountsPath = toml.getString("accounts.path");
 
         if (accountsPath == null) {
@@ -69,9 +69,8 @@ public class AccountManagerConfig {
 
             return accountManager;
         } catch (IOException e) {
-            logger.error("Load accounts error", e);
+            // logger.error("Load accounts error", e);
+            throw e;
         }
-
-        return null;
     }
 }
