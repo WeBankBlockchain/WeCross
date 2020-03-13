@@ -69,7 +69,6 @@ public class AccountManagerConfig {
 
             return accountManager;
         } catch (IOException e) {
-            // logger.error("Load accounts error", e);
             throw e;
         }
     }
