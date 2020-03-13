@@ -1,5 +1,6 @@
 package com.webank.wecross.config;
 
+import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.Map;
@@ -12,18 +13,13 @@ public class ZoneManagerConfig {
     @Resource(name = "newZoneMap")
     private Map<String, Zone> zones;
 
+    @Resource private StubManager stubManager;
+
     @Bean
     public ZoneManager newZoneManager() {
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setZones(zones);
+        zoneManager.setStubManager(stubManager);
         return zoneManager;
-    }
-
-    public Map<String, Zone> getNetworks() {
-        return zones;
-    }
-
-    public void setNetworks(Map<String, Zone> networks) {
-        this.zones = networks;
     }
 }

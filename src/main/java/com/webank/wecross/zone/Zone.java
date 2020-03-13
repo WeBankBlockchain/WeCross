@@ -1,7 +1,7 @@
 package com.webank.wecross.zone;
 
+import com.webank.wecross.chain.Chain;
 import com.webank.wecross.resource.Path;
-import com.webank.wecross.stub.Stub;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -11,18 +11,18 @@ public class Zone {
 
     private Logger logger = LoggerFactory.getLogger(Zone.class);
 
-    private Map<String, Stub> stubs = new HashMap<>();
+    private Map<String, Chain> chains = new HashMap<>();
 
     // Access control
     private Boolean visible;
 
-    public Stub getStub(Path path) {
+    public Chain getStub(Path path) {
         return getStub(path.getChain());
     }
 
-    public Stub getStub(String name) {
+    public Chain getStub(String name) {
         logger.trace("get stub: {}", name);
-        Stub stub = stubs.get(name);
+        Chain stub = chains.get(name);
         return stub;
     }
 
@@ -30,12 +30,12 @@ public class Zone {
         return getStubs() == null || getStubs().isEmpty();
     }
 
-    public Map<String, Stub> getStubs() {
-        return stubs;
+    public Map<String, Chain> getStubs() {
+        return chains;
     }
 
-    public void setStubs(Map<String, Stub> stubs) {
-        this.stubs = stubs;
+    public void setStubs(Map<String, Chain> stubs) {
+        this.chains = stubs;
     }
 
     public Boolean getVisible() {

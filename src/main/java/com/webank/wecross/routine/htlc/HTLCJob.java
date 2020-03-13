@@ -14,7 +14,7 @@ public class HTLCJob implements Job {
     public void execute(JobExecutionContext context) {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
         HTLCResourcePair htlcResourcePair = (HTLCResourcePair) dataMap.get("HTLC");
-        String ipath = htlcResourcePair.getSelfHTLCResource().getPathAsString();
+        // String ipath = htlcResourcePair.getSelfHTLCResource().getPathAsString();
 
         long startTime = System.currentTimeMillis();
         try {
@@ -22,11 +22,11 @@ public class HTLCJob implements Job {
         } catch (Exception e) {
             logger.error(
                     "error in current round, ipaht: {}, errorMessage: {}",
-                    ipath,
+                    // ipath,
                     e.getLocalizedMessage());
         }
         long endTime = System.currentTimeMillis();
-        logger.info("current round costs: {} ms, Ipath: {}", (endTime - startTime), ipath);
+        // logger.info("current round costs: {} ms, Ipath: {}", (endTime - startTime), ipath);
     }
 
     public void doHTLCTask(HTLCResourcePair htlcResourcePair) throws Exception {

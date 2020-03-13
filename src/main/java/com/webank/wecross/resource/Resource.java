@@ -1,53 +1,94 @@
 package com.webank.wecross.resource;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.webank.wecross.account.Account;
 import com.webank.wecross.peer.Peer;
-import com.webank.wecross.restserver.request.GetDataRequest;
-import com.webank.wecross.restserver.request.SetDataRequest;
-import com.webank.wecross.restserver.request.TransactionRequest;
-import com.webank.wecross.restserver.response.GetDataResponse;
-import com.webank.wecross.restserver.response.SetDataResponse;
-import com.webank.wecross.restserver.response.TransactionResponse;
-import java.util.Set;
+import com.webank.wecross.stub.Connection;
+import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stub.Request;
+import com.webank.wecross.stub.Response;
+import com.webank.wecross.stub.TransactionRequest;
+import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.stub.WithAccount;
+import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
-public interface Resource {
+public class Resource {
+    private String type;
+    private Driver driver;
+    private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
+    private Random random = new SecureRandom();
+    int distance = 0;
 
-    String getType();
+    public void addConnection(Peer peer, Connection connection) {
+        connections.put(peer, connection);
+    }
 
-    GetDataResponse getData(GetDataRequest request);
+    public void removeConnection(Peer peer) {
+        connections.remove(peer);
+    }
 
-    SetDataResponse setData(SetDataRequest request);
+    public boolean isConnectionEmpty() {
+        return connections.isEmpty();
+    }
 
-    byte[] callProposal(TransactionRequest request);
+    private Connection chooseConnection() {
+        if (connections.size() == 1) {
+            return (Connection) connections.values().toArray()[0];
+        } else {
+            int index = random.nextInt(connections.size());
+            return (Connection) connections.values().toArray()[index];
+        }
+    }
 
-    byte[] sendTransactionProposal(TransactionRequest request);
+    public TransactionResponse call(TransactionRequest request, Account account) {
+        return driver.call(
+                new WithAccount<TransactionRequest>(request, account), chooseConnection());
+    }
 
-    TransactionResponse call(TransactionRequest request);
+    public TransactionResponse sendTransaction(TransactionRequest request, Account account) {
+        return driver.sendTransaction(
+                new WithAccount<TransactionRequest>(request, account), chooseConnection());
+    }
 
-    TransactionResponse sendTransaction(TransactionRequest request);
+    public Response onRemoteTransaction(Request request) {
+        WithAccount<TransactionRequest> transactionRequest =
+                driver.decodeTransactionRequest(request.getData());
 
-    void registerEventHandler(EventCallback callback);
+        // TODO: check request
+        transactionRequest.getData().getArgs();
 
-    TransactionRequest createRequest();
+        return chooseConnection().send(request);
+    }
 
-    int getDistance(); // 0 local, > 0 remote
+    public void registerEventHandler(EventCallback callback) {}
 
-    String getChecksum();
+    public String getType() {
+        return type;
+    }
 
-    @JsonIgnore
-    Path getPath();
+    public void setType(String type) {
+        this.type = type;
+    }
 
-    void setPath(Path path);
+    public int getDistance() {
+        return distance;
+    }
 
-    @JsonProperty("path")
-    String getPathAsString();
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
 
-    @JsonIgnore
-    Set<Peer> getPeers();
+    public String getChecksum() {
+        return "";
+    }
 
-    void setPeers(Set<Peer> peers);
+    public Driver getDriver() {
+        return driver;
+    }
 
-    @JsonProperty("cryptoSuite")
-    String getCryptoSuite();
+    public void setDriver(Driver driver) {
+        this.driver = driver;
+    }
 }

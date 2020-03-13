@@ -1,5 +1,6 @@
 package com.webank.wecross.test.stub.remote;
 
+/*
 import com.webank.wecross.p2p.engine.P2PResponse;
 import com.webank.wecross.stub.bcos.BCOSTransactionResponse;
 import com.webank.wecross.stub.remote.RemoteTransactionResponseCallback;
@@ -56,3 +57,4 @@ public class RemoteTransactionResponseCallbackTest {
         Assert.assertTrue(bcosTransactionResponse.verify());
     }
 }
+*/

@@ -3,26 +3,21 @@ package com.webank.wecross.restserver;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.Account;
-import com.webank.wecross.account.Accounts;
+import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.chain.StateRequest;
+import com.webank.wecross.chain.StateResponse;
 import com.webank.wecross.common.QueryStatus;
-import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.restserver.request.GetDataRequest;
 import com.webank.wecross.restserver.request.ResourceRequest;
-import com.webank.wecross.restserver.request.SetDataRequest;
-import com.webank.wecross.restserver.request.TransactionRequest;
-import com.webank.wecross.restserver.response.GetDataResponse;
 import com.webank.wecross.restserver.response.ResourceResponse;
-import com.webank.wecross.restserver.response.SetDataResponse;
-import com.webank.wecross.restserver.response.TransactionResponse;
-import com.webank.wecross.stub.StateRequest;
-import com.webank.wecross.stub.StateResponse;
+import com.webank.wecross.stub.TransactionRequest;
+import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
-import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,11 +33,9 @@ public class RestfulController {
     @javax.annotation.Resource(name = "newWeCrossHost")
     private WeCrossHost host;
 
-    @javax.annotation.Resource(name = "newAccounts")
-    private Accounts accounts;
-
     private Logger logger = LoggerFactory.getLogger(RestfulController.class);
-    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private AccountManager accountManager;
 
     @RequestMapping("/test")
     public String test() {
@@ -68,7 +61,19 @@ public class RestfulController {
 
             ResourceRequest resourceRequest = restRequest.getData();
             ZoneManager networkManager = host.getZoneManager();
-            ResourceResponse resourceResponse = networkManager.list(resourceRequest);
+
+            ResourceResponse resourceResponse = new ResourceResponse();
+            try {
+                List<Resource> resources =
+                        networkManager.getAllResources(resourceRequest.isIgnoreRemote());
+                resourceResponse.setErrorCode(0);
+                resourceResponse.setErrorMessage("");
+                resourceResponse.setResources(resources);
+            } catch (Exception e) {
+                resourceResponse.setErrorCode(1);
+                resourceResponse.setErrorMessage("Unexpected error: " + e.getMessage());
+            }
+
             restResponse.setData(resourceResponse);
         } catch (WeCrossException e) {
             logger.warn("Process request error: {}", e.getMessage());
@@ -143,7 +148,6 @@ public class RestfulController {
                         }
                         break;
                     }
-
                 case "info":
                     {
                         if (resourceObj == null) {
@@ -152,45 +156,6 @@ public class RestfulController {
                         } else {
                             restResponse.setData(resourceObj);
                         }
-                        break;
-                    }
-                case "getData":
-                    {
-                        if (resourceObj == null) {
-                            throw new WeCrossException(
-                                    ErrorCode.RESOURCE_ERROR, "Resource not found");
-                        }
-                        RestRequest<GetDataRequest> restRequest =
-                                objectMapper.readValue(
-                                        restRequestString,
-                                        new TypeReference<RestRequest<GetDataRequest>>() {});
-
-                        restRequest.checkRestRequest(path.toString(), method);
-
-                        GetDataRequest getDataRequest = restRequest.getData();
-                        GetDataResponse getDataResponse = resourceObj.getData(getDataRequest);
-
-                        restResponse.setData(getDataResponse);
-                        break;
-                    }
-                case "setData":
-                    {
-                        if (resourceObj == null) {
-                            throw new WeCrossException(
-                                    ErrorCode.RESOURCE_ERROR, "Resource not found");
-                        }
-                        RestRequest<SetDataRequest> restRequest =
-                                objectMapper.readValue(
-                                        restRequestString,
-                                        new TypeReference<RestRequest<SetDataRequest>>() {});
-
-                        restRequest.checkRestRequest(path.toString(), method);
-
-                        SetDataRequest setDataRequest = (SetDataRequest) restRequest.getData();
-                        SetDataResponse setDataResponse =
-                                (SetDataResponse) resourceObj.setData(setDataRequest);
-
-                        restResponse.setData(setDataResponse);
                         break;
                     }
                 case "call":
@@ -209,22 +174,11 @@ public class RestfulController {
 
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) restRequest.getData();
-                        Account account = accounts.getAccount(transactionRequest.getAccountName());
 
-                        // get proposal and sign
-                        if (!account.getSignCryptoSuite().equals(resourceObj.getCryptoSuite())) {
-                            throw new WeCrossException(
-                                    ErrorCode.CRYPTO_SUITE_ERROR, "CryptoSuite does not match");
-                        }
-                        byte[] proposalBytes =
-                                account.reassembleProposal(
-                                        resourceObj.callProposal(transactionRequest),
-                                        WeCrossType.PROPOSAL_TYPE_PEER_PAYLODAD);
-                        byte[] sign = account.sign(proposalBytes);
-                        transactionRequest.setSig(sign);
+                        Account account = accountManager.getAccount(restRequest.getAccount());
 
                         TransactionResponse transactionResponse =
-                                (TransactionResponse) resourceObj.call(transactionRequest);
+                                (TransactionResponse) resourceObj.call(transactionRequest, account);
 
                         restResponse.setData(transactionResponse);
                         break;
@@ -244,32 +198,12 @@ public class RestfulController {
 
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) restRequest.getData();
-                        Account account = accounts.getAccount(transactionRequest.getAccountName());
 
-                        // get proposal and sign
-                        if (!account.getSignCryptoSuite().equals(resourceObj.getCryptoSuite())) {
-                            throw new WeCrossException(
-                                    ErrorCode.CRYPTO_SUITE_ERROR, "CryptoSuite does not match");
-                        }
-                        byte[] proposalBytes =
-                                account.reassembleProposal(
-                                        resourceObj.sendTransactionProposal(transactionRequest),
-                                        WeCrossType.PROPOSAL_TYPE_ENDORSER_PAYLODAD);
-                        byte[] sign = account.sign(proposalBytes);
-                        if (!account.isProposalReady(WeCrossType.PROPOSAL_TYPE_ENDORSER_PAYLODAD)) {
-                            transactionRequest.setProposalBytes(proposalBytes);
-                            transactionRequest.setSig(sign);
-                            proposalBytes =
-                                    account.reassembleProposal(
-                                            resourceObj.sendTransactionProposal(transactionRequest),
-                                            WeCrossType.PROPOSAL_TYPE_ORDERER_PAYLOAD);
-                            sign = account.sign(proposalBytes);
-                        }
-                        transactionRequest.setSig(sign);
+                        Account account = accountManager.getAccount(restRequest.getAccount());
 
                         TransactionResponse transactionResponse =
                                 (TransactionResponse)
-                                        resourceObj.sendTransaction(transactionRequest);
+                                        resourceObj.sendTransaction(transactionRequest, account);
 
                         restResponse.setData(transactionResponse);
                         break;
@@ -293,5 +227,13 @@ public class RestfulController {
         }
 
         return restResponse;
+    }
+
+    public AccountManager getAccountManager() {
+        return accountManager;
+    }
+
+    public void setAccountManager(AccountManager accountManager) {
+        this.accountManager = accountManager;
     }
 }

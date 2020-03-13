@@ -1,5 +1,6 @@
 package com.webank.wecross.p2p.engine;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.common.QueryStatus;
 import com.webank.wecross.p2p.MessageType;
 import com.webank.wecross.p2p.P2PMessage;
@@ -12,12 +13,12 @@ import com.webank.wecross.p2p.netty.response.ResponseCallBack;
 import com.webank.wecross.p2p.netty.response.StatusCode;
 import com.webank.wecross.peer.Peer;
 import java.io.IOException;
-import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RestfulP2PMessageEngine extends P2PMessageEngine {
     private Logger logger = LoggerFactory.getLogger(RestfulP2PMessageEngine.class);
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     private P2PService p2PService;
 
@@ -46,7 +47,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
         Request request = new Request();
         request.setType(MessageType.RESOURCE_REQUEST);
         try {
-            request.setContent(ObjectMapperFactory.getObjectMapper().writeValueAsString(msg));
+            request.setContent(objectMapper.writeValueAsString(msg));
         } catch (Exception e) {
             logger.error(" P2PMessage to json error: {}", e);
             executeCallback(callback, QueryStatus.INTERNAL_ERROR, e.getMessage(), null);

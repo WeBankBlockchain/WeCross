@@ -1,17 +1,13 @@
 package com.webank.wecross.zone;
 
+import com.webank.wecross.chain.Chain;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
-import com.webank.wecross.restserver.request.ResourceRequest;
-import com.webank.wecross.restserver.response.ResourceResponse;
-import com.webank.wecross.stub.StateRequest;
-import com.webank.wecross.stub.StateResponse;
-import com.webank.wecross.stub.Stub;
-import com.webank.wecross.stub.remote.RemoteResource;
-import com.webank.wecross.stub.remote.RemoteStub;
+import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.stub.remote.RemoteConnection;
 import com.webank.wecross.utils.core.PathUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
@@ -26,18 +23,11 @@ import org.slf4j.LoggerFactory;
 
 public class ZoneManager {
     private Map<String, Zone> zones = new HashMap<>();
-    private int seq = 1;
+    private AtomicInteger seq = new AtomicInteger(1);
     private Logger logger = LoggerFactory.getLogger(ZoneManager.class);
     private P2PMessageEngine p2pEngine;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
-
-    public StateResponse getState(StateRequest request) {
-
-        StateResponse response = new StateResponse();
-        response.setSeq(seq);
-
-        return response;
-    }
+    private StubManager stubManager;
 
     public Resource getResource(Path path) {
         lock.readLock().lock();
@@ -45,10 +35,10 @@ public class ZoneManager {
             Zone network = getZone(path);
 
             if (network != null) {
-                Stub stub = network.getStub(path);
+                Chain stub = network.getStub(path);
 
                 if (stub != null) {
-                    Resource resource = stub.getResource(path);
+                    Resource resource = stub.getResources().get(path.getResource());
 
                     return resource;
                 }
@@ -86,19 +76,15 @@ public class ZoneManager {
         return zones;
     }
 
-    public void setZones(Map<String, Zone> networks) {
-        this.zones = networks;
+    public void setZones(Map<String, Zone> zones) {
+        this.zones = zones;
     }
 
     public int getSeq() {
-        return seq;
+        return seq.intValue();
     }
 
-    public void setSeq(int seq) {
-        this.seq = seq;
-    }
-
-    public Map<String, Stub> getAllStubInfo(boolean ignoreLocal) {
+    public Map<String, Chain> getAllStubInfo(boolean ignoreLocal) {
         lock.readLock().lock();
         /*
         try {
@@ -120,6 +106,7 @@ public class ZoneManager {
                     info.setPath(path.toString());
                     info.setDistance(resource.getDistance());
                     info.setChecksum(resource.getChecksum());
+                    info.setStubType(resource.getType());
                     ret.put(path.toString(), info);
                 } catch (Exception e) {
                     logger.debug("Jump exception resources: " + path.toString());
@@ -144,7 +131,7 @@ public class ZoneManager {
             for (Map.Entry<String, Zone> zoneEntry : zones.entrySet()) {
                 String networkName = PathUtils.toPureName(zoneEntry.getKey());
 
-                for (Map.Entry<String, Stub> stubEntry :
+                for (Map.Entry<String, Chain> stubEntry :
                         zoneEntry.getValue().getStubs().entrySet()) {
                     String stubName = PathUtils.toPureName(stubEntry.getKey());
 
@@ -198,23 +185,28 @@ public class ZoneManager {
                     zones.put(path.getNetwork(), zone);
                 }
 
-                Stub stub = zone.getStubs().get(path.getChain());
-                if (stub == null) {
-                    stub = new RemoteStub();
-                    zone.getStubs().put(path.getChain(), stub);
+                Chain chain = zone.getStubs().get(path.getChain());
+                if (chain == null) {
+                    chain = new Chain();
+                    zone.getStubs().put(path.getChain(), chain);
                 }
 
-                Resource resource = stub.getResources().get(path.getResource());
+                RemoteConnection remoteConnection = new RemoteConnection();
+                remoteConnection.setP2pEngine(p2pEngine);
+                remoteConnection.setPeer(peer);
+                remoteConnection.setPath(path.toURI());
+                Resource resource = chain.getResources().get(path.getResource());
                 if (resource == null) {
-                    resource =
-                            stub.getResources()
-                                    .put(
-                                            path.getResource(),
-                                            new RemoteResource(
-                                                    peer, resourceInfo.getDistance(), p2pEngine));
-                } else {
-                    resource.getPeers().add(peer);
+                    resource = new Resource();
+                    resource.setDriver(
+                            stubManager.getStubFactory(resourceInfo.getStubType()).newDriver());
+                    resource.setDistance(resourceInfo.getDistance());
+                    chain.getResources().put(path.getResource(), resource);
                 }
+
+                resource.addConnection(peer, remoteConnection);
+
+                seq.addAndGet(1);
             }
         } finally {
             lock.writeLock().unlock();
@@ -240,7 +232,7 @@ public class ZoneManager {
                     continue;
                 }
 
-                Stub stub = zone.getStub(path.getChain());
+                Chain stub = zone.getStub(path.getChain());
                 if (stub == null) {
                     // stub not exists, bug?
                     logger.error("Stub not exists! Peer: {} Path: {}", peer, path);
@@ -255,13 +247,9 @@ public class ZoneManager {
                     continue;
                 }
 
-                if (!resource.getPeers().remove(peer)) {
-                    logger.error(
-                            "Remote resource doesn't contain such peer: {} path: {}", peer, path);
-                    continue;
-                }
+                resource.removeConnection(peer);
 
-                if (resource.getPeers().isEmpty()) {
+                if (resource.isConnectionEmpty()) {
                     stub.getResources().remove(path.getResource());
                 }
 
@@ -272,6 +260,8 @@ public class ZoneManager {
                 if (zone.getStubs().isEmpty()) {
                     zones.remove(path.getNetwork());
                 }
+
+                seq.addAndGet(1);
             }
         } finally {
             lock.writeLock().unlock();
@@ -295,31 +285,19 @@ public class ZoneManager {
         }
     }
 
-    public ResourceResponse list(ResourceRequest request) {
-        lock.readLock().lock();
-        try {
-            ResourceResponse resourceResponse = new ResourceResponse();
-            try {
-                List<Resource> resources = getAllResources(request.isIgnoreRemote());
-                resourceResponse.setErrorCode(0);
-                resourceResponse.setErrorMessage("");
-                resourceResponse.setResources(resources);
-            } catch (Exception e) {
-                resourceResponse.setErrorCode(1);
-                resourceResponse.setErrorMessage("Unexpected error: " + e.getMessage());
-            }
-
-            return resourceResponse;
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-
     public P2PMessageEngine getP2PEngine() {
         return p2pEngine;
     }
 
     public void setP2PEngine(P2PMessageEngine p2pEngine) {
         this.p2pEngine = p2pEngine;
+    }
+
+    public StubManager getStubManager() {
+        return stubManager;
+    }
+
+    public void setStubManager(StubManager stubManager) {
+        this.stubManager = stubManager;
     }
 }

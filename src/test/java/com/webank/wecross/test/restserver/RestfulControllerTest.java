@@ -5,16 +5,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.webank.wecross.account.Accounts;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.TestResource;
 import com.webank.wecross.restserver.RestfulController;
-import com.webank.wecross.restserver.response.GetDataResponse;
-import com.webank.wecross.restserver.response.ResourceResponse;
-import com.webank.wecross.restserver.response.SetDataResponse;
-import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.ArrayList;
 import org.junit.After;
@@ -47,9 +42,6 @@ public class RestfulControllerTest {
     @MockBean(name = "newWeCrossHost")
     private WeCrossHost weCrossHost;
 
-    @MockBean(name = "newAccounts")
-    private Accounts accounts;
-
     @Test
     public void okTest() throws Exception {
         try {
@@ -73,7 +65,7 @@ public class RestfulControllerTest {
     @Test
     public void statusTest() throws Exception {
         try {
-            Mockito.when(weCrossHost.getResource(Mockito.any())).thenReturn(new TestResource());
+            Mockito.when(weCrossHost.getResource(Mockito.any())).thenReturn(new Resource());
 
             MvcResult rsp =
                     this.mockMvc
@@ -96,15 +88,11 @@ public class RestfulControllerTest {
     @Test
     public void listTest() throws Exception {
         try {
-            ResourceResponse resourceResponse = new ResourceResponse();
-            resourceResponse.setErrorCode(0);
-            resourceResponse.setErrorMessage("");
-            resourceResponse.setResources(new ArrayList<Resource>());
+            ZoneManager mockZoneManager = Mockito.mock(ZoneManager.class);
+            Mockito.when(mockZoneManager.getAllResources(Mockito.anyBoolean()))
+                    .thenReturn(new ArrayList<Resource>());
 
-            ZoneManager mockNetworkManager = Mockito.mock(ZoneManager.class);
-            Mockito.when(mockNetworkManager.list(Mockito.any())).thenReturn(resourceResponse);
-
-            Mockito.when(weCrossHost.getZoneManager()).thenReturn(mockNetworkManager);
+            Mockito.when(weCrossHost.getZoneManager()).thenReturn(mockZoneManager);
 
             String json =
                     "{\n"
@@ -137,93 +125,6 @@ public class RestfulControllerTest {
         }
     }
 
-    @Test
-    public void setDataTest() throws Exception {
-        try {
-            SetDataResponse setDataResponse = new SetDataResponse();
-            setDataResponse.setErrorCode(0);
-            setDataResponse.setErrorMessage("setData test resource success");
-
-            Resource resource = Mockito.mock(Resource.class);
-            Mockito.when(resource.setData(Mockito.any())).thenReturn(setDataResponse);
-
-            Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
-
-            String json =
-                    "{\n"
-                            + "\"version\":\"1\",\n"
-                            + "\"path\":\"test-network.test-stub.test-resource\",\n"
-                            + "\"method\":\"setData\",\n"
-                            + "\"data\": {\n"
-                            + "\"key\":\"mockKey\",\n"
-                            + "\"value\":\"mockValueaaaa\"\n"
-                            + "}\n"
-                            + "}";
-
-            MvcResult rsp =
-                    this.mockMvc
-                            .perform(
-                                    post("/test-network/test-stub/test-resource/setData")
-                                            .contentType(MediaType.APPLICATION_JSON)
-                                            .content(json))
-                            .andDo(print())
-                            .andExpect(status().isOk())
-                            .andReturn();
-
-            String result = rsp.getResponse().getContentAsString();
-            System.out.println("####Respond: " + result);
-
-            String expectRsp =
-                    "{\"version\":\"1\",\"result\":0,\"message\":\"Success\",\"data\":{\"errorCode\":0,\"errorMessage\":\"setData test resource success\"}}";
-            Assert.assertTrue(result.contains(expectRsp));
-        } catch (Exception e) {
-            Assert.assertTrue(e.getMessage(), false);
-        }
-    }
-
-    @Test
-    public void getDataTest() throws Exception {
-        try {
-            GetDataResponse getDataResponse = new GetDataResponse();
-            getDataResponse.setErrorCode(0);
-            getDataResponse.setErrorMessage("getData test resource success");
-
-            Resource resource = Mockito.mock(Resource.class);
-            Mockito.when(resource.getData(Mockito.any())).thenReturn(getDataResponse);
-
-            Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
-
-            String json =
-                    "{\n"
-                            + "\"version\":\"1\",\n"
-                            + "\"path\":\"test-network.test-stub.test-resource\",\n"
-                            + "\"method\":\"getData\",\n"
-                            + "\"data\": {\n"
-                            + "\"key\":\"mockKey\"\n"
-                            + "}\n"
-                            + "}";
-
-            MvcResult rsp =
-                    this.mockMvc
-                            .perform(
-                                    post("/test-network/test-stub/test-resource/getData")
-                                            .contentType(MediaType.APPLICATION_JSON)
-                                            .content(json))
-                            .andDo(print())
-                            .andExpect(status().isOk())
-                            .andReturn();
-
-            String result = rsp.getResponse().getContentAsString();
-            System.out.println("####Respond: " + result);
-
-            String expectRsp =
-                    "{\"version\":\"1\",\"result\":0,\"message\":\"Success\",\"data\":{\"errorCode\":0,\"errorMessage\":\"getData test resource success\"";
-            Assert.assertTrue(result.contains(expectRsp));
-        } catch (Exception e) {
-            Assert.assertTrue(e.getMessage(), false);
-        }
-    }
-
     public void callTest() throws Exception {
         try {
             TransactionResponse transactionResponse = new TransactionResponse();
@@ -232,7 +133,8 @@ public class RestfulControllerTest {
             transactionResponse.setHash("010157f4");
 
             Resource resource = Mockito.mock(Resource.class);
-            Mockito.when(resource.call(Mockito.any())).thenReturn(transactionResponse);
+            Mockito.when(resource.call(Mockito.any(), Mockito.any()))
+                    .thenReturn(transactionResponse);
 
             Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
 
@@ -277,7 +179,8 @@ public class RestfulControllerTest {
             transactionResponse.setHash("010157f4");
 
             Resource resource = Mockito.mock(Resource.class);
-            Mockito.when(resource.sendTransaction(Mockito.any())).thenReturn(transactionResponse);
+            Mockito.when(resource.sendTransaction(Mockito.any(), Mockito.any()))
+                    .thenReturn(transactionResponse);
 
             Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
 

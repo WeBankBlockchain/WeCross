@@ -1,24 +1,18 @@
 package com.webank.wecross.routine.htlc;
 
+import com.webank.wecross.account.Account;
 import com.webank.wecross.common.ResourceQueryStatus;
 import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.exception.WeCrossException;
-import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.EventCallback;
-import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.restserver.request.GetDataRequest;
-import com.webank.wecross.restserver.request.SetDataRequest;
-import com.webank.wecross.restserver.request.TransactionRequest;
-import com.webank.wecross.restserver.response.GetDataResponse;
-import com.webank.wecross.restserver.response.SetDataResponse;
-import com.webank.wecross.restserver.response.TransactionResponse;
+import com.webank.wecross.stub.TransactionRequest;
+import com.webank.wecross.stub.TransactionResponse;
 import java.util.Arrays;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AssetHTLCResource implements Resource {
+public class AssetHTLCResource extends Resource {
 
     private Logger logger = LoggerFactory.getLogger(AssetHTLCResource.class);
 
@@ -34,27 +28,7 @@ public class AssetHTLCResource implements Resource {
     }
 
     @Override
-    public GetDataResponse getData(GetDataRequest request) {
-        return originResource.getData(request);
-    }
-
-    @Override
-    public SetDataResponse setData(SetDataRequest request) {
-        return originResource.setData(request);
-    }
-
-    @Override
-    public byte[] callProposal(TransactionRequest request) {
-        return originResource.callProposal(request);
-    }
-
-    @Override
-    public byte[] sendTransactionProposal(TransactionRequest request) {
-        return originResource.sendTransactionProposal(request);
-    }
-
-    @Override
-    public TransactionResponse call(TransactionRequest request) {
+    public TransactionResponse call(TransactionRequest request, Account account) {
         TransactionRequest newRequest;
         try {
             newRequest = handleCallRequest(request);
@@ -64,11 +38,11 @@ public class AssetHTLCResource implements Resource {
             transactionResponse.setErrorMessage(e.getMessage());
             return transactionResponse;
         }
-        return originResource.call(newRequest);
+        return originResource.call(newRequest, account);
     }
 
     @Override
-    public TransactionResponse sendTransaction(TransactionRequest request) {
+    public TransactionResponse sendTransaction(TransactionRequest request, Account account) {
         TransactionRequest newRequest;
         try {
             newRequest = handleSendTransactionRequest(request);
@@ -79,16 +53,11 @@ public class AssetHTLCResource implements Resource {
             return transactionResponse;
         }
 
-        return originResource.sendTransaction(newRequest);
+        return originResource.sendTransaction(newRequest, account);
     }
 
     @Override
     public void registerEventHandler(EventCallback callback) {}
-
-    @Override
-    public TransactionRequest createRequest() {
-        return originResource.createRequest();
-    }
 
     @Override
     public int getDistance() {
@@ -98,36 +67,6 @@ public class AssetHTLCResource implements Resource {
     @Override
     public String getChecksum() {
         return originResource.getChecksum();
-    }
-
-    @Override
-    public Path getPath() {
-        return originResource.getPath();
-    }
-
-    @Override
-    public void setPath(Path path) {
-        originResource.setPath(path);
-    }
-
-    @Override
-    public String getPathAsString() {
-        return originResource.getPathAsString();
-    }
-
-    @Override
-    public Set<Peer> getPeers() {
-        return originResource.getPeers();
-    }
-
-    @Override
-    public void setPeers(Set<Peer> peers) {
-        originResource.setPeers(peers);
-    }
-
-    @Override
-    public String getCryptoSuite() {
-        return null;
     }
 
     public TransactionRequest handleSendTransactionRequest(TransactionRequest request)
