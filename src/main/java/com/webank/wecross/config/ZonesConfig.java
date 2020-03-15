@@ -28,8 +28,8 @@ public class ZonesConfig {
 
     @Resource StubManager stubManager;
 
-    @Bean(name = "zoneConfig")
-    public Map<String, Zone> readNetworksConfig() {
+    @Bean
+    public Map<String, Zone> newZoneMap() {
         Map<String, Zone> result = new HashMap<>();
         try {
             String network = toml.getString("common.network");

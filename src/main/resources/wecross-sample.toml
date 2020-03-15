@@ -8,6 +8,11 @@
 [server] # rpc ip & port
     address = '127.0.0.1'
     port = 8250
+    storeType = 'PKCS12'
+    keyStore = 'classpath:server.keystore'
+    keyStorePass = '123456'
+    trustStore = 'classpath:server.truststore'
+    trustStorePass = '123456'
 
 [p2p]
     listenIP = '0.0.0.0'
