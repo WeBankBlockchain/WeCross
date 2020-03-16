@@ -3,6 +3,7 @@ package com.webank.wecross.stub;
 import com.webank.wecross.account.Account;
 
 public class WithAccount<T> {
+	private String path;
     private Account account;
     private T data;
 
@@ -10,6 +11,14 @@ public class WithAccount<T> {
         this.data = data;
         this.account = account;
     }
+    
+    public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
 
     public Account getAccount() {
         return account;

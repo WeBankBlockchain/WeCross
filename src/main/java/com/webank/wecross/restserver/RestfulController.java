@@ -27,14 +27,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-// @SpringBootApplication
 public class RestfulController {
 
-    @javax.annotation.Resource(name = "newWeCrossHost")
+    @javax.annotation.Resource
     private WeCrossHost host;
 
     private Logger logger = LoggerFactory.getLogger(RestfulController.class);
     private ObjectMapper objectMapper = new ObjectMapper();
+    
+    @javax.annotation.Resource
     private AccountManager accountManager;
 
     @RequestMapping("/test")
