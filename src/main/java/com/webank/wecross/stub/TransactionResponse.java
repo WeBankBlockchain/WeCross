@@ -9,24 +9,11 @@ import org.slf4j.LoggerFactory;
 public class TransactionResponse {
     private Logger logger = LoggerFactory.getLogger(TransactionResponse.class);
 
-    @Override
-    public String toString() {
-        return "TransactionResponse [errorCode="
-                + errorCode
-                + ", errorMessage="
-                + errorMessage
-                + ", hash="
-                + hash
-                + ", result="
-                + Arrays.toString(result)
-                + "]";
-    }
-
     private Integer errorCode;
     private String errorMessage;
     private String hash;
     private List<String> extraHashes;
-    private Object result[];
+    private String[] result;
     private String type = "";
     private String encryptType = "";
 
@@ -54,11 +41,11 @@ public class TransactionResponse {
         this.hash = hash;
     }
 
-    public Object[] getResult() {
+    public String[] getResult() {
         return result;
     }
 
-    public void setResult(Object result[]) {
+    public void setResult(String[] result) {
         this.result = result;
     }
 
@@ -91,6 +78,30 @@ public class TransactionResponse {
 
     public void setEncryptType(String encryptType) {
         this.encryptType = encryptType;
+    }
+
+    @Override
+    public String toString() {
+        return "TransactionResponse{"
+                + "errorCode="
+                + errorCode
+                + ", errorMessage='"
+                + errorMessage
+                + '\''
+                + ", hash='"
+                + hash
+                + '\''
+                + ", extraHashes="
+                + extraHashes
+                + ", result="
+                + Arrays.toString(result)
+                + ", type='"
+                + type
+                + '\''
+                + ", encryptType='"
+                + encryptType
+                + '\''
+                + '}';
     }
 
     /*

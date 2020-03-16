@@ -4,21 +4,18 @@ import java.util.Arrays;
 
 public class TransactionRequest {
     private int seq = 0;
-    private String retTypes[];
     private String method;
-    private Object args[];
+    private String[] args;
     private boolean fromP2P;
 
     public TransactionRequest() {}
 
-    public TransactionRequest(String[] retTypes, String method, Object[] args) {
-        this.retTypes = retTypes;
+    public TransactionRequest(String method, String[] args) {
         this.method = method;
         this.args = args;
     }
 
-    public TransactionRequest(String[] retTypes, String method, Object[] args, boolean fromP2P) {
-        this.retTypes = retTypes;
+    public TransactionRequest(String method, String[] args, boolean fromP2P) {
         this.method = method;
         this.args = args;
         this.fromP2P = fromP2P;
@@ -32,14 +29,6 @@ public class TransactionRequest {
         this.seq = seq;
     }
 
-    public String[] getRetTypes() {
-        return retTypes;
-    }
-
-    public void setRetTypes(String[] retTypes) {
-        this.retTypes = retTypes;
-    }
-
     public String getMethod() {
         return method;
     }
@@ -48,11 +37,11 @@ public class TransactionRequest {
         this.method = method;
     }
 
-    public Object[] getArgs() {
+    public String[] getArgs() {
         return args;
     }
 
-    public void setArgs(Object[] args) {
+    public void setArgs(String[] args) {
         this.args = args;
     }
 
@@ -70,8 +59,6 @@ public class TransactionRequest {
                 + "seq="
                 + seq
                 + '\''
-                + ", retTypes="
-                + Arrays.toString(retTypes)
                 + ", method='"
                 + method
                 + '\''

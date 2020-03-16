@@ -8,8 +8,7 @@ import java.math.BigInteger;
 public class AssetHTLC implements HTLC {
 
     public String lock(Resource htlcResource, String h) throws Exception {
-        TransactionRequest request =
-                new TransactionRequest(new String[] {"String"}, "lock", new Object[] {h});
+        TransactionRequest request = new TransactionRequest("lock", new String[] {h});
         TransactionResponse response = htlcResource.sendTransaction(request, null); // TODO: fix it
         if (response.getErrorCode() != 0) {
             throw new Exception(
@@ -26,8 +25,7 @@ public class AssetHTLC implements HTLC {
         // lock yourself to get transaction hash
         String transactionHash = lock(selfHTLCResource, h);
         TransactionRequest request =
-                new TransactionRequest(
-                        new String[] {"String"}, "unlock", new Object[] {transactionHash, h, s});
+                new TransactionRequest("unlock", new String[] {transactionHash, h, s});
         TransactionResponse response =
                 otherHTLCResource.sendTransaction(request, null); // TODO: fix it
         if (response.getErrorCode() != 0) {
@@ -65,9 +63,7 @@ public class AssetHTLC implements HTLC {
     }
 
     public String getSecret(Resource htlcResource, String h) throws Exception {
-        TransactionRequest request =
-                new TransactionRequest(
-                        new String[] {"String"}, "getSecret", new Object[] {h}, false);
+        TransactionRequest request = new TransactionRequest("getSecret", new String[] {h}, false);
         TransactionResponse response = htlcResource.call(request, null); // TODO: fix it
         if (response.getErrorCode() != 0) {
             throw new Exception(
@@ -141,9 +137,9 @@ public class AssetHTLC implements HTLC {
         sendTransaction(htlcResource, "", "setCounterpartyRollbackStatus", h);
     }
 
-    private static Object call(Resource htlcResource, String retType, String method, Object... args)
+    private static Object call(Resource htlcResource, String retType, String method, String... args)
             throws Exception {
-        TransactionRequest request = new TransactionRequest(new String[] {retType}, method, args);
+        TransactionRequest request = new TransactionRequest(method, args);
         TransactionResponse response = htlcResource.call(request, null); // TODO: fix it
         if (response.getErrorCode() != 0) {
             throw new Exception(
@@ -156,8 +152,8 @@ public class AssetHTLC implements HTLC {
     }
 
     private static Object sendTransaction(
-            Resource htlcResource, String retType, String method, Object... args) throws Exception {
-        TransactionRequest request = new TransactionRequest(new String[] {retType}, method, args);
+            Resource htlcResource, String retType, String method, String... args) throws Exception {
+        TransactionRequest request = new TransactionRequest(method, args);
         TransactionResponse response = htlcResource.sendTransaction(request, null); // TODO: fix it
         if (response.getErrorCode() != 0) {
             throw new Exception(

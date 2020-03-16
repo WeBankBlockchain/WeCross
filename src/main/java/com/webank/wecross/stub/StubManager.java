@@ -13,4 +13,12 @@ public class StubManager {
     public StubFactory getStubFactory(String type) {
         return drivers.get(type);
     }
+
+    public Map<String, StubFactory> getDrivers() {
+        return drivers;
+    }
+
+    public void setDrivers(Map<String, StubFactory> drivers) {
+        this.drivers = drivers;
+    }
 }

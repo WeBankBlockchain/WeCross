@@ -8,7 +8,7 @@ public class RestRequest<T> {
     private String version;
     private String path;
     private String method;
-    private String account;
+    private String accountName;
     private T data;
 
     public void checkRestRequest(String path, String method) throws WeCrossException {
@@ -68,12 +68,12 @@ public class RestRequest<T> {
         this.method = method;
     }
 
-    public String getAccount() {
-        return account;
+    public String getAccountName() {
+        return accountName;
     }
 
-    public void setAccount(String account) {
-        this.account = account;
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
     }
 
     public T getData() {

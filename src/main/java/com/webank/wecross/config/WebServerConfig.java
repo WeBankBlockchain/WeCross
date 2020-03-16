@@ -17,8 +17,7 @@ public class WebServerConfig {
 
     private static Logger logger = LoggerFactory.getLogger(WebServerConfig.class);
 
-    @Resource(name = "newToml")
-    Toml toml;
+    @Resource Toml toml;
 
     @Bean
     public TomcatServletWebServerFactory newTomcatServletWebServerFactory() {

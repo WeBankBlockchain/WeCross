@@ -23,8 +23,7 @@ import org.springframework.context.annotation.Configuration;
 public class ZonesConfig {
     private Logger logger = LoggerFactory.getLogger(ZonesConfig.class);
 
-    @Resource(name = "newToml")
-    Toml toml;
+    @Resource Toml toml;
 
     @Resource StubManager stubManager;
 
