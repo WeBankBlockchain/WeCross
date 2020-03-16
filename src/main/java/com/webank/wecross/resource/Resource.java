@@ -92,7 +92,7 @@ public class Resource {
     public void setDriver(Driver driver) {
         this.driver = driver;
     }
-    
+
     public boolean isHasLocalConnection() {
         return hasLocalConnection;
     }
