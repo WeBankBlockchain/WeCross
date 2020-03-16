@@ -11,6 +11,10 @@ public interface Connection {
      */
     Response send(Request request);
 
-    /** get resources name */
+    /**
+     * get resources name
+     *
+     * @return resources
+     */
     List<String> getResources();
 }

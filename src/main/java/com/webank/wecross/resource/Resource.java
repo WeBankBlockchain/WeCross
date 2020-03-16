@@ -18,15 +18,24 @@ public class Resource {
     private String type;
     private Driver driver;
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
+    boolean hasLocalConnection = false;
     private Random random = new SecureRandom();
-    int distance = 0;
 
     public void addConnection(Peer peer, Connection connection) {
-        connections.put(peer, connection);
+        if (!hasLocalConnection) {
+            if (peer == null) {
+                connections.clear();
+                hasLocalConnection = true;
+            }
+
+            connections.put(peer, connection);
+        }
     }
 
     public void removeConnection(Peer peer) {
-        connections.remove(peer);
+        if (!hasLocalConnection) {
+            connections.remove(peer);
+        }
     }
 
     public boolean isConnectionEmpty() {
@@ -72,14 +81,6 @@ public class Resource {
         this.type = type;
     }
 
-    public int getDistance() {
-        return distance;
-    }
-
-    public void setDistance(int distance) {
-        this.distance = distance;
-    }
-
     public String getChecksum() {
         return "";
     }
@@ -90,5 +91,9 @@ public class Resource {
 
     public void setDriver(Driver driver) {
         this.driver = driver;
+    }
+
+    public boolean isHasLocalConnection() {
+        return hasLocalConnection;
     }
 }

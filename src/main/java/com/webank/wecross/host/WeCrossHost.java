@@ -1,7 +1,5 @@
 package com.webank.wecross.host;
 
-import com.webank.wecross.chain.StateRequest;
-import com.webank.wecross.chain.StateResponse;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.netty.P2PService;
 import com.webank.wecross.peer.Peer;
@@ -10,6 +8,8 @@ import com.webank.wecross.peer.PeerSeqMessageData;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.Versions;
+import com.webank.wecross.restserver.request.StateRequest;
+import com.webank.wecross.restserver.response.StateResponse;
 import com.webank.wecross.routine.htlc.AssetHTLC;
 import com.webank.wecross.routine.htlc.AssetHTLCResource;
 import com.webank.wecross.routine.htlc.HTLCResourcePair;
@@ -95,7 +95,7 @@ public class WeCrossHost {
             if (resource.getType().equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_ASSET_HTLC_CONTRACT)
                     && resource.getDistance() == 0) {
             */
-            if (AssetHTLCResource.class.isInstance(resources) && resource.getDistance() == 0) {
+            if (AssetHTLCResource.class.isInstance(resources) && resource.isHasLocalConnection()) {
                 AssetHTLC assetHTLC = new AssetHTLC();
                 String counterpartyHTLCIpath = assetHTLC.getCounterpartyHTLCIpath(resource);
                 Resource counterpartyHTLCResource =

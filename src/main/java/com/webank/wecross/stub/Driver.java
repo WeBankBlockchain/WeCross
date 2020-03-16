@@ -34,14 +34,6 @@ public interface Driver {
     public TransactionResponse decodeTransactionResponse(byte[] data);
 
     /**
-     * Encode an abrstract block header.
-     *
-     * @param block the block header
-     * @return the encoded block header binary data
-     */
-    public byte[] encodeBlockHeader(BlockHeader block);
-
-    /**
      * Decode an encoded block header binary data.
      *
      * @param data the encoded block header
@@ -79,5 +71,5 @@ public interface Driver {
      * @param number
      * @return BlockHeader
      */
-    public BlockHeader getBlockHeader(long number, Connection connection);
+    public byte[] getBlockHeader(long number, Connection connection);
 }

@@ -3,7 +3,6 @@ package com.webank.wecross.test.zone;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import com.webank.wecross.chain.Chain;
 import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Path;
@@ -11,6 +10,7 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.stub.StubFactory;
 import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.HashMap;
@@ -63,7 +63,6 @@ public class ZoneManagerTest {
             for (int j = 0; j < 4; j++) {
                 ResourceInfo resourceInfo = new ResourceInfo();
                 resourceInfo.setPath("payment.bcos" + i + ".contract" + j);
-                resourceInfo.setDistance(i); // i == 0, set it as local resource
                 resourceInfo.setStubType("test");
 
                 Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
@@ -83,7 +82,7 @@ public class ZoneManagerTest {
 
         Set<String> allLocalResources = zoneManager.getAllResourceName(true);
         System.out.println(allLocalResources);
-        Assert.assertEquals(4, allLocalResources.size());
+        Assert.assertEquals(0, allLocalResources.size());
 
         // test for wrong path
         ResourceInfo resourceInfo = new ResourceInfo();
@@ -102,7 +101,7 @@ public class ZoneManagerTest {
         // test for different peer
         ResourceInfo resourceInfo2 = new ResourceInfo();
         resourceInfo2.setPath("payment.bcos0.contract0");
-        resourceInfo2.setDistance(0); // i == 0, set it as local resource
+        resourceInfo2.setStubType("test");
 
         Peer peer2 = new Peer(new Node("bbb", "127.0.0.1", 100));
 
@@ -162,7 +161,7 @@ public class ZoneManagerTest {
 
         ResourceInfo resourceInfo2 = new ResourceInfo();
         resourceInfo2.setPath("payment.bcos1.contract1");
-        resourceInfo2.setDistance(0); // i == 0, set it as local resource
+        resourceInfo2.setStubType("test");
 
         Peer peer2 = new Peer(new Node("bbb", "127.0.0.1", 100));
 

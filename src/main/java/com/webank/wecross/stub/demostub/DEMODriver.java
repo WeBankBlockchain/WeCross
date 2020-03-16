@@ -53,15 +53,6 @@ public class DEMODriver implements Driver {
     }
 
     @Override
-    public byte[] encodeBlockHeader(BlockHeader block) {
-        try {
-            return mapper.writeValueAsBytes(block);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
-    }
-
-    @Override
     public BlockHeader decodeBlockHeader(byte[] data) {
         try {
             return mapper.readValue(data, BlockHeader.class);
@@ -104,7 +95,7 @@ public class DEMODriver implements Driver {
     }
 
     @Override
-    public BlockHeader getBlockHeader(long number, Connection connection) {
+    public byte[] getBlockHeader(long number, Connection connection) {
         return null;
     }
 }

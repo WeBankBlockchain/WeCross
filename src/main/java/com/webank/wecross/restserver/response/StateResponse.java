@@ -1,4 +1,4 @@
-package com.webank.wecross.chain;
+package com.webank.wecross.restserver.response;
 
 public class StateResponse {
     private int seq;
