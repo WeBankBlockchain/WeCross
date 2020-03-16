@@ -12,12 +12,14 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.request.ResourceRequest;
 import com.webank.wecross.restserver.request.StateRequest;
+import com.webank.wecross.restserver.response.AccountResponse;
 import com.webank.wecross.restserver.response.ResourceResponse;
 import com.webank.wecross.restserver.response.StateResponse;
+import com.webank.wecross.restserver.response.StubResponse;
+import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,22 +31,50 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class RestfulController {
 
-    @javax.annotation.Resource
-    private WeCrossHost host;
+    @javax.annotation.Resource private WeCrossHost host;
 
     private Logger logger = LoggerFactory.getLogger(RestfulController.class);
     private ObjectMapper objectMapper = new ObjectMapper();
-    
-    @javax.annotation.Resource
-    private AccountManager accountManager;
+
+    @javax.annotation.Resource private AccountManager accountManager;
 
     @RequestMapping("/test")
     public String test() {
         return "OK!";
     }
 
-    @RequestMapping(value = "/list", method = RequestMethod.POST)
-    public RestResponse<ResourceResponse> handleList(@RequestBody String restRequestString) {
+    @RequestMapping(value = "/supportedStubs", method = RequestMethod.POST)
+    public RestResponse<StubResponse> supportedStubs(@RequestBody String restRequestString) {
+        RestResponse<StubResponse> restResponse = new RestResponse<>();
+        restResponse.setVersion(Versions.currentVersion);
+        restResponse.setResult(QueryStatus.SUCCESS);
+        restResponse.setMessage(QueryStatus.getStatusMessage(QueryStatus.SUCCESS));
+
+        logger.debug("request string: {}", restRequestString);
+
+        try {
+            RestRequest restRequest =
+                    objectMapper.readValue(restRequestString, new TypeReference<RestRequest>() {});
+            restRequest.checkRestRequest("", "supportedStubs");
+            StubResponse stubResponse = new StubResponse();
+            ZoneManager zoneManager = host.getZoneManager();
+            StubManager stubManager = zoneManager.getStubManager();
+            stubResponse.setStubs(stubManager);
+            restResponse.setData(stubResponse);
+        } catch (WeCrossException e) {
+            logger.warn("Process request error: {}", e.getMessage());
+            restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
+            restResponse.setMessage(e.getMessage());
+        } catch (Exception e) {
+            logger.warn("Process request error: {}", e.getMessage());
+            restResponse.setResult(QueryStatus.INTERNAL_ERROR);
+            restResponse.setMessage(e.getMessage());
+        }
+        return restResponse;
+    }
+
+    @RequestMapping(value = "/listResources", method = RequestMethod.POST)
+    public RestResponse<ResourceResponse> listResources(@RequestBody String restRequestString) {
         RestResponse<ResourceResponse> restResponse = new RestResponse<>();
         restResponse.setVersion(Versions.currentVersion);
         restResponse.setResult(QueryStatus.SUCCESS);
@@ -57,25 +87,40 @@ public class RestfulController {
                     objectMapper.readValue(
                             restRequestString,
                             new TypeReference<RestRequest<ResourceRequest>>() {});
-
-            restRequest.checkRestRequest("", "list");
-
+            restRequest.checkRestRequest("", "listResources");
             ResourceRequest resourceRequest = restRequest.getData();
-            ZoneManager networkManager = host.getZoneManager();
-
+            ZoneManager zoneManager = host.getZoneManager();
             ResourceResponse resourceResponse = new ResourceResponse();
-            try {
-                List<Resource> resources =
-                        networkManager.getAllResources(resourceRequest.isIgnoreRemote());
-                resourceResponse.setErrorCode(0);
-                resourceResponse.setErrorMessage("");
-                resourceResponse.setResources(resources);
-            } catch (Exception e) {
-                resourceResponse.setErrorCode(1);
-                resourceResponse.setErrorMessage("Unexpected error: " + e.getMessage());
-            }
-
+            resourceResponse.setResourceInfos(zoneManager, resourceRequest.isIgnoreRemote());
             restResponse.setData(resourceResponse);
+        } catch (WeCrossException e) {
+            logger.warn("Process request error: {}", e.getMessage());
+            restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
+            restResponse.setMessage(e.getMessage());
+        } catch (Exception e) {
+            logger.warn("Process request error: {}", e.getMessage());
+            restResponse.setResult(QueryStatus.INTERNAL_ERROR);
+            restResponse.setMessage(e.getMessage());
+        }
+        return restResponse;
+    }
+
+    @RequestMapping(value = "/listAccounts", method = RequestMethod.POST)
+    public RestResponse<AccountResponse> listAccounts(@RequestBody String restRequestString) {
+        RestResponse<AccountResponse> restResponse = new RestResponse<>();
+        restResponse.setVersion(Versions.currentVersion);
+        restResponse.setResult(QueryStatus.SUCCESS);
+        restResponse.setMessage(QueryStatus.getStatusMessage(QueryStatus.SUCCESS));
+
+        logger.debug("request string: {}", restRequestString);
+
+        try {
+            RestRequest restRequest =
+                    objectMapper.readValue(restRequestString, new TypeReference<RestRequest>() {});
+            restRequest.checkRestRequest("", "listAccounts");
+            AccountResponse accountResponse = new AccountResponse();
+            accountResponse.setAccountInfos(accountManager);
+            restResponse.setData(accountResponse);
         } catch (WeCrossException e) {
             logger.warn("Process request error: {}", e.getMessage());
             restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
@@ -176,7 +221,7 @@ public class RestfulController {
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) restRequest.getData();
 
-                        Account account = accountManager.getAccount(restRequest.getAccount());
+                        Account account = accountManager.getAccount(restRequest.getAccountName());
 
                         TransactionResponse transactionResponse =
                                 (TransactionResponse) resourceObj.call(transactionRequest, account);
@@ -200,7 +245,7 @@ public class RestfulController {
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) restRequest.getData();
 
-                        Account account = accountManager.getAccount(restRequest.getAccount());
+                        Account account = accountManager.getAccount(restRequest.getAccountName());
 
                         TransactionResponse transactionResponse =
                                 (TransactionResponse)

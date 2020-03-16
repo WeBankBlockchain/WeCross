@@ -23,13 +23,12 @@ import org.springframework.context.annotation.Configuration;
 public class ZonesConfig {
     private Logger logger = LoggerFactory.getLogger(ZonesConfig.class);
 
-    @Resource(name = "newToml")
-    Toml toml;
+    @Resource Toml toml;
 
     @Resource StubManager stubManager;
 
-    @Bean(name = "zoneConfig")
-    public Map<String, Zone> readNetworksConfig() {
+    @Bean
+    public Map<String, Zone> newZoneMap() {
         Map<String, Zone> result = new HashMap<>();
         try {
             String network = toml.getString("common.network");

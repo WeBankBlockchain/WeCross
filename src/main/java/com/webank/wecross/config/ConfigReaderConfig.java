@@ -19,8 +19,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 public class ConfigReaderConfig {
     private static Logger logger = LoggerFactory.getLogger(ConfigReaderConfig.class);
 
-    @Resource(name = "newToml")
-    Toml toml;
+    @Resource Toml toml;
 
     @Bean
     public P2PConfig newP2PConfig() throws WeCrossException {

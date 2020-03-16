@@ -14,9 +14,10 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestfulController;
 import com.webank.wecross.stub.TransactionRequest;
+import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
-import java.util.ArrayList;
+import java.util.HashMap;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -109,28 +110,26 @@ public class RestfulControllerTest {
     }
 
     @Test
-    public void listTest() throws Exception {
+    public void supportedStubsTest() throws Exception {
         try {
             ZoneManager mockZoneManager = Mockito.mock(ZoneManager.class);
-            Mockito.when(mockZoneManager.getAllResources(Mockito.anyBoolean()))
-                    .thenReturn(new ArrayList<Resource>());
-
             Mockito.when(weCrossHost.getZoneManager()).thenReturn(mockZoneManager);
-
+            StubManager mockStubManager = Mockito.mock(StubManager.class);
+            Mockito.when(weCrossHost.getZoneManager().getStubManager()).thenReturn(mockStubManager);
+            Mockito.when(mockStubManager.getDrivers()).thenReturn(new HashMap<>());
             String json =
                     "{\n"
                             + "\"version\":\"1\",\n"
                             + "\"path\":\"\",\n"
-                            + "\"method\":\"list\",\n"
+                            + "\"method\":\"supportedStubs\",\n"
                             + "\"data\": {\n"
-                            + "\"ignoreRemote\":true\n"
                             + "}\n"
                             + "}";
 
             MvcResult rsp =
                     this.mockMvc
                             .perform(
-                                    post("/list")
+                                    post("/supportedStubs")
                                             .contentType(MediaType.APPLICATION_JSON)
                                             .content(json))
                             .andDo(print())
@@ -141,7 +140,79 @@ public class RestfulControllerTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"1\",\"result\":0,\"message\":\"Success\",\"data\":{\"errorCode\":0,\"errorMessage\":\"\",\"resources\"";
+                    "{\"version\":\"1\",\"result\":0,\"message\":\"Success\",\"data\":{\"stubs\":[]}}";
+            Assert.assertTrue(result.contains(expectRsp));
+        } catch (Exception e) {
+            Assert.assertTrue(e.getMessage(), false);
+        }
+    }
+
+    @Test
+    public void listAccountsTest() throws Exception {
+        try {
+            String json =
+                    "{\n"
+                            + "\"version\":\"1\",\n"
+                            + "\"path\":\"\",\n"
+                            + "\"method\":\"listAccounts\",\n"
+                            + "\"data\": {\n"
+                            + "\"ignoreRemote\":true\n"
+                            + "}\n"
+                            + "}";
+
+            MvcResult rsp =
+                    this.mockMvc
+                            .perform(
+                                    post("/listAccounts")
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .content(json))
+                            .andDo(print())
+                            .andExpect(status().isOk())
+                            .andReturn();
+
+            String result = rsp.getResponse().getContentAsString();
+            System.out.println("####Respond: " + result);
+
+            String expectRsp =
+                    "{\"version\":\"1\",\"result\":0,\"message\":\"Success\",\"data\":{\"accountInfos\":null}}";
+            Assert.assertTrue(result.contains(expectRsp));
+        } catch (Exception e) {
+            Assert.assertTrue(e.getMessage(), false);
+        }
+    }
+
+    @Test
+    public void listResourcesTest() throws Exception {
+        try {
+            ZoneManager mockZoneManager = Mockito.mock(ZoneManager.class);
+            Mockito.when(weCrossHost.getZoneManager()).thenReturn(mockZoneManager);
+            Mockito.when(mockZoneManager.getAllResourceInfo(Mockito.anyBoolean()))
+                    .thenReturn(new HashMap<>());
+            String json =
+                    "{\n"
+                            + "\"version\":\"1\",\n"
+                            + "\"path\":\"\",\n"
+                            + "\"method\":\"listResources\",\n"
+                            + "\"data\": {\n"
+                            + "\"ignoreRemote\":true\n"
+                            + "}\n"
+                            + "}";
+
+            MvcResult rsp =
+                    this.mockMvc
+                            .perform(
+                                    post("/listResources")
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .content(json))
+                            .andDo(print())
+                            .andExpect(status().isOk())
+                            .andReturn();
+
+            String result = rsp.getResponse().getContentAsString();
+            System.out.println("####Respond: " + result);
+
+            String expectRsp =
+                    "{\"version\":\"1\",\"result\":0,\"message\":\"Success\",\"data\":{\"resourceInfos\":[]}}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
@@ -168,11 +239,11 @@ public class RestfulControllerTest {
             request.setVersion("1");
             request.setPath("test-network.test-stub.test-resource");
             request.setMethod("call");
-            request.setAccount("demo");
+            request.setAccountName("demo");
             request.setData(new TransactionRequest());
             
             request.getData().setMethod("get");
-            request.getData().setArgs(new Object[] {});
+            request.getData().setArgs(new String[] {});
             
             MvcResult rsp =
                     this.mockMvc
@@ -217,11 +288,11 @@ public class RestfulControllerTest {
             request.setVersion("1");
             request.setPath("test-network.test-stub.test-resource");
             request.setMethod("sendTransaction");
-            request.setAccount("demo");
+            request.setAccountName("demo");
             request.setData(new TransactionRequest());
             
             request.getData().setMethod("set");
-            request.getData().setArgs(new Object[] {"aaaaa"});
+            request.getData().setArgs(new String[] {"aaaaa"});
             
             MvcResult rsp =
                     this.mockMvc
