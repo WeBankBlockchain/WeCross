@@ -63,7 +63,6 @@ public class ZoneManagerTest {
             for (int j = 0; j < 4; j++) {
                 ResourceInfo resourceInfo = new ResourceInfo();
                 resourceInfo.setPath("payment.bcos" + i + ".contract" + j);
-                resourceInfo.setDistance(i); // i == 0, set it as local resource
                 resourceInfo.setStubType("test");
 
                 Set<ResourceInfo> resources = new HashSet<ResourceInfo>();
@@ -83,7 +82,7 @@ public class ZoneManagerTest {
 
         Set<String> allLocalResources = zoneManager.getAllResourceName(true);
         System.out.println(allLocalResources);
-        Assert.assertEquals(4, allLocalResources.size());
+        Assert.assertEquals(0, allLocalResources.size());
 
         // test for wrong path
         ResourceInfo resourceInfo = new ResourceInfo();
@@ -102,7 +101,7 @@ public class ZoneManagerTest {
         // test for different peer
         ResourceInfo resourceInfo2 = new ResourceInfo();
         resourceInfo2.setPath("payment.bcos0.contract0");
-        resourceInfo2.setDistance(0); // i == 0, set it as local resource
+        resourceInfo2.setStubType("test");
 
         Peer peer2 = new Peer(new Node("bbb", "127.0.0.1", 100));
 
@@ -162,7 +161,7 @@ public class ZoneManagerTest {
 
         ResourceInfo resourceInfo2 = new ResourceInfo();
         resourceInfo2.setPath("payment.bcos1.contract1");
-        resourceInfo2.setDistance(0); // i == 0, set it as local resource
+        resourceInfo2.setStubType("test");
 
         Peer peer2 = new Peer(new Node("bbb", "127.0.0.1", 100));
 

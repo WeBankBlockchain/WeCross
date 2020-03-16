@@ -19,23 +19,23 @@ public class Resource {
     private Driver driver;
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
     boolean hasLocalConnection = false;
-	private Random random = new SecureRandom();
+    private Random random = new SecureRandom();
 
     public void addConnection(Peer peer, Connection connection) {
-    	if(!hasLocalConnection) {
-    		if(peer == null) {
-    			connections.clear();
-    			hasLocalConnection = true;
-    		}
-    		
-    		connections.put(peer, connection);    		
-    	}
+        if (!hasLocalConnection) {
+            if (peer == null) {
+                connections.clear();
+                hasLocalConnection = true;
+            }
+
+            connections.put(peer, connection);
+        }
     }
 
     public void removeConnection(Peer peer) {
-    	if(!hasLocalConnection) {
-    		connections.remove(peer);
-    	}
+        if (!hasLocalConnection) {
+            connections.remove(peer);
+        }
     }
 
     public boolean isConnectionEmpty() {
@@ -92,8 +92,8 @@ public class Resource {
     public void setDriver(Driver driver) {
         this.driver = driver;
     }
-    
+
     public boolean isHasLocalConnection() {
-		return hasLocalConnection;
-	}
+        return hasLocalConnection;
+    }
 }

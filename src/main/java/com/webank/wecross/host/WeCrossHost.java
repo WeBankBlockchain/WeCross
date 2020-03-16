@@ -95,7 +95,7 @@ public class WeCrossHost {
             if (resource.getType().equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_ASSET_HTLC_CONTRACT)
                     && resource.getDistance() == 0) {
             */
-            if (AssetHTLCResource.class.isInstance(resources) && resource.getDistance() == 0) {
+            if (AssetHTLCResource.class.isInstance(resources) && resource.isHasLocalConnection()) {
                 AssetHTLC assetHTLC = new AssetHTLC();
                 String counterpartyHTLCIpath = assetHTLC.getCounterpartyHTLCIpath(resource);
                 Resource counterpartyHTLCResource =

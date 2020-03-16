@@ -183,7 +183,7 @@ public class ZoneManager {
                     zone = new Zone();
                     zones.put(path.getNetwork(), zone);
                 }
-                
+
                 Driver driver = stubManager.getStubFactory(resourceInfo.getStubType()).newDriver();
                 RemoteConnection remoteConnection = new RemoteConnection();
                 remoteConnection.setP2pEngine(p2pEngine);
@@ -196,9 +196,9 @@ public class ZoneManager {
                     chain.setDriver(driver);
                     zone.getStubs().put(path.getChain(), chain);
                 }
-                
+
                 chain.addConnection(peer, remoteConnection);
-                
+
                 Resource resource = chain.getResources().get(path.getResource());
                 if (resource == null) {
                     resource = new Resource();

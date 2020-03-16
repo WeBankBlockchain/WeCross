@@ -13,7 +13,8 @@ public interface Connection {
 
     /**
      * get resources name
+     *
      * @return resources
-    */
+     */
     List<String> getResources();
 }
