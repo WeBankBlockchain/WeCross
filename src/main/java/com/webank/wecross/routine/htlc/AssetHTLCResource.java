@@ -67,14 +67,14 @@ public class AssetHTLCResource extends Resource {
     public TransactionRequest handleSendTransactionRequest(TransactionRequest request)
             throws WeCrossException {
         if (request.getMethod().equals("unlock")) {
-            Object[] args = request.getArgs();
+            String[] args = request.getArgs();
             if (args == null || args.length < 2) {
                 logger.error("format of request is error in sendTransaction for unlock");
                 throw new WeCrossException(
                         ResourceQueryStatus.ASSET_HTLC_REQUEST_ERROR,
                         "hash of lock transaction not found");
             }
-            String transactionHash = (String) args[0];
+            String transactionHash = args[0];
 
             AssetHTLC assetHTLC = new AssetHTLC();
             // Verify that the asset is locked
@@ -86,9 +86,7 @@ public class AssetHTLCResource extends Resource {
                         ResourceQueryStatus.ASSET_HTLC_VERIFY_LOCK_ERROR,
                         "verify transaction of lock failed");
             }
-
-            Object[] newArgs = Arrays.copyOfRange(args, 1, args.length - 1);
-            request.setArgs(newArgs);
+            request.setArgs(Arrays.copyOfRange(args, 1, args.length - 1));
         }
 
         logger.info("HTLCRequest: {}", request.toString());

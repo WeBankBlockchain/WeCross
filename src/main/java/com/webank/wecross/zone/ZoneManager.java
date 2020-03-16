@@ -270,7 +270,7 @@ public class ZoneManager {
         }
     }
 
-    public List<Resource> getAllResources(boolean ignoreRemote) throws Exception {
+    public List<Resource> getAllResources(boolean ignoreRemote) {
         lock.readLock().lock();
         try {
             List<Resource> resourcesList = new ArrayList<>();

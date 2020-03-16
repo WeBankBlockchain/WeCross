@@ -15,12 +15,9 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 @Configuration
 public class AccountManagerConfig {
-    @Resource(name = "newToml")
-    Toml toml;
+    @Resource Toml toml;
 
     @Resource StubManager stubManager;
-
-    @Resource WeCrossConfig weCrossConfig;
 
     private Logger logger = LoggerFactory.getLogger(AccountManagerConfig.class);
 
