@@ -3,7 +3,6 @@ package com.webank.wecross.test.zone;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import com.webank.wecross.chain.Chain;
 import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Path;
@@ -11,6 +10,7 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.stub.StubFactory;
 import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.HashMap;

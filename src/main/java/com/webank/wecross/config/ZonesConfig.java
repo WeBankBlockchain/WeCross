@@ -1,7 +1,6 @@
 package com.webank.wecross.config;
 
 import com.moandjiezana.toml.Toml;
-import com.webank.wecross.chain.Chain;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
@@ -9,6 +8,7 @@ import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.StubFactory;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.utils.ConfigUtils;
+import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
 import java.util.HashMap;
 import java.util.List;
@@ -113,7 +113,6 @@ public class ZonesConfig {
             for (String name : resources) {
                 com.webank.wecross.resource.Resource resource =
                         new com.webank.wecross.resource.Resource();
-                resource.setDistance(0);
                 resource.setDriver(stubFactory.newDriver());
                 resource.addConnection(null, connection);
                 resource.setType(type);

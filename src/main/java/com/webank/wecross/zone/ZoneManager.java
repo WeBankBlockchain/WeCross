@@ -1,11 +1,11 @@
 package com.webank.wecross.zone;
 
-import com.webank.wecross.chain.Chain;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
+import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.stub.remote.RemoteConnection;
 import com.webank.wecross.utils.core.PathUtils;
@@ -104,7 +104,6 @@ public class ZoneManager {
                     Resource resource = getResource(path);
                     ResourceInfo info = new ResourceInfo();
                     info.setPath(path.toString());
-                    info.setDistance(resource.getDistance());
                     info.setChecksum(resource.getChecksum());
                     info.setStubType(resource.getType());
                     ret.put(path.toString(), info);
@@ -137,7 +136,7 @@ public class ZoneManager {
 
                     for (Map.Entry<String, Resource> resourceEntry :
                             stubEntry.getValue().getResources().entrySet()) {
-                        if (resourceEntry.getValue().getDistance() == 0 || !ignoreRemote) {
+                        if (resourceEntry.getValue().isHasLocalConnection() || !ignoreRemote) {
                             String resourceName = PathUtils.toPureName(resourceEntry.getKey());
                             ret.add(networkName + "." + stubName + "." + resourceName);
                         }
@@ -184,23 +183,26 @@ public class ZoneManager {
                     zone = new Zone();
                     zones.put(path.getNetwork(), zone);
                 }
-
-                Chain chain = zone.getStubs().get(path.getChain());
-                if (chain == null) {
-                    chain = new Chain();
-                    zone.getStubs().put(path.getChain(), chain);
-                }
-
+                
+                Driver driver = stubManager.getStubFactory(resourceInfo.getStubType()).newDriver();
                 RemoteConnection remoteConnection = new RemoteConnection();
                 remoteConnection.setP2pEngine(p2pEngine);
                 remoteConnection.setPeer(peer);
                 remoteConnection.setPath(path.toURI());
+
+                Chain chain = zone.getStubs().get(path.getChain());
+                if (chain == null) {
+                    chain = new Chain();
+                    chain.setDriver(driver);
+                    zone.getStubs().put(path.getChain(), chain);
+                }
+                
+                chain.addConnection(peer, remoteConnection);
+                
                 Resource resource = chain.getResources().get(path.getResource());
                 if (resource == null) {
                     resource = new Resource();
-                    resource.setDriver(
-                            stubManager.getStubFactory(resourceInfo.getStubType()).newDriver());
-                    resource.setDistance(resourceInfo.getDistance());
+                    resource.setDriver(driver);
                     chain.getResources().put(path.getResource(), resource);
                 }
 

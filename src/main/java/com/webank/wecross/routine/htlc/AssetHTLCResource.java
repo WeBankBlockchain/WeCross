@@ -60,11 +60,6 @@ public class AssetHTLCResource extends Resource {
     public void registerEventHandler(EventCallback callback) {}
 
     @Override
-    public int getDistance() {
-        return 0;
-    }
-
-    @Override
     public String getChecksum() {
         return originResource.getChecksum();
     }
