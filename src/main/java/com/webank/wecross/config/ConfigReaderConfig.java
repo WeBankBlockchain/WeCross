@@ -23,10 +23,10 @@ public class ConfigReaderConfig {
     Toml toml;
 
     @Bean
-    public WeCrossConfig newP2PConfig() throws WeCrossException {
+    public P2PConfig newP2PConfig() throws WeCrossException {
         logger.info("initializing p2p config...");
 
-        WeCrossConfig p2PConfig = null;
+        P2PConfig p2PConfig = null;
         try {
             Map<String, Object> wecrossMap = toml.toMap();
 
@@ -38,7 +38,7 @@ public class ConfigReaderConfig {
                                 + WeCrossDefault.MAIN_CONFIG_FILE;
                 throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
             }
-            p2PConfig = parseP2PConfig(p2pMap);
+            p2PConfig = parseWeCrossConfig(p2pMap);
 
         } catch (WeCrossException e) {
             logger.error(e.getMessage());
@@ -47,8 +47,8 @@ public class ConfigReaderConfig {
         return p2PConfig;
     }
 
-    public WeCrossConfig parseP2PConfig(Map<String, Object> p2pMap) throws WeCrossException {
-        WeCrossConfig p2PConfig = new WeCrossConfig();
+    public P2PConfig parseWeCrossConfig(Map<String, Object> p2pMap) throws WeCrossException {
+        P2PConfig p2PConfig = new P2PConfig();
 
         String listenIP = (String) p2pMap.get("listenIP");
         if (listenIP == null) {

@@ -5,6 +5,7 @@ import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
+import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.stub.remote.RemoteConnection;
@@ -28,6 +29,7 @@ public class ZoneManager {
     private P2PMessageEngine p2pEngine;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
     private StubManager stubManager;
+    BlockHeaderStorageFactory blockHeaderStorageFactory;
 
     public Resource getResource(Path path) {
         lock.readLock().lock();
@@ -194,6 +196,10 @@ public class ZoneManager {
                 if (chain == null) {
                     chain = new Chain();
                     chain.setDriver(driver);
+
+                    String blockPath = path.getNetwork() + "." + path.getChain();
+                    chain.setBlockHeaderStorage(
+                            blockHeaderStorageFactory.newBlockHeaderStorage(blockPath));
                     zone.getStubs().put(path.getChain(), chain);
                 }
 
@@ -301,5 +307,13 @@ public class ZoneManager {
 
     public void setStubManager(StubManager stubManager) {
         this.stubManager = stubManager;
+    }
+
+    public BlockHeaderStorageFactory getBlockHeaderStorageFactory() {
+        return blockHeaderStorageFactory;
+    }
+
+    public void setBlockHeaderStorageFactory(BlockHeaderStorageFactory blockHeaderStorageFactory) {
+        this.blockHeaderStorageFactory = blockHeaderStorageFactory;
     }
 }

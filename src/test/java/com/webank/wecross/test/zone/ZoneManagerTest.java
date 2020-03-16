@@ -8,6 +8,7 @@ import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
+import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.StubFactory;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.zone.Chain;
@@ -52,8 +53,16 @@ public class ZoneManagerTest {
         StubManager stubManager = Mockito.spy(StubManager.class);
         Mockito.when(stubManager.getStubFactory(Mockito.anyString())).thenReturn(stubFactory);
 
+        BlockHeaderStorageFactory blockHeaderStorageFactory =
+                Mockito.spy(BlockHeaderStorageFactory.class);
+        Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos"))
+                .thenReturn(null);
+        Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos0"))
+                .thenReturn(null);
+
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setStubManager(stubManager);
+        zoneManager.setBlockHeaderStorageFactory(blockHeaderStorageFactory);
 
         assertEquals(stubManager, zoneManager.getStubManager());
 
@@ -113,7 +122,7 @@ public class ZoneManagerTest {
         System.out.println(allResources3);
         Assert.assertEquals(12, allResources3.size());
 
-        Resource resource2 = zoneManager.getResource(Path.decode("payment.bcos0.contract0"));
+        // Resource resource2 = zoneManager.getResource(Path.decode("payment.bcos0.contract0"));
         // Assert.assertEquals(2, resource2.getPeers().size());
     }
 
@@ -126,8 +135,20 @@ public class ZoneManagerTest {
         StubManager stubManager = Mockito.spy(StubManager.class);
         Mockito.when(stubManager.getStubFactory("test")).thenReturn(stubFactory);
 
+        BlockHeaderStorageFactory blockHeaderStorageFactory =
+                Mockito.spy(BlockHeaderStorageFactory.class);
+        Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos"))
+                .thenReturn(null);
+        Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos0"))
+                .thenReturn(null);
+        Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos1"))
+                .thenReturn(null);
+        Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos2"))
+                .thenReturn(null);
+
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setStubManager(stubManager);
+        zoneManager.setBlockHeaderStorageFactory(blockHeaderStorageFactory);
 
         Peer peer = new Peer(new Node("aaa", "127.0.0.1", 100));
 

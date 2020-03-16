@@ -2,6 +2,7 @@ package com.webank.wecross.zone;
 
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.storage.BlockHeaderStorage;
 import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
@@ -19,14 +20,19 @@ public class Chain {
     private Map<String, Resource> resources = new HashMap<String, Resource>();
     private Driver driver;
     private String path;
+    private BlockHeaderStorage blockHeaderStorage;
     private Random random = new SecureRandom();
 
     public int getBlockNumber() {
-        return 0;
+        return blockHeaderStorage.readBlockNumber();
     }
 
     public BlockHeader getBlockHeader(int blockNumber) {
-        return null;
+        return driver.decodeBlockHeader(blockHeaderStorage.readBlockHeader(blockNumber));
+    }
+
+    public void putBlockHeader(int blockNumber, byte[] blockHeader) {
+        blockHeaderStorage.writeBlockHeader(blockNumber, blockHeader);
     }
 
     public void addConnection(Peer peer, Connection connection) {
@@ -80,5 +86,13 @@ public class Chain {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public BlockHeaderStorage getBlockHeaderStorage() {
+        return blockHeaderStorage;
+    }
+
+    public void setBlockHeaderStorage(BlockHeaderStorage blockHeaderStorage) {
+        this.blockHeaderStorage = blockHeaderStorage;
     }
 }

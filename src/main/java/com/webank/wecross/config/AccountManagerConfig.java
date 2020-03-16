@@ -20,13 +20,13 @@ public class AccountManagerConfig {
 
     @Resource StubManager stubManager;
 
-    @Resource WeCrossConfig weCrossConfig;
+    @Resource P2PConfig weCrossConfig;
 
     private Logger logger = LoggerFactory.getLogger(AccountManagerConfig.class);
 
     @Bean
     public AccountManager newAccountManager() throws IOException {
-        String accountsPath = toml.getString("accounts.path");
+        String accountsPath = toml.getString("accounts.path", "accounts/");
 
         if (accountsPath == null) {
             String errorMessage =

@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class NettyBootstrapConfig {
-    @Resource WeCrossConfig p2pConfig;
+    @Resource P2PConfig p2pConfig;
 
     @Resource MessageCallBack messageCallBack;
 
