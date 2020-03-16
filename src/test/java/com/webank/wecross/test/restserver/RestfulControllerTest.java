@@ -3,8 +3,8 @@ package com.webank.wecross.test.restserver;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
@@ -13,8 +13,8 @@ import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestfulController;
-import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.HashMap;
@@ -44,14 +44,13 @@ import org.springframework.test.web.servlet.MvcResult;
 // @ContextConfiguration(classes=RestfulServiceTestConfig.class)
 public class RestfulControllerTest {
     @Autowired private MockMvc mockMvc;
-    
+
     ObjectMapper objectMapper = new ObjectMapper();
 
     @MockBean(name = "newWeCrossHost")
     private WeCrossHost weCrossHost;
-    
-    @MockBean
-    private AccountManager accountManager;
+
+    @MockBean private AccountManager accountManager;
 
     @Test
     public void okTest() throws Exception {
@@ -72,18 +71,19 @@ public class RestfulControllerTest {
             Assert.assertTrue(e.getMessage(), false);
         }
     }
-    
+
     @Test
     public void stateTest() throws Exception {
-    	try {
-    		MvcResult rsp = mockMvc.perform(get("/state"))
-    				.andDo(print())
-    				.andExpect(status().isOk())
-    				.andReturn();
-    		String result = rsp.getResponse().getContentAsString();
-	    } catch (Exception e) {
-	        Assert.assertTrue(e.getMessage(), false);
-	    }
+        try {
+            MvcResult rsp =
+                    mockMvc.perform(get("/state"))
+                            .andDo(print())
+                            .andExpect(status().isOk())
+                            .andReturn();
+            String result = rsp.getResponse().getContentAsString();
+        } catch (Exception e) {
+            Assert.assertTrue(e.getMessage(), false);
+        }
     }
 
     @Test
@@ -232,19 +232,19 @@ public class RestfulControllerTest {
                     .thenReturn(transactionResponse);
 
             Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
-            
+
             Mockito.when(accountManager.getAccount("demo")).thenReturn(null);
-            
+
             RestRequest<TransactionRequest> request = new RestRequest<TransactionRequest>();
             request.setVersion("1");
             request.setPath("test-network.test-stub.test-resource");
             request.setMethod("call");
             request.setAccountName("demo");
             request.setData(new TransactionRequest());
-            
+
             request.getData().setMethod("get");
             request.getData().setArgs(new String[] {});
-            
+
             MvcResult rsp =
                     this.mockMvc
                             .perform(
@@ -257,7 +257,9 @@ public class RestfulControllerTest {
                             .andExpect(jsonPath("$.result").value(0))
                             .andExpect(jsonPath("$.message").value("Success"))
                             .andExpect(jsonPath("$.data.errorCode").value(0))
-                            .andExpect(jsonPath("$.data.errorMessage").value("call test resource success"))
+                            .andExpect(
+                                    jsonPath("$.data.errorMessage")
+                                            .value("call test resource success"))
                             .andExpect(jsonPath("$.data.hash").value("010157f4"))
                             .andReturn();
 
@@ -281,7 +283,7 @@ public class RestfulControllerTest {
                     .thenReturn(transactionResponse);
 
             Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
-            
+
             Mockito.when(accountManager.getAccount("demo")).thenReturn(null);
 
             RestRequest<TransactionRequest> request = new RestRequest<TransactionRequest>();
@@ -290,10 +292,10 @@ public class RestfulControllerTest {
             request.setMethod("sendTransaction");
             request.setAccountName("demo");
             request.setData(new TransactionRequest());
-            
+
             request.getData().setMethod("set");
             request.getData().setArgs(new String[] {"aaaaa"});
-            
+
             MvcResult rsp =
                     this.mockMvc
                             .perform(
@@ -306,7 +308,9 @@ public class RestfulControllerTest {
                             .andExpect(jsonPath("$.result").value(0))
                             .andExpect(jsonPath("$.message").value("Success"))
                             .andExpect(jsonPath("$.data.errorCode").value(0))
-                            .andExpect(jsonPath("$.data.errorMessage").value("sendTransaction test resource success"))
+                            .andExpect(
+                                    jsonPath("$.data.errorMessage")
+                                            .value("sendTransaction test resource success"))
                             .andExpect(jsonPath("$.data.hash").value("010157f4"))
                             .andReturn();
 

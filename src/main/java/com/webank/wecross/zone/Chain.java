@@ -48,7 +48,7 @@ public class Chain {
                                     }
                                 }
                             });
-            
+
             blockSyncThread.start();
         }
     }
@@ -57,7 +57,7 @@ public class Chain {
         if (running.get()) {
             running.set(false);
             try {
-            	blockSyncThread.interrupt();
+                blockSyncThread.interrupt();
                 blockSyncThread.join();
             } catch (InterruptedException e) {
                 logger.error("Thread interrupt", e);
