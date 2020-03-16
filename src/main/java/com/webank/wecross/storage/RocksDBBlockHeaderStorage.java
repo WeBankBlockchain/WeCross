@@ -2,6 +2,8 @@ package com.webank.wecross.storage;
 
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
+import org.rocksdb.WriteBatch;
+import org.rocksdb.WriteOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +46,13 @@ public class RocksDBBlockHeaderStorage implements BlockHeaderStorage {
         String key = blockKeyPrefix + String.valueOf(blockNumber);
 
         try {
-            rocksDB.put(key.getBytes(), blockHeader);
+            WriteBatch writeBatch = new WriteBatch();
+            writeBatch.put(numberKey.getBytes(), String.valueOf(blockNumber).getBytes());
+            writeBatch.put(key.getBytes(), blockHeader);
+
+            WriteOptions writeOptions = new WriteOptions();
+
+            rocksDB.write(writeOptions, writeBatch);
         } catch (RocksDBException e) {
             logger.error("RocksDB write error", e);
         }
