@@ -124,7 +124,7 @@ public class ZoneManager {
                 String networkName = PathUtils.toPureName(zoneEntry.getKey());
 
                 for (Map.Entry<String, Chain> stubEntry :
-                        zoneEntry.getValue().getStubs().entrySet()) {
+                        zoneEntry.getValue().getChains().entrySet()) {
                     String stubName = PathUtils.toPureName(stubEntry.getKey());
 
                     for (Map.Entry<String, Resource> resourceEntry :
@@ -183,7 +183,7 @@ public class ZoneManager {
                 remoteConnection.setPeer(peer);
                 remoteConnection.setPath(path.toURI());
 
-                Chain chain = zone.getStubs().get(path.getChain());
+                Chain chain = zone.getChains().get(path.getChain());
                 if (chain == null) {
                     chain = new Chain();
                     chain.setDriver(driver);
@@ -196,7 +196,7 @@ public class ZoneManager {
 
                     logger.info("Start block header sync: {}", blockPath);
 
-                    zone.getStubs().put(path.getChain(), chain);
+                    zone.getChains().put(path.getChain(), chain);
                 } else {
                     chain.addConnection(peer, remoteConnection);
                 }
@@ -263,10 +263,10 @@ public class ZoneManager {
                             "Stop block header sync: {}",
                             path.getNetwork() + "." + path.getChain());
 
-                    zone.getStubs().remove(path.getChain());
+                    zone.getChains().remove(path.getChain());
                 }
 
-                if (zone.getStubs().isEmpty()) {
+                if (zone.getChains().isEmpty()) {
                     zones.remove(path.getNetwork());
                 }
 

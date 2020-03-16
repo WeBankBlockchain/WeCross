@@ -63,7 +63,7 @@ public class ZonesConfig {
             Zone networkBean = new Zone();
             if (stubsBean != null) {
                 // init network bean
-                networkBean.setStubs(stubsBean);
+                networkBean.setChains(stubsBean);
                 networkBean.setVisible(visible);
                 result.put(network, networkBean);
             } else {

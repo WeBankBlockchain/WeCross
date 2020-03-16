@@ -38,24 +38,7 @@ public class Chain {
                                         try {
                                             Thread.sleep(1000);
 
-                                            Connection connection = chooseConnection();
-
-                                            long localBlockNumber =
-                                                    blockHeaderStorage.readBlockNumber();
-                                            long remoteBlockNumber =
-                                                    driver.getBlockNumber(connection);
-
-                                            if (remoteBlockNumber > localBlockNumber) {
-                                                for (long blockNumber = localBlockNumber + 1;
-                                                        blockNumber < remoteBlockNumber;
-                                                        ++blockNumber) {
-                                                    byte[] blockBytes =
-                                                            driver.getBlockHeader(
-                                                                    blockNumber, connection);
-                                                    blockHeaderStorage.writeBlockHeader(
-                                                            blockNumber, blockBytes);
-                                                }
-                                            }
+                                            fetchBlockHeader();
                                         } catch (InterruptedException e) {
                                             logger.info("Block sync thread interrupt");
                                             break;
@@ -75,6 +58,22 @@ public class Chain {
                 blockSyncThread.join();
             } catch (InterruptedException e) {
                 logger.error("Thread interrupt", e);
+            }
+        }
+    }
+
+    public void fetchBlockHeader() {
+        Connection connection = chooseConnection();
+
+        long localBlockNumber = blockHeaderStorage.readBlockNumber();
+        long remoteBlockNumber = driver.getBlockNumber(connection);
+
+        if (remoteBlockNumber > localBlockNumber) {
+            for (long blockNumber = localBlockNumber + 1;
+                    blockNumber < remoteBlockNumber;
+                    ++blockNumber) {
+                byte[] blockBytes = driver.getBlockHeader(blockNumber, connection);
+                blockHeaderStorage.writeBlockHeader(blockNumber, blockBytes);
             }
         }
     }
