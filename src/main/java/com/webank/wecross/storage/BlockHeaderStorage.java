@@ -2,9 +2,9 @@ package com.webank.wecross.storage;
 
 // storage for one stub
 public interface BlockHeaderStorage {
-    public int readBlockNumber();
+    public long readBlockNumber();
 
-    public byte[] readBlockHeader(int blockNumber);
+    public byte[] readBlockHeader(long blockNumber);
 
-    public void writeBlockHeader(int blockNumber, byte[] blockHeader);
+    public void writeBlockHeader(long blockNumber, byte[] blockHeader);
 }

@@ -14,11 +14,11 @@ public class RocksDBBlockHeaderStorage implements BlockHeaderStorage {
     private Logger logger = LoggerFactory.getLogger(RocksDBBlockHeaderStorage.class);
 
     @Override
-    public int readBlockNumber() {
+    public long readBlockNumber() {
         try {
             byte[] blockNumberBytes = rocksDB.get(numberKey.getBytes());
             String blockNumberStr = new String(blockNumberBytes);
-            int blockNumber = Integer.valueOf(blockNumberStr);
+            long blockNumber = Long.valueOf(blockNumberStr);
 
             return blockNumber;
         } catch (RocksDBException e) {
@@ -28,8 +28,8 @@ public class RocksDBBlockHeaderStorage implements BlockHeaderStorage {
     }
 
     @Override
-    public byte[] readBlockHeader(int blockNumber) {
-        String key = "block_" + blockNumber;
+    public byte[] readBlockHeader(long blockNumber) {
+        String key = "block_" + String.valueOf(blockNumber);
 
         try {
             return rocksDB.get(key.getBytes());
@@ -40,7 +40,7 @@ public class RocksDBBlockHeaderStorage implements BlockHeaderStorage {
     }
 
     @Override
-    public void writeBlockHeader(int blockNumber, byte[] blockHeader) {
+    public void writeBlockHeader(long blockNumber, byte[] blockHeader) {
         String key = blockKeyPrefix + String.valueOf(blockNumber);
 
         try {

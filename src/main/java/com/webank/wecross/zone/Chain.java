@@ -10,6 +10,7 @@ import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,11 +20,63 @@ public class Chain {
     boolean hasLocalConnection = false;
     private Map<String, Resource> resources = new HashMap<String, Resource>();
     private Driver driver;
-    private String path;
     private BlockHeaderStorage blockHeaderStorage;
+    private Thread blockSyncThread;
+    private AtomicBoolean running = new AtomicBoolean(false);
     private Random random = new SecureRandom();
 
-    public int getBlockNumber() {
+    public void start() {
+        if (!running.get()) {
+            running.set(true);
+
+            blockSyncThread =
+                    new Thread(
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    while (running.get()) {
+                                        try {
+                                            Thread.sleep(1000);
+                                        } catch (InterruptedException e) {
+                                            logger.info("Block sync thread interrupt");
+                                            break;
+                                        }
+
+                                        Connection connection = chooseConnection();
+
+                                        long localBlockNumber =
+                                                blockHeaderStorage.readBlockNumber();
+                                        long remoteBlockNumber = driver.getBlockNumber(connection);
+
+                                        if (remoteBlockNumber > localBlockNumber) {
+                                            for (long blockNumber = localBlockNumber + 1;
+                                                    blockNumber < remoteBlockNumber;
+                                                    ++blockNumber) {
+                                                byte[] blockBytes =
+                                                        driver.getBlockHeader(
+                                                                blockNumber, connection);
+                                                blockHeaderStorage.writeBlockHeader(
+                                                        blockNumber, blockBytes);
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+        }
+    }
+
+    public void stop() {
+        if (running.get()) {
+            running.set(false);
+            try {
+                blockSyncThread.join();
+            } catch (InterruptedException e) {
+                logger.error("Thread interrupt", e);
+            }
+        }
+    }
+
+    public long getBlockNumber() {
         return blockHeaderStorage.readBlockNumber();
     }
 
@@ -78,14 +131,6 @@ public class Chain {
 
     public void setDriver(Driver driver) {
         this.driver = driver;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public BlockHeaderStorage getBlockHeaderStorage() {

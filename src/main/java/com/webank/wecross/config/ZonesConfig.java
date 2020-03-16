@@ -83,8 +83,8 @@ public class ZonesConfig {
             throws WeCrossException {
         Map<String, Chain> stubMap = new HashMap<>();
 
-        for (String stub : stubsDir.keySet()) {
-            String stubPath = stubsDir.get(stub);
+        for (String chainName : stubsDir.keySet()) {
+            String stubPath = stubsDir.get(chainName);
             Toml stubToml;
             try {
                 stubToml = ConfigUtils.getToml(stubPath);
@@ -119,7 +119,9 @@ public class ZonesConfig {
                 chain.getResources().put(name, resource);
             }
 
-            stubMap.put(stub, chain);
+            chain.start();
+            logger.info("Start block header sync: {}", network + "." + chainName);
+            stubMap.put(chainName, chain);
         }
 
         return stubMap;

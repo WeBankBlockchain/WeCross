@@ -86,15 +86,6 @@ public class ZoneManager {
         return seq.intValue();
     }
 
-    public Map<String, Chain> getAllStubInfo(boolean ignoreLocal) {
-        lock.readLock().lock();
-        /*
-        try {
-        }
-        */
-        return null;
-    }
-
     public Map<String, ResourceInfo> getAllResourceInfo(boolean ignoreRemote) {
         lock.readLock().lock();
         try {
@@ -200,10 +191,15 @@ public class ZoneManager {
                     String blockPath = path.getNetwork() + "." + path.getChain();
                     chain.setBlockHeaderStorage(
                             blockHeaderStorageFactory.newBlockHeaderStorage(blockPath));
-                    zone.getStubs().put(path.getChain(), chain);
-                }
+                    chain.addConnection(peer, remoteConnection);
+                    chain.start();
 
-                chain.addConnection(peer, remoteConnection);
+                    logger.info("Start block header sync: {}", blockPath);
+
+                    zone.getStubs().put(path.getChain(), chain);
+                } else {
+                    chain.addConnection(peer, remoteConnection);
+                }
 
                 Resource resource = chain.getResources().get(path.getResource());
                 if (resource == null) {
@@ -240,14 +236,14 @@ public class ZoneManager {
                     continue;
                 }
 
-                Chain stub = zone.getStub(path.getChain());
-                if (stub == null) {
+                Chain chain = zone.getStub(path.getChain());
+                if (chain == null) {
                     // stub not exists, bug?
                     logger.error("Stub not exists! Peer: {} Path: {}", peer, path);
                     continue;
                 }
 
-                Resource resource = stub.getResources().get(path.getResource());
+                Resource resource = chain.getResources().get(path.getResource());
 
                 if (resource == null) {
                     // resource not exists, bug?
@@ -258,10 +254,15 @@ public class ZoneManager {
                 resource.removeConnection(peer);
 
                 if (resource.isConnectionEmpty()) {
-                    stub.getResources().remove(path.getResource());
+                    chain.getResources().remove(path.getResource());
                 }
 
-                if (stub.getResources().isEmpty()) {
+                if (chain.getResources().isEmpty()) {
+                    chain.stop();
+                    logger.info(
+                            "Stop block header sync: {}",
+                            path.getNetwork() + "." + path.getChain());
+
                     zone.getStubs().remove(path.getChain());
                 }
 
