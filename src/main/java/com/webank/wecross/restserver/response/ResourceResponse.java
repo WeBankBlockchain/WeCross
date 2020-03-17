@@ -1,6 +1,6 @@
 package com.webank.wecross.restserver.response;
 
-import com.webank.wecross.resource.ResourceInfo;
+import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.Map;
 
@@ -13,7 +13,7 @@ public class ResourceResponse {
     }
 
     public void setResourceInfos(ZoneManager zoneManager, boolean ignoreRemote) {
-        Map<String, ResourceInfo> resources = zoneManager.getAllResourceInfo(ignoreRemote);
+        Map<String, ResourceInfo> resources = zoneManager.getAllResourcesInfo(ignoreRemote);
         this.resourceInfos = resources.values().toArray(new ResourceInfo[resources.size()]);
     }
 

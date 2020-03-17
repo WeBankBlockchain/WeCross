@@ -14,17 +14,15 @@ import com.webank.wecross.peer.PeerInfoMessageData;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.peer.PeerSeqMessageData;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Request;
+import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.zone.ZoneManager;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,17 +144,12 @@ public class RequestProcessor implements Processor {
 
                         p2pRequest.checkP2PMessage(method);
 
-                        Map<String, ResourceInfo> resources = zoneManager.getAllResourceInfo(true);
-
-                        Set<ResourceInfo> activeResourceSet = new HashSet<>();
-                        for (ResourceInfo activeResource : resources.values()) {
-                            activeResourceSet.add(activeResource);
-                        }
+                        Map<String, ResourceInfo> resources = zoneManager.getAllResourcesInfo(true);
 
                         logger.info("Receive request peer info");
                         PeerInfoMessageData data = new PeerInfoMessageData();
                         data.setSeq(peerManager.getSeq());
-                        data.setResources(activeResourceSet);
+                        data.setResources(resources);
 
                         response.setResult(QueryStatus.SUCCESS);
                         response.setMessage("request " + method + " success");
@@ -206,7 +199,7 @@ public class RequestProcessor implements Processor {
                                                     if (peerManager.hasPeerChanged(
                                                             peerInfo.getNode(), newSeq)) {
                                                         // compare and update
-                                                        Set<ResourceInfo> newResources =
+                                                        Map<String, ResourceInfo> newResources =
                                                                 data.getResources();
                                                         logger.info(
                                                                 "Update peerInfo from {}, seq:{}, resource:{}",

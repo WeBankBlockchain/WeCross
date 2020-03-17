@@ -20,7 +20,7 @@ public class DEMOStubFactory implements StubFactory {
     }
 
     @Override
-    public Account newAccount(String path) {
+    public Account newAccount(String name, String path) {
         return new DEMOAccount();
     }
 }

@@ -16,5 +16,5 @@ public interface Connection {
      *
      * @return resources
      */
-    List<String> getResources();
+    List<ResourceInfo> getResources();
 }

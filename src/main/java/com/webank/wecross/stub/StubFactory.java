@@ -18,5 +18,5 @@ public interface StubFactory {
     public Connection newConnection(String path);
 
     /** load account */
-    public Account newAccount(String path);
+    public Account newAccount(String name, String path);
 }

@@ -228,7 +228,9 @@ public class RestfulController {
                                 (TransactionResponse)
                                         resourceObj.call(
                                                 new TransactionContext<TransactionRequest>(
-                                                        transactionRequest, account, path));
+                                                        transactionRequest,
+                                                        account,
+                                                        resourceObj.getResourceInfo()));
 
                         restResponse.setData(transactionResponse);
                         break;
@@ -255,7 +257,9 @@ public class RestfulController {
                                 (TransactionResponse)
                                         resourceObj.sendTransaction(
                                                 new TransactionContext<TransactionRequest>(
-                                                        transactionRequest, account, path));
+                                                        transactionRequest,
+                                                        account,
+                                                        resourceObj.getResourceInfo()));
 
                         restResponse.setData(transactionResponse);
                         break;

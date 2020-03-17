@@ -61,7 +61,9 @@ public class AccountManagerConfig {
                     Account account =
                             stubManager
                                     .getStubFactory(type)
-                                    .newAccount(resource.getFile().getAbsolutePath());
+                                    .newAccount(
+                                            resource.getFilename(),
+                                            resource.getFile().getAbsolutePath());
                     accountManager.addAccount(resource.getFile().getName(), account);
                 }
             }

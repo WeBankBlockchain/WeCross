@@ -5,21 +5,22 @@ import com.webank.wecross.account.Account;
 public class TransactionContext<T> {
     private T data;
     private Account account;
-    private Path path;
+    // private Path path;
+    private ResourceInfo resourceInfo;
     private BlockHeaderManager blockHeaderManager;
 
-    public TransactionContext(T data, Account account, Path path) {
+    public TransactionContext(T data, Account account, ResourceInfo resourceInfo) {
         this.data = data;
         this.account = account;
-        this.path = path;
+        this.resourceInfo = resourceInfo;
     }
 
-    public Path getPath() {
-        return path;
+    public T getData() {
+        return data;
     }
 
-    public void setPath(Path path) {
-        this.path = path;
+    public void setData(T data) {
+        this.data = data;
     }
 
     public Account getAccount() {
@@ -30,12 +31,12 @@ public class TransactionContext<T> {
         this.account = account;
     }
 
-    public T getData() {
-        return data;
+    public ResourceInfo getResourceInfo() {
+        return resourceInfo;
     }
 
-    public void setData(T data) {
-        this.data = data;
+    public void setResourceInfo(ResourceInfo resourceInfo) {
+        this.resourceInfo = resourceInfo;
     }
 
     public BlockHeaderManager getBlockHeaderManager() {

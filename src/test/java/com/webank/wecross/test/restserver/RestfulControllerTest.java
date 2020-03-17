@@ -186,7 +186,7 @@ public class RestfulControllerTest {
         try {
             ZoneManager mockZoneManager = Mockito.mock(ZoneManager.class);
             Mockito.when(weCrossHost.getZoneManager()).thenReturn(mockZoneManager);
-            Mockito.when(mockZoneManager.getAllResourceInfo(Mockito.anyBoolean()))
+            Mockito.when(mockZoneManager.getAllResourcesInfo(Mockito.anyBoolean()))
                     .thenReturn(new HashMap<>());
             String json =
                     "{\n"

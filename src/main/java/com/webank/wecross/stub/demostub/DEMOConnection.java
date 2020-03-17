@@ -3,6 +3,7 @@ package com.webank.wecross.stub.demostub;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Request;
+import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
@@ -34,9 +35,11 @@ public class DEMOConnection implements Connection {
     }
 
     @Override
-    public List<String> getResources() {
-        List<String> resources = new ArrayList<String>();
-        resources.add("demo");
+    public List<ResourceInfo> getResources() {
+        ResourceInfo resourceInfo = new ResourceInfo();
+        resourceInfo.setName("demo");
+        List<ResourceInfo> resources = new ArrayList<ResourceInfo>();
+        resources.add(resourceInfo);
 
         return resources;
     }
