@@ -1,14 +1,12 @@
 package com.webank.wecross.routine.htlc;
 
-import com.webank.wecross.resource.Resource;
-
 public class HTLCResourcePair {
     HTLC htlc;
-    Resource selfHTLCResource;
-    Resource counterpartyHTLCResource;
+    HTLCResource selfHTLCResource;
+    HTLCResource counterpartyHTLCResource;
 
     public HTLCResourcePair(
-            HTLC htlc, Resource selfHTLCResource, Resource counterpartyHTLCResource) {
+            HTLC htlc, HTLCResource selfHTLCResource, HTLCResource counterpartyHTLCResource) {
         this.htlc = htlc;
         this.selfHTLCResource = selfHTLCResource;
         this.counterpartyHTLCResource = counterpartyHTLCResource;
@@ -22,19 +20,19 @@ public class HTLCResourcePair {
         this.htlc = htlc;
     }
 
-    public Resource getSelfHTLCResource() {
+    public HTLCResource getSelfHTLCResource() {
         return selfHTLCResource;
     }
 
-    public void setSelfHTLCResource(Resource selfHTLCResource) {
+    public void setSelfHTLCResource(HTLCResource selfHTLCResource) {
         this.selfHTLCResource = selfHTLCResource;
     }
 
-    public Resource getCounterpartyHTLCResource() {
+    public HTLCResource getCounterpartyHTLCResource() {
         return counterpartyHTLCResource;
     }
 
-    public void setCounterpartyHTLCResource(Resource counterpartyHTLCResource) {
+    public void setCounterpartyHTLCResource(HTLCResource counterpartyHTLCResource) {
         this.counterpartyHTLCResource = counterpartyHTLCResource;
     }
 }

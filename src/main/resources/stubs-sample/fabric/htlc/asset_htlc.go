@@ -26,7 +26,7 @@ func (a *AssetHtlcChaincode) Init(stub shim.ChaincodeStubInterface) (res peer.Re
 
 	switch fn {
 	case "init":
-		res = a.init(stub, args)
+		res = a.initHTLCContract(stub, args)
 	default:
 		res = shim.Success(nil)
 	}
@@ -50,24 +50,26 @@ func (a *AssetHtlcChaincode) Invoke(stub shim.ChaincodeStubInterface) (res peer.
 		res = a.addInitiator(stub, args)
 	case "addParticipant":
 		res = a.addParticipant(stub, args)
+	case "setSecret":
+		res = a.setSecret(stub, args)
+	case "getSecret":
+		res = a.getSecret(stub, args)
 	case "addTask":
 		res = a.addTask(stub, args)
+	case "getTask":
+		res = a.getTask(stub, args)
+	case "deleteTask":
+		res = a.deleteTask(stub, args)
 	case "lock":
 		res = a.lock(stub, args)
 	case "unlock":
 		res = a.unlock(stub, args)
 	case "rollback":
 		res = a.rollback(stub, args)
-	case "getCounterpartyHTLCIpath":
-		res = a.getCounterpartyHTLCIpath(stub, args)
+	case "getCounterpartyHTLCPath":
+		res = a.getCounterpartyHTLCPath(stub, args)
 	case "getCounterpartyHTLCName":
 		res = a.getCounterpartyHTLCName(stub, args)
-	case "getTask":
-		res = a.getTask(stub, args)
-	case "deleteTask":
-		res = a.deleteTask(stub, args)
-	case "getSecret":
-		res = a.getSecret(stub, args)
 	case "getSelfTimelock":
 		res = a.getSelfTimelock(stub, args)
 	case "getCounterpartyTimelock":
@@ -95,13 +97,13 @@ func (a *AssetHtlcChaincode) Invoke(stub shim.ChaincodeStubInterface) (res peer.
 	return
 }
 
-func (a *AssetHtlcChaincode) init(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (a *AssetHtlcChaincode) initHTLCContract(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 4 {
 		return shim.Error("invalid arguments")
 	}
 
-	name, channel, counterpartyHtlcIpath, counterpartyHtlcName := args[0], args[1], args[2], args[3]
-	a.MyHTLC.setCounterpartyHTLCInfo(stub, counterpartyHtlcIpath, counterpartyHtlcName)
+	name, channel, counterpartyHtlcPath, counterpartyHtlcName := args[0], args[1], args[2], args[3]
+	a.MyHTLC.setCounterpartyHTLCInfo(stub, counterpartyHtlcPath, counterpartyHtlcName)
 
 	err := stub.PutState(LedgerChainCodeNameKey, []byte(name))
 	if err != nil {
@@ -127,12 +129,12 @@ func (a *AssetHtlcChaincode) setRole(stub shim.ChaincodeStubInterface, args []st
 }
 
 func (a *AssetHtlcChaincode) addInitiator(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 6 {
+	if len(args) != 5 {
 		return shim.Error("invalid arguments")
 	}
 
-	hash, secret, sender, receiver, amount, timelock := args[0], args[1], args[2], args[3], args[4], args[5]
-	a.MyHTLC.addInitiator(stub, hash, secret, sender, receiver, amount, timelock)
+	hash, sender, receiver, amount, timelock := args[0], args[1], args[2], args[3], args[4]
+	a.MyHTLC.addInitiator(stub, hash, sender, receiver, amount, timelock)
 	return shim.Success([]byte("success"))
 }
 
@@ -146,6 +148,29 @@ func (a *AssetHtlcChaincode) addParticipant(stub shim.ChaincodeStubInterface, ar
 	return shim.Success([]byte("success"))
 }
 
+func (a *AssetHtlcChaincode) setSecret(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) != 2 {
+		return shim.Error("invalid arguments")
+	}
+
+	hash, secret := args[0], args[1]
+	if !hashMatched(hash, secret) {
+		return shim.Error("hash not matched")
+	}
+
+	a.MyHTLC.setSecret(stub, hash, secret)
+	return shim.Success([]byte("success"))
+}
+
+func (a *AssetHtlcChaincode) getSecret(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) != 1 {
+		return shim.Error("invalid arguments")
+	}
+
+	hash := args[0]
+	return shim.Success(a.MyHTLC.getSecret(stub, hash))
+}
+
 func (a *AssetHtlcChaincode) addTask(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error("invalid arguments")
@@ -153,6 +178,24 @@ func (a *AssetHtlcChaincode) addTask(stub shim.ChaincodeStubInterface, args []st
 
 	hash := args[0]
 	a.MyHTLC.addTask(stub, hash)
+	return shim.Success([]byte("success"))
+}
+
+func (a *AssetHtlcChaincode) getTask(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) != 0 {
+		return shim.Error("invalid arguments")
+	}
+
+	return shim.Success(a.MyHTLC.getTask(stub))
+}
+
+func (a *AssetHtlcChaincode) deleteTask(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) != 1 {
+		return shim.Error("invalid arguments")
+	}
+
+	hash := args[0]
+	a.MyHTLC.deleteTask(stub, hash)
 	return shim.Success([]byte("success"))
 }
 
@@ -311,12 +354,12 @@ func (a *AssetHtlcChaincode) rollback(stub shim.ChaincodeStubInterface, args []s
 	return shim.Success([]byte("success"))
 }
 
-func (a *AssetHtlcChaincode) getCounterpartyHTLCIpath(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (a *AssetHtlcChaincode) getCounterpartyHTLCPath(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 0 {
 		return shim.Error("invalid arguments")
 	}
 
-	return shim.Success(a.MyHTLC.getCounterpartyHTLCIpath(stub))
+	return shim.Success(a.MyHTLC.getCounterpartyHTLCPath(stub))
 }
 
 func (a *AssetHtlcChaincode) getCounterpartyHTLCName(stub shim.ChaincodeStubInterface, args []string) peer.Response {
@@ -325,33 +368,6 @@ func (a *AssetHtlcChaincode) getCounterpartyHTLCName(stub shim.ChaincodeStubInte
 	}
 
 	return shim.Success(a.MyHTLC.getCounterpartyHTLCName(stub))
-}
-
-func (a *AssetHtlcChaincode) getTask(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 0 {
-		return shim.Error("invalid arguments")
-	}
-
-    return shim.Success(a.MyHTLC.getTask(stub))
-}
-
-func (a *AssetHtlcChaincode) deleteTask(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 1 {
-		return shim.Error("invalid arguments")
-	}
-
-	hash := args[0]
-	a.MyHTLC.deleteTask(stub, hash)
-	return shim.Success([]byte("success"))
-}
-
-func (a *AssetHtlcChaincode) getSecret(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 1 {
-		return shim.Error("invalid arguments")
-	}
-
-	hash := args[0]
-	return shim.Success(a.MyHTLC.getSecret(stub, hash))
 }
 
 func (a *AssetHtlcChaincode) getSelfTimelock(stub shim.ChaincodeStubInterface, args []string) peer.Response {

@@ -47,7 +47,7 @@ public class WebServerConfig {
         String address = toml.getString("server.address");
         if (address == null) {
             String errorMessage =
-                    "Something wrong with [server] item, please check [address] in"
+                    "Something wrong with [server] item, please check [address] in "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
             logger.error(errorMessage);
             System.exit(1);
@@ -59,7 +59,7 @@ public class WebServerConfig {
         Long port_temp = toml.getLong("server.port");
         if (port_temp == null) {
             String errorMessage =
-                    "Something wrong with [server] item, please check [port] in"
+                    "Something wrong with [server] item, please check [port] in "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
             logger.error(errorMessage);
             System.exit(1);
@@ -71,7 +71,7 @@ public class WebServerConfig {
         String keyStore = toml.getString("server.keyStore");
         if (keyStore == null) {
             String errorMessage =
-                    "Something wrong with [server] item, please check [keyStore] in"
+                    "Something wrong with [server] item, please check [keyStore] in "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
             logger.error(errorMessage);
             System.exit(1);
@@ -83,7 +83,7 @@ public class WebServerConfig {
         String keyStorePass = toml.getString("server.keyStorePass");
         if (keyStorePass == null) {
             String errorMessage =
-                    "Something wrong with [server] item, please check [keyStorePass] in"
+                    "Something wrong with [server] item, please check [keyStorePass] in "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
             logger.error(errorMessage);
             System.exit(1);
@@ -95,7 +95,7 @@ public class WebServerConfig {
         String keyStoreType = toml.getString("server.keyStoreType");
         if (keyStoreType == null) {
             String errorMessage =
-                    "Something wrong with [server] item, please check [keyStoreType] in"
+                    "Something wrong with [server] item, please check [keyStoreType] in "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
             logger.error(errorMessage);
             System.exit(1);
@@ -107,7 +107,7 @@ public class WebServerConfig {
         String trustStore = toml.getString("server.trustStore");
         if (trustStore == null) {
             String errorMessage =
-                    "Something wrong with [server] item, please check [trustStore] in"
+                    "Something wrong with [server] item, please check [trustStore] in "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
             logger.error(errorMessage);
             System.exit(1);
@@ -119,7 +119,7 @@ public class WebServerConfig {
         String trustStorePass = toml.getString("server.trustStorePass");
         if (trustStorePass == null) {
             String errorMessage =
-                    "Something wrong with [server] item, please check [trustStorePass] in"
+                    "Something wrong with [server] item, please check [trustStorePass] in "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
             logger.error(errorMessage);
             System.exit(1);

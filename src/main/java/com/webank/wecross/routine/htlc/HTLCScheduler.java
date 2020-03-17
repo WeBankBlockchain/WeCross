@@ -1,6 +1,5 @@
 package com.webank.wecross.routine.htlc;
 
-import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.task.TaskManager;
 import java.math.BigInteger;
 import java.util.concurrent.Callable;
@@ -24,8 +23,8 @@ public class HTLCScheduler {
 
     public void start(HTLCResourcePair htlcResourcePair, String h) throws Exception {
         boolean taskDone = false;
-        Resource selfHTLCResource = htlcResourcePair.getSelfHTLCResource();
-        Resource counterpartyHTLCResource = htlcResourcePair.getCounterpartyHTLCResource();
+        HTLCResource selfHTLCResource = htlcResourcePair.getSelfHTLCResource();
+        HTLCResource counterpartyHTLCResource = htlcResourcePair.getCounterpartyHTLCResource();
 
         boolean selfRolledback = checkSelfRollback(selfHTLCResource, h);
         boolean counterpartyRolledback = checkCounterpartyRollback(selfHTLCResource, h);
@@ -48,7 +47,8 @@ public class HTLCScheduler {
                             htlc.getCounterpartyLockStatus(selfHTLCResource, h);
                     if (!counterpartyLocked) {
                         String lockHash = htlc.lock(counterpartyHTLCResource, h);
-                        String verifyResult = htlc.verifyLock(selfHTLCResource, lockHash);
+                        String verifyResult =
+                                htlc.verifyLock(selfHTLCResource.getOriginResource(), lockHash);
                         if (!verifyResult.trim().equalsIgnoreCase("true")) {
                             if (counterpartyRolledback) {
                                 // the initiator executes roll back
@@ -68,7 +68,8 @@ public class HTLCScheduler {
                     if (!taskDone) {
                         String unlockHash =
                                 htlc.unlock(selfHTLCResource, counterpartyHTLCResource, h, s);
-                        String verifyResult = htlc.verifyUnlock(selfHTLCResource, unlockHash);
+                        String verifyResult =
+                                htlc.verifyUnlock(selfHTLCResource.getOriginResource(), unlockHash);
                         if (!verifyResult.trim().equalsIgnoreCase("true")) {
                             if (counterpartyRolledback) {
                                 htlc.rollback(selfHTLCResource, h);
@@ -96,7 +97,7 @@ public class HTLCScheduler {
         }
     }
 
-    public String getSecret(Resource htlcResource, String h) {
+    public String getSecret(HTLCResource htlcResource, String h) {
         String result = "null";
 
         Callable<String> task =
@@ -130,7 +131,7 @@ public class HTLCScheduler {
         return result;
     }
 
-    public boolean checkSelfRollback(Resource htlcResource, String h) throws Exception {
+    public boolean checkSelfRollback(HTLCResource htlcResource, String h) throws Exception {
         if (htlc.getSelfRollbackStatus(htlcResource, h)) {
             return true;
         }
@@ -145,7 +146,7 @@ public class HTLCScheduler {
         return false;
     }
 
-    public boolean checkCounterpartyRollback(Resource htlcResource, String h) throws Exception {
+    public boolean checkCounterpartyRollback(HTLCResource htlcResource, String h) throws Exception {
         if (htlc.getCounterpartyRollbackStatus(htlcResource, h)) {
             return true;
         }
@@ -160,7 +161,7 @@ public class HTLCScheduler {
         return false;
     }
 
-    public String getTask(Resource htlcResource) throws Exception {
+    public String getTask(HTLCResource htlcResource) throws Exception {
         return htlc.getTask(htlcResource);
     }
 }

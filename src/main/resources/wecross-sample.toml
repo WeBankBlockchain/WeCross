@@ -8,7 +8,7 @@
 [server] # rpc ip & port
     address = '127.0.0.1'
     port = 8250
-    storeType = 'PKCS12'
+    keyStoreType = 'PKCS12'
     keyStore = 'classpath:server.keystore'
     keyStorePass = '123456'
     trustStore = 'classpath:server.truststore'
@@ -22,5 +22,8 @@
     sslKey = 'classpath:p2p/node.key'
     peers = ['127.0.0.1:25501','127.0.0.1:25502']
 
-[test]
-    enableTestResource = false
+[[htlc]]
+    selfPath = 'payment.bcos.htlc'
+    selfAccount = 'default_bcos'
+    counterpartyPath = 'payment.fabric.htlc'
+    counterpartyAccount = 'default_fabric'

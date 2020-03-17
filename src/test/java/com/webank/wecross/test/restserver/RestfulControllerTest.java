@@ -12,6 +12,7 @@ import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestfulController;
+import com.webank.wecross.routine.htlc.HTLCManager;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.stub.TransactionRequest;
@@ -50,8 +51,6 @@ public class RestfulControllerTest {
     @MockBean(name = "newWeCrossHost")
     private WeCrossHost weCrossHost;
 
-    @MockBean private AccountManager accountManager;
-
     @Test
     public void okTest() throws Exception {
         try {
@@ -89,7 +88,10 @@ public class RestfulControllerTest {
     @Test
     public void statusTest() throws Exception {
         try {
-            Mockito.when(weCrossHost.getResource(Mockito.any())).thenReturn(new Resource());
+            HTLCManager mockHTLCManager = Mockito.mock(HTLCManager.class);
+            Mockito.when(weCrossHost.getHtlcManager()).thenReturn(mockHTLCManager);
+            Mockito.when(mockHTLCManager.filterHTLCResource(Mockito.any(), Mockito.any()))
+                    .thenReturn(new Resource());
 
             MvcResult rsp =
                     this.mockMvc
@@ -150,6 +152,8 @@ public class RestfulControllerTest {
     @Test
     public void listAccountsTest() throws Exception {
         try {
+            AccountManager mockAccountManager = Mockito.mock(AccountManager.class);
+            Mockito.when(weCrossHost.getAccountManager()).thenReturn(mockAccountManager);
             String json =
                     "{\n"
                             + "\"version\":\"1\",\n"
@@ -222,6 +226,10 @@ public class RestfulControllerTest {
     @Test
     public void callTest() throws Exception {
         try {
+            HTLCManager mockHTLCManager = Mockito.mock(HTLCManager.class);
+            AccountManager mockAccountManager = Mockito.mock(AccountManager.class);
+            Mockito.when(weCrossHost.getAccountManager()).thenReturn(mockAccountManager);
+            Mockito.when(weCrossHost.getHtlcManager()).thenReturn(mockHTLCManager);
             TransactionResponse transactionResponse = new TransactionResponse();
             transactionResponse.setErrorCode(0);
             transactionResponse.setErrorMessage("call test resource success");
@@ -231,8 +239,11 @@ public class RestfulControllerTest {
             Mockito.when(resource.call(Mockito.any())).thenReturn(transactionResponse);
 
             Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
-
-            Mockito.when(accountManager.getAccount("demo")).thenReturn(null);
+            Mockito.when(
+                            mockHTLCManager.filterHTLCResource(
+                                    Mockito.isA(Path.class), Mockito.isA(Resource.class)))
+                    .thenReturn(resource);
+            Mockito.when(mockAccountManager.getAccount("demo")).thenReturn(null);
 
             RestRequest<TransactionRequest> request = new RestRequest<TransactionRequest>();
             request.setVersion("1");
@@ -272,6 +283,10 @@ public class RestfulControllerTest {
     @Test
     public void sendTransactionTest() throws Exception {
         try {
+            HTLCManager mockHTLCManager = Mockito.mock(HTLCManager.class);
+            AccountManager mockAccountManager = Mockito.mock(AccountManager.class);
+            Mockito.when(weCrossHost.getAccountManager()).thenReturn(mockAccountManager);
+            Mockito.when(weCrossHost.getHtlcManager()).thenReturn(mockHTLCManager);
             TransactionResponse transactionResponse = new TransactionResponse();
             transactionResponse.setErrorCode(0);
             transactionResponse.setErrorMessage("sendTransaction test resource success");
@@ -281,8 +296,12 @@ public class RestfulControllerTest {
             Mockito.when(resource.sendTransaction(Mockito.any())).thenReturn(transactionResponse);
 
             Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
+            Mockito.when(
+                            mockHTLCManager.filterHTLCResource(
+                                    Mockito.isA(Path.class), Mockito.isA(Resource.class)))
+                    .thenReturn(resource);
 
-            Mockito.when(accountManager.getAccount("demo")).thenReturn(null);
+            Mockito.when(mockAccountManager.getAccount("demo")).thenReturn(null);
 
             RestRequest<TransactionRequest> request = new RestRequest<TransactionRequest>();
             request.setVersion("1");
@@ -322,6 +341,18 @@ public class RestfulControllerTest {
     @Test
     public void exceptionTest() {
         try {
+            HTLCManager mockHTLCManager = Mockito.mock(HTLCManager.class);
+            AccountManager mockAccountManager = Mockito.mock(AccountManager.class);
+            Resource resource = Mockito.mock(Resource.class);
+            Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
+            Mockito.when(weCrossHost.getAccountManager()).thenReturn(mockAccountManager);
+            Mockito.when(weCrossHost.getHtlcManager()).thenReturn(mockHTLCManager);
+            Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
+            Mockito.when(
+                            mockHTLCManager.filterHTLCResource(
+                                    Mockito.isA(Path.class), Mockito.isA(Resource.class)))
+                    .thenReturn(resource);
+
             String json =
                     "{\n"
                             + "\"version\":\"1\",\n"

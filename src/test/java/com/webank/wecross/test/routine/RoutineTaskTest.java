@@ -1,15 +1,13 @@
 package com.webank.wecross.test.routine;
 
-/*
-import com.webank.wecross.resource.Path;
+import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.htlc.AssetHTLC;
-import com.webank.wecross.routine.htlc.AssetHTLCResource;
+import com.webank.wecross.routine.htlc.HTLCResource;
 import com.webank.wecross.routine.htlc.HTLCResourcePair;
 import com.webank.wecross.routine.htlc.HTLCTaskFactory;
 import com.webank.wecross.routine.task.Task;
 import com.webank.wecross.routine.task.TaskFactory;
 import com.webank.wecross.routine.task.TaskManager;
-import com.webank.wecross.stub.bcos.BCOSContractResource;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Assert;
@@ -25,12 +23,11 @@ public class RoutineTaskTest {
         for (int i = 0; i < 2; i++) {
             JobDataMap dataMap = tasks.get(i).getJobDetail().getJobDataMap();
             HTLCResourcePair htlcResourcePair = (HTLCResourcePair) dataMap.get("HTLC");
-            String path1 = htlcResourcePair.getSelfHTLCResource().getPathAsString();
-            String path2 = getHTLCResourcePairs().get(i).getSelfHTLCResource().getPathAsString();
+            String path1 = htlcResourcePair.getSelfHTLCResource().getPath();
+            String path2 = getHTLCResourcePairs().get(i).getSelfHTLCResource().getPath();
             Assert.assertEquals(path1, path2);
-            String path3 = htlcResourcePair.getCounterpartyHTLCResource().getPathAsString();
-            String path4 =
-                    getHTLCResourcePairs().get(i).getCounterpartyHTLCResource().getPathAsString();
+            String path3 = htlcResourcePair.getCounterpartyHTLCResource().getPath();
+            String path4 = getHTLCResourcePairs().get(i).getCounterpartyHTLCResource().getPath();
             Assert.assertEquals(path3, path4);
         }
     }
@@ -43,21 +40,19 @@ public class RoutineTaskTest {
     }
 
     private List<HTLCResourcePair> getHTLCResourcePairs() throws Exception {
-        BCOSContractResource bcosContractResource1 = new BCOSContractResource();
-        bcosContractResource1.setPath(Path.decode("payment.bcos.test1"));
-        BCOSContractResource bcosContractResource2 = new BCOSContractResource();
-        bcosContractResource2.setPath(Path.decode("payment.bcos.test2"));
-        AssetHTLCResource assetHTLCResource1 = new AssetHTLCResource(bcosContractResource1);
-        AssetHTLCResource assetHTLCResource2 = new AssetHTLCResource(bcosContractResource2);
+        Resource resource = new Resource();
+        HTLCResource htlcResource1 = new HTLCResource(resource);
+        htlcResource1.setPath("a1.b1.c1");
+        HTLCResource htlcResource2 = new HTLCResource(resource);
+        htlcResource2.setPath("a2.b2.c2");
         AssetHTLC assetHTLC = new AssetHTLC();
         HTLCResourcePair htlcResourcePair1 =
-                new HTLCResourcePair(assetHTLC, assetHTLCResource1, assetHTLCResource2);
+                new HTLCResourcePair(assetHTLC, htlcResource1, htlcResource2);
         HTLCResourcePair htlcResourcePair2 =
-                new HTLCResourcePair(assetHTLC, assetHTLCResource2, assetHTLCResource1);
+                new HTLCResourcePair(assetHTLC, htlcResource2, htlcResource1);
         List<HTLCResourcePair> htlcResourcePairs = new ArrayList<>();
         htlcResourcePairs.add(htlcResourcePair1);
         htlcResourcePairs.add(htlcResourcePair2);
         return htlcResourcePairs;
     }
 }
-*/
