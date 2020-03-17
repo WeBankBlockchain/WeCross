@@ -3,19 +3,15 @@ package com.webank.wecross.zone;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
+import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.stub.remote.RemoteConnection;
 import com.webank.wecross.utils.core.PathUtils;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -86,88 +82,16 @@ public class ZoneManager {
         return seq.intValue();
     }
 
-    public Map<String, ResourceInfo> getAllResourceInfo(boolean ignoreRemote) {
-        lock.readLock().lock();
-        try {
-            Set<Path> resourcePaths = getAllNetworkStubResourcePath(ignoreRemote);
-            Map<String, ResourceInfo> ret = new HashMap<>();
-
-            for (Path path : resourcePaths) {
-                try {
-                    Resource resource = getResource(path);
-                    ResourceInfo info = new ResourceInfo();
-                    info.setPath(path.toString());
-                    info.setChecksum(resource.getChecksum());
-                    info.setStubType(resource.getType());
-                    ret.put(path.toString(), info);
-                } catch (Exception e) {
-                    logger.debug("Jump exception resources: " + path.toString());
-                    continue;
-                }
-            }
-
-            return ret;
-        } catch (Exception e) {
-            logger.debug("Exception: " + e);
-        } finally {
-            lock.readLock().unlock();
-        }
-        return null;
-    }
-
-    public Set<String> getAllResourceName(boolean ignoreRemote) {
-        lock.readLock().lock();
-        try {
-            Set<String> ret = new HashSet<>();
-
-            for (Map.Entry<String, Zone> zoneEntry : zones.entrySet()) {
-                String networkName = PathUtils.toPureName(zoneEntry.getKey());
-
-                for (Map.Entry<String, Chain> stubEntry :
-                        zoneEntry.getValue().getChains().entrySet()) {
-                    String stubName = PathUtils.toPureName(stubEntry.getKey());
-
-                    for (Map.Entry<String, Resource> resourceEntry :
-                            stubEntry.getValue().getResources().entrySet()) {
-                        if (resourceEntry.getValue().isHasLocalConnection() || !ignoreRemote) {
-                            String resourceName = PathUtils.toPureName(resourceEntry.getKey());
-                            ret.add(networkName + "." + stubName + "." + resourceName);
-                        }
-                    }
-                }
-            }
-            return ret;
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-
-    public Set<Path> getAllNetworkStubResourcePath(boolean ignoreRemote) {
-        lock.readLock().lock();
-        try {
-            Set<String> resourcesString = getAllResourceName(ignoreRemote);
-            Set<Path> ret = new HashSet<>();
-            for (String str : resourcesString) {
-                ret.add(Path.decode(str));
-            }
-            return ret;
-        } catch (Exception e) {
-            logger.debug("Exception: " + e);
-        } finally {
-            lock.readLock().unlock();
-        }
-        return null;
-    }
-
-    public void addRemoteResources(Peer peer, Set<ResourceInfo> resources) {
+    public void addRemoteResources(Peer peer, Map<String, ResourceInfo> resources) {
         lock.writeLock().lock();
         try {
-            for (ResourceInfo resourceInfo : resources) {
+            for (Map.Entry<String, ResourceInfo> entry : resources.entrySet()) {
                 Path path;
+                ResourceInfo resourceInfo = entry.getValue();
                 try {
-                    path = Path.decode(resourceInfo.getPath());
+                    path = Path.decode(entry.getKey());
                 } catch (Exception e) {
-                    logger.error("Parse path error: {} {}", resourceInfo.getPath(), e);
+                    logger.error("Parse path error: {} {}", entry.getKey(), e);
                     continue;
                 }
 
@@ -217,15 +141,15 @@ public class ZoneManager {
         }
     }
 
-    public void removeRemoteResources(Peer peer, Set<ResourceInfo> resources) {
+    public void removeRemoteResources(Peer peer, Map<String, ResourceInfo> resources) {
         lock.writeLock().lock();
         try {
-            for (ResourceInfo resourceInfo : resources) {
+            for (Map.Entry<String, ResourceInfo> entry : resources.entrySet()) {
                 Path path;
                 try {
-                    path = Path.decode(resourceInfo.getPath());
+                    path = Path.decode(entry.getKey());
                 } catch (Exception e) {
-                    logger.error("Parse path error: {} {}", resourceInfo.getPath(), e);
+                    logger.error("Parse path error: {} {}", entry.getKey(), e);
                     continue;
                 }
 
@@ -277,21 +201,64 @@ public class ZoneManager {
         }
     }
 
-    public List<Resource> getAllResources(boolean ignoreRemote) {
+    public Map<String, Resource> getAllResources(boolean ignoreRemote) {
+        Map<String, Resource> resources = new HashMap<String, Resource>();
+
         lock.readLock().lock();
         try {
-            List<Resource> resourcesList = new ArrayList<>();
+            for (Map.Entry<String, Zone> zoneEntry : zones.entrySet()) {
+                String networkName = PathUtils.toPureName(zoneEntry.getKey());
 
-            Set<Path> pathSet = getAllNetworkStubResourcePath(ignoreRemote);
-            for (Path path : pathSet) {
-                Resource resource = getResource(path);
-                resourcesList.add(resource);
+                for (Map.Entry<String, Chain> stubEntry :
+                        zoneEntry.getValue().getChains().entrySet()) {
+                    String stubName = PathUtils.toPureName(stubEntry.getKey());
+
+                    for (Map.Entry<String, Resource> resourceEntry :
+                            stubEntry.getValue().getResources().entrySet()) {
+                        if (resourceEntry.getValue().isHasLocalConnection() || !ignoreRemote) {
+                            String resourceName = PathUtils.toPureName(resourceEntry.getKey());
+                            resources.put(
+                                    networkName + "." + stubName + "." + resourceName,
+                                    resourceEntry.getValue());
+                        }
+                    }
+                }
             }
-
-            return resourcesList;
         } finally {
             lock.readLock().unlock();
         }
+
+        return resources;
+    }
+
+    public Map<String, ResourceInfo> getAllResourcesInfo(boolean ignoreRemote) {
+        Map<String, ResourceInfo> resources = new HashMap<String, ResourceInfo>();
+
+        lock.readLock().lock();
+        try {
+            for (Map.Entry<String, Zone> zoneEntry : zones.entrySet()) {
+                String networkName = PathUtils.toPureName(zoneEntry.getKey());
+
+                for (Map.Entry<String, Chain> stubEntry :
+                        zoneEntry.getValue().getChains().entrySet()) {
+                    String stubName = PathUtils.toPureName(stubEntry.getKey());
+
+                    for (Map.Entry<String, Resource> resourceEntry :
+                            stubEntry.getValue().getResources().entrySet()) {
+                        if (resourceEntry.getValue().isHasLocalConnection() || !ignoreRemote) {
+                            String resourceName = PathUtils.toPureName(resourceEntry.getKey());
+                            resources.put(
+                                    networkName + "." + stubName + "." + resourceName,
+                                    resourceEntry.getValue().getResourceInfo());
+                        }
+                    }
+                }
+            }
+        } finally {
+            lock.readLock().unlock();
+        }
+
+        return resources;
     }
 
     public P2PMessageEngine getP2PEngine() {

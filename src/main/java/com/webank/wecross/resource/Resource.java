@@ -4,6 +4,7 @@ import com.webank.wecross.peer.Peer;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Request;
+import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
@@ -17,6 +18,7 @@ public class Resource {
     private String type;
     private Driver driver;
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
+    private ResourceInfo resourceInfo;
     boolean hasLocalConnection = false;
     private Random random = new SecureRandom();
 
@@ -59,11 +61,15 @@ public class Resource {
     }
 
     public Response onRemoteTransaction(Request request) {
-        TransactionContext<TransactionRequest> transactionRequest =
-                driver.decodeTransactionRequest(request.getData());
+        if (driver.isTransaction(request)) {
+            TransactionContext<TransactionRequest> transactionRequest =
+                    driver.decodeTransactionRequest(request.getData());
 
-        // TODO: check request
-        transactionRequest.getData().getArgs();
+            // TODO: check request
+            transactionRequest.getData().getArgs();
+
+            // fail or return
+        }
 
         return chooseConnection().send(request);
     }
@@ -88,6 +94,14 @@ public class Resource {
 
     public void setDriver(Driver driver) {
         this.driver = driver;
+    }
+
+    public ResourceInfo getResourceInfo() {
+        return resourceInfo;
+    }
+
+    public void setResourceInfo(ResourceInfo resourceInfo) {
+        this.resourceInfo = resourceInfo;
     }
 
     public boolean isHasLocalConnection() {

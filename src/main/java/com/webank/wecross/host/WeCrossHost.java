@@ -18,6 +18,7 @@ import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,8 +90,8 @@ public class WeCrossHost {
     }
 
     public void findHTLCResourcePairs() throws Exception {
-        List<Resource> resources = zoneManager.getAllResources(true);
-        for (Resource resource : resources) {
+        Map<String, Resource> resources = zoneManager.getAllResources(true);
+        for (Resource resource : resources.values()) {
             /*
             if (resource.getType().equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_ASSET_HTLC_CONTRACT)
                     && resource.getDistance() == 0) {

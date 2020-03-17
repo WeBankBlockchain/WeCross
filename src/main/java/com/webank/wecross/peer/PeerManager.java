@@ -1,14 +1,12 @@
 package com.webank.wecross.peer;
 
-import static com.webank.wecross.resource.ResourceInfo.isEqualInfos;
+import static com.webank.wecross.stub.ResourceInfo.isEqualInfos;
 
 import com.webank.wecross.p2p.netty.common.Node;
-import com.webank.wecross.resource.ResourceInfo;
+import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.utils.core.SeqUtils;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,17 +78,6 @@ public class PeerManager {
 
     public void setPeerInfos(Map<Node, Peer> peerInfos) {
         this.peerInfos = peerInfos;
-    }
-
-    public synchronized PeerResources getActivePeerResources() {
-        Set<Peer> activeInfos = new HashSet<>();
-        for (Peer peerInfo : peerInfos.values()) {
-            if (!peerInfo.isTimeout(peerActiveTimeout)) {
-                activeInfos.add(peerInfo);
-            }
-        }
-
-        return new PeerResources(activeInfos);
     }
 
     public long getPeerActiveTimeout() {

@@ -8,6 +8,7 @@ import com.webank.wecross.peer.Peer;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Request;
+import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class RemoteConnection implements Connection {
     }
 
     @Override
-    public List<String> getResources() {
+    public List<ResourceInfo> getResources() {
         return null;
     }
 

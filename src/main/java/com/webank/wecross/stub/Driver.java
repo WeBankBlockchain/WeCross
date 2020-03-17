@@ -34,6 +34,14 @@ public interface Driver {
     public TransactionResponse decodeTransactionResponse(byte[] data);
 
     /**
+     * Check if the request is transaction
+     *
+     * @param request
+     * @return true if transaction
+     */
+    public boolean isTransaction(Request request);
+
+    /**
      * Decode an encoded block header binary data.
      *
      * @param data the encoded block header

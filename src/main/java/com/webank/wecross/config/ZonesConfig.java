@@ -5,6 +5,7 @@ import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.Connection;
+import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.StubFactory;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.utils.ConfigUtils;
@@ -106,16 +107,17 @@ public class ZonesConfig {
                 throw new WeCrossException(-1, "Cannot find stub type: " + type);
             }
             Connection connection = stubFactory.newConnection(stubPath);
-            List<String> resources = connection.getResources();
+            List<ResourceInfo> resources = connection.getResources();
 
             Chain chain = new Chain();
-            for (String name : resources) {
+            for (ResourceInfo resourceInfo : resources) {
                 com.webank.wecross.resource.Resource resource =
                         new com.webank.wecross.resource.Resource();
                 resource.setDriver(stubFactory.newDriver());
                 resource.addConnection(null, connection);
                 resource.setType(type);
-                chain.getResources().put(name, resource);
+                resource.setResourceInfo(resourceInfo);
+                chain.getResources().put(resourceInfo.getName(), resource);
             }
 
             chain.start();

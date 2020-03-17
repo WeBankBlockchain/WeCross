@@ -99,4 +99,9 @@ public class DEMODriver implements Driver {
     public byte[] getBlockHeader(long number, Connection connection) {
         return null;
     }
+
+    @Override
+    public boolean isTransaction(Request request) {
+        return false;
+    }
 }
