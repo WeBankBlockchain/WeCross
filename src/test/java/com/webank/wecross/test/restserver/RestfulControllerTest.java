@@ -9,10 +9,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.host.WeCrossHost;
-import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestfulController;
+import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
@@ -228,8 +228,7 @@ public class RestfulControllerTest {
             transactionResponse.setHash("010157f4");
 
             Resource resource = Mockito.mock(Resource.class);
-            Mockito.when(resource.call(Mockito.any(), Mockito.any()))
-                    .thenReturn(transactionResponse);
+            Mockito.when(resource.call(Mockito.any())).thenReturn(transactionResponse);
 
             Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
 
@@ -279,8 +278,7 @@ public class RestfulControllerTest {
             transactionResponse.setHash("010157f4");
 
             Resource resource = Mockito.mock(Resource.class);
-            Mockito.when(resource.sendTransaction(Mockito.any(), Mockito.any()))
-                    .thenReturn(transactionResponse);
+            Mockito.when(resource.sendTransaction(Mockito.any())).thenReturn(transactionResponse);
 
             Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
 

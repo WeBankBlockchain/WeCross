@@ -1,4 +1,4 @@
-package com.webank.wecross.resource;
+package com.webank.wecross.stub;
 
 import java.util.Objects;
 

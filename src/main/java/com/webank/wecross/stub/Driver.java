@@ -7,7 +7,7 @@ public interface Driver {
      * @param request the transaction request
      * @return the encoded transaction request binary data
      */
-    public byte[] encodeTransactionRequest(WithAccount<TransactionRequest> request);
+    public byte[] encodeTransactionRequest(TransactionContext<TransactionRequest> request);
 
     /**
      * Decode an encoded transaction request binary data.
@@ -15,7 +15,7 @@ public interface Driver {
      * @param data the encoded transaction request binary data
      * @return TransactionRequest
      */
-    public WithAccount<TransactionRequest> decodeTransactionRequest(byte[] data);
+    public TransactionContext<TransactionRequest> decodeTransactionRequest(byte[] data);
 
     /**
      * Encode an abrstract transaction resonse.
@@ -47,7 +47,8 @@ public interface Driver {
      * @param request the transaction request
      * @return the transaction response
      */
-    public TransactionResponse call(WithAccount<TransactionRequest> request, Connection connection);
+    public TransactionResponse call(
+            TransactionContext<TransactionRequest> request, Connection connection);
 
     /**
      * Send transaction to the interface of contract or chaincode
@@ -56,7 +57,7 @@ public interface Driver {
      * @return the transaction response
      */
     public TransactionResponse sendTransaction(
-            WithAccount<TransactionRequest> request, Connection connection);
+            TransactionContext<TransactionRequest> request, Connection connection);
 
     /**
      * Get block number

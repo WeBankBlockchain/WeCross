@@ -1,6 +1,7 @@
 package com.webank.wecross.routine.htlc;
 
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import java.math.BigInteger;
@@ -9,7 +10,13 @@ public class AssetHTLC implements HTLC {
 
     public String lock(Resource htlcResource, String h) throws Exception {
         TransactionRequest request = new TransactionRequest("lock", new String[] {h});
-        TransactionResponse response = htlcResource.sendTransaction(request, null); // TODO: fix it
+
+        // TODO: fill TransactionContext
+        TransactionContext<TransactionRequest> transactionContext =
+                new TransactionContext<TransactionRequest>(request, null, null);
+
+        TransactionResponse response =
+                htlcResource.sendTransaction(transactionContext); // TODO: fix it
         if (response.getErrorCode() != 0) {
             throw new Exception(
                     "ErrorCode: "
@@ -26,8 +33,13 @@ public class AssetHTLC implements HTLC {
         String transactionHash = lock(selfHTLCResource, h);
         TransactionRequest request =
                 new TransactionRequest("unlock", new String[] {transactionHash, h, s});
+
+        // TODO: fill TransactionContext
+        TransactionContext<TransactionRequest> transactionContext =
+                new TransactionContext<TransactionRequest>(request, null, null);
+
         TransactionResponse response =
-                otherHTLCResource.sendTransaction(request, null); // TODO: fix it
+                otherHTLCResource.sendTransaction(transactionContext); // TODO: fix it
         if (response.getErrorCode() != 0) {
             throw new Exception(
                     "ErrorCode: "
@@ -64,7 +76,12 @@ public class AssetHTLC implements HTLC {
 
     public String getSecret(Resource htlcResource, String h) throws Exception {
         TransactionRequest request = new TransactionRequest("getSecret", new String[] {h}, false);
-        TransactionResponse response = htlcResource.call(request, null); // TODO: fix it
+
+        // TODO: fill TransactionContext
+        TransactionContext<TransactionRequest> transactionContext =
+                new TransactionContext<TransactionRequest>(request, null, null);
+
+        TransactionResponse response = htlcResource.call(transactionContext); // TODO: fix it
         if (response.getErrorCode() != 0) {
             throw new Exception(
                     "ErrorCode: "
@@ -140,7 +157,11 @@ public class AssetHTLC implements HTLC {
     private static Object call(Resource htlcResource, String retType, String method, String... args)
             throws Exception {
         TransactionRequest request = new TransactionRequest(method, args);
-        TransactionResponse response = htlcResource.call(request, null); // TODO: fix it
+
+        // TODO: fill TransactionContext
+        TransactionContext<TransactionRequest> transactionContext =
+                new TransactionContext<TransactionRequest>(request, null, null);
+        TransactionResponse response = htlcResource.call(transactionContext); // TODO: fix it
         if (response.getErrorCode() != 0) {
             throw new Exception(
                     "ErrorCode: "
@@ -154,7 +175,13 @@ public class AssetHTLC implements HTLC {
     private static Object sendTransaction(
             Resource htlcResource, String retType, String method, String... args) throws Exception {
         TransactionRequest request = new TransactionRequest(method, args);
-        TransactionResponse response = htlcResource.sendTransaction(request, null); // TODO: fix it
+
+        // TODO: fill TransactionContext
+        TransactionContext<TransactionRequest> transactionContext =
+                new TransactionContext<TransactionRequest>(request, null, null);
+
+        TransactionResponse response =
+                htlcResource.sendTransaction(transactionContext); // TODO: fix it
         if (response.getErrorCode() != 0) {
             throw new Exception(
                     "ErrorCode: "

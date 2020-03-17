@@ -1,6 +1,6 @@
 package com.webank.wecross.zone;
 
-import com.webank.wecross.resource.Path;
+import com.webank.wecross.stub.Path;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;

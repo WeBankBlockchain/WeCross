@@ -2,23 +2,24 @@ package com.webank.wecross.stub;
 
 import com.webank.wecross.account.Account;
 
-public class WithAccount<T> {
-	private String path;
-    private Account account;
+public class TransactionContext<T> {
     private T data;
+    private Account account;
+    private Path path;
 
-    public WithAccount(T data, Account account) {
+    public TransactionContext(T data, Account account, Path path) {
         this.data = data;
         this.account = account;
+        this.path = path;
     }
-    
-    public String getPath() {
-		return path;
-	}
 
-	public void setPath(String path) {
-		this.path = path;
-	}
+    public Path getPath() {
+        return path;
+    }
+
+    public void setPath(Path path) {
+        this.path = path;
+    }
 
     public Account getAccount() {
         return account;

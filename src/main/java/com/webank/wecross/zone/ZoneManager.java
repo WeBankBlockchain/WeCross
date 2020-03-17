@@ -2,11 +2,11 @@ package com.webank.wecross.zone;
 
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.peer.Peer;
-import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
 import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.stub.remote.RemoteConnection;
 import com.webank.wecross.utils.core.PathUtils;

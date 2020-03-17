@@ -8,7 +8,6 @@ import com.webank.wecross.common.QueryStatus;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
-import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.request.ResourceRequest;
 import com.webank.wecross.restserver.request.StateRequest;
@@ -16,7 +15,9 @@ import com.webank.wecross.restserver.response.AccountResponse;
 import com.webank.wecross.restserver.response.ResourceResponse;
 import com.webank.wecross.restserver.response.StateResponse;
 import com.webank.wecross.restserver.response.StubResponse;
+import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
@@ -224,7 +225,10 @@ public class RestfulController {
                         Account account = accountManager.getAccount(restRequest.getAccountName());
 
                         TransactionResponse transactionResponse =
-                                (TransactionResponse) resourceObj.call(transactionRequest, account);
+                                (TransactionResponse)
+                                        resourceObj.call(
+                                                new TransactionContext<TransactionRequest>(
+                                                        transactionRequest, account, path));
 
                         restResponse.setData(transactionResponse);
                         break;
@@ -249,7 +253,9 @@ public class RestfulController {
 
                         TransactionResponse transactionResponse =
                                 (TransactionResponse)
-                                        resourceObj.sendTransaction(transactionRequest, account);
+                                        resourceObj.sendTransaction(
+                                                new TransactionContext<TransactionRequest>(
+                                                        transactionRequest, account, path));
 
                         restResponse.setData(transactionResponse);
                         break;
