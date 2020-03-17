@@ -6,6 +6,7 @@ public class TransactionContext<T> {
     private T data;
     private Account account;
     private Path path;
+    private BlockHeaderManager blockHeaderManager;
 
     public TransactionContext(T data, Account account, Path path) {
         this.data = data;
@@ -35,5 +36,13 @@ public class TransactionContext<T> {
 
     public void setData(T data) {
         this.data = data;
+    }
+
+    public BlockHeaderManager getBlockHeaderManager() {
+        return blockHeaderManager;
+    }
+
+    public void setBlockHeaderManager(BlockHeaderManager blockHeaderManager) {
+        this.blockHeaderManager = blockHeaderManager;
     }
 }
