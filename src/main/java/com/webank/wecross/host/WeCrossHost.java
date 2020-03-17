@@ -1,5 +1,7 @@
 package com.webank.wecross.host;
 
+import com.webank.wecross.account.Account;
+import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.netty.P2PService;
 import com.webank.wecross.peer.Peer;
@@ -10,15 +12,17 @@ import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.restserver.request.StateRequest;
 import com.webank.wecross.restserver.response.StateResponse;
 import com.webank.wecross.routine.htlc.AssetHTLC;
-import com.webank.wecross.routine.htlc.AssetHTLCResource;
+import com.webank.wecross.routine.htlc.HTLC;
+import com.webank.wecross.routine.htlc.HTLCManager;
+import com.webank.wecross.routine.htlc.HTLCResource;
 import com.webank.wecross.routine.htlc.HTLCResourcePair;
 import com.webank.wecross.routine.htlc.HTLCTaskFactory;
+import com.webank.wecross.routine.htlc.HTLCTaskInfo;
 import com.webank.wecross.routine.task.TaskManager;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +32,8 @@ public class WeCrossHost {
     private ZoneManager zoneManager;
     private PeerManager peerManager;
     private P2PService p2pService;
+    private AccountManager accountManager;
+    private HTLCManager htlcManager;
     private List<HTLCResourcePair> htlcResourcePairs = new ArrayList<>();
 
     Thread mainLoopThread;
@@ -89,21 +95,31 @@ public class WeCrossHost {
         taskManager.start();
     }
 
-    public void findHTLCResourcePairs() throws Exception {
-        Map<String, Resource> resources = zoneManager.getAllResources(true);
-        for (Resource resource : resources.values()) {
-            /*
-            if (resource.getType().equalsIgnoreCase(WeCrossType.RESOURCE_TYPE_ASSET_HTLC_CONTRACT)
-                    && resource.getDistance() == 0) {
-            */
-            if (AssetHTLCResource.class.isInstance(resources) && resource.isHasLocalConnection()) {
-                AssetHTLC assetHTLC = new AssetHTLC();
-                String counterpartyHTLCIpath = assetHTLC.getCounterpartyHTLCIpath(resource);
-                Resource counterpartyHTLCResource =
-                        zoneManager.getResource(Path.decode(counterpartyHTLCIpath));
-                htlcResourcePairs.add(
-                        new HTLCResourcePair(assetHTLC, resource, counterpartyHTLCResource));
+    public void initHTLCResourcePairs() throws Exception {
+        List<HTLCTaskInfo> htlcTaskInfos = htlcManager.getHtlcTaskInfos();
+        for (HTLCTaskInfo htlcTaskInfo : htlcTaskInfos) {
+            String selfPath = htlcTaskInfo.getSelfPath();
+            String counterpartyPath = htlcTaskInfo.getCounterpartyPath();
+            Resource selfResource = zoneManager.getResource(Path.decode(selfPath));
+            Resource counterpartyResource = zoneManager.getResource(Path.decode(counterpartyPath));
+            if (selfResource == null) {
+                throw new Exception("htlc resource: " + selfPath + " not found");
             }
+            if (counterpartyResource == null) {
+                throw new Exception("htlc resource: " + counterpartyResource + " not found");
+            }
+            HTLCResource selfHTLCResource = new HTLCResource(selfResource);
+            Account selfAccount = accountManager.getAccount(htlcTaskInfo.getSelfAccount());
+            selfHTLCResource.setAccount(selfAccount);
+            selfHTLCResource.setPath(selfPath);
+            HTLCResource counterpartyHTLCResource = new HTLCResource(counterpartyResource);
+            Account counterpartyAccount =
+                    accountManager.getAccount(htlcTaskInfo.getCounterpartyAccount());
+            counterpartyHTLCResource.setAccount(counterpartyAccount);
+            counterpartyHTLCResource.setPath(counterpartyPath);
+            HTLC assetHTLC = new AssetHTLC();
+            htlcResourcePairs.add(
+                    new HTLCResourcePair(assetHTLC, selfHTLCResource, counterpartyHTLCResource));
         }
     }
 
@@ -115,6 +131,30 @@ public class WeCrossHost {
         StateResponse response = new StateResponse();
         response.setSeq(zoneManager.getSeq());
         return response;
+    }
+
+    public AccountManager getAccountManager() {
+        return accountManager;
+    }
+
+    public void setAccountManager(AccountManager accountManager) {
+        this.accountManager = accountManager;
+    }
+
+    public HTLCManager getHtlcManager() {
+        return htlcManager;
+    }
+
+    public void setHtlcManager(HTLCManager htlcManager) {
+        this.htlcManager = htlcManager;
+    }
+
+    public List<HTLCResourcePair> getHtlcResourcePairs() {
+        return htlcResourcePairs;
+    }
+
+    public void setHtlcResourcePairs(List<HTLCResourcePair> htlcResourcePairs) {
+        this.htlcResourcePairs = htlcResourcePairs;
     }
 
     public void setZoneManager(ZoneManager networkManager) {

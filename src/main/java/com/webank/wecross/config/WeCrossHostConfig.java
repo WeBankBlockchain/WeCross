@@ -1,9 +1,11 @@
 package com.webank.wecross.config;
 
+import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.netty.P2PService;
 import com.webank.wecross.peer.PeerManager;
+import com.webank.wecross.routine.htlc.HTLCManager;
 import com.webank.wecross.zone.ZoneManager;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
@@ -16,13 +18,17 @@ public class WeCrossHostConfig {
 
     private Logger logger = LoggerFactory.getLogger(WeCrossHostConfig.class);
 
-    @Resource ZoneManager zoneManager;
+    @Resource private ZoneManager zoneManager;
 
-    @Resource P2PService p2pService;
+    @Resource private P2PService p2pService;
 
-    @Resource PeerManager peerManager;
+    @Resource private PeerManager peerManager;
 
-    @Resource P2PMessageEngine p2pMessageEngine;
+    @Resource private P2PMessageEngine p2pMessageEngine;
+
+    @Resource private HTLCManager htlcManager;
+
+    @Resource private AccountManager accountManager;
 
     @Bean
     public WeCrossHost newWeCrossHost() {
@@ -30,14 +36,17 @@ public class WeCrossHostConfig {
         host.setZoneManager(zoneManager);
         host.setP2pService(p2pService);
         host.setPeerManager(peerManager);
+        host.setAccountManager(accountManager);
+        host.setHtlcManager(htlcManager);
 
         // set the p2p engine here to avoid circular reference
         zoneManager.setP2PEngine(p2pMessageEngine);
 
         try {
-            host.findHTLCResourcePairs();
+            host.initHTLCResourcePairs();
         } catch (Exception e) {
-            logger.warn("something wrong with getHTLCResourcePairs: {}", e.getLocalizedMessage());
+            logger.error("something wrong with initHTLCResourcePairs: {}", e.getMessage());
+            System.exit(1);
         }
 
         host.start();

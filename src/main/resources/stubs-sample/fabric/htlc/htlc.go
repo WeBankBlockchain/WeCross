@@ -13,7 +13,7 @@ const (
 	TaskKey                  = "HTLCTask"
 	InitiatorKeyPrefix       = "I-%s"
 	ParticipantKeyPrefix     = "P-%s"
-	CounterpartyHtlcIpathKey = "CounterpartyHtlcIpath"
+	CounterpartyHtlcPathKey = "CounterpartyHtlcPath"
 	CounterpartyHtlcNameKey  = "CounterpartyHtlcName"
 )
 
@@ -36,16 +36,16 @@ type Tasks struct {
 	TaskQueue []string `json:"taskQueue"`
 }
 
-func (h *HTLC) setCounterpartyHTLCInfo(stub shim.ChaincodeStubInterface, counterpartyHTLCIpath, counterpartyHTLCName string) {
-	err := stub.PutState(CounterpartyHtlcIpathKey, []byte(counterpartyHTLCIpath))
+func (h *HTLC) setCounterpartyHTLCInfo(stub shim.ChaincodeStubInterface, counterpartyHTLCPath, counterpartyHTLCName string) {
+	err := stub.PutState(CounterpartyHtlcPathKey, []byte(counterpartyHTLCPath))
 	checkError(err)
 
 	err = stub.PutState(CounterpartyHtlcNameKey, []byte(counterpartyHTLCName))
 	checkError(err)
 }
 
-func (h *HTLC) getCounterpartyHTLCIpath(stub shim.ChaincodeStubInterface) []byte {
-	result, err := stub.GetState(CounterpartyHtlcIpathKey)
+func (h *HTLC) getCounterpartyHTLCPath(stub shim.ChaincodeStubInterface) []byte {
+	result, err := stub.GetState(CounterpartyHtlcPathKey)
 	checkError(err)
 
 	return result
@@ -81,17 +81,13 @@ func (h *HTLC) getRole(stub shim.ChaincodeStubInterface, hash string) bool {
 	return false
 }
 
-func (h *HTLC) addInitiator(stub shim.ChaincodeStubInterface, hash, secret, sender, receiver, amount, timelock string) {
+func (h *HTLC) addInitiator(stub shim.ChaincodeStubInterface, hash, sender, receiver, amount, timelock string) {
 	if isExisted(stub, getInitiatorKey(hash)) {
 		panic(errors.New("hash exists"))
 	}
 
-	if !hashMatched(hash, secret) {
-		panic(errors.New("hash not matched"))
-	}
-
 	var cd = &ContractData{
-		Secret:     secret,
+		Secret:     "null",
 		Sender:     sender,
 		Receiver:   receiver,
 		Amount:     stringToUint64(amount),
@@ -129,6 +125,48 @@ func (h *HTLC) addParticipant(stub shim.ChaincodeStubInterface, hash, sender, re
 
 	err = stub.PutState(getParticipantKey(hash), cdInfo)
 	checkError(err)
+}
+
+func (h *HTLC) setSecret(stub shim.ChaincodeStubInterface, hash, secret string) {
+	if !hashMatched(hash, secret) {
+		panic(errors.New("hash not matched"))
+	}
+
+	if h.getRole(stub, hash) {
+		cdInfo, err := stub.GetState(getInitiatorKey(hash))
+		checkError(err)
+
+		var cd ContractData
+		err = json.Unmarshal(cdInfo, &cd)
+		checkError(err)
+
+		cd.Secret = secret
+		cdInfo, err = json.Marshal(&cd)
+		checkError(err)
+
+		err = stub.PutState(getInitiatorKey(hash), cdInfo)
+		checkError(err)
+	} else {
+		cdInfo, err := stub.GetState(getParticipantKey(hash))
+		checkError(err)
+
+		var cd ContractData
+		err = json.Unmarshal(cdInfo, &cd)
+		checkError(err)
+
+		cd.Secret = secret
+		cdInfo, err = json.Marshal(&cd)
+		checkError(err)
+
+		err = stub.PutState(getParticipantKey(hash), cdInfo)
+		checkError(err)
+	}
+}
+
+func (h *HTLC) getSecret(stub shim.ChaincodeStubInterface, hash string) []byte {
+	var cd ContractData
+	h.getSelfContractData(stub, hash, &cd)
+	return []byte(cd.Secret)
 }
 
 func (h *HTLC) addTask(stub shim.ChaincodeStubInterface, hash string) {
@@ -208,34 +246,6 @@ func (h *HTLC) deleteTask(stub shim.ChaincodeStubInterface, hash string) {
 
 	err = stub.PutState(TaskKey, t)
 	checkError(err)
-}
-
-func (h *HTLC) getSecret(stub shim.ChaincodeStubInterface, hash string) []byte {
-	var cd ContractData
-	h.getSelfContractData(stub, hash, &cd)
-	return []byte(cd.Secret)
-}
-
-func (h *HTLC) setSecret(stub shim.ChaincodeStubInterface, hash, secret string) {
-	if !hashMatched(hash, secret) {
-		panic(errors.New("hash not matched"))
-	}
-
-	if !h.getRole(stub, hash) {
-		cdInfo, err := stub.GetState(getParticipantKey(hash))
-		checkError(err)
-
-		var cd ContractData
-		err = json.Unmarshal(cdInfo, &cd)
-		checkError(err)
-
-		cd.Secret = secret
-		cdInfo, err = json.Marshal(&cd)
-		checkError(err)
-
-		err = stub.PutState(getParticipantKey(hash), cdInfo)
-		checkError(err)
-	}
 }
 
 func (h *HTLC) getSender(stub shim.ChaincodeStubInterface, hash string) []byte {

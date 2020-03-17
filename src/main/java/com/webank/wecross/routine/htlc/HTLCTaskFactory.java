@@ -20,8 +20,7 @@ public class HTLCTaskFactory implements TaskFactory {
         int num = htlcResourcePairs.size();
         for (int i = 0; i < num; i++) {
             HTLCResourcePair htlcResourcePair = htlcResourcePairs.get(i);
-            // String jobName = htlcResourcePair.getSelfHTLCResource().getPathAsString();
-            String jobName = "HTLCSchedule";
+            String jobName = htlcResourcePair.getSelfHTLCResource().getPath();
             JobDetail jobDetail = loadHTLCJobDetail(jobName, "HTLC", htlcResourcePair);
 
             // execute per 5 seconds

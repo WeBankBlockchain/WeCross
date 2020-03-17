@@ -17,7 +17,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 @Configuration
 public class ConfigReaderConfig {
-    private static Logger logger = LoggerFactory.getLogger(ConfigReaderConfig.class);
+    private Logger logger = LoggerFactory.getLogger(ConfigReaderConfig.class);
 
     @Resource Toml toml;
 
