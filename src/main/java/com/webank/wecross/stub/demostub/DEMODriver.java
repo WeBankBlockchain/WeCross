@@ -8,16 +8,16 @@ import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.Response;
+import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
-import com.webank.wecross.stub.WithAccount;
 import java.io.IOException;
 
 public class DEMODriver implements Driver {
     private ObjectMapper mapper = new ObjectMapper();
 
     @Override
-    public byte[] encodeTransactionRequest(WithAccount<TransactionRequest> request) {
+    public byte[] encodeTransactionRequest(TransactionContext<TransactionRequest> request) {
         try {
             return mapper.writeValueAsBytes(request);
         } catch (JsonProcessingException e) {
@@ -26,9 +26,10 @@ public class DEMODriver implements Driver {
     }
 
     @Override
-    public WithAccount<TransactionRequest> decodeTransactionRequest(byte[] data) {
+    public TransactionContext<TransactionRequest> decodeTransactionRequest(byte[] data) {
         try {
-            return mapper.readValue(data, new TypeReference<WithAccount<TransactionRequest>>() {});
+            return mapper.readValue(
+                    data, new TypeReference<TransactionContext<TransactionRequest>>() {});
         } catch (IOException e) {
             return null;
         }
@@ -63,7 +64,7 @@ public class DEMODriver implements Driver {
 
     @Override
     public TransactionResponse call(
-            WithAccount<TransactionRequest> request, Connection connection) {
+            TransactionContext<TransactionRequest> request, Connection connection) {
         byte[] data = encodeTransactionRequest(request);
 
         Request connectionRequest = new Request();
@@ -77,7 +78,7 @@ public class DEMODriver implements Driver {
 
     @Override
     public TransactionResponse sendTransaction(
-            WithAccount<TransactionRequest> request, Connection connection) {
+            TransactionContext<TransactionRequest> request, Connection connection) {
         byte[] data = encodeTransactionRequest(request);
 
         Request connectionRequest = new Request();

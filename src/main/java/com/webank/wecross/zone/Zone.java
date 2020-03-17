@@ -1,6 +1,6 @@
 package com.webank.wecross.zone;
 
-import com.webank.wecross.resource.Path;
+import com.webank.wecross.stub.Path;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -26,14 +26,14 @@ public class Zone {
     }
 
     public boolean isEmpty() {
-        return getStubs() == null || getStubs().isEmpty();
+        return getChains() == null || getChains().isEmpty();
     }
 
-    public Map<String, Chain> getStubs() {
+    public Map<String, Chain> getChains() {
         return chains;
     }
 
-    public void setStubs(Map<String, Chain> stubs) {
+    public void setChains(Map<String, Chain> stubs) {
         this.chains = stubs;
     }
 

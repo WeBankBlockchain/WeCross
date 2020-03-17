@@ -2,10 +2,11 @@ package com.webank.wecross.zone;
 
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.peer.Peer;
-import com.webank.wecross.resource.Path;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceInfo;
+import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.stub.remote.RemoteConnection;
 import com.webank.wecross.utils.core.PathUtils;
@@ -28,6 +29,7 @@ public class ZoneManager {
     private P2PMessageEngine p2pEngine;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
     private StubManager stubManager;
+    BlockHeaderStorageFactory blockHeaderStorageFactory;
 
     public Resource getResource(Path path) {
         lock.readLock().lock();
@@ -84,15 +86,6 @@ public class ZoneManager {
         return seq.intValue();
     }
 
-    public Map<String, Chain> getAllStubInfo(boolean ignoreLocal) {
-        lock.readLock().lock();
-        /*
-        try {
-        }
-        */
-        return null;
-    }
-
     public Map<String, ResourceInfo> getAllResourceInfo(boolean ignoreRemote) {
         lock.readLock().lock();
         try {
@@ -131,7 +124,7 @@ public class ZoneManager {
                 String networkName = PathUtils.toPureName(zoneEntry.getKey());
 
                 for (Map.Entry<String, Chain> stubEntry :
-                        zoneEntry.getValue().getStubs().entrySet()) {
+                        zoneEntry.getValue().getChains().entrySet()) {
                     String stubName = PathUtils.toPureName(stubEntry.getKey());
 
                     for (Map.Entry<String, Resource> resourceEntry :
@@ -190,14 +183,23 @@ public class ZoneManager {
                 remoteConnection.setPeer(peer);
                 remoteConnection.setPath(path.toURI());
 
-                Chain chain = zone.getStubs().get(path.getChain());
+                Chain chain = zone.getChains().get(path.getChain());
                 if (chain == null) {
                     chain = new Chain();
                     chain.setDriver(driver);
-                    zone.getStubs().put(path.getChain(), chain);
-                }
 
-                chain.addConnection(peer, remoteConnection);
+                    String blockPath = path.getNetwork() + "." + path.getChain();
+                    chain.setBlockHeaderStorage(
+                            blockHeaderStorageFactory.newBlockHeaderStorage(blockPath));
+                    chain.addConnection(peer, remoteConnection);
+                    chain.start();
+
+                    logger.info("Start block header sync: {}", blockPath);
+
+                    zone.getChains().put(path.getChain(), chain);
+                } else {
+                    chain.addConnection(peer, remoteConnection);
+                }
 
                 Resource resource = chain.getResources().get(path.getResource());
                 if (resource == null) {
@@ -234,14 +236,14 @@ public class ZoneManager {
                     continue;
                 }
 
-                Chain stub = zone.getStub(path.getChain());
-                if (stub == null) {
+                Chain chain = zone.getStub(path.getChain());
+                if (chain == null) {
                     // stub not exists, bug?
                     logger.error("Stub not exists! Peer: {} Path: {}", peer, path);
                     continue;
                 }
 
-                Resource resource = stub.getResources().get(path.getResource());
+                Resource resource = chain.getResources().get(path.getResource());
 
                 if (resource == null) {
                     // resource not exists, bug?
@@ -252,14 +254,19 @@ public class ZoneManager {
                 resource.removeConnection(peer);
 
                 if (resource.isConnectionEmpty()) {
-                    stub.getResources().remove(path.getResource());
+                    chain.getResources().remove(path.getResource());
                 }
 
-                if (stub.getResources().isEmpty()) {
-                    zone.getStubs().remove(path.getChain());
+                if (chain.getResources().isEmpty()) {
+                    chain.stop();
+                    logger.info(
+                            "Stop block header sync: {}",
+                            path.getNetwork() + "." + path.getChain());
+
+                    zone.getChains().remove(path.getChain());
                 }
 
-                if (zone.getStubs().isEmpty()) {
+                if (zone.getChains().isEmpty()) {
                     zones.remove(path.getNetwork());
                 }
 
@@ -301,5 +308,13 @@ public class ZoneManager {
 
     public void setStubManager(StubManager stubManager) {
         this.stubManager = stubManager;
+    }
+
+    public BlockHeaderStorageFactory getBlockHeaderStorageFactory() {
+        return blockHeaderStorageFactory;
+    }
+
+    public void setBlockHeaderStorageFactory(BlockHeaderStorageFactory blockHeaderStorageFactory) {
+        this.blockHeaderStorageFactory = blockHeaderStorageFactory;
     }
 }

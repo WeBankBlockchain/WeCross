@@ -10,9 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 
-public class WeCrossConfig {
+public class P2PConfig {
 
-    private static Logger logger = LoggerFactory.getLogger(WeCrossConfig.class);
+    private static Logger logger = LoggerFactory.getLogger(P2PConfig.class);
 
     private String listenIP;
     private Integer listenPort;

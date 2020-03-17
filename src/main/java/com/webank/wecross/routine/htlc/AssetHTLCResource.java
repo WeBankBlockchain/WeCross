@@ -1,11 +1,11 @@
 package com.webank.wecross.routine.htlc;
 
-import com.webank.wecross.account.Account;
 import com.webank.wecross.common.ResourceQueryStatus;
 import com.webank.wecross.common.WeCrossType;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import java.util.Arrays;
@@ -28,24 +28,24 @@ public class AssetHTLCResource extends Resource {
     }
 
     @Override
-    public TransactionResponse call(TransactionRequest request, Account account) {
+    public TransactionResponse call(TransactionContext<TransactionRequest> request) {
         TransactionRequest newRequest;
         try {
-            newRequest = handleCallRequest(request);
+            newRequest = handleCallRequest(request.getData());
         } catch (WeCrossException e) {
             TransactionResponse transactionResponse = new TransactionResponse();
             transactionResponse.setErrorCode(e.getErrorCode());
             transactionResponse.setErrorMessage(e.getMessage());
             return transactionResponse;
         }
-        return originResource.call(newRequest, account);
+        return originResource.call(request);
     }
 
     @Override
-    public TransactionResponse sendTransaction(TransactionRequest request, Account account) {
+    public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request) {
         TransactionRequest newRequest;
         try {
-            newRequest = handleSendTransactionRequest(request);
+            newRequest = handleSendTransactionRequest(request.getData());
         } catch (WeCrossException e) {
             TransactionResponse transactionResponse = new TransactionResponse();
             transactionResponse.setErrorCode(e.getErrorCode());
@@ -53,7 +53,7 @@ public class AssetHTLCResource extends Resource {
             return transactionResponse;
         }
 
-        return originResource.sendTransaction(newRequest, account);
+        return originResource.sendTransaction(request);
     }
 
     @Override

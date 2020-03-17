@@ -28,14 +28,14 @@ public class WebServerConfig {
         try {
             tomcatServletWebServerFactory.setAddress(InetAddress.getByName(address));
             tomcatServletWebServerFactory.setPort(port);
-            Ssl sll = new Ssl();
-            sll.setKeyStore(getKeyStore());
-            sll.setKeyStorePassword(getKeyStorePass());
-            sll.setKeyStoreType(getKeyStoreType());
-            sll.setTrustStore(getTrustStore());
-            sll.setTrustStorePassword(getTrustStorePass());
-            sll.setClientAuth(ClientAuth.NEED);
-            tomcatServletWebServerFactory.setSsl(sll);
+            Ssl ssl = new Ssl();
+            ssl.setKeyStore(getKeyStore());
+            ssl.setKeyStorePassword(getKeyStorePass());
+            ssl.setKeyStoreType(getKeyStoreType());
+            ssl.setTrustStore(getTrustStore());
+            ssl.setTrustStorePassword(getTrustStorePass());
+            ssl.setClientAuth(ClientAuth.NEED);
+            tomcatServletWebServerFactory.setSsl(ssl);
         } catch (Exception e) {
             logger.error(e.getMessage());
             System.exit(1);

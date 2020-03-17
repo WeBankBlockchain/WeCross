@@ -1,25 +1,37 @@
 package com.webank.wecross.test.resource;
 
-/*
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import com.webank.wecross.p2p.netty.common.Node;
+import com.webank.wecross.peer.Peer;
+import com.webank.wecross.resource.Resource;
+import com.webank.wecross.stub.Connection;
+import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stub.Request;
+import com.webank.wecross.stub.Response;
+import com.webank.wecross.stub.TransactionContext;
+import com.webank.wecross.stub.TransactionRequest;
+import com.webank.wecross.stub.TransactionResponse;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 public class ResourceTest {
 
     @Test
     public void connectionTest() {
-        try {
-            Resource resource = new Resource();
-            assertTrue(resource.isConnectionEmpty());
+        Resource resource = new Resource();
+        assertTrue(resource.isConnectionEmpty());
 
-            Peer peer0 = new Peer(new Node("", "", 0));
-            Connection connection = Mockito.mock(Connection.class);
-            resource.addConnection(peer0, connection);
+        Peer peer0 = new Peer(new Node("", "", 0));
+        Connection connection = Mockito.mock(Connection.class);
+        resource.addConnection(peer0, connection);
 
-            assertFalse(resource.isConnectionEmpty());
+        assertFalse(resource.isConnectionEmpty());
 
-            resource.removeConnection(peer0);
-            assertTrue(resource.isConnectionEmpty());
-        } catch (Exception e) {
-            Assert.assertTrue("Test exception: " + e, false);
-        }
+        resource.removeConnection(peer0);
+        assertTrue(resource.isConnectionEmpty());
     }
 
     @Test
@@ -31,20 +43,23 @@ public class ResourceTest {
         resource.addConnection(peer0, connection0);
 
         TransactionRequest request = new TransactionRequest();
-        request.setArgs(new Object[] {"Hello world!"});
+        request.setArgs(new String[] {"Hello world!"});
 
         TransactionResponse response = new TransactionResponse();
         response.setErrorCode(0);
 
         Driver driver = Mockito.mock(Driver.class);
-        Mockito.when(driver.call(request, connection0)).thenReturn(response);
-        Mockito.when(driver.sendTransaction(request, connection0)).thenReturn(response);
+        Mockito.when(driver.call(Mockito.any(), Mockito.any())).thenReturn(response);
+        Mockito.when(driver.sendTransaction(Mockito.any(), Mockito.any())).thenReturn(response);
         resource.setDriver(driver);
 
-        TransactionResponse r = resource.call(request);
+        TransactionResponse r =
+                resource.call(new TransactionContext<TransactionRequest>(request, null, null));
         assertEquals(response, r);
 
-        r = resource.sendTransaction(request);
+        r =
+                resource.sendTransaction(
+                        new TransactionContext<TransactionRequest>(request, null, null));
         assertEquals(response, r);
     }
 
@@ -62,11 +77,12 @@ public class ResourceTest {
         resource.addConnection(peer1, connection1);
 
         TransactionRequest transactionRequest = new TransactionRequest();
-        transactionRequest.setArgs(new Object[] {"Hello world!"});
+        transactionRequest.setArgs(new String[] {"Hello world!"});
 
         Driver driver = Mockito.mock(Driver.class);
         Mockito.when(driver.decodeTransactionRequest("Helloworld".getBytes()))
-                .thenReturn(transactionRequest);
+                .thenReturn(
+                        new TransactionContext<TransactionRequest>(transactionRequest, null, null));
         resource.setDriver(driver);
 
         Request request = new Request();
@@ -80,4 +96,3 @@ public class ResourceTest {
         assertEquals(response, resource.onRemoteTransaction(request));
     }
 }
-*/

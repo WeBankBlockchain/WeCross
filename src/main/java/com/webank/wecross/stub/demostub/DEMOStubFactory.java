@@ -21,6 +21,6 @@ public class DEMOStubFactory implements StubFactory {
 
     @Override
     public Account newAccount(String path) {
-        return null;
+        return new DEMOAccount();
     }
 }

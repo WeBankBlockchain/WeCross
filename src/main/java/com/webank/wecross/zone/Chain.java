@@ -2,6 +2,7 @@ package com.webank.wecross.zone;
 
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.storage.BlockHeaderStorage;
 import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
@@ -9,6 +10,7 @@ import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,15 +20,77 @@ public class Chain {
     boolean hasLocalConnection = false;
     private Map<String, Resource> resources = new HashMap<String, Resource>();
     private Driver driver;
-    private String path;
+    private BlockHeaderStorage blockHeaderStorage;
+    private Thread blockSyncThread;
+    private AtomicBoolean running = new AtomicBoolean(false);
     private Random random = new SecureRandom();
 
-    public int getBlockNumber() {
-        return 0;
+    public void start() {
+        if (!running.get()) {
+            running.set(true);
+
+            blockSyncThread =
+                    new Thread(
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    while (running.get()) {
+                                        try {
+                                            Thread.sleep(1000);
+
+                                            fetchBlockHeader();
+                                        } catch (InterruptedException e) {
+                                            logger.info("Block sync thread interrupt");
+                                            break;
+                                        } catch (Exception e) {
+                                            logger.error("Get block header error", e);
+                                        }
+                                    }
+                                }
+                            });
+
+            blockSyncThread.start();
+        }
+    }
+
+    public void stop() {
+        if (running.get()) {
+            running.set(false);
+            try {
+                blockSyncThread.interrupt();
+                blockSyncThread.join();
+            } catch (InterruptedException e) {
+                logger.error("Thread interrupt", e);
+            }
+        }
+    }
+
+    public void fetchBlockHeader() {
+        Connection connection = chooseConnection();
+
+        long localBlockNumber = blockHeaderStorage.readBlockNumber();
+        long remoteBlockNumber = driver.getBlockNumber(connection);
+
+        if (remoteBlockNumber > localBlockNumber) {
+            for (long blockNumber = localBlockNumber + 1;
+                    blockNumber < remoteBlockNumber;
+                    ++blockNumber) {
+                byte[] blockBytes = driver.getBlockHeader(blockNumber, connection);
+                blockHeaderStorage.writeBlockHeader(blockNumber, blockBytes);
+            }
+        }
+    }
+
+    public long getBlockNumber() {
+        return blockHeaderStorage.readBlockNumber();
     }
 
     public BlockHeader getBlockHeader(int blockNumber) {
-        return null;
+        return driver.decodeBlockHeader(blockHeaderStorage.readBlockHeader(blockNumber));
+    }
+
+    public void putBlockHeader(int blockNumber, byte[] blockHeader) {
+        blockHeaderStorage.writeBlockHeader(blockNumber, blockHeader);
     }
 
     public void addConnection(Peer peer, Connection connection) {
@@ -74,11 +138,11 @@ public class Chain {
         this.driver = driver;
     }
 
-    public String getPath() {
-        return path;
+    public BlockHeaderStorage getBlockHeaderStorage() {
+        return blockHeaderStorage;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setBlockHeaderStorage(BlockHeaderStorage blockHeaderStorage) {
+        this.blockHeaderStorage = blockHeaderStorage;
     }
 }
