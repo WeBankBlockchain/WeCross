@@ -15,6 +15,7 @@ import com.webank.wecross.restserver.response.AccountResponse;
 import com.webank.wecross.restserver.response.ResourceResponse;
 import com.webank.wecross.restserver.response.StateResponse;
 import com.webank.wecross.restserver.response.StubResponse;
+import com.webank.wecross.routine.htlc.HTLCManager;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.stub.TransactionContext;
@@ -36,8 +37,6 @@ public class RestfulController {
 
     private Logger logger = LoggerFactory.getLogger(RestfulController.class);
     private ObjectMapper objectMapper = new ObjectMapper();
-
-    @javax.annotation.Resource private AccountManager accountManager;
 
     @RequestMapping("/test")
     public String test() {
@@ -116,6 +115,7 @@ public class RestfulController {
         logger.debug("request string: {}", restRequestString);
 
         try {
+            AccountManager accountManager = host.getAccountManager();
             RestRequest restRequest =
                     objectMapper.readValue(restRequestString, new TypeReference<RestRequest>() {});
             restRequest.checkRestRequest("", "listAccounts");
@@ -180,7 +180,12 @@ public class RestfulController {
         logger.debug("request string: {}", restRequestString);
 
         try {
+            AccountManager accountManager = host.getAccountManager();
+            HTLCManager htlcManager = host.getHtlcManager();
+
             Resource resourceObj = host.getResource(path);
+            resourceObj = htlcManager.filterHTLCResource(path, resourceObj);
+
             if (resourceObj == null) {
                 logger.warn("Unable to find resource: {}", path.toString());
             }
@@ -283,13 +288,5 @@ public class RestfulController {
         }
 
         return restResponse;
-    }
-
-    public AccountManager getAccountManager() {
-        return accountManager;
-    }
-
-    public void setAccountManager(AccountManager accountManager) {
-        this.accountManager = accountManager;
     }
 }

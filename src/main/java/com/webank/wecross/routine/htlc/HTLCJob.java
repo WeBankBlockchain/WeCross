@@ -14,19 +14,15 @@ public class HTLCJob implements Job {
     public void execute(JobExecutionContext context) {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
         HTLCResourcePair htlcResourcePair = (HTLCResourcePair) dataMap.get("HTLC");
-        // String ipath = htlcResourcePair.getSelfHTLCResource().getPathAsString();
-
-        long startTime = System.currentTimeMillis();
+        String path = htlcResourcePair.getSelfHTLCResource().getPath();
         try {
             doHTLCTask(htlcResourcePair);
         } catch (Exception e) {
             logger.error(
-                    "error in current round, ipaht: {}, errorMessage: {}",
-                    // ipath,
+                    "error in current round, path: {}, errorMessage: {}",
+                    path,
                     e.getLocalizedMessage());
         }
-        long endTime = System.currentTimeMillis();
-        // logger.info("current round costs: {} ms, Ipath: {}", (endTime - startTime), ipath);
     }
 
     public void doHTLCTask(HTLCResourcePair htlcResourcePair) throws Exception {
