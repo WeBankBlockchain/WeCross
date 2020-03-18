@@ -3,6 +3,7 @@ package com.webank.wecross.stub;
 public class Request {
     private int type;
     private byte[] data;
+    private ResourceInfo resourceInfo;
 
     public int getType() {
         return type;
@@ -18,5 +19,13 @@ public class Request {
 
     public void setData(byte[] data) {
         this.data = data;
+    }
+
+    public ResourceInfo getResourceInfo() {
+        return resourceInfo;
+    }
+
+    public void setResourceInfo(ResourceInfo resourceInfo) {
+        this.resourceInfo = resourceInfo;
     }
 }

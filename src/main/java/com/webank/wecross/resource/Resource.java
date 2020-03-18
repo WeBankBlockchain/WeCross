@@ -71,6 +71,7 @@ public class Resource {
             // fail or return
         }
 
+        request.setResourceInfo(resourceInfo);
         return chooseConnection().send(request);
     }
 

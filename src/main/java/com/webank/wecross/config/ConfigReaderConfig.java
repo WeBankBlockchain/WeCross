@@ -78,12 +78,6 @@ public class ConfigReaderConfig {
         }
 
         String caCertPath = (String) p2pMap.get("caCert");
-        if (caCertPath == null) {
-            String errorMessage =
-                    "\"caCert\" in [p2p] item  not found, please check "
-                            + WeCrossDefault.MAIN_CONFIG_FILE;
-            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
-        }
         if (!fileIsExists(caCertPath)) {
             String errorMessage = "File: " + caCertPath + " is not exists";
             throw new WeCrossException(ErrorCode.DIR_NOT_EXISTS, errorMessage);
