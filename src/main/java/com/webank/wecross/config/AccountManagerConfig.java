@@ -39,14 +39,14 @@ public class AccountManagerConfig {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         try {
             org.springframework.core.io.Resource[] resources =
-                    resolver.getResources("file:/" + accountsPath + "/*");
+                    resolver.getResources("file:" + accountsPath + "/*");
 
             AccountManager accountManager = new AccountManager();
             for (org.springframework.core.io.Resource resource : resources) {
                 if (resource.getFile().isDirectory()) {
                     org.springframework.core.io.Resource accountConfig =
                             resolver.getResource(
-                                    "file:/"
+                                    "file:"
                                             + resource.getFile().getAbsolutePath()
                                             + "/account.toml");
                     Toml toml = new Toml();
