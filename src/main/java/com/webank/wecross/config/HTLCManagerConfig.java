@@ -22,6 +22,11 @@ public class HTLCManagerConfig {
     @Bean
     public HTLCManager newHTLCManager() {
         List<Map<String, String>> infoList = toml.getList("htlc");
+        
+        if(infoList == null || infoList.isEmpty()) {
+        	return null;
+        }
+        
         List<HTLCTaskInfo> htlcTaskInfos = new ArrayList<>(infoList.size());
         HTLCManager htlcManager = new HTLCManager();
         for (Map<String, String> infoMap : infoList) {

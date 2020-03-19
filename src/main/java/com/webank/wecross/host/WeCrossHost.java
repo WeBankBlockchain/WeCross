@@ -89,10 +89,12 @@ public class WeCrossHost {
     }
 
     public void runHTLCService() {
-        HTLCTaskFactory htlcTaskFactory = new HTLCTaskFactory();
-        TaskManager taskManager = new TaskManager(htlcTaskFactory);
-        taskManager.registerTasks(htlcResourcePairs);
-        taskManager.start();
+    	if(htlcManager != null) {
+	        HTLCTaskFactory htlcTaskFactory = new HTLCTaskFactory();
+	        TaskManager taskManager = new TaskManager(htlcTaskFactory);
+	        taskManager.registerTasks(htlcResourcePairs);
+	        taskManager.start();
+    	}
     }
 
     public void initHTLCResourcePairs() throws Exception {

@@ -8,6 +8,8 @@ import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.routine.htlc.HTLCManager;
 import com.webank.wecross.zone.ZoneManager;
 import javax.annotation.Resource;
+
+import org.apache.logging.log4j.core.tools.picocli.CommandLine.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +28,8 @@ public class WeCrossHostConfig {
 
     @Resource private P2PMessageEngine p2pMessageEngine;
 
-    @Resource private HTLCManager htlcManager;
+    // @Resource
+    private HTLCManager htlcManager = null;
 
     @Resource private AccountManager accountManager;
 
@@ -43,7 +46,9 @@ public class WeCrossHostConfig {
         zoneManager.setP2PEngine(p2pMessageEngine);
 
         try {
-            host.initHTLCResourcePairs();
+        	if(htlcManager != null) {
+        		host.initHTLCResourcePairs();
+        	}
         } catch (Exception e) {
             logger.error("something wrong with initHTLCResourcePairs: {}", e.getMessage());
             System.exit(1);

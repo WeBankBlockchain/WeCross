@@ -10,7 +10,6 @@ import java.security.Provider;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import javax.annotation.Resource;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
@@ -35,12 +34,11 @@ public class WebServerConfig {
         TomcatServletWebServerFactory tomcatServletWebServerFactory =
                 new TomcatServletWebServerFactory();
 
-        Security.addProvider(new BouncyCastleProvider());
         try {
             tomcatServletWebServerFactory.setAddress(InetAddress.getByName(address));
             tomcatServletWebServerFactory.setPort(port);
             Ssl ssl = new Ssl();
-            ssl.setClientAuth(ClientAuth.NEED);
+            ssl.setClientAuth(ClientAuth.NONE);
 
             KeyCertLoader keyCertLoader = new KeyCertLoader();
 
@@ -48,7 +46,7 @@ public class WebServerConfig {
                 logger.debug("Provider: {}", provider.getName());
             }
 
-            KeyStore keyStore = KeyStore.getInstance("jks");
+            KeyStore keyStore = KeyStore.getInstance("pkcs12");
             keyStore.load(null);
 
             PrivateKey privateKey =
@@ -59,7 +57,7 @@ public class WebServerConfig {
 
             X509Certificate[] caCertificates =
                     keyCertLoader.toX509Certificates(p2pConfig.getCaCert().getInputStream());
-            KeyStore trustStore = KeyStore.getInstance("jks");
+            KeyStore trustStore = KeyStore.getInstance("pkcs12");
             trustStore.load(null);
             trustStore.setCertificateEntry("mykey", caCertificates[0]);
 
