@@ -1,6 +1,5 @@
-package com.webank.wecross.stub.demostub;
+package com.webank.wecross.demostub;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.stub.BlockHeader;
@@ -17,37 +16,10 @@ public class DEMODriver implements Driver {
     private ObjectMapper mapper = new ObjectMapper();
 
     @Override
-    public byte[] encodeTransactionRequest(TransactionContext<TransactionRequest> request) {
-        try {
-            return mapper.writeValueAsBytes(request);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
-    }
-
-    @Override
     public TransactionContext<TransactionRequest> decodeTransactionRequest(byte[] data) {
         try {
             return mapper.readValue(
                     data, new TypeReference<TransactionContext<TransactionRequest>>() {});
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-    @Override
-    public byte[] encodeTransactionResponse(TransactionResponse response) {
-        try {
-            return mapper.writeValueAsBytes(response);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
-    }
-
-    @Override
-    public TransactionResponse decodeTransactionResponse(byte[] data) {
-        try {
-            return mapper.readValue(data, TransactionResponse.class);
         } catch (IOException e) {
             return null;
         }
@@ -65,33 +37,55 @@ public class DEMODriver implements Driver {
     @Override
     public TransactionResponse call(
             TransactionContext<TransactionRequest> request, Connection connection) {
-        byte[] data = encodeTransactionRequest(request);
+        try {
+            byte[] data = mapper.writeValueAsBytes(request);
 
-        Request connectionRequest = new Request();
-        connectionRequest.setData(data);
-        Response connectionResponse = connection.send(connectionRequest);
+            Request connectionRequest = new Request();
+            connectionRequest.setData(data);
+            Response connectionResponse = connection.send(connectionRequest);
 
-        TransactionResponse response = decodeTransactionResponse(connectionResponse.getData());
+            TransactionResponse response =
+                    response =
+                            mapper.readValue(
+                                    connectionResponse.getData(),
+                                    new TypeReference<TransactionResponse>() {});
 
-        return response;
+            return response;
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     @Override
     public TransactionResponse sendTransaction(
             TransactionContext<TransactionRequest> request, Connection connection) {
-        byte[] data = encodeTransactionRequest(request);
+        try {
+            byte[] data = mapper.writeValueAsBytes(request);
 
-        Request connectionRequest = new Request();
-        connectionRequest.setData(data);
-        Response connectionResponse = connection.send(connectionRequest);
+            Request connectionRequest = new Request();
+            connectionRequest.setData(data);
+            Response connectionResponse = connection.send(connectionRequest);
 
-        TransactionResponse response = decodeTransactionResponse(connectionResponse.getData());
+            TransactionResponse response =
+                    mapper.readValue(
+                            connectionResponse.getData(),
+                            new TypeReference<TransactionResponse>() {});
+            return response;
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-        return response;
+        return null;
     }
 
     @Override
     public long getBlockNumber(Connection connection) {
+
         return 0;
     }
 

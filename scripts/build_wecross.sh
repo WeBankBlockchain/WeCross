@@ -194,13 +194,16 @@ gen_conf()
 [server] # rpc ip & port
     address = '${2}'
     port = ${3}
+    caCert = 'classpath:ca.crt'
+    sslCert = 'classpath:node.crt'
+    sslKey = 'classpath:node.key'
 
 [p2p]
     listenIP = '0.0.0.0'
     listenPort = ${4}
-    caCert = 'classpath:p2p/ca.crt'
-    sslCert = 'classpath:p2p/node.crt'
-    sslKey = 'classpath:p2p/node.key'
+    caCert = 'classpath:ca.crt'
+    sslCert = 'classpath:node.crt'
+    sslKey = 'classpath:node.key'
     peers = [${5}]
 
 [test]

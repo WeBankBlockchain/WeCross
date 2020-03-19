@@ -1,9 +1,9 @@
 package com.webank.wecross.config;
 
 import com.moandjiezana.toml.Toml;
-import com.webank.wecross.account.Account;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.common.WeCrossDefault;
+import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.StubManager;
 import java.io.IOException;
 import javax.annotation.Resource;

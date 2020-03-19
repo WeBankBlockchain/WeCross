@@ -1,11 +1,11 @@
 package com.webank.wecross.routine.htlc;
 
-import com.webank.wecross.account.Account;
 import com.webank.wecross.common.ResourceQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Request;

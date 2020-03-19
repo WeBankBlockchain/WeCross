@@ -1,6 +1,5 @@
 package com.webank.wecross.host;
 
-import com.webank.wecross.account.Account;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.netty.P2PService;
@@ -19,6 +18,7 @@ import com.webank.wecross.routine.htlc.HTLCResourcePair;
 import com.webank.wecross.routine.htlc.HTLCTaskFactory;
 import com.webank.wecross.routine.htlc.HTLCTaskInfo;
 import com.webank.wecross.routine.task.TaskManager;
+import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.ArrayList;
@@ -89,12 +89,12 @@ public class WeCrossHost {
     }
 
     public void runHTLCService() {
-    	if(htlcManager != null) {
-	        HTLCTaskFactory htlcTaskFactory = new HTLCTaskFactory();
-	        TaskManager taskManager = new TaskManager(htlcTaskFactory);
-	        taskManager.registerTasks(htlcResourcePairs);
-	        taskManager.start();
-    	}
+        if (htlcManager != null) {
+            HTLCTaskFactory htlcTaskFactory = new HTLCTaskFactory();
+            TaskManager taskManager = new TaskManager(htlcTaskFactory);
+            taskManager.registerTasks(htlcResourcePairs);
+            taskManager.start();
+        }
     }
 
     public void initHTLCResourcePairs() throws Exception {

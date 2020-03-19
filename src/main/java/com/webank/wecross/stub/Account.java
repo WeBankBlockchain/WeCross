@@ -1,4 +1,4 @@
-package com.webank.wecross.account;
+package com.webank.wecross.stub;
 
 public interface Account {
     String getName();

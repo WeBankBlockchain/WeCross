@@ -1,7 +1,5 @@
 package com.webank.wecross.stub;
 
-import com.webank.wecross.account.Account;
-
 public class TransactionContext<T> {
     private T data;
     private Account account;

@@ -1,7 +1,5 @@
 package com.webank.wecross.stub;
 
-import com.webank.wecross.account.Account;
-
 public interface StubFactory {
     /**
      * create a driver

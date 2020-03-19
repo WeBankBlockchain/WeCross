@@ -90,6 +90,15 @@ jar {
     }
 }
 
+task makeStubJAR(type:org.gradle.api.tasks.bundling.Jar) {
+	baseName 'stub'
+	from 'build/classes/java/main/com/webank/wecross/stub'
+	from 'src/main/java/com/webank/wecross/stub'
+	into 'com/webank/wecross/stub/'
+	
+	destinationDir file('dist/stub/')
+}
+
 test {
     testLogging.showStandardStreams = true
 }
