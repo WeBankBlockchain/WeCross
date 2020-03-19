@@ -2,13 +2,14 @@ package com.webank.wecross.routine.htlc;
 
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.Path;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class HTLCManager {
     Set<String> paths = new HashSet();
-    List<HTLCTaskInfo> htlcTaskInfos;
+    List<HTLCTaskInfo> htlcTaskInfos = new ArrayList<>();
 
     public Resource filterHTLCResource(Path path, Resource resource) {
         if (paths.contains(path.toString())) {
