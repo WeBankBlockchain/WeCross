@@ -53,8 +53,6 @@ public class DEMODriver implements Driver {
             return response;
 
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
 
         return null;
@@ -76,8 +74,6 @@ public class DEMODriver implements Driver {
                             new TypeReference<TransactionResponse>() {});
             return response;
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
 
         return null;
