@@ -21,9 +21,12 @@ public class HTLCManagerConfig {
 
     @Bean
     public HTLCManager newHTLCManager() {
-        List<Map<String, String>> infoList = toml.getList("htlc");
-        List<HTLCTaskInfo> htlcTaskInfos = new ArrayList<>(infoList.size());
         HTLCManager htlcManager = new HTLCManager();
+        List<Map<String, String>> infoList = toml.getList("htlc");
+        if (infoList == null) {
+            return htlcManager;
+        }
+        List<HTLCTaskInfo> htlcTaskInfos = new ArrayList<>(infoList.size());
         for (Map<String, String> infoMap : infoList) {
             HTLCTaskInfo htlcTaskInfo = new HTLCTaskInfo();
             String selfPath = getSelfPath(infoMap);
