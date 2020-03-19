@@ -26,7 +26,7 @@ public class WeCrossHostConfig {
 
     @Resource private P2PMessageEngine p2pMessageEngine;
 
-    @Resource private HTLCManager htlcManager;
+    @Resource private HTLCManager htlcManager = null;
 
     @Resource private AccountManager accountManager;
 
@@ -43,7 +43,9 @@ public class WeCrossHostConfig {
         zoneManager.setP2PEngine(p2pMessageEngine);
 
         try {
-            host.initHTLCResourcePairs();
+            if (htlcManager != null) {
+                host.initHTLCResourcePairs();
+            }
         } catch (Exception e) {
             logger.error(
                     "something wrong with initHTLCResourcePairs: {}, exception: {}",

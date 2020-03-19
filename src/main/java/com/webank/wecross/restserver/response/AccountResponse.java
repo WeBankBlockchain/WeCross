@@ -1,7 +1,7 @@
 package com.webank.wecross.restserver.response;
 
-import com.webank.wecross.account.Account;
 import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.stub.Account;
 import java.util.Map;
 
 public class AccountResponse {
@@ -38,7 +38,7 @@ public class AccountResponse {
     }
 
     public void setAccountInfos(AccountManager accountManager) {
-        Map<String, com.webank.wecross.account.Account> accounts = accountManager.getAccounts();
+        Map<String, com.webank.wecross.stub.Account> accounts = accountManager.getAccounts();
         AccountInfo[] accountInfos = new AccountInfo[accounts.size()];
         int i = 0;
         for (Account account : accounts.values()) {

@@ -1,4 +1,4 @@
-package com.webank.wecross.stub.demostub;
+package com.webank.wecross.demostub;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.stub.Connection;

@@ -2,7 +2,6 @@ package com.webank.wecross.restserver;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.wecross.account.Account;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.common.QueryStatus;
 import com.webank.wecross.exception.ErrorCode;
@@ -16,6 +15,7 @@ import com.webank.wecross.restserver.response.ResourceResponse;
 import com.webank.wecross.restserver.response.StateResponse;
 import com.webank.wecross.restserver.response.StubResponse;
 import com.webank.wecross.routine.htlc.HTLCManager;
+import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.stub.TransactionContext;

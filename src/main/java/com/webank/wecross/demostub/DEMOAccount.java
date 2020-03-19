@@ -1,6 +1,6 @@
-package com.webank.wecross.stub.demostub;
+package com.webank.wecross.demostub;
 
-import com.webank.wecross.account.Account;
+import com.webank.wecross.stub.Account;
 
 public class DEMOAccount implements Account {
 

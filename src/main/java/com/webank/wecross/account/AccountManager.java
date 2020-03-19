@@ -1,5 +1,6 @@
 package com.webank.wecross.account;
 
+import com.webank.wecross.stub.Account;
 import java.util.HashMap;
 import java.util.Map;
 

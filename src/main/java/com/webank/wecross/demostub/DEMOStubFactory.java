@@ -1,6 +1,6 @@
-package com.webank.wecross.stub.demostub;
+package com.webank.wecross.demostub;
 
-import com.webank.wecross.account.Account;
+import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Stub;

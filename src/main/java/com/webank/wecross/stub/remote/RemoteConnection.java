@@ -26,6 +26,8 @@ public class RemoteConnection implements Connection {
                 p2pReq.setVersion(Versions.currentVersion);
                 p2pReq.setMethod("transaction");
                 p2pReq.newSeq();
+
+                request.setResourceInfo(null);
                 p2pReq.setData(request);
 
                 RemoteSemaphoreCallback callback =

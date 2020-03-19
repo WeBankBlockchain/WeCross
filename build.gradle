@@ -4,11 +4,76 @@ plugins {
 
 // Apply the java-library plugin to add support for Java Library
 apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'java'
 //apply plugin: 'war'
 apply plugin: 'jacoco'
+
+sourceCompatibility = '1.8'
+version = '1.0.0-SNAPSHOT'
+
+task sourcesJar(type: Jar) {
+	from 'dist/stub/stub.jar'
+	classifier = 'sources'
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			groupId = 'com.webank'
+			artifactId = 'wecross-java-stub'
+			from components.java
+			artifact sourcesJar
+
+			// https://docs.gradle.org/current/dsl/org.gradle.api.publish.maven.MavenPublication.html
+			pom {
+				name = "WeCross-Stub"
+				description = "Stub interface for WeCross"
+				url = "https://github.com/WeBankFinTech/WeCross"
+				licenses {
+					license {
+						name = "The Apache License, Version 2.0"
+						url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+					}
+				}
+				developers {
+					developer {
+						id = "Shareong"
+						name = "Shareong"
+						email = "740310627@qq.com"
+					}
+				}
+				scm {
+					connection = "scm:git:git://github.com/WeBankFinTech/WeCross.git"
+					developerConnection = "scm:git:ssh://github.com/WeBankFinTech/WeCross.git"
+					url = "https://github.com/WeBankFinTech/WeCross"
+				}
+			}
+		}
+	}
+	repositories {
+		maven {
+			def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+			def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+			
+			def nexus_username = ""
+			def nexus_password = ""
+			
+			credentials {
+				username = nexus_username
+				password = nexus_password
+			}
+		}
+	}
+}
+
+signing {
+	sign publishing.publications.mavenJava
+}
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -88,6 +153,15 @@ jar {
             into 'dist'
         }
     }
+}
+
+task makeStubJAR(type:org.gradle.api.tasks.bundling.Jar) {
+	baseName 'stub'
+	from 'build/classes/java/main/com/webank/wecross/stub'
+	from 'src/main/java/com/webank/wecross/stub'
+	into 'com/webank/wecross/stub/'
+	
+	destinationDir file('dist/stub/')
 }
 
 test {

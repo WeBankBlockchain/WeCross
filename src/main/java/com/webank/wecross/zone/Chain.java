@@ -68,15 +68,17 @@ public class Chain {
     public void fetchBlockHeader() {
         Connection connection = chooseConnection();
 
-        long localBlockNumber = blockHeaderStorage.readBlockNumber();
-        long remoteBlockNumber = driver.getBlockNumber(connection);
+        if (connection != null) {
+            long localBlockNumber = blockHeaderStorage.readBlockNumber();
+            long remoteBlockNumber = driver.getBlockNumber(connection);
 
-        if (remoteBlockNumber > localBlockNumber) {
-            for (long blockNumber = localBlockNumber + 1;
-                    blockNumber < remoteBlockNumber;
-                    ++blockNumber) {
-                byte[] blockBytes = driver.getBlockHeader(blockNumber, connection);
-                blockHeaderStorage.writeBlockHeader(blockNumber, blockBytes);
+            if (remoteBlockNumber > localBlockNumber) {
+                for (long blockNumber = localBlockNumber + 1;
+                        blockNumber < remoteBlockNumber;
+                        ++blockNumber) {
+                    byte[] blockBytes = driver.getBlockHeader(blockNumber, connection);
+                    blockHeaderStorage.writeBlockHeader(blockNumber, blockBytes);
+                }
             }
         }
     }
@@ -110,6 +112,10 @@ public class Chain {
     }
 
     public Connection chooseConnection() {
+        if (connections.isEmpty()) {
+            return null;
+        }
+
         if (connections.size() == 1) {
             return (Connection) connections.values().toArray()[0];
         } else {

@@ -14,8 +14,6 @@ public class TransactionResponse {
     private String hash;
     private List<String> extraHashes;
     private String[] result;
-    private String type = "";
-    private String encryptType = "";
 
     public Integer getErrorCode() {
         return errorCode;
@@ -64,22 +62,6 @@ public class TransactionResponse {
         this.extraHashes.add(hash);
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getEncryptType() {
-        return encryptType;
-    }
-
-    public void setEncryptType(String encryptType) {
-        this.encryptType = encryptType;
-    }
-
     @Override
     public String toString() {
         return "TransactionResponse{"
@@ -95,11 +77,7 @@ public class TransactionResponse {
                 + extraHashes
                 + ", result="
                 + Arrays.toString(result)
-                + ", type='"
-                + type
                 + '\''
-                + ", encryptType='"
-                + encryptType
                 + '\''
                 + '}';
     }
