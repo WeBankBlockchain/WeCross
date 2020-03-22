@@ -252,7 +252,9 @@ public class RestfulController {
                                                 new TransactionContext<TransactionRequest>(
                                                         transactionRequest,
                                                         account,
-                                                        resourceObj.getResourceInfo()));
+                                                        resourceObj.getResourceInfo(),
+                                                        resourceObj
+                                                                .getResourceBlockHeaderManager()));
 
                         restResponse.setData(transactionResponse);
                         break;
@@ -281,7 +283,9 @@ public class RestfulController {
                                                 new TransactionContext<TransactionRequest>(
                                                         transactionRequest,
                                                         account,
-                                                        resourceObj.getResourceInfo()));
+                                                        resourceObj.getResourceInfo(),
+                                                        resourceObj
+                                                                .getResourceBlockHeaderManager()));
 
                         restResponse.setData(transactionResponse);
                         break;

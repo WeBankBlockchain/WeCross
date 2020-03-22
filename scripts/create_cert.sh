@@ -190,11 +190,11 @@ gen_node_cert() {
     file_must_not_exists "$ndpath/ssl.key"
     file_must_not_exists "$ndpath/ssl.crt"
 
-    check_name node "$node"
+    check_name ssl "$node"
 
     mkdir -p $ndpath
 
-    gen_cert_secp256k1 "$capath" "$ndpath" "node"
+    gen_cert_secp256k1 "$capath" "$ndpath" "ssl"
     #nodeid is pubkey
     openssl ec -in $ndpath/ssl.key -text -noout | sed -n '7,11p' | tr -d ": \n" | awk '{print substr($0,3);}' | cat >$ndpath/node.nodeid
     # openssl x509 -serial -noout -in $ndpath/ssl.crt | awk -F= '{print $2}' | cat >$ndpath/node.serial

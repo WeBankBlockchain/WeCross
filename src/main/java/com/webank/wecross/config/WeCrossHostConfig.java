@@ -2,7 +2,9 @@ package com.webank.wecross.config;
 
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.host.WeCrossHost;
+import com.webank.wecross.p2p.MessageType;
 import com.webank.wecross.p2p.P2PMessageEngine;
+import com.webank.wecross.p2p.RequestProcessor;
 import com.webank.wecross.p2p.netty.P2PService;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.routine.htlc.HTLCManager;
@@ -41,6 +43,13 @@ public class WeCrossHostConfig {
 
         // set the p2p engine here to avoid circular reference
         zoneManager.setP2PEngine(p2pMessageEngine);
+        RequestProcessor processor =
+                (RequestProcessor)
+                        p2pService
+                                .getInitializer()
+                                .getMessageCallBack()
+                                .getProcessor(MessageType.RESOURCE_REQUEST);
+        processor.setP2pEngine(p2pMessageEngine);
 
         try {
             if (htlcManager != null) {

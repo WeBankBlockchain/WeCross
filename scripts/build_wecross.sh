@@ -166,9 +166,11 @@ gen_one_wecross()
     cp -r ${wecross_dir}./*.sh "${output}/"
     cp -r ${wecross_dir}/apps "${output}/"
     cp -r ${wecross_dir}/lib "${output}/"
+    mkdir -p ${output}/plugin
 
     cp -r "${wecross_dir}/conf" "${output}/conf"
-    cp -r "${cert_dir}/*" "${output}"/conf/
+    cp -r "${cert_dir}"/* "${output}"/conf/
+    mkdir -p ${output}/conf/accounts
     gen_conf "${output}"/conf/wecross.toml "${2}" "${3}" "${4}" "${5}"
     LOG_INFO "Create ${output} successfully"
 

@@ -1,5 +1,6 @@
 package com.webank.wecross.config;
 
+import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
@@ -15,11 +16,14 @@ public class ZoneManagerConfig {
 
     @Resource private StubManager stubManager;
 
+    @Resource private BlockHeaderStorageFactory blockHeaderStorageFactory;
+
     @Bean
     public ZoneManager newZoneManager() {
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setZones(zones);
         zoneManager.setStubManager(stubManager);
+        zoneManager.setBlockHeaderStorageFactory(blockHeaderStorageFactory);
         return zoneManager;
     }
 }

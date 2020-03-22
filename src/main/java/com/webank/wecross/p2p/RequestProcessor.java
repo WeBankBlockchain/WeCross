@@ -148,7 +148,7 @@ public class RequestProcessor implements Processor {
 
                         logger.info("Receive request peer info");
                         PeerInfoMessageData data = new PeerInfoMessageData();
-                        data.setSeq(peerManager.getSeq());
+                        data.setSeq(zoneManager.getSeq());
                         data.setResources(resources);
 
                         response.setResult(QueryStatus.SUCCESS);
@@ -180,21 +180,19 @@ public class RequestProcessor implements Processor {
                                         "Request peer info, peer:{}, seq:{}",
                                         peerInfo,
                                         msg.getSeq());
-                                p2pEngine.asyncSendMessage(
-                                        peerInfo,
-                                        msg,
+
+                                P2PMessageCallback<PeerInfoMessageData> callback =
                                         new P2PMessageCallback<PeerInfoMessageData>() {
                                             @Override
                                             public void onResponse(
                                                     int status,
                                                     String message,
-                                                    P2PMessage<PeerInfoMessageData> msg) {
+                                                    P2PResponse<PeerInfoMessageData> responseMsg) {
                                                 logger.info("Receive peer info from {}", peerInfo);
 
                                                 PeerInfoMessageData data =
-                                                        (PeerInfoMessageData) msg.getData();
-                                                if (data != null
-                                                        && msg.getMethod().equals("peerInfo")) {
+                                                        (PeerInfoMessageData) responseMsg.getData();
+                                                if (data != null) {
                                                     int newSeq = data.getSeq();
                                                     if (peerManager.hasPeerChanged(
                                                             peerInfo.getNode(), newSeq)) {
@@ -212,7 +210,6 @@ public class RequestProcessor implements Processor {
                                                                 peerInfo,
                                                                 peerInfo.getResourceInfos());
                                                         peerInfo.setResources(newSeq, newResources);
-                                                        peerInfo.setSeq(newSeq);
                                                         zoneManager.addRemoteResources(
                                                                 peerInfo, newResources);
                                                     } else {
@@ -226,7 +223,11 @@ public class RequestProcessor implements Processor {
                                                                     + peerInfo);
                                                 }
                                             }
-                                        });
+                                        };
+                                callback.setTypeReference(
+                                        new TypeReference<P2PResponse<PeerInfoMessageData>>() {});
+
+                                p2pEngine.asyncSendMessage(peerInfo, msg, callback);
                             }
                         } else {
                             logger.warn("Receive unrecognized seq message from peer:" + peerInfo);
@@ -288,6 +289,7 @@ public class RequestProcessor implements Processor {
             switch (method) {
                 case "transaction":
                     {
+                        logger.debug("On remote transaction request");
                         P2PMessage<Request> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,

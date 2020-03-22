@@ -24,7 +24,7 @@ public class RemoteConnection implements Connection {
             try {
                 P2PMessage<Request> p2pReq = new P2PMessage<Request>();
                 p2pReq.setVersion(Versions.currentVersion);
-                p2pReq.setMethod("transaction");
+                p2pReq.setMethod(path.replace(".", "/") + "/transaction");
                 p2pReq.newSeq();
 
                 request.setResourceInfo(null);

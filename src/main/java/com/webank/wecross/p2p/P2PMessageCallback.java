@@ -4,22 +4,19 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.p2p.engine.P2PResponse;
-import com.webank.wecross.peer.Peer;
 
 public abstract class P2PMessageCallback<T> {
     private TypeReference<?> typeReference;
     protected int status;
     protected String message;
-    protected P2PMessage<T> data;
+    protected P2PResponse<T> data;
     private ObjectMapper objectMapper = new ObjectMapper();
-
-    private Peer peer;
 
     public void execute() {
         this.onResponse(status, message, data);
     }
 
-    public abstract void onResponse(int status, String message, P2PMessage<T> msg);
+    public abstract void onResponse(int status, String message, P2PResponse<T> msg);
 
     public void setStatus(int status) {
         this.status = status;
@@ -40,7 +37,7 @@ public abstract class P2PMessageCallback<T> {
         return this.status;
     }
 
-    public void setData(P2PMessage<T> msg) {
+    public void setData(P2PResponse<T> msg) {
         this.data = msg;
     }
 
@@ -59,15 +56,5 @@ public abstract class P2PMessageCallback<T> {
     @JsonIgnore
     public String getMessage() {
         return this.message;
-    }
-
-    @JsonIgnore
-    public Peer getPeer() {
-        return peer;
-    }
-
-    @JsonIgnore
-    public void setPeer(Peer peer) {
-        this.peer = peer;
     }
 }

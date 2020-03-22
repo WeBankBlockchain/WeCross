@@ -85,7 +85,7 @@ public class ZoneManagerTest {
         Map<String, ResourceInfo> allResources = zoneManager.getAllResourcesInfo(false);
         Assert.assertEquals(12, allResources.size());
 
-        Assert.assertEquals(13, zoneManager.getSeq());
+        Assert.assertEquals(1, zoneManager.getSeq());
 
         Map<String, ResourceInfo> allLocalResources = zoneManager.getAllResourcesInfo(true);
         System.out.println(allLocalResources);
@@ -208,7 +208,7 @@ public class ZoneManagerTest {
         }
 
         Zone zone = zoneManager.getZone("payment");
-        Chain stub = zone.getStub("bcos2");
+        Chain stub = zone.getChain("bcos2");
         Assert.assertNull(stub);
 
         // fatal test

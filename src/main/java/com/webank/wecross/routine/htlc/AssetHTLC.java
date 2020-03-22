@@ -13,7 +13,10 @@ public class AssetHTLC implements HTLC {
 
         TransactionContext<TransactionRequest> transactionContext =
                 new TransactionContext<TransactionRequest>(
-                        request, htlcResource.getAccount(), htlcResource.getResourceInfo());
+                        request,
+                        htlcResource.getAccount(),
+                        htlcResource.getResourceInfo(),
+                        htlcResource.getResourceBlockHeaderManager());
 
         TransactionResponse response = htlcResource.sendTransaction(transactionContext);
         if (response.getErrorCode() != 0) {
@@ -38,7 +41,8 @@ public class AssetHTLC implements HTLC {
                 new TransactionContext<TransactionRequest>(
                         request,
                         otherHTLCResource.getAccount(),
-                        otherHTLCResource.getResourceInfo());
+                        otherHTLCResource.getResourceInfo(),
+                        otherHTLCResource.getResourceBlockHeaderManager());
 
         TransactionResponse response = otherHTLCResource.sendTransaction(transactionContext);
         if (response.getErrorCode() != 0) {
@@ -84,7 +88,10 @@ public class AssetHTLC implements HTLC {
         // TODO: fill TransactionContext
         TransactionContext<TransactionRequest> transactionContext =
                 new TransactionContext<TransactionRequest>(
-                        request, htlcResource.getAccount(), htlcResource.getResourceInfo());
+                        request,
+                        htlcResource.getAccount(),
+                        htlcResource.getResourceInfo(),
+                        htlcResource.getResourceBlockHeaderManager());
 
         TransactionResponse response = htlcResource.call(transactionContext); // TODO: fix it
         if (response.getErrorCode() != 0) {
@@ -154,7 +161,10 @@ public class AssetHTLC implements HTLC {
 
         TransactionContext<TransactionRequest> transactionContext =
                 new TransactionContext<TransactionRequest>(
-                        request, htlcResource.getAccount(), htlcResource.getResourceInfo());
+                        request,
+                        htlcResource.getAccount(),
+                        htlcResource.getResourceInfo(),
+                        htlcResource.getResourceBlockHeaderManager());
         TransactionResponse response = htlcResource.call(transactionContext);
         if (response.getErrorCode() != 0) {
             throw new Exception(
@@ -172,7 +182,10 @@ public class AssetHTLC implements HTLC {
 
         TransactionContext<TransactionRequest> transactionContext =
                 new TransactionContext<TransactionRequest>(
-                        request, htlcResource.getAccount(), htlcResource.getResourceInfo());
+                        request,
+                        htlcResource.getAccount(),
+                        htlcResource.getResourceInfo(),
+                        htlcResource.getResourceBlockHeaderManager());
 
         TransactionResponse response = htlcResource.sendTransaction(transactionContext);
         if (response.getErrorCode() != 0) {
