@@ -20,8 +20,6 @@ task stubJar(type: Jar) {
 	from 'build/classes/java/main/com/webank/wecross/stub'
 	from 'src/main/java/com/webank/wecross/stub'
 	into 'com/webank/wecross/stub/'
-	
-	// destinationDir file('dist/stub/')
 }
 
 publishing {
@@ -29,8 +27,6 @@ publishing {
 		mavenJava(MavenPublication) {
 			groupId = 'com.webank'
 			artifactId = 'wecross-java-stub'
-			// from components.java
-			// artifact sourcesJar
 			
 			artifact stubJar
 
@@ -159,6 +155,15 @@ jar {
             into 'dist'
         }
     }
+}
+
+task makeStubJAR(type:org.gradle.api.tasks.bundling.Jar) {
+	baseName 'stub'
+	from 'build/classes/java/main/com/webank/wecross/stub'
+	from 'src/main/java/com/webank/wecross/stub'
+	into 'com/webank/wecross/stub/'
+	
+	destinationDir file('dist/stub/')
 }
 
 test {
