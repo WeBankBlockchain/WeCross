@@ -1,4 +1,4 @@
-package com.webank.wecross.stub.remote;
+package com.webank.wecross.remote;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.wecross.p2p.P2PMessage;

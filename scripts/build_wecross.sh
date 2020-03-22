@@ -168,7 +168,7 @@ gen_one_wecross()
     cp -r ${wecross_dir}/lib "${output}/"
 
     cp -r "${wecross_dir}/conf" "${output}/conf"
-    cp -r "${cert_dir}" "${output}"/conf/p2p
+    cp -r "${cert_dir}" "${output}"/conf/
     gen_conf "${output}"/conf/wecross.toml "${2}" "${3}" "${4}" "${5}"
     LOG_INFO "Create ${output} successfully"
 
@@ -195,15 +195,15 @@ gen_conf()
     address = '${2}'
     port = ${3}
     caCert = 'classpath:ca.crt'
-    sslCert = 'classpath:node.crt'
-    sslKey = 'classpath:node.key'
+    sslCert = 'classpath:ssl.crt'
+    sslKey = 'classpath:ssl.key'
 
 [p2p]
     listenIP = '0.0.0.0'
     listenPort = ${4}
     caCert = 'classpath:ca.crt'
-    sslCert = 'classpath:node.crt'
-    sslKey = 'classpath:node.key'
+    sslCert = 'classpath:ssl.crt'
+    sslKey = 'classpath:ssl.key'
     peers = [${5}]
 
 [test]

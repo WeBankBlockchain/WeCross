@@ -15,9 +15,13 @@ apply plugin: 'jacoco'
 sourceCompatibility = '1.8'
 version = '1.0.0-SNAPSHOT'
 
-task sourcesJar(type: Jar) {
-	from 'dist/stub/stub.jar'
-	classifier = 'sources'
+task stubJar(type: Jar) {
+	baseName 'stub'
+	from 'build/classes/java/main/com/webank/wecross/stub'
+	from 'src/main/java/com/webank/wecross/stub'
+	into 'com/webank/wecross/stub/'
+	
+	// destinationDir file('dist/stub/')
 }
 
 publishing {
@@ -25,8 +29,10 @@ publishing {
 		mavenJava(MavenPublication) {
 			groupId = 'com.webank'
 			artifactId = 'wecross-java-stub'
-			from components.java
-			artifact sourcesJar
+			// from components.java
+			// artifact sourcesJar
+			
+			artifact stubJar
 
 			// https://docs.gradle.org/current/dsl/org.gradle.api.publish.maven.MavenPublication.html
 			pom {
@@ -60,8 +66,8 @@ publishing {
 			def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
 			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
 			
-			def nexus_username = ""
-			def nexus_password = ""
+			def nexus_username = ''
+			def nexus_password = ''
 			
 			credentials {
 				username = nexus_username
@@ -153,15 +159,6 @@ jar {
             into 'dist'
         }
     }
-}
-
-task makeStubJAR(type:org.gradle.api.tasks.bundling.Jar) {
-	baseName 'stub'
-	from 'build/classes/java/main/com/webank/wecross/stub'
-	from 'src/main/java/com/webank/wecross/stub'
-	into 'com/webank/wecross/stub/'
-	
-	destinationDir file('dist/stub/')
 }
 
 test {

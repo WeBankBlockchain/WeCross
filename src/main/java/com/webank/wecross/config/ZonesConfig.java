@@ -90,6 +90,7 @@ public class ZonesConfig {
                 stubToml = ConfigUtils.getToml(stubPath);
             } catch (WeCrossException e) {
                 String errorMessage = "Parse " + stubPath + " failed";
+                logger.error(errorMessage, e);
                 throw new WeCrossException(ErrorCode.UNEXPECTED_CONFIG, errorMessage);
             }
 
@@ -107,6 +108,13 @@ public class ZonesConfig {
                 throw new WeCrossException(-1, "Cannot find stub type: " + type);
             }
             Connection connection = stubFactory.newConnection(stubPath);
+
+            if (connection == null) {
+                logger.error("Init connection: {}-{} failed", stubPath, type);
+
+                throw new WeCrossException(-1, "Init connection failed");
+            }
+
             List<ResourceInfo> resources = connection.getResources();
 
             Chain chain = new Chain();

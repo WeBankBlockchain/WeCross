@@ -78,6 +78,8 @@ public class Chain {
                         ++blockNumber) {
                     byte[] blockBytes = driver.getBlockHeader(blockNumber, connection);
                     blockHeaderStorage.writeBlockHeader(blockNumber, blockBytes);
+
+                    logger.debug("update blockheader: {}", blockNumber);
                 }
             }
         }

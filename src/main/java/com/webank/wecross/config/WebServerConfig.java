@@ -18,6 +18,7 @@ import org.springframework.boot.web.server.Ssl.ClientAuth;
 import org.springframework.boot.web.server.SslStoreProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 @Configuration
 public class WebServerConfig {
@@ -25,7 +26,6 @@ public class WebServerConfig {
     private static Logger logger = LoggerFactory.getLogger(WebServerConfig.class);
 
     @Resource Toml toml;
-    @Resource P2PConfig p2pConfig;
 
     @Bean
     public TomcatServletWebServerFactory newTomcatServletWebServerFactory() {
@@ -49,14 +49,24 @@ public class WebServerConfig {
             KeyStore keyStore = KeyStore.getInstance("pkcs12");
             keyStore.load(null);
 
+            PathMatchingResourcePatternResolver resolver =
+                    new PathMatchingResourcePatternResolver();
+            org.springframework.core.io.Resource sslKeyResource =
+                    resolver.getResource(toml.getString("rpc.sslKey", "classpath:ssl.key"));
             PrivateKey privateKey =
-                    keyCertLoader.toPrivateKey(p2pConfig.getSslKey().getInputStream(), null);
+                    keyCertLoader.toPrivateKey(sslKeyResource.getInputStream(), null);
+
+            org.springframework.core.io.Resource sslCertResource =
+                    resolver.getResource(toml.getString("rpc.sslCert", "classpath:ssl.crt"));
             X509Certificate[] certificates =
-                    keyCertLoader.toX509Certificates(p2pConfig.getSslCert().getInputStream());
+                    keyCertLoader.toX509Certificates(sslCertResource.getInputStream());
             keyStore.setKeyEntry("mykey", privateKey, "".toCharArray(), certificates);
 
+            org.springframework.core.io.Resource caCertResource =
+                    resolver.getResource(toml.getString("rpc.caCert", "classpath:ca.crt"));
             X509Certificate[] caCertificates =
-                    keyCertLoader.toX509Certificates(p2pConfig.getCaCert().getInputStream());
+                    keyCertLoader.toX509Certificates(caCertResource.getInputStream());
+
             KeyStore trustStore = KeyStore.getInstance("pkcs12");
             trustStore.load(null);
             trustStore.setCertificateEntry("mykey", caCertificates[0]);
@@ -83,10 +93,10 @@ public class WebServerConfig {
     }
 
     private String getAddress() {
-        String address = toml.getString("server.address");
+        String address = toml.getString("rpc.address");
         if (address == null) {
             String errorMessage =
-                    "Something wrong with [server] item, please check [address] in "
+                    "Something wrong with [rpc] item, please check [address] in "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
             logger.error(errorMessage);
             System.exit(1);
@@ -95,10 +105,10 @@ public class WebServerConfig {
     }
 
     private int getPort() {
-        Long port_temp = toml.getLong("server.port");
+        Long port_temp = toml.getLong("rpc.port");
         if (port_temp == null) {
             String errorMessage =
-                    "Something wrong with [server] item, please check [port] in "
+                    "Something wrong with [rpc] item, please check [port] in "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
             logger.error(errorMessage);
             System.exit(1);
