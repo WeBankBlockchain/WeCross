@@ -10,13 +10,13 @@ run_wecross()
 {
     if [ "$(uname)" == "Darwin" ]; then
         # Mac
-        nohup java -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
+        nohup java -Djdk.tls.namedGroups="secp256k1" -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
     elif [ "$(uname -s | grep MINGW | wc -l)" != "0" ]; then
         # Windows
-        nohup java -cp ${WINDS_CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
+        nohup java -Djdk.tls.namedGroups="secp256k1" -cp ${WINDS_CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
     else
         # GNU/Linux
-        nohup java -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
+        nohup java -Djdk.tls.namedGroups="secp256k1" -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
     fi
 }
 

@@ -14,6 +14,7 @@ import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestfulController;
 import com.webank.wecross.routine.htlc.HTLCManager;
 import com.webank.wecross.stub.Path;
+import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
@@ -105,6 +106,35 @@ public class RestfulControllerTest {
 
             String expectRsp =
                     "{\"version\":\"1\",\"result\":0,\"message\":\"Success\",\"data\":\"exists\"}";
+            Assert.assertEquals(expectRsp, result);
+        } catch (Exception e) {
+            Assert.assertTrue(e.getMessage(), false);
+        }
+    }
+
+    @Test
+    public void deTailTest() throws Exception {
+        try {
+            ResourceInfo resourceInfo = new ResourceInfo();
+            Resource resource = new Resource();
+            resource.setResourceInfo(resourceInfo);
+            HTLCManager mockHTLCManager = Mockito.mock(HTLCManager.class);
+            Mockito.when(weCrossHost.getHtlcManager()).thenReturn(mockHTLCManager);
+            Mockito.when(mockHTLCManager.filterHTLCResource(Mockito.any(), Mockito.any()))
+                    .thenReturn(resource);
+
+            MvcResult rsp =
+                    this.mockMvc
+                            .perform(get("/test-network/test-stub/test-resource/detail"))
+                            .andDo(print())
+                            .andExpect(status().isOk())
+                            .andReturn();
+
+            String result = rsp.getResponse().getContentAsString();
+            System.out.println("####Respond: " + result);
+
+            String expectRsp =
+                    "{\"version\":\"1\",\"result\":0,\"message\":\"Success\",\"data\":{\"path\":\"test-network.test-stub.test-resource\",\"distance\":1,\"type\":null,\"stubType\":null,\"properties\":{},\"checksum\":null}}";
             Assert.assertEquals(expectRsp, result);
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
@@ -216,7 +246,7 @@ public class RestfulControllerTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"1\",\"result\":0,\"message\":\"Success\",\"data\":{\"resourceInfos\":[]}}";
+                    "{\"version\":\"1\",\"result\":0,\"message\":\"Success\",\"data\":{\"resourceDetails\":[]}}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);

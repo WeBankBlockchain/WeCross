@@ -6,9 +6,6 @@ import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import java.io.File;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -33,9 +30,7 @@ public class ConfigUtils {
         try {
             PathMatchingResourcePatternResolver resolver =
                     new PathMatchingResourcePatternResolver();
-            Path path = Paths.get(resolver.getResource(fileName).getURI());
-            String encryptedSecret = new String(Files.readAllBytes(path));
-            return new Toml().read(encryptedSecret);
+            return new Toml().read(resolver.getResource(fileName).getInputStream());
         } catch (Exception e) {
             throw new WeCrossException(
                     ErrorCode.INTERNAL_ERROR,
