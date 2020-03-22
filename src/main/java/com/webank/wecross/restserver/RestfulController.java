@@ -22,6 +22,10 @@ import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,11 +66,11 @@ public class RestfulController {
             stubResponse.setStubs(stubManager);
             restResponse.setData(stubResponse);
         } catch (WeCrossException e) {
-            logger.warn("Process request error: {}", e.getMessage());
+            logger.warn("Process request error", e);
             restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
         } catch (Exception e) {
-            logger.warn("Process request error: {}", e.getMessage());
+            logger.warn("Process request error", e);
             restResponse.setResult(QueryStatus.INTERNAL_ERROR);
             restResponse.setMessage(e.getMessage());
         }
@@ -94,11 +98,11 @@ public class RestfulController {
             resourceResponse.setResourceInfos(zoneManager, resourceRequest.isIgnoreRemote());
             restResponse.setData(resourceResponse);
         } catch (WeCrossException e) {
-            logger.warn("Process request error: {}", e.getMessage());
+            logger.warn("Process request error", e);
             restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
         } catch (Exception e) {
-            logger.warn("Process request error: {}", e.getMessage());
+            logger.warn("Process request error", e);
             restResponse.setResult(QueryStatus.INTERNAL_ERROR);
             restResponse.setMessage(e.getMessage());
         }
@@ -119,15 +123,25 @@ public class RestfulController {
             RestRequest restRequest =
                     objectMapper.readValue(restRequestString, new TypeReference<RestRequest>() {});
             restRequest.checkRestRequest("", "listAccounts");
+            Map<String, com.webank.wecross.stub.Account> accounts = accountManager.getAccounts();
+            List<Map<String, String>> accountInfos = new ArrayList<Map<String, String>>();
+            for (Account account : accounts.values()) {
+                Map<String, String> accountInfo = new HashMap<String, String>();
+                accountInfo.put("name", account.getName());
+                accountInfo.put("type", account.getType());
+
+                accountInfos.add(accountInfo);
+            }
+
             AccountResponse accountResponse = new AccountResponse();
-            accountResponse.setAccountInfos(accountManager);
+            accountResponse.setAccountInfos(accountInfos);
             restResponse.setData(accountResponse);
         } catch (WeCrossException e) {
-            logger.warn("Process request error: {}", e.getMessage());
+            logger.warn("Process request error", e);
             restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
         } catch (Exception e) {
-            logger.warn("Process request error: {}", e.getMessage());
+            logger.warn("Process request error", e);
             restResponse.setResult(QueryStatus.INTERNAL_ERROR);
             restResponse.setMessage(e.getMessage());
         }
@@ -238,7 +252,9 @@ public class RestfulController {
                                                 new TransactionContext<TransactionRequest>(
                                                         transactionRequest,
                                                         account,
-                                                        resourceObj.getResourceInfo()));
+                                                        resourceObj.getResourceInfo(),
+                                                        resourceObj
+                                                                .getResourceBlockHeaderManager()));
 
                         restResponse.setData(transactionResponse);
                         break;
@@ -267,7 +283,9 @@ public class RestfulController {
                                                 new TransactionContext<TransactionRequest>(
                                                         transactionRequest,
                                                         account,
-                                                        resourceObj.getResourceInfo()));
+                                                        resourceObj.getResourceInfo(),
+                                                        resourceObj
+                                                                .getResourceBlockHeaderManager()));
 
                         restResponse.setData(transactionResponse);
                         break;
@@ -281,7 +299,7 @@ public class RestfulController {
                     }
             }
         } catch (WeCrossException e) {
-            logger.warn("Process request error: {}", e.getMessage());
+            logger.warn("Process request error", e);
             restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
         } catch (Exception e) {

@@ -7,10 +7,15 @@ public class TransactionContext<T> {
     private ResourceInfo resourceInfo;
     private BlockHeaderManager blockHeaderManager;
 
-    public TransactionContext(T data, Account account, ResourceInfo resourceInfo) {
+    public TransactionContext(
+            T data,
+            Account account,
+            ResourceInfo resourceInfo,
+            BlockHeaderManager blockHeaderManager) {
         this.data = data;
         this.account = account;
         this.resourceInfo = resourceInfo;
+        this.blockHeaderManager = blockHeaderManager;
     }
 
     public T getData() {

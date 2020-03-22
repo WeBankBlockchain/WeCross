@@ -34,13 +34,14 @@ public class Chain {
                             new Runnable() {
                                 @Override
                                 public void run() {
+                                    logger.trace("Block header sync thread started");
                                     while (running.get()) {
                                         try {
                                             Thread.sleep(1000);
 
                                             fetchBlockHeader();
                                         } catch (InterruptedException e) {
-                                            logger.info("Block sync thread interrupt");
+                                            logger.info("Block header sync thread interrupt", e);
                                             break;
                                         } catch (Exception e) {
                                             logger.error("Get block header error", e);
@@ -57,8 +58,10 @@ public class Chain {
         if (running.get()) {
             running.set(false);
             try {
+                logger.trace("Stoping block header sync thread...");
                 blockSyncThread.interrupt();
                 blockSyncThread.join();
+                logger.trace("Block header sync thread stopped");
             } catch (InterruptedException e) {
                 logger.error("Thread interrupt", e);
             }
@@ -68,6 +71,7 @@ public class Chain {
     public void fetchBlockHeader() {
         Connection connection = chooseConnection();
 
+        logger.trace("Fetch block header: {}", connection);
         if (connection != null) {
             long localBlockNumber = blockHeaderStorage.readBlockNumber();
             long remoteBlockNumber = driver.getBlockNumber(connection);
@@ -78,6 +82,8 @@ public class Chain {
                         ++blockNumber) {
                     byte[] blockBytes = driver.getBlockHeader(blockNumber, connection);
                     blockHeaderStorage.writeBlockHeader(blockNumber, blockBytes);
+
+                    logger.debug("update blockheader: {}", blockNumber);
                 }
             }
         }
@@ -113,6 +119,7 @@ public class Chain {
 
     public Connection chooseConnection() {
         if (connections.isEmpty()) {
+            logger.warn("Empty connections");
             return null;
         }
 

@@ -15,12 +15,11 @@ public class Zone {
     // Access control
     private Boolean visible;
 
-    public Chain getStub(Path path) {
-        return getStub(path.getChain());
+    public Chain getChain(Path path) {
+        return getChain(path.getChain());
     }
 
-    public Chain getStub(String name) {
-        logger.trace("get stub: {}", name);
+    public Chain getChain(String name) {
         Chain stub = chains.get(name);
         return stub;
     }

@@ -3,6 +3,7 @@ package com.webank.wecross.config;
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.common.WeCrossDefault;
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.StubManager;
 import java.io.IOException;
@@ -24,8 +25,8 @@ public class AccountManagerConfig {
     private Logger logger = LoggerFactory.getLogger(AccountManagerConfig.class);
 
     @Bean
-    public AccountManager newAccountManager() throws IOException {
-        String accountsPath = toml.getString("accounts.path", "accounts/");
+    public AccountManager newAccountManager() throws IOException, WeCrossException {
+        String accountsPath = toml.getString("accounts.path", "classpath:accounts/");
 
         if (accountsPath == null) {
             String errorMessage =
@@ -39,7 +40,7 @@ public class AccountManagerConfig {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         try {
             org.springframework.core.io.Resource[] resources =
-                    resolver.getResources("file:" + accountsPath + "/*");
+                    resolver.getResources(accountsPath + "/*");
 
             AccountManager accountManager = new AccountManager();
             for (org.springframework.core.io.Resource resource : resources) {
@@ -52,7 +53,7 @@ public class AccountManagerConfig {
                     Toml toml = new Toml();
                     toml.read(accountConfig.getInputStream());
 
-                    String type = toml.getString("type");
+                    String type = toml.getString("account.type");
 
                     logger.debug(
                             "Loading account, path: {}, name: {}, type: {}",
@@ -66,6 +67,14 @@ public class AccountManagerConfig {
                                     .newAccount(
                                             resource.getFilename(),
                                             resource.getFile().getAbsolutePath());
+                    if (account == null) {
+                        logger.error(
+                                "Load account path: {}, name: {} type: {} failed",
+                                accountConfig.getURI(),
+                                resource.getFile().getName(),
+                                type);
+                        continue;
+                    }
                     accountManager.addAccount(resource.getFile().getName(), account);
                 }
             }

@@ -19,6 +19,7 @@ public class Resource {
     private Driver driver;
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
     private ResourceInfo resourceInfo;
+    private ResourceBlockHeaderManager resourceBlockHeaderManager;
     boolean hasLocalConnection = false;
     private Random random = new SecureRandom();
 
@@ -66,7 +67,6 @@ public class Resource {
                     driver.decodeTransactionRequest(request.getData());
 
             // TODO: check request
-            transactionRequest.getData().getArgs();
 
             // fail or return
         }
@@ -103,6 +103,15 @@ public class Resource {
 
     public void setResourceInfo(ResourceInfo resourceInfo) {
         this.resourceInfo = resourceInfo;
+    }
+
+    public ResourceBlockHeaderManager getResourceBlockHeaderManager() {
+        return resourceBlockHeaderManager;
+    }
+
+    public void setResourceBlockHeaderManager(
+            ResourceBlockHeaderManager resourceBlockHeaderManager) {
+        this.resourceBlockHeaderManager = resourceBlockHeaderManager;
     }
 
     public boolean isHasLocalConnection() {

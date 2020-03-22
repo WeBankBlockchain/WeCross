@@ -19,10 +19,13 @@ public class RocksDBBlockHeaderStorage implements BlockHeaderStorage {
     public long readBlockNumber() {
         try {
             byte[] blockNumberBytes = rocksDB.get(numberKey.getBytes());
-            String blockNumberStr = new String(blockNumberBytes);
-            long blockNumber = Long.valueOf(blockNumberStr);
-
-            return blockNumber;
+            if (blockNumberBytes != null) {
+                String blockNumberStr = new String(blockNumberBytes);
+                long blockNumber = Long.valueOf(blockNumberStr);
+                return blockNumber;
+            } else {
+                return 0;
+            }
         } catch (RocksDBException e) {
             logger.error("Read rocksdb error", e);
         }

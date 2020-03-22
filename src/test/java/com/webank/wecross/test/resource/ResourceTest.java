@@ -54,12 +54,13 @@ public class ResourceTest {
         resource.setDriver(driver);
 
         TransactionResponse r =
-                resource.call(new TransactionContext<TransactionRequest>(request, null, null));
+                resource.call(
+                        new TransactionContext<TransactionRequest>(request, null, null, null));
         assertEquals(response, r);
 
         r =
                 resource.sendTransaction(
-                        new TransactionContext<TransactionRequest>(request, null, null));
+                        new TransactionContext<TransactionRequest>(request, null, null, null));
         assertEquals(response, r);
     }
 
@@ -82,7 +83,8 @@ public class ResourceTest {
         Driver driver = Mockito.mock(Driver.class);
         Mockito.when(driver.decodeTransactionRequest("Helloworld".getBytes()))
                 .thenReturn(
-                        new TransactionContext<TransactionRequest>(transactionRequest, null, null));
+                        new TransactionContext<TransactionRequest>(
+                                transactionRequest, null, null, null));
         resource.setDriver(driver);
 
         Request request = new Request();

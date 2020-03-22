@@ -84,16 +84,15 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
                                                 callback,
                                                 QueryStatus.SUCCESS,
                                                 QueryStatus.getStatusMessage(QueryStatus.SUCCESS),
-                                                p2PResponse.toP2PMessage(
-                                                        "restfulP2PMessageResponse"));
+                                                p2PResponse);
 
                                     } catch (Exception e) {
+                                        logger.error("p2p error:", e);
                                         executeCallback(
                                                 callback,
                                                 QueryStatus.INTERNAL_ERROR,
                                                 e.getMessage(),
                                                 null);
-                                        logger.error(" error : {}", e.getMessage());
                                     }
                                 }
                             }

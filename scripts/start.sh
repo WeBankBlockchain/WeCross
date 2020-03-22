@@ -3,8 +3,8 @@
 rm -f start.out
 
 APPS_FOLDER=$(pwd)/apps
-CLASS_PATH=$(pwd)'/apps/*:lib/*:conf'
-WINDS_CLASS_PATH=$(pwd)'/apps/*;lib/*;conf'
+CLASS_PATH=$(pwd)'/apps/*:lib/*:conf:plugin/*'
+WINDS_CLASS_PATH=$(pwd)'/apps/*;lib/*;conf;plugin/*'
 
 run_wecross() 
 {

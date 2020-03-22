@@ -1,3 +1,0 @@
-[account]
-    accountFile = '0x953a1773a7a1e1d84a9d3ac47c5b5f6ef0ec568d.pem'
-    password = ''  # if you choose .p12, then password is required

@@ -16,7 +16,7 @@ public class ResourceResponse {
         for (String path : resources.keySet()) {
             ResourceDetail detail = new ResourceDetail();
             Resource resource = resources.get(path);
-            details[i] = detail.initResourceDetail(resource, path);
+            details[i++] = detail.initResourceDetail(resource, path);
         }
         this.resourceDetails = details;
     }

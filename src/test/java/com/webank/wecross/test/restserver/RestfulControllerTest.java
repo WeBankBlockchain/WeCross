@@ -202,14 +202,13 @@ public class RestfulControllerTest {
                                             .content(json))
                             .andDo(print())
                             .andExpect(status().isOk())
+                            .andExpect(jsonPath("$.version").value("1"))
+                            .andExpect(jsonPath("$.result").value(0))
+                            .andExpect(jsonPath("message").value("Success"))
                             .andReturn();
 
             String result = rsp.getResponse().getContentAsString();
             System.out.println("####Respond: " + result);
-
-            String expectRsp =
-                    "{\"version\":\"1\",\"result\":0,\"message\":\"Success\",\"data\":{\"accountInfos\":null}}";
-            Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
         }

@@ -41,8 +41,8 @@ bash ./scripts/create_cert.sh -c -d ./ca
 bash ./scripts/create_cert.sh -n -D ./ca -d ./ca/node
 mkdir -p ./src/test/resources/p2p
 cp ./ca/ca.crt ./src/test/resources/p2p/
-cp ./ca/node/node.crt ./src/test/resources/p2p/
-cp ./ca/node/node.key ./src/test/resources/p2p/
+cp ./ca/node/ssl.crt ./src/test/resources/p2p/
+cp ./ca/node/ssl.key ./src/test/resources/p2p/
 cp ./ca/node/node.nodeid ./src/test/resources/p2p/
 
 #configure wecross

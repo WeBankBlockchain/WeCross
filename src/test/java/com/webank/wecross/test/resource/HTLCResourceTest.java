@@ -17,7 +17,7 @@ public class HTLCResourceTest {
         HTLCResource assetHtlcResource = new HTLCResource(resource);
         TransactionRequest request = new TransactionRequest();
         TransactionContext<TransactionRequest> context =
-                new TransactionContext<TransactionRequest>(request, null, null);
+                new TransactionContext<TransactionRequest>(request, null, null, null);
         //        try {
         //            request.setMethod("getSecret");
         //            request.setFromP2P(true);

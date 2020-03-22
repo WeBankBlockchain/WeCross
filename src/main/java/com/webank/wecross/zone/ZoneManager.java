@@ -1,14 +1,16 @@
 package com.webank.wecross.zone;
 
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.peer.Peer;
+import com.webank.wecross.remote.RemoteConnection;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.ResourceBlockHeaderManager;
 import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.StubManager;
-import com.webank.wecross.stub.remote.RemoteConnection;
 import com.webank.wecross.utils.core.PathUtils;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +35,7 @@ public class ZoneManager {
             Zone network = getZone(path);
 
             if (network != null) {
-                Chain stub = network.getStub(path);
+                Chain stub = network.getChain(path);
 
                 if (stub != null) {
                     Resource resource = stub.getResources().get(path.getResource());
@@ -129,13 +131,20 @@ public class ZoneManager {
                 if (resource == null) {
                     resource = new Resource();
                     resource.setDriver(driver);
+
+                    ResourceBlockHeaderManager resourceBlockHeaderManager =
+                            new ResourceBlockHeaderManager();
+                    resourceBlockHeaderManager.setBlockHeaderStorage(chain.getBlockHeaderStorage());
+                    resource.setResourceBlockHeaderManager(resourceBlockHeaderManager);
+                    resource.setResourceInfo(resourceInfo);
+
                     chain.getResources().put(path.getResource(), resource);
                 }
 
                 resource.addConnection(peer, remoteConnection);
-
-                seq.addAndGet(1);
             }
+        } catch (WeCrossException e) {
+            logger.error("Add remote resource error", e);
         } finally {
             lock.writeLock().unlock();
         }
@@ -160,7 +169,7 @@ public class ZoneManager {
                     continue;
                 }
 
-                Chain chain = zone.getStub(path.getChain());
+                Chain chain = zone.getChain(path.getChain());
                 if (chain == null) {
                     // stub not exists, bug?
                     logger.error("Stub not exists! Peer: {} Path: {}", peer, path);
@@ -193,8 +202,6 @@ public class ZoneManager {
                 if (zone.getChains().isEmpty()) {
                     zones.remove(path.getNetwork());
                 }
-
-                seq.addAndGet(1);
             }
         } finally {
             lock.writeLock().unlock();
@@ -245,7 +252,8 @@ public class ZoneManager {
 
                     for (Map.Entry<String, Resource> resourceEntry :
                             stubEntry.getValue().getResources().entrySet()) {
-                        if (resourceEntry.getValue().isHasLocalConnection() || !ignoreRemote) {
+                        if (ignoreRemote && !resourceEntry.getValue().isHasLocalConnection()) {
+                        } else {
                             String resourceName = PathUtils.toPureName(resourceEntry.getKey());
                             resources.put(
                                     networkName + "." + stubName + "." + resourceName,

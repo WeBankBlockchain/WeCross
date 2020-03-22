@@ -4,6 +4,8 @@ import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.resource.ResourceBlockHeaderManager;
+import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.StubFactory;
@@ -27,6 +29,8 @@ public class ZonesConfig {
     @Resource Toml toml;
 
     @Resource StubManager stubManager;
+
+    @Resource BlockHeaderStorageFactory blockHeaderStorageFactory;
 
     @Bean
     public Map<String, Zone> newZoneMap() {
@@ -90,6 +94,7 @@ public class ZonesConfig {
                 stubToml = ConfigUtils.getToml(stubPath);
             } catch (WeCrossException e) {
                 String errorMessage = "Parse " + stubPath + " failed";
+                logger.error(errorMessage, e);
                 throw new WeCrossException(ErrorCode.UNEXPECTED_CONFIG, errorMessage);
             }
 
@@ -107,18 +112,35 @@ public class ZonesConfig {
                 throw new WeCrossException(-1, "Cannot find stub type: " + type);
             }
             Connection connection = stubFactory.newConnection(stubPath);
+
+            if (connection == null) {
+                logger.error("Init connection: {}-{} failed", stubPath, type);
+
+                throw new WeCrossException(-1, "Init connection failed");
+            }
+
             List<ResourceInfo> resources = connection.getResources();
 
+            String blockPath = network + "." + chainName;
             Chain chain = new Chain();
+            chain.setDriver(stubFactory.newDriver());
+            chain.setBlockHeaderStorage(blockHeaderStorageFactory.newBlockHeaderStorage(blockPath));
             for (ResourceInfo resourceInfo : resources) {
                 com.webank.wecross.resource.Resource resource =
                         new com.webank.wecross.resource.Resource();
-                resource.setDriver(stubFactory.newDriver());
+                resource.setDriver(chain.getDriver());
                 resource.addConnection(null, connection);
                 resource.setType(type);
                 resource.setResourceInfo(resourceInfo);
+
+                ResourceBlockHeaderManager resourceBlockHeaderManager =
+                        new ResourceBlockHeaderManager();
+                resourceBlockHeaderManager.setBlockHeaderStorage(chain.getBlockHeaderStorage());
+                resource.setResourceBlockHeaderManager(resourceBlockHeaderManager);
+
                 chain.getResources().put(resourceInfo.getName(), resource);
             }
+            chain.addConnection(null, connection);
 
             chain.start();
             logger.info("Start block header sync: {}", network + "." + chainName);

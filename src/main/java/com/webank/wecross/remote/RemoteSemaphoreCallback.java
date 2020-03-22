@@ -1,8 +1,8 @@
-package com.webank.wecross.stub.remote;
+package com.webank.wecross.remote;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
+import com.webank.wecross.p2p.engine.P2PResponse;
 import java.util.concurrent.Semaphore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ class RemoteSemaphoreCallback extends P2PMessageCallback {
     }
 
     @Override
-    public void onResponse(int status, String message, P2PMessage msg) {
+    public void onResponse(int status, String message, P2PResponse msg) {
         responseData = msg.getData();
         semaphore.release();
     }
