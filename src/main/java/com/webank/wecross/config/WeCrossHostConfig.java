@@ -26,7 +26,7 @@ public class WeCrossHostConfig {
 
     @Resource private P2PMessageEngine p2pMessageEngine;
 
-    @Resource private HTLCManager htlcManager = null;
+    @Resource private HTLCManager htlcManager;
 
     @Resource private AccountManager accountManager;
 

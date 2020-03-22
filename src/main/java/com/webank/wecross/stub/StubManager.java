@@ -1,5 +1,6 @@
 package com.webank.wecross.stub;
 
+import com.webank.wecross.exception.WeCrossException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,7 +11,11 @@ public class StubManager {
         drivers.put(type, stubFactory);
     }
 
-    public StubFactory getStubFactory(String type) {
+    public StubFactory getStubFactory(String type) throws WeCrossException {
+        if (!drivers.containsKey(type)) {
+            throw new WeCrossException(-1, "StubFactory[" + type + "] not found!");
+        }
+
         return drivers.get(type);
     }
 

@@ -62,11 +62,11 @@ public class RestfulController {
             stubResponse.setStubs(stubManager);
             restResponse.setData(stubResponse);
         } catch (WeCrossException e) {
-            logger.warn("Process request error: {}", e.getMessage());
+            logger.warn("Process request error", e);
             restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
         } catch (Exception e) {
-            logger.warn("Process request error: {}", e.getMessage());
+            logger.warn("Process request error", e);
             restResponse.setResult(QueryStatus.INTERNAL_ERROR);
             restResponse.setMessage(e.getMessage());
         }
@@ -94,11 +94,11 @@ public class RestfulController {
             resourceResponse.setResourceInfos(zoneManager, resourceRequest.isIgnoreRemote());
             restResponse.setData(resourceResponse);
         } catch (WeCrossException e) {
-            logger.warn("Process request error: {}", e.getMessage());
+            logger.warn("Process request error", e);
             restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
         } catch (Exception e) {
-            logger.warn("Process request error: {}", e.getMessage());
+            logger.warn("Process request error", e);
             restResponse.setResult(QueryStatus.INTERNAL_ERROR);
             restResponse.setMessage(e.getMessage());
         }
@@ -123,11 +123,11 @@ public class RestfulController {
             accountResponse.setAccountInfos(accountManager);
             restResponse.setData(accountResponse);
         } catch (WeCrossException e) {
-            logger.warn("Process request error: {}", e.getMessage());
+            logger.warn("Process request error", e);
             restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
         } catch (Exception e) {
-            logger.warn("Process request error: {}", e.getMessage());
+            logger.warn("Process request error", e);
             restResponse.setResult(QueryStatus.INTERNAL_ERROR);
             restResponse.setMessage(e.getMessage());
         }
@@ -278,7 +278,7 @@ public class RestfulController {
                     }
             }
         } catch (WeCrossException e) {
-            logger.warn("Process request error: {}", e.getMessage());
+            logger.warn("Process request error", e);
             restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
         } catch (Exception e) {

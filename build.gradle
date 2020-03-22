@@ -129,6 +129,10 @@ sourceSets {
 jar {
     destinationDir file('dist/apps')
     archiveName project.name + '.jar'
+	exclude '**/*.toml'
+	exclude '**/*.xml'
+	exclude '**/*.properties'
+    exclude '**/*.yml'
 
     manifest {
         attributes(

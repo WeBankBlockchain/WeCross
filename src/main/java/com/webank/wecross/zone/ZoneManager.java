@@ -1,5 +1,6 @@
 package com.webank.wecross.zone;
 
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.remote.RemoteConnection;
@@ -136,6 +137,8 @@ public class ZoneManager {
 
                 seq.addAndGet(1);
             }
+        } catch (WeCrossException e) {
+            logger.error("Add remote resource error", e);
         } finally {
             lock.writeLock().unlock();
         }
