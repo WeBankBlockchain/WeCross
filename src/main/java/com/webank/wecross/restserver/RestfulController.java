@@ -22,6 +22,10 @@ import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -119,8 +123,18 @@ public class RestfulController {
             RestRequest restRequest =
                     objectMapper.readValue(restRequestString, new TypeReference<RestRequest>() {});
             restRequest.checkRestRequest("", "listAccounts");
+            Map<String, com.webank.wecross.stub.Account> accounts = accountManager.getAccounts();
+            List<Map<String, String>> accountInfos = new ArrayList<Map<String, String>>();
+            for (Account account : accounts.values()) {
+                Map<String, String> accountInfo = new HashMap<String, String>();
+                accountInfo.put("name", account.getName());
+                accountInfo.put("type", account.getType());
+
+                accountInfos.add(accountInfo);
+            }
+
             AccountResponse accountResponse = new AccountResponse();
-            accountResponse.setAccountInfos(accountManager);
+            accountResponse.setAccountInfos(accountInfos);
             restResponse.setData(accountResponse);
         } catch (WeCrossException e) {
             logger.warn("Process request error", e);

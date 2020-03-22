@@ -53,7 +53,7 @@ public class AccountManagerConfig {
                     Toml toml = new Toml();
                     toml.read(accountConfig.getInputStream());
 
-                    String type = toml.getString("type");
+                    String type = toml.getString("account.type");
 
                     logger.debug(
                             "Loading account, path: {}, name: {}, type: {}",
@@ -67,6 +67,14 @@ public class AccountManagerConfig {
                                     .newAccount(
                                             resource.getFilename(),
                                             resource.getFile().getAbsolutePath());
+                    if (account == null) {
+                        logger.error(
+                                "Load account path: {}, name: {} type: {} failed",
+                                accountConfig.getURI(),
+                                resource.getFile().getName(),
+                                type);
+                        continue;
+                    }
                     accountManager.addAccount(resource.getFile().getName(), account);
                 }
             }

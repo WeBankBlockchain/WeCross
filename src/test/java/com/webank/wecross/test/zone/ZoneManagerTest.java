@@ -47,7 +47,7 @@ public class ZoneManagerTest {
         Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
         Mockito.when(stubFactory.newDriver()).thenReturn(null);
 
-        StubManager stubManager = Mockito.spy(StubManager.class);
+        StubManager stubManager = Mockito.mock(StubManager.class);
         Mockito.when(stubManager.getStubFactory(Mockito.anyString())).thenReturn(stubFactory);
 
         BlockHeaderStorageFactory blockHeaderStorageFactory =
@@ -129,7 +129,7 @@ public class ZoneManagerTest {
         Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
         Mockito.when(stubFactory.newDriver()).thenReturn(null);
 
-        StubManager stubManager = Mockito.spy(StubManager.class);
+        StubManager stubManager = Mockito.mock(StubManager.class);
         Mockito.when(stubManager.getStubFactory("test")).thenReturn(stubFactory);
 
         BlockHeaderStorageFactory blockHeaderStorageFactory =
