@@ -168,7 +168,7 @@ gen_one_wecross()
     cp -r ${wecross_dir}/lib "${output}/"
 
     cp -r "${wecross_dir}/conf" "${output}/conf"
-    cp -r "${cert_dir}" "${output}"/conf/
+    cp -r "${cert_dir}/*" "${output}"/conf/
     gen_conf "${output}"/conf/wecross.toml "${2}" "${3}" "${4}" "${5}"
     LOG_INFO "Create ${output} successfully"
 
@@ -191,7 +191,7 @@ gen_conf()
 [stubs]
     path = 'classpath:stubs'
 
-[server] # rpc ip & port
+[rpc] # rpc ip & port
     address = '${2}'
     port = ${3}
     caCert = 'classpath:ca.crt'
