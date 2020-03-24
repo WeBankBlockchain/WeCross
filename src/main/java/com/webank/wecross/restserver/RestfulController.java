@@ -255,7 +255,7 @@ public class RestfulController {
                                                         resourceObj.getResourceInfo(),
                                                         resourceObj
                                                                 .getResourceBlockHeaderManager()));
-
+                        logger.info(transactionResponse.toString());
                         restResponse.setData(transactionResponse);
                         break;
                     }
@@ -286,7 +286,7 @@ public class RestfulController {
                                                         resourceObj.getResourceInfo(),
                                                         resourceObj
                                                                 .getResourceBlockHeaderManager()));
-
+                        logger.info(transactionResponse.toString());
                         restResponse.setData(transactionResponse);
                         break;
                     }
