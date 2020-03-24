@@ -5,7 +5,7 @@
 [stubs]
     path = 'classpath:stubs'
 
-[server] # rpc ip & port
+[rpc] # rpc ip & port
     address = '127.0.0.1'
     port = 8250
 

@@ -137,7 +137,7 @@ public class HTLCScheduler {
         }
 
         BigInteger selfTimelock = htlc.getSelfTimelock(htlcResource, h);
-        BigInteger now = BigInteger.valueOf(System.currentTimeMillis());
+        BigInteger now = BigInteger.valueOf(System.currentTimeMillis() / 1000);
         logger.info("task: {}, selfTimelock: {}, now: {}", h, selfTimelock, now);
         if (now.compareTo(selfTimelock) >= 0) {
             htlc.rollback(htlcResource, h);
@@ -152,7 +152,7 @@ public class HTLCScheduler {
         }
 
         BigInteger counterpartyTimelock = htlc.getCounterpartyTimelock(htlcResource, h);
-        BigInteger now = BigInteger.valueOf(System.currentTimeMillis());
+        BigInteger now = BigInteger.valueOf(System.currentTimeMillis() / 1000);
         logger.info("task: {}, counterpartyTimelock: {}, now: {}", h, counterpartyTimelock, now);
         if (now.compareTo(counterpartyTimelock) >= 0) {
             htlc.setCounterpartyRollbackStatus(htlcResource, h);

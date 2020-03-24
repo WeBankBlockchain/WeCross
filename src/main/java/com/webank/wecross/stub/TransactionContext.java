@@ -49,4 +49,18 @@ public class TransactionContext<T> {
     public void setBlockHeaderManager(BlockHeaderManager blockHeaderManager) {
         this.blockHeaderManager = blockHeaderManager;
     }
+
+    @Override
+    public String toString() {
+        return "TransactionContext{"
+                + "data="
+                + data
+                + ", account="
+                + account
+                + ", resourceInfo="
+                + resourceInfo
+                + ", blockHeaderManager="
+                + blockHeaderManager
+                + '}';
+    }
 }

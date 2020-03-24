@@ -39,7 +39,7 @@ public class WebServerConfig {
             tomcatServletWebServerFactory.setAddress(InetAddress.getByName(address));
             tomcatServletWebServerFactory.setPort(port);
             Ssl ssl = new Ssl();
-            ssl.setClientAuth(ClientAuth.NONE);
+            ssl.setClientAuth(ClientAuth.NEED);
 
             KeyCertLoader keyCertLoader = new KeyCertLoader();
 
