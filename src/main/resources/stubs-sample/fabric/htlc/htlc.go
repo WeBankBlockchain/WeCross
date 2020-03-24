@@ -10,11 +10,9 @@ import (
 )
 
 const (
-	TaskKey                  = "HTLCTask"
-	InitiatorKeyPrefix       = "I-%s"
-	ParticipantKeyPrefix     = "P-%s"
-	CounterpartyHtlcPathKey = "CounterpartyHtlcPath"
-	CounterpartyHtlcNameKey  = "CounterpartyHtlcName"
+	TaskKey              = "HTLCTask"
+	InitiatorKeyPrefix   = "I-%s"
+	ParticipantKeyPrefix = "P-%s"
 )
 
 type HTLC struct {
@@ -36,37 +34,6 @@ type Tasks struct {
 	TaskQueue []string `json:"taskQueue"`
 }
 
-func (h *HTLC) setCounterpartyHTLCInfo(stub shim.ChaincodeStubInterface, counterpartyHTLCPath, counterpartyHTLCName string) {
-	err := stub.PutState(CounterpartyHtlcPathKey, []byte(counterpartyHTLCPath))
-	checkError(err)
-
-	err = stub.PutState(CounterpartyHtlcNameKey, []byte(counterpartyHTLCName))
-	checkError(err)
-}
-
-func (h *HTLC) getCounterpartyHTLCPath(stub shim.ChaincodeStubInterface) []byte {
-	result, err := stub.GetState(CounterpartyHtlcPathKey)
-	checkError(err)
-
-	return result
-}
-
-func (h *HTLC) getCounterpartyHTLCName(stub shim.ChaincodeStubInterface) []byte {
-	result, err := stub.GetState(CounterpartyHtlcNameKey)
-	checkError(err)
-
-	return result
-}
-
-func (h *HTLC) setRole(stub shim.ChaincodeStubInterface, hash, role string) {
-	if isExisted(stub, hash) {
-		panic(errors.New("hash exists"))
-	}
-
-	err := stub.PutState(hash, []byte(role))
-	checkError(err)
-}
-
 func (h *HTLC) getRole(stub shim.ChaincodeStubInterface, hash string) bool {
 	role, err := stub.GetState(hash)
 	checkError(err)
@@ -75,63 +42,65 @@ func (h *HTLC) getRole(stub shim.ChaincodeStubInterface, hash string) bool {
 		panic(errors.New("hash not found"))
 	}
 
+	return string(role) == "true"
+}
+
+func (h *HTLC) newContract(stub shim.ChaincodeStubInterface, hash, role, secret, sender0, receiver0, amount0, timelock0, sender1, receiver1, amount1, timelock1 string) {
+	if isExisted(stub, hash) {
+		panic(errors.New("task exists"))
+	}
+
+	if !rightTimelock(stub, timelock0, timelock1) {
+		panic(errors.New("illegal timelocks"))
+	}
+
+	err := stub.PutState(hash, []byte(role))
+	checkError(err)
+
 	if string(role) == "true" {
-		return true
-	}
-	return false
-}
-
-func (h *HTLC) addInitiator(stub shim.ChaincodeStubInterface, hash, sender, receiver, amount, timelock string) {
-	if isExisted(stub, getInitiatorKey(hash)) {
-		panic(errors.New("hash exists"))
+		if !hashMatched(hash, secret) {
+			panic(errors.New("hash not matched"))
+		}
 	}
 
-	var cd = &ContractData{
-		Secret:     "null",
-		Sender:     sender,
-		Receiver:   receiver,
-		Amount:     stringToUint64(amount),
-		Timelock:   stringToUint64(timelock),
+	var initiator = &ContractData{
+		Secret:     secret,
+		Sender:     sender0,
+		Receiver:   receiver0,
+		Amount:     stringToUint64(amount0),
+		Timelock:   stringToUint64(timelock0),
 		Locked:     false,
 		Unlocked:   false,
 		Rolledback: false,
 	}
 
-	cdInfo, err := json.Marshal(cd)
+	initiatorInfo, err := json.Marshal(initiator)
 	checkError(err)
 
-	err = stub.PutState(getInitiatorKey(hash), cdInfo)
+	err = stub.PutState(getInitiatorKey(hash), initiatorInfo)
 	checkError(err)
-}
 
-func (h *HTLC) addParticipant(stub shim.ChaincodeStubInterface, hash, sender, receiver, amount, timelock string) {
-	if isExisted(stub, getParticipantKey(hash)) {
-		panic(errors.New("hash exists"))
-	}
-
-	var cd = &ContractData{
+	var participant = &ContractData{
 		Secret:     "null",
-		Sender:     sender,
-		Receiver:   receiver,
-		Amount:     stringToUint64(amount),
-		Timelock:   stringToUint64(timelock),
+		Sender:     sender1,
+		Receiver:   receiver1,
+		Amount:     stringToUint64(amount1),
+		Timelock:   stringToUint64(timelock1),
 		Locked:     false,
 		Unlocked:   false,
 		Rolledback: false,
 	}
 
-	cdInfo, err := json.Marshal(cd)
+	participantInfo, err := json.Marshal(participant)
 	checkError(err)
 
-	err = stub.PutState(getParticipantKey(hash), cdInfo)
+	err = stub.PutState(getParticipantKey(hash), participantInfo)
 	checkError(err)
+
+	h.addTask(stub, hash)
 }
 
 func (h *HTLC) setSecret(stub shim.ChaincodeStubInterface, hash, secret string) {
-	if !hashMatched(hash, secret) {
-		panic(errors.New("hash not matched"))
-	}
-
 	if h.getRole(stub, hash) {
 		cdInfo, err := stub.GetState(getInitiatorKey(hash))
 		checkError(err)
@@ -141,6 +110,8 @@ func (h *HTLC) setSecret(stub shim.ChaincodeStubInterface, hash, secret string) 
 		checkError(err)
 
 		cd.Secret = secret
+		// only unlock would set secret
+		cd.Unlocked = true
 		cdInfo, err = json.Marshal(&cd)
 		checkError(err)
 
@@ -155,6 +126,7 @@ func (h *HTLC) setSecret(stub shim.ChaincodeStubInterface, hash, secret string) 
 		checkError(err)
 
 		cd.Secret = secret
+		cd.Unlocked = true
 		cdInfo, err = json.Marshal(&cd)
 		checkError(err)
 
@@ -170,9 +142,6 @@ func (h *HTLC) getSecret(stub shim.ChaincodeStubInterface, hash string) []byte {
 }
 
 func (h *HTLC) addTask(stub shim.ChaincodeStubInterface, hash string) {
-	if !taskIsExisted(stub, hash) {
-		panic(errors.New("illegal task"))
-	}
 
 	t, err := stub.GetState(TaskKey)
 	checkError(err)
@@ -286,7 +255,7 @@ func (h *HTLC) getUnlockStatus(stub shim.ChaincodeStubInterface, hash string) bo
 
 func (h *HTLC) getRollbackStatus(stub shim.ChaincodeStubInterface, hash string) bool {
 	var cd ContractData
-    h.getSelfContractData(stub, hash, &cd)
+	h.getSelfContractData(stub, hash, &cd)
 	return cd.Rolledback
 }
 
@@ -483,4 +452,12 @@ func mySha256(input []byte) string {
 	hash := sha256.New()
 	hash.Write(input)
 	return fmt.Sprintf("%x", hash.Sum(nil))
+}
+
+func rightTimelock(stub shim.ChaincodeStubInterface, timelock0, timelock1 string) bool {
+	t0 := stringToUint64(timelock0)
+	t1 := stringToUint64(timelock1)
+	timeStamp, err := stub.GetTxTimestamp()
+	checkError(err)
+	return t0 > (t1+3600) && t1 > (uint64(timeStamp.Seconds)+3600)
 }

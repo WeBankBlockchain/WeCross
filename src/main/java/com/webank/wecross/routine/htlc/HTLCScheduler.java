@@ -1,6 +1,5 @@
 package com.webank.wecross.routine.htlc;
 
-import com.webank.wecross.routine.task.TaskManager;
 import java.math.BigInteger;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -13,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HTLCScheduler {
-    private Logger logger = LoggerFactory.getLogger(TaskManager.class);
+    private Logger logger = LoggerFactory.getLogger(HTLCScheduler.class);
 
     private HTLC htlc;
 
@@ -56,12 +55,16 @@ public class HTLCScheduler {
                                 taskDone = true;
                             } else {
                                 logger.error(
-                                        "task: {}, verifying lock failed: {}", h, verifyResult);
+                                        "task: {}, verifying lock failed: {}, path: {}",
+                                        h,
+                                        verifyResult,
+                                        selfHTLCResource.getPath());
                                 return;
                             }
                         } else {
                             htlc.setCounterpartyLockStatus(selfHTLCResource, h);
-                            logger.info("lock succeeded: {}", h);
+                            logger.info(
+                                    "lock succeeded: {}, path: {}", h, selfHTLCResource.getPath());
                         }
                     }
 
@@ -76,7 +79,10 @@ public class HTLCScheduler {
                                 taskDone = true;
                             } else {
                                 logger.error(
-                                        "task: {}, verifying unlock failed: {}", h, verifyResult);
+                                        "task: {}, verifying unlock failed: {}, path: {}",
+                                        h,
+                                        verifyResult,
+                                        selfHTLCResource.getPath());
                                 return;
                             }
                         } else {
@@ -84,7 +90,10 @@ public class HTLCScheduler {
                                 taskDone = true;
                             }
                             htlc.setCounterpartyUnlockStatus(selfHTLCResource, h);
-                            logger.info("unlock succeeded: {}", h);
+                            logger.info(
+                                    "unlock succeeded: {}, path: {}",
+                                    h,
+                                    selfHTLCResource.getPath());
                         }
                     }
                 }
@@ -93,7 +102,7 @@ public class HTLCScheduler {
 
         if (taskDone) {
             htlc.deleteTask(selfHTLCResource, h);
-            logger.info("current task completed: {}", h);
+            logger.info("current task completed: {},path: {}", h, selfHTLCResource.getPath());
         }
     }
 
@@ -111,7 +120,6 @@ public class HTLCScheduler {
                                 Thread.sleep(1000);
                             }
                         }
-                        logger.info("assetHtlc task h: {}, s: {}", h, s);
                         return s;
                     }
                 };
@@ -122,11 +130,14 @@ public class HTLCScheduler {
             // set timeout of getSecret
             result = future.get(4000, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
-            logger.warn("timeout in getSecret: {}", h);
+            logger.warn("timeout in getSecret, h : {}, path: {}", h, htlcResource.getPath());
         } catch (ExecutionException | InterruptedException e) {
-            logger.warn("failed to getSecret: {}", h);
+            logger.warn("failed to getSecret, h : {}, path: {}", h, htlcResource.getPath());
         } finally {
             executorService.shutdown();
+        }
+        if (!result.equalsIgnoreCase("null")) {
+            logger.info("getSecret succeeded, task h: {}, s: {}", h, result);
         }
         return result;
     }
@@ -138,7 +149,12 @@ public class HTLCScheduler {
 
         BigInteger selfTimelock = htlc.getSelfTimelock(htlcResource, h);
         BigInteger now = BigInteger.valueOf(System.currentTimeMillis() / 1000);
-        logger.info("task: {}, selfTimelock: {}, now: {}", h, selfTimelock, now);
+        logger.info(
+                "task: {}, selfTimelock: {}, now: {}, path: {}",
+                h,
+                selfTimelock,
+                now,
+                htlcResource.getPath());
         if (now.compareTo(selfTimelock) >= 0) {
             htlc.rollback(htlcResource, h);
             return true;
@@ -153,7 +169,12 @@ public class HTLCScheduler {
 
         BigInteger counterpartyTimelock = htlc.getCounterpartyTimelock(htlcResource, h);
         BigInteger now = BigInteger.valueOf(System.currentTimeMillis() / 1000);
-        logger.info("task: {}, counterpartyTimelock: {}, now: {}", h, counterpartyTimelock, now);
+        logger.info(
+                "task: {}, counterpartyTimelock: {}, now: {}, path: {}",
+                h,
+                counterpartyTimelock,
+                now,
+                htlcResource.getPath());
         if (now.compareTo(counterpartyTimelock) >= 0) {
             htlc.setCounterpartyRollbackStatus(htlcResource, h);
             return true;

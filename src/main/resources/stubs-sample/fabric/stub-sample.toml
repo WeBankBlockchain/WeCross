@@ -1,37 +1,36 @@
 [common]
     stub = 'fabric'
-    type = 'FABRIC'
+    type = 'Fabric1.4'
 
-# fabricServices is a list
 [fabricServices]
     channelName = 'mychannel'
     orgName = 'Org1'
     mspId = 'Org1MSP'
-    orgUserName = 'Admin'
-    orgUserKeyFile = 'classpath:/stub/fabric/orgUserKeyFile'
-    orgUserCertFile = 'classpath:/stub/fabric/orgUserCertFile'
-    ordererTlsCaFile = 'classpath:/stub/fabric/ordererTlsCaFile'
-    ordererAddress = 'grpcs://127.0.0.1:7050'
+    orgUserName = 'fabric'
+    orgUserAccountPath = 'classpath:accounts/fabric'
+    ordererTlsCaFile = 'classpath:/stubs/fabric/ordererTlsCaFile'
+    ordererAddress = 'grpcs://localhost:7050'
 
 [peers]
     [peers.org1]
-        peerTlsCaFile = 'classpath:/stub/fabric/peerOrg1CertFile'
-        peerAddress = 'grpcs://127.0.0.1:7051'
+        peerTlsCaFile = 'classpath:/stubs/fabric/peerOrg1CertFile'
+        peerAddress = 'grpcs://localhost:7051'
     [peers.org2]
-         peerTlsCaFile = 'classpath:/stub/fabric/peerOrg2CertFile'
-         peerAddress = 'grpcs://127.0.0.1:9051'
+         peerTlsCaFile = 'classpath:/stubs/fabric/peerOrg2CertFile'
+         peerAddress = 'grpcs://localhost:9051'
 
 # resources is a list
 [[resources]]
     # name cannot be repeated
-    name = 'HelloWeCross'
+    name = 'htlc'
     type = 'FABRIC_CONTRACT'
-    chainCodeName = 'mycc'
+    chainCodeName = 'htlc0324'
     chainLanguage = "go"
-    peers=['org1','org2']
+    peers=['org1']
 [[resources]]
-    name = 'HelloWorld'
+    # name cannot be repeated
+    name = 'ledger'
     type = 'FABRIC_CONTRACT'
-    chainCodeName = 'mygg'
+    chainCodeName = 'ledge0324'
     chainLanguage = "go"
-    peers=['org1','org2']
+    peers=['org1', 'org2']

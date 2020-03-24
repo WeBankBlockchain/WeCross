@@ -4,6 +4,7 @@ import com.webank.wecross.common.ResourceQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.htlc.HTLCResource;
+import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
 import org.junit.Assert;
@@ -13,21 +14,11 @@ public class HTLCResourceTest {
     @Test
     public void handleRequestTest() throws Exception {
         Resource resource = new Resource();
-        // bcosContractResource.setPath(Path.decode("a.b.c"));
+        ResourceInfo resourceInfo = new ResourceInfo();
         HTLCResource assetHtlcResource = new HTLCResource(resource);
         TransactionRequest request = new TransactionRequest();
         TransactionContext<TransactionRequest> context =
-                new TransactionContext<TransactionRequest>(request, null, null, null);
-        //        try {
-        //            request.setMethod("getSecret");
-        //            request.setFromP2P(true);
-        //            context.setData(request);
-        //            assetHtlcResource.handleCallRequest(context);
-        //        } catch (WeCrossException e) {
-        //            Assert.assertEquals(
-        //                    java.util.Optional.of(ResourceQueryStatus.ASSET_HTLC_NO_PERMISSION),
-        //                    java.util.Optional.of(e.getErrorCode()));
-        //        }
+                new TransactionContext<TransactionRequest>(request, null, resourceInfo, null);
 
         try {
             request.setMethod("unlock");

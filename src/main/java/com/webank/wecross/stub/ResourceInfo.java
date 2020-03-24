@@ -92,4 +92,24 @@ public class ResourceInfo {
     public String getChecksum() {
         return checksum;
     }
+
+    @Override
+    public String toString() {
+        return "ResourceInfo{"
+                + "name='"
+                + name
+                + '\''
+                + ", stubType='"
+                + stubType
+                + '\''
+                + ", type='"
+                + type
+                + '\''
+                + ", properties="
+                + properties
+                + ", checksum='"
+                + checksum
+                + '\''
+                + '}';
+    }
 }

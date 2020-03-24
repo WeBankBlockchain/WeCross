@@ -5,8 +5,11 @@ import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import java.math.BigInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AssetHTLC implements HTLC {
+    private Logger logger = LoggerFactory.getLogger(AssetHTLC.class);
 
     public String lock(HTLCResource htlcResource, String h) throws Exception {
         TransactionRequest request = new TransactionRequest("lock", new String[] {h});
@@ -17,7 +20,7 @@ public class AssetHTLC implements HTLC {
                         htlcResource.getAccount(),
                         htlcResource.getResourceInfo(),
                         htlcResource.getResourceBlockHeaderManager());
-
+        logger.info("lock request: {}, path: {}", request.toString(), htlcResource.getPath());
         TransactionResponse response = htlcResource.sendTransaction(transactionContext);
         if (response.getErrorCode() != 0) {
             throw new Exception(
@@ -26,6 +29,7 @@ public class AssetHTLC implements HTLC {
                             + " ErrorMessage: "
                             + response.getErrorMessage());
         }
+        logger.info("lock response: {}", response.toString());
         return response.getHash();
     }
 
@@ -43,7 +47,8 @@ public class AssetHTLC implements HTLC {
                         otherHTLCResource.getAccount(),
                         otherHTLCResource.getResourceInfo(),
                         otherHTLCResource.getResourceBlockHeaderManager());
-
+        logger.info(
+                "unlock request: {}, path: {}", request.toString(), otherHTLCResource.getPath());
         TransactionResponse response = otherHTLCResource.sendTransaction(transactionContext);
         if (response.getErrorCode() != 0) {
             throw new Exception(
@@ -52,6 +57,7 @@ public class AssetHTLC implements HTLC {
                             + " ErrorMessage: "
                             + response.getErrorMessage());
         }
+        logger.info("unlock response: {}", response.toString());
         return response.getHash();
     }
 
@@ -70,93 +76,68 @@ public class AssetHTLC implements HTLC {
         return "true";
     }
 
-    public String getCounterpartyHTLCPath(HTLCResource htlcResource) throws Exception {
-        return call(htlcResource, "String", "getCounterpartyHTLCPath");
-    }
-
     public String getTask(HTLCResource htlcResource) throws Exception {
-        return call(htlcResource, "String", "getTask");
+        return call(htlcResource, "getTask");
     }
 
     public String deleteTask(HTLCResource htlcResource, String h) throws Exception {
-        return sendTransaction(htlcResource, "String", "deleteTask", h);
+        return sendTransaction(htlcResource, "deleteTask", h);
     }
 
     public String getSecret(HTLCResource htlcResource, String h) throws Exception {
-        TransactionRequest request = new TransactionRequest("getSecret", new String[] {h}, false);
-
-        // TODO: fill TransactionContext
-        TransactionContext<TransactionRequest> transactionContext =
-                new TransactionContext<TransactionRequest>(
-                        request,
-                        htlcResource.getAccount(),
-                        htlcResource.getResourceInfo(),
-                        htlcResource.getResourceBlockHeaderManager());
-
-        TransactionResponse response = htlcResource.call(transactionContext); // TODO: fix it
-        if (response.getErrorCode() != 0) {
-            throw new Exception(
-                    "ErrorCode: "
-                            + response.getErrorCode()
-                            + " ErrorMessage: "
-                            + response.getErrorMessage());
-        }
-        return response.getResult()[0];
+        return call(htlcResource, "getSecret", h);
     }
 
     public BigInteger getSelfTimelock(HTLCResource htlcResource, String h) throws Exception {
-        String result = call(htlcResource, "String", "getSelfTimelock", h);
-        return new BigInteger(result);
+        return new BigInteger(call(htlcResource, "getSelfTimelock", h));
     }
 
     public BigInteger getCounterpartyTimelock(HTLCResource htlcResource, String h)
             throws Exception {
-        String result = call(htlcResource, "String", "getCounterpartyTimelock", h);
-        return new BigInteger(result);
+        return new BigInteger(call(htlcResource, "getCounterpartyTimelock", h));
     }
 
     public boolean getCounterpartyLockStatus(HTLCResource htlcResource, String h) throws Exception {
-        String result = call(htlcResource, "String", "getCounterpartyLockStatus", h);
+        String result = call(htlcResource, "getCounterpartyLockStatus", h);
         return result.trim().equalsIgnoreCase("true");
     }
 
     public boolean getSelfUnlockStatus(HTLCResource htlcResource, String h) throws Exception {
-        String result = call(htlcResource, "String", "getSelfUnlockStatus", h);
+        String result = call(htlcResource, "getSelfUnlockStatus", h);
         return result.trim().equalsIgnoreCase("true");
     }
 
     public boolean getCounterpartyUnlockStatus(HTLCResource htlcResource, String h)
             throws Exception {
-        String result = call(htlcResource, "String", "getCounterpartyUnlockStatus", h);
+        String result = call(htlcResource, "getCounterpartyUnlockStatus", h);
         return result.trim().equalsIgnoreCase("true");
     }
 
     public boolean getSelfRollbackStatus(HTLCResource htlcResource, String h) throws Exception {
-        String result = call(htlcResource, "String", "getSelfRollbackStatus", h);
+        String result = call(htlcResource, "getSelfRollbackStatus", h);
         return result.trim().equalsIgnoreCase("true");
     }
 
     public boolean getCounterpartyRollbackStatus(HTLCResource htlcResource, String h)
             throws Exception {
-        String result = call(htlcResource, "String", "getCounterpartyRollbackStatus", h);
+        String result = call(htlcResource, "getCounterpartyRollbackStatus", h);
         return result.trim().equalsIgnoreCase("true");
     }
 
     public void setCounterpartyLockStatus(HTLCResource htlcResource, String h) throws Exception {
-        sendTransaction(htlcResource, "", "setCounterpartyLockStatus", h);
+        sendTransaction(htlcResource, "setCounterpartyLockStatus", h);
     }
 
     public void setCounterpartyUnlockStatus(HTLCResource htlcResource, String h) throws Exception {
-        sendTransaction(htlcResource, "", "setCounterpartyUnlockStatus", h);
+        sendTransaction(htlcResource, "setCounterpartyUnlockStatus", h);
     }
 
     public void setCounterpartyRollbackStatus(HTLCResource htlcResource, String h)
             throws Exception {
-        sendTransaction(htlcResource, "", "setCounterpartyRollbackStatus", h);
+        sendTransaction(htlcResource, "setCounterpartyRollbackStatus", h);
     }
 
-    private static String call(HTLCResource htlcResource, String method, String... args)
-            throws Exception {
+    private String call(HTLCResource htlcResource, String method, String... args) throws Exception {
         TransactionRequest request = new TransactionRequest(method, args);
 
         TransactionContext<TransactionRequest> transactionContext =
@@ -165,6 +146,7 @@ public class AssetHTLC implements HTLC {
                         htlcResource.getAccount(),
                         htlcResource.getResourceInfo(),
                         htlcResource.getResourceBlockHeaderManager());
+        logger.info("call request: {}, path: {}", request.toString(), htlcResource.getPath());
         TransactionResponse response = htlcResource.call(transactionContext);
         if (response.getErrorCode() != 0) {
             throw new Exception(
@@ -173,10 +155,11 @@ public class AssetHTLC implements HTLC {
                             + " ErrorMessage: "
                             + response.getErrorMessage());
         }
-        return response.getResult()[0];
+        logger.info("call response: {}", response.toString());
+        return response.getResult()[0].trim();
     }
 
-    private static String sendTransaction(HTLCResource htlcResource, String method, String... args)
+    private String sendTransaction(HTLCResource htlcResource, String method, String... args)
             throws Exception {
         TransactionRequest request = new TransactionRequest(method, args);
 
@@ -186,7 +169,10 @@ public class AssetHTLC implements HTLC {
                         htlcResource.getAccount(),
                         htlcResource.getResourceInfo(),
                         htlcResource.getResourceBlockHeaderManager());
-
+        logger.info(
+                "sendTransaction request: {}, path: {}",
+                request.toString(),
+                htlcResource.getPath());
         TransactionResponse response = htlcResource.sendTransaction(transactionContext);
         if (response.getErrorCode() != 0) {
             throw new Exception(
@@ -195,6 +181,7 @@ public class AssetHTLC implements HTLC {
                             + " ErrorMessage: "
                             + response.getErrorMessage());
         }
-        return response.getResult()[0];
+        logger.info("sendTransaction response: {}", response.toString());
+        return response.getResult()[0].trim();
     }
 }

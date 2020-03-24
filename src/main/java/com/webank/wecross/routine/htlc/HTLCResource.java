@@ -5,6 +5,7 @@ import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.ResourceBlockHeaderManager;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
@@ -32,15 +33,6 @@ public class HTLCResource extends Resource {
 
     @Override
     public TransactionResponse call(TransactionContext<TransactionRequest> request) {
-        //        TransactionContext<TransactionRequest> newRequest;
-        //        try {
-        //            newRequest = handleCallRequest(request);
-        //        } catch (WeCrossException e) {
-        //            TransactionResponse transactionResponse = new TransactionResponse();
-        //            transactionResponse.setErrorCode(e.getErrorCode());
-        //            transactionResponse.setErrorMessage(e.getMessage());
-        //            return transactionResponse;
-        //        }
         return originResource.call(request);
     }
 
@@ -82,28 +74,13 @@ public class HTLCResource extends Resource {
                         ResourceQueryStatus.ASSET_HTLC_VERIFY_LOCK_ERROR,
                         "verify transaction of lock failed");
             }
-            request.setArgs(Arrays.copyOfRange(args, 1, args.length - 1));
+            request.setArgs(Arrays.copyOfRange(args, 1, args.length));
         }
 
         transactionContext.setData(request);
         logger.info("HTLCRequest: {}", transactionContext.toString());
         return transactionContext;
     }
-
-    //    public TransactionContext<TransactionRequest> handleCallRequest(
-    //            TransactionContext<TransactionRequest> transactionContext) throws WeCrossException
-    // {
-    //        TransactionRequest request = transactionContext.getData();
-    //        if (request.getMethod().equals("getSecret")) {
-    //            if (request.isFromP2P()) {
-    //                throw new WeCrossException(
-    //                        ResourceQueryStatus.ASSET_HTLC_NO_PERMISSION,
-    //                        "cannot call getSecret by rpc interface");
-    //            }
-    //        }
-    //        transactionContext.setData(request);
-    //        return transactionContext;
-    //    }
 
     public String getPath() {
         return path;
@@ -199,6 +176,17 @@ public class HTLCResource extends Resource {
     @Override
     public void setResourceInfo(ResourceInfo resourceInfo) {
         originResource.setResourceInfo(resourceInfo);
+    }
+
+    @Override
+    public ResourceBlockHeaderManager getResourceBlockHeaderManager() {
+        return originResource.getResourceBlockHeaderManager();
+    }
+
+    @Override
+    public void setResourceBlockHeaderManager(
+            ResourceBlockHeaderManager resourceBlockHeaderManager) {
+        originResource.setResourceBlockHeaderManager(resourceBlockHeaderManager);
     }
 
     @Override
