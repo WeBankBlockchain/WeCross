@@ -19,8 +19,6 @@ public interface HTLC {
 
     String verifyUnlock(Resource htlcResource, String transactionHash);
 
-    String getCounterpartyHTLCPath(HTLCResource htlcResource) throws Exception;
-
     String getTask(HTLCResource htlcResource) throws Exception;
 
     String deleteTask(HTLCResource htlcResource, String h) throws Exception;

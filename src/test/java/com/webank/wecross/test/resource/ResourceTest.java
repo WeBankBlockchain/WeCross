@@ -10,6 +10,7 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Request;
+import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
@@ -37,7 +38,7 @@ public class ResourceTest {
     @Test
     public void callAndTransactionTest() {
         Resource resource = new Resource();
-
+        ResourceInfo resourceInfo = new ResourceInfo();
         Peer peer0 = new Peer(new Node("", "", 0));
         Connection connection0 = Mockito.mock(Connection.class);
         resource.addConnection(peer0, connection0);
@@ -55,12 +56,14 @@ public class ResourceTest {
 
         TransactionResponse r =
                 resource.call(
-                        new TransactionContext<TransactionRequest>(request, null, null, null));
+                        new TransactionContext<TransactionRequest>(
+                                request, null, resourceInfo, null));
         assertEquals(response, r);
 
         r =
                 resource.sendTransaction(
-                        new TransactionContext<TransactionRequest>(request, null, null, null));
+                        new TransactionContext<TransactionRequest>(
+                                request, null, resourceInfo, null));
         assertEquals(response, r);
     }
 

@@ -14,10 +14,6 @@ contract HTLC {
         bool rolledback;
     }
 
-    // to lock and unlock counterparty
-    string counterpartyHTLCPath;
-    string counterpartyHTLCAddress;
-
     // recode if you're the initiator
     mapping(string => bool) htlcRoles;
 
@@ -37,177 +33,110 @@ contract HTLC {
     // function unlock(string _hash) external returns (string);
     // function rollback(string _hash) external returns (string);
 
-    function setCounterpartyHTLCInfo(
-        string _counterpartyHTLCPath,
-        string _counterpartyHTLCAddress
-    )
-    internal
-    {
-        counterpartyHTLCPath = _counterpartyHTLCPath;
-        counterpartyHTLCAddress = _counterpartyHTLCAddress;
-    }
-
-    function getCounterpartyHTLCPath()
-    external
-    view
+    function newContract(string[] _ss)
+    public
     returns (string[] result)
     {
         result = new string[](1);
-        result[0] = counterpartyHTLCPath;
-    }
-
-    function getCounterpartyHTLCAddress()
-    external
-    view
-    returns (string[] result)
-    {
-        result = new string[](1);
-        result[0] = counterpartyHTLCAddress;
-    }
-
-
-    function setRole(
-        string _hash,
-        string _role
-    )
-    external
-    returns (string[] result)
-    {
-        result = new string[](1);
-        if(taskIsExisted(_hash)) {
-            result[0] = "role exists";
+        if (taskIsExisted(_ss[0])) {
+            result[0] = "task exists";
+            return;
         }
 
-        if(sameString(_role, "true")) {
-           htlcRoles[_hash] = true;
+        if(!rightTimelock(_ss[6], _ss[10])) {
+            result[0] = "illegal timelocks";
+            return;
+        }
+
+        if(equal(_ss[1], "true")) {
+           htlcRoles[_ss[0]] = true;
         } else {
-           htlcRoles[_hash] = false;
-        }
-        result[0] = "success";
-    }
-
-
-    function addInitiator(
-        string _hash,
-        string _sender,
-        string _receiver,
-        string _amount,
-        string _timelock
-    )
-    external
-    returns (string[] result)
-    {
-        result = new string[](1);
-        if (hasInitiator(_hash)) {
-            result[0] = "initiator exists";
+           htlcRoles[_ss[0]] = false;
         }
 
-        initiators[_hash] = ContractData(
-            "null",
-            _sender,
-            _receiver,
-            stringToUint(_amount),
-            stringToUint(_timelock),
+        if(htlcRoles[_ss[0]]) {
+            if(!hashMatched(_ss[0], _ss[2])) {
+                result[0] = "hash not matched";
+                return;
+            }
+        }
+
+        initiators[_ss[0]] = ContractData(
+            _ss[2],
+            _ss[3],
+            _ss[4],
+            stringToUint(_ss[5]),
+            stringToUint(_ss[6]),
             false,
             false,
             false
         );
-        result[0] = "success";
-    }
 
-    function addParticipant(
-        string _hash,
-        string _sender,
-        string _receiver,
-        string _amount,
-        string _timelock
-    )
-    external
-    returns (string[] result)
-    {
-        result = new string[](1);
-        if (hasParticipant(_hash)) {
-            result[0] = "participant exists";
-        }
-
-        participants[_hash] = ContractData(
+        participants[_ss[0]] = ContractData(
             "null",
-            _sender,
-            _receiver,
-            stringToUint(_amount),
-            stringToUint(_timelock),
+            _ss[7],
+            _ss[8],
+            stringToUint(_ss[9]),
+            stringToUint(_ss[10]),
             false,
             false,
             false
         );
+
+        addTask(_ss[0]);
         result[0] = "success";
     }
 
     function setSecret(string _hash, string _secret)
     internal
-    returns (string[] result)
     {
-        result = new string[](1);
-        if(!hashMatched(_hash, _secret)) {
-            result[0] =  "hash not matched";
-        }
-        if(htlcRoles[_hash]) {
-            initiators[_hash].secret = _secret;
-        } else {
+        if(!htlcRoles[_hash]) {
             participants[_hash].secret = _secret;
         }
-        result[0] =  "seccess";
     }
 
-    function getSecret(string _hash)
-    external
+    function getSecret(string[] _ss)
+    public
     view
     returns (string[] result)
     {
         result = new string[](1);
-        if(htlcRoles[_hash]) {
-            result[0] = initiators[_hash].secret;
+        if(htlcRoles[_ss[0]]) {
+            result[0] = initiators[_ss[0]].secret;
         } else {
-            result[0] = participants[_hash].secret;
+            result[0] = participants[_ss[0]].secret;
         }
     }
 
-
-    function addTask(string _hash)
-    external
-    returns (string[] result)
+    function addTask(string _task)
+    internal
     {
-        result = new string[](1);
-        if(!taskIsExisted(_hash)) {
-            result[0] = "task not exists";
-        }
 
         tail = tail + 1;
-        taskQueue.push(_hash);
-        result[0] = "success";
+        taskQueue.push(_task);
     }
 
-    function getTask()
-    external
+    function getTask(string[] _ss)
+    public
     view
     returns (string[] result)
     {
         result = new string[](1);
         if(head == tail) {
             result[0] = ("null");
-        }
-        else {
+        } else {
             result[0] = (taskQueue[uint(head)]);
         }
     }
 
-    function deleteTask(string _hash)
-    external
+    function deleteTask(string[] _ss)
+    public
     returns (string[] result)
     {
         result = new string[](1);
-        if(head == tail || !sameString(taskQueue[head], _hash)) {
+        if(head == tail || !equal(taskQueue[head], _ss[0])) {
             result[0] = "invalid operation";
+            return;
         }
         head = head + 1;
         result[0] = "success";
@@ -336,98 +265,46 @@ contract HTLC {
     }
 
      // these following functions are just for HTLC scheduler
-    function getSelfTimelock(string _hash)
+    function getSelfTimelock(string[] _ss)
     public
     view
     returns (string[] result)
     {
         result = new string[](1);
-        if(htlcRoles[_hash]) {
-            result[0] = uintToString(initiators[_hash].timelock);
+        if(htlcRoles[_ss[0]]) {
+            result[0] = uintToString(initiators[_ss[0]].timelock);
         } else {
-            result[0] = uintToString(participants[_hash].timelock);
+            result[0] = uintToString(participants[_ss[0]].timelock);
         }
     }
 
-    function getCounterpartyTimelock(string _hash)
-    external
-    view
-    returns (string[] result)
-    {
-        result = new string[](1);
-        if(!htlcRoles[_hash]) {
-            result[0] = uintToString(initiators[_hash].timelock);
-        } else {
-            result[0] = uintToString(participants[_hash].timelock);
-        }
-    }
-
-    function getSelfLockStatus(string _hash)
+    function getCounterpartyTimelock(string[] _ss)
     public
     view
     returns (string[] result)
     {
         result = new string[](1);
-        if(htlcRoles[_hash]) {
-            if(initiators[_hash].locked) {
-                result[0] = "true";
-            } else {
-                result[0] = "false";
-            }
+        if(!htlcRoles[_ss[0]]) {
+            result[0] = uintToString(initiators[_ss[0]].timelock);
         } else {
-            if(participants[_hash].locked) {
-                result[0] = "true";
-            } else {
-                result[0] = "false";
-            }
+            result[0] = uintToString(participants[_ss[0]].timelock);
         }
     }
 
-    function getCounterpartyLockStatus(string _hash)
-    external
-    view
-    returns (string[] result)
-    {
-        result = new string[](1);
-        if(!htlcRoles[_hash]) {
-            if(initiators[_hash].locked) {
-                result[0] = "true";
-            } else {
-                result[0] = "false";
-            }
-        } else {
-            if(participants[_hash].locked) {
-                result[0] = "true";
-            } else {
-                result[0] = "false";
-            }
-        }
-    }
-
-    function setCounterpartyLockStatus(string _hash)
-    external
-    {
-        if(!htlcRoles[_hash]) {
-            initiators[_hash].locked = true;
-        } else {
-            participants[_hash].locked = true;
-        }
-    }
-
-    function getSelfUnlockStatus(string _hash)
+    function getSelfLockStatus(string[] _ss)
     public
     view
     returns (string[] result)
     {
         result = new string[](1);
-        if(htlcRoles[_hash]) {
-            if(initiators[_hash].unlocked) {
+        if(htlcRoles[_ss[0]]) {
+            if(initiators[_ss[0]].locked) {
                 result[0] = "true";
             } else {
                 result[0] = "false";
             }
         } else {
-            if(participants[_hash].unlocked) {
+            if(participants[_ss[0]].locked) {
                 result[0] = "true";
             } else {
                 result[0] = "false";
@@ -435,51 +312,20 @@ contract HTLC {
         }
     }
 
-    function getCounterpartyUnlockStatus(string _hash)
-    external
-    view
-    returns (string[] result)
-    {
-        result = new string[](1);
-        if(!htlcRoles[_hash]) {
-            if(initiators[_hash].unlocked) {
-                result[0] = "true";
-            } else {
-                result[0] = "false";
-            }
-        } else {
-            if(participants[_hash].unlocked) {
-                result[0] = "true";
-            } else {
-                result[0] = "false";
-            }
-        }
-    }
-
-    function setCounterpartyUnlockStatus(string _hash)
-    external
-    {
-        if(!htlcRoles[_hash]) {
-            initiators[_hash].unlocked = true;
-        } else {
-            participants[_hash].unlocked = true;
-        }
-    }
-
-    function getSelfRollbackStatus(string _hash)
+    function getCounterpartyLockStatus(string[] _ss)
     public
     view
     returns (string[] result)
     {
         result = new string[](1);
-        if(htlcRoles[_hash]) {
-            if(initiators[_hash].rolledback) {
+        if(!htlcRoles[_ss[0]]) {
+            if(initiators[_ss[0]].locked) {
                 result[0] = "true";
             } else {
                 result[0] = "false";
             }
         } else {
-            if(participants[_hash].rolledback) {
+            if(participants[_ss[0]].locked) {
                 result[0] = "true";
             } else {
                 result[0] = "false";
@@ -487,20 +333,30 @@ contract HTLC {
         }
     }
 
-    function getCounterpartyRollbackStatus(string _hash)
-    external
+    function setCounterpartyLockStatus(string[] _ss)
+    public
+    {
+        if(!htlcRoles[_ss[0]]) {
+            initiators[_ss[0]].locked = true;
+        } else {
+            participants[_ss[0]].locked = true;
+        }
+    }
+
+    function getSelfUnlockStatus(string[] _ss)
+    public
     view
     returns (string[] result)
     {
         result = new string[](1);
-        if(!htlcRoles[_hash]) {
-            if(initiators[_hash].rolledback) {
+        if(htlcRoles[_ss[0]]) {
+            if(initiators[_ss[0]].unlocked) {
                 result[0] = "true";
             } else {
                 result[0] = "false";
             }
         } else {
-            if(participants[_hash].rolledback) {
+            if(participants[_ss[0]].unlocked) {
                 result[0] = "true";
             } else {
                 result[0] = "false";
@@ -508,13 +364,86 @@ contract HTLC {
         }
     }
 
-    function setCounterpartyRollbackStatus(string _hash)
-    external
+    function getCounterpartyUnlockStatus(string[] _ss)
+    public
+    view
+    returns (string[] result)
     {
-        if(!htlcRoles[_hash]) {
-            initiators[_hash].rolledback = true;
+        result = new string[](1);
+        if(!htlcRoles[_ss[0]]) {
+            if(initiators[_ss[0]].unlocked) {
+                result[0] = "true";
+            } else {
+                result[0] = "false";
+            }
         } else {
-            participants[_hash].rolledback = true;
+            if(participants[_ss[0]].unlocked) {
+                result[0] = "true";
+            } else {
+                result[0] = "false";
+            }
+        }
+    }
+
+    function setCounterpartyUnlockStatus(string[] _ss)
+    public
+    {
+        if(!htlcRoles[_ss[0]]) {
+            initiators[_ss[0]].unlocked = true;
+        } else {
+            participants[_ss[0]].unlocked = true;
+        }
+    }
+
+    function getSelfRollbackStatus(string[] _ss)
+    public
+    view
+    returns (string[] result)
+    {
+        result = new string[](1);
+        if(htlcRoles[_ss[0]]) {
+            if(initiators[_ss[0]].rolledback) {
+                result[0] = "true";
+            } else {
+                result[0] = "false";
+            }
+        } else {
+            if(participants[_ss[0]].rolledback) {
+                result[0] = "true";
+            } else {
+                result[0] = "false";
+            }
+        }
+    }
+
+    function getCounterpartyRollbackStatus(string[] _ss)
+    public
+    view
+    returns (string[] result)
+    {
+        result = new string[](1);
+        if(!htlcRoles[_ss[0]]) {
+            if(initiators[_ss[0]].rolledback) {
+                result[0] = "true";
+            } else {
+                result[0] = "false";
+            }
+        } else {
+            if(participants[_ss[0]].rolledback) {
+                result[0] = "true";
+            } else {
+                result[0] = "false";
+            }
+        }
+    }
+
+    function setCounterpartyRollbackStatus(string[] _ss)
+    public
+    {
+        if(!htlcRoles[_ss[0]]) {
+            initiators[_ss[0]].rolledback = true;
+        } else {
+            participants[_ss[0]].rolledback = true;
         }
     }
 
@@ -544,17 +473,17 @@ contract HTLC {
         return (participants[_hash].amount > 0);
     }
 
-    // function rightTimelock(string _t0, string _t1)
-    // internal
-    // view
-    // returns (bool)
-    // {
-    //     uint t0 = stringToUint(_t0);
-    //     uint t1 = stringToUint(_t1);
-    //     return t0 > (t1 + 3600) && t1 > (now + 3600);
-    // }
+    function rightTimelock(string _t0, string _t1)
+    internal
+    view
+    returns (bool)
+    {
+        uint t0 = stringToUint(_t0);
+        uint t1 = stringToUint(_t1);
+        return t0 > (t1 + 3600) && t1 > (now / 1000 + 3600);
+    }
 
-    function sameString(string a, string b)
+    function equal(string a, string b)
     internal
     pure
     returns (bool)
