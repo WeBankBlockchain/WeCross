@@ -5,6 +5,7 @@ import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.routine.htlc.HTLCManager;
 import com.webank.wecross.routine.htlc.HTLCTaskInfo;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
@@ -38,6 +39,7 @@ public class HTLCManagerConfig {
             htlcManager.addPath(selfPath);
         }
         htlcManager.setHtlcTaskInfos(htlcTaskInfos);
+        logger.info("HTLC: {}", Arrays.toString(htlcManager.getPaths().toArray()));
         return htlcManager;
     }
 

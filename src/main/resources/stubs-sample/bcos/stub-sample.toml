@@ -1,31 +1,28 @@
 [common]
     stub = 'bcos' # stub must be same with directory name
-    type = 'BCOS'
+    type = 'BCOS2.0' # BCOS
 
-[smCrypto]
-    # boolean
-    enable = false
-
-[account]
-    accountFile = 'classpath:/stubs/bcos/0xa1ca07c7ff567183c889e1ad5f4dcd37716831ca.pem'
-    password = ''  # if you choose .p12, then password is required
-
+[chain]
+    groupId = 1 # default 1
+    chainId = 1 # default 1
+    enableGM = false # default false
 
 [channelService]
-    timeout = 60000  # millisecond
     caCert = 'classpath:/stubs/bcos/ca.crt'
     sslCert = 'classpath:/stubs/bcos/sdk.crt'
     sslKey = 'classpath:/stubs/bcos/sdk.key'
-    groupId = 1
+    timeout = 5000  # ms, default 60000ms
+    # connectionsStr = ['127.0.0.1:20200', '127.0.0.1:20201', '127.0.0.1:20202']
     connectionsStr = ['127.0.0.1:20200']
 
 # resources is a list
 [[resources]]
-    # name must be unique
-    name = 'HelloWeCross'
-    type = 'BCOS_CONTRACT'
-    contractAddress = '0x8827cca7f0f38b861b62dae6d711efe92a1e3602'
+    # name cannot be repeated
+    name = 'htlc'
+    type = 'BCOS_CONTRACT' # BCOS_CONTRACT or BCOS_SM_CONTRACT
+    contractAddress = '0x82df1ce5de28636213492128b3381c3000f53c10'
 [[resources]]
-    name = 'HelloWorld'
-    type = 'BCOS_CONTRACT'
-    contractAddress = '0x584ecb848dd84499639fbe2581bfb8a8774b485c'
+    # name cannot be repeated
+    name = 'hello'
+    type = 'BCOS_CONTRACT' # BCOS_CONTRACT or BCOS_SM_CONTRACT
+    contractAddress = '0x153f9c47dd4bd6e9a561ed133608496590e0903b'

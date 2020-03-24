@@ -54,11 +54,11 @@ public class TransactionContext<T> {
     public String toString() {
         return "TransactionContext{"
                 + "data="
-                + data
+                + data.toString()
                 + ", account="
                 + account
                 + ", resourceInfo="
-                + resourceInfo
+                + resourceInfo.toString()
                 + ", blockHeaderManager="
                 + blockHeaderManager
                 + '}';

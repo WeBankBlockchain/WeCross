@@ -29,12 +29,15 @@ public class HTLCJob implements Job {
         HTLC htlc = htlcResourcePair.getHtlc();
         HTLCScheduler htlcScheduler = new HTLCScheduler(htlc);
         // get unfinished htlc task
-        String h = htlcScheduler.getTask(htlcResourcePair.getSelfHTLCResource());
+        HTLCResource htlcResource = htlcResourcePair.getSelfHTLCResource();
+        String h = htlcScheduler.getTask(htlcResource);
         if (!h.equalsIgnoreCase("null")) {
-            logger.info("start running htlc task: {}", h);
+            logger.info("start running htlc task: {}, path; {}", h, htlcResource.getPath());
             htlcScheduler.start(htlcResourcePair, h);
         } else {
-            logger.info("no unfinished htlc task, continue listening");
+            logger.info(
+                    "no unfinished htlc task, continue listening, path: {}",
+                    htlcResource.getPath());
         }
     }
 }

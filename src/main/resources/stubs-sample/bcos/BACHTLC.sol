@@ -9,35 +9,35 @@ contract BACHTLC is HTLC {
     // bac001 asset contract address
     address assetContract;
 
-    function initHTLCContract(
-        string _counterpartyHTLCPath,
-        string _counterpartyHTLCAddress,
-        string _assetContract
-    )
-    external
+    function init(string[] _ss)
+    public
     {
-        setCounterpartyHTLCInfo(_counterpartyHTLCPath, _counterpartyHTLCAddress);
-        assetContract = stringToAddress(_assetContract);
+        assetContract = stringToAddress(_ss[0]);
     }
 
-    function lock(string _hash)
-    external
+    function lock(string[] _ss)
+    public
     returns (string[] result)
     {
+        string memory _hash = _ss[0];
+
         result = new string[](1);
         if (!taskIsExisted(_hash))
         {
            result[0] = "task not exists";
+           return;
         }
 
         if(getLockStatus(_hash)) {
             result[0] = "success";
+            return;
         }
 
         uint timelock = getTimelock(_hash);
-        if(getRollbackStatus(_hash) || timelock <= now)
+        if(getRollbackStatus(_hash) || timelock <= (now / 1000))
         {
             result[0] = "has rolled back";
+            return;
         }
 
         address sender = getSender(_hash);
@@ -45,6 +45,7 @@ contract BACHTLC is HTLC {
         if (BAC001(assetContract).allowance(sender, address(this)) < uint(amount))
         {
             result[0] = "insufficient authorized assets";
+            return;
         }
 
         setLockStatus(_hash);
@@ -56,35 +57,43 @@ contract BACHTLC is HTLC {
     }
 
 
-    function unlock(string _hash, string _secret)
-    external
+    function unlock(string[] _ss)
+    public
     returns (string[] result)
     {
+        string memory _hash = _ss[0];
+        string memory _secret = _ss[1];
+
         result = new string[](1);
         if (!taskIsExisted(_hash))
         {
            result[0] = "task not exists";
+           return;
         }
 
         if (getUnlockStatus(_hash))
         {
            result[0] = "success";
+           return;
         }
 
         if(!hashMatched(_hash, _secret))
         {
            result[0] = "hash not matched";
+           return;
         }
 
         if (!getLockStatus(_hash))
         {
            result[0] = "can not unlock until lock is done";
+           return;
         }
 
         uint timelock = getTimelock(_hash);
-        if(getRollbackStatus(_hash) || timelock <= now)
+        if(getRollbackStatus(_hash) || timelock <= (now / 1000))
         {
             result[0] = "has rolled back";
+            return;
         }
 
         setUnlockStatus(_hash);
@@ -99,35 +108,42 @@ contract BACHTLC is HTLC {
     }
 
 
-    function rollback(string _hash)
-    external
+    function rollback(string[] _ss)
+    public
     returns (string[] result)
     {
+        string memory _hash = _ss[0];
+
         result = new string[](1);
         if (!taskIsExisted(_hash))
         {
            result[0] = "task not exists";
+           return;
         }
 
         if (getRollbackStatus(_hash))
         {
            result[0] = "success";
+           return;
         }
 
         uint timelock = getTimelock(_hash);
-        if(timelock > now)
+        if(timelock > (now / 1000))
         {
             result[0] = "can not rollback until now > timelock";
+            return;
         }
 
         if (!getLockStatus(_hash))
         {
            result[0] = "no need to rollback unless lock is done";
+           return;
         }
 
         if (getUnlockStatus(_hash))
         {
            result[0] = "can not rollback if unlock is done";
+           return;
         }
 
         setRollbackStatus(_hash);
