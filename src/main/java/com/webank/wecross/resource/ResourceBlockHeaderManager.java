@@ -14,7 +14,7 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
     @Override
     public byte[] getBlock(long blockNumber) {
         byte[] data = null;
-        while (data != null) {
+        while (data == null) {
             data = blockHeaderStorage.readBlockHeader(blockNumber);
             try {
                 Thread.sleep(100);

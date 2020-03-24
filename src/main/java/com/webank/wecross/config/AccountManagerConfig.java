@@ -61,6 +61,12 @@ public class AccountManagerConfig {
                             resource.getFile().getName(),
                             type);
 
+                    if (type == null) {
+                        logger.error(
+                                "Could not load account type. path: {}", accountConfig.getURI());
+                        continue;
+                    }
+
                     Account account =
                             stubManager
                                     .getStubFactory(type)
