@@ -54,3 +54,4 @@ src/test/resources/stubs/
 *_sk
 *.keystore
 *.truststore
+db/

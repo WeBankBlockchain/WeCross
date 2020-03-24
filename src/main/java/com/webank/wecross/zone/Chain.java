@@ -78,7 +78,7 @@ public class Chain {
 
             if (remoteBlockNumber > localBlockNumber) {
                 for (long blockNumber = localBlockNumber + 1;
-                        blockNumber < remoteBlockNumber;
+                        blockNumber <= remoteBlockNumber;
                         ++blockNumber) {
                     byte[] blockBytes = driver.getBlockHeader(blockNumber, connection);
                     blockHeaderStorage.writeBlockHeader(blockNumber, blockBytes);
