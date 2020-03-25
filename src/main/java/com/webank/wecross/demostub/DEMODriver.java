@@ -3,6 +3,7 @@ package com.webank.wecross.demostub;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.stub.BlockHeader;
+import com.webank.wecross.stub.BlockHeaderManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Request;
@@ -10,6 +11,7 @@ import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.stub.VerifiedTransaction;
 import java.io.IOException;
 
 public class DEMODriver implements Driver {
@@ -87,6 +89,12 @@ public class DEMODriver implements Driver {
 
     @Override
     public byte[] getBlockHeader(long number, Connection connection) {
+        return null;
+    }
+
+    @Override
+    public VerifiedTransaction getVerifiedTransaction(
+            String transactionHash, BlockHeaderManager blockHeaderManager, Connection connection) {
         return null;
     }
 
