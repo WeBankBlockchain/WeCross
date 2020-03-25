@@ -24,13 +24,13 @@
     # name cannot be repeated
     name = 'htlc'
     type = 'FABRIC_CONTRACT'
-    chainCodeName = 'htlc0324'
+    chainCodeName = 'htlcSample'
     chainLanguage = "go"
     peers=['org1']
 [[resources]]
     # name cannot be repeated
     name = 'ledger'
     type = 'FABRIC_CONTRACT'
-    chainCodeName = 'ledge0324'
+    chainCodeName = 'ledgerSample'
     chainLanguage = "go"
-    peers=['org1', 'org2']
+    peers=['org1']

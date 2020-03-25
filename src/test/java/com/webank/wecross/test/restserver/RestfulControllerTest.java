@@ -12,6 +12,7 @@ import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestfulController;
+import com.webank.wecross.routine.RoutineManager;
 import com.webank.wecross.routine.htlc.HTLCManager;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
@@ -90,9 +91,14 @@ public class RestfulControllerTest {
     public void statusTest() throws Exception {
         try {
             HTLCManager mockHTLCManager = Mockito.mock(HTLCManager.class);
-            Mockito.when(weCrossHost.getHtlcManager()).thenReturn(mockHTLCManager);
+            RoutineManager mockRoutineManager = Mockito.mock(RoutineManager.class);
+            Resource mokcResource = Mockito.mock(Resource.class);
+            Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(mokcResource);
+            Mockito.when(weCrossHost.getRoutineManager()).thenReturn(mockRoutineManager);
+            Mockito.when(weCrossHost.getRoutineManager()).thenReturn(mockRoutineManager);
+            Mockito.when(mockRoutineManager.getHtlcManager()).thenReturn(mockHTLCManager);
             Mockito.when(mockHTLCManager.filterHTLCResource(Mockito.any(), Mockito.any()))
-                    .thenReturn(new Resource());
+                    .thenReturn(mokcResource);
 
             MvcResult rsp =
                     this.mockMvc
@@ -113,13 +119,16 @@ public class RestfulControllerTest {
     }
 
     @Test
-    public void deTailTest() throws Exception {
+    public void detailTest() throws Exception {
         try {
             ResourceInfo resourceInfo = new ResourceInfo();
             Resource resource = new Resource();
             resource.setResourceInfo(resourceInfo);
+            Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
             HTLCManager mockHTLCManager = Mockito.mock(HTLCManager.class);
-            Mockito.when(weCrossHost.getHtlcManager()).thenReturn(mockHTLCManager);
+            RoutineManager mockRoutineManager = Mockito.mock(RoutineManager.class);
+            Mockito.when(weCrossHost.getRoutineManager()).thenReturn(mockRoutineManager);
+            Mockito.when(mockRoutineManager.getHtlcManager()).thenReturn(mockHTLCManager);
             Mockito.when(mockHTLCManager.filterHTLCResource(Mockito.any(), Mockito.any()))
                     .thenReturn(resource);
 
@@ -255,10 +264,12 @@ public class RestfulControllerTest {
     @Test
     public void callTest() throws Exception {
         try {
-            HTLCManager mockHTLCManager = Mockito.mock(HTLCManager.class);
             AccountManager mockAccountManager = Mockito.mock(AccountManager.class);
             Mockito.when(weCrossHost.getAccountManager()).thenReturn(mockAccountManager);
-            Mockito.when(weCrossHost.getHtlcManager()).thenReturn(mockHTLCManager);
+            HTLCManager mockHTLCManager = Mockito.mock(HTLCManager.class);
+            RoutineManager mockRoutineManager = Mockito.mock(RoutineManager.class);
+            Mockito.when(weCrossHost.getRoutineManager()).thenReturn(mockRoutineManager);
+            Mockito.when(mockRoutineManager.getHtlcManager()).thenReturn(mockHTLCManager);
             TransactionResponse transactionResponse = new TransactionResponse();
             transactionResponse.setErrorCode(0);
             transactionResponse.setErrorMessage("call test resource success");
@@ -312,10 +323,12 @@ public class RestfulControllerTest {
     @Test
     public void sendTransactionTest() throws Exception {
         try {
-            HTLCManager mockHTLCManager = Mockito.mock(HTLCManager.class);
             AccountManager mockAccountManager = Mockito.mock(AccountManager.class);
             Mockito.when(weCrossHost.getAccountManager()).thenReturn(mockAccountManager);
-            Mockito.when(weCrossHost.getHtlcManager()).thenReturn(mockHTLCManager);
+            HTLCManager mockHTLCManager = Mockito.mock(HTLCManager.class);
+            RoutineManager mockRoutineManager = Mockito.mock(RoutineManager.class);
+            Mockito.when(weCrossHost.getRoutineManager()).thenReturn(mockRoutineManager);
+            Mockito.when(mockRoutineManager.getHtlcManager()).thenReturn(mockHTLCManager);
             TransactionResponse transactionResponse = new TransactionResponse();
             transactionResponse.setErrorCode(0);
             transactionResponse.setErrorMessage("sendTransaction test resource success");
@@ -370,12 +383,14 @@ public class RestfulControllerTest {
     @Test
     public void exceptionTest() {
         try {
-            HTLCManager mockHTLCManager = Mockito.mock(HTLCManager.class);
             AccountManager mockAccountManager = Mockito.mock(AccountManager.class);
             Resource resource = Mockito.mock(Resource.class);
             Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
             Mockito.when(weCrossHost.getAccountManager()).thenReturn(mockAccountManager);
-            Mockito.when(weCrossHost.getHtlcManager()).thenReturn(mockHTLCManager);
+            HTLCManager mockHTLCManager = Mockito.mock(HTLCManager.class);
+            RoutineManager mockRoutineManager = Mockito.mock(RoutineManager.class);
+            Mockito.when(weCrossHost.getRoutineManager()).thenReturn(mockRoutineManager);
+            Mockito.when(mockRoutineManager.getHtlcManager()).thenReturn(mockHTLCManager);
             Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
             Mockito.when(
                             mockHTLCManager.filterHTLCResource(

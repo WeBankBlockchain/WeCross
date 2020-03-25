@@ -122,7 +122,7 @@ public class HTLCResource extends Resource {
 
     @Override
     public Response onRemoteTransaction(Request request) {
-        Driver driver = getDriver();
+        Driver driver = originResource.getDriver();
         if (driver.isTransaction(request)) {
             TransactionContext<TransactionRequest> context =
                     driver.decodeTransactionRequest(request.getData());
@@ -130,7 +130,7 @@ public class HTLCResource extends Resource {
             if (transactionRequest.getMethod().equals("getSecret")) {
                 Response response = new Response();
                 response.setErrorCode(HTLCQueryStatus.ASSET_HTLC_NO_PERMISSION);
-                response.setErrorMessage("cannot call getSecret by rpc interface");
+                response.setErrorMessage("HTLCResource doesn't allow peers to call \"getSecret\"");
                 return response;
             }
         }

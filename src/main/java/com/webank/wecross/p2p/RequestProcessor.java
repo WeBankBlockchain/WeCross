@@ -15,6 +15,8 @@ import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.peer.PeerSeqMessageData;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.Versions;
+import com.webank.wecross.routine.RoutineManager;
+import com.webank.wecross.routine.htlc.HTLCManager;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
@@ -32,6 +34,7 @@ public class RequestProcessor implements Processor {
     private PeerManager peerManager;
     private ZoneManager zoneManager;
     private P2PMessageEngine p2pEngine;
+    private RoutineManager routineManager;
     private ObjectMapper objectMapper = new ObjectMapper();
 
     public PeerManager getPeerManager() {
@@ -56,6 +59,14 @@ public class RequestProcessor implements Processor {
 
     public void setP2pEngine(P2PMessageEngine p2pEngine) {
         this.p2pEngine = p2pEngine;
+    }
+
+    public RoutineManager getRoutineManager() {
+        return routineManager;
+    }
+
+    public void setRoutineManager(RoutineManager routineManager) {
+        this.routineManager = routineManager;
     }
 
     @Override
@@ -282,8 +293,10 @@ public class RequestProcessor implements Processor {
             Resource resourceObj = zoneManager.getResource(path);
             if (resourceObj == null) {
                 logger.warn("Unable to find resource: {}.{}.{}", network, chain, resource);
-
                 throw new Exception("Resource not found");
+            } else {
+                HTLCManager htlcManager = routineManager.getHtlcManager();
+                resourceObj = htlcManager.filterHTLCResource(path, resourceObj);
             }
 
             switch (method) {
