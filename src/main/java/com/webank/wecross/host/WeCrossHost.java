@@ -10,9 +10,9 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.restserver.request.StateRequest;
 import com.webank.wecross.restserver.response.StateResponse;
+import com.webank.wecross.routine.RoutineManager;
 import com.webank.wecross.routine.htlc.AssetHTLC;
 import com.webank.wecross.routine.htlc.HTLC;
-import com.webank.wecross.routine.htlc.HTLCManager;
 import com.webank.wecross.routine.htlc.HTLCResource;
 import com.webank.wecross.routine.htlc.HTLCResourcePair;
 import com.webank.wecross.routine.htlc.HTLCTaskFactory;
@@ -33,8 +33,7 @@ public class WeCrossHost {
     private PeerManager peerManager;
     private P2PService p2pService;
     private AccountManager accountManager;
-    private HTLCManager htlcManager;
-    private List<HTLCResourcePair> htlcResourcePairs = new ArrayList<>();
+    private RoutineManager routineManager;
 
     Thread mainLoopThread;
 
@@ -109,25 +108,25 @@ public class WeCrossHost {
         if (accountManager == null) {
             throw new Exception("accountManager is null");
         }
-        if (htlcManager == null) {
-            throw new Exception("htlcManager is null");
-        }
-        if (htlcResourcePairs == null) {
-            throw new Exception("htlcResourcePairs is null");
-        }
     }
 
     public void runHTLCService() {
-        if (htlcManager != null) {
-            HTLCTaskFactory htlcTaskFactory = new HTLCTaskFactory();
-            TaskManager taskManager = new TaskManager(htlcTaskFactory);
-            taskManager.registerTasks(htlcResourcePairs);
-            taskManager.start();
+        try {
+            if (routineManager.getHtlcManager() != null) {
+                HTLCTaskFactory htlcTaskFactory = new HTLCTaskFactory();
+                TaskManager taskManager = new TaskManager(htlcTaskFactory);
+                taskManager.registerTasks(initHTLCResourcePairs());
+                taskManager.start();
+            }
+        } catch (Exception e) {
+            logger.error(
+                    "something wrong with runHTLCService: {}, exception: {}", e.getMessage(), e);
         }
     }
 
-    public void initHTLCResourcePairs() throws Exception {
-        List<HTLCTaskInfo> htlcTaskInfos = htlcManager.getHtlcTaskInfos();
+    public List<HTLCResourcePair> initHTLCResourcePairs() throws Exception {
+        List<HTLCResourcePair> htlcResourcePairs = new ArrayList<>();
+        List<HTLCTaskInfo> htlcTaskInfos = routineManager.getHtlcManager().getHtlcTaskInfos();
         for (HTLCTaskInfo htlcTaskInfo : htlcTaskInfos) {
             String selfPath = htlcTaskInfo.getSelfPath();
             String counterpartyPath = htlcTaskInfo.getCounterpartyPath();
@@ -152,6 +151,7 @@ public class WeCrossHost {
             htlcResourcePairs.add(
                     new HTLCResourcePair(assetHTLC, selfHTLCResource, counterpartyHTLCResource));
         }
+        return htlcResourcePairs;
     }
 
     public Resource getResource(Path path) throws Exception {
@@ -170,22 +170,6 @@ public class WeCrossHost {
 
     public void setAccountManager(AccountManager accountManager) {
         this.accountManager = accountManager;
-    }
-
-    public HTLCManager getHtlcManager() {
-        return htlcManager;
-    }
-
-    public void setHtlcManager(HTLCManager htlcManager) {
-        this.htlcManager = htlcManager;
-    }
-
-    public List<HTLCResourcePair> getHtlcResourcePairs() {
-        return htlcResourcePairs;
-    }
-
-    public void setHtlcResourcePairs(List<HTLCResourcePair> htlcResourcePairs) {
-        this.htlcResourcePairs = htlcResourcePairs;
     }
 
     public void setZoneManager(ZoneManager networkManager) {
@@ -210,5 +194,13 @@ public class WeCrossHost {
 
     public void setP2pService(P2PService p2pService) {
         this.p2pService = p2pService;
+    }
+
+    public RoutineManager getRoutineManager() {
+        return routineManager;
+    }
+
+    public void setRoutineManager(RoutineManager routineManager) {
+        this.routineManager = routineManager;
     }
 }

@@ -14,9 +14,10 @@ import (
 )
 
 const (
-	TokenId          = "HTLCoin"
-	AccountKeyPrefix = TokenId + "-%s-Balance"
-	ApproveKeyPrefix = TokenId + "-%s-Approve-%s"
+	TokenId                = "HTLCoin"
+	AccountKeyPrefix       = TokenId + "-%s-Balance"
+	ApproveKeyPrefix       = TokenId + "-%s-Approve-%s"
+	EscrowAccountKeyPrefix = TokenId + "-%s-EscrowAccount"
 )
 
 type LedgerChaincode struct {
@@ -31,6 +32,11 @@ type Token struct {
 type SugarAccount struct {
 	Owner string `json:"owner"`
 	Sugar string `json:"sugar"`
+	Value uint64 `json:"value"`
+}
+
+type EscrowAccount struct {
+	Owner string `json:"owner"`
 	Value uint64 `json:"value"`
 }
 
@@ -100,8 +106,14 @@ func (l *LedgerChaincode) Invoke(stub shim.ChaincodeStubInterface) (res peer.Res
 		res = l.balanceOfSugarAccount(stub, args)
 	case "transfer":
 		res = l.transfer(stub, args)
+	case "createEscrowAccount":
+		res = l.createEscrowAccount(stub, args)
+	case "transferToEscrowAccount":
+		res = l.transferToEscrowAccount(stub, args)
 	case "createSugarAccount":
 		res = l.createSugarAccount(stub, args)
+	case "escrowToSugar":
+		res = l.escrowToSugar(stub, args)
 	case "withdrawFromSugarAccount":
 		res = l.withdrawFromSugarAccount(stub, args)
 	case "allowance":
@@ -146,7 +158,7 @@ func (l *LedgerChaincode) init(stub shim.ChaincodeStubInterface, args []string) 
 		return shim.Error(err.Error())
 	}
 
-	owner := getMsgSender(stub)
+	owner := getTxOrigin(stub)
 	updateBalance(stub, owner, token.TotalSupply)
 	emitEvent(stub, "Transfer", marshalTransferEvent("genesis", owner, token.TotalSupply))
 
@@ -158,7 +170,7 @@ func (l *LedgerChaincode) senderInfo(stub shim.ChaincodeStubInterface, args []st
 		return shim.Error("invalid arguments")
 	}
 
-	return shim.Success([]byte(getMsgSender(stub)))
+	return shim.Success([]byte(getTxOrigin(stub)))
 }
 
 func (l *LedgerChaincode) tokenInfo(stub shim.ChaincodeStubInterface, args []string) peer.Response {
@@ -231,7 +243,7 @@ func (l *LedgerChaincode) transfer(stub shim.ChaincodeStubInterface, args []stri
 		return shim.Error("invalid arguments")
 	}
 
-	sender := getMsgSender(stub)
+	sender := getTxOrigin(stub)
 	to := args[0]
 	value := stringToUint64(args[1])
 
@@ -242,13 +254,90 @@ func (l *LedgerChaincode) transfer(stub shim.ChaincodeStubInterface, args []stri
 	return shim.Success([]byte("success"))
 }
 
-// owner create a Sugar account
+// owner create an escrow account
+func (l *LedgerChaincode) createEscrowAccount(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) != 1 {
+		return shim.Error("invalid arguments")
+	}
+
+	owner := getTxOrigin(stub)
+	value := stringToUint64(args[0])
+
+	key := fmt.Sprintf(EscrowAccountKeyPrefix, owner)
+	eaInfo, err := stub.GetState(key)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if eaInfo != nil {
+		return shim.Error("escrow account exists")
+	}
+
+	updateBalance(stub, owner, safeSub(getBalance(stub, owner), value))
+
+	var ea = &EscrowAccount{
+		Owner: owner,
+		Value: value,
+	}
+	eaInfo, err = json.Marshal(ea)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	err = stub.PutState(key, eaInfo)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	emitEvent(stub, "Transfer", marshalTransferEvent(owner, key, value))
+
+	return shim.Success([]byte(key))
+}
+
+func (l *LedgerChaincode) transferToEscrowAccount(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) != 1 {
+		return shim.Error("invalid arguments")
+	}
+
+	owner := getTxOrigin(stub)
+	value := stringToUint64(args[0])
+
+	key := fmt.Sprintf(EscrowAccountKeyPrefix, owner)
+	eaInfo, err := stub.GetState(key)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if eaInfo == nil {
+		return shim.Error("escrow account not found")
+	}
+
+	updateBalance(stub, owner, safeSub(getBalance(stub, owner), value))
+
+	var ea EscrowAccount
+	err = json.Unmarshal(eaInfo, &ea)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	ea.Value = safeAdd(ea.Value, value)
+
+	eaInfo, err = json.Marshal(&ea)
+	err = stub.PutState(key, eaInfo)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	emitEvent(stub, "Transfer", marshalTransferEvent(owner, key, value))
+
+	return shim.Success([]byte(key))
+}
+
+// owner create a sugar account
 func (l *LedgerChaincode) createSugarAccount(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 2 {
 		return shim.Error("invalid arguments")
 	}
 
-	owner := getMsgSender(stub)
+	owner := getTxOrigin(stub)
 	sugar := args[0]
 	value := stringToUint64(args[1])
 	updateBalance(stub, owner, safeSub(getBalance(stub, owner), value))
@@ -272,7 +361,71 @@ func (l *LedgerChaincode) createSugarAccount(stub shim.ChaincodeStubInterface, a
 	key := mySha256(append(saInfo, currentTime...))
 
 	err = stub.PutState(key, saInfo)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
 	emitEvent(stub, "Transfer", marshalTransferEvent(owner, key, value))
+
+	return shim.Success([]byte(key))
+}
+
+func (l *LedgerChaincode) escrowToSugar(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) != 3 {
+		return shim.Error("invalid arguments")
+	}
+
+	owner := args[0]
+	sugar := args[1]
+	value := stringToUint64(args[2])
+
+	key := fmt.Sprintf(EscrowAccountKeyPrefix, owner)
+	eaInfo, err := stub.GetState(key)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if eaInfo == nil {
+		return shim.Error("escrow account not found")
+	}
+
+	var ea EscrowAccount
+	err = json.Unmarshal(eaInfo, &ea)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	ea.Value = safeSub(ea.Value, value)
+
+	eaInfo, err = json.Marshal(&ea)
+	err = stub.PutState(key, eaInfo)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	var sa = &SugarAccount{
+		Owner: owner,
+		Sugar: sugar,
+		Value: value,
+	}
+	saInfo, err := json.Marshal(sa)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	// get an unique key
+	timestamp, err := stub.GetTxTimestamp()
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	currentTime := uint64ToBytes(uint64(timestamp.Seconds))
+	key = mySha256(append(saInfo, currentTime...))
+
+	err = stub.PutState(key, saInfo)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	emitEvent(stub, "Transfer", marshalTransferEvent(fmt.Sprintf(EscrowAccountKeyPrefix, owner), key, value))
 
 	return shim.Success([]byte(key))
 }
@@ -288,7 +441,7 @@ func (l *LedgerChaincode) withdrawFromSugarAccount(stub shim.ChaincodeStubInterf
 		return shim.Error("invalid arguments")
 	}
 
-	sender := getMsgSender(stub)
+	sender := getTxOrigin(stub)
 	key := args[0]
 	to := args[1]
 
@@ -334,7 +487,7 @@ func (l *LedgerChaincode) approve(stub shim.ChaincodeStubInterface, args []strin
 	if len(args) != 2 {
 		return shim.Error("invalid arguments")
 	}
-	sender := getMsgSender(stub)
+	sender := getTxOrigin(stub)
 	spender := args[0]
 	value := stringToUint64(args[1])
 
@@ -349,7 +502,7 @@ func (l *LedgerChaincode) transferFrom(stub shim.ChaincodeStubInterface, args []
 		return shim.Error("invalid arguments")
 	}
 
-	sender := getMsgSender(stub)
+	sender := getTxOrigin(stub)
 	from := args[0]
 	to := args[1]
 	value := stringToUint64(args[2])
@@ -362,7 +515,7 @@ func (l *LedgerChaincode) transferFrom(stub shim.ChaincodeStubInterface, args []
 	return shim.Success([]byte("success"))
 }
 
-func getMsgSender(stub shim.ChaincodeStubInterface) string {
+func getTxOrigin(stub shim.ChaincodeStubInterface) string {
 	creatorInfo, err := stub.GetCreator()
 	checkError(err)
 

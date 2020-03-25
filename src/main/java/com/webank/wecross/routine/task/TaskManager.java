@@ -36,12 +36,8 @@ public class TaskManager {
         }
     }
 
-    public void start() {
-        try {
-            logger.info("scheduler starts working");
-            scheduler.start();
-        } catch (SchedulerException e) {
-            logger.error("something wrong with starting scheduler");
-        }
+    public void start() throws SchedulerException {
+        logger.info("scheduler starts working");
+        scheduler.start();
     }
 }

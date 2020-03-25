@@ -194,13 +194,12 @@ public class RestfulController {
 
         try {
             AccountManager accountManager = host.getAccountManager();
-            HTLCManager htlcManager = host.getHtlcManager();
-
             Resource resourceObj = host.getResource(path);
-            resourceObj = htlcManager.filterHTLCResource(path, resourceObj);
-
             if (resourceObj == null) {
                 logger.warn("Unable to find resource: {}", path.toString());
+            } else {
+                HTLCManager htlcManager = host.getRoutineManager().getHtlcManager();
+                resourceObj = htlcManager.filterHTLCResource(path, resourceObj);
             }
 
             switch (method) {
