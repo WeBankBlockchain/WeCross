@@ -1,6 +1,7 @@
 package com.webank.wecross.remote;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.webank.wecross.common.StubQueryStatus;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.engine.P2PResponse;
@@ -47,7 +48,7 @@ public class RemoteConnection implements Connection {
             }
         } catch (Exception e) {
             Response response = new Response();
-            response.setErrorCode(-1);
+            response.setErrorCode(StubQueryStatus.REMOTE_QUERY_FAILED);
             response.setErrorMessage("Call remote resource exception: " + e.getMessage());
             return response;
         }

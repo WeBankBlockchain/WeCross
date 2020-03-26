@@ -1,6 +1,5 @@
 package com.webank.wecross.p2p;
 
-import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.utils.core.SeqUtils;
@@ -25,29 +24,29 @@ public class P2PMessage<T> {
         String errorMessage;
         if (this.version == null) {
             errorMessage = "\"version\" not found in request package";
-            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         if (this.seq == null) {
             errorMessage = "\"seq\" not found in request package";
-            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         if (this.method == null) {
             errorMessage = "\"method\" not found in request package";
-            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         if (!Versions.checkVersion(version)) {
             errorMessage = "Unsupported version :" + version;
-            throw new WeCrossException(ErrorCode.VERSION_ERROR, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.VERSION_ERROR, errorMessage);
         }
 
         String methods[] = this.method.split("/");
 
         if (!methods[methods.length - 1].equals(method)) {
             errorMessage = "Expect method: " + method;
-            throw new WeCrossException(ErrorCode.METHOD_ERROR, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.METHOD_ERROR, errorMessage);
         }
     }
 

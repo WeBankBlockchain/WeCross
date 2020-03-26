@@ -3,8 +3,7 @@ package com.webank.wecross.restserver;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
-import com.webank.wecross.common.QueryStatus;
-import com.webank.wecross.exception.ErrorCode;
+import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.resource.Resource;
@@ -51,8 +50,8 @@ public class RestfulController {
     public RestResponse<StubResponse> supportedStubs(@RequestBody String restRequestString) {
         RestResponse<StubResponse> restResponse = new RestResponse<>();
         restResponse.setVersion(Versions.currentVersion);
-        restResponse.setResult(QueryStatus.SUCCESS);
-        restResponse.setMessage(QueryStatus.getStatusMessage(QueryStatus.SUCCESS));
+        restResponse.setErrorCode(NetworkQueryStatus.SUCCESS);
+        restResponse.setMessage(NetworkQueryStatus.getStatusMessage(NetworkQueryStatus.SUCCESS));
 
         logger.debug("request string: {}", restRequestString);
 
@@ -67,11 +66,11 @@ public class RestfulController {
             restResponse.setData(stubResponse);
         } catch (WeCrossException e) {
             logger.warn("Process request error", e);
-            restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
+            restResponse.setErrorCode(NetworkQueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error", e);
-            restResponse.setResult(QueryStatus.INTERNAL_ERROR);
+            restResponse.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
             restResponse.setMessage(e.getMessage());
         }
         return restResponse;
@@ -81,8 +80,8 @@ public class RestfulController {
     public RestResponse<ResourceResponse> listResources(@RequestBody String restRequestString) {
         RestResponse<ResourceResponse> restResponse = new RestResponse<>();
         restResponse.setVersion(Versions.currentVersion);
-        restResponse.setResult(QueryStatus.SUCCESS);
-        restResponse.setMessage(QueryStatus.getStatusMessage(QueryStatus.SUCCESS));
+        restResponse.setErrorCode(NetworkQueryStatus.SUCCESS);
+        restResponse.setMessage(NetworkQueryStatus.getStatusMessage(NetworkQueryStatus.SUCCESS));
 
         logger.debug("request string: {}", restRequestString);
 
@@ -99,11 +98,11 @@ public class RestfulController {
             restResponse.setData(resourceResponse);
         } catch (WeCrossException e) {
             logger.warn("Process request error", e);
-            restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
+            restResponse.setErrorCode(NetworkQueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error", e);
-            restResponse.setResult(QueryStatus.INTERNAL_ERROR);
+            restResponse.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
             restResponse.setMessage(e.getMessage());
         }
         return restResponse;
@@ -113,8 +112,8 @@ public class RestfulController {
     public RestResponse<AccountResponse> listAccounts(@RequestBody String restRequestString) {
         RestResponse<AccountResponse> restResponse = new RestResponse<>();
         restResponse.setVersion(Versions.currentVersion);
-        restResponse.setResult(QueryStatus.SUCCESS);
-        restResponse.setMessage(QueryStatus.getStatusMessage(QueryStatus.SUCCESS));
+        restResponse.setErrorCode(NetworkQueryStatus.SUCCESS);
+        restResponse.setMessage(NetworkQueryStatus.getStatusMessage(NetworkQueryStatus.SUCCESS));
 
         logger.debug("request string: {}", restRequestString);
 
@@ -138,11 +137,11 @@ public class RestfulController {
             restResponse.setData(accountResponse);
         } catch (WeCrossException e) {
             logger.warn("Process request error", e);
-            restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
+            restResponse.setErrorCode(NetworkQueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error", e);
-            restResponse.setResult(QueryStatus.INTERNAL_ERROR);
+            restResponse.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
             restResponse.setMessage(e.getMessage());
         }
         return restResponse;
@@ -154,8 +153,8 @@ public class RestfulController {
 
         StateResponse stateResponse = host.getState(new StateRequest());
         restResponse.setVersion(Versions.currentVersion);
-        restResponse.setResult(QueryStatus.SUCCESS);
-        restResponse.setMessage(QueryStatus.getStatusMessage(QueryStatus.SUCCESS));
+        restResponse.setErrorCode(NetworkQueryStatus.SUCCESS);
+        restResponse.setMessage(NetworkQueryStatus.getStatusMessage(NetworkQueryStatus.SUCCESS));
         restResponse.setData(stateResponse);
 
         return restResponse;
@@ -188,8 +187,8 @@ public class RestfulController {
 
         RestResponse<Object> restResponse = new RestResponse<Object>();
         restResponse.setVersion(Versions.currentVersion);
-        restResponse.setResult(QueryStatus.SUCCESS);
-        restResponse.setMessage(QueryStatus.getStatusMessage(QueryStatus.SUCCESS));
+        restResponse.setErrorCode(NetworkQueryStatus.SUCCESS);
+        restResponse.setMessage(NetworkQueryStatus.getStatusMessage(NetworkQueryStatus.SUCCESS));
 
         logger.debug("request string: {}", restRequestString);
 
@@ -218,7 +217,8 @@ public class RestfulController {
                     {
                         if (resourceObj == null) {
                             throw new WeCrossException(
-                                    ErrorCode.RESOURCE_ERROR, "Resource not found");
+                                    WeCrossException.ErrorCode.RESOURCE_ERROR,
+                                    "Resource not found");
                         } else {
                             ResourceDetail resourceDetail = new ResourceDetail();
                             restResponse.setData(
@@ -231,7 +231,8 @@ public class RestfulController {
                     {
                         if (resourceObj == null) {
                             throw new WeCrossException(
-                                    ErrorCode.RESOURCE_ERROR, "Resource not found");
+                                    WeCrossException.ErrorCode.RESOURCE_ERROR,
+                                    "Resource not found");
                         }
 
                         RestRequest<TransactionRequest> restRequest =
@@ -263,7 +264,8 @@ public class RestfulController {
                     {
                         if (resourceObj == null) {
                             throw new WeCrossException(
-                                    ErrorCode.RESOURCE_ERROR, "Resource not found");
+                                    WeCrossException.ErrorCode.RESOURCE_ERROR,
+                                    "Resource not found");
                         }
                         RestRequest<TransactionRequest> restRequest =
                                 objectMapper.readValue(
@@ -293,18 +295,18 @@ public class RestfulController {
                 default:
                     {
                         logger.warn("Unsupported method: {}", method);
-                        restResponse.setResult(QueryStatus.METHOD_ERROR);
+                        restResponse.setErrorCode(NetworkQueryStatus.METHOD_ERROR);
                         restResponse.setMessage("Unsupported method: " + method);
                         break;
                     }
             }
         } catch (WeCrossException e) {
             logger.warn("Process request error", e);
-            restResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
+            restResponse.setErrorCode(NetworkQueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error:", e);
-            restResponse.setResult(QueryStatus.INTERNAL_ERROR);
+            restResponse.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
             restResponse.setMessage(e.getLocalizedMessage());
         }
 

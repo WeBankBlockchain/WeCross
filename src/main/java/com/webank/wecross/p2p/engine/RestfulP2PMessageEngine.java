@@ -1,7 +1,7 @@
 package com.webank.wecross.p2p.engine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.wecross.common.QueryStatus;
+import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.p2p.MessageType;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageCallback;
@@ -50,7 +50,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
             request.setContent(objectMapper.writeValueAsString(msg));
         } catch (Exception e) {
             logger.error(" P2PMessage to json error: {}", e);
-            executeCallback(callback, QueryStatus.INTERNAL_ERROR, e.getMessage(), null);
+            executeCallback(callback, NetworkQueryStatus.INTERNAL_ERROR, e.getMessage(), null);
             return;
         }
 
@@ -76,21 +76,23 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
                                         P2PResponse<Object> p2PResponse =
                                                 callback.parseContent(content);
                                         /** remote execute return not ok */
-                                        if (p2PResponse.getResult() != QueryStatus.SUCCESS) {
+                                        if (p2PResponse.getErrorCode()
+                                                != NetworkQueryStatus.SUCCESS) {
                                             throw new IOException(p2PResponse.getMessage());
                                         }
 
                                         executeCallback(
                                                 callback,
-                                                QueryStatus.SUCCESS,
-                                                QueryStatus.getStatusMessage(QueryStatus.SUCCESS),
+                                                NetworkQueryStatus.SUCCESS,
+                                                NetworkQueryStatus.getStatusMessage(
+                                                        NetworkQueryStatus.SUCCESS),
                                                 p2PResponse);
 
                                     } catch (Exception e) {
                                         logger.error("p2p error:", e);
                                         executeCallback(
                                                 callback,
-                                                QueryStatus.INTERNAL_ERROR,
+                                                NetworkQueryStatus.INTERNAL_ERROR,
                                                 e.getMessage(),
                                                 null);
                                     }

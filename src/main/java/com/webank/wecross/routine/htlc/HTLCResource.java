@@ -1,6 +1,5 @@
 package com.webank.wecross.routine.htlc;
 
-import com.webank.wecross.common.ResourceQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.EventCallback;
@@ -59,7 +58,7 @@ public class HTLCResource extends Resource {
             if (args == null || args.length < 2) {
                 logger.error("format of request is error in sendTransaction for unlock");
                 throw new WeCrossException(
-                        ResourceQueryStatus.ASSET_HTLC_REQUEST_ERROR,
+                        HTLCQueryStatus.ASSET_HTLC_REQUEST_ERROR,
                         "hash of lock transaction not found");
             }
             String transactionHash = args[0];
@@ -71,7 +70,7 @@ public class HTLCResource extends Resource {
                     .trim()
                     .equalsIgnoreCase("true")) {
                 throw new WeCrossException(
-                        ResourceQueryStatus.ASSET_HTLC_VERIFY_LOCK_ERROR,
+                        HTLCQueryStatus.ASSET_HTLC_VERIFY_LOCK_ERROR,
                         "verify transaction of lock failed");
             }
             request.setArgs(Arrays.copyOfRange(args, 1, args.length));
@@ -130,7 +129,7 @@ public class HTLCResource extends Resource {
             TransactionRequest transactionRequest = context.getData();
             if (transactionRequest.getMethod().equals("getSecret")) {
                 Response response = new Response();
-                response.setErrorCode(ResourceQueryStatus.ASSET_HTLC_NO_PERMISSION);
+                response.setErrorCode(HTLCQueryStatus.ASSET_HTLC_NO_PERMISSION);
                 response.setErrorMessage("cannot call getSecret by rpc interface");
                 return response;
             }

@@ -14,6 +14,4 @@ public class WeCrossDefault {
     // Config
     public static final String MAIN_CONFIG_FILE = "classpath:wecross.toml";
     public static final String STUB_CONFIG_FILE = "stub.toml";
-    public static final Integer DEFAULT_TIME_OUT = 60 * 1000;
-    public static final long DEFAULT_PROPOSAL_WAIT_TIME = 120000; // ms
 }

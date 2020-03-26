@@ -2,7 +2,6 @@ package com.webank.wecross.utils;
 
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
-import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import java.io.File;
 import java.net.URL;
@@ -22,7 +21,8 @@ public class ConfigUtils {
         try {
             new URL(templateUrl);
         } catch (Exception e) {
-            throw new WeCrossException(ErrorCode.ILLEGAL_SYMBOL, "Invalid path: " + path);
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.ILLEGAL_SYMBOL, "Invalid path: " + path);
         }
     }
 
@@ -33,7 +33,7 @@ public class ConfigUtils {
             return new Toml().read(resolver.getResource(fileName).getInputStream());
         } catch (Exception e) {
             throw new WeCrossException(
-                    ErrorCode.INTERNAL_ERROR,
+                    WeCrossException.ErrorCode.INTERNAL_ERROR,
                     "Something wrong with parse " + fileName + ": " + e.getMessage());
         }
     }
@@ -59,7 +59,7 @@ public class ConfigUtils {
 
         if (!dir.isDirectory()) {
             String errorMessage = stubsPath + " is not a valid directory";
-            throw new WeCrossException(ErrorCode.DIR_NOT_EXISTS, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.DIR_NOT_EXISTS, errorMessage);
         }
 
         String thisPath = stubsPath;
@@ -72,7 +72,7 @@ public class ConfigUtils {
             String stubPath = thisPath + "/" + stub + "/" + WeCrossDefault.STUB_CONFIG_FILE;
             if (!fileIsExists(stubPath)) {
                 String errorMessage = "Stub configuration file: " + stubPath + " does not exist";
-                throw new WeCrossException(ErrorCode.DIR_NOT_EXISTS, errorMessage);
+                throw new WeCrossException(WeCrossException.ErrorCode.DIR_NOT_EXISTS, errorMessage);
             }
             result.put(stub, stubPath);
         }
