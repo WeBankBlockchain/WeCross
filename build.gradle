@@ -64,9 +64,12 @@ publishing {
 			def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
 			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
 			
+			def nexus_username = ''
+			def nexus_password = ''
+			
 			credentials {
-				username = NEXUS_USERNAME
-				password = NEXUS_PASSWORD
+				username = nexus_username
+				password = nexus_password
 			}
 		}
 	}
