@@ -6,7 +6,7 @@ import com.webank.wecross.p2p.P2PMessage;
 public class P2PResponse<T> {
     private String version;
     private int seq;
-    private int result = 0;
+    private int errorCode = 0;
     private String message;
     private T data;
 
@@ -26,12 +26,12 @@ public class P2PResponse<T> {
         this.seq = seq;
     }
 
-    public Integer getResult() {
-        return result;
+    public Integer getErrorCode() {
+        return errorCode;
     }
 
-    public void setResult(Integer result) {
-        this.result = result;
+    public void setErrorCode(Integer errorCode) {
+        this.errorCode = errorCode;
     }
 
     public String getMessage() {

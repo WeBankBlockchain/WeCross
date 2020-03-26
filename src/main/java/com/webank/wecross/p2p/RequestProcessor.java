@@ -2,7 +2,7 @@ package com.webank.wecross.p2p;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.wecross.common.QueryStatus;
+import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.p2p.engine.P2PResponse;
 import com.webank.wecross.p2p.netty.common.Node;
@@ -91,7 +91,7 @@ public class RequestProcessor implements Processor {
             } else {
                 // invalid paramter method
                 p2PResponse.setMessage(" invalid method paramter format");
-                p2PResponse.setResult(QueryStatus.INTERNAL_ERROR);
+                p2PResponse.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
                 p2PResponse.setSeq(p2PMessage.getSeq());
                 p2PResponse.setVersion(p2PMessage.getVersion());
 
@@ -127,8 +127,8 @@ public class RequestProcessor implements Processor {
 
         P2PResponse<Object> response = new P2PResponse<Object>();
         response.setVersion(Versions.currentVersion);
-        response.setResult(QueryStatus.SUCCESS);
-        response.setMessage(QueryStatus.getStatusMessage(QueryStatus.SUCCESS));
+        response.setErrorCode(NetworkQueryStatus.SUCCESS);
+        response.setMessage(NetworkQueryStatus.getStatusMessage(NetworkQueryStatus.SUCCESS));
 
         logger.debug("request string: {}", p2pRequestString);
 
@@ -151,7 +151,7 @@ public class RequestProcessor implements Processor {
                         data.setSeq(zoneManager.getSeq());
                         data.setResources(resources);
 
-                        response.setResult(QueryStatus.SUCCESS);
+                        response.setErrorCode(NetworkQueryStatus.SUCCESS);
                         response.setMessage("request " + method + " success");
                         response.setSeq(p2pRequest.getSeq());
                         response.setData(data);
@@ -242,7 +242,7 @@ public class RequestProcessor implements Processor {
                                 objectMapper.readValue(
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<Object>>() {});
-                        response.setResult(QueryStatus.METHOD_ERROR);
+                        response.setErrorCode(NetworkQueryStatus.METHOD_ERROR);
                         response.setSeq(p2pRequest.getSeq());
                         response.setMessage("Unsupported method: " + method);
                         break;
@@ -251,12 +251,12 @@ public class RequestProcessor implements Processor {
 
         } catch (WeCrossException e) {
             logger.warn("Process request error: {}", e.getMessage());
-            response.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
+            response.setErrorCode(NetworkQueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error:", e);
 
-            response.setResult(QueryStatus.INTERNAL_ERROR);
+            response.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
             response.setMessage(e.getMessage());
         }
 
@@ -273,8 +273,8 @@ public class RequestProcessor implements Processor {
 
         P2PResponse<Object> p2pResponse = new P2PResponse<Object>();
         p2pResponse.setVersion(Versions.currentVersion);
-        p2pResponse.setResult(QueryStatus.SUCCESS);
-        p2pResponse.setMessage(QueryStatus.getStatusMessage(QueryStatus.SUCCESS));
+        p2pResponse.setErrorCode(NetworkQueryStatus.SUCCESS);
+        p2pResponse.setMessage(NetworkQueryStatus.getStatusMessage(NetworkQueryStatus.SUCCESS));
 
         logger.debug("request string: {}", p2pRequestString);
 
@@ -316,7 +316,7 @@ public class RequestProcessor implements Processor {
                                         p2pRequestString,
                                         new TypeReference<P2PMessage<Object>>() {});
                         logger.warn("Unsupported method: {}", method);
-                        p2pResponse.setResult(QueryStatus.METHOD_ERROR);
+                        p2pResponse.setErrorCode(NetworkQueryStatus.METHOD_ERROR);
                         p2pResponse.setMessage("Unsupported method: " + method);
                         p2pResponse.setSeq(p2pRequest.getSeq());
                         break;
@@ -324,12 +324,12 @@ public class RequestProcessor implements Processor {
             }
         } catch (WeCrossException e) {
             logger.warn("Process request error: {}", e.getMessage());
-            p2pResponse.setResult(QueryStatus.EXCEPTION_FLAG + e.getErrorCode());
+            p2pResponse.setErrorCode(NetworkQueryStatus.EXCEPTION_FLAG + e.getErrorCode());
             p2pResponse.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error:", e);
 
-            p2pResponse.setResult(QueryStatus.INTERNAL_ERROR);
+            p2pResponse.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
             p2pResponse.setMessage(e.getLocalizedMessage());
         }
 

@@ -1,6 +1,5 @@
 package com.webank.wecross.restserver;
 
-import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 
 public class RestRequest<T> {
@@ -15,32 +14,32 @@ public class RestRequest<T> {
         String errorMessage;
         if (this.version == null) {
             errorMessage = "\"version\" not found in request package";
-            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         if (this.path == null) {
             errorMessage = "\"path\" not found in request package";
-            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         if (this.method == null) {
             errorMessage = "\"method\" not found in request package";
-            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         if (!Versions.checkVersion(version)) {
             errorMessage = "Unsupported version :" + version;
-            throw new WeCrossException(ErrorCode.VERSION_ERROR, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.VERSION_ERROR, errorMessage);
         }
 
         if (!this.path.equals(path)) {
             errorMessage = "Expect path: " + path;
-            throw new WeCrossException(ErrorCode.PATH_ERROR, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.PATH_ERROR, errorMessage);
         }
 
         if (!this.method.equals(method)) {
             errorMessage = "Expect method: " + method;
-            throw new WeCrossException(ErrorCode.METHOD_ERROR, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.METHOD_ERROR, errorMessage);
         }
     }
 

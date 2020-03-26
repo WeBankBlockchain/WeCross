@@ -1,8 +1,8 @@
 package com.webank.wecross.test.resource;
 
-import com.webank.wecross.common.ResourceQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.routine.htlc.HTLCQueryStatus;
 import com.webank.wecross.routine.htlc.HTLCResource;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.TransactionContext;
@@ -26,7 +26,7 @@ public class HTLCResourceTest {
             assetHtlcResource.handleSendTransactionRequest(context);
         } catch (WeCrossException e) {
             Assert.assertEquals(
-                    java.util.Optional.of(ResourceQueryStatus.ASSET_HTLC_REQUEST_ERROR),
+                    java.util.Optional.of(HTLCQueryStatus.ASSET_HTLC_REQUEST_ERROR),
                     java.util.Optional.of(e.getErrorCode()));
         }
 
@@ -37,7 +37,7 @@ public class HTLCResourceTest {
             assetHtlcResource.handleSendTransactionRequest(context);
         } catch (WeCrossException e) {
             Assert.assertEquals(
-                    java.util.Optional.of(ResourceQueryStatus.ASSET_HTLC_VERIFY_LOCK_ERROR),
+                    java.util.Optional.of(HTLCQueryStatus.ASSET_HTLC_VERIFY_LOCK_ERROR),
                     java.util.Optional.of(e.getErrorCode()));
         }
 

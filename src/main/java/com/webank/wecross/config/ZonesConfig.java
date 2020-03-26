@@ -2,7 +2,6 @@ package com.webank.wecross.config;
 
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
-import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.ResourceBlockHeaderManager;
 import com.webank.wecross.storage.BlockHeaderStorageFactory;
@@ -59,7 +58,7 @@ public class ZonesConfig {
                 String errorMessage =
                         "\"path\" in [stubs] item  not found, please check "
                                 + WeCrossDefault.MAIN_CONFIG_FILE;
-                throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+                throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
             }
 
             Map<String, String> stubsDir = ConfigUtils.getStubsDir(stubsPath);
@@ -95,14 +94,15 @@ public class ZonesConfig {
             } catch (WeCrossException e) {
                 String errorMessage = "Parse " + stubPath + " failed";
                 logger.error(errorMessage, e);
-                throw new WeCrossException(ErrorCode.UNEXPECTED_CONFIG, errorMessage);
+                throw new WeCrossException(
+                        WeCrossException.ErrorCode.UNEXPECTED_CONFIG, errorMessage);
             }
 
             String type = stubToml.getString("common.type");
             if (type == null) {
                 String errorMessage =
                         "\"type\" in [common] item  not found, please check " + stubPath;
-                throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+                throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
             }
 
             StubFactory stubFactory = stubManager.getStubFactory(type);

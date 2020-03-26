@@ -1,6 +1,8 @@
 package com.webank.wecross.common;
 
-public class QueryStatus {
+public class NetworkQueryStatus {
+
+    // The errorCode definition of RestResponse and P2PResponse
 
     public static final int SUCCESS = 0;
 

@@ -13,12 +13,14 @@ apply plugin: 'java'
 apply plugin: 'jacoco'
 
 sourceCompatibility = '1.8'
-version = '1.0.0-SNAPSHOT'
+version = '1.0.0-rc2-0326-SNAPSHOT'
 
 task stubJar(type: Jar) {
-	baseName 'stub'
+	baseName 'wecross-java-stub'
 	from 'build/classes/java/main/com/webank/wecross/stub'
 	from 'src/main/java/com/webank/wecross/stub'
+	from 'build/classes/java/main/com/webank/wecross/exception'
+	from 'src/main/java/com/webank/wecross/exception'
 	into 'com/webank/wecross/stub/'
 }
 

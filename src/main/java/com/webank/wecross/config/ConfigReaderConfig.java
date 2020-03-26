@@ -4,7 +4,6 @@ import static com.webank.wecross.utils.ConfigUtils.fileIsExists;
 
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
-import com.webank.wecross.exception.ErrorCode;
 import com.webank.wecross.exception.WeCrossException;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +34,7 @@ public class ConfigReaderConfig {
                 String errorMessage =
                         "Something wrong in [p2p] item, please check "
                                 + WeCrossDefault.MAIN_CONFIG_FILE;
-                throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+                throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
             }
             p2PConfig = parseP2PConfig(p2pMap);
 
@@ -54,7 +53,7 @@ public class ConfigReaderConfig {
             String errorMessage =
                     "\"listenIP\" in [p2p] item  not found, please check "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
-            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         @SuppressWarnings("unchecked")
@@ -63,7 +62,7 @@ public class ConfigReaderConfig {
             String errorMessage =
                     "\"peers\" in [p2p] item  not found, please check "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
-            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         Long listenPort_temp = (Long) p2pMap.get("listenPort");
@@ -74,13 +73,13 @@ public class ConfigReaderConfig {
             String errorMessage =
                     "\"listenPort\" in [p2p] item  not found, please check "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
-            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
         }
 
         String caCertPath = (String) p2pMap.get("caCert");
         if (!fileIsExists(caCertPath)) {
             String errorMessage = "File: " + caCertPath + " is not exists";
-            throw new WeCrossException(ErrorCode.DIR_NOT_EXISTS, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.DIR_NOT_EXISTS, errorMessage);
         }
 
         String sslCertPath = (String) p2pMap.get("sslCert");
@@ -88,11 +87,11 @@ public class ConfigReaderConfig {
             String errorMessage =
                     "\"sslCert\" in [p2p] item  not found, please check "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
-            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
         }
         if (!fileIsExists(sslCertPath)) {
             String errorMessage = "File: " + sslCertPath + " is not exists";
-            throw new WeCrossException(ErrorCode.DIR_NOT_EXISTS, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.DIR_NOT_EXISTS, errorMessage);
         }
 
         String sslKeyPath = (String) p2pMap.get("sslKey");
@@ -100,11 +99,11 @@ public class ConfigReaderConfig {
             String errorMessage =
                     "\"sslKey\" in [p2p] item  not found, please check "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
-            throw new WeCrossException(ErrorCode.FIELD_MISSING, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
         }
         if (!fileIsExists(sslKeyPath)) {
             String errorMessage = "File: " + sslKeyPath + " is not exists";
-            throw new WeCrossException(ErrorCode.DIR_NOT_EXISTS, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.DIR_NOT_EXISTS, errorMessage);
         }
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();

@@ -105,7 +105,7 @@ public class RestfulControllerTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"1\",\"result\":0,\"message\":\"Success\",\"data\":\"exists\"}";
+                    "{\"version\":\"1\",\"errorCode\":0,\"message\":\"Success\",\"data\":\"exists\"}";
             Assert.assertEquals(expectRsp, result);
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
@@ -134,7 +134,7 @@ public class RestfulControllerTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"1\",\"result\":0,\"message\":\"Success\",\"data\":{\"path\":\"test-network.test-stub.test-resource\",\"distance\":1,\"type\":null,\"stubType\":null,\"properties\":{},\"checksum\":null}}";
+                    "{\"version\":\"1\",\"errorCode\":0,\"message\":\"Success\",\"data\":{\"path\":\"test-network.test-stub.test-resource\",\"distance\":1,\"type\":null,\"stubType\":null,\"properties\":{},\"checksum\":null}}";
             Assert.assertEquals(expectRsp, result);
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
@@ -172,7 +172,7 @@ public class RestfulControllerTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"1\",\"result\":0,\"message\":\"Success\",\"data\":{\"stubs\":[]}}";
+                    "{\"version\":\"1\",\"errorCode\":0,\"message\":\"Success\",\"data\":{\"stubs\":[]}}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
@@ -203,7 +203,7 @@ public class RestfulControllerTest {
                             .andDo(print())
                             .andExpect(status().isOk())
                             .andExpect(jsonPath("$.version").value("1"))
-                            .andExpect(jsonPath("$.result").value(0))
+                            .andExpect(jsonPath("$.errorCode").value(0))
                             .andExpect(jsonPath("message").value("Success"))
                             .andReturn();
 
@@ -245,7 +245,7 @@ public class RestfulControllerTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"1\",\"result\":0,\"message\":\"Success\",\"data\":{\"resourceDetails\":[]}}";
+                    "{\"version\":\"1\",\"errorCode\":0,\"message\":\"Success\",\"data\":{\"resourceDetails\":[]}}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
@@ -293,7 +293,7 @@ public class RestfulControllerTest {
                             .andDo(print())
                             .andExpect(status().isOk())
                             .andExpect(jsonPath("$.version").value("1"))
-                            .andExpect(jsonPath("$.result").value(0))
+                            .andExpect(jsonPath("$.errorCode").value(0))
                             .andExpect(jsonPath("$.message").value("Success"))
                             .andExpect(jsonPath("$.data.errorCode").value(0))
                             .andExpect(
@@ -351,7 +351,7 @@ public class RestfulControllerTest {
                             .andDo(print())
                             .andExpect(status().isOk())
                             .andExpect(jsonPath("$.version").value("1"))
-                            .andExpect(jsonPath("$.result").value(0))
+                            .andExpect(jsonPath("$.errorCode").value(0))
                             .andExpect(jsonPath("$.message").value("Success"))
                             .andExpect(jsonPath("$.data.errorCode").value(0))
                             .andExpect(
@@ -407,7 +407,7 @@ public class RestfulControllerTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"1\",\"result\":20001,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
+                    "{\"version\":\"1\",\"errorCode\":20001,\"message\":\"Unsupported method: notExistMethod\",\"data\":null}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
