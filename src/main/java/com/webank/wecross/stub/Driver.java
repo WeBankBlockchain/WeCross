@@ -57,4 +57,15 @@ public interface Driver {
      * @return BlockHeader
      */
     public byte[] getBlockHeader(long number, Connection connection);
+
+    /**
+     * Get verified transaction info of the Chain
+     *
+     * @param transactionHash
+     * @param blockHeaderManager
+     * @param connection
+     * @return null if the transaction has not been verified
+     */
+    public VerifiedTransaction getVerifiedTransaction(
+            String transactionHash, BlockHeaderManager blockHeaderManager, Connection connection);
 }
