@@ -1,7 +1,6 @@
 package com.webank.wecross.remote;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.webank.wecross.common.StubQueryStatus;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
 import com.webank.wecross.p2p.engine.P2PResponse;
@@ -11,6 +10,7 @@ import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
+import com.webank.wecross.stub.StubQueryStatus;
 import java.util.List;
 
 public class RemoteConnection implements Connection {

@@ -1,4 +1,4 @@
-package com.webank.wecross.common;
+package com.webank.wecross.stub;
 
 public class StubQueryStatus {
     public static final int SUCCESS = 0;
