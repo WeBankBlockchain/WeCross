@@ -88,13 +88,16 @@ public class DEMODriver implements Driver {
     }
 
     @Override
-    public byte[] getBlockHeader(long number, Connection connection) {
+    public byte[] getBlockHeader(long blockNumber, Connection connection) {
         return null;
     }
 
     @Override
     public VerifiedTransaction getVerifiedTransaction(
-            String transactionHash, BlockHeaderManager blockHeaderManager, Connection connection) {
+            String transactionHash,
+            long blockNumber,
+            BlockHeaderManager blockHeaderManager,
+            Connection connection) {
         return null;
     }
 

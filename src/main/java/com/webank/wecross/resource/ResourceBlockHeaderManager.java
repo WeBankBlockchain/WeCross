@@ -12,7 +12,7 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
     }
 
     @Override
-    public byte[] getBlock(long blockNumber) {
+    public byte[] getBlockHeader(long blockNumber) {
         byte[] data = null;
         while (data == null) {
             data = blockHeaderStorage.readBlockHeader(blockNumber);

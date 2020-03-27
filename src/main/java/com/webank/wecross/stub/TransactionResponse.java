@@ -13,6 +13,7 @@ public class TransactionResponse {
     private String errorMessage;
     private String hash;
     private List<String> extraHashes;
+    private long blockNumber;
     private String[] result;
 
     public Integer getErrorCode() {
@@ -37,6 +38,14 @@ public class TransactionResponse {
 
     public void setHash(String hash) {
         this.hash = hash;
+    }
+
+    public long getBlockNumber() {
+        return blockNumber;
+    }
+
+    public void setBlockNumber(long blockNumber) {
+        this.blockNumber = blockNumber;
     }
 
     public String[] getResult() {
@@ -81,48 +90,4 @@ public class TransactionResponse {
                 + '\''
                 + '}';
     }
-
-    /*
-    private void beforeVerify() {
-        configProofTools();
-    }
-
-    private void configProofTools() {
-        ProofTools proofTools = newProofTools();
-
-        if (getBlockHeader() != null) {
-            getBlockHeader().setProofTools(proofTools);
-        }
-
-        if (getProofs() != null) {
-            for (PathProof proof : getProofs()) {
-                proof.setProofTools(proofTools);
-            }
-        }
-    }
-
-    private ProofTools newProofTools() {
-        ProofTools proofTools = null;
-        switch (getType()) {
-            case WeCrossType.TRANSACTION_RSP_TYPE_BCOS:
-                {
-                    switch (getEncryptType()) {
-                        case WeCrossType.ENCRYPT_TYPE_GUOMI:
-                            proofTools = new BCOSGuomiProofTools();
-                            break;
-
-                        case WeCrossType.ENCRYPT_TYPE_NORMAL:
-                        default:
-                            proofTools = new BCOSProofTools();
-                            break;
-                    }
-                }
-                break;
-
-            default:
-                break;
-        }
-        return proofTools;
-    }
-    */
 }
