@@ -53,19 +53,23 @@ public interface Driver {
     /**
      * Get block header
      *
-     * @param number
+     * @param blockNumber
      * @return BlockHeader
      */
-    public byte[] getBlockHeader(long number, Connection connection);
+    public byte[] getBlockHeader(long blockNumber, Connection connection);
 
     /**
      * Get verified transaction info of the Chain
      *
      * @param transactionHash
+     * @param blockNumber
      * @param blockHeaderManager
      * @param connection
      * @return null if the transaction has not been verified
      */
     public VerifiedTransaction getVerifiedTransaction(
-            String transactionHash, BlockHeaderManager blockHeaderManager, Connection connection);
+            String transactionHash,
+            long blockNumber,
+            BlockHeaderManager blockHeaderManager,
+            Connection connection);
 }

@@ -11,7 +11,7 @@ public class RocksDBBlockHeaderManager implements BlockHeaderManager {
     }
 
     @Override
-    public byte[] getBlock(long blockNumber) {
+    public byte[] getBlockHeader(long blockNumber) {
         return blockHeaderStorage.readBlockHeader(blockNumber);
     }
 }
