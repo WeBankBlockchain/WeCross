@@ -1,5 +1,6 @@
 package com.webank.wecross;
 
+import java.security.Security;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -9,9 +10,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 public class Service {
 
     public static void main(String[] args) {
-        // Security.insertProviderAt(new BouncyCastleProvider(), 1);
-        // Security.insertProviderAt(new BouncyCastleJsseProvider(), 1);
-
         SpringApplication.run(Service.class, args);
     }
 }

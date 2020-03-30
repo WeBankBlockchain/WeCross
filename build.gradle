@@ -13,70 +13,122 @@ apply plugin: 'java'
 apply plugin: 'jacoco'
 
 sourceCompatibility = '1.8'
-version = '1.0.0-rc2-0326-SNAPSHOT'
+version = '1.0.0-rc2-0330-SNAPSHOT'
 
-task stubJar(type: Jar) {
-	baseName 'wecross-java-stub'
-	from 'build/classes/java/main/com/webank/wecross/stub'
-	from 'src/main/java/com/webank/wecross/stub'
-	from 'build/classes/java/main/com/webank/wecross/exception'
-	from 'src/main/java/com/webank/wecross/exception'
-	into 'com/webank/wecross/stub/'
+sourceSets {
+    main {
+        resources {
+            exclude '/*'
+        }
+    }
+
+    exception {
+        compileClasspath += main.compileClasspath
+        java {
+            srcDir 'src/main/java/com/webank/wecross/exception'
+        }
+        resources {
+            exclude '/*'
+        }
+    }
+
+    stub {
+        compileClasspath += main.compileClasspath
+        java {
+            srcDir 'src/main/java/com/webank/wecross/stub'
+        }
+        resources {
+            exclude '/*'
+        }
+    }
 }
 
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			groupId = 'com.webank'
-			artifactId = 'wecross-java-stub'
-			
-			artifact stubJar
+dependencies {
+    compile('org.quartz-scheduler:quartz:2.3.2')
+    compile 'com.moandjiezana.toml:toml4j:0.7.2'
+    compile 'org.springframework.boot:spring-boot-starter-log4j2:2.1.4.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-actuator:2.1.4.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-web:2.1.4.RELEASE'
+    compile 'org.springframework.boot:spring-boot-configuration-processor:2.1.4.RELEASE'
+    compile 'org.rocksdb:rocksdbjni:6.6.4'
+    compile 'org.bouncycastle:bcprov-jdk15on:1.64'
+    compile 'io.netty:netty-all:4.1.47.Final'
 
-			// https://docs.gradle.org/current/dsl/org.gradle.api.publish.maven.MavenPublication.html
-			pom {
-				name = "WeCross-Stub"
-				description = "Stub interface for WeCross"
-				url = "https://github.com/WeBankFinTech/WeCross"
-				licenses {
-					license {
-						name = "The Apache License, Version 2.0"
-						url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-					}
-				}
-				developers {
-					developer {
-						id = "Shareong"
-						name = "Shareong"
-						email = "740310627@qq.com"
-					}
-				}
-				scm {
-					connection = "scm:git:git://github.com/WeBankFinTech/WeCross.git"
-					developerConnection = "scm:git:ssh://github.com/WeBankFinTech/WeCross.git"
-					url = "https://github.com/WeBankFinTech/WeCross"
-				}
-			}
-		}
-	}
-	repositories {
-		maven {
-			def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-			def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
-			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-			
-			def nexus_username = ''
-			def nexus_password = ''
-			
-			credentials {
-				username = nexus_username
-				password = nexus_password
-			}
-		}
-	}
+    // Use JUnit test framework
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.1.4.RELEASE'
+
+    stubCompile sourceSets.exception.output
+}
+
+task stubSourceJar(type: Jar) {
+    into 'com/webank/wecross/stub', { from sourceSets.stub.allJava }
+    into 'com/webank/wecross/exception', { from sourceSets.exception.allJava }
+    classifier = 'sources'
+}
+
+task stubJar(type: Jar) {
+    from sourceSets.stub.output
+    from sourceSets.exception.output
+}
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'com.webank'
+            artifactId = 'wecross-java-stub'
+            from components.java
+            artifacts = [stubJar, stubSourceJar]
+
+            // https://docs.gradle.org/current/dsl/org.gradle.api.publish.maven.MavenPublication.html
+            pom {
+                name = "WeCross-Stub"
+                description = "Stub interface for WeCross"
+                url = "https://github.com/WeBankFinTech/WeCross"
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "Shareong"
+                        name = "Shareong"
+                        email = "740310627@qq.com"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://github.com/WeBankFinTech/WeCross.git"
+                    developerConnection = "scm:git:ssh://github.com/WeBankFinTech/WeCross.git"
+                    url = "https://github.com/WeBankFinTech/WeCross"
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+
+            //*
+            def NEXUS_USERNAME = ''
+            def NEXUS_PASSWORD = ''
+            //*/
+            credentials {
+                username = NEXUS_USERNAME
+                password = NEXUS_PASSWORD
+            }
+
+        }
+    }
 }
 
 signing {
-	sign publishing.publications.mavenJava
+    sign publishing.publications.mavenJava
 }
 
 // In this section you declare where to find the dependencies of your project
@@ -133,9 +185,9 @@ sourceSets {
 jar {
     destinationDir file('dist/apps')
     archiveName project.name + '.jar'
-	exclude '**/*.toml'
-	exclude '**/*.xml'
-	exclude '**/*.properties'
+    exclude '**/*.toml'
+    exclude '**/*.xml'
+    exclude '**/*.properties'
     exclude '**/*.yml'
 
     manifest {
@@ -165,13 +217,13 @@ jar {
     }
 }
 
-task makeStubJAR(type:org.gradle.api.tasks.bundling.Jar) {
-	baseName 'stub'
-	from 'build/classes/java/main/com/webank/wecross/stub'
-	from 'src/main/java/com/webank/wecross/stub'
-	into 'com/webank/wecross/stub/'
-	
-	destinationDir file('dist/stub/')
+task makeStubJAR(type: org.gradle.api.tasks.bundling.Jar) {
+    baseName 'stub'
+    from 'build/classes/java/main/com/webank/wecross/stub'
+    from 'src/main/java/com/webank/wecross/stub'
+    into 'com/webank/wecross/stub/'
+
+    destinationDir file('dist/stub/')
 }
 
 test {
