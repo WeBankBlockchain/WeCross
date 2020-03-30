@@ -113,6 +113,7 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-web:2.1.4.RELEASE'
     compile 'org.springframework.boot:spring-boot-configuration-processor:2.1.4.RELEASE'
 	compile 'org.rocksdb:rocksdbjni:6.6.4'
+	compile 'org.bouncycastle:bcprov-jdk15on:1.64'
 	compile 'io.netty:netty-all:4.1.47.Final'
 
     // Use JUnit test framework
