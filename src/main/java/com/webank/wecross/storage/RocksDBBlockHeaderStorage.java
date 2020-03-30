@@ -24,12 +24,12 @@ public class RocksDBBlockHeaderStorage implements BlockHeaderStorage {
                 long blockNumber = Long.valueOf(blockNumberStr);
                 return blockNumber;
             } else {
-                return 0;
+                return -1;
             }
         } catch (RocksDBException e) {
             logger.error("Read rocksdb error", e);
         }
-        return 0;
+        return -1;
     }
 
     @Override

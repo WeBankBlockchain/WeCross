@@ -24,6 +24,7 @@ public class Chain {
     private Thread blockSyncThread;
     private AtomicBoolean running = new AtomicBoolean(false);
     private Random random = new SecureRandom();
+    private BlockHeader localBlockHeader;
 
     public void start() {
         if (!running.get()) {
@@ -34,6 +35,7 @@ public class Chain {
                             new Runnable() {
                                 @Override
                                 public void run() {
+                                    loadLocalBlockHeader();
                                     logger.trace("Block header sync thread started");
                                     while (running.get()) {
                                         try {
@@ -73,7 +75,8 @@ public class Chain {
 
         logger.trace("Fetch block header: {}", connection);
         if (connection != null) {
-            long localBlockNumber = blockHeaderStorage.readBlockNumber();
+            long localBlockNumber = localBlockHeader.getNumber();
+            String localBlockHash = localBlockHeader.getHash();
             long remoteBlockNumber = driver.getBlockNumber(connection);
 
             if (remoteBlockNumber > localBlockNumber) {
@@ -81,9 +84,23 @@ public class Chain {
                         blockNumber <= remoteBlockNumber;
                         ++blockNumber) {
                     byte[] blockBytes = driver.getBlockHeader(blockNumber, connection);
+                    BlockHeader blockHeader = driver.decodeBlockHeader(blockBytes);
+                    if (localBlockNumber >= 0) {
+                        if (blockHeader.getNumber() != localBlockHeader.getNumber() + 1
+                                || !blockHeader.getPrevHash().equals(localBlockHeader.getHash())) {
+                            logger.error(
+                                    "Fetched block couldn't be the next block, localBlockNumber: {} localBlockHash: {} fetchedBlockNumber: {} fetchedBlockPrevHash: {}",
+                                    localBlockNumber,
+                                    localBlockHash,
+                                    blockHeader.getNumber(),
+                                    blockHeader.getPrevHash());
+                            break;
+                        }
+                    }
+                    localBlockHeader = blockHeader;
                     blockHeaderStorage.writeBlockHeader(blockNumber, blockBytes);
 
-                    logger.debug("update blockheader: {}", blockNumber);
+                    logger.debug("Commit blockHeader: {}", localBlockHeader.toString());
                 }
             }
         }
@@ -157,5 +174,18 @@ public class Chain {
 
     public void setBlockHeaderStorage(BlockHeaderStorage blockHeaderStorage) {
         this.blockHeaderStorage = blockHeaderStorage;
+    }
+
+    private void loadLocalBlockHeader() {
+        long localBlockNumber = blockHeaderStorage.readBlockNumber();
+        if (localBlockNumber < 0) {
+            BlockHeader beforeGenesisBlockHeader = new BlockHeader();
+            beforeGenesisBlockHeader.setNumber(-1);
+            beforeGenesisBlockHeader.setHash("");
+            localBlockHeader = beforeGenesisBlockHeader;
+        } else {
+            byte[] blockHeaderBytes = blockHeaderStorage.readBlockHeader(localBlockNumber);
+            localBlockHeader = driver.decodeBlockHeader(blockHeaderBytes);
+        }
     }
 }
