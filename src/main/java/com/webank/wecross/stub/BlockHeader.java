@@ -55,4 +55,27 @@ public class BlockHeader {
     public void setReceiptRoot(String receiptRoot) {
         this.receiptRoot = receiptRoot;
     }
+
+    @Override
+    public String toString() {
+        return "BlockHeader{"
+                + "number="
+                + number
+                + ", prevHash='"
+                + prevHash
+                + '\''
+                + ", hash='"
+                + hash
+                + '\''
+                + ", stateRoot='"
+                + stateRoot
+                + '\''
+                + ", transactionRoot='"
+                + transactionRoot
+                + '\''
+                + ", receiptRoot='"
+                + receiptRoot
+                + '\''
+                + '}';
+    }
 }
