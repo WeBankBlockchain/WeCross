@@ -12,31 +12,20 @@ apply plugin: 'java'
 //apply plugin: 'war'
 apply plugin: 'jacoco'
 
+// In this section you declare where to find the dependencies of your project
+repositories {
+    // Use jcenter for resolving your dependencies.
+    // You can declare any Maven/Ivy/file repository here.
+    jcenter()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url 'https://dl.bintray.com/ethereum/maven/' }
+}
+
 sourceCompatibility = '1.8'
-version = '1.0.0-rc2-0330-SNAPSHOT'
+version = '1.0.0-rc2-03301-SNAPSHOT'
 
 sourceSets {
     main {
-        resources {
-            exclude '/*'
-        }
-    }
-
-    exception {
-        compileClasspath += main.compileClasspath
-        java {
-            srcDir 'src/main/java/com/webank/wecross/exception'
-        }
-        resources {
-            exclude '/*'
-        }
-    }
-
-    stub {
-        compileClasspath += main.compileClasspath
-        java {
-            srcDir 'src/main/java/com/webank/wecross/stub'
-        }
         resources {
             exclude '/*'
         }
@@ -57,19 +46,17 @@ dependencies {
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.1.4.RELEASE'
-
-    stubCompile sourceSets.exception.output
 }
 
 task stubSourceJar(type: Jar) {
-    into 'com/webank/wecross/stub', { from sourceSets.stub.allJava }
-    into 'com/webank/wecross/exception', { from sourceSets.exception.allJava }
+    into 'com/webank/wecross/stub', { from 'src/main/java/com/webank/wecross/stub' }
+    into 'com/webank/wecross/exception', { from 'src/main/java/com/webank/wecross/exception' }
     classifier = 'sources'
 }
 
 task stubJar(type: Jar) {
-    from sourceSets.stub.output
-    from sourceSets.exception.output
+    into 'com/webank/wecross/stub', { from 'build/classes/java/main/com/webank/wecross/stub' }
+    into 'com/webank/wecross/exception', { from 'build/classes/java/main/com/webank/wecross/exception' }
 }
 
 
@@ -131,14 +118,6 @@ signing {
     sign publishing.publications.mavenJava
 }
 
-// In this section you declare where to find the dependencies of your project
-repositories {
-    // Use jcenter for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url 'https://dl.bintray.com/ethereum/maven/' }
-}
 
 googleJavaFormat {
     options style: 'AOSP'
