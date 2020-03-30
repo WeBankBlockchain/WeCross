@@ -39,4 +39,22 @@ public class VerifiedTransaction {
     public TransactionResponse getTransactionResponse() {
         return transactionResponse;
     }
+
+    @Override
+    public String toString() {
+        return "VerifiedTransaction{"
+                + "blockNumber="
+                + blockNumber
+                + ", transactionHash='"
+                + transactionHash
+                + '\''
+                + ", realAddress='"
+                + realAddress
+                + '\''
+                + ", transactionRequest="
+                + transactionRequest.toString()
+                + ", transactionResponse="
+                + transactionResponse.toString()
+                + '}';
+    }
 }

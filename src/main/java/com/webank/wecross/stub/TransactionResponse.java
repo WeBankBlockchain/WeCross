@@ -3,12 +3,8 @@ package com.webank.wecross.stub;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TransactionResponse {
-    private Logger logger = LoggerFactory.getLogger(TransactionResponse.class);
-
     private Integer errorCode;
     private String errorMessage;
     private String hash;
@@ -84,10 +80,10 @@ public class TransactionResponse {
                 + '\''
                 + ", extraHashes="
                 + extraHashes
+                + ", blockNumber="
+                + blockNumber
                 + ", result="
                 + Arrays.toString(result)
-                + '\''
-                + '\''
                 + '}';
     }
 }

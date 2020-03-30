@@ -1,6 +1,5 @@
-package com.webank.wecross.restserver;
+package com.webank.wecross.resource;
 
-import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.ResourceInfo;
 import java.util.HashMap;
 import java.util.Map;

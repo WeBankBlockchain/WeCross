@@ -11,18 +11,8 @@ import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.restserver.request.StateRequest;
 import com.webank.wecross.restserver.response.StateResponse;
 import com.webank.wecross.routine.RoutineManager;
-import com.webank.wecross.routine.htlc.AssetHTLC;
-import com.webank.wecross.routine.htlc.HTLC;
-import com.webank.wecross.routine.htlc.HTLCResource;
-import com.webank.wecross.routine.htlc.HTLCResourcePair;
-import com.webank.wecross.routine.htlc.HTLCTaskFactory;
-import com.webank.wecross.routine.htlc.HTLCTaskInfo;
-import com.webank.wecross.routine.task.TaskManager;
-import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.ZoneManager;
-import java.util.ArrayList;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,16 +27,10 @@ public class WeCrossHost {
 
     Thread mainLoopThread;
 
-    public void init() throws Exception {
-        initHTLCResourcePairs();
-    }
-
     public void start() {
+        /* start netty p2p service */
         try {
             check();
-            init();
-            /** start htlc service */
-            runHTLCService();
 
             /** start netty p2p service */
             p2pService.start();
@@ -108,50 +92,6 @@ public class WeCrossHost {
         if (accountManager == null) {
             throw new Exception("accountManager is null");
         }
-    }
-
-    public void runHTLCService() {
-        try {
-            if (routineManager.getHtlcManager() != null) {
-                HTLCTaskFactory htlcTaskFactory = new HTLCTaskFactory();
-                TaskManager taskManager = new TaskManager(htlcTaskFactory);
-                taskManager.registerTasks(initHTLCResourcePairs());
-                taskManager.start();
-            }
-        } catch (Exception e) {
-            logger.error(
-                    "something wrong with runHTLCService: {}, exception: {}", e.getMessage(), e);
-        }
-    }
-
-    public List<HTLCResourcePair> initHTLCResourcePairs() throws Exception {
-        List<HTLCResourcePair> htlcResourcePairs = new ArrayList<>();
-        List<HTLCTaskInfo> htlcTaskInfos = routineManager.getHtlcManager().getHtlcTaskInfos();
-        for (HTLCTaskInfo htlcTaskInfo : htlcTaskInfos) {
-            String selfPath = htlcTaskInfo.getSelfPath();
-            String counterpartyPath = htlcTaskInfo.getCounterpartyPath();
-            Resource selfResource = zoneManager.getResource(Path.decode(selfPath));
-            Resource counterpartyResource = zoneManager.getResource(Path.decode(counterpartyPath));
-            if (selfResource == null) {
-                throw new Exception("htlc resource: " + selfPath + " not found");
-            }
-            if (counterpartyResource == null) {
-                throw new Exception("htlc resource: " + counterpartyResource + " not found");
-            }
-            HTLCResource selfHTLCResource = new HTLCResource(selfResource);
-            Account selfAccount = accountManager.getAccount(htlcTaskInfo.getSelfAccount());
-            selfHTLCResource.setAccount(selfAccount);
-            selfHTLCResource.setPath(selfPath);
-            HTLCResource counterpartyHTLCResource = new HTLCResource(counterpartyResource);
-            Account counterpartyAccount =
-                    accountManager.getAccount(htlcTaskInfo.getCounterpartyAccount());
-            counterpartyHTLCResource.setAccount(counterpartyAccount);
-            counterpartyHTLCResource.setPath(counterpartyPath);
-            HTLC assetHTLC = new AssetHTLC();
-            htlcResourcePairs.add(
-                    new HTLCResourcePair(assetHTLC, selfHTLCResource, counterpartyHTLCResource));
-        }
-        return htlcResourcePairs;
     }
 
     public Resource getResource(Path path) throws Exception {

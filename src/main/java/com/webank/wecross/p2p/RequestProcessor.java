@@ -296,7 +296,7 @@ public class RequestProcessor implements Processor {
                 throw new Exception("Resource not found");
             } else {
                 HTLCManager htlcManager = routineManager.getHtlcManager();
-                resourceObj = htlcManager.filterHTLCResource(path, resourceObj);
+                resourceObj = htlcManager.filterHTLCResource(zoneManager, path, resourceObj);
             }
 
             switch (method) {

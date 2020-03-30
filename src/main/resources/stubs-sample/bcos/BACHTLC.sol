@@ -22,18 +22,16 @@ contract BACHTLC is HTLC {
     public
     returns (string[] result)
     {
-        string memory _hash = _ss[0];
         result = new string[](1);
-        if(getLockStatus(_hash)) {
+        result = super.lock(_ss);
+        if(equal(result[0], "done")) {
             result[0] = "success";
             return;
-        }
-
-        result = super.lock(_ss);
-        if(!equal(result[0], "success")) {
+        } else if (!equal(result[0], "continue")) {
             return;
         }
 
+        string memory _hash = _ss[0];
         address sender = getSender(_hash);
         uint amount = getAmount(_hash);
         if (BAC001(assetContract).allowance(sender, address(this)) < uint(amount))
@@ -54,19 +52,16 @@ contract BACHTLC is HTLC {
     public
     returns (string[] result)
     {
-        string memory _hash = _ss[0];
         result = new string[](1);
-        if (getUnlockStatus(_hash))
-        {
-           result[0] = "success";
-           return;
-        }
-
         result = super.unlock(_ss);
-        if(!equal(result[0], "success")) {
+        if(equal(result[0], "done")) {
+            result[0] = "success";
+            return;
+        } else if (!equal(result[0], "continue")) {
             return;
         }
 
+        string memory _hash = _ss[0];
         // transfer from htlc contract to receiver
         address receiver = getReceiver(_hash);
         uint amount = getAmount(_hash);
@@ -81,19 +76,16 @@ contract BACHTLC is HTLC {
     public
     returns (string[] result)
     {
-        string memory _hash = _ss[0];
         result = new string[](1);
-        if (getRollbackStatus(_hash))
-        {
-           result[0] = "success";
-           return;
-        }
-
         result = super.rollback(_ss);
-        if(!equal(result[0], "success")) {
+        if(equal(result[0], "done")) {
+            result[0] = "success";
+            return;
+        } else if (!equal(result[0], "continue")) {
             return;
         }
 
+        string memory _hash = _ss[0];
         // transfer from htlc contract to sender
         address sender = getSender(_hash);
         uint amount = getAmount(_hash);
