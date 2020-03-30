@@ -17,8 +17,8 @@ const (
 	InitiatorKeyPrefix         = "I-%s"
 	ParticipantKeyPrefix       = "P-%s"
 	CounterpartyHtlcKey        = "CounterpartyHtlcKey"
-	LockTxHashKeyPrefix        = "LockTxHash-%s"
-	NewContractTxHashKeyPrefix = "NewContractTxHash-%s"
+	LockTxInfoKeyPrefix        = "LockTxHash-%s"
+	NewContractTxInfoKeyPrefix = "NewContractTxHash-%s"
 )
 
 type HTLC struct {
@@ -116,20 +116,20 @@ func (h *HTLC) newContract(stub shim.ChaincodeStubInterface, hash, role, sender0
 	h.addTask(stub, hash)
 }
 
-func (h *HTLC) setNewContractTxHash(stub shim.ChaincodeStubInterface, hash, txHash string) {
-	err := stub.PutState(getNewContractTxHashKey(hash), []byte(txHash))
+func (h *HTLC) setNewContractTxInfo(stub shim.ChaincodeStubInterface, hash, txHash, blockNum string) {
+	err := stub.PutState(getNewContractTxInfoKey(hash), []byte(txHash+" "+blockNum))
 	checkError(err)
 
 }
 
-func (h *HTLC) getNewContractTxHash(stub shim.ChaincodeStubInterface, hash string) []byte {
-	txHash, err := stub.GetState(getNewContractTxHashKey(hash))
+func (h *HTLC) getNewContractTxInfo(stub shim.ChaincodeStubInterface, hash string) []byte {
+	txInfo, err := stub.GetState(getNewContractTxInfoKey(hash))
 	checkError(err)
 
-	if txHash == nil {
+	if txInfo == nil {
 		return []byte("null")
 	} else {
-		return txHash
+		return txInfo
 	}
 }
 
@@ -202,6 +202,10 @@ func (h *HTLC) lock(stub shim.ChaincodeStubInterface, hash string) string {
 	var cd ContractData
 	h.getSelfContractData(stub, hash, &cd)
 
+	if cd.Locked {
+		return "done"
+	}
+
 	timelock := cd.Timelock
 	timeStamp, err := stub.GetTxTimestamp()
 	if err != nil {
@@ -211,7 +215,7 @@ func (h *HTLC) lock(stub shim.ChaincodeStubInterface, hash string) string {
 		return "has rolled back"
 	}
 
-	return "success"
+	return "continue"
 }
 
 func (h *HTLC) unlock(stub shim.ChaincodeStubInterface, hash, secret string) string {
@@ -221,6 +225,10 @@ func (h *HTLC) unlock(stub shim.ChaincodeStubInterface, hash, secret string) str
 
 	var cd ContractData
 	h.getSelfContractData(stub, hash, &cd)
+
+	if cd.Unlocked {
+		return "done"
+	}
 
 	if !hashMatched(hash, secret) {
 		return "hash not matched"
@@ -239,7 +247,7 @@ func (h *HTLC) unlock(stub shim.ChaincodeStubInterface, hash, secret string) str
 		return "has rolled back"
 	}
 
-	return "success"
+	return "continue"
 }
 
 func (h *HTLC) rollback(stub shim.ChaincodeStubInterface, hash string) string {
@@ -249,6 +257,10 @@ func (h *HTLC) rollback(stub shim.ChaincodeStubInterface, hash string) string {
 
 	var cd ContractData
 	h.getSelfContractData(stub, hash, &cd)
+
+	if cd.Rolledback {
+		return "done"
+	}
 
 	timelock := cd.Timelock
 	timeStamp, err := stub.GetTxTimestamp()
@@ -266,22 +278,22 @@ func (h *HTLC) rollback(stub shim.ChaincodeStubInterface, hash string) string {
 		return "can not rollback if unlock is done"
 	}
 
-	return "success"
+	return "continue"
 }
 
-func (h *HTLC) setLockTxHash(stub shim.ChaincodeStubInterface, hash, txHash string) {
-	err := stub.PutState(getLockTxHashKeyKey(hash), []byte(txHash))
+func (h *HTLC) setLockTxInfo(stub shim.ChaincodeStubInterface, hash, txHash, blockNum string) {
+	err := stub.PutState(getLockTxInfoKeyKey(hash), []byte(txHash+" "+blockNum))
 	checkError(err)
 }
 
-func (h *HTLC) getLockTxHash(stub shim.ChaincodeStubInterface, hash string) []byte {
-	txHash, err := stub.GetState(getLockTxHashKeyKey(hash))
+func (h *HTLC) getLockTxInfo(stub shim.ChaincodeStubInterface, hash string) []byte {
+	txInfo, err := stub.GetState(getLockTxInfoKeyKey(hash))
 	checkError(err)
 
-	if txHash == nil {
+	if txInfo == nil {
 		return []byte("null")
 	} else {
-		return txHash
+		return txInfo
 	}
 }
 
@@ -491,12 +503,12 @@ func getParticipantKey(hash string) string {
 	return fmt.Sprintf(ParticipantKeyPrefix, hash)
 }
 
-func getLockTxHashKeyKey(hash string) string {
-	return fmt.Sprintf(LockTxHashKeyPrefix, hash)
+func getLockTxInfoKeyKey(hash string) string {
+	return fmt.Sprintf(LockTxInfoKeyPrefix, hash)
 }
 
-func getNewContractTxHashKey(hash string) string {
-	return fmt.Sprintf(NewContractTxHashKeyPrefix, hash)
+func getNewContractTxInfoKey(hash string) string {
+	return fmt.Sprintf(NewContractTxInfoKeyPrefix, hash)
 }
 
 func taskIsExisted(stub shim.ChaincodeStubInterface, hash string) bool {

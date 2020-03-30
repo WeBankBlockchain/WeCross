@@ -97,7 +97,9 @@ public class RestfulControllerTest {
             Mockito.when(weCrossHost.getRoutineManager()).thenReturn(mockRoutineManager);
             Mockito.when(weCrossHost.getRoutineManager()).thenReturn(mockRoutineManager);
             Mockito.when(mockRoutineManager.getHtlcManager()).thenReturn(mockHTLCManager);
-            Mockito.when(mockHTLCManager.filterHTLCResource(Mockito.any(), Mockito.any()))
+            Mockito.when(
+                            mockHTLCManager.filterHTLCResource(
+                                    Mockito.any(), Mockito.any(), Mockito.any()))
                     .thenReturn(mokcResource);
 
             MvcResult rsp =
@@ -129,7 +131,9 @@ public class RestfulControllerTest {
             RoutineManager mockRoutineManager = Mockito.mock(RoutineManager.class);
             Mockito.when(weCrossHost.getRoutineManager()).thenReturn(mockRoutineManager);
             Mockito.when(mockRoutineManager.getHtlcManager()).thenReturn(mockHTLCManager);
-            Mockito.when(mockHTLCManager.filterHTLCResource(Mockito.any(), Mockito.any()))
+            Mockito.when(
+                            mockHTLCManager.filterHTLCResource(
+                                    Mockito.any(), Mockito.any(), Mockito.any()))
                     .thenReturn(resource);
 
             MvcResult rsp =
@@ -281,7 +285,9 @@ public class RestfulControllerTest {
             Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
             Mockito.when(
                             mockHTLCManager.filterHTLCResource(
-                                    Mockito.isA(Path.class), Mockito.isA(Resource.class)))
+                                    Mockito.any(),
+                                    Mockito.isA(Path.class),
+                                    Mockito.isA(Resource.class)))
                     .thenReturn(resource);
             Mockito.when(mockAccountManager.getAccount("demo")).thenReturn(null);
 
@@ -340,7 +346,9 @@ public class RestfulControllerTest {
             Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
             Mockito.when(
                             mockHTLCManager.filterHTLCResource(
-                                    Mockito.isA(Path.class), Mockito.isA(Resource.class)))
+                                    Mockito.any(),
+                                    Mockito.isA(Path.class),
+                                    Mockito.isA(Resource.class)))
                     .thenReturn(resource);
 
             Mockito.when(mockAccountManager.getAccount("demo")).thenReturn(null);
@@ -394,7 +402,9 @@ public class RestfulControllerTest {
             Mockito.when(weCrossHost.getResource(Mockito.isA(Path.class))).thenReturn(resource);
             Mockito.when(
                             mockHTLCManager.filterHTLCResource(
-                                    Mockito.isA(Path.class), Mockito.isA(Resource.class)))
+                                    Mockito.any(),
+                                    Mockito.isA(Path.class),
+                                    Mockito.isA(Resource.class)))
                     .thenReturn(resource);
 
             String json =

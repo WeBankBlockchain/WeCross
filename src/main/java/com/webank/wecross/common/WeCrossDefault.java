@@ -9,7 +9,6 @@ public class WeCrossDefault {
     public static final String ACCOUNTS_BASE = "classpath:accounts" + File.separator;
     public static final String ACCOUNTS_CONFIG_NAME = "accounts.toml";
     public static final String ACCOUNTS_CONFIG_FILE = ACCOUNTS_BASE + ACCOUNTS_CONFIG_NAME;
-    public static final String ACCOUNT_CONFIG_NAME = "config.toml";
 
     // Config
     public static final String MAIN_CONFIG_FILE = "classpath:wecross.toml";

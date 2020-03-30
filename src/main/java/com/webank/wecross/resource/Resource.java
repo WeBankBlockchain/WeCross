@@ -13,12 +13,8 @@ import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Resource {
-    private Logger logger = LoggerFactory.getLogger(Resource.class);
-
     private String type;
     private Driver driver;
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
@@ -48,7 +44,7 @@ public class Resource {
         return connections.isEmpty();
     }
 
-    private Connection chooseConnection() {
+    public Connection chooseConnection() {
         if (connections.size() == 1) {
             return (Connection) connections.values().toArray()[0];
         } else {
@@ -58,17 +54,14 @@ public class Resource {
     }
 
     public TransactionResponse call(TransactionContext<TransactionRequest> request) {
-        logger.info(request.toString());
         return driver.call(request, chooseConnection());
     }
 
     public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request) {
-        logger.info(request.toString());
         return driver.sendTransaction(request, chooseConnection());
     }
 
     public Response onRemoteTransaction(Request request) {
-        logger.info(request.toString());
         if (driver.isTransaction(request)) {
             TransactionContext<TransactionRequest> transactionRequest =
                     driver.decodeTransactionRequest(request.getData());

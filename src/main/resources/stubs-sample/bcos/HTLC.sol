@@ -16,9 +16,9 @@ contract HTLC {
 
     string counterpartyHtlc;
 
-    mapping(string => string) lockTxHashs;
+    mapping(string => string) lockTxInfos;
 
-    mapping(string => string) newContractTxHashs;
+    mapping(string => string) newContractTxInfos;
 
     // recode if you're the initiator
     mapping(string => bool) htlcRoles;
@@ -96,23 +96,27 @@ contract HTLC {
         result[0] = "success";
     }
 
-    function setNewContractTxHash(string[] _ss)
+    function setNewContractTxInfo(string[] _ss)
     public
     {
-        newContractTxHashs[_ss[0]] = _ss[1];
+        newContractTxInfos[_ss[0]] = string(abi.encodePacked(
+            _ss[1],
+            " ",
+            _ss[2])
+            );
     }
 
-    function getNewContractTxHash(string[] _ss)
+    function getNewContractTxInfo(string[] _ss)
     public
     view
     returns (string[] result)
     {
         result = new string[](1);
-        string memory hash = newContractTxHashs[_ss[0]];
-        if(bytes(hash).length == 0) {
+        string memory info = newContractTxInfos[_ss[0]];
+        if(bytes(info).length == 0) {
             result[0] = "null";
         } else {
-            result[0] = hash;
+            result[0] = info;
         }
     }
 
@@ -183,6 +187,7 @@ contract HTLC {
     // please override it
     function lock(string[] _ss)
     public
+    view
     returns (string[] result)
     {
         string memory _hash = _ss[0];
@@ -194,6 +199,11 @@ contract HTLC {
            return;
         }
 
+        if(getLockStatus(_hash)) {
+            result[0] = "done";
+            return;
+        }
+
         uint timelock = getTimelock(_hash);
         if(getRollbackStatus(_hash) || timelock <= (now / 1000))
         {
@@ -201,12 +211,13 @@ contract HTLC {
             return;
         }
 
-        result[0] = "success";
+        result[0] = "continue";
     }
 
     // please override it
     function unlock(string[] _ss)
     public
+    view
     returns (string[] result)
     {
         string memory _hash = _ss[0];
@@ -216,6 +227,12 @@ contract HTLC {
         if (!taskIsExisted(_hash))
         {
            result[0] = "task not exists";
+           return;
+        }
+
+        if (getUnlockStatus(_hash))
+        {
+           result[0] = "done";
            return;
         }
 
@@ -238,12 +255,13 @@ contract HTLC {
             return;
         }
 
-        result[0] = "success";
+        result[0] = "continue";
     }
 
     // please override it
     function rollback(string[] _ss)
     public
+    view
     returns (string[] result)
     {
         string memory _hash = _ss[0];
@@ -252,6 +270,12 @@ contract HTLC {
         if (!taskIsExisted(_hash))
         {
            result[0] = "task not exists";
+           return;
+        }
+
+        if (getRollbackStatus(_hash))
+        {
+           result[0] = "done";
            return;
         }
 
@@ -274,26 +298,31 @@ contract HTLC {
            return;
         }
 
-        result[0] = "success";
+        result[0] = "continue";
     }
 
-    function setLockTxHash(string[] _ss)
+
+    function setLockTxInfo(string[] _ss)
     public
     {
-        lockTxHashs[_ss[0]] = _ss[1];
+        lockTxInfos[_ss[0]] = string(abi.encodePacked(
+            _ss[1],
+            " ",
+            _ss[2])
+            );
     }
 
-    function getLockTxHash(string[] _ss)
+    function getLockTxInfo(string[] _ss)
     public
     view
     returns (string[] result)
     {
         result = new string[](1);
-        string memory hash = lockTxHashs[_ss[0]];
-        if(bytes(hash).length == 0) {
+        string memory info = lockTxInfos[_ss[0]];
+        if(bytes(info).length == 0) {
             result[0] = "null";
         } else {
-            result[0] = hash;
+            result[0] = info;
         }
     }
 
@@ -673,21 +702,6 @@ contract HTLC {
         return keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b));
     }
 
-    function stringToBytes32(string _source)
-    internal
-    pure
-    returns (bytes32 result)
-    {
-        bytes memory tempEmptyString = bytes(_source);
-        if (tempEmptyString.length == 0) {
-            return 0x0;
-        }
-
-        assembly {
-            result := mload(add(_source, 32))
-        }
-    }
-
     function bytes32ToString(bytes32 _source)
     internal
     pure
@@ -696,7 +710,8 @@ contract HTLC {
 
        bytes memory result = new bytes(_source.length);
 
-       for(uint i = 0; i < _source.length; i++) {
+       uint len = _source.length;
+       for(uint i = 0; i < len; i++) {
 
            result[i] = _source[i];
        }
@@ -790,7 +805,8 @@ contract HTLC {
     {
         bytes memory b = bytes(_s);
         uint result = 0;
-        for (uint i = 0; i < b.length; i++) {
+        uint len = b.length;
+        for (uint i = 0; i < len; i++) {
             if (b[i] >= 48 && b[i] <= 57) {
                 result = result * 10 + (uint(b[i]) - 48);
             }
@@ -816,7 +832,8 @@ contract HTLC {
         bytes memory ss = bytes(s);
         require(ss.length%2 == 0);
         bytes memory r = new bytes(ss.length/2);
-        for (uint i=0; i<ss.length/2; ++i) {
+        uint len = ss.length/2;
+        for (uint i = 0; i < len; ++i) {
             r[i] = byte(fromHexChar(uint(ss[2*i])) * 16 +
                         fromHexChar(uint(ss[2*i+1])));
         }

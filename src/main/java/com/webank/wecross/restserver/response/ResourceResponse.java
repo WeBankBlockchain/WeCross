@@ -1,7 +1,7 @@
 package com.webank.wecross.restserver.response;
 
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.restserver.ResourceDetail;
+import com.webank.wecross.resource.ResourceDetail;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.Map;
 

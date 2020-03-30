@@ -10,15 +10,11 @@ import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.routine.RoutineManager;
 import com.webank.wecross.zone.ZoneManager;
 import javax.annotation.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class WeCrossHostConfig {
-
-    private Logger logger = LoggerFactory.getLogger(WeCrossHostConfig.class);
 
     @Resource private ZoneManager zoneManager;
 
