@@ -38,12 +38,18 @@ public class WeCrossHost {
 
     Thread mainLoopThread;
 
-    public void start() {
-        /** start htlc service */
-        runHTLCService();
+    public void init() throws Exception {
+        initHTLCResourcePairs();
+    }
 
-        /** start netty p2p service */
+    public void start() {
         try {
+            check();
+            init();
+            /** start htlc service */
+            runHTLCService();
+
+            /** start netty p2p service */
             p2pService.start();
 
             // start main loop
@@ -85,6 +91,29 @@ public class WeCrossHost {
                 logger.debug("Send peer seq, to peer:{}, seq:{}", peer, msg.getSeq());
                 zoneManager.getP2PEngine().asyncSendMessage(peer, msg, null);
             }
+
+            logger.info("WeCross router is running");
+        }
+    }
+
+    public void check() throws Exception {
+        if (zoneManager == null) {
+            throw new Exception("zoneManager is null");
+        }
+        if (peerManager == null) {
+            throw new Exception("peerManager is null");
+        }
+        if (p2pService == null) {
+            throw new Exception("p2pService is null");
+        }
+        if (accountManager == null) {
+            throw new Exception("accountManager is null");
+        }
+        if (htlcManager == null) {
+            throw new Exception("htlcManager is null");
+        }
+        if (htlcResourcePairs == null) {
+            throw new Exception("htlcResourcePairs is null");
         }
     }
 

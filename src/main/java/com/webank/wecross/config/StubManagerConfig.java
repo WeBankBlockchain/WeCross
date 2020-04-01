@@ -35,7 +35,7 @@ public class StubManagerConfig {
 
             MetadataReaderFactory metadataReaderFabtFactory = new SimpleMetadataReaderFactory();
             for (Resource resource : resources) {
-                logger.debug("Reading class: {}", resource.getURI().toString());
+                logger.debug("Reading stub plugin: {}", resource.getURI().toString());
                 MetadataReader metadataReader =
                         metadataReaderFabtFactory.getMetadataReader(resource);
                 if (metadataReader.getAnnotationMetadata().hasAnnotation(Stub.class.getName())) {
@@ -45,17 +45,28 @@ public class StubManagerConfig {
                                     .getAnnotationAttributes(Stub.class.getName());
                     String name = (String) attributes.get("value");
 
+                    if (stubManager.hasDriver(name)) {
+                        throw new Exception(
+                                "Duplicate stub plugin["
+                                        + name
+                                        + "]: "
+                                        + resource.getURI().toString());
+                    }
+
                     Class<?> claz = Class.forName(metadataReader.getClassMetadata().getClassName());
                     StubFactory stubFactory =
                             (StubFactory) claz.getDeclaredConstructor().newInstance();
 
                     stubManager.addStubFactory(name, stubFactory);
 
-                    logger.info("Loaded stub {}", name);
+                    logger.info(
+                            "Loaded stub plugin[" + name + "]: " + resource.getURI().toString());
                 }
             }
         } catch (Exception e) {
-            logger.error("Loading stub error", e);
+            String errorMsg = "Loading stub error: " + e;
+            logger.error(errorMsg);
+            System.exit(-1);
         }
 
         return stubManager;

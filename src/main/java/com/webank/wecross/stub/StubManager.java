@@ -13,7 +13,7 @@ public class StubManager {
 
     public StubFactory getStubFactory(String type) throws WeCrossException {
         if (!drivers.containsKey(type)) {
-            throw new WeCrossException(-1, "StubFactory[" + type + "] not found!");
+            throw new WeCrossException(-1, "Stub plugin[" + type + "] not found!");
         }
 
         return drivers.get(type);
@@ -25,5 +25,9 @@ public class StubManager {
 
     public void setDrivers(Map<String, StubFactory> drivers) {
         this.drivers = drivers;
+    }
+
+    public boolean hasDriver(String type) {
+        return drivers.containsKey(type);
     }
 }
