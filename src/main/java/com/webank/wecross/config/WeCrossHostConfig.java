@@ -51,18 +51,6 @@ public class WeCrossHostConfig {
                                 .getProcessor(MessageType.RESOURCE_REQUEST);
         processor.setP2pEngine(p2pMessageEngine);
 
-        try {
-            if (htlcManager != null) {
-                host.initHTLCResourcePairs();
-            }
-        } catch (Exception e) {
-            logger.error(
-                    "something wrong with initHTLCResourcePairs: {}, exception: {}",
-                    e.getMessage(),
-                    e);
-            System.exit(1);
-        }
-
         host.start();
         return host;
     }

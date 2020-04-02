@@ -67,6 +67,11 @@ public class AccountManagerConfig {
                         continue;
                     }
 
+                    if (!stubManager.hasDriver(type)) {
+                        logger.error("Stub plugin[" + type + "] not found!");
+                        continue;
+                    }
+
                     Account account =
                             stubManager
                                     .getStubFactory(type)
