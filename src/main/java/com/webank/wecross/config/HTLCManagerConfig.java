@@ -48,7 +48,8 @@ public class HTLCManagerConfig {
             String counterpartyAccount = getCounterpartyAccount(infoMap);
             htlcTaskInfo.setSelfPath(selfPath);
             htlcTaskInfo.setSelfAccount(selfAccount);
-            htlcTaskInfo.setSelfAddress(getCounterpartyHtlc(counterpartyPath, counterpartyAccount));
+            // htlcTaskInfo.setSelfAddress(getCounterpartyHtlc(counterpartyPath,
+            // counterpartyAccount));
             htlcTaskInfo.setCounterpartyPath(counterpartyPath);
             htlcTaskInfo.setCounterpartyAccount(counterpartyAccount);
             htlcTaskInfo.setCounterpartyAddress(getCounterpartyHtlc(selfPath, selfAccount));
