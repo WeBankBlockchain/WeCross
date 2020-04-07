@@ -6,17 +6,17 @@
     channelName = 'mychannel'
     orgName = 'Org1'
     mspId = 'Org1MSP'
-    orgUserName = 'fabric'
-    orgUserAccountPath = 'classpath:accounts/fabric'
-    ordererTlsCaFile = 'classpath:/stubs/fabric/ordererTlsCaFile'
+    orgUserName = 'fabric_admin'
+    orgUserAccountPath = 'classpath:accounts/fabric_admin'
+    ordererTlsCaFile = 'classpath:/stubs/fabric/orderer-tlsca.crt'
     ordererAddress = 'grpcs://localhost:7050'
 
 [peers]
     [peers.org1]
-        peerTlsCaFile = 'classpath:/stubs/fabric/peerOrg1CertFile'
+        peerTlsCaFile = 'classpath:/stubs/fabric/org1-tlsca.crt'
         peerAddress = 'grpcs://localhost:7051'
     [peers.org2]
-         peerTlsCaFile = 'classpath:/stubs/fabric/peerOrg2CertFile'
+         peerTlsCaFile = 'classpath:/stubs/fabric/org2-tlsca.crt'
          peerAddress = 'grpcs://localhost:9051'
 
 # resources is a list

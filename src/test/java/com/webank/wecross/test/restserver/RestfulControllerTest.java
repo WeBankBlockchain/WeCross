@@ -147,7 +147,7 @@ public class RestfulControllerTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"1\",\"errorCode\":0,\"message\":\"Success\",\"data\":{\"path\":\"test-network.test-stub.test-resource\",\"distance\":1,\"type\":null,\"stubType\":null,\"properties\":{},\"checksum\":null}}";
+                    "{\"version\":\"1\",\"errorCode\":0,\"message\":\"Success\",\"data\":{\"path\":\"test-network.test-stub.test-resource\",\"distance\":1,\"stubType\":null,\"properties\":{},\"checksum\":null}}";
             Assert.assertEquals(expectRsp, result);
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);
@@ -185,7 +185,7 @@ public class RestfulControllerTest {
             System.out.println("####Respond: " + result);
 
             String expectRsp =
-                    "{\"version\":\"1\",\"errorCode\":0,\"message\":\"Success\",\"data\":{\"stubs\":[]}}";
+                    "{\"version\":\"1\",\"errorCode\":0,\"message\":\"Success\",\"data\":{\"stubTypes\":[]}}";
             Assert.assertTrue(result.contains(expectRsp));
         } catch (Exception e) {
             Assert.assertTrue(e.getMessage(), false);

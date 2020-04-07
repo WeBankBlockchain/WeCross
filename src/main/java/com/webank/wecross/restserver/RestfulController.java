@@ -63,7 +63,7 @@ public class RestfulController {
             StubResponse stubResponse = new StubResponse();
             ZoneManager zoneManager = host.getZoneManager();
             StubManager stubManager = zoneManager.getStubManager();
-            stubResponse.setStubs(stubManager);
+            stubResponse.setStubTypes(stubManager);
             restResponse.setData(stubResponse);
         } catch (WeCrossException e) {
             logger.warn("Process request error", e);

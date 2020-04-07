@@ -5,18 +5,18 @@ import com.webank.wecross.stub.StubManager;
 import java.util.Map;
 
 public class StubResponse {
-    String[] stubs;
+    String[] stubTypes;
 
-    public String[] getStubs() {
-        return stubs;
+    public String[] getStubTypes() {
+        return stubTypes;
     }
 
-    public void setStubs(String[] stubs) {
-        this.stubs = stubs;
+    public void setStubTypes(String[] stubTypes) {
+        this.stubTypes = stubTypes;
     }
 
-    public void setStubs(StubManager stubManager) {
+    public void setStubTypes(StubManager stubManager) {
         Map<String, StubFactory> stubMap = stubManager.getDrivers();
-        this.stubs = stubMap.keySet().toArray(new String[stubMap.size()]);
+        this.stubTypes = stubMap.keySet().toArray(new String[stubMap.size()]);
     }
 }
