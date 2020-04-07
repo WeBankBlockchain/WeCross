@@ -6,7 +6,6 @@ import java.util.Map;
 public class ResourceInfo {
     private String name;
     private String stubType;
-    private String type;
     private Map<Object, Object> properties = new HashMap<Object, Object>();
     private String checksum;
 
@@ -69,14 +68,6 @@ public class ResourceInfo {
         this.stubType = driverType;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public Map<Object, Object> getProperties() {
         return properties;
     }
@@ -101,9 +92,6 @@ public class ResourceInfo {
                 + '\''
                 + ", stubType='"
                 + stubType
-                + '\''
-                + ", type='"
-                + type
                 + '\''
                 + ", properties="
                 + properties
