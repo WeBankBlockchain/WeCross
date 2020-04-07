@@ -36,6 +36,7 @@ public class HTLCScheduler {
                         s,
                         h,
                         selfResource.getSelfPath().toString());
+
                 // check that the task data in two chains is consistent
                 if (!checkContractInfo(htlcResourcePair, h)) {
                     // delete invalid task
@@ -63,6 +64,11 @@ public class HTLCScheduler {
 
                     // lock counterparty
                     handleCounterpartyLock(selfResource, counterpartyResource, h);
+
+                    counterpartyResource.setCounterpartyAddress(
+                            htlc.getCounterpartyHtlc(
+                                    counterpartyResource.getSelfResource(),
+                                    counterpartyResource.getAccount()));
 
                     // unlock counterparty
                     htlc.unlockWithVerify(

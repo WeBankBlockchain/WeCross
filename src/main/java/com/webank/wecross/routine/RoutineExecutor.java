@@ -72,7 +72,7 @@ public class RoutineExecutor {
             HTLCResource counterpartyHTLCResource =
                     new HTLCResource(
                             weCrossHost, Path.decode(counterpartyPath), Path.decode(selfPath));
-            counterpartyHTLCResource.setCounterpartyAddress(htlcTaskInfo.getSelfAddress());
+            // counterpartyHTLCResource.setCounterpartyAddress(htlcTaskInfo.getSelfAddress());
             Account counterpartyAccount =
                     accountManager.getAccount(htlcTaskInfo.getCounterpartyAccount());
             counterpartyHTLCResource.setAccount(counterpartyAccount);
