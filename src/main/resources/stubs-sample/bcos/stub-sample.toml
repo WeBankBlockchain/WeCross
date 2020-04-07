@@ -12,7 +12,6 @@
     sslCert = 'classpath:/stubs/bcos/sdk.crt'
     sslKey = 'classpath:/stubs/bcos/sdk.key'
     timeout = 5000  # ms, default 60000ms
-    # connectionsStr = ['127.0.0.1:20200', '127.0.0.1:20201', '127.0.0.1:20202']
     connectionsStr = ['127.0.0.1:20200']
 
 # resources is a list
