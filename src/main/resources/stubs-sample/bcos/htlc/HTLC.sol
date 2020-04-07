@@ -187,7 +187,6 @@ contract HTLC {
     // please override it
     function lock(string[] _ss)
     public
-    view
     returns (string[] result)
     {
         string memory _hash = _ss[0];
@@ -217,7 +216,6 @@ contract HTLC {
     // please override it
     function unlock(string[] _ss)
     public
-    view
     returns (string[] result)
     {
         string memory _hash = _ss[0];
@@ -261,7 +259,6 @@ contract HTLC {
     // please override it
     function rollback(string[] _ss)
     public
-    view
     returns (string[] result)
     {
         string memory _hash = _ss[0];
