@@ -26,7 +26,6 @@ public class WebServerConfig {
     private static Logger logger = LoggerFactory.getLogger(WebServerConfig.class);
 
     @Resource Toml toml;
-    @Resource P2PConfig p2pConfig;
 
     @Bean
     public TomcatServletWebServerFactory newTomcatServletWebServerFactory() {

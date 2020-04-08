@@ -12,7 +12,6 @@
     sslCert = 'classpath:/stubs/bcos/sdk.crt'
     sslKey = 'classpath:/stubs/bcos/sdk.key'
     timeout = 5000  # ms, default 60000ms
-    # connectionsStr = ['127.0.0.1:20200', '127.0.0.1:20201', '127.0.0.1:20202']
     connectionsStr = ['127.0.0.1:20200']
 
 # resources is a list
@@ -20,9 +19,9 @@
     # name cannot be repeated
     name = 'htlc'
     type = 'BCOS_CONTRACT' # BCOS_CONTRACT or BCOS_SM_CONTRACT
-    contractAddress = '0x82df1ce5de28636213492128b3381c3000f53c10'
+    contractAddress = '0xdd02687ee3b20608f10d2794d5cd2e1133dad204'
 [[resources]]
     # name cannot be repeated
-    name = 'hello'
+    name = 'ledger'
     type = 'BCOS_CONTRACT' # BCOS_CONTRACT or BCOS_SM_CONTRACT
-    contractAddress = '0x153f9c47dd4bd6e9a561ed133608496590e0903b'
+    contractAddress = '0xa54c22ebcd2ffb5eae960d933e105fb67e40a445'

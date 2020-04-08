@@ -1,13 +1,10 @@
 package com.webank.wecross.routine.htlc;
 
+import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.routine.RoutineDefault;
+import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.stub.VerifiedTransaction;
 import java.math.BigInteger;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,129 +17,123 @@ public class HTLCScheduler {
         this.htlc = htlc;
     }
 
-    public void start(HTLCResourcePair htlcResourcePair, String h) throws Exception {
+    public void start(HTLCResourcePair htlcResourcePair, String h) throws WeCrossException {
         boolean taskDone = false;
-        HTLCResource selfHTLCResource = htlcResourcePair.getSelfHTLCResource();
-        HTLCResource counterpartyHTLCResource = htlcResourcePair.getCounterpartyHTLCResource();
+        HTLCResource selfResource = htlcResourcePair.getSelfHTLCResource();
+        HTLCResource counterpartyResource = htlcResourcePair.getCounterpartyHTLCResource();
 
-        boolean selfRolledback = checkSelfRollback(selfHTLCResource, h);
-        boolean counterpartyRolledback = checkCounterpartyRollback(selfHTLCResource, h);
+        boolean selfRolledback = checkSelfRollback(selfResource, h);
+        boolean counterpartyRolledback = checkCounterpartyRollback(selfResource, h);
         // the initiator and participant can still do their jobs even though the participant seems
         // to be rolled back
         if (selfRolledback && counterpartyRolledback) {
             taskDone = true;
         } else {
-            String s = getSecret(selfHTLCResource, h);
-            if (!s.trim().equalsIgnoreCase("null")) {
-                boolean otherUnlocked = htlc.getCounterpartyUnlockStatus(selfHTLCResource, h);
-                boolean selfUnlocked = htlc.getSelfUnlockStatus(selfHTLCResource, h);
+            String s = getSecret(selfResource, h);
+            if (!s.equalsIgnoreCase(RoutineDefault.NULL_FLAG)) {
+                logger.info(
+                        "getSecret succeeded, s: {}, h: {}, path: {}",
+                        s,
+                        h,
+                        selfResource.getSelfPath().toString());
+
+                // check that the task data in two chains is consistent
+                if (!checkContractInfo(htlcResourcePair, h)) {
+                    // delete invalid task
+                    htlc.deleteTask(selfResource, h);
+                    logger.info(
+                            "inconsistent contract data, delete current task: {}, path: {}",
+                            h,
+                            selfResource.getSelfPath().toString());
+                    return;
+                }
+
+                boolean otherUnlocked = htlc.getCounterpartyUnlockStatus(selfResource, h);
+                boolean selfUnlocked = htlc.getSelfUnlockStatus(selfResource, h);
                 if (otherUnlocked) {
                     if (selfUnlocked) {
                         taskDone = true;
                     }
                     // else: do nothing but wait to roll back
                 } else {
-                    boolean counterpartyLocked =
-                            htlc.getCounterpartyLockStatus(selfHTLCResource, h);
-                    if (!counterpartyLocked) {
-                        String lockHash = htlc.lock(counterpartyHTLCResource, h);
-                        String verifyResult =
-                                htlc.verifyLock(selfHTLCResource.getOriginResource(), lockHash);
-                        if (!verifyResult.trim().equalsIgnoreCase("true")) {
-                            if (counterpartyRolledback) {
-                                // the initiator executes roll back
-                                htlc.rollback(selfHTLCResource, h);
-                                taskDone = true;
-                            } else {
-                                logger.error(
-                                        "task: {}, verifying lock failed: {}, path: {}",
-                                        h,
-                                        verifyResult,
-                                        selfHTLCResource.getPath());
-                                return;
-                            }
-                        } else {
-                            htlc.setCounterpartyLockStatus(selfHTLCResource, h);
-                            logger.info(
-                                    "lock succeeded: {}, path: {}", h, selfHTLCResource.getPath());
-                        }
-                    }
+                    // lock self
+                    String[] lockTxInfo = handleSelfLock(selfResource, h);
 
-                    if (!taskDone) {
-                        String unlockHash =
-                                htlc.unlock(selfHTLCResource, counterpartyHTLCResource, h, s);
-                        String verifyResult =
-                                htlc.verifyUnlock(selfHTLCResource.getOriginResource(), unlockHash);
-                        if (!verifyResult.trim().equalsIgnoreCase("true")) {
-                            if (counterpartyRolledback) {
-                                htlc.rollback(selfHTLCResource, h);
-                                taskDone = true;
-                            } else {
-                                logger.error(
-                                        "task: {}, verifying unlock failed: {}, path: {}",
-                                        h,
-                                        verifyResult,
-                                        selfHTLCResource.getPath());
-                                return;
-                            }
-                        } else {
-                            if (selfUnlocked) {
-                                taskDone = true;
-                            }
-                            htlc.setCounterpartyUnlockStatus(selfHTLCResource, h);
-                            logger.info(
-                                    "unlock succeeded: {}, path: {}",
-                                    h,
-                                    selfHTLCResource.getPath());
-                        }
-                    }
+                    String lockTxHash = lockTxInfo[0];
+                    long lockTxBlockNum = Long.parseLong(lockTxInfo[1]);
+
+                    // lock counterparty
+                    handleCounterpartyLock(selfResource, counterpartyResource, h);
+
+                    counterpartyResource.setCounterpartyAddress(
+                            htlc.getCounterpartyHtlc(
+                                    counterpartyResource.getSelfResource(),
+                                    counterpartyResource.getAccount()));
+
+                    // unlock counterparty
+                    htlc.unlockWithVerify(
+                            counterpartyResource,
+                            lockTxHash,
+                            lockTxBlockNum,
+                            selfResource.getCounterpartyAddress(),
+                            h,
+                            s);
+                    htlc.setCounterpartyUnlockStatus(selfResource, h);
+                    logger.info("unlock succeeded: {}, path: {}", h, selfResource.getSelfPath());
+                    taskDone = true;
                 }
             }
         }
 
         if (taskDone) {
-            htlc.deleteTask(selfHTLCResource, h);
-            logger.info("current task completed: {},path: {}", h, selfHTLCResource.getPath());
+            htlc.deleteTask(selfResource, h);
+            logger.info("current htlc task completed: {},path: {}", h, selfResource.getSelfPath());
         }
     }
 
-    public String getSecret(HTLCResource htlcResource, String h) {
-        String result = "null";
+    public boolean checkContractInfo(HTLCResourcePair htlcResourcePair, String h)
+            throws WeCrossException {
+        HTLCResource selfResource = htlcResourcePair.getSelfHTLCResource();
+        HTLCResource counterpartyResource = htlcResourcePair.getCounterpartyHTLCResource();
+        String address = selfResource.getCounterpartyAddress();
 
-        Callable<String> task =
-                new Callable<String>() {
-                    @Override
-                    public String call() throws Exception {
-                        String s = "null";
-                        while (s.trim().equalsIgnoreCase("null")) {
-                            s = htlc.getSecret(htlcResource, h);
-                            if (s.equalsIgnoreCase("null")) {
-                                Thread.sleep(1000);
-                            }
-                        }
-                        return s;
-                    }
-                };
+        String[] info0 = htlc.getNewContractTxInfo(selfResource, h);
+        VerifiedTransaction verifiedTransaction0 =
+                selfResource
+                        .getDriver()
+                        .getVerifiedTransaction(
+                                info0[0],
+                                Long.parseLong(info0[1]),
+                                selfResource.getResourceBlockHeaderManager(),
+                                selfResource.chooseConnection());
 
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Future<String> future = executorService.submit(task);
-        try {
-            // set timeout of getSecret
-            result = future.get(4000, TimeUnit.MILLISECONDS);
-        } catch (TimeoutException e) {
-            logger.warn("timeout in getSecret, h : {}, path: {}", h, htlcResource.getPath());
-        } catch (ExecutionException | InterruptedException e) {
-            logger.warn("failed to getSecret, h : {}, path: {}", h, htlcResource.getPath());
-        } finally {
-            executorService.shutdown();
+        String[] args = verifiedTransaction0.getTransactionRequest().getArgs();
+        if (args[1].equalsIgnoreCase(RoutineDefault.TRUE_FLAG)) {
+            args[1] = RoutineDefault.FALSE_FLAG;
+        } else {
+            args[1] = RoutineDefault.TRUE_FLAG;
         }
-        if (!result.equalsIgnoreCase("null")) {
-            logger.info("getSecret succeeded, task h: {}, s: {}", h, result);
-        }
-        return result;
+
+        String[] output = verifiedTransaction0.getTransactionResponse().getResult();
+
+        String[] info1 = htlc.getNewContractTxInfo(counterpartyResource, h);
+        VerifyData verifyData =
+                new VerifyData(
+                        Long.parseLong(info1[1]), info1[0], address, "newContract", args, output);
+
+        VerifiedTransaction verifiedTransaction1 =
+                counterpartyResource
+                        .getDriver()
+                        .getVerifiedTransaction(
+                                info1[0],
+                                Long.parseLong(info1[1]),
+                                counterpartyResource.getResourceBlockHeaderManager(),
+                                counterpartyResource.chooseConnection());
+
+        return verifyData.equals(verifiedTransaction1);
     }
 
-    public boolean checkSelfRollback(HTLCResource htlcResource, String h) throws Exception {
+    public boolean checkSelfRollback(HTLCResource htlcResource, String h) throws WeCrossException {
         if (htlc.getSelfRollbackStatus(htlcResource, h)) {
             return true;
         }
@@ -154,7 +145,7 @@ public class HTLCScheduler {
                 h,
                 selfTimelock,
                 now,
-                htlcResource.getPath());
+                htlcResource.getSelfPath());
         if (now.compareTo(selfTimelock) >= 0) {
             htlc.rollback(htlcResource, h);
             return true;
@@ -162,7 +153,8 @@ public class HTLCScheduler {
         return false;
     }
 
-    public boolean checkCounterpartyRollback(HTLCResource htlcResource, String h) throws Exception {
+    public boolean checkCounterpartyRollback(HTLCResource htlcResource, String h)
+            throws WeCrossException {
         if (htlc.getCounterpartyRollbackStatus(htlcResource, h)) {
             return true;
         }
@@ -174,7 +166,7 @@ public class HTLCScheduler {
                 h,
                 counterpartyTimelock,
                 now,
-                htlcResource.getPath());
+                htlcResource.getSelfPath());
         if (now.compareTo(counterpartyTimelock) >= 0) {
             htlc.setCounterpartyRollbackStatus(htlcResource, h);
             return true;
@@ -182,7 +174,56 @@ public class HTLCScheduler {
         return false;
     }
 
-    public String getTask(HTLCResource htlcResource) throws Exception {
+    public String getSecret(HTLCResource htlcResource, String h) throws WeCrossException {
+        String result = RoutineDefault.NULL_FLAG;
+
+        try {
+            int round = 0;
+            while (result.equalsIgnoreCase(RoutineDefault.NULL_FLAG) && round++ < 10) {
+                result = htlc.getSecret(htlcResource, h);
+                if (result.equalsIgnoreCase(RoutineDefault.NULL_FLAG)) {
+                    Thread.sleep(100);
+                }
+            }
+        } catch (InterruptedException e) {
+            logger.warn("failed to getSecret, h: {}, path: {}", h, htlcResource.getSelfPath());
+        }
+        return result;
+    }
+
+    public String[] handleSelfLock(HTLCResource htlcResource, String h) throws WeCrossException {
+        if (htlc.getSelfLockStatus(htlcResource, h)) {
+            // if self locked, query tx hash and block number
+            return htlc.getLockTxInfo(htlcResource, h);
+        } else {
+            TransactionResponse lockResponse = htlc.lock(htlcResource, h);
+            logger.info("lock self succeeded: {}, path: {}", h, htlcResource.getSelfPath());
+            return new String[] {
+                lockResponse.getHash(), String.valueOf(lockResponse.getBlockNumber())
+            };
+        }
+    }
+
+    public void handleCounterpartyLock(
+            HTLCResource selfResource, HTLCResource counterpartyResource, String h)
+            throws WeCrossException {
+        boolean counterpartyLocked = htlc.getCounterpartyLockStatus(selfResource, h);
+        if (!counterpartyLocked) {
+            htlc.lockWithVerify(counterpartyResource, selfResource.getCounterpartyAddress(), h);
+            htlc.setCounterpartyLockStatus(selfResource, h);
+            logger.info("lock counterparty succeeded: {}, path: {}", h, selfResource.getSelfPath());
+        }
+    }
+
+    public String getTask(HTLCResource htlcResource) throws WeCrossException {
         return htlc.getTask(htlcResource);
+    }
+
+    public HTLC getHtlc() {
+        return htlc;
+    }
+
+    public void setHtlc(HTLC htlc) {
+        this.htlc = htlc;
     }
 }

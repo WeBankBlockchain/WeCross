@@ -1,20 +1,22 @@
 package com.webank.wecross.routine.htlc;
 
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceBlockHeaderManager;
+import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
-import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,79 +24,172 @@ public class HTLCResource extends Resource {
 
     private Logger logger = LoggerFactory.getLogger(HTLCResource.class);
 
-    private Resource originResource;
+    private WeCrossHost weCrossHost;
+    private boolean isFresh = false;
+    private Resource freshSelfResource;
+    private Resource freshCounterpartyResource;
     private Account account;
-    private String path;
+    private Path selfPath;
+    private Path counterpartyPath;
+    private String counterpartyAddress;
 
-    public HTLCResource(Resource originResource) {
-        this.originResource = originResource;
+    public HTLCResource() {}
+
+    public HTLCResource(
+            boolean isFresh,
+            Resource freshSelfResource,
+            Resource freshCounterpartyResource,
+            String counterpartyAddress) {
+        this.isFresh = isFresh;
+        this.freshSelfResource = freshSelfResource;
+        this.freshCounterpartyResource = freshCounterpartyResource;
+        this.counterpartyAddress = counterpartyAddress;
+    }
+
+    public HTLCResource(WeCrossHost weCrossHost, Path selfPath, Path counterpartyPath) {
+        this.weCrossHost = weCrossHost;
+        this.selfPath = selfPath;
+        this.counterpartyPath = counterpartyPath;
     }
 
     @Override
     public TransactionResponse call(TransactionContext<TransactionRequest> request) {
-        return originResource.call(request);
+        return getSelfResource().call(request);
     }
 
     @Override
     public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request) {
-        TransactionContext<TransactionRequest> newRequest;
         try {
-            newRequest = handleSendTransactionRequest(request);
+            handleSendTransactionRequest(request.getData());
         } catch (WeCrossException e) {
+            logger.error(
+                    "HTLC sendTransaction, errorCode: {}, errorMsg: {}",
+                    e.getErrorCode(),
+                    e.getMessage());
             TransactionResponse transactionResponse = new TransactionResponse();
             transactionResponse.setErrorCode(e.getErrorCode());
             transactionResponse.setErrorMessage(e.getMessage());
             return transactionResponse;
         }
 
-        return originResource.sendTransaction(newRequest);
+        return getSelfResource().sendTransaction(request);
     }
 
-    public TransactionContext<TransactionRequest> handleSendTransactionRequest(
-            TransactionContext<TransactionRequest> transactionContext) throws WeCrossException {
-        TransactionRequest request = transactionContext.getData();
+    public void handleSendTransactionRequest(TransactionRequest request) throws WeCrossException {
         if (request.getMethod().equals("unlock")) {
-            String[] args = request.getArgs();
-            if (args == null || args.length < 2) {
-                logger.error("format of request is error in sendTransaction for unlock");
-                throw new WeCrossException(
-                        HTLCQueryStatus.ASSET_HTLC_REQUEST_ERROR,
-                        "hash of lock transaction not found");
-            }
-            String transactionHash = args[0];
+            verifyLock(request);
+        }
+    }
 
-            AssetHTLC assetHTLC = new AssetHTLC();
-            // Verify that the asset is locked
-            if (!assetHTLC
-                    .verifyLock(originResource, transactionHash)
-                    .trim()
-                    .equalsIgnoreCase("true")) {
-                throw new WeCrossException(
-                        HTLCQueryStatus.ASSET_HTLC_VERIFY_LOCK_ERROR,
-                        "verify transaction of lock failed");
-            }
-            request.setArgs(Arrays.copyOfRange(args, 1, args.length));
+    public void verifyLock(TransactionRequest request) throws WeCrossException {
+        String[] args = request.getArgs();
+        if (args == null || args.length != 4) {
+            throw new WeCrossException(
+                    HTLCErrorCode.ASSET_HTLC_REQUEST_ERROR, "info of lock transaction not found");
         }
 
-        transactionContext.setData(request);
-        logger.info("HTLCRequest: {}", transactionContext.toString());
-        return transactionContext;
+        // args: h, s, txHash, blockNumber
+        String h = args[0];
+        String txhash = args[2];
+        long bolckNumber = Long.parseLong(args[3]);
+        WeCrossHTLC weCrossHTLC = new WeCrossHTLC();
+
+        VerifyData verifyData =
+                new VerifyData(
+                        bolckNumber,
+                        txhash,
+                        counterpartyAddress,
+                        "lock",
+                        new String[] {h},
+                        new String[] {RoutineDefault.SUCCESS_FLAG});
+
+        if (!weCrossHTLC.verify(getCounterpartyResource(), verifyData)) {
+            throw new WeCrossException(
+                    HTLCErrorCode.ASSET_HTLC_VERIFY_ERROR, "failed to verify lock");
+        }
     }
 
-    public String getPath() {
-        return path;
+    @Override
+    public Response onRemoteTransaction(Request request) {
+        Driver driver = getSelfResource().getDriver();
+        if (driver.isTransaction(request)) {
+            TransactionContext<TransactionRequest> context =
+                    driver.decodeTransactionRequest(request.getData());
+            TransactionRequest transactionRequest = context.getData();
+            String method = transactionRequest.getMethod();
+            if (method.equalsIgnoreCase("getSecret") || method.equalsIgnoreCase("init")) {
+                String errorMsg = "HTLCResource doesn't allow peers to call \"getSecret\"";
+                logger.info(errorMsg);
+                Response response = new Response();
+                response.setErrorCode(HTLCErrorCode.ASSET_HTLC_NO_PERMISSION);
+                response.setErrorMessage(errorMsg);
+                return response;
+            } else if (transactionRequest.getMethod().equalsIgnoreCase("unlock")) {
+                try {
+                    verifyLock(transactionRequest);
+                } catch (WeCrossException e) {
+                    String errorMsg =
+                            "HTLC unlock failed, errorCode: "
+                                    + e.getErrorCode()
+                                    + " errorMsg: "
+                                    + e.getMessage();
+                    logger.info(errorMsg);
+                    Response response = new Response();
+                    response.setErrorCode(HTLCErrorCode.ASSET_HTLC_VERIFY_ERROR);
+                    response.setErrorMessage(errorMsg);
+                    return response;
+                }
+            }
+        }
+        return getSelfResource().onRemoteTransaction(request);
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public boolean isFresh() {
+        return isFresh;
     }
 
-    public Resource getOriginResource() {
-        return originResource;
+    public void setFresh(boolean fresh) {
+        isFresh = fresh;
     }
 
-    public void setOriginResource(Resource originResource) {
-        this.originResource = originResource;
+    public Resource getSelfResource() {
+        if (isFresh) {
+            return freshSelfResource;
+        } else {
+            return weCrossHost.getZoneManager().getResource(selfPath);
+        }
+    }
+
+    public Resource getCounterpartyResource() {
+        if (isFresh) {
+            return freshCounterpartyResource;
+        } else {
+            return weCrossHost.getZoneManager().getResource(counterpartyPath);
+        }
+    }
+
+    public WeCrossHost getWeCrossHost() {
+        return weCrossHost;
+    }
+
+    public void setWeCrossHost(WeCrossHost weCrossHost) {
+        this.weCrossHost = weCrossHost;
+    }
+
+    public Path getSelfPath() {
+        return selfPath;
+    }
+
+    public void setSelfPath(Path selfPath) {
+        this.selfPath = selfPath;
+    }
+
+    public Path getCounterpartyPath() {
+        return counterpartyPath;
+    }
+
+    public void setCounterpartyPath(Path counterpartyPath) {
+        this.counterpartyPath = counterpartyPath;
     }
 
     public Account getAccount() {
@@ -105,91 +200,87 @@ public class HTLCResource extends Resource {
         this.account = account;
     }
 
+    public String getCounterpartyAddress() {
+        return counterpartyAddress;
+    }
+
+    public void setCounterpartyAddress(String counterpartyAddress) {
+        this.counterpartyAddress = counterpartyAddress;
+    }
+
     @Override
     public void addConnection(Peer peer, Connection connection) {
-        originResource.addConnection(peer, connection);
+        getSelfResource().addConnection(peer, connection);
     }
 
     @Override
     public void removeConnection(Peer peer) {
-        originResource.removeConnection(peer);
+        getSelfResource().removeConnection(peer);
+    }
+
+    @Override
+    public Connection chooseConnection() {
+        return getSelfResource().chooseConnection();
     }
 
     @Override
     public boolean isConnectionEmpty() {
-        return originResource.isConnectionEmpty();
-    }
-
-    @Override
-    public Response onRemoteTransaction(Request request) {
-        Driver driver = getDriver();
-        if (driver.isTransaction(request)) {
-            TransactionContext<TransactionRequest> context =
-                    driver.decodeTransactionRequest(request.getData());
-            TransactionRequest transactionRequest = context.getData();
-            if (transactionRequest.getMethod().equals("getSecret")) {
-                Response response = new Response();
-                response.setErrorCode(HTLCQueryStatus.ASSET_HTLC_NO_PERMISSION);
-                response.setErrorMessage("cannot call getSecret by rpc interface");
-                return response;
-            }
-        }
-        return originResource.onRemoteTransaction(request);
+        return getSelfResource().isConnectionEmpty();
     }
 
     @Override
     public void registerEventHandler(EventCallback callback) {
-        originResource.registerEventHandler(callback);
+        getSelfResource().registerEventHandler(callback);
     }
 
     @Override
     public String getType() {
-        return originResource.getType();
+        return getSelfResource().getType();
     }
 
     @Override
     public void setType(String type) {
-        originResource.setType(type);
+        getSelfResource().setType(type);
     }
 
     @Override
     public String getChecksum() {
-        return originResource.getChecksum();
+        return getSelfResource().getChecksum();
     }
 
     @Override
     public Driver getDriver() {
-        return originResource.getDriver();
+        return getSelfResource().getDriver();
     }
 
     @Override
     public void setDriver(Driver driver) {
-        originResource.setDriver(driver);
+        getSelfResource().setDriver(driver);
     }
 
     @Override
     public ResourceInfo getResourceInfo() {
-        return originResource.getResourceInfo();
+        return getSelfResource().getResourceInfo();
     }
 
     @Override
     public void setResourceInfo(ResourceInfo resourceInfo) {
-        originResource.setResourceInfo(resourceInfo);
+        getSelfResource().setResourceInfo(resourceInfo);
     }
 
     @Override
     public ResourceBlockHeaderManager getResourceBlockHeaderManager() {
-        return originResource.getResourceBlockHeaderManager();
+        return getSelfResource().getResourceBlockHeaderManager();
     }
 
     @Override
     public void setResourceBlockHeaderManager(
             ResourceBlockHeaderManager resourceBlockHeaderManager) {
-        originResource.setResourceBlockHeaderManager(resourceBlockHeaderManager);
+        getSelfResource().setResourceBlockHeaderManager(resourceBlockHeaderManager);
     }
 
     @Override
     public boolean isHasLocalConnection() {
-        return originResource.isHasLocalConnection();
+        return getSelfResource().isHasLocalConnection();
     }
 }

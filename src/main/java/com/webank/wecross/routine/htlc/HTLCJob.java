@@ -1,6 +1,8 @@
 package com.webank.wecross.routine.htlc;
 
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
+import com.webank.wecross.routine.RoutineDefault;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -14,30 +16,27 @@ public class HTLCJob implements Job {
     public void execute(JobExecutionContext context) {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
         HTLCResourcePair htlcResourcePair = (HTLCResourcePair) dataMap.get("HTLC");
-        String path = htlcResourcePair.getSelfHTLCResource().getPath();
+        String path = htlcResourcePair.getSelfHTLCResource().getSelfPath().toString();
         try {
             doHTLCTask(htlcResourcePair);
-        } catch (Exception e) {
+        } catch (WeCrossException e) {
             logger.error(
-                    "error in current round, path: {}, errorMessage: {}",
+                    "error in current round, path: {}, errorMessage: {}, internalMessage: {},",
                     path,
-                    e.getLocalizedMessage());
+                    e.getLocalizedMessage(),
+                    e.getInternalMessage());
         }
     }
 
-    public void doHTLCTask(HTLCResourcePair htlcResourcePair) throws Exception {
+    public void doHTLCTask(HTLCResourcePair htlcResourcePair) throws WeCrossException {
         HTLC htlc = htlcResourcePair.getHtlc();
         HTLCScheduler htlcScheduler = new HTLCScheduler(htlc);
         // get unfinished htlc task
         HTLCResource htlcResource = htlcResourcePair.getSelfHTLCResource();
         String h = htlcScheduler.getTask(htlcResource);
-        if (!h.equalsIgnoreCase("null")) {
-            logger.info("start running htlc task: {}, path; {}", h, htlcResource.getPath());
+        if (!h.equalsIgnoreCase(RoutineDefault.NULL_FLAG)) {
+            logger.info("start running htlc task: {}, path; {}", h, htlcResource.getSelfPath());
             htlcScheduler.start(htlcResourcePair, h);
-        } else {
-            logger.info(
-                    "no unfinished htlc task, continue listening, path: {}",
-                    htlcResource.getPath());
         }
     }
 }

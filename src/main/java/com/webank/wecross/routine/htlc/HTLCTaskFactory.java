@@ -20,7 +20,7 @@ public class HTLCTaskFactory implements TaskFactory {
         int num = htlcResourcePairs.size();
         for (int i = 0; i < num; i++) {
             HTLCResourcePair htlcResourcePair = htlcResourcePairs.get(i);
-            String jobName = htlcResourcePair.getSelfHTLCResource().getPath();
+            String jobName = htlcResourcePair.getSelfHTLCResource().getSelfPath().toString();
             JobDetail jobDetail = loadHTLCJobDetail(jobName, "HTLC", htlcResourcePair);
 
             // execute per 5 seconds
@@ -29,7 +29,7 @@ public class HTLCTaskFactory implements TaskFactory {
                             .withIdentity(jobName, Scheduler.DEFAULT_GROUP)
                             .withSchedule(
                                     SimpleScheduleBuilder.simpleSchedule()
-                                            .withIntervalInSeconds(5)
+                                            .withIntervalInSeconds(2)
                                             .repeatForever())
                             .build();
             tasks.add(new Task(trigger, jobDetail));

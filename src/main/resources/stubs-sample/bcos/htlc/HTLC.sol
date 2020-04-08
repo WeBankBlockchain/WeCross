@@ -7,12 +7,18 @@ contract HTLC {
         string secret;
         string sender;
         string receiver;
-        uint amount;
-        uint timelock; // UNIX timestamp seconds - locked UNTIL this time
+        string amount;
+        string timelock; // UNIX timestamp seconds - locked UNTIL this time
         bool locked;
         bool unlocked;
         bool rolledback;
     }
+
+    string counterpartyHtlc;
+
+    mapping(string => string) lockTxInfos;
+
+    mapping(string => string) newContractTxInfos;
 
     // recode if you're the initiator
     mapping(string => bool) htlcRoles;
@@ -28,10 +34,11 @@ contract HTLC {
     uint tail = 0;        // point to the next position for added task
     string[] taskQueue;
 
-    /* to be defined*/
-    // function lock(string _hash) external returns (string);
-    // function unlock(string _hash) external returns (string);
-    // function rollback(string _hash) external returns (string);
+    function init(string[] _ss)
+    public
+    {
+        counterpartyHtlc = _ss[0];
+    }
 
     function newContract(string[] _ss)
     public
@@ -43,30 +50,32 @@ contract HTLC {
             return;
         }
 
-        if(!rightTimelock(_ss[6], _ss[10])) {
+        if(!rightTimelock(_ss[5], _ss[9])) {
             result[0] = "illegal timelocks";
             return;
         }
 
         if(equal(_ss[1], "true")) {
            htlcRoles[_ss[0]] = true;
+          if(stringToAddress(_ss[2]) != tx.origin) {
+                result[0] = "only sender can new a contract";
+                return;
+          }
+
         } else {
            htlcRoles[_ss[0]] = false;
-        }
-
-        if(htlcRoles[_ss[0]]) {
-            if(!hashMatched(_ss[0], _ss[2])) {
-                result[0] = "hash not matched";
+            if(stringToAddress(_ss[6]) != tx.origin) {
+                result[0] = "only sender can new a contract";
                 return;
-            }
+          }
         }
 
         initiators[_ss[0]] = ContractData(
+            "null",
             _ss[2],
             _ss[3],
             _ss[4],
-            stringToUint(_ss[5]),
-            stringToUint(_ss[6]),
+            _ss[5],
             false,
             false,
             false
@@ -74,10 +83,10 @@ contract HTLC {
 
         participants[_ss[0]] = ContractData(
             "null",
+            _ss[6],
             _ss[7],
             _ss[8],
-            stringToUint(_ss[9]),
-            stringToUint(_ss[10]),
+            _ss[9],
             false,
             false,
             false
@@ -87,12 +96,79 @@ contract HTLC {
         result[0] = "success";
     }
 
-    function setSecret(string _hash, string _secret)
-    internal
+    function setNewContractTxInfo(string[] _ss)
+    public
     {
-        if(!htlcRoles[_hash]) {
-            participants[_hash].secret = _secret;
+        newContractTxInfos[_ss[0]] = string(abi.encodePacked(
+            _ss[1],
+            " ",
+            _ss[2])
+            );
+    }
+
+    function getNewContractTxInfo(string[] _ss)
+    public
+    view
+    returns (string[] result)
+    {
+        result = new string[](1);
+        string memory info = newContractTxInfos[_ss[0]];
+        if(bytes(info).length == 0) {
+            result[0] = "null";
+        } else {
+            result[0] = info;
         }
+    }
+
+    function getContract(string[] _ss)
+    public
+    view
+    returns (string[] result)
+    {
+        string memory _hash = _ss[0];
+        result = new string[](1);
+
+        if (!taskIsExisted(_hash))
+        {
+           result[0] = "contract not exists";
+           return;
+        }
+
+        result[0] = string(abi.encodePacked(
+            initiators[_hash].sender,
+            " ",
+            initiators[_hash].receiver,
+            " ",
+            initiators[_hash].amount,
+            " ",
+            initiators[_hash].timelock,
+            " ",
+            participants[_hash].sender,
+            " ",
+            participants[_hash].receiver,
+            " ",
+            participants[_hash].amount,
+            " ",
+            participants[_hash].timelock)
+            );
+    }
+
+    function setSecret(string[] _ss)
+    public
+    returns (string[] result)
+    {
+        result = new string[](1);
+        if(!hashMatched(_ss[0], _ss[1])) {
+            result[0] = "hash not matched";
+            return;
+        }
+
+        if(htlcRoles[_ss[0]]) {
+            initiators[_ss[0]].secret = _ss[1];
+        } else {
+            participants[_ss[0]].secret = _ss[1];
+        }
+        result[0] = "success";
     }
 
     function getSecret(string[] _ss)
@@ -106,6 +182,154 @@ contract HTLC {
         } else {
             result[0] = participants[_ss[0]].secret;
         }
+    }
+
+    // please override it
+    function lock(string[] _ss)
+    public
+    returns (string[] result)
+    {
+        string memory _hash = _ss[0];
+        result = new string[](1);
+
+        if (!taskIsExisted(_hash))
+        {
+           result[0] = "task not exists";
+           return;
+        }
+
+        if(getLockStatus(_hash)) {
+            result[0] = "done";
+            return;
+        }
+
+        uint timelock = getTimelock(_hash);
+        if(getRollbackStatus(_hash) || timelock <= (now / 1000))
+        {
+            result[0] = "has rolled back";
+            return;
+        }
+
+        result[0] = "continue";
+    }
+
+    // please override it
+    function unlock(string[] _ss)
+    public
+    returns (string[] result)
+    {
+        string memory _hash = _ss[0];
+        string memory _secret = _ss[1];
+        result = new string[](1);
+
+        if (!taskIsExisted(_hash))
+        {
+           result[0] = "task not exists";
+           return;
+        }
+
+        if (getUnlockStatus(_hash))
+        {
+           result[0] = "done";
+           return;
+        }
+
+        if(!hashMatched(_hash, _secret))
+        {
+           result[0] = "hash not matched";
+           return;
+        }
+
+        if (!getLockStatus(_hash))
+        {
+           result[0] = "can not unlock until lock is done";
+           return;
+        }
+
+        uint timelock = getTimelock(_hash);
+        if(getRollbackStatus(_hash) || timelock <= (now / 1000))
+        {
+            result[0] = "has rolled back";
+            return;
+        }
+
+        result[0] = "continue";
+    }
+
+    // please override it
+    function rollback(string[] _ss)
+    public
+    returns (string[] result)
+    {
+        string memory _hash = _ss[0];
+        result = new string[](1);
+
+        if (!taskIsExisted(_hash))
+        {
+           result[0] = "task not exists";
+           return;
+        }
+
+        if (getRollbackStatus(_hash))
+        {
+           result[0] = "done";
+           return;
+        }
+
+        uint timelock = getTimelock(_hash);
+        if(timelock > (now / 1000))
+        {
+            result[0] = "can not rollback until now > timelock";
+            return;
+        }
+
+        if (!getLockStatus(_hash))
+        {
+           result[0] = "no need to rollback unless lock is done";
+           return;
+        }
+
+        if (getUnlockStatus(_hash))
+        {
+           result[0] = "can not rollback if unlock is done";
+           return;
+        }
+
+        result[0] = "continue";
+    }
+
+
+    function setLockTxInfo(string[] _ss)
+    public
+    {
+        lockTxInfos[_ss[0]] = string(abi.encodePacked(
+            _ss[1],
+            " ",
+            _ss[2])
+            );
+    }
+
+    function getLockTxInfo(string[] _ss)
+    public
+    view
+    returns (string[] result)
+    {
+        result = new string[](1);
+        string memory info = lockTxInfos[_ss[0]];
+        if(bytes(info).length == 0) {
+            result[0] = "null";
+        } else {
+            result[0] = info;
+        }
+    }
+
+    function getCounterpartyHtlc(string[] _ss)
+    public
+    view
+    returns (string[] result)
+    {
+        result = new string[](1);
+        result[0] = counterpartyHtlc;
     }
 
     function addTask(string _task)
@@ -180,9 +404,9 @@ contract HTLC {
     returns (uint)
     {
         if(htlcRoles[_hash]) {
-            return initiators[_hash].amount;
+            return stringToUint(initiators[_hash].amount);
         } else {
-            return participants[_hash].amount;
+            return stringToUint(participants[_hash].amount);
         }
     }
 
@@ -192,9 +416,9 @@ contract HTLC {
     returns (uint)
     {
         if(htlcRoles[_hash]) {
-            return initiators[_hash].timelock;
+            return stringToUint(initiators[_hash].timelock);
         } else {
-            return participants[_hash].timelock;
+            return stringToUint(participants[_hash].timelock);
         }
     }
 
@@ -272,9 +496,9 @@ contract HTLC {
     {
         result = new string[](1);
         if(htlcRoles[_ss[0]]) {
-            result[0] = uintToString(initiators[_ss[0]].timelock);
+            result[0] = initiators[_ss[0]].timelock;
         } else {
-            result[0] = uintToString(participants[_ss[0]].timelock);
+            result[0] = participants[_ss[0]].timelock;
         }
     }
 
@@ -285,9 +509,9 @@ contract HTLC {
     {
         result = new string[](1);
         if(!htlcRoles[_ss[0]]) {
-            result[0] = uintToString(initiators[_ss[0]].timelock);
+            result[0] = initiators[_ss[0]].timelock;
         } else {
-            result[0] = uintToString(participants[_ss[0]].timelock);
+            result[0] = participants[_ss[0]].timelock;
         }
     }
 
@@ -453,24 +677,8 @@ contract HTLC {
     view
     returns (bool)
     {
-        return (initiators[_hash].amount > 0 &&
-                participants[_hash].amount > 0);
-    }
-
-    function hasInitiator(string _hash)
-    internal
-    view
-    returns (bool)
-    {
-        return (initiators[_hash].amount > 0);
-    }
-
-    function hasParticipant(string _hash)
-    internal
-    view
-    returns (bool)
-    {
-        return (participants[_hash].amount > 0);
+        return (bytes(initiators[_hash].sender).length > 0 &&
+                bytes(participants[_hash].sender).length > 0);
     }
 
     function rightTimelock(string _t0, string _t1)
@@ -480,7 +688,7 @@ contract HTLC {
     {
         uint t0 = stringToUint(_t0);
         uint t1 = stringToUint(_t1);
-        return t0 > (t1 + 3600) && t1 > (now / 1000 + 3600);
+        return t0 > (t1 + 200) && t1 > (now / 1000 + 200);
     }
 
     function equal(string a, string b)
@@ -491,21 +699,6 @@ contract HTLC {
         return keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b));
     }
 
-    function stringToBytes32(string _source)
-    internal
-    pure
-    returns (bytes32 result)
-    {
-        bytes memory tempEmptyString = bytes(_source);
-        if (tempEmptyString.length == 0) {
-            return 0x0;
-        }
-
-        assembly {
-            result := mload(add(_source, 32))
-        }
-    }
-
     function bytes32ToString(bytes32 _source)
     internal
     pure
@@ -514,7 +707,8 @@ contract HTLC {
 
        bytes memory result = new bytes(_source.length);
 
-       for(uint i = 0; i < _source.length; i++) {
+       uint len = _source.length;
+       for(uint i = 0; i < len; i++) {
 
            result[i] = _source[i];
        }
@@ -608,7 +802,8 @@ contract HTLC {
     {
         bytes memory b = bytes(_s);
         uint result = 0;
-        for (uint i = 0; i < b.length; i++) {
+        uint len = b.length;
+        for (uint i = 0; i < len; i++) {
             if (b[i] >= 48 && b[i] <= 57) {
                 result = result * 10 + (uint(b[i]) - 48);
             }
@@ -634,7 +829,8 @@ contract HTLC {
         bytes memory ss = bytes(s);
         require(ss.length%2 == 0);
         bytes memory r = new bytes(ss.length/2);
-        for (uint i=0; i<ss.length/2; ++i) {
+        uint len = ss.length/2;
+        for (uint i = 0; i < len; ++i) {
             r[i] = byte(fromHexChar(uint(ss[2*i])) * 16 +
                         fromHexChar(uint(ss[2*i+1])));
         }

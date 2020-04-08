@@ -7,6 +7,7 @@ import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.ResourceDetail;
 import com.webank.wecross.restserver.request.ResourceRequest;
 import com.webank.wecross.restserver.request.StateRequest;
 import com.webank.wecross.restserver.response.AccountResponse;
@@ -62,7 +63,7 @@ public class RestfulController {
             StubResponse stubResponse = new StubResponse();
             ZoneManager zoneManager = host.getZoneManager();
             StubManager stubManager = zoneManager.getStubManager();
-            stubResponse.setStubs(stubManager);
+            stubResponse.setStubTypes(stubManager);
             restResponse.setData(stubResponse);
         } catch (WeCrossException e) {
             logger.warn("Process request error", e);
@@ -194,13 +195,13 @@ public class RestfulController {
 
         try {
             AccountManager accountManager = host.getAccountManager();
-            HTLCManager htlcManager = host.getHtlcManager();
-
             Resource resourceObj = host.getResource(path);
-            resourceObj = htlcManager.filterHTLCResource(path, resourceObj);
-
             if (resourceObj == null) {
                 logger.warn("Unable to find resource: {}", path.toString());
+            } else {
+                HTLCManager htlcManager = host.getRoutineManager().getHtlcManager();
+                resourceObj =
+                        htlcManager.filterHTLCResource(host.getZoneManager(), path, resourceObj);
             }
 
             switch (method) {
@@ -245,7 +246,12 @@ public class RestfulController {
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) restRequest.getData();
 
-                        Account account = accountManager.getAccount(restRequest.getAccountName());
+                        String accountName = restRequest.getAccountName();
+                        Account account = accountManager.getAccount(accountName);
+                        logger.info(
+                                "call request: {}, account: {}",
+                                transactionRequest.toString(),
+                                accountName);
 
                         TransactionResponse transactionResponse =
                                 (TransactionResponse)
@@ -256,7 +262,7 @@ public class RestfulController {
                                                         resourceObj.getResourceInfo(),
                                                         resourceObj
                                                                 .getResourceBlockHeaderManager()));
-                        logger.info(transactionResponse.toString());
+                        logger.info("call response: {}", transactionResponse.toString());
                         restResponse.setData(transactionResponse);
                         break;
                     }
@@ -276,8 +282,12 @@ public class RestfulController {
 
                         TransactionRequest transactionRequest =
                                 (TransactionRequest) restRequest.getData();
-
-                        Account account = accountManager.getAccount(restRequest.getAccountName());
+                        String accountName = restRequest.getAccountName();
+                        Account account = accountManager.getAccount(accountName);
+                        logger.info(
+                                "sendTransaction request: {}, account: {}",
+                                transactionRequest.toString(),
+                                accountName);
 
                         TransactionResponse transactionResponse =
                                 (TransactionResponse)
@@ -288,7 +298,7 @@ public class RestfulController {
                                                         resourceObj.getResourceInfo(),
                                                         resourceObj
                                                                 .getResourceBlockHeaderManager()));
-                        logger.info(transactionResponse.toString());
+                        logger.info("sendTransaction response: {}", transactionResponse.toString());
                         restResponse.setData(transactionResponse);
                         break;
                     }

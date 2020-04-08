@@ -38,7 +38,7 @@ public class ZonesConfig {
             String network = toml.getString("common.network");
             if (network == null) {
                 String errorMessage =
-                        "\"network\" in [common] item  not found, please check "
+                        "\"network\" in [common] item not found, please check "
                                 + WeCrossDefault.MAIN_CONFIG_FILE;
                 logger.error(errorMessage);
                 System.exit(1);
