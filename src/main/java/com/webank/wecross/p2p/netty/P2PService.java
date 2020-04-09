@@ -108,6 +108,11 @@ public class P2PService {
                 logger.debug(" callback: request response {}", response);
                 semaphore.release();
             }
+
+            @Override
+            public boolean needOnResponse() {
+                return true;
+            }
         }
 
         Callback callback = new Callback();
@@ -153,27 +158,30 @@ public class P2PService {
 
                 final ResponseCallBack finalCallback = callback;
                 final ThreadPoolTaskExecutor finalThreadPool = threadPool;
-                callback.setTimeout(
-                        timer.newTimeout(
-                                new TimerTask() {
-                                    @Override
-                                    public void run(Timeout timeout) throws Exception {
-                                        if (finalThreadPool == null) {
-                                            callback.sendFailed(StatusCode.TIMEOUT, "timeout");
-                                        } else {
-                                            finalThreadPool.execute(
-                                                    new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            callback.sendFailed(
-                                                                    StatusCode.TIMEOUT, "timeout");
-                                                        }
-                                                    });
+                if (callback.needOnResponse()) {
+                    callback.setTimeout(
+                            timer.newTimeout(
+                                    new TimerTask() {
+                                        @Override
+                                        public void run(Timeout timeout) throws Exception {
+                                            if (finalThreadPool == null) {
+                                                callback.sendFailed(StatusCode.TIMEOUT, "timeout");
+                                            } else {
+                                                finalThreadPool.execute(
+                                                        new Runnable() {
+                                                            @Override
+                                                            public void run() {
+                                                                callback.sendFailed(
+                                                                        StatusCode.TIMEOUT,
+                                                                        "timeout");
+                                                            }
+                                                        });
+                                            }
                                         }
-                                    }
-                                },
-                                request.getTimeout(),
-                                TimeUnit.MILLISECONDS));
+                                    },
+                                    request.getTimeout(),
+                                    TimeUnit.MILLISECONDS));
+                }
             }
 
             MessageSerializer serializer = new MessageSerializer();

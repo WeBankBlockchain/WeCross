@@ -139,7 +139,7 @@ public class ChannelHandlerCallBack {
     }
 
     public void onDisconnect(ChannelHandlerContext ctx) {
-        Node node = (Node) ctx.channel().attr(AttributeKey.valueOf("node"));
+        Node node = (Node) ctx.channel().attr(AttributeKey.valueOf("node")).get();
 
         if (null != node.getNodeID()) {
             getConnections().removeChannelHandler(node, ctx);

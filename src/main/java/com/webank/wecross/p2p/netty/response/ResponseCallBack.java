@@ -41,6 +41,8 @@ public abstract class ResponseCallBack {
     /** @param response */
     public abstract void onResponse(Response response);
 
+    public abstract boolean needOnResponse();
+
     public void sendFailed(int errorCode, String errorMsg) {
 
         logger.error(
