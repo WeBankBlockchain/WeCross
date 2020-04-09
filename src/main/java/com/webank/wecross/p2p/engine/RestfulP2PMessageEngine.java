@@ -98,6 +98,11 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
                                     }
                                 }
                             }
+
+                            @Override
+                            public boolean needOnResponse() {
+                                return callback != null;
+                            }
                         });
     }
 }

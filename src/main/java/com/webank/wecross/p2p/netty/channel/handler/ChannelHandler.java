@@ -75,11 +75,11 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         try {
-            // logger.info(" channel inactive: {}", host);
+            logger.info(" channel inactive: {}");
 
             getChannelHandlerCallBack().onDisconnect(ctx);
         } catch (Exception e) {
-            // logger.error("host: {}, ctx: {}, error: {}", host, System.identityHashCode(ctx), e);
+            logger.error("ctx: {}, error: {}", System.identityHashCode(ctx), e);
         }
     }
 

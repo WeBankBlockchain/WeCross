@@ -84,7 +84,8 @@ public class ZoneManager {
         return seq.intValue();
     }
 
-    public void addRemoteResources(Peer peer, Map<String, ResourceInfo> resources) {
+    public void addRemoteResources(Peer peer, Map<String, ResourceInfo> resources)
+            throws Exception {
         lock.writeLock().lock();
         try {
             for (Map.Entry<String, ResourceInfo> entry : resources.entrySet()) {
@@ -145,6 +146,7 @@ public class ZoneManager {
             }
         } catch (WeCrossException e) {
             logger.error("Add remote resource error", e);
+            throw e;
         } finally {
             lock.writeLock().unlock();
         }

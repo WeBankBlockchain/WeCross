@@ -35,7 +35,7 @@ public class StubManagerConfig {
 
             MetadataReaderFactory metadataReaderFabtFactory = new SimpleMetadataReaderFactory();
             for (Resource resource : resources) {
-                logger.debug("Reading stub plugin: {}", resource.getURI().toString());
+                logger.debug("Scan stub plugin: {}", resource.getURI().toString());
                 MetadataReader metadataReader =
                         metadataReaderFabtFactory.getMetadataReader(resource);
                 if (metadataReader.getAnnotationMetadata().hasAnnotation(Stub.class.getName())) {
@@ -59,8 +59,7 @@ public class StubManagerConfig {
 
                     stubManager.addStubFactory(name, stubFactory);
 
-                    logger.info(
-                            "Loaded stub plugin[" + name + "]: " + resource.getURI().toString());
+                    logger.info("Load stub plugin[" + name + "]: " + resource.getURI().toString());
                 }
             }
         } catch (Exception e) {
