@@ -28,7 +28,7 @@ public class RoutineExecutorTest {
         Mockito.when(mockZoneManager.getResource(Mockito.any(Path.class))).thenReturn(mockResource);
         RoutineExecutor routineExecutor = new RoutineExecutor();
         routineExecutor.setWeCrossHost(mockWeCrossHost);
-        routineExecutor.checkHtlcResources("a.b.c", "a.b.c");
+        routineExecutor.checkHtlcResources("a.b.c");
     }
 
     @Test

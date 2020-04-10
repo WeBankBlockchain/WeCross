@@ -173,7 +173,6 @@ contract HTLC {
 
     function getSecret(string[] _ss)
     public
-    view
     returns (string[] result)
     {
         result = new string[](1);
@@ -279,7 +278,7 @@ contract HTLC {
         uint timelock = getTimelock(_hash);
         if(timelock > (now / 1000))
         {
-            result[0] = "can not rollback until now > timelock";
+            result[0] = "not_yet";
             return;
         }
 
