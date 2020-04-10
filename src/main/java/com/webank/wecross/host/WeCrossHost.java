@@ -44,9 +44,8 @@ public class WeCrossHost {
                             new Runnable() {
                                 @Override
                                 public void run() {
-                                    System.out.println(
-                                            "WeCross router start success!"); // Used for start status
-                                                                          // checking of start.sh
+                                    // This out is used for start.sh checking
+                                    System.out.println("WeCross router start success!");
                                     mainLoop();
                                 }
                             });
