@@ -58,7 +58,7 @@ public class RoutineExecutor {
         for (HTLCTaskInfo htlcTaskInfo : htlcTaskInfos.values()) {
             String selfPath = htlcTaskInfo.getSelfPath();
             String counterpartyPath = htlcTaskInfo.getCounterpartyPath();
-            checkHtlcResources(selfPath, counterpartyPath);
+            checkHtlcResources(selfPath);
 
             AccountManager accountManager = weCrossHost.getAccountManager();
             HTLCResource selfHTLCResource =
@@ -84,15 +84,11 @@ public class RoutineExecutor {
         return htlcResourcePairs;
     }
 
-    public void checkHtlcResources(String selfPath, String counterpartyPath) throws Exception {
+    public void checkHtlcResources(String selfPath) throws Exception {
         ZoneManager zoneManager = weCrossHost.getZoneManager();
         Resource selfResource = zoneManager.getResource(Path.decode(selfPath));
-        Resource counterpartyResource = zoneManager.getResource(Path.decode(counterpartyPath));
         if (selfResource == null) {
             throw new Exception("htlc resource: " + selfPath + " not found");
-        }
-        if (counterpartyResource == null) {
-            throw new Exception("htlc resource: " + counterpartyResource + " not found");
         }
     }
 }

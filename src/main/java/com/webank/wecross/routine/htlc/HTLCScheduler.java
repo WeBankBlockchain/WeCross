@@ -145,9 +145,22 @@ public class HTLCScheduler {
                 h,
                 selfTimelock,
                 now,
-                htlcResource.getSelfPath());
+                htlcResource.getSelfPath().toString());
         if (now.compareTo(selfTimelock) >= 0) {
-            htlc.rollback(htlcResource, h);
+            String result = htlc.rollback(htlcResource, h);
+            {
+                if (!result.equalsIgnoreCase(RoutineDefault.SUCCESS_FLAG)) {
+                    if (result.equalsIgnoreCase(RoutineDefault.NOT_YET)) {
+                        return false;
+                    }
+                    logger.info(
+                            "no need to rollback, reason: {}, task: {}, path: {}",
+                            h,
+                            result,
+                            htlcResource.getSelfPath().toString());
+                }
+            }
+
             return true;
         }
         return false;
@@ -197,6 +210,11 @@ public class HTLCScheduler {
             return htlc.getLockTxInfo(htlcResource, h);
         } else {
             TransactionResponse lockResponse = htlc.lock(htlcResource, h);
+            String result = lockResponse.getResult()[0].trim();
+            if (!result.equalsIgnoreCase(RoutineDefault.SUCCESS_FLAG)) {
+                throw new WeCrossException(
+                        HTLCErrorCode.ASSET_HTLC_LOCK_ERROR, "failed to lock self: " + result);
+            }
             logger.info("lock self succeeded: {}, path: {}", h, htlcResource.getSelfPath());
             return new String[] {
                 lockResponse.getHash(), String.valueOf(lockResponse.getBlockNumber())

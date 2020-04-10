@@ -64,6 +64,7 @@ public class HTLCSchedulerTest {
         TransactionResponse transactionResponse = new TransactionResponse();
         transactionResponse.setHash("0x");
         transactionResponse.setBlockNumber(100);
+        transactionResponse.setResult(new String[] {"success"});
         Mockito.when(mockHTLC.lock(mockHTLCResource, h)).thenReturn(transactionResponse);
 
         htlcScheduler.start(mockHTLCResourcePair, h);
