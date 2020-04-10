@@ -121,7 +121,7 @@ public class WeCrossHost {
             dumpStr += ", ";
         }
         dumpStr += "]";
-        logger.info(dumpStr);
+        logger.debug(dumpStr);
     }
 
     private void dumpPeers() {
@@ -132,7 +132,7 @@ public class WeCrossHost {
         }
 
         dumpStr += "]";
-        logger.info(dumpStr);
+        logger.debug(dumpStr);
     }
 
     public Resource getResource(Path path) throws Exception {
