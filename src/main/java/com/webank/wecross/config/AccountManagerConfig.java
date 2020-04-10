@@ -28,6 +28,8 @@ public class AccountManagerConfig {
     public AccountManager newAccountManager() throws IOException, WeCrossException {
         String accountsPath = toml.getString("accounts.path", "classpath:accounts/");
 
+        System.out.println("Initializing AccountManager with config(" + accountsPath + ") ...");
+
         if (accountsPath == null) {
             String errorMessage =
                     "\"path\" in [accounts] not found, please check "

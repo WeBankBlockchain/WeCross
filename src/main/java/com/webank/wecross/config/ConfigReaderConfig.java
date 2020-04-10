@@ -22,7 +22,9 @@ public class ConfigReaderConfig {
 
     @Bean
     public P2PConfig newP2PConfig() throws WeCrossException {
-        logger.info("initializing p2p config...");
+        System.out.println("Initializing P2PConfig ...");
+
+        logger.info("Initializing p2p config...");
 
         P2PConfig p2PConfig = null;
         try {

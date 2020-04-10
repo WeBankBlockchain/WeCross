@@ -33,6 +33,8 @@ public class ZonesConfig {
 
     @Bean
     public Map<String, Zone> newZoneMap() {
+        System.out.println("Initializing ZoneMap ...");
+
         Map<String, Zone> result = new HashMap<>();
         try {
             String network = toml.getString("common.network");

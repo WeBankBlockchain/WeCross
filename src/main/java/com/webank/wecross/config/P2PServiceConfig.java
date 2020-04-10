@@ -18,6 +18,7 @@ public class P2PServiceConfig {
 
     @Bean
     public ThreadPoolTaskExecutor newThreadPoolTaskExecutor() {
+        System.out.println("Initializing ThreadPoolTaskExecutor ...");
         // init default thread pool
 
         final int threadNum = 8;
@@ -32,6 +33,8 @@ public class P2PServiceConfig {
 
     @Bean
     public P2PService newP2PService() {
+        System.out.println("Initializing P2PService ...");
+
         P2PService p2pService = new P2PService();
         p2pService.setThreadPool(threadPoolTaskExecutor);
         p2pService.setInitializer(nettyBootstrap);

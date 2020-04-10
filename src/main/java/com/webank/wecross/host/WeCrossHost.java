@@ -35,6 +35,7 @@ public class WeCrossHost {
             check();
 
             /** start netty p2p service */
+            System.out.println("Start netty p2p service");
             p2pService.start();
 
             // start main loop
@@ -43,12 +44,17 @@ public class WeCrossHost {
                             new Runnable() {
                                 @Override
                                 public void run() {
+                                    System.out.println(
+                                            "WeCross router start success!"); // Used for start status
+                                                                          // checking of start.sh
                                     mainLoop();
                                 }
                             });
             mainLoopThread.start();
         } catch (Exception e) {
-            logger.error("Startup host error: {}", e);
+            String errorInfo = "Startup host error: " + e.toString();
+            System.out.println(errorInfo);
+            logger.error(errorInfo);
             System.exit(-1);
         }
     }
@@ -64,8 +70,6 @@ public class WeCrossHost {
             broadcastResourceSeq();
 
             dumpStatus();
-
-            logger.info("WeCross router is running");
         }
     }
 

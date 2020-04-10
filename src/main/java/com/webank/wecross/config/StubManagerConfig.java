@@ -22,6 +22,8 @@ public class StubManagerConfig {
 
     @Bean
     public StubManager newStubManager() {
+        System.out.println("Initializing StubManager...");
+
         StubManager stubManager = new StubManager();
 
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
