@@ -18,6 +18,8 @@ public class RestfulP2PMessageEngineConfig {
 
     @Bean
     public P2PMessageEngine newRestfulP2PMessageEngine() {
+        System.out.println("Initializing RestfulP2PMessageEngine ...");
+
         // Init engine
         logger.info("New RestfulP2PMessageEngine");
         RestfulP2PMessageEngine engineInstance = new RestfulP2PMessageEngine();

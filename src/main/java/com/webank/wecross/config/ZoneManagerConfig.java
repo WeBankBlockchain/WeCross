@@ -20,6 +20,8 @@ public class ZoneManagerConfig {
 
     @Bean
     public ZoneManager newZoneManager() {
+        System.out.println("Initializing ZoneManager ...");
+
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setZones(zones);
         zoneManager.setStubManager(stubManager);

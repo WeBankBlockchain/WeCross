@@ -14,6 +14,8 @@ public class NettyBootstrapConfig {
 
     @Bean
     public NettyBootstrap newNettyBootstrap() {
+        System.out.println("Initializing NettyBootstrap ...");
+
         NettyBootstrap bootstrap = new NettyBootstrap();
         bootstrap.setConfig(p2pConfig);
         bootstrap.setMessageCallBack(messageCallBack);

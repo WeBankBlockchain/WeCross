@@ -35,6 +35,7 @@ public class WeCrossHost {
             check();
 
             /** start netty p2p service */
+            System.out.println("Start netty p2p service");
             p2pService.start();
 
             // start main loop
@@ -43,12 +44,16 @@ public class WeCrossHost {
                             new Runnable() {
                                 @Override
                                 public void run() {
+                                    // This out is used for start.sh checking
+                                    System.out.println("WeCross router start success!");
                                     mainLoop();
                                 }
                             });
             mainLoopThread.start();
         } catch (Exception e) {
-            logger.error("Startup host error: {}", e);
+            String errorInfo = "Startup host error: " + e.toString();
+            System.out.println(errorInfo);
+            logger.error(errorInfo);
             System.exit(-1);
         }
     }
@@ -64,8 +69,6 @@ public class WeCrossHost {
             broadcastResourceSeq();
 
             dumpStatus();
-
-            logger.info("WeCross router is running");
         }
     }
 
@@ -121,7 +124,7 @@ public class WeCrossHost {
             dumpStr += ", ";
         }
         dumpStr += "]";
-        logger.info(dumpStr);
+        logger.debug(dumpStr);
     }
 
     private void dumpPeers() {
@@ -132,7 +135,7 @@ public class WeCrossHost {
         }
 
         dumpStr += "]";
-        logger.info(dumpStr);
+        logger.debug(dumpStr);
     }
 
     public Resource getResource(Path path) throws Exception {

@@ -12,6 +12,8 @@ public class RoutineManagerConfig {
 
     @Bean
     public RoutineManager newRoutineManager() {
+        System.out.println("Initializing RoutineManager ...");
+
         RoutineManager routineManager = new RoutineManager();
         routineManager.setHtlcManager(htlcManager);
         return routineManager;

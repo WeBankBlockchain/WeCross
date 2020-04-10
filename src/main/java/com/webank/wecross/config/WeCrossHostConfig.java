@@ -30,6 +30,8 @@ public class WeCrossHostConfig {
 
     @Bean
     public WeCrossHost newWeCrossHost() {
+        System.out.println("Initializing WeCrossHost ...");
+
         WeCrossHost host = new WeCrossHost();
         host.setZoneManager(zoneManager);
         host.setP2pService(p2pService);

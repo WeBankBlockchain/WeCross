@@ -10,6 +10,11 @@ public class PeerManagerConfig {
 
     @Bean
     public PeerManager newPeerManager() {
+        System.out.println(
+                "Initializing newPeerManager with peerActiveTimeout("
+                        + peerActiveTimeout
+                        + ") ...");
+
         PeerManager peerManager = new PeerManager();
         peerManager.setPeerActiveTimeout(peerActiveTimeout);
 

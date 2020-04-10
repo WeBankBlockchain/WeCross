@@ -33,6 +33,8 @@ public class HTLCManagerConfig {
 
     @Bean
     public HTLCManager newHTLCManager() {
+        System.out.println("Initializing HTLCManager ...");
+
         HTLCManager htlcManager = new HTLCManager();
         List<Map<String, String>> infoList = toml.getList("htlc");
         if (infoList == null) {

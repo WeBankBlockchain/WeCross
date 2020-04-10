@@ -29,6 +29,8 @@ public class WebServerConfig {
 
     @Bean
     public TomcatServletWebServerFactory newTomcatServletWebServerFactory() {
+        System.out.println("Initializing TomcatServletWebServerFactory ...");
+
         String address = getAddress();
         int port = getPort();
         TomcatServletWebServerFactory tomcatServletWebServerFactory =

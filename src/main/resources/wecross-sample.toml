@@ -1,5 +1,5 @@
 [common]
-    network = 'payment'
+    network = 'network'
     visible = true
 
 [stubs]
@@ -8,6 +8,9 @@
 [rpc] # rpc ip & port
     address = '127.0.0.1'
     port = 8250
+    caCert = 'classpath:ca.crt'
+    sslCert = 'classpath:ssl.crt'
+    sslKey = 'classpath:ssl.key'
 
 [p2p]
     listenIP = '0.0.0.0'
@@ -15,4 +18,4 @@
     caCert = 'classpath:ca.crt'
     sslCert = 'classpath:ssl.crt'
     sslKey = 'classpath:ssl.key'
-    peers = [] #['127.0.0.1:25501','127.0.0.1:25502']
+    peers = ['127.0.0.1:25501']

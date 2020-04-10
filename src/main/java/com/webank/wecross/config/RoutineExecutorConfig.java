@@ -12,6 +12,8 @@ public class RoutineExecutorConfig {
 
     @Bean
     public RoutineExecutor newRoutineExecutor() {
+        System.out.println("Initializing RoutineExecutor ...");
+
         RoutineExecutor routineExecutor = new RoutineExecutor();
         routineExecutor.setWeCrossHost(weCrossHost);
         routineExecutor.start();
