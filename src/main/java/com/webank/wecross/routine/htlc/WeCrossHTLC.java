@@ -37,7 +37,7 @@ public class WeCrossHTLC implements HTLC {
         TransactionResponse response = htlcResource.call(transactionContext);
         if (response.getErrorCode() != 0) {
             throw new WeCrossException(
-                    HTLCErrorCode.ASSET_HTLC_TRANSACTION_ERROR,
+                    HTLCErrorCode.TRANSACTION_ERROR,
                     method + " failed",
                     response.getErrorCode(),
                     response.getErrorMessage());
@@ -65,7 +65,7 @@ public class WeCrossHTLC implements HTLC {
         TransactionResponse response = htlcResource.sendTransaction(transactionContext);
         if (response.getErrorCode() != 0) {
             throw new WeCrossException(
-                    HTLCErrorCode.ASSET_HTLC_TRANSACTION_ERROR,
+                    HTLCErrorCode.TRANSACTION_ERROR,
                     method + " failed",
                     response.getErrorCode(),
                     response.getErrorMessage());
@@ -96,7 +96,7 @@ public class WeCrossHTLC implements HTLC {
         TransactionResponse response = htlcResource.sendTransaction(transactionContext);
         if (response.getErrorCode() != 0) {
             throw new WeCrossException(
-                    HTLCErrorCode.ASSET_HTLC_TRANSACTION_ERROR,
+                    HTLCErrorCode.TRANSACTION_ERROR,
                     "lock failed",
                     response.getErrorCode(),
                     response.getErrorMessage());
@@ -116,8 +116,7 @@ public class WeCrossHTLC implements HTLC {
             throws WeCrossException {
         TransactionResponse response = lock(htlcResource, h);
         if (!response.getResult()[0].trim().equalsIgnoreCase(RoutineDefault.SUCCESS_FLAG)) {
-            throw new WeCrossException(
-                    HTLCErrorCode.ASSET_HTLC_LOCK_ERROR, response.getResult()[0].trim());
+            throw new WeCrossException(HTLCErrorCode.LOCK_ERROR, response.getResult()[0].trim());
         }
         VerifyData verifyData =
                 new VerifyData(
@@ -130,7 +129,7 @@ public class WeCrossHTLC implements HTLC {
 
         if (!verify(htlcResource, verifyData)) {
             throw new WeCrossException(
-                    HTLCErrorCode.ASSET_HTLC_VERIFY_ERROR, "verify transaction of lock failed");
+                    HTLCErrorCode.VERIFY_ERROR, "verify transaction of lock failed");
         }
     }
 
@@ -155,7 +154,7 @@ public class WeCrossHTLC implements HTLC {
         TransactionResponse response = htlcResource.sendTransaction(transactionContext);
         if (response.getErrorCode() != 0) {
             throw new WeCrossException(
-                    HTLCErrorCode.ASSET_HTLC_TRANSACTION_ERROR,
+                    HTLCErrorCode.TRANSACTION_ERROR,
                     "unlock failed",
                     response.getErrorCode(),
                     response.getErrorMessage());
@@ -176,8 +175,7 @@ public class WeCrossHTLC implements HTLC {
             throws WeCrossException {
         TransactionResponse response = unlock(htlcResource, txHash, blockNumber, h, s);
         if (!response.getResult()[0].trim().equalsIgnoreCase(RoutineDefault.SUCCESS_FLAG)) {
-            throw new WeCrossException(
-                    HTLCErrorCode.ASSET_HTLC_UNLOCK_ERROR, response.getResult()[0].trim());
+            throw new WeCrossException(HTLCErrorCode.UNLOCK_ERROR, response.getResult()[0].trim());
         }
         VerifyData verifyData =
                 new VerifyData(
@@ -190,7 +188,7 @@ public class WeCrossHTLC implements HTLC {
 
         if (!verify(htlcResource, verifyData)) {
             throw new WeCrossException(
-                    HTLCErrorCode.ASSET_HTLC_VERIFY_ERROR, "verify transaction of lock failed");
+                    HTLCErrorCode.VERIFY_ERROR, "verify transaction of lock failed");
         }
     }
 
@@ -231,7 +229,7 @@ public class WeCrossHTLC implements HTLC {
         if (response.getErrorCode() != 0
                 || result[0].trim().equalsIgnoreCase(RoutineDefault.NULL_FLAG)) {
             throw new WeCrossException(
-                    HTLCErrorCode.ASSET_HTLC_TRANSACTION_ERROR,
+                    HTLCErrorCode.TRANSACTION_ERROR,
                     "getCounterpartyHtlc failed",
                     response.getErrorCode(),
                     response.getErrorMessage());
@@ -264,7 +262,7 @@ public class WeCrossHTLC implements HTLC {
                             + h
                             + " path: "
                             + htlcResource.getSelfPath().toString();
-            throw new WeCrossException(HTLCErrorCode.ASSET_HTLC_GET_TX_INFO_ERROR, errorMsg);
+            throw new WeCrossException(HTLCErrorCode.GET_TX_INFO_ERROR, errorMsg);
         }
         return info.split(" ");
     }
@@ -278,7 +276,7 @@ public class WeCrossHTLC implements HTLC {
                             + h
                             + " path: "
                             + htlcResource.getSelfPath().toString();
-            throw new WeCrossException(HTLCErrorCode.ASSET_HTLC_GET_TX_INFO_ERROR, errorMsg);
+            throw new WeCrossException(HTLCErrorCode.GET_TX_INFO_ERROR, errorMsg);
         }
         return info.split(" ");
     }

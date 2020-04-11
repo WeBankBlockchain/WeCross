@@ -2,7 +2,6 @@ package com.webank.wecross.routine;
 
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.host.WeCrossHost;
-import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.htlc.HTLC;
 import com.webank.wecross.routine.htlc.HTLCResource;
 import com.webank.wecross.routine.htlc.HTLCResourcePair;
@@ -12,7 +11,6 @@ import com.webank.wecross.routine.htlc.WeCrossHTLC;
 import com.webank.wecross.routine.task.TaskManager;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
-import com.webank.wecross.zone.ZoneManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,8 +44,7 @@ public class RoutineExecutor {
                 taskManager.start();
             }
         } catch (Exception e) {
-            logger.error(
-                    "something wrong with runHTLCService: {}, exception: {}", e.getMessage(), e);
+            logger.error("failed to run htlc service: {}, exception: {}", e.getMessage(), e);
         }
     }
 
@@ -58,7 +55,6 @@ public class RoutineExecutor {
         for (HTLCTaskInfo htlcTaskInfo : htlcTaskInfos.values()) {
             String selfPath = htlcTaskInfo.getSelfPath();
             String counterpartyPath = htlcTaskInfo.getCounterpartyPath();
-            checkHtlcResources(selfPath);
 
             AccountManager accountManager = weCrossHost.getAccountManager();
             HTLCResource selfHTLCResource =
@@ -82,13 +78,5 @@ public class RoutineExecutor {
                     new HTLCResourcePair(weCrossHTLC, selfHTLCResource, counterpartyHTLCResource));
         }
         return htlcResourcePairs;
-    }
-
-    public void checkHtlcResources(String selfPath) throws Exception {
-        ZoneManager zoneManager = weCrossHost.getZoneManager();
-        Resource selfResource = zoneManager.getResource(Path.decode(selfPath));
-        if (selfResource == null) {
-            throw new Exception("htlc resource: " + selfPath + " not found");
-        }
     }
 }

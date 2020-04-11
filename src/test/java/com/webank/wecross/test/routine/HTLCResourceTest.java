@@ -52,8 +52,7 @@ public class HTLCResourceTest {
         Mockito.when(mockDriver.getVerifiedTransaction("tx", 100, null, null))
                 .thenReturn(unVerifiedTransaction);
         response = htlcResource.sendTransaction(request);
-        Assert.assertEquals(
-                response.getErrorCode().intValue(), HTLCErrorCode.ASSET_HTLC_VERIFY_ERROR);
+        Assert.assertEquals(response.getErrorCode().intValue(), HTLCErrorCode.VERIFY_ERROR);
     }
 
     //    @Test
