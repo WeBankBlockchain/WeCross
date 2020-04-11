@@ -22,6 +22,14 @@ public class HTLCScheduler {
         HTLCResource selfResource = htlcResourcePair.getSelfHTLCResource();
         HTLCResource counterpartyResource = htlcResourcePair.getCounterpartyHTLCResource();
 
+        if (counterpartyResource.getSelfResource() == null) {
+            throw new WeCrossException(
+                    HTLCErrorCode.NO_COUNTERPARTY_RESOURCE,
+                    "counterparty resource: "
+                            + counterpartyResource.getSelfPath().toString()
+                            + " not found");
+        }
+
         boolean selfRolledback = checkSelfRollback(selfResource, h);
         boolean counterpartyRolledback = checkCounterpartyRollback(selfResource, h);
         // the initiator and participant can still do their jobs even though the participant seems
@@ -32,12 +40,12 @@ public class HTLCScheduler {
             String s = getSecret(selfResource, h);
             if (!s.equalsIgnoreCase(RoutineDefault.NULL_FLAG)) {
                 logger.info(
-                        "getSecret succeeded, s: {}, h: {}, path: {}",
+                        "get secret successfully, s: {}, h: {}, path: {}",
                         s,
                         h,
                         selfResource.getSelfPath().toString());
 
-                // check that the task data in two chains is consistent
+                // check that the contract data in two chains is consistent
                 if (!checkContractInfo(htlcResourcePair, h)) {
                     // delete invalid task
                     htlc.deleteTask(selfResource, h);
@@ -192,7 +200,7 @@ public class HTLCScheduler {
 
         try {
             int round = 0;
-            while (result.equalsIgnoreCase(RoutineDefault.NULL_FLAG) && round++ < 10) {
+            while (result.equalsIgnoreCase(RoutineDefault.NULL_FLAG) && round++ < 20) {
                 result = htlc.getSecret(htlcResource, h);
                 if (result.equalsIgnoreCase(RoutineDefault.NULL_FLAG)) {
                     Thread.sleep(100);
@@ -213,9 +221,9 @@ public class HTLCScheduler {
             String result = lockResponse.getResult()[0].trim();
             if (!result.equalsIgnoreCase(RoutineDefault.SUCCESS_FLAG)) {
                 throw new WeCrossException(
-                        HTLCErrorCode.ASSET_HTLC_LOCK_ERROR, "failed to lock self: " + result);
+                        HTLCErrorCode.LOCK_ERROR, "failed to lock self: " + result);
             }
-            logger.info("lock self succeeded: {}, path: {}", h, htlcResource.getSelfPath());
+            logger.info("lock self successfully: {}, path: {}", h, htlcResource.getSelfPath());
             return new String[] {
                 lockResponse.getHash(), String.valueOf(lockResponse.getBlockNumber())
             };
@@ -229,7 +237,8 @@ public class HTLCScheduler {
         if (!counterpartyLocked) {
             htlc.lockWithVerify(counterpartyResource, selfResource.getCounterpartyAddress(), h);
             htlc.setCounterpartyLockStatus(selfResource, h);
-            logger.info("lock counterparty succeeded: {}, path: {}", h, selfResource.getSelfPath());
+            logger.info(
+                    "lock counterparty successfully: {}, path: {}", h, selfResource.getSelfPath());
         }
     }
 

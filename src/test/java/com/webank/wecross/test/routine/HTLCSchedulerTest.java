@@ -1,5 +1,6 @@
 package com.webank.wecross.test.routine;
 
+import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.htlc.HTLC;
 import com.webank.wecross.routine.htlc.HTLCResource;
 import com.webank.wecross.routine.htlc.HTLCResourcePair;
@@ -26,6 +27,7 @@ public class HTLCSchedulerTest {
         Mockito.when(mockHTLCResourcePair.getSelfHTLCResource()).thenReturn(mockHTLCResource);
         Mockito.when(mockHTLCResourcePair.getCounterpartyHTLCResource())
                 .thenReturn(mockHTLCResource);
+        Mockito.when(mockHTLCResource.getSelfResource()).thenReturn(new Resource());
 
         // checkSelfRollback
         Mockito.when(mockHTLC.getSelfRollbackStatus(mockHTLCResource, h)).thenReturn(false);
@@ -84,6 +86,8 @@ public class HTLCSchedulerTest {
 
         Mockito.when(mockHTLCResourcePair.getCounterpartyHTLCResource())
                 .thenReturn(mockHTLCResource);
+        Mockito.when(mockHTLCResource.getSelfResource()).thenReturn(new Resource());
+        Mockito.when(mockHTLCResource.getSelfPath()).thenReturn(new Path());
 
         // checkSelfRollback
         Mockito.when(mockHTLC.getSelfRollbackStatus(mockHTLCResource, h)).thenReturn(true);

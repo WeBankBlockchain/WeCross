@@ -32,8 +32,11 @@ public class VerifyData {
     }
 
     public boolean equals(VerifiedTransaction transaction) {
-        logger.info("VerifiedTransaction: {}", transaction.toString());
-        logger.info("VerifyData: {}", toString());
+        if (transaction == null) {
+            return false;
+        }
+        logger.debug("VerifiedTransaction: {}", transaction.toString());
+        logger.debug("VerifyData: {}", toString());
         TransactionRequest request = transaction.getTransactionRequest();
         return getBlockNumber() == transaction.getBlockNumber()
                 && getTransactionHash().equals(transaction.getTransactionHash())

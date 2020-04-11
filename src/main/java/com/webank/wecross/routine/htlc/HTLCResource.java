@@ -85,7 +85,7 @@ public class HTLCResource extends Resource {
         String[] args = request.getArgs();
         if (args == null || args.length != 4) {
             throw new WeCrossException(
-                    HTLCErrorCode.ASSET_HTLC_REQUEST_ERROR, "info of lock transaction not found");
+                    HTLCErrorCode.REQUEST_ERROR, "info of lock transaction not found");
         }
 
         // args: h, s, txHash, blockNumber
@@ -104,8 +104,7 @@ public class HTLCResource extends Resource {
                         new String[] {RoutineDefault.SUCCESS_FLAG});
 
         if (!weCrossHTLC.verify(getCounterpartyResource(), verifyData)) {
-            throw new WeCrossException(
-                    HTLCErrorCode.ASSET_HTLC_VERIFY_ERROR, "failed to verify lock");
+            throw new WeCrossException(HTLCErrorCode.VERIFY_ERROR, "failed to verify lock");
         }
     }
 

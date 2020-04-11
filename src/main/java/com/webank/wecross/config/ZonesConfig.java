@@ -37,10 +37,10 @@ public class ZonesConfig {
 
         Map<String, Zone> result = new HashMap<>();
         try {
-            String network = toml.getString("common.network");
+            String network = toml.getString("common.zone");
             if (network == null) {
                 String errorMessage =
-                        "\"network\" in [common] item not found, please check "
+                        "\"zone\" in [common] item not found, please check "
                                 + WeCrossDefault.MAIN_CONFIG_FILE;
                 logger.error(errorMessage);
                 System.exit(1);
