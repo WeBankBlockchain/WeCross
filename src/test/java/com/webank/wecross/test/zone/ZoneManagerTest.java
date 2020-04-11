@@ -71,6 +71,7 @@ public class ZoneManagerTest {
                 resourceInfo.setName("contract" + j);
                 String path = "payment.bcos" + i + ".contract" + j;
                 resourceInfo.setStubType("test");
+                resourceInfo.setChecksum(resourceInfo.getName());
 
                 Map<String, ResourceInfo> resources = new HashMap<String, ResourceInfo>();
                 resources.put(path, resourceInfo);
@@ -95,6 +96,7 @@ public class ZoneManagerTest {
         ResourceInfo resourceInfo = new ResourceInfo();
         resourceInfo.setName("bcos");
         resourceInfo.setStubType("test");
+        resourceInfo.setChecksum(resourceInfo.getName());
 
         Map<String, ResourceInfo> resources = new HashMap<String, ResourceInfo>();
         resources.put("payment.bcos", resourceInfo);
@@ -108,6 +110,7 @@ public class ZoneManagerTest {
         ResourceInfo resourceInfo2 = new ResourceInfo();
         resourceInfo2.setName("contract0");
         resourceInfo2.setStubType("test");
+        resourceInfo2.setChecksum(resourceInfo2.getName());
 
         Peer peer2 = new Peer(new Node("bbb", "127.0.0.1", 100));
 
@@ -154,6 +157,7 @@ public class ZoneManagerTest {
                 ResourceInfo resourceInfo = new ResourceInfo();
                 resourceInfo.setName("contract" + j);
                 resourceInfo.setStubType("test");
+                resourceInfo.setChecksum(resourceInfo.getName());
 
                 Map<String, ResourceInfo> resources = new HashMap<String, ResourceInfo>();
                 resources.put("payment.bcos" + i + ".contract" + j, resourceInfo);
@@ -166,6 +170,7 @@ public class ZoneManagerTest {
 
         ResourceInfo removeResource = new ResourceInfo();
         removeResource.setName("contract0");
+        removeResource.setChecksum(removeResource.getName());
 
         Map<String, ResourceInfo> removeResources = new HashMap<String, ResourceInfo>();
         removeResources.put("payment.bcos0.contract0", removeResource);
@@ -178,6 +183,7 @@ public class ZoneManagerTest {
         ResourceInfo resourceInfo2 = new ResourceInfo();
         resourceInfo2.setName("contract1");
         resourceInfo2.setStubType("test");
+        resourceInfo2.setChecksum(resourceInfo2.getName());
 
         Peer peer2 = new Peer(new Node("bbb", "127.0.0.1", 100));
 
@@ -201,6 +207,8 @@ public class ZoneManagerTest {
         for (int j = 0; j < 4; j++) {
             ResourceInfo resourceInfo = new ResourceInfo();
             resourceInfo.setName("contract" + j);
+            resourceInfo.setChecksum("fakeChecksum" + j);
+            resourceInfo.setChecksum(resourceInfo.getName());
 
             Map<String, ResourceInfo> resources = new HashMap<String, ResourceInfo>();
             resources.put("payment.bcos2" + ".contract" + j, resourceInfo);
@@ -214,6 +222,7 @@ public class ZoneManagerTest {
         // fatal test
         ResourceInfo resourceInfo = new ResourceInfo();
         resourceInfo.setName("payment.bcos2.aaa");
+        resourceInfo.setChecksum(resourceInfo.getName());
 
         Map<String, ResourceInfo> resources = new HashMap<String, ResourceInfo>();
         resources.put("payment.bcos2.aaa", resourceInfo);
@@ -247,5 +256,49 @@ public class ZoneManagerTest {
         }
 
         Assert.assertEquals(0, zoneManager.getZones().size());
+    }
+
+    @Test
+    public void checksumTest() throws Exception {
+        StubFactory stubFactory = Mockito.spy(StubFactory.class);
+        Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
+        Mockito.when(stubFactory.newDriver()).thenReturn(null);
+
+        StubManager stubManager = Mockito.mock(StubManager.class);
+        Mockito.when(stubManager.getStubFactory("test")).thenReturn(stubFactory);
+
+        BlockHeaderStorageFactory blockHeaderStorageFactory =
+                Mockito.spy(BlockHeaderStorageFactory.class);
+        Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos"))
+                .thenReturn(null);
+
+        ZoneManager zoneManager = new ZoneManager();
+        zoneManager.setStubManager(stubManager);
+        zoneManager.setBlockHeaderStorageFactory(blockHeaderStorageFactory);
+
+        // Add resource 1
+        String path = "payment.bcos.aaaaa";
+        ResourceInfo resourceInfo1 = new ResourceInfo();
+        resourceInfo1.setStubType("test");
+        resourceInfo1.setName(path);
+        resourceInfo1.setChecksum("aaaaa");
+        Peer peer = new Peer(new Node("bbb", "127.0.0.1", 100));
+        Map<String, ResourceInfo> resources1 = new HashMap<String, ResourceInfo>();
+        resources1.put(path, resourceInfo1);
+
+        zoneManager.addRemoteResources(peer, resources1);
+        Assert.assertTrue(zoneManager.getResource(Path.decode(path)) != null);
+
+        // Add same path diff checksum resource
+        ResourceInfo resourceInfo2 = new ResourceInfo();
+        resourceInfo1.setStubType("test");
+        resourceInfo2.setName(path);
+        resourceInfo2.setChecksum("bbbbb");
+
+        Map<String, ResourceInfo> resources2 = new HashMap<String, ResourceInfo>();
+        resources2.put(path, resourceInfo2);
+
+        zoneManager.addRemoteResources(peer, resources2);
+        Assert.assertTrue(zoneManager.getResource(Path.decode(path)) != null);
     }
 }

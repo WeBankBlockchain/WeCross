@@ -98,6 +98,21 @@ public class ZoneManager {
                     continue;
                 }
 
+                // Verify Checksum
+                if (getResource(path) != null) {
+                    String originChecksum = getResource(path).getResourceInfo().getChecksum();
+                    String receiveChecksum = resourceInfo.getChecksum();
+                    if (!originChecksum.equals(receiveChecksum)) {
+                        logger.error(
+                                "Receive resource with different checksum, ipath: {} peer: {} receiveChecksum: {} originChecksum: {}",
+                                path.toString(),
+                                peer.getNode().toString(),
+                                receiveChecksum,
+                                originChecksum);
+                        continue;
+                    }
+                }
+
                 Zone zone = zones.get(path.getNetwork());
                 if (zone == null) {
                     zone = new Zone();
