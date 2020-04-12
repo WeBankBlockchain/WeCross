@@ -10,4 +10,5 @@ public class HTLCErrorCode {
     public static final int TRANSACTION_ERROR = 1006;
     public static final int GET_TX_INFO_ERROR = 1007;
     public static final int NO_COUNTERPARTY_RESOURCE = 1008;
+    public static final int NONE_RETURN = 1009;
 }

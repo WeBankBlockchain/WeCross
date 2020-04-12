@@ -96,7 +96,10 @@ public class HTLCManagerConfig {
         try {
             counterpartyaddress = htlc.getCounterpartyHtlc(resource, account);
         } catch (WeCrossException e) {
-            logger.error("failed to getCounterpartyHtlc, path: {}", iPath);
+            logger.error(
+                    "failed to get counterparty htlc address, path: {}, error: {}",
+                    iPath,
+                    e.getInternalMessage());
             System.exit(1);
         }
         return counterpartyaddress;

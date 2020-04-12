@@ -1,6 +1,7 @@
 package com.webank.wecross.routine.htlc;
 
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.stub.VerifiedTransaction;
@@ -24,6 +25,8 @@ public class HTLCScheduler {
 
         if (counterpartyResource.getSelfResource() == null) {
             throw new WeCrossException(
+                    ErrorCode.HTLC_ERROR,
+                    "error in scheduler",
                     HTLCErrorCode.NO_COUNTERPARTY_RESOURCE,
                     "counterparty resource: "
                             + counterpartyResource.getSelfPath().toString()
@@ -58,12 +61,7 @@ public class HTLCScheduler {
 
                 boolean otherUnlocked = htlc.getCounterpartyUnlockStatus(selfResource, h);
                 boolean selfUnlocked = htlc.getSelfUnlockStatus(selfResource, h);
-                if (otherUnlocked) {
-                    if (selfUnlocked) {
-                        taskDone = true;
-                    }
-                    // else: do nothing but wait to roll back
-                } else {
+                if (!otherUnlocked) {
                     // lock self
                     String[] lockTxInfo = handleSelfLock(selfResource, h);
 
@@ -88,6 +86,10 @@ public class HTLCScheduler {
                             s);
                     htlc.setCounterpartyUnlockStatus(selfResource, h);
                     logger.info("unlock succeeded: {}, path: {}", h, selfResource.getSelfPath());
+                }
+
+                // else: do nothing but wait to roll back
+                if (selfUnlocked) {
                     taskDone = true;
                 }
             }
@@ -115,6 +117,10 @@ public class HTLCScheduler {
                                 selfResource.getResourceBlockHeaderManager(),
                                 selfResource.chooseConnection());
 
+        logger.debug(
+                "verifiedTransaction for self transfer contract: {}",
+                verifiedTransaction0.toString());
+
         String[] args = verifiedTransaction0.getTransactionRequest().getArgs();
         if (args[1].equalsIgnoreCase(RoutineDefault.TRUE_FLAG)) {
             args[1] = RoutineDefault.FALSE_FLAG;
@@ -137,6 +143,10 @@ public class HTLCScheduler {
                                 Long.parseLong(info1[1]),
                                 counterpartyResource.getResourceBlockHeaderManager(),
                                 counterpartyResource.chooseConnection());
+
+        logger.debug(
+                "verifiedTransaction for counterparty transfer contract: {}",
+                verifiedTransaction1.toString());
 
         return verifyData.equals(verifiedTransaction1);
     }
@@ -200,10 +210,10 @@ public class HTLCScheduler {
 
         try {
             int round = 0;
-            while (result.equalsIgnoreCase(RoutineDefault.NULL_FLAG) && round++ < 20) {
+            while (result.equalsIgnoreCase(RoutineDefault.NULL_FLAG) && round++ < 4) {
                 result = htlc.getSecret(htlcResource, h);
                 if (result.equalsIgnoreCase(RoutineDefault.NULL_FLAG)) {
-                    Thread.sleep(100);
+                    Thread.sleep(500);
                 }
             }
         } catch (InterruptedException e) {
@@ -221,7 +231,10 @@ public class HTLCScheduler {
             String result = lockResponse.getResult()[0].trim();
             if (!result.equalsIgnoreCase(RoutineDefault.SUCCESS_FLAG)) {
                 throw new WeCrossException(
-                        HTLCErrorCode.LOCK_ERROR, "failed to lock self: " + result);
+                        ErrorCode.HTLC_ERROR,
+                        "error in handleSelfLock",
+                        HTLCErrorCode.LOCK_ERROR,
+                        "failed to lock self: " + result);
             }
             logger.info("lock self successfully: {}, path: {}", h, htlcResource.getSelfPath());
             return new String[] {
