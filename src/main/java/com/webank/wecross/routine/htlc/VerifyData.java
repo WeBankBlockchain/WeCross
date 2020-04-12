@@ -33,17 +33,30 @@ public class VerifyData {
 
     public boolean equals(VerifiedTransaction transaction) {
         if (transaction == null) {
+            logger.error(
+                    "verify transaction failed, transaction: null, verifyData: {}", toString());
             return false;
         }
+
         logger.debug("VerifiedTransaction: {}", transaction.toString());
         logger.debug("VerifyData: {}", toString());
+
         TransactionRequest request = transaction.getTransactionRequest();
-        return getBlockNumber() == transaction.getBlockNumber()
-                && getTransactionHash().equals(transaction.getTransactionHash())
-                && getRealAddress().equals(transaction.getRealAddress())
-                //                && getMethod().equals(request.getMethod())
-                && Arrays.equals(getArgs(), request.getArgs())
-                && Arrays.equals(getResult(), transaction.getTransactionResponse().getResult());
+        boolean isEqual =
+                getBlockNumber() == transaction.getBlockNumber()
+                        && getTransactionHash().equals(transaction.getTransactionHash())
+                        && getRealAddress().equals(transaction.getRealAddress())
+                        //                && getMethod().equals(request.getMethod())
+                        && Arrays.equals(getArgs(), request.getArgs())
+                        && Arrays.equals(
+                                getResult(), transaction.getTransactionResponse().getResult());
+        if (!isEqual) {
+            logger.error(
+                    "verify transaction failed, transaction: {}, verifyData: {}",
+                    transaction.toString(),
+                    toString());
+        }
+        return isEqual;
     }
 
     @Override

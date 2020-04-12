@@ -10,8 +10,11 @@ import org.quartz.Scheduler;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HTLCTaskFactory implements TaskFactory {
+    private Logger logger = LoggerFactory.getLogger(HTLCTaskFactory.class);
 
     public List<Task> load(Object... args) {
         @SuppressWarnings("unchecked")
@@ -20,6 +23,8 @@ public class HTLCTaskFactory implements TaskFactory {
         int num = htlcResourcePairs.size();
         for (int i = 0; i < num; i++) {
             HTLCResourcePair htlcResourcePair = htlcResourcePairs.get(i);
+            logger.debug("HTLCResourcePair: {}", htlcResourcePair.toString());
+
             String jobName = htlcResourcePair.getSelfHTLCResource().getSelfPath().toString();
             JobDetail jobDetail = loadHTLCJobDetail(jobName, "HTLC", htlcResourcePair);
 

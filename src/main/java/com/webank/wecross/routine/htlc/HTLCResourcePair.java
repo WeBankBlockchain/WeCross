@@ -35,4 +35,14 @@ public class HTLCResourcePair {
     public void setCounterpartyHTLCResource(HTLCResource counterpartyHTLCResource) {
         this.counterpartyHTLCResource = counterpartyHTLCResource;
     }
+
+    @Override
+    public String toString() {
+        return "HTLCResourcePair{"
+                + "selfHTLCResource="
+                + selfHTLCResource.toString()
+                + ", counterpartyHTLCResource="
+                + counterpartyHTLCResource.toString()
+                + '}';
+    }
 }
