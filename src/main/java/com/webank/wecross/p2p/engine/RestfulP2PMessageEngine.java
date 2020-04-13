@@ -54,6 +54,9 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
             return;
         }
 
+        if(callback == null) {
+        	request.setTimeout(0);
+        }
         // send request by p2p network
         getP2PService()
                 .asyncSendRequest(
@@ -62,7 +65,6 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
                         new ResponseCallBack() {
                             @Override
                             public void onResponse(Response response) {
-
                                 logger.info(" receive response: {}", response);
 
                                 if (callback != null) {
