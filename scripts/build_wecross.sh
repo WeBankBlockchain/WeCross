@@ -17,6 +17,7 @@ enable_test_resource="false"
 make_tar=0
 router_output=$(pwd)/routers
 wecross_dir=$(dirname $(pwd)/${0})/
+plugins='BCOS2.0,Fabric1.4'
 
 LOG_INFO()
 {
@@ -43,6 +44,7 @@ Usage:
     -o  <output dir>                [Optional]   default ./${router_output}/
     -z  <generate tar packet>       [Optional]   default no
     -T  <enable test mode>          [Optional]   default no. Enable test resource.
+    -p  <enable plugin>             [Optional]   enabled plugins, split by ',', default BCOS2.0,Fabric1.4, Enable all plugins
     -h  call for help
 e.g
     bash $0 -n payment -l 127.0.0.1:8250:25500
@@ -103,6 +105,9 @@ while getopts "o:n:l:f:c:zTh" option;do
     ;;
     T)
         enable_test_resource="true"
+    ;;
+    p)
+        plugins=$OPTARG
     ;;
     h)  help;;
     esac
@@ -166,7 +171,25 @@ gen_one_wecross()
     cp -r ${wecross_dir}./*.sh "${output}/"
     cp -r ${wecross_dir}/apps "${output}/"
     cp -r ${wecross_dir}/lib "${output}/"
+    
     mkdir -p ${output}/plugin
+    #download plugins
+    oldIPS="$IPS"
+    IPS=','
+    for plugin in "$plugins";do
+        case $plugin in
+        BCOS2.0)
+            #download and initialize the plugin
+            #wget
+            ;;
+        Fabric1.4)
+        	#download and initialize the plugin
+            #wget
+            ;;
+        esac
+    done
+    IPS="$oldIPS"
+    
 
     cp -r "${wecross_dir}/conf" "${output}/conf"
     cp -r "${cert_dir}"/* "${output}"/conf/
