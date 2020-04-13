@@ -21,7 +21,7 @@ public class HTLCJob implements Job {
             doHTLCTask(htlcResourcePair);
         } catch (WeCrossException e) {
             logger.error(
-                    "error in current round, path: {}, errorMessage: {}, internalMessage: {},",
+                    "current round failed, path: {}, errorMessage: {}, internalMessage: {}",
                     path,
                     e.getLocalizedMessage(),
                     e.getInternalMessage());

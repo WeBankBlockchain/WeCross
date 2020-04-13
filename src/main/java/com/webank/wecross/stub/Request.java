@@ -1,5 +1,7 @@
 package com.webank.wecross.stub;
 
+import java.util.Arrays;
+
 public class Request {
     private int type;
     private byte[] data;
@@ -27,5 +29,17 @@ public class Request {
 
     public void setResourceInfo(ResourceInfo resourceInfo) {
         this.resourceInfo = resourceInfo;
+    }
+
+    @Override
+    public String toString() {
+        return "Request{"
+                + "type="
+                + type
+                + ", data="
+                + Arrays.toString(data)
+                + ", resourceInfo="
+                + resourceInfo
+                + '}';
     }
 }

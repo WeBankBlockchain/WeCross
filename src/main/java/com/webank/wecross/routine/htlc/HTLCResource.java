@@ -1,6 +1,7 @@
 package com.webank.wecross.routine.htlc;
 
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.EventCallback;
@@ -62,10 +63,6 @@ public class HTLCResource extends Resource {
         try {
             handleSendTransactionRequest(request.getData());
         } catch (WeCrossException e) {
-            logger.error(
-                    "HTLC sendTransaction, errorCode: {}, errorMsg: {}",
-                    e.getErrorCode(),
-                    e.getMessage());
             TransactionResponse transactionResponse = new TransactionResponse();
             transactionResponse.setErrorCode(e.getErrorCode());
             transactionResponse.setErrorMessage(e.getMessage());
@@ -85,7 +82,10 @@ public class HTLCResource extends Resource {
         String[] args = request.getArgs();
         if (args == null || args.length != 4) {
             throw new WeCrossException(
-                    HTLCErrorCode.ASSET_HTLC_REQUEST_ERROR, "info of lock transaction not found");
+                    ErrorCode.HTLC_ERROR,
+                    "error in unlock",
+                    HTLCErrorCode.REQUEST_ERROR,
+                    "info of lock transaction not found");
         }
 
         // args: h, s, txHash, blockNumber
@@ -105,7 +105,10 @@ public class HTLCResource extends Resource {
 
         if (!weCrossHTLC.verify(getCounterpartyResource(), verifyData)) {
             throw new WeCrossException(
-                    HTLCErrorCode.ASSET_HTLC_VERIFY_ERROR, "failed to verify lock");
+                    ErrorCode.HTLC_ERROR,
+                    "error in unlock",
+                    HTLCErrorCode.VERIFY_ERROR,
+                    "verify lock faileds");
         }
     }
 
@@ -113,31 +116,42 @@ public class HTLCResource extends Resource {
     public Response onRemoteTransaction(Request request) {
         //        Driver driver = getDriver();
         //        if (driver.isTransaction(request)) {
+        //            logger.info("onRemoteTransaction, request: {}", request.toString());
+        //
         //            TransactionContext<TransactionRequest> context =
         //                    driver.decodeTransactionRequest(request.getData());
+        //
+        //            if (context == null) {
+        //                Response response = new Response();
+        //                response.setErrorCode(ErrorCode.DECODE_TRANSACTION_REQUEST_ERROR);
+        //                response.setErrorMessage("decode transaction request failed");
+        //                return response;
+        //            }
+        //
         //            TransactionRequest transactionRequest = context.getData();
+        //            logger.info(
+        //                    "onRemoteTransaction, transactionRequest: {}",
+        // transactionRequest.toString());
+        //
         //            String method = transactionRequest.getMethod();
         //            if (method.equalsIgnoreCase("getSecret") || method.equalsIgnoreCase("init")) {
-        //                String errorMsg = "HTLCResource doesn't allow peers to call
-        // \"getSecret\"";
-        //                logger.info(errorMsg);
+        //                logger.warn("illegal access from peer, method: " + method);
         //                Response response = new Response();
-        //                response.setErrorCode(HTLCErrorCode.ASSET_HTLC_NO_PERMISSION);
-        //                response.setErrorMessage(errorMsg);
+        //                response.setErrorCode(HTLCErrorCode.NO_PERMISSION);
+        //                response.setErrorMessage("HTLCResource doesn't allow peers to call " +
+        // method);
         //                return response;
         //            } else if (transactionRequest.getMethod().equalsIgnoreCase("unlock")) {
         //                try {
         //                    verifyLock(transactionRequest);
         //                } catch (WeCrossException e) {
-        //                    String errorMsg =
-        //                            "HTLC unlock failed, errorCode: "
-        //                                    + e.getErrorCode()
-        //                                    + " errorMsg: "
-        //                                    + e.getMessage();
-        //                    logger.info(errorMsg);
+        //                    logger.error(
+        //                            "htlc unlock failed, errorCode: {}, errorMsg: {}",
+        //                            e.getInternalErrorCode(),
+        //                            e.getInternalMessage());
         //                    Response response = new Response();
-        //                    response.setErrorCode(HTLCErrorCode.ASSET_HTLC_VERIFY_ERROR);
-        //                    response.setErrorMessage(errorMsg);
+        //                    response.setErrorCode(HTLCErrorCode.VERIFY_ERROR);
+        //                    response.setErrorMessage(e.getInternalMessage());
         //                    return response;
         //                }
         //            }
@@ -283,5 +297,26 @@ public class HTLCResource extends Resource {
     @Override
     public boolean isHasLocalConnection() {
         return getSelfResource().isHasLocalConnection();
+    }
+
+    @Override
+    public String toString() {
+        return "HTLCResource{"
+                + "isFresh="
+                + isFresh
+                + ", freshSelfResource="
+                + freshSelfResource
+                + ", freshCounterpartyResource="
+                + freshCounterpartyResource
+                + ", account="
+                + account
+                + ", selfPath="
+                + selfPath
+                + ", counterpartyPath="
+                + counterpartyPath
+                + ", counterpartyAddress='"
+                + counterpartyAddress
+                + '\''
+                + '}';
     }
 }

@@ -179,7 +179,7 @@ public class WeCrossHTLCTest {
             weCrossHTLC.getNewContractTxInfo(mockResource, "h");
         } catch (WeCrossException e) {
             Assert.assertEquals(
-                    e.getErrorCode().intValue(), HTLCErrorCode.ASSET_HTLC_GET_TX_INFO_ERROR);
+                    e.getInternalErrorCode().intValue(), HTLCErrorCode.GET_TX_INFO_ERROR);
         }
     }
 

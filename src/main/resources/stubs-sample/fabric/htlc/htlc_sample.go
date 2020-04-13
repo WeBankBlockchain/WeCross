@@ -38,7 +38,8 @@ func (a *HtlcChaincode) Init(stub shim.ChaincodeStubInterface) (res peer.Respons
 func (a *HtlcChaincode) Invoke(stub shim.ChaincodeStubInterface) (res peer.Response) {
 	defer func() {
 		if r, ok := recover().(error); ok {
-			res = shim.Error(r.Error())
+			// return error message
+			res = shim.Success([]byte(r.Error()))
 		}
 	}()
 
@@ -192,7 +193,7 @@ func (a *HtlcChaincode) lock(stub shim.ChaincodeStubInterface, args []string) pe
 	if result == "done" {
 		return shim.Success([]byte("success"))
 	} else if result != "continue" {
-		return shim.Error(result)
+		return shim.Success([]byte(result))
 	}
 
 	var cd ContractData
@@ -231,7 +232,7 @@ func (a *HtlcChaincode) unlock(stub shim.ChaincodeStubInterface, args []string) 
 	if result == "done" {
 		return shim.Success([]byte("success"))
 	} else if result != "continue" {
-		return shim.Error(result)
+		return shim.Success([]byte(result))
 	}
 
 	var cd ContractData

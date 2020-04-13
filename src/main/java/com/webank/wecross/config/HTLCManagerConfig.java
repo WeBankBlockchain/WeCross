@@ -41,26 +41,43 @@ public class HTLCManagerConfig {
             return htlcManager;
         }
         Map<String, HTLCTaskInfo> htlcTaskInfos = new HashMap<>();
-        for (Map<String, String> infoMap : infoList) {
-            HTLCTaskInfo htlcTaskInfo = new HTLCTaskInfo();
-            String selfPath = getSelfPath(infoMap);
-            String counterpartyPath = getCounterpartyPath(infoMap);
-            String selfAccount = getSelfAccount(infoMap);
 
-            String counterpartyAccount = getCounterpartyAccount(infoMap);
-            htlcTaskInfo.setSelfPath(selfPath);
-            htlcTaskInfo.setSelfAccount(selfAccount);
-            // htlcTaskInfo.setSelfAddress(getCounterpartyHtlc(counterpartyPath,
-            // counterpartyAccount));
-            htlcTaskInfo.setCounterpartyPath(counterpartyPath);
-            htlcTaskInfo.setCounterpartyAccount(counterpartyAccount);
-            htlcTaskInfo.setCounterpartyAddress(getCounterpartyHtlc(selfPath, selfAccount));
+        try {
+            for (Map<String, String> infoMap : infoList) {
+                HTLCTaskInfo htlcTaskInfo = new HTLCTaskInfo();
 
-            htlcTaskInfos.put(selfPath, htlcTaskInfo);
+                String selfPath = getSelfPath(infoMap);
+                checkHtlcResources(selfPath);
+
+                String counterpartyPath = getCounterpartyPath(infoMap);
+                String selfAccount = getAccount1(infoMap);
+                String counterpartyAccount = getAccount2(infoMap);
+
+                htlcTaskInfo.setSelfPath(selfPath);
+                htlcTaskInfo.setSelfAccount(selfAccount);
+
+                htlcTaskInfo.setCounterpartyPath(counterpartyPath);
+                htlcTaskInfo.setCounterpartyAccount(counterpartyAccount);
+                htlcTaskInfo.setCounterpartyAddress(getCounterpartyHtlc(selfPath, selfAccount));
+
+                htlcTaskInfos.put(selfPath, htlcTaskInfo);
+            }
+        } catch (Exception e) {
+            logger.error("failed to new HTLCManager: {}", e.getMessage());
+            System.exit(-1);
         }
+
         htlcManager.setHtlcTaskInfos(htlcTaskInfos);
         logger.info("HTLC resources: {}", Arrays.toString(htlcTaskInfos.keySet().toArray()));
         return htlcManager;
+    }
+
+    public void checkHtlcResources(String path) throws Exception {
+        com.webank.wecross.resource.Resource selfResource =
+                zoneManager.getResource(Path.decode(path));
+        if (selfResource == null) {
+            throw new Exception("htlc resource: " + path + " not found");
+        }
     }
 
     private String getCounterpartyHtlc(String iPath, String accountName) {
@@ -79,7 +96,10 @@ public class HTLCManagerConfig {
         try {
             counterpartyaddress = htlc.getCounterpartyHtlc(resource, account);
         } catch (WeCrossException e) {
-            logger.error("failed to getCounterpartyHtlc, path: {}", iPath);
+            logger.error(
+                    "failed to get counterparty htlc address, path: {}, error: {}",
+                    iPath,
+                    e.getInternalMessage());
             System.exit(1);
         }
         return counterpartyaddress;
@@ -97,11 +117,11 @@ public class HTLCManagerConfig {
         return selfPath;
     }
 
-    private String getSelfAccount(Map<String, String> infoMap) {
-        String selfAccount = infoMap.get("selfAccount");
+    private String getAccount1(Map<String, String> infoMap) {
+        String selfAccount = infoMap.get("account1");
         if (selfAccount == null) {
             String errorMessage =
-                    "Something wrong with [htlc] item, please check [selfAccount] in "
+                    "Something wrong with [htlc] item, please check [account1] in "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
             logger.error(errorMessage);
             System.exit(1);
@@ -121,11 +141,11 @@ public class HTLCManagerConfig {
         return counterpartyPath;
     }
 
-    private String getCounterpartyAccount(Map<String, String> infoMap) {
-        String counterpartyAccount = infoMap.get("counterpartyAccount");
+    private String getAccount2(Map<String, String> infoMap) {
+        String counterpartyAccount = infoMap.get("account2");
         if (counterpartyAccount == null) {
             String errorMessage =
-                    "Something wrong with [htlc] item, please check [counterpartyAccount] in "
+                    "Something wrong with [htlc] item, please check [account2] in "
                             + WeCrossDefault.MAIN_CONFIG_FILE;
             logger.error(errorMessage);
             System.exit(1);

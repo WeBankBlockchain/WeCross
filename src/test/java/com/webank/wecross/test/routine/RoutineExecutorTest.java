@@ -20,18 +20,6 @@ import org.mockito.Mockito;
 
 public class RoutineExecutorTest {
     @Test
-    public void checkHtlcResourcesTest() throws Exception {
-        WeCrossHost mockWeCrossHost = Mockito.mock(WeCrossHost.class);
-        ZoneManager mockZoneManager = Mockito.mock(ZoneManager.class);
-        Resource mockResource = Mockito.mock(Resource.class);
-        Mockito.when(mockWeCrossHost.getZoneManager()).thenReturn(mockZoneManager);
-        Mockito.when(mockZoneManager.getResource(Mockito.any(Path.class))).thenReturn(mockResource);
-        RoutineExecutor routineExecutor = new RoutineExecutor();
-        routineExecutor.setWeCrossHost(mockWeCrossHost);
-        routineExecutor.checkHtlcResources("a.b.c");
-    }
-
-    @Test
     public void initHTLCResourcePairsTest() throws Exception {
         HTLCTaskInfo htlcTaskInfo = new HTLCTaskInfo("a.b.c", "ac", "0x", "a.b.c", "ac", "0x");
         WeCrossHost mockWeCrossHost = Mockito.mock(WeCrossHost.class);
