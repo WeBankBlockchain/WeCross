@@ -34,8 +34,7 @@ public class Generator {
                 System.err.println("Unknown operation: " + op);
             }
         } catch (Exception e) {
-            System.err.println("Error");
-            e.printStackTrace();
+            System.err.println("Error" + e.toString());
             return;
         }
     }
