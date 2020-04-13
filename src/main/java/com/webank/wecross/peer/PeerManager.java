@@ -15,7 +15,7 @@ public class PeerManager {
     Logger logger = LoggerFactory.getLogger(PeerManager.class);
 
     private Map<Node, Peer> peerInfos = new ConcurrentHashMap<Node, Peer>(); // peer
-    private int seq = SeqUtils.newSeq(); // Seq of the host
+    private int seq = 1; // Seq of the host
     private long peerActiveTimeout;
 
     private Map<String, ResourceInfo> activeResources = new HashMap<>();
@@ -46,6 +46,10 @@ public class PeerManager {
 
     public synchronized Peer addPeerInfo(Node node) {
         Peer peerInfo = new Peer(node);
+        if (peerInfos.containsKey(node)) {
+            logger.error("");
+        }
+
         peerInfos.put(node, peerInfo);
 
         return peerInfo;
