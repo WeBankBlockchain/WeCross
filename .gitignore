@@ -55,3 +55,4 @@ src/test/resources/stubs/
 *.keystore
 *.truststore
 db/
+routers/

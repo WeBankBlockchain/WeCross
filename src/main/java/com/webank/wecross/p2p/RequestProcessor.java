@@ -200,38 +200,50 @@ public class RequestProcessor implements Processor {
                                                     String message,
                                                     P2PResponse<PeerInfoMessageData> responseMsg) {
                                                 logger.info("Receive peer info from {}", peerInfo);
+                                                try {
+                                                    PeerInfoMessageData data =
+                                                            (PeerInfoMessageData)
+                                                                    responseMsg.getData();
+                                                    if (data != null) {
+                                                        int newSeq = data.getSeq();
+                                                        if (peerManager.hasPeerChanged(
+                                                                peerInfo.getNode(), newSeq)) {
+                                                            // compare and update
+                                                            Map<String, ResourceInfo> newResources =
+                                                                    data.getResources();
+                                                            logger.info(
+                                                                    "Update peerInfo from {}, seq:{}, resource:{}",
+                                                                    peerInfo,
+                                                                    newSeq,
+                                                                    newResources);
 
-                                                PeerInfoMessageData data =
-                                                        (PeerInfoMessageData) responseMsg.getData();
-                                                if (data != null) {
-                                                    int newSeq = data.getSeq();
-                                                    if (peerManager.hasPeerChanged(
-                                                            peerInfo.getNode(), newSeq)) {
-                                                        // compare and update
-                                                        Map<String, ResourceInfo> newResources =
-                                                                data.getResources();
-                                                        logger.info(
-                                                                "Update peerInfo from {}, seq:{}, resource:{}",
-                                                                peerInfo,
-                                                                newSeq,
-                                                                newResources);
-
-                                                        // update zonemanager
-                                                        zoneManager.removeRemoteResources(
-                                                                peerInfo,
-                                                                peerInfo.getResourceInfos());
-                                                        peerInfo.setResources(newSeq, newResources);
-                                                        zoneManager.addRemoteResources(
-                                                                peerInfo, newResources);
+                                                            // update zonemanager
+                                                            zoneManager.removeRemoteResources(
+                                                                    peerInfo,
+                                                                    peerInfo.getResourceInfos());
+                                                            zoneManager.addRemoteResources(
+                                                                    peerInfo, newResources);
+                                                            peerInfo.setResources(
+                                                                    newSeq, newResources);
+                                                        } else {
+                                                            logger.info(
+                                                                    "Peer info not changed, seq:{}",
+                                                                    newSeq);
+                                                        }
                                                     } else {
-                                                        logger.info(
-                                                                "Peer info not changed, seq:{}",
-                                                                newSeq);
+                                                        logger.warn(
+                                                                "Receive unrecognized seq message from peer:"
+                                                                        + peerInfo);
                                                     }
-                                                } else {
-                                                    logger.warn(
-                                                            "Receive unrecognized seq message from peer:"
-                                                                    + peerInfo);
+                                                } catch (WeCrossException e) {
+                                                    logger.error(
+                                                            "Update peerInfo error({}): {}",
+                                                            e.getErrorCode(),
+                                                            e);
+                                                } catch (Exception e) {
+                                                    logger.error(
+                                                            "Update peerInfo error(Internal error): {}",
+                                                            e);
                                                 }
                                             }
                                         };

@@ -1,6 +1,7 @@
 package com.webank.wecross.config;
 
 import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.common.BCManager;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.p2p.MessageType;
 import com.webank.wecross.p2p.P2PMessageEngine;
@@ -28,8 +29,12 @@ public class WeCrossHostConfig {
 
     @Resource private AccountManager accountManager;
 
+    @Resource private BCManager bcManager;
+
     @Bean
     public WeCrossHost newWeCrossHost() {
+        System.out.println("Initializing WeCrossHost ...");
+
         WeCrossHost host = new WeCrossHost();
         host.setZoneManager(zoneManager);
         host.setP2pService(p2pService);

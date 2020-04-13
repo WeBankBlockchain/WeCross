@@ -270,7 +270,7 @@ func (a *HtlcChaincode) rollback(stub shim.ChaincodeStubInterface, args []string
 	if result == "done" {
 		return shim.Success([]byte("success"))
 	} else if result != "continue" {
-		return shim.Error(result)
+		return shim.Success([]byte(result))
 	}
 
 	var cd ContractData

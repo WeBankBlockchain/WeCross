@@ -42,7 +42,7 @@ run_wecross()
 wecross_status()
 {
     if [ ! -z $(wecross_pid) ]; then
-        if [ ! -z "$(grep "WeCross router is running" start.out)" ]; then
+        if [ ! -z "$(grep "WeCross router start success" start.out)" ]; then
             echo ${STATUS_RUNNING}
         else
             echo ${STATUS_STARTING}

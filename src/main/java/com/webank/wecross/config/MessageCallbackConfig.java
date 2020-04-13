@@ -28,6 +28,7 @@ public class MessageCallbackConfig {
 
     @Bean
     public MessageCallBack newMessageCallBack() {
+        System.out.println("Initializing MessageCallBack ...");
 
         MessageCallBack callback = new MessageCallBack();
         callback.setSeqMapper(seqMapper);

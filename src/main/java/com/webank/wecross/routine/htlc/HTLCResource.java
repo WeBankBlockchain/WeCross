@@ -111,36 +111,37 @@ public class HTLCResource extends Resource {
 
     @Override
     public Response onRemoteTransaction(Request request) {
-        Driver driver = getSelfResource().getDriver();
-        if (driver.isTransaction(request)) {
-            TransactionContext<TransactionRequest> context =
-                    driver.decodeTransactionRequest(request.getData());
-            TransactionRequest transactionRequest = context.getData();
-            String method = transactionRequest.getMethod();
-            if (method.equalsIgnoreCase("getSecret") || method.equalsIgnoreCase("init")) {
-                String errorMsg = "HTLCResource doesn't allow peers to call \"getSecret\"";
-                logger.info(errorMsg);
-                Response response = new Response();
-                response.setErrorCode(HTLCErrorCode.ASSET_HTLC_NO_PERMISSION);
-                response.setErrorMessage(errorMsg);
-                return response;
-            } else if (transactionRequest.getMethod().equalsIgnoreCase("unlock")) {
-                try {
-                    verifyLock(transactionRequest);
-                } catch (WeCrossException e) {
-                    String errorMsg =
-                            "HTLC unlock failed, errorCode: "
-                                    + e.getErrorCode()
-                                    + " errorMsg: "
-                                    + e.getMessage();
-                    logger.info(errorMsg);
-                    Response response = new Response();
-                    response.setErrorCode(HTLCErrorCode.ASSET_HTLC_VERIFY_ERROR);
-                    response.setErrorMessage(errorMsg);
-                    return response;
-                }
-            }
-        }
+        //        Driver driver = getDriver();
+        //        if (driver.isTransaction(request)) {
+        //            TransactionContext<TransactionRequest> context =
+        //                    driver.decodeTransactionRequest(request.getData());
+        //            TransactionRequest transactionRequest = context.getData();
+        //            String method = transactionRequest.getMethod();
+        //            if (method.equalsIgnoreCase("getSecret") || method.equalsIgnoreCase("init")) {
+        //                String errorMsg = "HTLCResource doesn't allow peers to call
+        // \"getSecret\"";
+        //                logger.info(errorMsg);
+        //                Response response = new Response();
+        //                response.setErrorCode(HTLCErrorCode.ASSET_HTLC_NO_PERMISSION);
+        //                response.setErrorMessage(errorMsg);
+        //                return response;
+        //            } else if (transactionRequest.getMethod().equalsIgnoreCase("unlock")) {
+        //                try {
+        //                    verifyLock(transactionRequest);
+        //                } catch (WeCrossException e) {
+        //                    String errorMsg =
+        //                            "HTLC unlock failed, errorCode: "
+        //                                    + e.getErrorCode()
+        //                                    + " errorMsg: "
+        //                                    + e.getMessage();
+        //                    logger.info(errorMsg);
+        //                    Response response = new Response();
+        //                    response.setErrorCode(HTLCErrorCode.ASSET_HTLC_VERIFY_ERROR);
+        //                    response.setErrorMessage(errorMsg);
+        //                    return response;
+        //                }
+        //            }
+        //        }
         return getSelfResource().onRemoteTransaction(request);
     }
 

@@ -14,6 +14,8 @@ public class RocksDBBlockHeaderFactoryConfig {
 
     @Bean
     BlockHeaderStorageFactory newBlockHeaderStorageFactory() {
+        System.out.println("Initializing BlockHeaderStorageFactory ...");
+
         String basePath = toml.getString("db.path", "db/");
 
         RocksDBBlockHeaderStorageFactory rocksDBBlockHeaderStorageFactory =

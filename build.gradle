@@ -121,6 +121,7 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-configuration-processor:2.1.4.RELEASE'
     compile 'org.rocksdb:rocksdbjni:6.6.4'
     compile 'io.netty:netty-all:4.1.47.Final'
+    compile 'org.bouncycastle:bcprov-jdk15on:1.60'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'

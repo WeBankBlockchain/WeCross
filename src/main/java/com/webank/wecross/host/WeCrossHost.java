@@ -3,6 +3,7 @@ package com.webank.wecross.host;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.netty.P2PService;
+import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.peer.PeerSeqMessageData;
@@ -13,6 +14,7 @@ import com.webank.wecross.restserver.response.StateResponse;
 import com.webank.wecross.routine.RoutineManager;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.ZoneManager;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,7 @@ public class WeCrossHost {
             check();
 
             /** start netty p2p service */
+            System.out.println("Start netty p2p service");
             p2pService.start();
 
             // start main loop
@@ -41,12 +44,16 @@ public class WeCrossHost {
                             new Runnable() {
                                 @Override
                                 public void run() {
+                                    // This out is used for start.sh checking
+                                    System.out.println("WeCross router start success!");
                                     mainLoop();
                                 }
                             });
             mainLoopThread.start();
         } catch (Exception e) {
-            logger.error("Startup host error: {}", e);
+            String errorInfo = "Startup host error: " + e.toString();
+            System.out.println(errorInfo);
+            logger.error(errorInfo);
             System.exit(-1);
         }
     }
@@ -59,23 +66,9 @@ public class WeCrossHost {
                 logger.error("Thread exception", e);
             }
 
-            int seq = zoneManager.getSeq();
+            broadcastResourceSeq();
 
-            PeerSeqMessageData peerSeqMessageData = new PeerSeqMessageData();
-            peerSeqMessageData.setSeq(seq);
-
-            P2PMessage<Object> msg = new P2PMessage<>();
-            msg.newSeq();
-            msg.setData(peerSeqMessageData);
-            msg.setVersion(Versions.currentVersion);
-            msg.setMethod("seq");
-
-            for (Peer peer : peerManager.getPeerInfos().values()) {
-                logger.debug("Send peer seq, to peer:{}, seq:{}", peer, msg.getSeq());
-                zoneManager.getP2PEngine().asyncSendMessage(peer, msg, null);
-            }
-
-            logger.info("WeCross router is running");
+            dumpStatus();
         }
     }
 
@@ -92,6 +85,57 @@ public class WeCrossHost {
         if (accountManager == null) {
             throw new Exception("accountManager is null");
         }
+    }
+
+    private void broadcastResourceSeq() {
+        int seq = zoneManager.getSeq();
+
+        PeerSeqMessageData peerSeqMessageData = new PeerSeqMessageData();
+        peerSeqMessageData.setSeq(seq);
+
+        P2PMessage<Object> msg = new P2PMessage<>();
+        msg.newSeq();
+        msg.setData(peerSeqMessageData);
+        msg.setVersion(Versions.currentVersion);
+        msg.setMethod("seq");
+
+        for (Peer peer : peerManager.getPeerInfos().values()) {
+            logger.debug("Send peer seq, to peer:{}, seq:{}", peer, msg.getSeq());
+            zoneManager.getP2PEngine().asyncSendMessage(peer, msg, null);
+        }
+    }
+
+    private void dumpStatus() {
+        dumpPeers();
+        dumpActiveResources();
+    }
+
+    private void dumpActiveResources() {
+        Map<String, Resource> activeResources = getZoneManager().getAllResources(false);
+        String dumpStr = "Current active resources: [";
+        for (Map.Entry<String, Resource> entry : activeResources.entrySet()) {
+            String path = entry.getKey();
+            dumpStr += path;
+            if (entry.getValue().isHasLocalConnection()) {
+                dumpStr += "(local)";
+            } else {
+                dumpStr += "(remote)";
+            }
+            dumpStr += ", ";
+        }
+        dumpStr += "]";
+        logger.debug(dumpStr);
+    }
+
+    private void dumpPeers() {
+        Map<Node, Peer> peerInfos = getPeerManager().getPeerInfos();
+        String dumpStr = "Current peers: [";
+        for (Node node : peerInfos.keySet()) {
+            dumpStr += node.toString() + ", ";
+        }
+
+        dumpStr += "]";
+        logger.debug(dumpStr);
     }
 
     public Resource getResource(Path path) throws Exception {

@@ -6,4 +6,5 @@ public class RoutineDefault {
     public static final String NULL_FLAG = "null";
     public static final String TRUE_FLAG = "true";
     public static final String FALSE_FLAG = "false";
+    public static final String NOT_YET = "not_yet";
 }

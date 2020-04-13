@@ -84,7 +84,8 @@ public class ZoneManager {
         return seq.intValue();
     }
 
-    public void addRemoteResources(Peer peer, Map<String, ResourceInfo> resources) {
+    public void addRemoteResources(Peer peer, Map<String, ResourceInfo> resources)
+            throws Exception {
         lock.writeLock().lock();
         try {
             for (Map.Entry<String, ResourceInfo> entry : resources.entrySet()) {
@@ -95,6 +96,21 @@ public class ZoneManager {
                 } catch (Exception e) {
                     logger.error("Parse path error: {} {}", entry.getKey(), e);
                     continue;
+                }
+
+                // Verify Checksum
+                if (getResource(path) != null) {
+                    String originChecksum = getResource(path).getResourceInfo().getChecksum();
+                    String receiveChecksum = resourceInfo.getChecksum();
+                    if (!originChecksum.equals(receiveChecksum)) {
+                        logger.error(
+                                "Receive resource with different checksum, ipath: {} peer: {} receiveChecksum: {} originChecksum: {}",
+                                path.toString(),
+                                peer.getNode().toString(),
+                                receiveChecksum,
+                                originChecksum);
+                        continue;
+                    }
                 }
 
                 Zone zone = zones.get(path.getNetwork());
@@ -145,6 +161,7 @@ public class ZoneManager {
             }
         } catch (WeCrossException e) {
             logger.error("Add remote resource error", e);
+            throw e;
         } finally {
             lock.writeLock().unlock();
         }

@@ -10,12 +10,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class TomlConfig {
+public class WeCrossTomlConfig {
 
-    private Logger logger = LoggerFactory.getLogger(TomlConfig.class);
+    private Logger logger = LoggerFactory.getLogger(WeCrossTomlConfig.class);
 
     @Bean
     public Toml newToml() {
+        System.out.println("Load " + WeCrossDefault.MAIN_CONFIG_FILE + " ...");
+
         Toml toml = new Toml();
         try {
             toml = ConfigUtils.getToml(WeCrossDefault.MAIN_CONFIG_FILE);

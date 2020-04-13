@@ -268,7 +268,7 @@ func (h *HTLC) rollback(stub shim.ChaincodeStubInterface, hash string) string {
 		return err.Error()
 	}
 	if timelock > uint64(timeStamp.Seconds) {
-		return "can not rollback until now > timelock"
+		return "not_yet"
 	}
 
 	if !cd.Locked {

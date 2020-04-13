@@ -98,8 +98,6 @@
 
     <Loggers>
         <Root level="DEBUG">
-            <AppenderRef ref="asyncConsole"/>
-            <AppenderRef ref="asyncFile"/>
             <AppenderRef ref="asyncDEBUG"/>
             <AppenderRef ref="asyncINFO"/>
             <AppenderRef ref="asyncWARN"/>
