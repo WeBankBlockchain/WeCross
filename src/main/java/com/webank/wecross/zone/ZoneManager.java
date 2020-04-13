@@ -209,6 +209,9 @@ public class ZoneManager {
 
                 if (chain.getResources().isEmpty()) {
                     chain.stop();
+                    if (chain.getBlockHeaderStorage() != null) {
+                        chain.getBlockHeaderStorage().close();
+                    }
                     logger.info(
                             "Stop block header sync: {}",
                             path.getNetwork() + "." + path.getChain());

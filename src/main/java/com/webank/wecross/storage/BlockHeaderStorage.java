@@ -7,4 +7,6 @@ public interface BlockHeaderStorage {
     public byte[] readBlockHeader(long blockNumber);
 
     public void writeBlockHeader(long blockNumber, byte[] blockHeader);
+
+    public void close();
 }

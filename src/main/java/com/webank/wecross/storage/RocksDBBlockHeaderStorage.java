@@ -68,4 +68,9 @@ public class RocksDBBlockHeaderStorage implements BlockHeaderStorage {
     public void setRocksDB(RocksDB rocksDB) {
         this.rocksDB = rocksDB;
     }
+
+    @Override
+    public void close() {
+        rocksDB.close();
+    }
 }

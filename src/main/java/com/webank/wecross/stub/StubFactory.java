@@ -1,8 +1,8 @@
 package com.webank.wecross.stub;
 
 public interface StubFactory {
-	public String version = "1.0.0";
-	
+    public String version = "1.0.0";
+
     /**
      * create a driver
      *
@@ -19,9 +19,10 @@ public interface StubFactory {
 
     /** load account */
     public Account newAccount(String name, String path);
-    
+
     /**
      * generate account
+     *
      * @param path
      * @param args
      */
@@ -29,6 +30,7 @@ public interface StubFactory {
 
     /**
      * generate stub
+     *
      * @param path
      * @param args
      */
