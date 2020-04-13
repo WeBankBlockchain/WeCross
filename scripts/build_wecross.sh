@@ -174,22 +174,21 @@ gen_one_wecross()
     
     mkdir -p ${output}/plugin
     #download plugins
-    oldIPS="$IPS"
-    IPS=','
-    for plugin in "$plugins";do
-        case $plugin in
-        BCOS2.0)
-            #download and initialize the plugin
-            #wget
-            ;;
-        Fabric1.4)
-        	#download and initialize the plugin
-            #wget
-            ;;
-        esac
-    done
-    IPS="$oldIPS"
-    
+    #oldIPS="$IPS"
+    #IPS=','
+    #for plugin in "$plugins";do
+    #    case $plugin in
+    #    BCOS2.0)
+    #        #download and initialize the plugin
+    #        #wget
+    #        ;;
+    #    Fabric1.4)
+    #    	#download and initialize the plugin
+    #        #wget
+    #        ;;
+    #    esac
+    #done
+    #IPS="$oldIPS"
 
     cp -r "${wecross_dir}/conf" "${output}/conf"
     cp -r "${cert_dir}"/* "${output}"/conf/
