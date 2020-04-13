@@ -56,7 +56,7 @@ public class NettyBootstrap {
     /** ssl handle shake timeout default 10000 ms */
     private static final Integer handShakeTimeoutMS = 10000;
 
-    private ChannelHandlerCallBack channelHandlerCallBack = new ChannelHandlerCallBack();
+    private ChannelHandlerCallBack channelHandlerCallBack;
     private Connections connections = new Connections();
     private P2PConfig config;
 
