@@ -117,8 +117,14 @@ public class ChannelHandlerCallBack {
         ctx.channel().attr(AttributeKey.valueOf("NodeID")).set(node.getNodeID());
 
         logger.info("add new connections: {}", node);
-        getConnections().addChannelHandler(node, ctx, connectToServer);
-
+        try {
+            getConnections().addChannelHandler(node, ctx, connectToServer);
+        } catch (UnsupportedOperationException e) {
+            logger.debug("Reconnect: " + e.getLocalizedMessage());
+            ctx.disconnect();
+            ctx.close();
+            return;
+        }
         logger.info(
                 " node {} connect success, nodeID: {}, ctx: {}",
                 node,
