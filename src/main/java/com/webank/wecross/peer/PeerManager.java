@@ -46,6 +46,10 @@ public class PeerManager {
 
     public synchronized Peer addPeerInfo(Node node) {
         Peer peerInfo = new Peer(node);
+        if (peerInfos.containsKey(node)) {
+            logger.error("Duplicate peerInfo update " + peerInfo);
+        }
+
         peerInfos.put(node, peerInfo);
 
         return peerInfo;
