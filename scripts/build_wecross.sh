@@ -86,7 +86,7 @@ check_env()
 
 parse_command()
 {
-while getopts "o:n:l:f:c:zTh" option;do
+while getopts "o:n:l:f:c:d:p:zTh" option;do
     # shellcheck disable=SC2220
     case ${option} in
     o)
@@ -115,6 +115,9 @@ while getopts "o:n:l:f:c:zTh" option;do
     ;;
     p)
         plugins=$OPTARG
+    ;;
+    d)
+        dep_dir=$OPTARG
     ;;
     h)  help;;
     esac

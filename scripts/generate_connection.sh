@@ -2,7 +2,7 @@
 
 #set -e
 
-target_dir=conf/
+target_dir=conf/stubs/
 type=''
 name=''
 
@@ -22,7 +22,7 @@ EOF
 exit 0
 }
 
-while getopts "cC:d:D:nt:h" option;do
+while getopts "t:n:d:h" option;do
     case $option in
     t) type=$OPTARG ;;
     n) name=$OPTARG ;;
@@ -35,4 +35,4 @@ done
 [ -z "$name" ] && help
 
 mkdir -p "${target_dir}/${name}"
-java -cp '/apps/*:lib/*:conf:plugin/*' com.webank.wecross.Generator account "$type" "${target_dir}/${name}"
+java -cp 'apps/*:lib/*:conf:plugin/*' com.webank.wecross.Generator connection "$type" "${target_dir}/${name}"
