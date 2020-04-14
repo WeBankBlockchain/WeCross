@@ -1,3 +1,4 @@
+pragma solidity ^0.4.25;
 pragma experimental ABIEncoderV2;
 
 import "./BAC001.sol";
@@ -94,4 +95,13 @@ contract BACHTLC is HTLC {
         result[0] = "success";
     }
 
+    function balanceOf(string[] _ss)
+    public
+    view
+    returns(string[] result)
+    {
+        result = new string[](1);
+        uint b = BAC001(assetContract).balance(stringToAddress(_ss[0]));
+        result[0] = uintToString(b);
+    }
 }
