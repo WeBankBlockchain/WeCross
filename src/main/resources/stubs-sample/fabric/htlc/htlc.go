@@ -58,7 +58,7 @@ func (h *HTLC) init(stub shim.ChaincodeStubInterface, counterpartyHtlc string) {
 
 func (h *HTLC) newContract(stub shim.ChaincodeStubInterface, hash, role, sender0, receiver0, amount0, timelock0, sender1, receiver1, amount1, timelock1 string) {
 	if isExisted(stub, hash) {
-		panic(errors.New("task exists"))
+		panic(errors.New("hash as contract-id existed"))
 	}
 
 	if !rightTimelock(stub, timelock0, timelock1) {

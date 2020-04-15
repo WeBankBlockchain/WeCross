@@ -1,5 +1,5 @@
 [common]
-    zone = 'network'
+    zone = 'payment'
     visible = true
 
 [stubs]
@@ -21,7 +21,7 @@
     peers = ['127.0.0.1:25501']
 
 #[[htlc]]
-#    selfPath = 'network.bcos.htlc'
+#    selfPath = 'payment.bcos.htlc'
 #    account1 = 'bcos_default'
-#    counterpartyPath = 'network.fabric.htlc'
+#    counterpartyPath = 'payment.fabric.htlc'
 #    account2 = 'fabric_default'
