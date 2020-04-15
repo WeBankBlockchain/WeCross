@@ -1,5 +1,7 @@
 package com.webank.wecross.stub;
 
+import java.util.Arrays;
+
 public class Response {
     private int errorCode;
     private String errorMessage;
@@ -27,5 +29,18 @@ public class Response {
 
     public void setData(byte[] data) {
         this.data = data;
+    }
+
+    @Override
+    public String toString() {
+        return "Response{"
+                + "errorCode="
+                + errorCode
+                + ", errorMessage='"
+                + errorMessage
+                + '\''
+                + ", data="
+                + Arrays.toString(data)
+                + '}';
     }
 }

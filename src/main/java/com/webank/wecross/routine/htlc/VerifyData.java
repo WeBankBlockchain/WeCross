@@ -38,8 +38,8 @@ public class VerifyData {
             return false;
         }
 
-        logger.debug("VerifiedTransaction: {}", transaction.toString());
-        logger.debug("VerifyData: {}", toString());
+        logger.debug(transaction.toString());
+        logger.debug(toString());
 
         TransactionRequest request = transaction.getTransactionRequest();
         boolean isEqual =
@@ -52,7 +52,7 @@ public class VerifyData {
                                 getResult(), transaction.getTransactionResponse().getResult());
         if (!isEqual) {
             logger.error(
-                    "verify transaction failed, transaction: {}, verifyData: {}",
+                    "verify transaction failed, detail:\n{}\n{}",
                     transaction.toString(),
                     toString());
         }
