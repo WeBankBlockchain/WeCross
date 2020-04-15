@@ -33,10 +33,20 @@ contract HTLC {
     uint tail = 0;        // point to the next position for added task
     string[] taskQueue;
 
+    bool isInited = false;
+
     function init(string[] _ss)
     public
+    returns (string[] result)
     {
+        result = new string[](1);
+        if(isInited) {
+            result[0] = "cannot init repeatedly";
+            return;
+        }
         counterpartyHtlc = _ss[0];
+        isInited = true;
+        result[0] = "success";
     }
 
     function newContract(string[] _ss)
@@ -45,7 +55,7 @@ contract HTLC {
     {
         result = new string[](1);
         if (taskIsExisted(_ss[0])) {
-            result[0] = "task exists";
+            result[0] = "hash as contract-id existed";
             return;
         }
 
@@ -321,7 +331,7 @@ contract HTLC {
         }
     }
 
-    function getCounterpartyHtlc(string[] _ss)
+    function getCounterpartyHtlc()
     public
     view
     returns (string[] result)
@@ -338,7 +348,7 @@ contract HTLC {
         taskQueue.push(_task);
     }
 
-    function getTask(string[] _ss)
+    function getTask()
     public
     view
     returns (string[] result)
