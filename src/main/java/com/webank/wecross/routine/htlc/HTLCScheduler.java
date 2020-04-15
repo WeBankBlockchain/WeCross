@@ -210,7 +210,7 @@ public class HTLCScheduler {
 
         try {
             int round = 0;
-            while (result.equalsIgnoreCase(RoutineDefault.NULL_FLAG) && round++ < 4) {
+            while (result.equalsIgnoreCase(RoutineDefault.NULL_FLAG) && round++ < 3) {
                 result = htlc.getSecret(htlcResource, h);
                 if (result.equalsIgnoreCase(RoutineDefault.NULL_FLAG)) {
                     Thread.sleep(500);
