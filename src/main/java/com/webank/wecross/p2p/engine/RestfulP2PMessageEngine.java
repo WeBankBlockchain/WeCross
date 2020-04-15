@@ -65,7 +65,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
                         new ResponseCallBack() {
                             @Override
                             public void onResponse(Response response) {
-                                logger.info(" receive response: {}", response);
+                                logger.debug(" receive response: {}", response);
 
                                 if (callback != null) {
                                     String content = response.getContent();
