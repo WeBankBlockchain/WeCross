@@ -34,7 +34,7 @@ public class ResponseProcessor implements Processor {
     public void process(ChannelHandlerContext ctx, Node node, Message message) {
         try {
             String content = new String(message.getData(), "utf-8");
-            logger.info(" source response, message: {}, content: {}", message, content);
+            logger.debug(" source response, message: {}, content: {}", message, content);
 
             ResponseCallBack callback =
                     (ResponseCallBack) getSeqMapper().getAndRemove(message.getSeq());

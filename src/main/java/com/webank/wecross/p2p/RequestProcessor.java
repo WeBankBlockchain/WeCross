@@ -79,7 +79,7 @@ public class RequestProcessor implements Processor {
         try {
             String content = new String(message.getData(), "utf-8");
 
-            logger.info(
+            logger.debug(
                     "  resource request message, host: {}, seq: {}, content: {}",
                     node,
                     message.getSeq(),
@@ -122,7 +122,7 @@ public class RequestProcessor implements Processor {
                 serializer.serialize(message, byteBuf);
                 ctx.writeAndFlush(byteBuf);
 
-                logger.info(
+                logger.debug(
                         " resource request, host: {}, seq: {}, response content: {}",
                         node,
                         message.getSeq(),
@@ -157,7 +157,7 @@ public class RequestProcessor implements Processor {
 
                         Map<String, ResourceInfo> resources = zoneManager.getAllResourcesInfo(true);
 
-                        logger.info("Receive request peer info");
+                        logger.debug("Receive request peer info:{}", peerInfo);
                         PeerInfoMessageData data = new PeerInfoMessageData();
                         data.setSeq(zoneManager.getSeq());
                         data.setResources(resources);
@@ -170,7 +170,7 @@ public class RequestProcessor implements Processor {
                     }
                 case "seq":
                     {
-                        logger.info("Receive peer seq from peer:{}", peerInfo);
+                        logger.debug("Receive peer seq from peer:{}", peerInfo);
                         P2PMessage<PeerSeqMessageData> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
@@ -187,7 +187,7 @@ public class RequestProcessor implements Processor {
                                 msg.setVersion(Versions.currentVersion);
                                 msg.setMethod("requestPeerInfo");
 
-                                logger.info(
+                                logger.debug(
                                         "Request peer info, peer:{}, seq:{}",
                                         peerInfo,
                                         msg.getSeq());
@@ -199,7 +199,7 @@ public class RequestProcessor implements Processor {
                                                     int status,
                                                     String message,
                                                     P2PResponse<PeerInfoMessageData> responseMsg) {
-                                                logger.info("Receive peer info from {}", peerInfo);
+                                                logger.debug("Receive peer info from {}", peerInfo);
                                                 try {
                                                     PeerInfoMessageData data =
                                                             (PeerInfoMessageData)
@@ -211,7 +211,7 @@ public class RequestProcessor implements Processor {
                                                             // compare and update
                                                             Map<String, ResourceInfo> newResources =
                                                                     data.getResources();
-                                                            logger.info(
+                                                            logger.debug(
                                                                     "Update peerInfo from {}, seq:{}, resource:{}",
                                                                     peerInfo,
                                                                     newSeq,
@@ -226,7 +226,7 @@ public class RequestProcessor implements Processor {
                                                             peerInfo.setResources(
                                                                     newSeq, newResources);
                                                         } else {
-                                                            logger.info(
+                                                            logger.debug(
                                                                     "Peer info not changed, seq:{}",
                                                                     newSeq);
                                                         }
