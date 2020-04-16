@@ -147,7 +147,7 @@ public class RequestProcessor implements Processor {
             switch (method) {
                 case "requestPeerInfo":
                     {
-                        logger.debug("request method: " + method);
+                        logger.debug("Receive requestPeerInfo from peer {}", method, peerInfo);
                         P2PMessage<Object> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
@@ -157,7 +157,6 @@ public class RequestProcessor implements Processor {
 
                         Map<String, ResourceInfo> resources = zoneManager.getAllResourcesInfo(true);
 
-                        logger.debug("Receive request peer info:{}", peerInfo);
                         PeerInfoMessageData data = new PeerInfoMessageData();
                         data.setSeq(zoneManager.getSeq());
                         data.setResources(resources);
@@ -170,7 +169,7 @@ public class RequestProcessor implements Processor {
                     }
                 case "seq":
                     {
-                        logger.debug("Receive peer seq from peer:{}", peerInfo);
+                        logger.debug("Receive seq from peer:{}", peerInfo);
                         P2PMessage<PeerSeqMessageData> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
@@ -188,7 +187,7 @@ public class RequestProcessor implements Processor {
                                 msg.setMethod("requestPeerInfo");
 
                                 logger.debug(
-                                        "Request peer info, peer:{}, seq:{}",
+                                        "Request peerInfo to peer:{}, seq:{}",
                                         peerInfo,
                                         msg.getSeq());
 
@@ -199,7 +198,7 @@ public class RequestProcessor implements Processor {
                                                     int status,
                                                     String message,
                                                     P2PResponse<PeerInfoMessageData> responseMsg) {
-                                                logger.debug("Receive peer info from {}", peerInfo);
+                                                logger.trace("Receive peerInfo:{}", peerInfo);
                                                 try {
                                                     PeerInfoMessageData data =
                                                             (PeerInfoMessageData)
