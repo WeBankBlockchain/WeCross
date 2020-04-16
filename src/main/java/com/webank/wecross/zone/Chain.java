@@ -47,9 +47,6 @@ public class Chain {
                                             Thread.sleep(1000);
 
                                             fetchBlockHeader();
-                                        } catch (InterruptedException e) {
-                                            logger.info("Block header sync thread interrupt", e);
-                                            break;
                                         } catch (Exception e) {
                                             logger.error("Get block header error", e);
                                         }
