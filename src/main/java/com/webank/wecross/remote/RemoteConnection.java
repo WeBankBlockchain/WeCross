@@ -1,9 +1,7 @@
 package com.webank.wecross.remote;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.engine.P2PResponse;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.stub.Connection;
@@ -31,14 +29,12 @@ public class RemoteConnection implements Connection {
                 request.setResourceInfo(null);
                 p2pReq.setData(request);
 
-                RemoteSemaphoreCallback callback =
-                        new RemoteSemaphoreCallback(new TypeReference<P2PResponse<Response>>() {});
+                RemoteConnectionSemaphoreCallback callback =
+                        new RemoteConnectionSemaphoreCallback();
 
                 p2pEngine.asyncSendMessage(peer, p2pReq, callback);
 
-                callback.semaphore.acquire(1);
-
-                return (Response) callback.getResponseData();
+                return callback.getResponseData();
 
             } catch (Exception e) {
                 errorHistory +=
