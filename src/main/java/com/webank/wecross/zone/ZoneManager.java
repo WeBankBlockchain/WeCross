@@ -32,10 +32,10 @@ public class ZoneManager {
     public Resource getResource(Path path) {
         lock.readLock().lock();
         try {
-            Zone network = getZone(path);
+            Zone zone = getZone(path);
 
-            if (network != null) {
-                Chain stub = network.getChain(path);
+            if (zone != null) {
+                Chain stub = zone.getChain(path);
 
                 if (stub != null) {
                     Resource resource = stub.getResources().get(path.getResource());
@@ -64,9 +64,9 @@ public class ZoneManager {
     public Zone getZone(String name) {
         lock.readLock().lock();
         try {
-            logger.trace("get network: {}", name);
-            Zone network = zones.get(name);
-            return network;
+            logger.trace("get zone: {}", name);
+            Zone zone = zones.get(name);
+            return zone;
         } finally {
             lock.readLock().unlock();
         }
@@ -127,7 +127,7 @@ public class ZoneManager {
 
                 Chain chain = zone.getChains().get(path.getChain());
                 if (chain == null) {
-                    chain = new Chain();
+                    chain = new Chain(path.getChain());
                     chain.setDriver(driver);
 
                     String blockPath = path.getNetwork() + "." + path.getChain();
@@ -234,7 +234,7 @@ public class ZoneManager {
         lock.readLock().lock();
         try {
             for (Map.Entry<String, Zone> zoneEntry : zones.entrySet()) {
-                String networkName = PathUtils.toPureName(zoneEntry.getKey());
+                String zoneName = PathUtils.toPureName(zoneEntry.getKey());
 
                 for (Map.Entry<String, Chain> stubEntry :
                         zoneEntry.getValue().getChains().entrySet()) {
@@ -245,7 +245,7 @@ public class ZoneManager {
                         if (resourceEntry.getValue().isHasLocalConnection() || !ignoreRemote) {
                             String resourceName = PathUtils.toPureName(resourceEntry.getKey());
                             resources.put(
-                                    networkName + "." + stubName + "." + resourceName,
+                                    zoneName + "." + stubName + "." + resourceName,
                                     resourceEntry.getValue());
                         }
                     }
@@ -264,7 +264,7 @@ public class ZoneManager {
         lock.readLock().lock();
         try {
             for (Map.Entry<String, Zone> zoneEntry : zones.entrySet()) {
-                String networkName = PathUtils.toPureName(zoneEntry.getKey());
+                String zoneName = PathUtils.toPureName(zoneEntry.getKey());
 
                 for (Map.Entry<String, Chain> stubEntry :
                         zoneEntry.getValue().getChains().entrySet()) {
@@ -276,7 +276,7 @@ public class ZoneManager {
                         } else {
                             String resourceName = PathUtils.toPureName(resourceEntry.getKey());
                             resources.put(
-                                    networkName + "." + stubName + "." + resourceName,
+                                    zoneName + "." + stubName + "." + resourceName,
                                     resourceEntry.getValue().getResourceInfo());
                         }
                     }

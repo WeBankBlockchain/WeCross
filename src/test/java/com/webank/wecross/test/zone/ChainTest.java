@@ -59,7 +59,7 @@ public class ChainTest {
                             }
                         });
 
-        Chain chain = new Chain();
+        Chain chain = new Chain("MockChain");
         chain.setBlockHeaderStorage(blockHeaderStorage);
         chain.setDriver(driver);
         chain.addConnection(null, null);

@@ -288,7 +288,7 @@ public class NettyBootstrap {
         synchronized (host2NodeID) {
             host2NodeID.forEach(
                     (host, nodeID) -> {
-                        logger.info(" connected, host: {}, node: {}", host, nodeID);
+                        logger.info("Current peer url:{} nodeid:{}", host, nodeID);
                     });
         }
     }

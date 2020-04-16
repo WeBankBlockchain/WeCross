@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Chain {
+    private String name;
     private Logger logger = LoggerFactory.getLogger(Chain.class);
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
     boolean hasLocalConnection = false;
@@ -25,6 +26,10 @@ public class Chain {
     private AtomicBoolean running = new AtomicBoolean(false);
     private Random random = new SecureRandom();
     private BlockHeader localBlockHeader;
+
+    public Chain(String name) {
+        this.name = name;
+    }
 
     public void start() {
         if (!running.get()) {
@@ -42,9 +47,6 @@ public class Chain {
                                             Thread.sleep(1000);
 
                                             fetchBlockHeader();
-                                        } catch (InterruptedException e) {
-                                            logger.info("Block header sync thread interrupt", e);
-                                            break;
                                         } catch (Exception e) {
                                             logger.error("Get block header error", e);
                                         }
@@ -84,16 +86,24 @@ public class Chain {
                         blockNumber <= remoteBlockNumber;
                         ++blockNumber) {
                     byte[] blockBytes = driver.getBlockHeader(blockNumber, connection);
+                    if (blockBytes == null) {
+                        logger.error(
+                                "Could not get block header, please start the router which has chain({})",
+                                name);
+                        break;
+                    }
+
                     BlockHeader blockHeader = driver.decodeBlockHeader(blockBytes);
                     if (localBlockNumber >= 0) {
                         if (blockHeader.getNumber() != localBlockHeader.getNumber() + 1
                                 || !blockHeader.getPrevHash().equals(localBlockHeader.getHash())) {
                             logger.error(
-                                    "Fetched block couldn't be the next block, localBlockNumber: {} localBlockHash: {} fetchedBlockNumber: {} fetchedBlockPrevHash: {}",
+                                    "Fetched block couldn't be the next block, localBlockNumber: {} localBlockHash: {} fetchedBlockNumber: {} fetchedBlockPrevHash: {}, please check the router which has chain({}) is the same chain?",
                                     localBlockNumber,
                                     localBlockHash,
                                     blockHeader.getNumber(),
-                                    blockHeader.getPrevHash());
+                                    blockHeader.getPrevHash(),
+                                    name);
                             break;
                         }
                     }

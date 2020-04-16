@@ -248,7 +248,7 @@ public class RestfulController {
 
                         String accountName = restRequest.getAccountName();
                         Account account = accountManager.getAccount(accountName);
-                        logger.info(
+                        logger.trace(
                                 "call request: {}, account: {}",
                                 transactionRequest.toString(),
                                 accountName);
@@ -262,7 +262,7 @@ public class RestfulController {
                                                         resourceObj.getResourceInfo(),
                                                         resourceObj
                                                                 .getResourceBlockHeaderManager()));
-                        logger.info("call response: {}", transactionResponse.toString());
+                        logger.trace("call response: {}", transactionResponse.toString());
                         restResponse.setData(transactionResponse);
                         break;
                     }
@@ -284,7 +284,7 @@ public class RestfulController {
                                 (TransactionRequest) restRequest.getData();
                         String accountName = restRequest.getAccountName();
                         Account account = accountManager.getAccount(accountName);
-                        logger.info(
+                        logger.trace(
                                 "sendTransaction request: {}, account: {}",
                                 transactionRequest.toString(),
                                 accountName);
@@ -298,7 +298,8 @@ public class RestfulController {
                                                         resourceObj.getResourceInfo(),
                                                         resourceObj
                                                                 .getResourceBlockHeaderManager()));
-                        logger.info("sendTransaction response: {}", transactionResponse.toString());
+                        logger.trace(
+                                "sendTransaction response: {}", transactionResponse.toString());
                         restResponse.setData(transactionResponse);
                         break;
                     }

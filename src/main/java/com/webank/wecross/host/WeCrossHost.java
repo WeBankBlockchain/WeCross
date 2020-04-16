@@ -3,7 +3,6 @@ package com.webank.wecross.host;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.p2p.P2PMessage;
 import com.webank.wecross.p2p.netty.P2PService;
-import com.webank.wecross.p2p.netty.common.Node;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.peer.PeerSeqMessageData;
@@ -13,6 +12,8 @@ import com.webank.wecross.restserver.request.StateRequest;
 import com.webank.wecross.restserver.response.StateResponse;
 import com.webank.wecross.routine.RoutineManager;
 import com.webank.wecross.stub.Path;
+import com.webank.wecross.zone.Chain;
+import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -106,14 +107,39 @@ public class WeCrossHost {
     }
 
     private void dumpStatus() {
-        dumpPeers();
+        dumpChainsStatus();
         dumpActiveResources();
+    }
+
+    private void dumpChainsStatus() {
+        String dumpStr = "Current active chains: ";
+
+        boolean first = true;
+        for (Zone zone : getZoneManager().getZones().values()) {
+            for (Map.Entry<String, Chain> entry : zone.getChains().entrySet()) {
+                dumpStr += first ? "" : ", ";
+                first = false;
+                dumpStr +=
+                        "[chain="
+                                + entry.getKey()
+                                + ",blockNUmber="
+                                + entry.getValue().getBlockNumber()
+                                + "]";
+            }
+        }
+
+        dumpByTime(dumpStr);
     }
 
     private void dumpActiveResources() {
         Map<String, Resource> activeResources = getZoneManager().getAllResources(false);
-        String dumpStr = "Current active resources: [";
+        String dumpStr = "Current active resources: ";
+
+        boolean first = true;
         for (Map.Entry<String, Resource> entry : activeResources.entrySet()) {
+            dumpStr += first ? "" : ", ";
+            first = false;
+
             String path = entry.getKey();
             dumpStr += path;
             if (entry.getValue().isHasLocalConnection()) {
@@ -121,21 +147,18 @@ public class WeCrossHost {
             } else {
                 dumpStr += "(remote)";
             }
-            dumpStr += ", ";
         }
-        dumpStr += "]";
-        logger.debug(dumpStr);
+
+        dumpByTime(dumpStr);
     }
 
-    private void dumpPeers() {
-        Map<Node, Peer> peerInfos = getPeerManager().getPeerInfos();
-        String dumpStr = "Current peers: [";
-        for (Node node : peerInfos.keySet()) {
-            dumpStr += node.toString() + ", ";
+    private void dumpByTime(String dumpStr) {
+        if ((System.currentTimeMillis() / 1000) % 10 == 0) {
+            // dump to info every 10 seconds
+            logger.info(dumpStr);
+        } else {
+            logger.debug(dumpStr);
         }
-
-        dumpStr += "]";
-        logger.debug(dumpStr);
     }
 
     public Resource getResource(Path path) throws Exception {
