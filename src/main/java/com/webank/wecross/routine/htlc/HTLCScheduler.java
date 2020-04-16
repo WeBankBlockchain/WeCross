@@ -21,25 +21,26 @@ public class HTLCScheduler {
     public void start(HTLCResourcePair htlcResourcePair, String h) throws WeCrossException {
         boolean taskDone = false;
         HTLCResource selfResource = htlcResourcePair.getSelfHTLCResource();
-        HTLCResource counterpartyResource = htlcResourcePair.getCounterpartyHTLCResource();
-
-        if (counterpartyResource.getSelfResource() == null) {
-            throw new WeCrossException(
-                    ErrorCode.HTLC_ERROR,
-                    "error in scheduler",
-                    HTLCErrorCode.NO_COUNTERPARTY_RESOURCE,
-                    "counterparty resource: "
-                            + counterpartyResource.getSelfPath().toString()
-                            + " not found");
-        }
-
         boolean selfRolledback = checkSelfRollback(selfResource, h);
         boolean counterpartyRolledback = checkCounterpartyRollback(selfResource, h);
+
         // the initiator and participant can still do their jobs even though the participant seems
         // to be rolled back
         if (selfRolledback && counterpartyRolledback) {
             taskDone = true;
         } else {
+
+            HTLCResource counterpartyResource = htlcResourcePair.getCounterpartyHTLCResource();
+            if (counterpartyResource.getSelfResource() == null) {
+                throw new WeCrossException(
+                        ErrorCode.HTLC_ERROR,
+                        "error in scheduler",
+                        HTLCErrorCode.NO_COUNTERPARTY_RESOURCE,
+                        "counterparty resource: "
+                                + counterpartyResource.getSelfPath().toString()
+                                + " not found");
+            }
+
             String s = getSecret(selfResource, h);
             if (!s.equalsIgnoreCase(RoutineDefault.NULL_FLAG)) {
                 logger.info(
