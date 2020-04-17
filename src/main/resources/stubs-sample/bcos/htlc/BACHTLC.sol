@@ -3,18 +3,23 @@ pragma experimental ABIEncoderV2;
 import "./BAC001.sol";
 import "./HTLC.sol";
 
-contract BACHTLC is HTLC {
+contract BACHTLC is HTLC, BAC001Holder {
 
     // bac001 asset contract address
     address assetContract;
 
     function init(string[] _ss)
     public
+    returns (string[] result)
     {
-        assetContract = stringToAddress(_ss[0]);
+        result = new string[](1);
         string[] memory ss = new string[](1);
         ss[0] = _ss[1];
-        super.init(ss);
+        result = super.init(ss);
+        if(!equal(result[0], "success")) {
+            return;
+        }
+        assetContract = stringToAddress(_ss[0]);
     }
 
     function lock(string[] _ss)
@@ -94,4 +99,13 @@ contract BACHTLC is HTLC {
         result[0] = "success";
     }
 
+    function balanceOf(string[] _ss)
+    public
+    view
+    returns(string[] result)
+    {
+        result = new string[](1);
+        uint b = BAC001(assetContract).balance(stringToAddress(_ss[0]));
+        result[0] = uintToString(b);
+    }
 }

@@ -124,7 +124,7 @@ public class ZonesConfig {
             List<ResourceInfo> resources = connection.getResources();
 
             String blockPath = network + "." + chainName;
-            Chain chain = new Chain();
+            Chain chain = new Chain(chainName);
             chain.setDriver(stubFactory.newDriver());
             chain.setBlockHeaderStorage(blockHeaderStorageFactory.newBlockHeaderStorage(blockPath));
             for (ResourceInfo resourceInfo : resources) {

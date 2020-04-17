@@ -28,13 +28,13 @@ public class HTLCTaskFactory implements TaskFactory {
             String jobName = htlcResourcePair.getSelfHTLCResource().getSelfPath().toString();
             JobDetail jobDetail = loadHTLCJobDetail(jobName, "HTLC", htlcResourcePair);
 
-            // execute per 3 seconds
+            // execute per 2 seconds
             Trigger trigger =
                     TriggerBuilder.newTrigger()
                             .withIdentity(jobName, Scheduler.DEFAULT_GROUP)
                             .withSchedule(
                                     SimpleScheduleBuilder.simpleSchedule()
-                                            .withIntervalInSeconds(3)
+                                            .withIntervalInSeconds(2)
                                             .repeatForever())
                             .build();
             tasks.add(new Task(trigger, jobDetail));

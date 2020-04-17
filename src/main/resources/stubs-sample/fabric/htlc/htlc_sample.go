@@ -96,6 +96,8 @@ func (a *HtlcChaincode) Invoke(stub shim.ChaincodeStubInterface) (res peer.Respo
 		res = a.getCounterpartyRollbackStatus(stub, args)
 	case "setCounterpartyRollbackStatus":
 		res = a.setCounterpartyRollbackStatus(stub, args)
+	case "balanceOf":
+		res = a.balanceOf(stub, args)
 	default:
 		res = shim.Error("invalid function name")
 	}
@@ -209,7 +211,7 @@ func (a *HtlcChaincode) lock(stub shim.ChaincodeStubInterface, args []string) pe
 	trans := [][]byte{[]byte("escrowToSugar"), []byte(cd.Sender), []byte(hash), uint64ToBytes(cd.Amount)}
 	response := stub.InvokeChaincode(string(cname), trans, string(channel))
 	if response.Status != 200 {
-		return shim.Error(response.Message)
+		return shim.Success([]byte(response.Message))
 	}
 
 	err = stub.PutState(getSugarAccountKey(hash), response.Payload)
@@ -252,7 +254,7 @@ func (a *HtlcChaincode) unlock(stub shim.ChaincodeStubInterface, args []string) 
 	trans := [][]byte{[]byte("withdrawFromSugarAccount"), sa, []byte(cd.Receiver), []byte(secret)}
 	response := stub.InvokeChaincode(string(cname), trans, string(channel))
 	if response.Status != 200 {
-		return shim.Error(response.Message)
+		return shim.Success([]byte(response.Message))
 	}
 
 	cd.Unlocked = true
@@ -291,7 +293,7 @@ func (a *HtlcChaincode) rollback(stub shim.ChaincodeStubInterface, args []string
 	trans := [][]byte{[]byte("withdrawFromSugarAccount"), sa, []byte(cd.Sender)}
 	response := stub.InvokeChaincode(string(cname), trans, string(channel))
 	if response.Status != 200 {
-		return shim.Error(response.Message)
+		return shim.Success([]byte(response.Message))
 	}
 
 	cd.Rolledback = true
@@ -436,6 +438,27 @@ func (a *HtlcChaincode) setCounterpartyRollbackStatus(stub shim.ChaincodeStubInt
 	hash := args[0]
 	a.MyHTLC.setCounterpartyRollbackStatus(stub, hash)
 	return shim.Success([]byte("success"))
+}
+
+func (a *HtlcChaincode) balanceOf(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) != 1 {
+		return shim.Error("invalid arguments")
+	}
+
+	cname, err := stub.GetState(LedgerChainCodeNameKey)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	channel, err := stub.GetState(LedgerChainCodeChannelKey)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	trans := [][]byte{[]byte("balanceOf"), []byte(args[0])}
+	response := stub.InvokeChaincode(string(cname), trans, string(channel))
+	if response.Status != 200 {
+		return shim.Success([]byte(response.Message))
+	}
+	return shim.Success(response.Payload)
 }
 
 func getSugarAccountKey(hash string) string {

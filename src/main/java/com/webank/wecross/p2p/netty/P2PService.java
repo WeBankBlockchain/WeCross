@@ -140,7 +140,7 @@ public class P2PService {
 
         String nodeID = node.getNodeID();
 
-        logger.debug(
+        logger.trace(
                 " request content, node: {}, seq: {}, type: {}, timeout: {}, content: {}",
                 nodeID,
                 message.getSeq(),
@@ -189,7 +189,7 @@ public class P2PService {
             serializer.serialize(message, byteBuf);
             ctx.writeAndFlush(byteBuf);
 
-            logger.debug(" send request, host: {}, seq: {}", node, message.getSeq());
+            logger.trace(" send request, host: {}, seq: {}", node, message.getSeq());
         } else {
             callback.sendFailed(StatusCode.UNREACHABLE, "node unreachable");
         }

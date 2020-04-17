@@ -114,49 +114,47 @@ public class HTLCResource extends Resource {
 
     @Override
     public Response onRemoteTransaction(Request request) {
-        //        Driver driver = getDriver();
-        //        if (driver.isTransaction(request)) {
-        //            logger.info("onRemoteTransaction, request: {}", request.toString());
-        //
-        //            TransactionContext<TransactionRequest> context =
-        //                    driver.decodeTransactionRequest(request.getData());
-        //
-        //            if (context == null) {
-        //                Response response = new Response();
-        //                response.setErrorCode(ErrorCode.DECODE_TRANSACTION_REQUEST_ERROR);
-        //                response.setErrorMessage("decode transaction request failed");
-        //                return response;
-        //            }
-        //
-        //            TransactionRequest transactionRequest = context.getData();
-        //            logger.info(
-        //                    "onRemoteTransaction, transactionRequest: {}",
-        // transactionRequest.toString());
-        //
-        //            String method = transactionRequest.getMethod();
-        //            if (method.equalsIgnoreCase("getSecret") || method.equalsIgnoreCase("init")) {
-        //                logger.warn("illegal access from peer, method: " + method);
-        //                Response response = new Response();
-        //                response.setErrorCode(HTLCErrorCode.NO_PERMISSION);
-        //                response.setErrorMessage("HTLCResource doesn't allow peers to call " +
-        // method);
-        //                return response;
-        //            } else if (transactionRequest.getMethod().equalsIgnoreCase("unlock")) {
-        //                try {
-        //                    verifyLock(transactionRequest);
-        //                } catch (WeCrossException e) {
-        //                    logger.error(
-        //                            "htlc unlock failed, errorCode: {}, errorMsg: {}",
-        //                            e.getInternalErrorCode(),
-        //                            e.getInternalMessage());
-        //                    Response response = new Response();
-        //                    response.setErrorCode(HTLCErrorCode.VERIFY_ERROR);
-        //                    response.setErrorMessage(e.getInternalMessage());
-        //                    return response;
-        //                }
-        //            }
-        //        }
-        return getSelfResource().onRemoteTransaction(request);
+        Response response = new Response();
+        Driver driver = getDriver();
+        if (driver.isTransaction(request)) {
+            logger.info("onRemoteTransaction, request: {}", request.toString());
+
+            TransactionContext<TransactionRequest> context =
+                    driver.decodeTransactionRequest(request.getData());
+
+            if (context == null) {
+                response.setErrorCode(ErrorCode.DECODE_TRANSACTION_REQUEST_ERROR);
+                response.setErrorMessage("decode transaction request failed");
+                logger.info("onRemoteTransaction, response: {}", response.toString());
+                return response;
+            }
+
+            TransactionRequest transactionRequest = context.getData();
+            logger.info(
+                    "onRemoteTransaction, transactionRequest: {}", transactionRequest.toString());
+
+            String method = transactionRequest.getMethod();
+            if (method.equalsIgnoreCase("getSecret") || method.equalsIgnoreCase("init")) {
+                response = new Response();
+                response.setErrorCode(HTLCErrorCode.NO_PERMISSION);
+                response.setErrorMessage("HTLCResource doesn't allow peers to call " + method);
+                logger.info("onRemoteTransaction, response: {}", response.toString());
+                return response;
+            } else if (transactionRequest.getMethod().equalsIgnoreCase("unlock")) {
+                try {
+                    verifyLock(transactionRequest);
+                } catch (WeCrossException e) {
+                    response = new Response();
+                    response.setErrorCode(HTLCErrorCode.VERIFY_ERROR);
+                    response.setErrorMessage(e.getInternalMessage());
+                    logger.info("onRemoteTransaction, response: {}", response.toString());
+                    return response;
+                }
+            }
+        }
+        response = getSelfResource().onRemoteTransaction(request);
+        logger.trace("onRemoteTransaction, response: {}", response.toString());
+        return response;
     }
 
     public boolean isFresh() {

@@ -242,8 +242,7 @@ public class WeCrossHTLC implements HTLC {
 
     @Override
     public String getCounterpartyHtlc(Resource resource, Account account) throws WeCrossException {
-        TransactionRequest transactionRequest =
-                new TransactionRequest("getCounterpartyHtlc", new String[] {});
+        TransactionRequest transactionRequest = new TransactionRequest("getCounterpartyHtlc", null);
 
         TransactionResponse response =
                 (TransactionResponse)
@@ -279,7 +278,7 @@ public class WeCrossHTLC implements HTLC {
 
     @Override
     public String getTask(HTLCResource htlcResource) throws WeCrossException {
-        return call(htlcResource, "getTask");
+        return call(htlcResource, "getTask", null);
     }
 
     @Override
