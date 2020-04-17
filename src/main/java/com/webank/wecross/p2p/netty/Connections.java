@@ -140,7 +140,7 @@ public class Connections {
             }
 
             throw new UnsupportedOperationException(
-                    " existing connection, node : " + node.getNodeID());
+                    " existing connection, node : " + node.getNodeID() + ", hashCode: " + hashCode);
         }
     }
 

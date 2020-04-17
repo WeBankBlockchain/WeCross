@@ -53,12 +53,27 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                     break;
             }
         } else if (evt instanceof SslHandshakeCompletionEvent) {
-            logger.info(" handshake success, host: {}, ctx: {}", node, hashCode);
-            // ssl handshake success.
-            try {
-                getChannelHandlerCallBack().onConnect(ctx, getConnectToServer());
-            } catch (Exception e) {
-                logger.error(" disconnect, host: {}, ctx: {}, error:", node, hashCode, e);
+            SslHandshakeCompletionEvent e = (SslHandshakeCompletionEvent) evt;
+            if (e.isSuccess()) {
+                logger.info(" handshake success, host: {}, ctx: {}", node, hashCode);
+                try {
+                    getChannelHandlerCallBack().onConnect(ctx, getConnectToServer());
+                } catch (Exception e1) {
+                    logger.error(
+                            " handshake on connect exception, disconnect, host: {}, ctx: {}, cause: {}",
+                            node,
+                            hashCode,
+                            e1.getCause());
+                    ctx.disconnect();
+                    ctx.close();
+                }
+            } else {
+                logger.error(
+                        " handshake failed, host: {}, message: {}, cause: {} ",
+                        node,
+                        e.cause().getMessage(),
+                        e.cause());
+
                 ctx.disconnect();
                 ctx.close();
             }
@@ -69,17 +84,23 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        // logger.info(" channel active: {}, ctx: {}", node, System.identityHashCode(ctx));
+        int hashCode = System.identityHashCode(ctx);
+        logger.trace(
+                " channelActive, node: {}:{}, ctx: {}",
+                ((SocketChannel) ctx.channel()).remoteAddress().getAddress().getHostAddress(),
+                ((SocketChannel) ctx.channel()).remoteAddress().getPort(),
+                hashCode);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
+        int hashCode = System.identityHashCode(ctx);
         try {
-            logger.info(" channel inactive: {}");
+            logger.info(" channel inactive, ctx: {}", hashCode);
 
             getChannelHandlerCallBack().onDisconnect(ctx);
         } catch (Exception e) {
-            logger.error("ctx: {}, error: {}", System.identityHashCode(ctx), e);
+            logger.error(" channelInactive exception, ctx: {}, error: {}", hashCode, e);
         }
     }
 
@@ -94,7 +115,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         logger.error(
-                " caugth exception, e: {}, node: {}:{}",
+                " caught exception, e: {}, node: {}:{}",
                 cause,
                 ((SocketChannel) ctx.channel()).remoteAddress().getAddress().getHostAddress(),
                 ((SocketChannel) ctx.channel()).remoteAddress().getPort());
