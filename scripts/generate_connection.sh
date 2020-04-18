@@ -10,13 +10,13 @@ help() {
     echo $1
     cat << EOF
 Usage: 
-    -t                                  [Required] type of account, BCOS2.0 or Fabric1.4
-    -n                                  [Required] name of account
-    -d <dir>                            [Optional] generated target_directory, default conf/accounts/
+    -t <type>                           [Required] type of account, BCOS2.0 or Fabric1.4
+    -n <name>                           [Required] name of account
+    -d <dir>                            [Optional] generated target_directory, default conf/stubs/
     -h                                  [Optional] Help
 e.g 
-    bash $0 -t BCOS2.0 -n my_bcos_account
-    bash $0 -t Fabric1.4 -n my_fabric_account
+    bash $0 -t BCOS2.0 -n my_bcos_connection
+    bash $0 -t Fabric1.4 -n my_fabric_connection
 EOF
 
 exit 0

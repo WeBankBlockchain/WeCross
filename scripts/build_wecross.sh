@@ -50,7 +50,7 @@ Usage:
     -o  <output dir>                [Optional]   default ./${router_output}/
     -z  <generate tar packet>       [Optional]   default no
     -T  <enable test mode>          [Optional]   default no. Enable test resource.
-    -p  <enable plugin>             [Optional]   enabled plugins, split by ',', default BCOS2.0,Fabric1.4, Enable all plugins
+    -p  <enable plugin>             [Optional]   enabled plugins, split by ',', e.g: BCOS2.0,Fabric1.4, default enable all plugins
     -d  <dependencies dir>          [Optional]   dependencies dir, default './deps'
     -h  call for help
 e.g
@@ -232,7 +232,7 @@ gen_conf()
 {
     cat << EOF > "${1}"
 [common]
-    network = '${zone}'
+    zone = '${zone}'
     visible = true
 
 [stubs]
