@@ -55,10 +55,10 @@ public class ZonesConfig {
                 System.exit(1);
             }
 
-            String stubsPath = toml.getString("stubs.path");
+            String stubsPath = toml.getString("chains.path");
             if (stubsPath == null) {
                 String errorMessage =
-                        "\"path\" in [stubs] item  not found, please check "
+                        "\"path\" in [chains] item  not found, please check "
                                 + WeCrossDefault.MAIN_CONFIG_FILE;
                 throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
             }

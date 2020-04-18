@@ -1,8 +1,6 @@
 #!/bin/bash
 
-#set -e
-
-target_dir=conf/stubs/
+target_dir=conf/chains/
 type=''
 name=''
 
@@ -10,13 +8,13 @@ help() {
     echo $1
     cat << EOF
 Usage: 
-    -t                                  [Required] type of account, BCOS2.0 or Fabric1.4
-    -n                                  [Required] name of account
-    -d <dir>                            [Optional] generated target_directory, default conf/accounts/
+    -t <type>                           [Required] type of account, BCOS2.0 or Fabric1.4
+    -n <name>                           [Required] name of account
+    -d <dir>                            [Optional] generated target_directory, default conf/chains/
     -h                                  [Optional] Help
 e.g 
-    bash $0 -t BCOS2.0 -n my_bcos_account
-    bash $0 -t Fabric1.4 -n my_fabric_account
+    bash $0 -t BCOS2.0 -n my_bcos_chain
+    bash $0 -t Fabric1.4 -n my_fabric_chain
 EOF
 
 exit 0
