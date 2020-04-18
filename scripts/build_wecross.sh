@@ -21,7 +21,7 @@ plugins='BCOS2.0,Fabric1.4'
 dep_dir='./deps'
 
 bcos_stub_url='https://oss.sonatype.org/service/local/repositories/snapshots/content/com/webank/wecross-bcos-stub/1.0.0-rc2-0414-SNAPSHOT/wecross-bcos-stub-1.0.0-rc2-0414-20200414.030542-1-all.jar'
-bcos_stub_md5='0ac664555e31bb4c54eccd574dfe435b'
+bcos_stub_md5='101852b78cb4166c72b65899e609950e'
 fabric_stub_url='https://oss.sonatype.org/service/local/repositories/snapshots/content/com/webank/wecross-fabric-stub/1.0.0-rc2-0414-SNAPSHOT/wecross-fabric-stub-1.0.0-rc2-0414-20200414.032736-1-all.jar'
 fabric_stub_md5='f22a3ef5917caa5632d827f4d0fb8965'
 
@@ -50,11 +50,7 @@ Usage:
     -o  <output dir>                [Optional]   default ./${router_output}/
     -z  <generate tar packet>       [Optional]   default no
     -T  <enable test mode>          [Optional]   default no. Enable test resource.
-<<<<<<< HEAD
     -p  <enable plugin>             [Optional]   enabled plugins, split by ',', e.g: BCOS2.0,Fabric1.4, default enable all plugins
-=======
-    -p  <enable plugin>             [Optional]   enabled plugins, split by ',', default BCOS2.0,Fabric1.4, Enable all plugins
->>>>>>> upstream/release-rc2
     -d  <dependencies dir>          [Optional]   dependencies dir, default './deps'
     -h  call for help
 e.g
@@ -239,8 +235,8 @@ gen_conf()
     zone = '${zone}'
     visible = true
 
-[stubs]
-    path = 'classpath:stubs'
+[chains]
+    path = 'classpath:chains'
 
 [rpc] # rpc ip & port
     address = '${2}'

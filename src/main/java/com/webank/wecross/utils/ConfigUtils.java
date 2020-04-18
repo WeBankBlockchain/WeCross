@@ -71,7 +71,7 @@ public class ConfigUtils {
         for (String stub : stubsDir) {
             String stubPath = thisPath + "/" + stub + "/" + WeCrossDefault.STUB_CONFIG_FILE;
             if (!fileIsExists(stubPath)) {
-                String errorMessage = "Stub configuration file: " + stubPath + " does not exist";
+                String errorMessage = "Chain configuration file: " + stubPath + " does not exist";
                 throw new WeCrossException(WeCrossException.ErrorCode.DIR_NOT_EXISTS, errorMessage);
             }
             result.put(stub, stubPath);

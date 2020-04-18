@@ -8,7 +8,7 @@ import io.netty.channel.ChannelHandlerContext;
 
 public class ConnectProcessor implements Processor {
     private PeerManager peerManager;
-    
+
     @Override
     public String name() {
         return "ConnectProcessor";
