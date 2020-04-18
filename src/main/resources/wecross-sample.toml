@@ -2,8 +2,8 @@
     zone = 'payment'
     visible = true
 
-[stubs]
-    path = 'classpath:stubs'
+[chains]
+    path = 'classpath:chains'
 
 [rpc] # rpc ip & port
     address = '127.0.0.1'

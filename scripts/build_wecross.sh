@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+LANG=en_US.utf8
 
 counter=0
 zone=
@@ -18,12 +19,15 @@ make_tar=0
 router_output=$(pwd)/routers
 wecross_dir=$(dirname $(pwd)/${0})/
 plugins='BCOS2.0,Fabric1.4'
-dep_dir='./deps'
+deps_dir='./deps'
 
+bcos_stub_jar_name=bcos-stub.jar
 bcos_stub_url='https://oss.sonatype.org/service/local/repositories/snapshots/content/com/webank/wecross-bcos-stub/1.0.0-rc2-0414-SNAPSHOT/wecross-bcos-stub-1.0.0-rc2-0414-20200414.030542-1-all.jar'
-bcos_stub_md5='101852b78cb4166c72b65899e609950e'
+bcos_stub_md5='99d08a92b7c5ccf79362ec0caec4eb01'
+
+fabric_stub_jar_name=fabric-stub.jar
 fabric_stub_url='https://oss.sonatype.org/service/local/repositories/snapshots/content/com/webank/wecross-fabric-stub/1.0.0-rc2-0414-SNAPSHOT/wecross-fabric-stub-1.0.0-rc2-0414-20200414.032736-1-all.jar'
-fabric_stub_md5='f22a3ef5917caa5632d827f4d0fb8965'
+fabric_stub_md5='0fb7e1ceca0996ef88a1203ea232b058'
 
 LOG_INFO()
 {
@@ -117,7 +121,7 @@ while getopts "o:n:l:f:c:d:p:zTh" option;do
         plugins=$OPTARG
     ;;
     d)
-        dep_dir=$OPTARG
+        deps_dir=$OPTARG
     ;;
     h)  help;;
     esac
@@ -155,20 +159,77 @@ gen_crt()
     output=${2}/
     num=${3}
 
+    # generate ca.crt
     if [ ${ca} -eq 0 ];then
         bash "${scripts_dir}"/create_cert.sh -c -d "${output}" 2>/dev/null
         ca_dir=${output}
     fi
-    # get ca.crt
 
-    # get node.crt by number
+    # generate sdk cert
+    bash "${scripts_dir}"/create_cert.sh -n -D "${ca_dir}" -d "${output}/sdk" 2>/dev/null
+
+    # generate node cert by number
     bash "${scripts_dir}"/create_cert.sh -n -C "${num}" -D "${ca_dir}" -d "${output}" 2>/dev/null
 
     rm -f cert.cnf
     echo "================================================================"
 }
 
-#index ip rpc_port p2p_port pers
+download_bcos_plugin()
+{
+    mkdir -p ${deps_dir}
+    [ -f "${deps_dir}/${bcos_stub_jar_name}" ] && [ ${bcos_stub_md5} != $(md5sum "${deps_dir}/${bcos_stub_jar_name}" | cut -f1 -d' ') ] && rm "${deps_dir}/${bcos_stub_jar_name}"
+    [ ! -f "${deps_dir}/${bcos_stub_jar_name}" ] && wget -O "${deps_dir}/${bcos_stub_jar_name}" "$bcos_stub_url"
+    [ $bcos_stub_md5 != $(md5sum "${deps_dir}/${bcos_stub_jar_name}" | cut -f1 -d' ') ] && {
+        LOG_ERROR "Download bcos-stub failed!"
+        exit 1
+    }
+    LOG_INFO "Download ${bcos_stub_jar_name} success!"
+}
+
+download_fabric_plugin()
+{
+    mkdir -p ${deps_dir}
+    #download and initialize the plugin
+    [ -f "${deps_dir}/${fabric_stub_jar_name}" ] && [ $fabric_stub_md5 != $(md5sum "${deps_dir}/${fabric_stub_jar_name}" | cut -f1 -d' ') ] && rm "${deps_dir}/${fabric_stub_jar_name}"
+    [ ! -f "${deps_dir}/${fabric_stub_jar_name}" ] && wget -O "${deps_dir}/${fabric_stub_jar_name}" "$fabric_stub_url"
+    [ $fabric_stub_md5 != $(md5sum "${deps_dir}/${fabric_stub_jar_name}" | cut -f1 -d' ') ] && {
+        LOG_ERROR "Download fabirc-stub failed!"
+        exit 1
+    }
+    LOG_INFO "Download ${fabric_stub_jar_name} success!"
+}
+
+download_plugins()
+{
+    to_dir=${1}
+
+    echo "plugins: $plugins"
+    mkdir -p ${to_dir}
+    mkdir -p ${deps_dir}
+    #download plugins
+    plugins_array=(${plugins/,/ })
+    for plugin in ${plugins_array[*]};do
+        echo ${plugin}
+        case ${plugin} in
+        BCOS2.0)
+            download_bcos_plugin
+            cp ${deps_dir}/${bcos_stub_jar_name} ${to_dir}/${bcos_stub_jar_name}
+            ;;
+        Fabric1.4)
+        	download_fabric_plugin
+        	cp ${deps_dir}/${fabric_stub_jar_name} ${to_dir}/${fabric_stub_jar_name}
+            ;;
+
+        *)
+            LOG_ERROR "Unknown plugin: ${plugin}"
+            exit 1
+            ;;
+        esac
+    done
+}
+
+#index ip rpc_port p2p_port peers
 gen_one_wecross()
 {
     #default execute dir: ../WeCross
@@ -176,46 +237,23 @@ gen_one_wecross()
     output=${router_output}/${2}-${3}-${4}
     target=${2}-${3}-${4}
 
-    mkdir -p "${output}/"
+    # mkdir
+    mkdir -p ${output}/
+    mkdir -p ${output}/conf/accounts
+    mkdir -p ${output}/conf/chains
+    mkdir -p ${output}/plugin
+
+    # copy files
     chmod u+x ${wecross_dir}./*.sh
     cp -r ${wecross_dir}./*.sh "${output}/"
     cp -r ${wecross_dir}/apps "${output}/"
     cp -r ${wecross_dir}/lib "${output}/"
-    
-    echo "plugins: $plugins"
-    mkdir -p ${output}/plugin
-    mkdir -p "$dep_dir"
-    #download plugins
-    plugins_array=(${plugins/,/ })
-    for plugin in ${plugins_array[*]};do
-        echo $plugin
-        case "$plugin" in
-        BCOS2.0)
-            #download and initialize the plugin
-            [ -f "$dep_dir/bcos-stub.jar" ] && [ $bcos_stub_md5 != $(md5sum "$dep_dir/bcos-stub.jar" | cut -f1 -d' ') ] && rm "$dep_dir/bcos-stub.jar"
-            [ ! -f "$dep_dir/bcos-stub.jar" ] && wget -O "$dep_dir/bcos-stub.jar" "$bcos_stub_url"
-            [ $bcos_stub_md5 != $(md5sum "$dep_dir/bcos-stub.jar" | cut -f1 -d' ') ] && {
-            	echo "Download bcos-stub failed!"
-            	exit 1
-            }
-            cp "$dep_dir/bcos-stub.jar" "${output}/plugin/bcos-stub.jar"
-            ;;
-        Fabric1.4)
-        	#download and initialize the plugin
-        	[ -f "$dep_dir/fabric-stub.jar" ] && [ $fabric_stub_md5 != $(md5sum "$dep_dir/fabric-stub.jar" | cut -f1 -d' ') ] && rm "$dep_dir/fabric-stub.jar"
-        	[ ! -f "$dep_dir/fabric-stub.jar" ] && wget -O "$dep_dir/fabric-stub.jar" "$fabric_stub_url"
-        	[ $fabric_stub_md5 != $(md5sum "$dep_dir/fabric-stub.jar" | cut -f1 -d' ') ] && {
-        		echo "Download fabirc-stub failed!"
-        		exit 1
-        	}
-        	cp "$dep_dir/fabric-stub.jar" "${output}/plugin/fabric-stub.jar"
-            ;;
-        esac
-    done
 
-    cp -r "${wecross_dir}/conf" "${output}/conf"
+    # download plugin
+    download_plugins ${output}/plugin
+
+    cp -r "${wecross_dir}/conf" "${output}/"
     cp -r "${cert_dir}"/* "${output}"/conf/
-    mkdir -p ${output}/conf/accounts
     gen_conf "${output}"/conf/wecross.toml "${2}" "${3}" "${4}" "${5}"
     LOG_INFO "Create ${output} successfully"
 
@@ -252,9 +290,6 @@ gen_conf()
     sslCert = 'classpath:ssl.crt'
     sslKey = 'classpath:ssl.key'
     peers = [${5}]
-
-[test]
-    enableTestResource = ${enable_test_resource}
 EOF
 }
 
