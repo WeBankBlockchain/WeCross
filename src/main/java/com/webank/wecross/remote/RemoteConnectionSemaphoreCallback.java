@@ -42,6 +42,7 @@ class RemoteConnectionSemaphoreCallback extends P2PMessageCallback {
             Response response = new Response();
             response.setErrorCode(StubQueryStatus.REMOTE_QUERY_FAILED);
             response.setErrorMessage("Send error: " + e.getMessage());
+            return response;
         }
         semaphore.release();
         return responseData;

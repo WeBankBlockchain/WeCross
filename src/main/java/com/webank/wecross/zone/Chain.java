@@ -107,8 +107,9 @@ public class Chain {
                             break;
                         }
                     }
-                    localBlockHeader = blockHeader;
+
                     blockHeaderStorage.writeBlockHeader(blockNumber, blockBytes);
+                    localBlockHeader = blockHeader; // Must update header after write in db
 
                     logger.debug("Commit blockHeader: {}", localBlockHeader.toString());
                 }

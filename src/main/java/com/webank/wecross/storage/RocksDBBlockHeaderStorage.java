@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RocksDBBlockHeaderStorage implements BlockHeaderStorage {
+    private boolean dbClosed = false;
+
     private RocksDB rocksDB;
 
     private static final String numberKey = "number";
@@ -17,6 +19,11 @@ public class RocksDBBlockHeaderStorage implements BlockHeaderStorage {
 
     @Override
     public long readBlockNumber() {
+        if (dbClosed == true) {
+            logger.warn("Read RocksDB error: RocksDB has been closed");
+            return -1;
+        }
+
         try {
             byte[] blockNumberBytes = rocksDB.get(numberKey.getBytes());
             if (blockNumberBytes != null) {
@@ -27,13 +34,18 @@ public class RocksDBBlockHeaderStorage implements BlockHeaderStorage {
                 return -1;
             }
         } catch (RocksDBException e) {
-            logger.error("Read rocksdb error", e);
+            logger.error("Read RocksDB error", e);
         }
         return -1;
     }
 
     @Override
     public byte[] readBlockHeader(long blockNumber) {
+        if (dbClosed == true) {
+            logger.warn("Read RocksDB error: RocksDB has been closed");
+            return null;
+        }
+
         String key = "block_" + String.valueOf(blockNumber);
 
         try {
@@ -46,6 +58,11 @@ public class RocksDBBlockHeaderStorage implements BlockHeaderStorage {
 
     @Override
     public void writeBlockHeader(long blockNumber, byte[] blockHeader) {
+        if (dbClosed == true) {
+            logger.warn("Write RocksDB error: RocksDB has been closed");
+            return;
+        }
+
         String key = blockKeyPrefix + String.valueOf(blockNumber);
 
         try {
@@ -67,10 +84,12 @@ public class RocksDBBlockHeaderStorage implements BlockHeaderStorage {
 
     public void setRocksDB(RocksDB rocksDB) {
         this.rocksDB = rocksDB;
+        this.dbClosed = false;
     }
 
     @Override
     public void close() {
+        dbClosed = true;
         rocksDB.close();
     }
 }
