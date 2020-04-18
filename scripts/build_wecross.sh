@@ -18,6 +18,12 @@ make_tar=0
 router_output=$(pwd)/routers
 wecross_dir=$(dirname $(pwd)/${0})/
 plugins='BCOS2.0,Fabric1.4'
+dep_dir='./deps'
+
+bcos_stub_url='https://oss.sonatype.org/service/local/repositories/snapshots/content/com/webank/wecross-bcos-stub/1.0.0-rc2-0414-SNAPSHOT/wecross-bcos-stub-1.0.0-rc2-0414-20200414.030542-1-all.jar'
+bcos_stub_md5='0ac664555e31bb4c54eccd574dfe435b'
+fabric_stub_url='https://oss.sonatype.org/service/local/repositories/snapshots/content/com/webank/wecross-fabric-stub/1.0.0-rc2-0414-SNAPSHOT/wecross-fabric-stub-1.0.0-rc2-0414-20200414.032736-1-all.jar'
+fabric_stub_md5='f22a3ef5917caa5632d827f4d0fb8965'
 
 LOG_INFO()
 {
@@ -45,6 +51,7 @@ Usage:
     -z  <generate tar packet>       [Optional]   default no
     -T  <enable test mode>          [Optional]   default no. Enable test resource.
     -p  <enable plugin>             [Optional]   enabled plugins, split by ',', default BCOS2.0,Fabric1.4, Enable all plugins
+    -d  <dependencies dir>          [Optional]   dependencies dir, default './deps'
     -h  call for help
 e.g
     bash $0 -n payment -l 127.0.0.1:8250:25500
@@ -79,7 +86,7 @@ check_env()
 
 parse_command()
 {
-while getopts "o:n:l:f:c:zTh" option;do
+while getopts "o:n:l:f:c:d:p:zTh" option;do
     # shellcheck disable=SC2220
     case ${option} in
     o)
@@ -108,6 +115,9 @@ while getopts "o:n:l:f:c:zTh" option;do
     ;;
     p)
         plugins=$OPTARG
+    ;;
+    d)
+        dep_dir=$OPTARG
     ;;
     h)  help;;
     esac
@@ -172,23 +182,36 @@ gen_one_wecross()
     cp -r ${wecross_dir}/apps "${output}/"
     cp -r ${wecross_dir}/lib "${output}/"
     
+    echo "plugins: $plugins"
     mkdir -p ${output}/plugin
+    mkdir -p "$dep_dir"
     #download plugins
-    #oldIPS="$IPS"
-    #IPS=','
-    #for plugin in "$plugins";do
-    #    case $plugin in
-    #    BCOS2.0)
-    #        #download and initialize the plugin
-    #        #wget
-    #        ;;
-    #    Fabric1.4)
-    #    	#download and initialize the plugin
-    #        #wget
-    #        ;;
-    #    esac
-    #done
-    #IPS="$oldIPS"
+    plugins_array=(${plugins/,/ })
+    for plugin in ${plugins_array[*]};do
+        echo $plugin
+        case "$plugin" in
+        BCOS2.0)
+            #download and initialize the plugin
+            [ -f "$dep_dir/bcos-stub.jar" ] && [ $bcos_stub_md5 != $(md5sum "$dep_dir/bcos-stub.jar" | cut -f1 -d' ') ] && rm "$dep_dir/bcos-stub.jar"
+            [ ! -f "$dep_dir/bcos-stub.jar" ] && wget -O "$dep_dir/bcos-stub.jar" "$bcos_stub_url"
+            [ $bcos_stub_md5 != $(md5sum "$dep_dir/bcos-stub.jar" | cut -f1 -d' ') ] && {
+            	echo "Download bcos-stub failed!"
+            	exit 1
+            }
+            cp "$dep_dir/bcos-stub.jar" "${output}/plugin/bcos-stub.jar"
+            ;;
+        Fabric1.4)
+        	#download and initialize the plugin
+        	[ -f "$dep_dir/fabric-stub.jar" ] && [ $fabric_stub_md5 != $(md5sum "$dep_dir/fabric-stub.jar" | cut -f1 -d' ') ] && rm "$dep_dir/fabric-stub.jar"
+        	[ ! -f "$dep_dir/fabric-stub.jar" ] && wget -O "$dep_dir/fabric-stub.jar" "$fabric_stub_url"
+        	[ $fabric_stub_md5 != $(md5sum "$dep_dir/fabric-stub.jar" | cut -f1 -d' ') ] && {
+        		echo "Download fabirc-stub failed!"
+        		exit 1
+        	}
+        	cp "$dep_dir/fabric-stub.jar" "${output}/plugin/fabric-stub.jar"
+            ;;
+        esac
+    done
 
     cp -r "${wecross_dir}/conf" "${output}/conf"
     cp -r "${cert_dir}"/* "${output}"/conf/
