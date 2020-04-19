@@ -12,6 +12,7 @@ import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.utils.ConfigUtils;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,9 @@ public class ZonesConfig {
 
             String stubsPath = toml.getString("chains.path");
             if (stubsPath == null) {
+                stubsPath = toml.getString("stubs.path"); // To support old version
+            }
+            if (stubsPath == null) {
                 String errorMessage =
                         "\"path\" in [chains] item  not found, please check "
                                 + WeCrossDefault.MAIN_CONFIG_FILE;
@@ -90,11 +94,12 @@ public class ZonesConfig {
 
         for (String chainName : stubsDir.keySet()) {
             String stubPath = stubsDir.get(chainName);
+            String stubFile = stubPath + File.separator + WeCrossDefault.STUB_CONFIG_FILE;
             Toml stubToml;
             try {
-                stubToml = ConfigUtils.getToml(stubPath);
+                stubToml = ConfigUtils.getToml(stubFile);
             } catch (WeCrossException e) {
-                String errorMessage = "Parse " + stubPath + " failed";
+                String errorMessage = "Parse " + stubFile + " failed";
                 logger.error(errorMessage, e);
                 throw new WeCrossException(
                         WeCrossException.ErrorCode.UNEXPECTED_CONFIG, errorMessage);
@@ -103,7 +108,7 @@ public class ZonesConfig {
             String type = stubToml.getString("common.type");
             if (type == null) {
                 String errorMessage =
-                        "\"type\" in [common] item  not found, please check " + stubPath;
+                        "\"type\" in [common] item  not found, please check " + stubFile;
                 throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
             }
 
