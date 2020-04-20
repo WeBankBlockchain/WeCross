@@ -93,9 +93,9 @@ public class Connections {
     }
 
     /**
-     * @param nodeID
+     * @param node
      * @param ctx
-     * @return
+     * @param connectToServer
      */
     public void addChannelHandler(Node node, ChannelHandlerContext ctx, boolean connectToServer) {
         int hashCode = System.identityHashCode(ctx);
@@ -140,7 +140,7 @@ public class Connections {
             }
 
             throw new UnsupportedOperationException(
-                    " existing connection, node : " + node.getNodeID());
+                    " existing connection, node : " + node.getNodeID() + ", hashCode: " + hashCode);
         }
     }
 
@@ -158,7 +158,7 @@ public class Connections {
     }
 
     /**
-     * @param nodeID
+     * @param node
      * @param ctx
      */
     public void removeChannelHandler(Node node, ChannelHandlerContext ctx) {

@@ -12,6 +12,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -166,7 +167,7 @@ public class NettyBootstrap {
 
         startListen();
         startConnect();
-        startOthers();
+        startPeriodTasks();
     }
 
     private void startListen() throws ExecutionException, InterruptedException, IOException {
@@ -266,7 +267,7 @@ public class NettyBootstrap {
         logger.info(" start connect, config: {}", config);
     }
 
-    private void startOthers() {
+    private void startPeriodTasks() {
         // heartbeat: 3 s
         scheduledExecutorService.scheduleAtFixedRate(
                 () -> heartBeat(), 0, heartBeatPeriod, TimeUnit.MILLISECONDS);
@@ -316,8 +317,22 @@ public class NettyBootstrap {
                 .shouldConnectNodes()
                 .forEach(
                         host -> {
-                            bootstrap.connect(host.getHost(), host.getPort());
-                            logger.info(" try to connect {}", host);
+                            ChannelFuture channelFuture =
+                                    bootstrap.connect(host.getHost(), host.getPort());
+                            channelFuture.addListener(
+                                    new ChannelFutureListener() {
+                                        public void operationComplete(ChannelFuture future) {
+                                            if (future.isSuccess()) {
+                                                logger.debug(" connect to {} success", host);
+                                            } else {
+                                                logger.error(
+                                                        " connect to {} failed, error: {}",
+                                                        host,
+                                                        future.cause());
+                                            }
+                                        }
+                                    });
+                            logger.debug(" try to connect {}", host);
                         });
     }
 }

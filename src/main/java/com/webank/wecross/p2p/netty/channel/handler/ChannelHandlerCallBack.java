@@ -111,20 +111,15 @@ public class ChannelHandlerCallBack {
     public void onConnect(ChannelHandlerContext ctx, boolean connectToServer)
             throws SSLPeerUnverifiedException {
         Node node = channelContext2Node(ctx);
+        int hashCode = System.identityHashCode(ctx);
 
         // set nodeID to channel attribute map
         ctx.channel().attr(AttributeKey.valueOf("node")).set(node);
         ctx.channel().attr(AttributeKey.valueOf("NodeID")).set(node.getNodeID());
 
-        logger.info("add new connections: {}", node);
-        try {
-            getConnections().addChannelHandler(node, ctx, connectToServer);
-        } catch (UnsupportedOperationException e) {
-            logger.debug("Reconnect: " + e.getLocalizedMessage());
-            ctx.disconnect();
-            ctx.close();
-            return;
-        }
+        logger.info("add new connections: {}, ctx: {}", node, hashCode);
+        getConnections().addChannelHandler(node, ctx, connectToServer);
+
         logger.info(
                 " node {} connect success, nodeID: {}, ctx: {}",
                 node,
