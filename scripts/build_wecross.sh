@@ -19,7 +19,7 @@ make_tar=0
 router_output=$(pwd)/routers
 wecross_dir=$(dirname $(pwd)/${0})/
 plugins='BCOS2.0,Fabric1.4'
-deps_dir='./plugin/'
+deps_dir=$(pwd)'/plugin/'
 
 bcos_stub_jar_name=bcos-stub.jar
 bcos_stub_url='https://oss.sonatype.org/service/local/repositories/snapshots/content/com/webank/wecross-bcos-stub/1.0.0-rc2-0414-SNAPSHOT/wecross-bcos-stub-1.0.0-rc2-0414-20200414.030542-1-all.jar'
@@ -250,7 +250,8 @@ gen_one_wecross()
     cp -r ${wecross_dir}/lib "${output}/"
 
     # download plugin
-    download_plugins ${output}/plugin
+    # download_plugins ${output}/plugin
+    cp ${deps_dir}/*  ${output}/plugin/
 
     cp -r "${wecross_dir}/conf" "${output}/"
     cp -r "${cert_dir}"/* "${output}"/conf/

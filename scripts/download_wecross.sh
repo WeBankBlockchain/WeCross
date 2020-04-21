@@ -5,16 +5,17 @@ LANG=en_US.utf8
 
 enable_build_from_resource=0
 
+deps_dir=$(pwd)'/plugin/'
+src_dir=$(pwd)'/src/'
+
 wecross_url=https://github.com/WeBankFinTech/WeCross.git
-wecross_branch=release-rc2
+wecross_branch=master
 
 bcos_stub_url=https://github.com/WeBankFinTech/WeCross-BCOS-Stub.git
-bcos_stub_branch=release-rc2
+bcos_stub_branch=master
 
 fabric_stub_url=https://github.com/WeBankFinTech/WeCross-Fabric-Stub.git
-fabric_stub_branch=release-rc2
-
-deps_dir=./plugin
+fabric_stub_branch=master
 
 
 LOG_INFO()
@@ -35,6 +36,7 @@ help()
     cat << EOF
 Usage:
     -s                              [Optional] Get wecross by: gradle build from github Source Code.
+    -b                              [Optional] Download from certain branch if '-s' is set
     -h  call for help
 e.g
     bash $0 
@@ -46,11 +48,16 @@ exit 0
 
 parse_command()
 {
-while getopts "sh" option;do
+while getopts "b:sh" option;do
     # shellcheck disable=SC2220
     case ${option} in
     s)
         enable_build_from_resource=1
+    ;;
+    b)
+        wecross_branch=$OPTARG
+        bcos_stub_branch=$OPTARG
+        fabric_stub_branch=$OPTARG
     ;;
     h)  help;;
     esac
@@ -142,20 +149,44 @@ download_release_pkg()
     tar -zxf ${release_pkg}
 }
 
+download_latest_code()
+{
+    local name=${1}
+    local url=${2}
+    local branch=${3}
+
+    if [ -d ${name} ];then
+        cd ${name}
+        git checkout ${branch}
+        git pull
+        cd -
+    else
+        git clone --depth 1 -b ${branch} ${url}
+    fi
+}
+
 build_from_source()
 {
+    LOG_INFO "Build WeCross from source"
+
     local url=${wecross_url}
     local branch=${wecross_branch}
+    local output_dir=$(pwd)
 
-    if [ -d WeCross/apps ];then
+    if [ -d WeCross ];then
         LOG_INFO "./WeCross/ exists"
-        exit 0
         return
     fi
 
-    git clone -b ${branch} ${url}
+    mkdir -p ${src_dir}/
+    cd ${src_dir}/
+
+    download_latest_code WeCross ${url} ${branch}
+
     cd WeCross
-    ./gradlew assemble 2>&1 | tee output.log
+    rm -rf dist
+    bash ./gradlew assemble 2>&1 | tee output.log
+    chmod +x dist/apps/*
     # shellcheck disable=SC2046
     # shellcheck disable=SC2006
     if [ `grep -c "BUILD SUCCESSFUL" output.log` -eq '0' ]; then
@@ -166,9 +197,10 @@ build_from_source()
         exit 1
     fi
     cd ..
-    mv WeCross WeCross-Source
-    mv WeCross-Source/dist WeCross
-    rm -rf WeCross-Source
+
+    mv WeCross/dist ${output_dir}/WeCross
+
+    cd ${output_dir}
 }
 
 build_plugin_from_source()
@@ -176,15 +208,30 @@ build_plugin_from_source()
     local name=${1}
     local url=${2}
     local branch=${3}
+    local origin_dir=$(pwd)
 
-    git clone -b ${branch} ${url}
+    LOG_INFO "Build ${name} from source"
+
+    if [ -d ${name} ];then
+        LOG_INFO "./${name}/ exists"
+        return
+    fi
+
+    mkdir -p ${src_dir}/
+    cd ${src_dir}/
+
+    download_latest_code ${name} ${url} ${branch}
+
     cd ${name}
-    ./gradlew assemble 2>&1 | tee output.log
+    bash ./gradlew assemble 2>&1 | tee output.log
+    chmod +x dist/apps/*
     cd ..
 
     mkdir -p ${deps_dir}/
 
-    cp ${name}/dist/apps/* ${deps_dir}
+    cp ${name}/dist/apps/* ${deps_dir}/
+
+    cd ${origin_dir}
 }
 
 main()

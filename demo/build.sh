@@ -212,7 +212,7 @@ config_router_8251()
     cd -
 }
 
-main2()
+main()
 {
     check_env
 
@@ -224,14 +224,10 @@ main2()
 
     # Download
     LOG_INFO "Download WeCross ..."
-    bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross.sh)
+    bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross-rc2.sh) -s -b release-rc2
     LOG_INFO "Download WeCross Console ..."
-    bash <(curl -sL https://github.com/WeBankFinTech/WeCross-Console/releases/download/resources/download_console.sh)
+    bash <(curl -sL https://github.com/WeBankFinTech/WeCross-Console/releases/download/resources/download_console-rc2.sh) -s -b release-rc2
 
-}
-
-main()
-{
     # Build Routers
     LOG_INFO "Build Routers ..."
     cat << EOF > ipfile
