@@ -5,6 +5,17 @@ LANG=en_US.utf8
 
 enable_build_from_resource=0
 
+wecross_url=https://github.com/WeBankFinTech/WeCross.git
+wecross_branch=release-rc2
+
+bcos_stub_url=https://github.com/WeBankFinTech/WeCross-BCOS-Stub.git
+bcos_stub_branch=release-rc2
+
+fabric_stub_url=https://github.com/WeBankFinTech/WeCross-Fabric-Stub.git
+fabric_stub_branch=release-rc2
+
+deps_dir=./plugin
+
 
 LOG_INFO()
 {
@@ -133,13 +144,16 @@ download_release_pkg()
 
 build_from_source()
 {
+    local url=${wecross_url}
+    local branch=${wecross_branch}
+
     if [ -d WeCross/apps ];then
         LOG_INFO "./WeCross/ exists"
         exit 0
         return
     fi
 
-    git clone https://github.com/WeBankFinTech/WeCross.git
+    git clone -b ${branch} ${url}
     cd WeCross
     ./gradlew assemble 2>&1 | tee output.log
     # shellcheck disable=SC2046
@@ -157,10 +171,28 @@ build_from_source()
     rm -rf WeCross-Source
 }
 
+build_plugin_from_source()
+{
+    local name=${1}
+    local url=${2}
+    local branch=${3}
+
+    git clone -b ${branch} ${url}
+    cd ${name}
+    ./gradlew assemble 2>&1 | tee output.log
+    cd ..
+
+    mkdir -p ${deps_dir}/
+
+    cp ${name}/dist/apps/* ${deps_dir}
+}
+
 main()
 {
     if [ 1 -eq ${enable_build_from_resource} ];then
         build_from_source
+        build_plugin_from_source WeCross-BCOS-Stub ${bcos_stub_url} ${bcos_stub_branch}
+        build_plugin_from_source WeCross-Fabric-Stub ${fabric_stub_url} ${fabric_stub_branch}
     else
         download_wecross_pkg
     fi
