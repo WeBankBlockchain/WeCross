@@ -1,5 +1,5 @@
 [common]
-    stub = 'fabric'
+    name = 'fabric'
     type = 'Fabric1.4'
 
 [fabricServices]
@@ -8,25 +8,18 @@
     mspId = 'Org1MSP'
     orgUserName = 'fabric_admin'
     orgUserAccountPath = 'classpath:accounts/fabric_admin'
-    ordererTlsCaFile = 'classpath:/stubs/fabric/orderer-tlsca.crt'
+    ordererTlsCaFile = 'orderer-tlsca.crt'
     ordererAddress = 'grpcs://localhost:7050'
 
 [peers]
     [peers.org1]
-        peerTlsCaFile = 'classpath:/stubs/fabric/org1-tlsca.crt'
+        peerTlsCaFile = 'org1-tlsca.crt'
         peerAddress = 'grpcs://localhost:7051'
     [peers.org2]
-         peerTlsCaFile = 'classpath:/stubs/fabric/org2-tlsca.crt'
+         peerTlsCaFile = 'org2-tlsca.crt'
          peerAddress = 'grpcs://localhost:9051'
 
 # resources is a list
-[[resources]]
-    # name cannot be repeated
-    name = 'htlc'
-    type = 'FABRIC_CONTRACT'
-    chainCodeName = 'htlcSample'
-    chainLanguage = "go"
-    peers=['org1']
 [[resources]]
     # name cannot be repeated
     name = 'ledger'

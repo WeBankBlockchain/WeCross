@@ -47,8 +47,8 @@ public class AccountManagerConfig {
 
             AccountManager accountManager = new AccountManager();
             for (org.springframework.core.io.Resource resource : resources) {
-                if (resource.getFile().isDirectory() && !Objects
-                    .requireNonNull(resource.getFilename()).startsWith(".")) {
+                if (resource.getFile().isDirectory()
+                        && !Objects.requireNonNull(resource.getFilename()).startsWith(".")) {
                     org.springframework.core.io.Resource accountConfig =
                             resolver.getResource(
                                     "file:"

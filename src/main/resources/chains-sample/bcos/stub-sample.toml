@@ -1,5 +1,5 @@
 [common]
-    stub = 'bcos' # stub must be same with directory name
+    name = 'bcos' # stub must be same with directory name
     type = 'BCOS2.0' # BCOS
 
 [chain]
@@ -8,20 +8,15 @@
     enableGM = false # default false
 
 [channelService]
-    caCert = 'classpath:/stubs/bcos/ca.crt'
-    sslCert = 'classpath:/stubs/bcos/sdk.crt'
-    sslKey = 'classpath:/stubs/bcos/sdk.key'
+    caCert = 'ca.crt'
+    sslCert = 'sdk.crt'
+    sslKey = 'sdk.key'
     timeout = 5000  # ms, default 60000ms
     connectionsStr = ['127.0.0.1:20200']
 
 # resources is a list
 [[resources]]
     # name cannot be repeated
-    name = 'htlc'
+    name = 'HelloWeCross'
     type = 'BCOS_CONTRACT' # BCOS_CONTRACT or BCOS_SM_CONTRACT
     contractAddress = '0xdd02687ee3b20608f10d2794d5cd2e1133dad204'
-[[resources]]
-    # name cannot be repeated
-    name = 'ledger'
-    type = 'BCOS_CONTRACT' # BCOS_CONTRACT or BCOS_SM_CONTRACT
-    contractAddress = '0xa54c22ebcd2ffb5eae960d933e105fb67e40a445'
