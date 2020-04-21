@@ -88,12 +88,12 @@ public class ZonesConfig {
         return result;
     }
 
-    public Map<String, Chain> getChains(String network, Map<String, String> stubsDir)
+    public Map<String, Chain> getChains(String zone, Map<String, String> chainsDir)
             throws WeCrossException {
         Map<String, Chain> stubMap = new HashMap<>();
 
-        for (String chainName : stubsDir.keySet()) {
-            String stubPath = stubsDir.get(chainName);
+        for (String chainName : chainsDir.keySet()) {
+            String stubPath = chainsDir.get(chainName);
             String stubFile = stubPath + File.separator + WeCrossDefault.STUB_CONFIG_FILE;
             Toml stubToml;
             try {
@@ -128,7 +128,7 @@ public class ZonesConfig {
 
             List<ResourceInfo> resources = connection.getResources();
 
-            String blockPath = network + "." + chainName;
+            String blockPath = zone + "." + chainName;
             Chain chain = new Chain(chainName);
             chain.setDriver(stubFactory.newDriver());
             chain.setBlockHeaderStorage(blockHeaderStorageFactory.newBlockHeaderStorage(blockPath));
@@ -146,11 +146,17 @@ public class ZonesConfig {
                 resource.setResourceBlockHeaderManager(resourceBlockHeaderManager);
 
                 chain.getResources().put(resourceInfo.getName(), resource);
+                logger.info(
+                        "Load local resource({}.{}.{}): {}",
+                        zone,
+                        chainName,
+                        resource.getResourceInfo().getName(),
+                        resource.getResourceInfo());
             }
             chain.addConnection(null, connection);
 
             chain.start();
-            logger.info("Start block header sync: {}", network + "." + chainName);
+            logger.info("Start block header sync: {}", zone + "." + chainName);
             stubMap.put(chainName, chain);
         }
 

@@ -158,6 +158,11 @@ public class ZoneManager {
                 }
 
                 resource.addConnection(peer, remoteConnection);
+                logger.info(
+                        "Add remote resource({}) connection, peer: {}, resource: {}",
+                        path.toString(),
+                        peer.toString(),
+                        resource.getResourceInfo());
             }
         } catch (WeCrossException e) {
             logger.error("Add remote resource error", e);
