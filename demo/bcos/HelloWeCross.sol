@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 pragma experimental ABIEncoderV2;
 
 contract HelloWeCross {
-    string[] ss;
+    string[] ss = ["Talk is cheap", "Show me the code"];
 
     function set(string[] memory _ss) public returns (string[] memory) {
         ss = _ss;

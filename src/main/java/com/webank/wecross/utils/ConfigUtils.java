@@ -70,7 +70,7 @@ public class ConfigUtils {
         String stubsDir[] = dir.list();
         for (String stub : stubsDir) {
             // ignore hidden dir
-            if(stub.startsWith(".")) {
+            if (stub.startsWith(".")) {
                 continue;
             }
 

@@ -5,8 +5,8 @@ ROOT=$(pwd)
 
 BCOS_LEDGER=
 BCOS_HTLC=
-FABRIC_LEDGER=ledger5
-FABRIC_HTLC=myhtlc5
+FABRIC_LEDGER=ledger_sample
+FABRIC_HTLC=htlc
 DOCKER_ID=
 
 LOG_INFO()
@@ -94,18 +94,18 @@ update_wecross_config()
 
 [[htlc]]
     selfPath = 'payment.bcos.htlc'
-    account1 = 'bcos_default'
+    account1 = 'bcos_default_account'
     counterpartyPath = 'payment.fabric.htlc'
-    account2 = 'fabric_default'
+    account2 = 'fabric_default_account'
 EOF
 
     cat >>routers-payment/127.0.0.1-8251-25501/conf/wecross.toml<<EOF
 
 [[htlc]]
     selfPath = 'payment.fabric.htlc'
-    account1 = 'fabric_default'
+    account1 = 'fabric_default_account'
     counterpartyPath = 'payment.bcos.htlc'
-    account2 = 'bcos_default'
+    account2 = 'bcos_default_account'
 EOF
 }
 
@@ -160,6 +160,19 @@ copy_console()
 EOF
 }
 
+restart_router()
+{
+    LOG_INFO "Restart routers ..."
+
+    cd ${ROOT}/routers-payment/127.0.0.1-8250-25500/
+    bash stop.sh
+    bash start.sh
+
+    cd ${ROOT}/routers-payment/127.0.0.1-8251-25501/
+    bash stop.sh
+    bash start.sh
+}
+
 main()
 {
     deploy_bcos_htlc
@@ -174,6 +187,7 @@ main()
     config_bcos_sender_account
 
     copy_console
+    restart_router
 
     LOG_INFO "Config htlc successfully!"
         echo -e "

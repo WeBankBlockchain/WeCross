@@ -169,10 +169,13 @@ config_router_8250()
 
     cd ${router_dir}
     # account
-    bash add_account.sh -t BCOS2.0 -n bcos_default -d conf/accounts
+    bash add_account.sh -t BCOS2.0 -n bcos_default_account -d conf/accounts
+    bash add_account.sh -t BCOS2.0 -n bcos_user1 -d conf/accounts
 
-    bash add_account.sh -t Fabric1.4 -n fabric_default -d conf/accounts
-    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_default/
+    bash add_account.sh -t Fabric1.4 -n fabric_default_account -d conf/accounts
+    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_default_account/
+    bash add_account.sh -t Fabric1.4 -n fabric_user1 -d conf/accounts
+    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_user1/
 
     # stubs
     bash add_chain.sh -t BCOS2.0 -n bcos -d conf/chains
@@ -192,12 +195,15 @@ config_router_8251()
 
     cd ${router_dir}
     # account
-    bash add_account.sh -t BCOS2.0 -n bcos_default -d conf/accounts
+    bash add_account.sh -t BCOS2.0 -n bcos_default_account -d conf/accounts
+    bash add_account.sh -t BCOS2.0 -n bcos_user2 -d conf/accounts
 
     bash add_account.sh -t Fabric1.4 -n fabric_admin -d conf/accounts
     cp ${fabric_demo_dir}/certs/accounts/fabric_admin/* conf/accounts/fabric_admin/
-    bash add_account.sh -t Fabric1.4 -n fabric_default -d conf/accounts
-    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_default/
+    bash add_account.sh -t Fabric1.4 -n fabric_default_account -d conf/accounts
+    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_default_account/
+    bash add_account.sh -t Fabric1.4 -n fabric_user1 -d conf/accounts
+    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_user1/
 
     # stubs
     bash add_chain.sh -t Fabric1.4 -n fabric -d conf/chains
