@@ -5,4 +5,4 @@ Y
 EOF
 cd -
 
-rm fabric-samples-1.4.4 config bin certs -rf
+rm -rf fabric-samples-1.4.4 config bin certs

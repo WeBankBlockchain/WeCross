@@ -34,13 +34,20 @@ chmod u+x build_chain.sh
 LOG_INFO "Build chain ..."
 echo "127.0.0.1:4 agency1 1,2,3" >ipconf
 ./build_chain.sh -f ipconf -p 30300,20200,8545 -v ${BCOS_VERSION}
+if [ "$(uname)" == "Darwin" ]; then
+    # Mac
+    sed -i "" "s/max_forward_block=10/max_forward_block=0/g" ./nodes/127.0.0.1/node0/conf/group.1.ini
+else
+    # Other
+    sed -i "s/max_forward_block=10/max_forward_block=0/g" ./nodes/127.0.0.1/node0/conf/group.1.ini
+fi
 ./nodes/127.0.0.1/start_all.sh
 ./nodes/127.0.0.1/fisco-bcos -v
 
 # Download console
 LOG_INFO "Download console ..."
 if [ -e console.tar.gz ]; then
-    rm console -rf
+    rm -rf console
     tar -zxf console.tar.gz
 else
     bash ./nodes/127.0.0.1/download_console.sh
@@ -60,4 +67,3 @@ deploy HelloWeCross
 EOF
 hello_address=$(grep 'HelloWeCross' deploylog.txt | awk '{print $5}')
 cd -
-

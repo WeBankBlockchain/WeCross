@@ -69,6 +69,10 @@ public class ConfigUtils {
 
         String stubsDir[] = dir.list();
         for (String stub : stubsDir) {
+            // ignore hidden dir
+            if(stub.startsWith(".")) {
+                continue;
+            }
 
             String stubPath = thisPath + File.separator + stub;
             if (!fileIsExists(stubPath + File.separator + WeCrossDefault.STUB_CONFIG_FILE)) {

@@ -3,6 +3,7 @@ set -e
 LANG=en_US.utf8
 ROOT=$(pwd)
 
+
 LOG_INFO()
 {
     local content=${1}
@@ -59,7 +60,7 @@ check_env()
 build_bcos()
 {
     LOG_INFO "Build BCOS ..."
-    cd ${ROOT}/bcos 
+    cd ${ROOT}/bcos
     bash build.sh
 
     hello_address=$(grep 'HelloWorld' console/deploylog.txt | awk 'END {print $5}')
@@ -74,7 +75,7 @@ config_bcos_stub_toml()
     local contractAddress=${2}
 
     # delete resources sample
-    local start=$(grep -rn 'resources is' ${file} | awk -F ":" '{print $1}')
+    local start=$(grep -n 'resources is' ${file} | awk -F ":" '{print $1}')
     local end=$(wc -l ${file} |awk '{print $1}')
     sed_i "${start},${end}d" ${file} #delete line: [start, end]
 
@@ -103,7 +104,7 @@ check_process()
 {
     local process_name=${1}
     if [ -z "$(ps -ef |grep ${process_name} |grep -v grep)" ];then
-        LOG_ERROR "Build demo failed: ${process_name} is not exist." 
+        LOG_ERROR "Build demo failed: ${process_name} is not exist."
         exit 1
     fi
 }
@@ -112,7 +113,7 @@ check_container()
 {
     local container_name=${1}
     if [ -z "$(docker ps |grep ${container_name} |grep -v grep)" ];then
-        LOG_ERROR "Build demo failed: ${container_name} is not exist." 
+        LOG_ERROR "Build demo failed: ${container_name} is not exist."
         exit 1
     fi
 }
@@ -168,10 +169,10 @@ config_router_8250()
 
     cd ${router_dir}
     # account
-    bash add_account.sh -t BCOS2.0 -n bcos_user1 -d conf/accounts
+    bash add_account.sh -t BCOS2.0 -n bcos_default -d conf/accounts
 
-    bash add_account.sh -t Fabric1.4 -n fabric_user1 -d conf/accounts
-    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_user1/
+    bash add_account.sh -t Fabric1.4 -n fabric_default -d conf/accounts
+    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_default/
 
     # stubs
     bash add_chain.sh -t BCOS2.0 -n bcos -d conf/chains
@@ -191,12 +192,12 @@ config_router_8251()
 
     cd ${router_dir}
     # account
-    bash add_account.sh -t BCOS2.0 -n bcos_user2 -d conf/accounts
+    bash add_account.sh -t BCOS2.0 -n bcos_default -d conf/accounts
 
     bash add_account.sh -t Fabric1.4 -n fabric_admin -d conf/accounts
     cp ${fabric_demo_dir}/certs/accounts/fabric_admin/* conf/accounts/fabric_admin/
-    bash add_account.sh -t Fabric1.4 -n fabric_user1 -d conf/accounts
-    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_user1/
+    bash add_account.sh -t Fabric1.4 -n fabric_default -d conf/accounts
+    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_default/
 
     # stubs
     bash add_chain.sh -t Fabric1.4 -n fabric -d conf/chains
@@ -282,4 +283,3 @@ EOF
 }
 
 main
-

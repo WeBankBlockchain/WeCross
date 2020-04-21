@@ -35,7 +35,12 @@ Download_IMG()
 
 # Download
 LOG_INFO "Download fabric tools ..."
-Download https://github.com/hyperledger/fabric/releases/download/v1.4.6/hyperledger-fabric-linux-amd64-1.4.6.tar.gz
+if [ "$(uname)" == "Darwin" ]; then
+    # Mac
+    Download https://github.com/hyperledger/fabric/releases/download/v1.4.6/hyperledger-fabric-darwin-amd64-1.4.6.tar.gz
+else
+    Download https://github.com/hyperledger/fabric/releases/download/v1.4.6/hyperledger-fabric-linux-amd64-1.4.6.tar.gz
+fi
 
 LOG_INFO "Download fabric samples ..."
 Download https://github.com/hyperledger/fabric-samples/archive/v1.4.4.tar.gz
@@ -51,9 +56,14 @@ Download_IMG hyperledger/fabric-tools 1.4.4
 # Install
 LOG_INFO "Install ..."
 tar -zxf v1.4.4.tar.gz
-tar -zxf hyperledger-fabric-linux-amd64-1.4.6.tar.gz
-mv bin fabric-samples-1.4.4/ -f
-rm config -rf
+if [ "$(uname)" == "Darwin" ]; then
+    # Mac
+    tar -zxf hyperledger-fabric-darwin-amd64-1.4.6.tar.gz
+else
+    tar -zxf hyperledger-fabric-linux-amd64-1.4.6.tar.gz
+fi
+mv -f bin fabric-samples-1.4.4/
+rm -rf config
 
 
 # Startup
@@ -83,6 +93,3 @@ cp ${crypto_dir}/peerOrganizations/org1.example.com/users/User1@org1.example.com
 cp ${crypto_dir}/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem ${fabric_stub_dir}/orderer-tlsca.crt
 cp ${crypto_dir}/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt ${fabric_stub_dir}/org1-tlsca.crt
 cp ${crypto_dir}/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt ${fabric_stub_dir}/org2-tlsca.crt
-
-
-
