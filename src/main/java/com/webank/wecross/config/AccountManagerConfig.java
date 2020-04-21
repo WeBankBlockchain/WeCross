@@ -7,6 +7,7 @@ import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.StubManager;
 import java.io.IOException;
+import java.util.Objects;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,8 @@ public class AccountManagerConfig {
 
             AccountManager accountManager = new AccountManager();
             for (org.springframework.core.io.Resource resource : resources) {
-                if (resource.getFile().isDirectory()) {
+                if (resource.getFile().isDirectory() && !Objects
+                    .requireNonNull(resource.getFilename()).startsWith(".")) {
                     org.springframework.core.io.Resource accountConfig =
                             resolver.getResource(
                                     "file:"

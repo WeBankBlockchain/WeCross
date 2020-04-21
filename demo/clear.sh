@@ -6,7 +6,7 @@ cd ${ROOT}/routers-payment/127.0.0.1-8251-25501/
 bash stop.sh
 
 cd ${ROOT}
-rm WeCross WeCross-Console ipfile routers-payment -rf
+rm -rf WeCross WeCross-Console ipfile routers-payment
 
 cd ${ROOT}/bcos
 bash clear.sh
