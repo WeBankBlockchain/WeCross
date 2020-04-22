@@ -51,6 +51,7 @@ check_docker_service()
 
 check_env()
 {
+    LOG_INFO "Check environments"
     check_command java
     check_command docker
     check_command docker-compose
@@ -85,7 +86,7 @@ $(cat ${file})
 # resources is a list
 [[resources]]
     # name must be unique
-    name = 'HelloWorld'
+    name = 'HelloWeCross'
     type = 'BCOS_CONTRACT'
     contractAddress = '${contractAddress}'
 EOF
@@ -104,7 +105,7 @@ check_process()
 {
     local process_name=${1}
     if [ -z "$(ps -ef |grep ${process_name} |grep -v grep)" ];then
-        LOG_ERROR "Build demo failed: ${process_name} is not exist."
+        LOG_ERROR "Build demo failed: ${process_name} does not exist."
         exit 1
     fi
 }
@@ -113,7 +114,7 @@ check_container()
 {
     local container_name=${1}
     if [ -z "$(docker ps |grep ${container_name} |grep -v grep)" ];then
-        LOG_ERROR "Build demo failed: ${container_name} is not exist."
+        LOG_ERROR "Build demo failed: ${container_name} does not exist."
         exit 1
     fi
 }
@@ -146,6 +147,25 @@ check_wecross_network()
     check_bcos
     check_fabric
     check_wecross
+}
+
+clear_ask()
+{
+
+    # Clear history
+    if [ -e ${ROOT}/routers-payment ];then
+        read -p "Old demo network exist. Clear all and re-build? [Y/n]" ans
+        case "$ans" in
+        y | Y | "")
+            LOG_INFO "Clear old network ..."
+            bash clear.sh
+        ;;
+        *)
+            exit 0
+        ;;
+        esac
+
+    fi
 }
 
 console_ask()
@@ -212,21 +232,35 @@ config_router_8251()
     cd -
 }
 
+download_wecross()
+{
+    # Download
+    LOG_INFO "Download WeCross ..."
+    if [ -e download_wecross.sh ];then
+        bash download_wecross.sh -s -b release-rc2
+    else
+        bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross-rc2.sh) -s -b release-rc2
+    fi
+}
+
+download_wecross_console()
+{
+    LOG_INFO "Download WeCross Console ..."
+    if [ -e download_console.sh ];then
+        bash download_console.sh -s -b release-rc2
+    else
+        bash <(curl -sL https://github.com/WeBankFinTech/WeCross-Console/releases/download/resources/download_console-rc2.sh) -s -b release-rc2
+    fi
+}
+
 main()
 {
     check_env
 
-    # Clear history
-    if [ -e ${ROOT}/routers-payment ];then
-        LOG_INFO "Clear old network ..."
-        bash clear.sh
-    fi
+    clear_ask
 
-    # Download
-    LOG_INFO "Download WeCross ..."
-    bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross-rc2.sh) -s -b release-rc2
-    LOG_INFO "Download WeCross Console ..."
-    bash <(curl -sL https://github.com/WeBankFinTech/WeCross-Console/releases/download/resources/download_console-rc2.sh) -s -b release-rc2
+    download_wecross
+    download_wecross_console
 
     # Build Routers
     LOG_INFO "Build Routers ..."
