@@ -28,7 +28,7 @@ public class WeCrossHTLCTest {
         Mockito.when(mockResource.getSelfPath()).thenReturn(new Path());
         Mockito.when(mockResource.call(Mockito.any(TransactionContext.class))).thenReturn(response);
         WeCrossHTLC weCrossHTLC = new WeCrossHTLC();
-        String result = weCrossHTLC.call(mockResource, "test", "h", "s");
+        String result = weCrossHTLC.call(mockResource, "test", new String[] {"h", "s"});
         Assert.assertEquals(result, "success");
     }
 
@@ -42,7 +42,7 @@ public class WeCrossHTLCTest {
         Mockito.when(mockResource.sendTransaction(Mockito.any(TransactionContext.class)))
                 .thenReturn(response);
         WeCrossHTLC weCrossHTLC = new WeCrossHTLC();
-        String result = weCrossHTLC.sendTransaction(mockResource, "test", "h", "s");
+        String result = weCrossHTLC.sendTransaction(mockResource, "test", new String[] {"h", "s"});
         Assert.assertEquals(result, "success");
     }
 
