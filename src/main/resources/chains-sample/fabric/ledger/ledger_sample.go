@@ -633,14 +633,14 @@ func uint64ToBytes(u uint64) []byte {
 func safeAdd(a uint64, b uint64) uint64 {
 	c := a + b
 	if c < a {
-		panic(errors.New("invalid addition"))
+		panic(errors.New("balance overflow"))
 	}
 	return c
 }
 
 func safeSub(a uint64, b uint64) uint64 {
 	if b > a {
-		panic(errors.New("invalid subtraction"))
+		panic(errors.New("insufficient balance"))
 	}
 	return a - b
 }

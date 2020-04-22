@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 public class WeCrossHTLC implements HTLC {
     private Logger logger = LoggerFactory.getLogger(WeCrossHTLC.class);
 
-    public String call(HTLCResource htlcResource, String method, String... args)
+    public String call(HTLCResource htlcResource, String method, String[] args)
             throws WeCrossException {
         TransactionRequest request = new TransactionRequest(method, args);
 
@@ -55,7 +55,7 @@ public class WeCrossHTLC implements HTLC {
         return response.getResult()[0].trim();
     }
 
-    public String sendTransaction(HTLCResource htlcResource, String method, String... args)
+    public String sendTransaction(HTLCResource htlcResource, String method, String[] args)
             throws WeCrossException {
         TransactionRequest request = new TransactionRequest(method, args);
 
@@ -134,7 +134,11 @@ public class WeCrossHTLC implements HTLC {
             throws WeCrossException {
         TransactionResponse response = lock(htlcResource, h);
         if (!response.getResult()[0].trim().equalsIgnoreCase(RoutineDefault.SUCCESS_FLAG)) {
-            throw new WeCrossException(HTLCErrorCode.LOCK_ERROR, response.getResult()[0].trim());
+            throw new WeCrossException(
+                    ErrorCode.HTLC_ERROR,
+                    "error in lock counterparty",
+                    HTLCErrorCode.LOCK_ERROR,
+                    response.getResult()[0].trim());
         }
         VerifyData verifyData =
                 new VerifyData(
@@ -201,7 +205,11 @@ public class WeCrossHTLC implements HTLC {
             throws WeCrossException {
         TransactionResponse response = unlock(htlcResource, txHash, blockNumber, h, s);
         if (!response.getResult()[0].trim().equalsIgnoreCase(RoutineDefault.SUCCESS_FLAG)) {
-            throw new WeCrossException(HTLCErrorCode.UNLOCK_ERROR, response.getResult()[0].trim());
+            throw new WeCrossException(
+                    ErrorCode.HTLC_ERROR,
+                    "error in unlock counterparty",
+                    HTLCErrorCode.UNLOCK_ERROR,
+                    response.getResult()[0].trim());
         }
         VerifyData verifyData =
                 new VerifyData(
@@ -223,7 +231,7 @@ public class WeCrossHTLC implements HTLC {
 
     @Override
     public String rollback(HTLCResource htlcResource, String h) throws WeCrossException {
-        return sendTransaction(htlcResource, "rollback", h);
+        return sendTransaction(htlcResource, "rollback", new String[] {h});
     }
 
     @Override
@@ -283,18 +291,18 @@ public class WeCrossHTLC implements HTLC {
 
     @Override
     public String deleteTask(HTLCResource htlcResource, String h) throws WeCrossException {
-        return sendTransaction(htlcResource, "deleteTask", h);
+        return sendTransaction(htlcResource, "deleteTask", new String[] {h});
     }
 
     @Override
     public String getSecret(HTLCResource htlcResource, String h) throws WeCrossException {
-        return call(htlcResource, "getSecret", h);
+        return call(htlcResource, "getSecret", new String[] {h});
     }
 
     @Override
     public String[] getNewContractTxInfo(HTLCResource htlcResource, String h)
             throws WeCrossException {
-        String info = call(htlcResource, "getNewContractTxInfo", h);
+        String info = call(htlcResource, "getNewContractTxInfo", new String[] {h});
         if (info.equalsIgnoreCase(RoutineDefault.NULL_FLAG)) {
             String errorMsg =
                     "tx-info for transfer contract not found, h: "
@@ -313,7 +321,7 @@ public class WeCrossHTLC implements HTLC {
 
     @Override
     public String[] getLockTxInfo(HTLCResource htlcResource, String h) throws WeCrossException {
-        String info = call(htlcResource, "getLockTxInfo", h);
+        String info = call(htlcResource, "getLockTxInfo", new String[] {h});
         if (info.equalsIgnoreCase(RoutineDefault.NULL_FLAG)) {
             String errorMsg =
                     "tx-info for lock not found, h: "
@@ -332,76 +340,79 @@ public class WeCrossHTLC implements HTLC {
     @Override
     public void setLockTxInfo(HTLCResource htlcResource, String h, String txHash, long blockNumber)
             throws WeCrossException {
-        sendTransaction(htlcResource, "setLockTxInfo", h, txHash, String.valueOf(blockNumber));
+        sendTransaction(
+                htlcResource,
+                "setLockTxInfo",
+                new String[] {h, txHash, String.valueOf(blockNumber)});
     }
 
     @Override
     public BigInteger getSelfTimelock(HTLCResource htlcResource, String h) throws WeCrossException {
-        return new BigInteger(call(htlcResource, "getSelfTimelock", h));
+        return new BigInteger(call(htlcResource, "getSelfTimelock", new String[] {h}));
     }
 
     @Override
     public BigInteger getCounterpartyTimelock(HTLCResource htlcResource, String h)
             throws WeCrossException {
-        return new BigInteger(call(htlcResource, "getCounterpartyTimelock", h));
+        return new BigInteger(call(htlcResource, "getCounterpartyTimelock", new String[] {h}));
     }
 
     @Override
     public boolean getSelfLockStatus(HTLCResource htlcResource, String h) throws WeCrossException {
-        String result = call(htlcResource, "getSelfLockStatus", h);
+        String result = call(htlcResource, "getSelfLockStatus", new String[] {h});
         return result.equalsIgnoreCase(RoutineDefault.TRUE_FLAG);
     }
 
     @Override
     public boolean getCounterpartyLockStatus(HTLCResource htlcResource, String h)
             throws WeCrossException {
-        String result = call(htlcResource, "getCounterpartyLockStatus", h);
+        String result = call(htlcResource, "getCounterpartyLockStatus", new String[] {h});
         return result.equalsIgnoreCase(RoutineDefault.TRUE_FLAG);
     }
 
     @Override
     public boolean getSelfUnlockStatus(HTLCResource htlcResource, String h)
             throws WeCrossException {
-        String result = call(htlcResource, "getSelfUnlockStatus", h);
+        String result = call(htlcResource, "getSelfUnlockStatus", new String[] {h});
         return result.equalsIgnoreCase(RoutineDefault.TRUE_FLAG);
     }
 
     @Override
     public boolean getCounterpartyUnlockStatus(HTLCResource htlcResource, String h)
             throws WeCrossException {
-        String result = call(htlcResource, "getCounterpartyUnlockStatus", h);
+        String result = call(htlcResource, "getCounterpartyUnlockStatus", new String[] {h});
         return result.equalsIgnoreCase(RoutineDefault.TRUE_FLAG);
     }
 
     @Override
     public boolean getSelfRollbackStatus(HTLCResource htlcResource, String h)
             throws WeCrossException {
-        String result = call(htlcResource, "getSelfRollbackStatus", h);
+        String result = call(htlcResource, "getSelfRollbackStatus", new String[] {h});
         return result.equalsIgnoreCase(RoutineDefault.TRUE_FLAG);
     }
 
     @Override
     public boolean getCounterpartyRollbackStatus(HTLCResource htlcResource, String h)
             throws WeCrossException {
-        String result = call(htlcResource, "getCounterpartyRollbackStatus", h);
+        String result = call(htlcResource, "getCounterpartyRollbackStatus", new String[] {h});
         return result.equalsIgnoreCase(RoutineDefault.TRUE_FLAG);
     }
 
     @Override
     public void setCounterpartyLockStatus(HTLCResource htlcResource, String h)
             throws WeCrossException {
-        sendTransaction(htlcResource, "setCounterpartyLockStatus", h);
+        sendTransaction(htlcResource, "setCounterpartyLockStatus", new String[] {h});
     }
 
     @Override
     public void setCounterpartyUnlockStatus(HTLCResource htlcResource, String h)
             throws WeCrossException {
-        sendTransaction(htlcResource, "setCounterpartyUnlockStatus", h);
+        sendTransaction(htlcResource, "setCounterpartyUnlockStatus", new String[] {h});
     }
 
     @Override
     public void setCounterpartyRollbackStatus(HTLCResource htlcResource, String h)
             throws WeCrossException {
-        sendTransaction(htlcResource, "setCounterpartyRollbackStatus", h);
+        sendTransaction(htlcResource, "setCounterpartyRollbackStatus", new String[] {h});
     }
 }
