@@ -77,42 +77,67 @@ public class Chain {
 
         logger.trace("Fetch block header: {}", connection);
         if (connection != null) {
-            long localBlockNumber = localBlockHeader.getNumber();
-            String localBlockHash = localBlockHeader.getHash();
+
             long remoteBlockNumber = driver.getBlockNumber(connection);
 
-            if (remoteBlockNumber > localBlockNumber) {
-                for (long blockNumber = localBlockNumber + 1;
-                        blockNumber <= remoteBlockNumber;
-                        ++blockNumber) {
-                    byte[] blockBytes = driver.getBlockHeader(blockNumber, connection);
-                    if (blockBytes == null) {
+            long localBlockNumber = localBlockHeader.getNumber();
+
+            if (remoteBlockNumber < localBlockNumber) {
+                logger.error(
+                        "Local blockNumber({}) is bigger than remote blockNumber({}), please remove ./db carefully and try again.",
+                        localBlockNumber,
+                        remoteBlockNumber);
+                return;
+            } else if (remoteBlockNumber == localBlockNumber) {
+                logger.trace(
+                        "Chain({}) blockNumber({}) is up to date", this.name, remoteBlockNumber);
+            } else {
+                fetchBlockHeaderByNumber(remoteBlockNumber);
+            }
+        }
+    }
+
+    public void fetchBlockHeaderByNumber(long number) {
+        long localBlockNumber = localBlockHeader.getNumber();
+        if (number <= localBlockNumber) {
+            return;
+        }
+        synchronized (this) {
+            if (number <= localBlockNumber) {
+                return;
+            }
+
+            String localBlockHash = localBlockHeader.getHash();
+            Connection connection = chooseConnection();
+
+            for (long blockNumber = localBlockNumber + 1; blockNumber <= number; ++blockNumber) {
+                byte[] blockBytes = driver.getBlockHeader(blockNumber, connection);
+                if (blockBytes == null) {
+                    logger.error(
+                            "Could not get block header, please start the router which has chain({})",
+                            name);
+                    break;
+                }
+
+                BlockHeader blockHeader = driver.decodeBlockHeader(blockBytes);
+                if (localBlockNumber >= 0) {
+                    if (blockHeader.getNumber() != localBlockHeader.getNumber() + 1
+                            || !blockHeader.getPrevHash().equals(localBlockHeader.getHash())) {
                         logger.error(
-                                "Could not get block header, please start the router which has chain({})",
+                                "Fetched block couldn't be the next block, localBlockNumber: {} localBlockHash: {} fetchedBlockNumber: {} fetchedBlockPrevHash: {}, please check the router which has chain({}) is the same chain?",
+                                localBlockNumber,
+                                localBlockHash,
+                                blockHeader.getNumber(),
+                                blockHeader.getPrevHash(),
                                 name);
                         break;
                     }
-
-                    BlockHeader blockHeader = driver.decodeBlockHeader(blockBytes);
-                    if (localBlockNumber >= 0) {
-                        if (blockHeader.getNumber() != localBlockHeader.getNumber() + 1
-                                || !blockHeader.getPrevHash().equals(localBlockHeader.getHash())) {
-                            logger.error(
-                                    "Fetched block couldn't be the next block, localBlockNumber: {} localBlockHash: {} fetchedBlockNumber: {} fetchedBlockPrevHash: {}, please check the router which has chain({}) is the same chain?",
-                                    localBlockNumber,
-                                    localBlockHash,
-                                    blockHeader.getNumber(),
-                                    blockHeader.getPrevHash(),
-                                    name);
-                            break;
-                        }
-                    }
-
-                    blockHeaderStorage.writeBlockHeader(blockNumber, blockBytes);
-                    localBlockHeader = blockHeader; // Must update header after write in db
-
-                    logger.debug("Commit blockHeader: {}", localBlockHeader.toString());
                 }
+
+                blockHeaderStorage.writeBlockHeader(blockNumber, blockBytes);
+                localBlockHeader = blockHeader; // Must update header after write in db
+
+                logger.debug("Commit blockHeader: {}", localBlockHeader.toString());
             }
         }
     }

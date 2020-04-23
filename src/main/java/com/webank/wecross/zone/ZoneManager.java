@@ -151,6 +151,8 @@ public class ZoneManager {
                     ResourceBlockHeaderManager resourceBlockHeaderManager =
                             new ResourceBlockHeaderManager();
                     resourceBlockHeaderManager.setBlockHeaderStorage(chain.getBlockHeaderStorage());
+                    resourceBlockHeaderManager.setChain(chain);
+
                     resource.setResourceBlockHeaderManager(resourceBlockHeaderManager);
                     resource.setResourceInfo(resourceInfo);
 
