@@ -37,11 +37,22 @@ build_bcos_chain()
     echo "127.0.0.1:4 agency1 1,2,3" >ipconf
 
     # build chain
-    if [ -e fisco-bcos ];then
-        ./build_chain.sh -f ipconf -p 30300,20200,8545 -v ${BCOS_VERSION} -e ./fisco-bcos
+    if [ "$(uname)" == "Darwin" ]; then
+        # Mac
+        if [ -e fisco-bcos-mac ];then
+            ./build_chain.sh -f ipconf -p 30300,20200,8545 -v ${BCOS_VERSION} -e ./fisco-bcos-mac
+        else
+            ./build_chain.sh -f ipconf -p 30300,20200,8545 -v ${BCOS_VERSION}
+        fi
     else
-        ./build_chain.sh -f ipconf -p 30300,20200,8545 -v ${BCOS_VERSION}
+        # Other
+        if [ -e fisco-bcos ];then
+            ./build_chain.sh -f ipconf -p 30300,20200,8545 -v ${BCOS_VERSION} -e ./fisco-bcos
+        else
+            ./build_chain.sh -f ipconf -p 30300,20200,8545 -v ${BCOS_VERSION}
+        fi
     fi
+
 
 
 
@@ -52,8 +63,8 @@ build_bcos_chain()
         # Other
         sed -i "s/max_forward_block=10/max_forward_block=0/g" ./nodes/127.0.0.1/node0/conf/group.1.ini
     fi
+
     ./nodes/127.0.0.1/start_all.sh
-    ./nodes/127.0.0.1/fisco-bcos -v
 }
 
 
@@ -95,6 +106,3 @@ main()
 }
 
 main
-
-
-

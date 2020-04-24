@@ -19,6 +19,7 @@
     sslCert = 'classpath:ssl.crt'
     sslKey = 'classpath:ssl.key'
     peers = ['127.0.0.1:25501']
+    threadNum = 500
 
 #[[htlc]]
 #    selfPath = 'payment.bcos.htlc'
