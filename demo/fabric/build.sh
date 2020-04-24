@@ -33,6 +33,19 @@ Download_IMG()
     fi
 }
 
+check_docker_service()
+{
+    set +e
+    docker ps > /dev/null
+    if [ "$?" -ne "0" ]; then
+        LOG_INFO "Please install docker and add your user by: sudo gpasswd -a ${USER} docker"
+        exit 1
+    fi
+    set -e
+}
+
+check_docker_service
+
 # Download
 LOG_INFO "Download fabric tools ..."
 if [ "$(uname)" == "Darwin" ]; then
