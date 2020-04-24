@@ -53,17 +53,6 @@ build_bcos_chain()
         fi
     fi
 
-
-
-
-    if [ "$(uname)" == "Darwin" ]; then
-        # Mac
-        sed -i "" "s/max_forward_block=10/max_forward_block=0/g" ./nodes/127.0.0.1/node0/conf/group.1.ini
-    else
-        # Other
-        sed -i "s/max_forward_block=10/max_forward_block=0/g" ./nodes/127.0.0.1/node0/conf/group.1.ini
-    fi
-
     ./nodes/127.0.0.1/start_all.sh
 }
 
