@@ -46,7 +46,13 @@ check_command()
 
 check_docker_service()
 {
+    set +e
     docker ps > /dev/null
+    if [ "$?" -ne "0" ]; then
+        LOG_INFO "Please install docker and add your user by: sudo gpasswd -a ${USER} docker"
+        exit 1
+    fi
+    set -e
 }
 
 check_env()
@@ -306,7 +312,7 @@ EOF
     echo -e "
       FISCO BCOS                    Fabric
      (4node pbft)              (first-network)
-   (HelloWorld.sol)               (abac.go)
+   (HelloWeCross.sol)             (abac.go)
           |                           |
           |                           |
     WeCross Router <----------> WeCross Router
