@@ -54,7 +54,6 @@ Usage:
     -o  <output dir>                [Optional]   default ./${router_output}/
     -z  <generate tar packet>       [Optional]   default no
     -T  <enable test mode>          [Optional]   default no. Enable test resource.
-    -p  <enable plugin>             [Optional]   enabled plugins, split by ',', e.g: BCOS2.0,Fabric1.4, default enable all plugins
     -d  <dependencies dir>          [Optional]   dependencies dir, default './deps'
     -h  call for help
 e.g
@@ -90,7 +89,7 @@ check_env()
 
 parse_command()
 {
-while getopts "o:n:l:f:c:d:p:zTh" option;do
+while getopts "o:n:l:f:c:d:zTh" option;do
     # shellcheck disable=SC2220
     case ${option} in
     o)
@@ -116,9 +115,6 @@ while getopts "o:n:l:f:c:d:p:zTh" option;do
     ;;
     T)
         enable_test_resource="true"
-    ;;
-    p)
-        plugins=$OPTARG
     ;;
     d)
         deps_dir=$OPTARG
@@ -175,60 +171,6 @@ gen_crt()
     echo "================================================================"
 }
 
-download_bcos_plugin()
-{
-    mkdir -p ${deps_dir}
-    [ -f "${deps_dir}/${bcos_stub_jar_name}" ] && [ ${bcos_stub_md5} != $(md5sum "${deps_dir}/${bcos_stub_jar_name}" | cut -f1 -d' ') ] && rm "${deps_dir}/${bcos_stub_jar_name}"
-    [ ! -f "${deps_dir}/${bcos_stub_jar_name}" ] && wget -O "${deps_dir}/${bcos_stub_jar_name}" "$bcos_stub_url"
-    [ $bcos_stub_md5 != $(md5sum "${deps_dir}/${bcos_stub_jar_name}" | cut -f1 -d' ') ] && {
-        LOG_ERROR "Download bcos-stub failed!"
-        exit 1
-    }
-    LOG_INFO "Download ${bcos_stub_jar_name} success!"
-}
-
-download_fabric_plugin()
-{
-    mkdir -p ${deps_dir}
-    #download and initialize the plugin
-    [ -f "${deps_dir}/${fabric_stub_jar_name}" ] && [ $fabric_stub_md5 != $(md5sum "${deps_dir}/${fabric_stub_jar_name}" | cut -f1 -d' ') ] && rm "${deps_dir}/${fabric_stub_jar_name}"
-    [ ! -f "${deps_dir}/${fabric_stub_jar_name}" ] && wget -O "${deps_dir}/${fabric_stub_jar_name}" "$fabric_stub_url"
-    [ $fabric_stub_md5 != $(md5sum "${deps_dir}/${fabric_stub_jar_name}" | cut -f1 -d' ') ] && {
-        LOG_ERROR "Download fabirc-stub failed!"
-        exit 1
-    }
-    LOG_INFO "Download ${fabric_stub_jar_name} success!"
-}
-
-download_plugins()
-{
-    to_dir=${1}
-
-    echo "plugins: $plugins"
-    mkdir -p ${to_dir}
-    mkdir -p ${deps_dir}
-    #download plugins
-    plugins_array=(${plugins/,/ })
-    for plugin in ${plugins_array[*]};do
-        echo ${plugin}
-        case ${plugin} in
-        BCOS2.0)
-            download_bcos_plugin
-            cp ${deps_dir}/${bcos_stub_jar_name} ${to_dir}/${bcos_stub_jar_name}
-            ;;
-        Fabric1.4)
-        	download_fabric_plugin
-        	cp ${deps_dir}/${fabric_stub_jar_name} ${to_dir}/${fabric_stub_jar_name}
-            ;;
-
-        *)
-            LOG_ERROR "Unknown plugin: ${plugin}"
-            exit 1
-            ;;
-        esac
-    done
-}
-
 #index ip rpc_port p2p_port peers
 gen_one_wecross()
 {
@@ -249,8 +191,7 @@ gen_one_wecross()
     cp -r ${wecross_dir}/apps "${output}/"
     cp -r ${wecross_dir}/lib "${output}/"
 
-    # download plugin
-    # download_plugins ${output}/plugin
+    # Configure plugin
     cp ${deps_dir}/*  ${output}/plugin/
 
     cp -r "${wecross_dir}/conf" "${output}/"
