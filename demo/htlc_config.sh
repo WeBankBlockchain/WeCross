@@ -37,7 +37,7 @@ init_bcos_asset()
 
     # clone bactool
     cd bcos
-    git clone https://github.com/Shareong/bactool.git
+    git clone --depth 1 https://github.com/Shareong/bactool.git
     cd bactool
     ./gradlew build
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* ${ROOT}/bcos/bactool/dist/conf
