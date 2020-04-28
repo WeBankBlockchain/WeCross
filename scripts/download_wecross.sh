@@ -11,10 +11,10 @@ src_dir=$(pwd)'/src/'
 wecross_url=https://github.com/WeBankFinTech/WeCross.git
 wecross_branch=master
 
-bcos_stub_url=https://github.com/WeBankFinTech/WeCross-BCOS-Stub.git
+bcos_stub_url=https://github.com/WeBankFinTech/WeCross-BCOS2-Stub.git
 bcos_stub_branch=master
 
-fabric_stub_url=https://github.com/WeBankFinTech/WeCross-Fabric-Stub.git
+fabric_stub_url=https://github.com/WeBankFinTech/WeCross-Fabric1-Stub.git
 fabric_stub_branch=master
 
 
@@ -238,8 +238,8 @@ main()
 {
     if [ 1 -eq ${enable_build_from_resource} ];then
         build_from_source
-        build_plugin_from_source WeCross-BCOS-Stub ${bcos_stub_url} ${bcos_stub_branch}
-        build_plugin_from_source WeCross-Fabric-Stub ${fabric_stub_url} ${fabric_stub_branch}
+        build_plugin_from_source WeCross-BCOS2-Stub ${bcos_stub_url} ${bcos_stub_branch}
+        build_plugin_from_source WeCross-Fabric1-Stub ${fabric_stub_url} ${fabric_stub_branch}
     else
         download_wecross_pkg
     fi
