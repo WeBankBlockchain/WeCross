@@ -21,14 +21,6 @@ wecross_dir=$(dirname $(pwd)/${0})/
 plugins='BCOS2.0,Fabric1.4'
 deps_dir=$(pwd)'/plugin/'
 
-bcos_stub_jar_name=bcos-stub.jar
-bcos_stub_url='https://oss.sonatype.org/service/local/repositories/snapshots/content/com/webank/wecross-bcos-stub/1.0.0-rc2-0414-SNAPSHOT/wecross-bcos-stub-1.0.0-rc2-0414-20200414.030542-1-all.jar'
-bcos_stub_md5='99d08a92b7c5ccf79362ec0caec4eb01'
-
-fabric_stub_jar_name=fabric-stub.jar
-fabric_stub_url='https://oss.sonatype.org/service/local/repositories/snapshots/content/com/webank/wecross-fabric-stub/1.0.0-rc2-0414-SNAPSHOT/wecross-fabric-stub-1.0.0-rc2-0414-20200414.032736-1-all.jar'
-fabric_stub_md5='0fb7e1ceca0996ef88a1203ea232b058'
-
 LOG_INFO()
 {
     local content=${1}
