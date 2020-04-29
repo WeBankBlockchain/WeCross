@@ -29,7 +29,12 @@ build_bcos_chain()
 {
     # Download
     LOG_INFO "Download build_chain.sh ..."
-    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v${BCOS_VERSION}/build_chain.sh
+
+    curl -LO https://github.com/WeBankFinTech/WeCross/releases/download/resources/fisco-bcos # delete me after fisco-bcos 2.4 release
+    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.3.0/build_chain.sh
+
+
+    #Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v${BCOS_VERSION}/build_chain.sh
     chmod u+x build_chain.sh
 
     # Build chain
