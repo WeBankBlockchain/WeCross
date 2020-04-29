@@ -32,6 +32,7 @@ build_bcos_chain()
 
     curl -LO https://github.com/WeBankFinTech/WeCross/releases/download/resources/fisco-bcos && chmod +x fisco-bcos # delete me after fisco-bcos 2.4 release
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.3.0/build_chain.sh
+     cp ../../src/main/resources/chains-sample/bcos/HelloWeCross.sol ./
 
 
     #Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v${BCOS_VERSION}/build_chain.sh
