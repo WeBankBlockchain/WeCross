@@ -114,7 +114,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        logger.error(
+        logger.warn(
                 " caught exception, e: {}, node: {}:{}",
                 cause,
                 ((SocketChannel) ctx.channel()).remoteAddress().getAddress().getHostAddress(),

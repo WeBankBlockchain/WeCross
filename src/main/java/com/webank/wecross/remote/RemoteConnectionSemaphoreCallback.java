@@ -38,7 +38,7 @@ class RemoteConnectionSemaphoreCallback extends P2PMessageCallback {
             semaphore.tryAcquire(1, 10, TimeUnit.SECONDS);
 
         } catch (InterruptedException e) {
-            logger.error("Send error: {}", e);
+            logger.warn("Send error: {}", e);
             Response response = new Response();
             response.setErrorCode(StubQueryStatus.REMOTE_QUERY_FAILED);
             response.setErrorMessage("Send error: " + e.getMessage());

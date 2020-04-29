@@ -82,7 +82,13 @@ public class Chain {
 
             long localBlockNumber = localBlockHeader.getNumber();
 
-            if (remoteBlockNumber < localBlockNumber) {
+            if (remoteBlockNumber < 0) {
+                logger.warn(
+                        "Remote blockNumber({}), remote router access failed.",
+                        localBlockNumber,
+                        remoteBlockNumber);
+                return;
+            } else if (remoteBlockNumber < localBlockNumber) {
                 logger.error(
                         "Local blockNumber({}) is bigger than remote blockNumber({}), please remove ./db carefully and try again.",
                         localBlockNumber,
