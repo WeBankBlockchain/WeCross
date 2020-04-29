@@ -48,7 +48,7 @@ public class Chain {
 
                                             fetchBlockHeader();
                                         } catch (Exception e) {
-                                            logger.error("Get block header error", e);
+                                            logger.warn("Get block header exception", e);
                                         }
                                     }
                                 }

@@ -325,7 +325,7 @@ public class NettyBootstrap {
                                             if (future.isSuccess()) {
                                                 logger.debug(" connect to {} success", host);
                                             } else {
-                                                logger.error(
+                                                logger.warn(
                                                         " connect to {} failed, error: {}",
                                                         host,
                                                         future.cause());
