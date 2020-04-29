@@ -103,6 +103,7 @@ public class Chain {
             return;
         }
         synchronized (this) {
+            localBlockNumber = localBlockHeader.getNumber();
             if (number <= localBlockNumber) {
                 return;
             }
