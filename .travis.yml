@@ -3,6 +3,9 @@ branches:
     only:
         - /.*/
 
+services:
+    - docker
+
 matrix:
     fast_finish: true
     include:
@@ -55,7 +58,10 @@ cache:
 before_install:
     - gradle wrapper
 script: |
+    echo "########## ci_check ################"
     bash .ci/ci_check.sh
+    echo "######## ci_demo_check #############"
+    bash .ci/ci_demo_check.sh
 
 after_success:
     - bash <(curl -s https://codecov.io/bash)
