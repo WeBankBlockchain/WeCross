@@ -3,21 +3,34 @@
 set -e
 ROOT=$(pwd)/demo/
 
+LOG_INFO()
+{
+    local content=${1}
+    echo -e "\033[32m[INFO] ${content}\033[0m"
+}
+
+LOG_ERROR()
+{
+    local content=${1}
+    echo -e "\033[31m[ERROR] ${content}\033[0m"
+}
+
 check_log()
 {
     cd ${ROOT}
-    # check error from log
     error_log=routers-payment/127.0.0.1-8250-25500/logs/error.log
+    LOG_INFO "Check log ${error_log}"
     if [ "$(grep ERROR ${error_log} |wc -l)" -ne "0" ];then
         cat ${error_log}
-        echo "Error log is ${error_log}"
+        LOG_ERROR "Error log is ${error_log}"
         exit 1
     fi
 
     error_log=routers-payment/127.0.0.1-8251-25501/logs/error.log
+    LOG_INFO "Check log ${error_log}"
     if [ "$(grep ERROR ${error_log} |wc -l)" -ne "0" ];then
         cat ${error_log}
-        echo "Error log is ${error_log}"
+        LOG_ERROR "Error log is ${error_log}"
         exit 1
     fi
 }
@@ -43,8 +56,6 @@ EOF
     cd ..
 
     check_log
-
-
 }
 
 # htlc test

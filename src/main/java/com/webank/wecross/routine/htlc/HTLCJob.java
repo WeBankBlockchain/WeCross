@@ -20,7 +20,7 @@ public class HTLCJob implements Job {
         try {
             doHTLCTask(htlcResourcePair);
         } catch (WeCrossException e) {
-            logger.error(
+            logger.warn(
                     "current round failed, path: {}, errorMessage: {}, internalMessage: {}",
                     path,
                     e.getLocalizedMessage(),
