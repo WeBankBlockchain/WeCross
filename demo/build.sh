@@ -194,6 +194,8 @@ config_router_8250()
     fabric_demo_dir=${2}
     bcos_demo_dir=${3}
 
+    LOG_INFO "Configure router ${router_dir}"
+
     cd ${router_dir}
     # account
     bash add_account.sh -t BCOS2.0 -n bcos_default_account -d conf/accounts
@@ -219,6 +221,8 @@ config_router_8251()
 {
     router_dir=${1}
     fabric_demo_dir=${2}
+
+    LOG_INFO "Configure router ${router_dir}"
 
     cd ${router_dir}
     # account
@@ -322,7 +326,10 @@ EOF
            | 
     WeCross Console
 "
-    console_ask
+
 }
 
 main
+if [ ! -n "$1" ] ;then
+    console_ask
+fi

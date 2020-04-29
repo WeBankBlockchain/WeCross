@@ -59,7 +59,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 try {
                     getChannelHandlerCallBack().onConnect(ctx, getConnectToServer());
                 } catch (Exception e1) {
-                    logger.error(
+                    logger.warn(
                             " handshake on connect exception, disconnect, host: {}, ctx: {}, cause: {}",
                             node,
                             hashCode,
@@ -68,7 +68,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                     ctx.close();
                 }
             } else {
-                logger.error(
+                logger.warn(
                         " handshake failed, host: {}, message: {}, cause: {} ",
                         node,
                         e.cause().getMessage(),
@@ -114,7 +114,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        logger.error(
+        logger.warn(
                 " caught exception, e: {}, node: {}:{}",
                 cause,
                 ((SocketChannel) ctx.channel()).remoteAddress().getAddress().getHostAddress(),
