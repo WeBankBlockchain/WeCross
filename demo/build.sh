@@ -322,7 +322,10 @@ EOF
            | 
     WeCross Console
 "
-    console_ask
+
 }
 
 main
+if [ ! -n "$1" ] ;then
+    console_ask
+fi
