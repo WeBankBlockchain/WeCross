@@ -29,14 +29,11 @@ build_bcos_chain()
 {
     # Download
     LOG_INFO "Download build_chain.sh ..."
-
-    curl -LO https://github.com/WeBankFinTech/WeCross/releases/download/resources/fisco-bcos && chmod +x fisco-bcos # delete me after fisco-bcos 2.4 release
-    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.3.0/build_chain.sh
-     cp ../../src/main/resources/chains-sample/bcos/HelloWeCross.sol ./
-
-
-    #Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v${BCOS_VERSION}/build_chain.sh
+    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v${BCOS_VERSION}/build_chain.sh
     chmod u+x build_chain.sh
+
+    LOG_INFO "Download HelloWeCross.sol ..."
+    Download https://github.com/WeBankFinTech/WeCross/releases/download/resources/HelloWeCross.sol
 
     # Build chain
     LOG_INFO "Build chain ..."
@@ -46,16 +43,16 @@ build_bcos_chain()
     if [ "$(uname)" == "Darwin" ]; then
         # Mac
         if [ -e fisco-bcos-mac ];then
-            ./build_chain.sh -f ipconf -p 30300,20200,8545 -v ${BCOS_VERSION} -e ./fisco-bcos-mac
+            ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos-mac
         else
-            ./build_chain.sh -f ipconf -p 30300,20200,8545 -v ${BCOS_VERSION}
+            ./build_chain.sh -f ipconf -p 30300,20200,8545
         fi
     else
         # Other
         if [ -e fisco-bcos ];then
-            ./build_chain.sh -f ipconf -p 30300,20200,8545 -v ${BCOS_VERSION} -e ./fisco-bcos
+            ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos
         else
-            ./build_chain.sh -f ipconf -p 30300,20200,8545 -v ${BCOS_VERSION}
+            ./build_chain.sh -f ipconf -p 30300,20200,8545
         fi
     fi
 
