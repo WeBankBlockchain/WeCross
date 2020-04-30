@@ -91,7 +91,7 @@ public class RestfulP2PMessageEngine extends P2PMessageEngine {
                                                 p2PResponse);
 
                                     } catch (Exception e) {
-                                        logger.error("p2p error:", e);
+                                        logger.warn("p2p error:", e);
                                         executeCallback(
                                                 callback,
                                                 NetworkQueryStatus.INTERNAL_ERROR,

@@ -5,6 +5,7 @@ LANG=en_US.utf8
 
 enable_build_from_resource=0
 
+default_compatibility_version=v1.0.0-rc2 # update this every release
 deps_dir=$(pwd)'/plugin/'
 src_dir=$(pwd)'/src/'
 
@@ -101,6 +102,12 @@ download_wecross_pkg()
     if [ -z "${compatibility_version}" ];then
         compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross/releases/latest | grep "tag_name"|awk -F '\"' '{print $4}')
     fi
+
+    if [ -z "${compatibility_version}" ];then
+        # could not get version from github
+        compatibility_version=${default_compatibility_version}
+    fi
+
     LOG_INFO "Latest release: ${compatibility_version}"
 
     download_release_pkg ${github_url} ${cdn_url} ${compatibility_version} ${release_pkg} ${release_pkg_checksum_file}

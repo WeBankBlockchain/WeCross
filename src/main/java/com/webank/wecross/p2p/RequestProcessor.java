@@ -200,10 +200,12 @@ public class RequestProcessor implements Processor {
                                                     P2PResponse<PeerInfoMessageData> responseMsg) {
                                                 logger.trace("Receive peerInfo:{}", peerInfo);
                                                 try {
-                                                    PeerInfoMessageData data =
-                                                            (PeerInfoMessageData)
-                                                                    responseMsg.getData();
-                                                    if (data != null) {
+                                                    if (responseMsg != null
+                                                            && responseMsg.getData() != null) {
+
+                                                        PeerInfoMessageData data =
+                                                                (PeerInfoMessageData)
+                                                                        responseMsg.getData();
                                                         int newSeq = data.getSeq();
                                                         if (peerManager.hasPeerChanged(
                                                                 peerInfo.getNode(), newSeq)) {
@@ -231,7 +233,9 @@ public class RequestProcessor implements Processor {
                                                         }
                                                     } else {
                                                         logger.warn(
-                                                                "Receive unrecognized seq message from peer:"
+                                                                "Receive unrecognized seq message("
+                                                                        + responseMsg
+                                                                        + ") from peer:"
                                                                         + peerInfo);
                                                     }
                                                 } catch (WeCrossException e) {
