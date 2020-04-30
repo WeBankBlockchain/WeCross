@@ -42,11 +42,11 @@ matrix:
             dist: xenial
             sudo: required
 
-        - language: java
-           jdk: openjdk11
-           os: osx
-           before_install:
-             - brew install gradle && gradle wrapper
+        -   language: java
+            jdk: openjdk11
+            os: osx
+            before_install:
+                - brew install gradle && gradle wrapper
 
 before_cache:
     - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
