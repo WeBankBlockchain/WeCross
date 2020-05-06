@@ -50,11 +50,51 @@ check_docker_service()
     docker ps > /dev/null
     if [ "$?" -ne "0" ]; then
         LOG_INFO "Please install docker and add your user by:"
-        LOG_INFO "        sudo gpasswd -a ${USER} docker && su ${USER}"
+        echo -e "\033[32m        sudo gpasswd -a ${USER} docker && su ${USER}\033[0m"
         exit 1
     fi
     set -e
 }
+
+check_port_avaliable()
+{
+    port=$1
+    name=$2
+    if [ "$(netstat -npl 2>/dev/null |grep $port | wc -l)" -ne "0" ]; then
+        LOG_ERROR "${name} port ${port} is not avaliable. Are there any other blockchain is running?"
+        exit 1
+    fi
+}
+
+check_fabric_avaliable()
+{
+    check_port_avaliable 7050 Fabric-Orderer
+    check_port_avaliable 7051 Fabric-Peer
+    check_port_avaliable 8051 Fabric-Peer
+    check_port_avaliable 9051 Fabric-Peer
+    check_port_avaliable 10051 Fabric-Peer
+}
+
+check_bcos_avaliable()
+{
+    # 30300,20200,8545
+    check_port_avaliable 30300 BCOS-P2P
+    check_port_avaliable 20200 BCOS-Channel
+    check_port_avaliable 8542 BCOS-RPC
+
+    check_port_avaliable 30301 BCOS-P2P
+    check_port_avaliable 20201 BCOS-Channel
+    check_port_avaliable 8543 BCOS-RPC
+
+    check_port_avaliable 30302 BCOS-P2P
+    check_port_avaliable 20202 BCOS-Channel
+    check_port_avaliable 8544 BCOS-RPC
+
+    check_port_avaliable 30303 BCOS-P2P
+    check_port_avaliable 20203 BCOS-Channel
+    check_port_avaliable 8545 BCOS-RPC
+}
+
 
 check_env()
 {
@@ -63,6 +103,8 @@ check_env()
     check_command docker
     check_command docker-compose
     check_docker_service
+    check_fabric_avaliable
+    check_bcos_avaliable
 }
 
 build_bcos()
@@ -318,8 +360,8 @@ EOF
       FISCO BCOS                    Fabric
      (4node pbft)              (first-network)
    (HelloWeCross.sol)             (abac.go)
-          |                           |
-          |                           |
+           |                          |
+           |                          |
     WeCross Router <----------> WeCross Router
 (127.0.0.1-8250-25500)      (127.0.0.1-8251-25501)
            | 
