@@ -2,8 +2,6 @@
 set -e
 LANG=en_US.utf8
 
-BCOS_VERSION=2.4.0
-
 LOG_INFO()
 {
     local content=${1}
@@ -29,7 +27,7 @@ build_bcos_chain()
 {
     # Download
     LOG_INFO "Download build_chain.sh ..."
-    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v${BCOS_VERSION}/build_chain.sh
+    Download https://github.com/FISCO-BCOS/FISCO-BCOS/raw/master/tools/build_chain.sh
     chmod u+x build_chain.sh
 
     LOG_INFO "Download HelloWeCross.sol ..."

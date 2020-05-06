@@ -1,0 +1,37 @@
+name: Publish binaries
+
+on:
+  release:
+    types: [prereleased, published, created]
+
+jobs:
+  build:
+    name: Publish binaries
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Download demo requirements
+      run: cd demo/ && bash .prepare.sh && cd -
+    - name: Pack
+      run: tar -zcvf demo.tar.gz demo/
+    - name: Checksum
+      run: md5sum demo.tar.gz > demo.tar.gz.md5
+    - name: Upload demo to release
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: demo.tar.gz
+        asset_name: demo.tar.gz
+        tag: ${{ github.ref }}
+        overwrite: true
+
+    - name: Upload checksum to release
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: demo.tar.gz.md5
+        asset_name: demo.tar.gz.md5
+        tag: ${{ github.ref }}
+        overwrite: true
