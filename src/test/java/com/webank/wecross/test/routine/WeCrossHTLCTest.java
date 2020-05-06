@@ -29,7 +29,7 @@ public class WeCrossHTLCTest {
         Mockito.when(mockResource.call(Mockito.any(TransactionContext.class))).thenReturn(response);
         WeCrossHTLC weCrossHTLC = new WeCrossHTLC();
         String result = weCrossHTLC.call(mockResource, "test", new String[] {"h", "s"});
-        Assert.assertEquals(result, "success");
+        Assert.assertEquals("success", result);
     }
 
     @Test
@@ -43,7 +43,7 @@ public class WeCrossHTLCTest {
                 .thenReturn(response);
         WeCrossHTLC weCrossHTLC = new WeCrossHTLC();
         String result = weCrossHTLC.sendTransaction(mockResource, "test", new String[] {"h", "s"});
-        Assert.assertEquals(result, "success");
+        Assert.assertEquals("success", result);
     }
 
     @Test
@@ -163,7 +163,7 @@ public class WeCrossHTLCTest {
                                 return null;
                             }
                         });
-        Assert.assertEquals(result, "htlc");
+        Assert.assertEquals("htlc", result);
     }
 
     @Test
@@ -179,7 +179,7 @@ public class WeCrossHTLCTest {
             weCrossHTLC.getNewContractTxInfo(mockResource, "h");
         } catch (WeCrossException e) {
             Assert.assertEquals(
-                    e.getInternalErrorCode().intValue(), HTLCErrorCode.GET_TX_INFO_ERROR);
+                    HTLCErrorCode.GET_TX_INFO_ERROR, e.getInternalErrorCode().intValue());
         }
     }
 
@@ -193,7 +193,7 @@ public class WeCrossHTLCTest {
         Mockito.when(mockResource.call(Mockito.any(TransactionContext.class))).thenReturn(response);
         WeCrossHTLC weCrossHTLC = new WeCrossHTLC();
         String[] result = weCrossHTLC.getLockTxInfo(mockResource, "h");
-        Assert.assertEquals(result[0], "0x");
+        Assert.assertEquals("0x", result[0]);
     }
 
     @Test
@@ -207,7 +207,7 @@ public class WeCrossHTLCTest {
         WeCrossHTLC weCrossHTLC = new WeCrossHTLC();
 
         String result = weCrossHTLC.getSecret(mockResource, "h");
-        Assert.assertEquals(result, "0");
+        Assert.assertEquals("0", result);
 
         BigInteger bigInteger = weCrossHTLC.getSelfTimelock(mockResource, "h");
         Assert.assertEquals(bigInteger, BigInteger.valueOf(0));
@@ -245,7 +245,7 @@ public class WeCrossHTLCTest {
                 .thenReturn(response);
         WeCrossHTLC weCrossHTLC = new WeCrossHTLC();
         String result = weCrossHTLC.rollback(mockResource, "h");
-        Assert.assertEquals(result, "success");
+        Assert.assertEquals("success", result);
 
         weCrossHTLC.deleteTask(mockResource, "h");
         weCrossHTLC.setLockTxInfo(mockResource, "h", "0x", 100);

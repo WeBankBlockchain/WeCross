@@ -66,7 +66,7 @@ public class Chain {
                 blockSyncThread.interrupt();
                 blockSyncThread.join();
                 logger.trace("Block header sync thread stopped");
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 logger.error("Thread interrupt", e);
             }
         }

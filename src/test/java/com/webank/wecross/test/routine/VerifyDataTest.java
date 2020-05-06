@@ -24,10 +24,10 @@ public class VerifyDataTest {
         response.setResult(new String[] {"hello", "world"});
         VerifiedTransaction verifiedTransaction =
                 new VerifiedTransaction(100, "0x", "0x", request, response);
-        Assert.assertEquals(verifyData.equals(verifiedTransaction), true);
+        Assert.assertEquals(true, verifyData.verify(verifiedTransaction));
 
         VerifiedTransaction unVerifiedTransaction =
                 new VerifiedTransaction(1000, null, "0xx", request, response);
-        Assert.assertEquals(verifyData.equals(unVerifiedTransaction), false);
+        Assert.assertEquals(false, verifyData.verify(unVerifiedTransaction));
     }
 }

@@ -30,10 +30,7 @@ public class WeCrossHTLC implements HTLC {
                         htlcResource.getResourceInfo(),
                         htlcResource.getResourceBlockHeaderManager());
         if (!method.equals("getTask")) {
-            logger.info(
-                    "call request: {}, path: {}",
-                    request.toString(),
-                    htlcResource.getSelfPath().toString());
+            logger.info("call request: {}, path: {}", request, htlcResource.getSelfPath());
         }
         TransactionResponse response = htlcResource.call(transactionContext);
         if (response.getErrorCode() != 0) {
@@ -50,7 +47,7 @@ public class WeCrossHTLC implements HTLC {
                     response.getErrorMessage());
         }
         if (!method.equals("getTask")) {
-            logger.info("call response: {}", response.toString());
+            logger.info("call response: {}", response);
         }
         return response.getResult()[0].trim();
     }
@@ -65,10 +62,7 @@ public class WeCrossHTLC implements HTLC {
                         htlcResource.getAccount(),
                         htlcResource.getResourceInfo(),
                         htlcResource.getResourceBlockHeaderManager());
-        logger.info(
-                "sendTransaction request: {}, path: {}",
-                request.toString(),
-                htlcResource.getSelfPath().toString());
+        logger.info("sendTransaction request: {}, path: {}", request, htlcResource.getSelfPath());
         TransactionResponse response = htlcResource.sendTransaction(transactionContext);
         if (response.getErrorCode() != 0) {
             logger.error(
@@ -83,7 +77,7 @@ public class WeCrossHTLC implements HTLC {
                     HTLCErrorCode.TRANSACTION_ERROR,
                     response.getErrorMessage());
         }
-        logger.info("sendTransaction response: {}", response.toString());
+        logger.info("sendTransaction response: {}", response);
         String[] result = response.getResult();
         if (result == null || result.length == 0) {
             return null;
@@ -102,10 +96,7 @@ public class WeCrossHTLC implements HTLC {
                         htlcResource.getAccount(),
                         htlcResource.getResourceInfo(),
                         htlcResource.getResourceBlockHeaderManager());
-        logger.info(
-                "lock request: {}, path: {}",
-                request.toString(),
-                htlcResource.getSelfPath().toString());
+        logger.info("lock request: {}, path: {}", request, htlcResource.getSelfPath());
         TransactionResponse response = htlcResource.sendTransaction(transactionContext);
         if (response.getErrorCode() != 0) {
             logger.error(
@@ -119,7 +110,7 @@ public class WeCrossHTLC implements HTLC {
                     HTLCErrorCode.TRANSACTION_ERROR,
                     response.getErrorMessage());
         }
-        logger.info("lock response: {}", response.toString());
+        logger.info("lock response: {}", response);
         if (response.getResult()[0].trim().equalsIgnoreCase(RoutineDefault.SUCCESS_FLAG)) {
             String lockTxHash = response.getHash();
             long lockTxBlockNum = response.getBlockNumber();
@@ -172,10 +163,7 @@ public class WeCrossHTLC implements HTLC {
                         htlcResource.getAccount(),
                         htlcResource.getResourceInfo(),
                         htlcResource.getResourceBlockHeaderManager());
-        logger.info(
-                "unlock request: {}, path: {}",
-                request.toString(),
-                htlcResource.getSelfPath().toString());
+        logger.info("unlock request: {}, path: {}", request, htlcResource.getSelfPath());
         TransactionResponse response = htlcResource.sendTransaction(transactionContext);
         if (response.getErrorCode() != 0) {
             logger.error(
@@ -189,7 +177,7 @@ public class WeCrossHTLC implements HTLC {
                     HTLCErrorCode.TRANSACTION_ERROR,
                     response.getErrorMessage());
         }
-        logger.info("unlock response: {}", response.toString());
+        logger.info("unlock response: {}", response);
         return response;
     }
 
@@ -245,7 +233,7 @@ public class WeCrossHTLC implements HTLC {
         VerifiedTransaction verifiedTransaction =
                 driver.getVerifiedTransaction(txHash, blockNumber, blockHeaderManager, connection);
 
-        return verifyData.equals(verifiedTransaction);
+        return verifyData.verify(verifiedTransaction);
     }
 
     @Override
@@ -253,13 +241,12 @@ public class WeCrossHTLC implements HTLC {
         TransactionRequest transactionRequest = new TransactionRequest("getCounterpartyHtlc", null);
 
         TransactionResponse response =
-                (TransactionResponse)
-                        resource.call(
-                                new TransactionContext<TransactionRequest>(
-                                        transactionRequest,
-                                        account,
-                                        resource.getResourceInfo(),
-                                        resource.getResourceBlockHeaderManager()));
+                resource.call(
+                        new TransactionContext<TransactionRequest>(
+                                transactionRequest,
+                                account,
+                                resource.getResourceInfo(),
+                                resource.getResourceBlockHeaderManager()));
 
         String[] result = response.getResult();
         if (response.getErrorCode() != 0) {

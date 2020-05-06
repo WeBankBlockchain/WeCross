@@ -31,30 +31,26 @@ public class VerifyData {
         this.result = result;
     }
 
-    public boolean equals(VerifiedTransaction transaction) {
+    public boolean verify(VerifiedTransaction transaction) {
         if (transaction == null) {
-            logger.error(
-                    "verify transaction failed, transaction: null, verifyData: {}", toString());
+            logger.error("verify transaction failed, transaction: null, verifyData: {}", this);
             return false;
         }
 
         logger.debug(transaction.toString());
-        logger.debug(toString());
+        logger.debug(this.toString());
 
         TransactionRequest request = transaction.getTransactionRequest();
         boolean isEqual =
                 getBlockNumber() == transaction.getBlockNumber()
                         && getTransactionHash().equals(transaction.getTransactionHash())
                         && getRealAddress().equals(transaction.getRealAddress())
-                        //                && getMethod().equals(request.getMethod())
+                        //                && getMethod().verify(request.getMethod())
                         && Arrays.equals(getArgs(), request.getArgs())
                         && Arrays.equals(
                                 getResult(), transaction.getTransactionResponse().getResult());
         if (!isEqual) {
-            logger.error(
-                    "verify transaction failed, detail:\n{}\n{}",
-                    transaction.toString(),
-                    toString());
+            logger.error("verify transaction failed, detail:\n{}\n{}", transaction, this);
         }
         return isEqual;
     }

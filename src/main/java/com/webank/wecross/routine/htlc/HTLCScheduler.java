@@ -149,7 +149,7 @@ public class HTLCScheduler {
                 "verifiedTransaction for counterparty transfer contract: {}",
                 verifiedTransaction1.toString());
 
-        return verifyData.equals(verifiedTransaction1);
+        return verifyData.verify(verifiedTransaction1);
     }
 
     public boolean checkSelfRollback(HTLCResource htlcResource, String h) throws WeCrossException {
@@ -217,7 +217,7 @@ public class HTLCScheduler {
                     Thread.sleep(500);
                 }
             }
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             logger.warn("failed to getSecret, h: {}, path: {}", h, htlcResource.getSelfPath());
         }
         return result;

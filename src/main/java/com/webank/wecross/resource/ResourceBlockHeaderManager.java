@@ -3,8 +3,11 @@ package com.webank.wecross.resource;
 import com.webank.wecross.storage.BlockHeaderStorage;
 import com.webank.wecross.stub.BlockHeaderManager;
 import com.webank.wecross.zone.Chain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResourceBlockHeaderManager implements BlockHeaderManager {
+    private Logger logger = LoggerFactory.getLogger(ResourceBlockHeaderManager.class);
     private BlockHeaderStorage blockHeaderStorage;
     private Chain chain;
 
@@ -26,7 +29,8 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
 
             try {
                 Thread.sleep(100);
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
+                logger.warn("Thread exception", e);
                 return null;
             }
         }
