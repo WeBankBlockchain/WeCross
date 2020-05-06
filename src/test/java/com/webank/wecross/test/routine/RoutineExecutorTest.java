@@ -44,7 +44,7 @@ public class RoutineExecutorTest {
         RoutineExecutor routineExecutor = new RoutineExecutor();
         routineExecutor.setWeCrossHost(mockWeCrossHost);
         List<HTLCResourcePair> htlcResourcePairs = routineExecutor.initHTLCResourcePairs();
-        Assert.assertEquals(htlcResourcePairs.size(), 1);
+        Assert.assertEquals(1, htlcResourcePairs.size());
     }
 
     @Test

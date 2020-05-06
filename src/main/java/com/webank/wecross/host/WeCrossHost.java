@@ -60,17 +60,19 @@ public class WeCrossHost {
     }
 
     public void mainLoop() {
-        while (true) {
+        boolean flag = true;
+        while (flag) {
             try {
                 Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                logger.error("Thread exception", e);
+            } catch (Exception e) {
+                logger.warn("Thread exception", e);
+                flag = false;
             }
 
             broadcastResourceSeq();
-
             dumpStatus();
         }
+        System.exit(0);
     }
 
     public void check() throws Exception {

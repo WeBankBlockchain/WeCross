@@ -29,8 +29,12 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KeyCertLoader {
+    private Logger logger = LoggerFactory.getLogger(KeyCertLoader.class);
+
     private static final Pattern CERT_PATTERN =
             Pattern.compile(
                     "-+BEGIN\\s+.*CERTIFICATE[^-]*-+(?:\\s|\\r|\\n)+"
@@ -194,7 +198,7 @@ public class KeyCertLoader {
                         is.close();
                     } catch (IOException e) {
                         // This is not expected to happen, but re-throw in case it does.
-                        throw new RuntimeException(e);
+                        logger.warn("Close failed", e);
                     }
                 }
             }
