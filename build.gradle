@@ -170,6 +170,7 @@ jar {
             from file('scripts/')
             into 'dist'
         }
+        mkdir 'dist/plugin'
     }
 }
 

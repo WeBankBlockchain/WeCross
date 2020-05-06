@@ -1,4 +1,4 @@
-name: Publish binaries
+name: Publish demo
 
 on:
   release:
