@@ -65,7 +65,6 @@ prepare_wecross()
 {
     cd ${ROOT}
     LOG_INFO "Copy WeCross scripts"
-    cp ${WECROSS_ROOT}/scripts/build_wecross.sh ./
     cp ${WECROSS_ROOT}/scripts/download_wecross.sh ./
     cp ${WECROSS_ROOT}/scripts/download_console.sh ./
 }

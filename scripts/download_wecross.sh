@@ -6,7 +6,7 @@ LANG=en_US.utf8
 enable_build_from_resource=0
 
 default_compatibility_version=v1.0.0-rc2 # update this every release
-deps_dir=$(pwd)'/plugin/'
+deps_dir=$(pwd)'/WeCross/plugin/'
 src_dir=$(pwd)'/src/'
 
 wecross_url=https://github.com/WeBankFinTech/WeCross.git
