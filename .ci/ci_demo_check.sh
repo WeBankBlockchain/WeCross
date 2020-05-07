@@ -35,6 +35,15 @@ check_log()
     fi
 }
 
+prepare_demo()
+{
+    cd ${ROOT}
+
+    bash .prepare.sh # prepare requirements
+
+    cd -
+}
+
 demo_test()
 {
     cd ${ROOT}
@@ -106,6 +115,7 @@ main()
 
     mv dist demo/WeCross
 
+    prepare_demo
     demo_test
     htlc_test
 }
