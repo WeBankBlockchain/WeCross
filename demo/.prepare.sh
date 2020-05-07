@@ -37,6 +37,12 @@ prepare_bcos()
 
     LOG_INFO "Download HelloWeCross.sol ..."
     cp ${WECROSS_ROOT}/src/main/resources/chains-sample/bcos/HelloWeCross.sol ./
+
+    LOG_INFO "Download bactool ..."
+    git clone --depth 1 https://github.com/Shareong/bactool.git
+    tar -zcf bactool.tar.gz bactool
+    rm -rf bactool
+
     cd -
 }
 
