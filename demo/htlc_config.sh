@@ -24,6 +24,7 @@ deploy_bcos_htlc()
 
     # deploy htlc
     cd bcos/console
+    rm -rf deploylog.txt
     bash start.sh <<EOF
 deploy BACHTLC
 EOF
@@ -37,7 +38,13 @@ init_bcos_asset()
 
     # clone bactool
     cd bcos
-    git clone --depth 1 https://github.com/Shareong/bactool.git
+    if [ -e bactool.tar.gz ]; then
+        rm -rf bactool
+        tar -zxf bactool.tar.gz
+    else
+        git clone --depth 1 https://github.com/Shareong/bactool.git
+    fi
+
     cd bactool
     ./gradlew build
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* ${ROOT}/bcos/bactool/dist/conf
