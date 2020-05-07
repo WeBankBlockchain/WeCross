@@ -38,6 +38,7 @@ help()
 Usage:
     -s                              [Optional] Get wecross by: gradle build from github Source Code.
     -b                              [Optional] Download from certain branch if '-s' is set
+    -t                              [Optional] Download from certain tag if '-s' is set (same as -b)
     -h  call for help
 e.g
     bash $0 
@@ -49,13 +50,18 @@ exit 0
 
 parse_command()
 {
-while getopts "b:sh" option;do
+while getopts "b:t:sh" option;do
     # shellcheck disable=SC2220
     case ${option} in
     s)
         enable_build_from_resource=1
     ;;
     b)
+        wecross_branch=$OPTARG
+        bcos_stub_branch=$OPTARG
+        fabric_stub_branch=$OPTARG
+    ;;
+    t)
         wecross_branch=$OPTARG
         bcos_stub_branch=$OPTARG
         fabric_stub_branch=$OPTARG
