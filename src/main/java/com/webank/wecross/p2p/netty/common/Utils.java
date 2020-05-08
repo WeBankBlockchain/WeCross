@@ -1,7 +1,5 @@
 package com.webank.wecross.p2p.netty.common;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.socket.SocketChannel;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,24 +38,5 @@ public class Utils {
      */
     public static boolean validPort(Integer port) {
         return port.intValue() > 0 && port.intValue() <= 65535;
-    }
-
-    /**
-     * get peer ip, port from channel connect context
-     *
-     * @param context
-     * @return
-     */
-    public static Host channelContextPeerHost(ChannelHandlerContext context) {
-
-        if (null == context) {
-            return null;
-        }
-
-        String host =
-                ((SocketChannel) context.channel()).remoteAddress().getAddress().getHostAddress();
-        Integer port = ((SocketChannel) context.channel()).remoteAddress().getPort();
-
-        return new Host(host, port);
     }
 }

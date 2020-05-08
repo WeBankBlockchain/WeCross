@@ -41,9 +41,11 @@ public abstract class ResponseCallBack {
     /** @param response */
     public abstract void onResponse(Response response);
 
+    public abstract boolean needOnResponse();
+
     public void sendFailed(int errorCode, String errorMsg) {
 
-        logger.error(
+        logger.warn(
                 " send message not successfully, errorCode: {}, errorMessage: {}, message: {}",
                 errorCode,
                 errorMsg,
@@ -52,7 +54,7 @@ public abstract class ResponseCallBack {
             Response response = Response.build(errorCode, errorMsg, message.getSeq(), null);
             onResponse(response);
         } catch (Exception e) {
-            logger.error(" response timeout, seq: {}, e: {}", message.getSeq(), e);
+            logger.warn(" response timeout, seq: {}, e: {}", message.getSeq(), e);
         }
 
         cancelTimer();

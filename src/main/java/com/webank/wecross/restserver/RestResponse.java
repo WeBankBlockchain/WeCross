@@ -2,7 +2,7 @@ package com.webank.wecross.restserver;
 
 public class RestResponse<T> {
     private String version;
-    private Integer result = 0;
+    private Integer errorCode = 0;
     private String message;
     private T data;
 
@@ -14,12 +14,12 @@ public class RestResponse<T> {
         this.version = version;
     }
 
-    public Integer getResult() {
-        return result;
+    public Integer getErrorCode() {
+        return errorCode;
     }
 
-    public void setResult(Integer result) {
-        this.result = result;
+    public void setErrorCode(Integer errorCode) {
+        this.errorCode = errorCode;
     }
 
     public String getMessage() {

@@ -1,13 +1,10 @@
 package com.webank.wecross.utils;
 
 import com.moandjiezana.toml.Toml;
-import com.webank.wecross.exception.Status;
+import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
 import java.io.File;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -24,7 +21,8 @@ public class ConfigUtils {
         try {
             new URL(templateUrl);
         } catch (Exception e) {
-            throw new WeCrossException(Status.ILLEGAL_SYMBOL, "Invalid path: " + path);
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.ILLEGAL_SYMBOL, "Invalid path: " + path);
         }
     }
 
@@ -32,14 +30,16 @@ public class ConfigUtils {
         try {
             PathMatchingResourcePatternResolver resolver =
                     new PathMatchingResourcePatternResolver();
-            Path path = Paths.get(resolver.getResource(fileName).getURI());
-            String encryptedSecret = new String(Files.readAllBytes(path));
-            return new Toml().read(encryptedSecret);
+            return new Toml().read(resolver.getResource(fileName).getInputStream());
         } catch (Exception e) {
             throw new WeCrossException(
-                    Status.INTERNAL_ERROR,
+                    WeCrossException.ErrorCode.INTERNAL_ERROR,
                     "Something wrong with parse " + fileName + ": " + e.getMessage());
         }
+    }
+
+    public static Map<String, Object> getTomlMap(String fileName) throws WeCrossException {
+        return getToml(fileName).toMap();
     }
 
     public static Map<String, String> getStubsDir(String stubsPath) throws WeCrossException {
@@ -52,14 +52,14 @@ public class ConfigUtils {
             dir = resolver.getResource(stubsPath).getFile();
             // dir = new File(ConfigUtils.class.getClassLoader().getResource(stubsPath).getFile());
         } catch (Exception e) {
-            logger.debug("Local stubs: " + stubsPath + "is empty");
-            // throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+            logger.debug("Local stubs: " + stubsPath + " is empty");
+            // throw new WeCrossException(ResourceQueryStatus.DIR_NOT_EXISTS, errorMessage);
             return result;
         }
 
         if (!dir.isDirectory()) {
             String errorMessage = stubsPath + " is not a valid directory";
-            throw new WeCrossException(Status.DIR_NOT_EXISTS, errorMessage);
+            throw new WeCrossException(WeCrossException.ErrorCode.DIR_NOT_EXISTS, errorMessage);
         }
 
         String thisPath = stubsPath;
@@ -69,11 +69,32 @@ public class ConfigUtils {
 
         String stubsDir[] = dir.list();
         for (String stub : stubsDir) {
-            String stubPath = thisPath + "/" + stub + "/" + WeCrossDefault.STUB_CONFIG_FILE;
+            // ignore hidden dir
+            if (stub.startsWith(".")) {
+                continue;
+            }
+
+            String stubPath = thisPath + File.separator + stub;
+            if (!fileIsExists(stubPath + File.separator + WeCrossDefault.STUB_CONFIG_FILE)) {
+                String errorMessage = "Stub configuration file: " + stubPath + " does not exist";
+                throw new WeCrossException(WeCrossException.ErrorCode.DIR_NOT_EXISTS, errorMessage);
+            }
             result.put(stub, stubPath);
         }
 
         logger.info("Stub config files: {}", result);
         return result;
+    }
+
+    // Check if the file exists or not
+    public static boolean fileIsExists(String path) {
+        try {
+            PathMatchingResourcePatternResolver resolver_temp =
+                    new PathMatchingResourcePatternResolver();
+            resolver_temp.getResource(path).getFile();
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 }

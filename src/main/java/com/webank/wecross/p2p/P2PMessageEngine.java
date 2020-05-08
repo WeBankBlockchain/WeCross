@@ -1,24 +1,13 @@
 package com.webank.wecross.p2p;
 
 import com.webank.wecross.p2p.engine.P2PResponse;
-import com.webank.wecross.p2p.netty.P2PService;
-import com.webank.wecross.p2p.netty.common.Peer;
+import com.webank.wecross.peer.Peer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public abstract class P2PMessageEngine {
     public abstract <T> void asyncSendMessage(
-            Peer peer, P2PMessage<T> msg, P2PMessageCallback callback);
-
-    private P2PService p2PService;
-
-    public P2PService getP2PService() {
-        return p2PService;
-    }
-
-    public void setP2PService(P2PService p2PService) {
-        this.p2PService = p2PService;
-    }
+            Peer peer, P2PMessage<T> msg, P2PMessageCallback<?> callback);
 
     protected <T> void checkP2PMessage(P2PMessage<T> msg) throws Exception {
         if (msg.getVersion().isEmpty()) {
@@ -33,9 +22,7 @@ public abstract class P2PMessageEngine {
     }
 
     protected void checkCallback(P2PMessageCallback callback) throws Exception {
-        if (callback.getPeer() == null) {
-            throw new Exception("callback from peer has not set");
-        }
+        if (callback != null) {}
     }
 
     protected <T> void checkHttpResponse(ResponseEntity<P2PResponse<T>> response) throws Exception {
@@ -54,10 +41,12 @@ public abstract class P2PMessageEngine {
     }
 
     protected void executeCallback(
-            P2PMessageCallback callback, int status, String message, P2PMessage data) {
-        callback.setStatus(status);
-        callback.setMessage(message);
-        callback.setData(data);
-        callback.execute();
+            P2PMessageCallback callback, int status, String message, P2PResponse data) {
+        if (callback != null) {
+            callback.setStatus(status);
+            callback.setMessage(message);
+            callback.setData(data);
+            callback.execute();
+        }
     }
 }

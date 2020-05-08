@@ -1,0 +1,29 @@
+[common]
+    name = 'fabric'
+    type = 'Fabric1.4'
+
+[fabricServices]
+    channelName = 'mychannel'
+    orgName = 'Org1'
+    mspId = 'Org1MSP'
+    orgUserName = 'fabric_admin'
+    orgUserAccountPath = 'classpath:accounts/fabric_admin'
+    ordererTlsCaFile = 'orderer-tlsca.crt'
+    ordererAddress = 'grpcs://localhost:7050'
+
+[peers]
+    [peers.org1]
+        peerTlsCaFile = 'org1-tlsca.crt'
+        peerAddress = 'grpcs://localhost:7051'
+    [peers.org2]
+         peerTlsCaFile = 'org2-tlsca.crt'
+         peerAddress = 'grpcs://localhost:9051'
+
+# resources is a list
+[[resources]]
+    # name cannot be repeated
+    name = 'ledger'
+    type = 'FABRIC_CONTRACT'
+    chainCodeName = 'ledgerSample'
+    chainLanguage = "go"
+    peers=['org1']

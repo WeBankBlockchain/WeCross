@@ -43,10 +43,16 @@ nodes/
 console/
 out/
 
-src/main/resources/wecross.toml
-src/test/resources/wecross.toml
+wecross.toml
+src/main/resources/stubs/
+src/test/resources/stubs/
 *stub.toml
 *.p12
 *.pem
 *.crt
 *.key
+*_sk
+*.keystore
+*.truststore
+db/
+routers/

@@ -17,8 +17,8 @@ jobs:
         java-version: 1.8
     - name: Build with Gradle
       run: ./gradlew assemble
-    - name: Download needs
-      run: curl -LO https://raw.githubusercontent.com/FISCO-BCOS/console/master/tools/get_account.sh && chmod u+x get_account.sh && bash get_account.sh -h && cp get_account.sh dist/
+    - name: Download plugin
+      run: cd dist/ && bash download_plugin.sh BCOS2 ${{ github.ref }} && bash download_plugin.sh Fabric1 ${{ github.ref }} && && rm -rf src && cd -
     - name: Pack
       run: mv dist WeCross && tar -zcvf WeCross.tar.gz WeCross
     - name: Checksum

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+LANG=en_US.utf8
 
 counter=0
 zone=
@@ -17,6 +18,7 @@ enable_test_resource="false"
 make_tar=0
 router_output=$(pwd)/routers
 wecross_dir=$(dirname $(pwd)/${0})/
+
 
 LOG_INFO()
 {
@@ -140,20 +142,23 @@ gen_crt()
     output=${2}/
     num=${3}
 
+    # generate ca.crt
     if [ ${ca} -eq 0 ];then
         bash "${scripts_dir}"/create_cert.sh -c -d "${output}" 2>/dev/null
         ca_dir=${output}
     fi
-    # get ca.crt
 
-    # get node.crt by number
+    # generate sdk cert
+    bash "${scripts_dir}"/create_cert.sh -n -D "${ca_dir}" -d "${output}/sdk" 2>/dev/null
+
+    # generate node cert by number
     bash "${scripts_dir}"/create_cert.sh -n -C "${num}" -D "${ca_dir}" -d "${output}" 2>/dev/null
 
     rm -f cert.cnf
     echo "================================================================"
 }
 
-#index ip rpc_port p2p_port pers
+#index ip rpc_port p2p_port peers
 gen_one_wecross()
 {
     #default execute dir: ../WeCross
@@ -161,14 +166,23 @@ gen_one_wecross()
     output=${router_output}/${2}-${3}-${4}
     target=${2}-${3}-${4}
 
-    mkdir -p "${output}/"
+    # mkdir
+    mkdir -p ${output}/
+    mkdir -p ${output}/conf/accounts
+    mkdir -p ${output}/conf/chains
+    mkdir -p ${output}/plugin
+
+    # copy files
     chmod u+x ${wecross_dir}./*.sh
     cp -r ${wecross_dir}./*.sh "${output}/"
     cp -r ${wecross_dir}/apps "${output}/"
     cp -r ${wecross_dir}/lib "${output}/"
 
-    cp -r "${wecross_dir}/conf" "${output}/conf"
-    cp -r "${cert_dir}" "${output}"/conf/p2p
+    # Configure plugin
+    cp ${wecross_dir}/plugin/*  ${output}/plugin/
+
+    cp -r "${wecross_dir}/conf" "${output}/"
+    cp -r "${cert_dir}"/* "${output}"/conf/
     gen_conf "${output}"/conf/wecross.toml "${2}" "${3}" "${4}" "${5}"
     LOG_INFO "Create ${output} successfully"
 
@@ -185,26 +199,26 @@ gen_conf()
 {
     cat << EOF > "${1}"
 [common]
-    network = '${zone}'
+    zone = '${zone}'
     visible = true
 
-[stubs]
-    path = 'classpath:stubs'
+[chains]
+    path = 'classpath:chains'
 
-[server] # rpc ip & port
+[rpc] # rpc ip & port
     address = '${2}'
     port = ${3}
+    caCert = 'classpath:ca.crt'
+    sslCert = 'classpath:ssl.crt'
+    sslKey = 'classpath:ssl.key'
 
 [p2p]
     listenIP = '0.0.0.0'
     listenPort = ${4}
-    caCert = 'classpath:p2p/ca.crt'
-    sslCert = 'classpath:p2p/node.crt'
-    sslKey = 'classpath:p2p/node.key'
+    caCert = 'classpath:ca.crt'
+    sslCert = 'classpath:ssl.crt'
+    sslKey = 'classpath:ssl.key'
     peers = [${5}]
-
-[test]
-    enableTestResource = ${enable_test_resource}
 EOF
 }
 

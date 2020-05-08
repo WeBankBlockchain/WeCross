@@ -1,46 +1,120 @@
 package com.webank.wecross.resource;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.webank.wecross.p2p.netty.common.Peer;
-import com.webank.wecross.restserver.request.GetDataRequest;
-import com.webank.wecross.restserver.request.SetDataRequest;
-import com.webank.wecross.restserver.request.TransactionRequest;
-import com.webank.wecross.restserver.response.GetDataResponse;
-import com.webank.wecross.restserver.response.SetDataResponse;
-import com.webank.wecross.restserver.response.TransactionResponse;
-import java.util.Set;
+import com.webank.wecross.peer.Peer;
+import com.webank.wecross.stub.Connection;
+import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stub.Request;
+import com.webank.wecross.stub.ResourceInfo;
+import com.webank.wecross.stub.Response;
+import com.webank.wecross.stub.TransactionContext;
+import com.webank.wecross.stub.TransactionRequest;
+import com.webank.wecross.stub.TransactionResponse;
+import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
-public interface Resource {
+public class Resource {
+    private String type;
+    private Driver driver;
+    private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
+    private ResourceInfo resourceInfo;
+    private ResourceBlockHeaderManager resourceBlockHeaderManager;
+    boolean hasLocalConnection = false;
+    private Random random = new SecureRandom();
 
-    String getType();
+    public void addConnection(Peer peer, Connection connection) {
+        if (!hasLocalConnection) {
+            if (peer == null) {
+                connections.clear();
+                hasLocalConnection = true;
+            }
 
-    GetDataResponse getData(GetDataRequest request);
+            connections.put(peer, connection);
+        }
+    }
 
-    SetDataResponse setData(SetDataRequest request);
+    public void removeConnection(Peer peer) {
+        if (!hasLocalConnection) {
+            connections.remove(peer);
+        }
+    }
 
-    TransactionResponse call(TransactionRequest request);
+    public boolean isConnectionEmpty() {
+        return connections.isEmpty();
+    }
 
-    TransactionResponse sendTransaction(TransactionRequest request);
+    public Connection chooseConnection() {
+        if (connections.size() == 1) {
+            return (Connection) connections.values().toArray()[0];
+        } else {
+            int index = random.nextInt(connections.size());
+            return (Connection) connections.values().toArray()[index];
+        }
+    }
 
-    void registerEventHandler(EventCallback callback);
+    public TransactionResponse call(TransactionContext<TransactionRequest> request) {
+        return driver.call(request, chooseConnection());
+    }
 
-    TransactionRequest createRequest();
+    public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request) {
+        return driver.sendTransaction(request, chooseConnection());
+    }
 
-    int getDistance(); // 0 local, > 0 remote
+    public Response onRemoteTransaction(Request request) {
+        if (driver.isTransaction(request)) {
+            TransactionContext<TransactionRequest> transactionRequest =
+                    driver.decodeTransactionRequest(request.getData());
 
-    String getChecksum();
+            // TODO: check request
 
-    @JsonIgnore
-    Path getPath();
+            // fail or return
+        }
 
-    void setPath(Path path);
+        request.setResourceInfo(resourceInfo);
+        return chooseConnection().send(request);
+    }
 
-    @JsonProperty("path")
-    String getPathAsString();
+    public void registerEventHandler(EventCallback callback) {}
 
-    @JsonIgnore
-    Set<Peer> getPeers();
+    public String getType() {
+        return type;
+    }
 
-    void setPeers(Set<Peer> peers);
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getChecksum() {
+        return "";
+    }
+
+    public Driver getDriver() {
+        return driver;
+    }
+
+    public void setDriver(Driver driver) {
+        this.driver = driver;
+    }
+
+    public ResourceInfo getResourceInfo() {
+        return resourceInfo;
+    }
+
+    public void setResourceInfo(ResourceInfo resourceInfo) {
+        this.resourceInfo = resourceInfo;
+    }
+
+    public ResourceBlockHeaderManager getResourceBlockHeaderManager() {
+        return resourceBlockHeaderManager;
+    }
+
+    public void setResourceBlockHeaderManager(
+            ResourceBlockHeaderManager resourceBlockHeaderManager) {
+        this.resourceBlockHeaderManager = resourceBlockHeaderManager;
+    }
+
+    public boolean isHasLocalConnection() {
+        return hasLocalConnection;
+    }
 }

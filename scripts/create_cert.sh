@@ -187,17 +187,17 @@ gen_node_cert() {
 
     dir_must_exists "$capath"
     file_must_exists "$capath/ca.key"
-    file_must_not_exists "$ndpath/node.key"
-    file_must_not_exists "$ndpath/node.crt"
+    file_must_not_exists "$ndpath/ssl.key"
+    file_must_not_exists "$ndpath/ssl.crt"
 
-    check_name node "$node"
+    check_name ssl "$node"
 
     mkdir -p $ndpath
 
-    gen_cert_secp256k1 "$capath" "$ndpath" "node"
+    gen_cert_secp256k1 "$capath" "$ndpath" "ssl"
     #nodeid is pubkey
-    openssl ec -in $ndpath/node.key -text -noout | sed -n '7,11p' | tr -d ": \n" | awk '{print substr($0,3);}' | cat >$ndpath/node.nodeid
-    # openssl x509 -serial -noout -in $ndpath/node.crt | awk -F= '{print $2}' | cat >$ndpath/node.serial
+    openssl ec -in $ndpath/ssl.key -text -noout | sed -n '7,11p' | tr -d ": \n" | awk '{print substr($0,3);}' | cat >$ndpath/node.nodeid
+    # openssl x509 -serial -noout -in $ndpath/ssl.crt | awk -F= '{print $2}' | cat >$ndpath/node.serial
     cp $capath/ca.crt $ndpath
     # cd $ndpath
 
@@ -213,14 +213,14 @@ gen_rsa_node_cert() {
     file_must_exists "$capath/ca.key"
     check_name node "$node"
 
-    file_must_not_exists "$ndpath"/node.key
-    file_must_not_exists "$ndpath"/node.crt
+    file_must_not_exists "$ndpath"/ssl.key
+    file_must_not_exists "$ndpath"/ssl.crt
     mkdir -p $ndpath
 
-    openssl genrsa -out $ndpath/node.key 2048
-    openssl req -new -sha256 -subj "/CN=FISCO-BCOS/O=fisco-bcos/OU=agency" -key $ndpath/node.key -config $capath/cert.cnf -out $ndpath/node.csr
+    openssl genrsa -out $ndpath/ssl.key 2048
+    openssl req -new -sha256 -subj "/CN=FISCO-BCOS/O=fisco-bcos/OU=agency" -key $ndpath/ssl.key -config $capath/cert.cnf -out $ndpath/node.csr
     openssl x509 -req -days 3650 -sha256 -CA $capath/ca.crt -CAkey $capath/ca.key -CAcreateserial\
-        -in $ndpath/node.csr -out $ndpath/node.crt  -extensions v4_req -extfile $capath/cert.cnf
+        -in $ndpath/node.csr -out $ndpath/ssl.crt  -extensions v4_req -extfile $capath/cert.cnf
 
     cp $capath/ca.crt $capath/cert.cnf $ndpath/
     rm -f $ndpath/node.csr

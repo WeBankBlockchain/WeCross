@@ -1,18 +1,18 @@
 package com.webank.wecross.stub;
 
 public class BlockHeader {
-    private int number;
+    private long number;
     private String prevHash;
     private String hash;
     private String stateRoot;
     private String transactionRoot;
     private String receiptRoot;
 
-    public int getNumber() {
+    public long getNumber() {
         return number;
     }
 
-    public void setNumber(int number) {
+    public void setNumber(long number) {
         this.number = number;
     }
 
@@ -54,5 +54,28 @@ public class BlockHeader {
 
     public void setReceiptRoot(String receiptRoot) {
         this.receiptRoot = receiptRoot;
+    }
+
+    @Override
+    public String toString() {
+        return "BlockHeader{"
+                + "number="
+                + number
+                + ", prevHash='"
+                + prevHash
+                + '\''
+                + ", hash='"
+                + hash
+                + '\''
+                + ", stateRoot='"
+                + stateRoot
+                + '\''
+                + ", transactionRoot='"
+                + transactionRoot
+                + '\''
+                + ", receiptRoot='"
+                + receiptRoot
+                + '\''
+                + '}';
     }
 }

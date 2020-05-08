@@ -1,0 +1,48 @@
+name: Upload files to resources
+# upload scripts to release on push to master: WeCross latest download resources
+on:
+  push:
+    branches:
+    - master
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Upload download_wecross.sh
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: scripts/download_wecross.sh
+        asset_name: download_wecross.sh
+        tag: resources
+        overwrite: true
+
+    - name: Upload download_console.sh
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: scripts/download_console.sh
+        asset_name: download_console.sh
+        tag: resources
+        overwrite: true
+
+    - name: Upload download_demo.sh
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: scripts/download_demo.sh
+        asset_name: download_demo.sh
+        tag: resources
+        overwrite: true
+
+    - name: Upload HelloWeCross.sol
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: src/main/resources/chains-sample/bcos/HelloWeCross.sol
+        asset_name: HelloWeCross.sol
+        tag: resources
+        overwrite: true

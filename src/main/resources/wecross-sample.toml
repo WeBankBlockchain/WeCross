@@ -1,21 +1,28 @@
 [common]
-    network = 'payment'
+    zone = 'payment'
     visible = true
 
-[stubs]
-    path = 'classpath:stubs'
+[chains]
+    path = 'classpath:chains'
 
-[server] # rpc ip & port
+[rpc] # rpc ip & port
     address = '127.0.0.1'
     port = 8250
+    caCert = 'classpath:ca.crt'
+    sslCert = 'classpath:ssl.crt'
+    sslKey = 'classpath:ssl.key'
 
 [p2p]
     listenIP = '0.0.0.0'
     listenPort = 25500
-    caCert = 'classpath:p2p/ca.crt'
-    sslCert = 'classpath:p2p/node.crt'
-    sslKey = 'classpath:p2p/node.key'
-    peers = ['127.0.0.1:25501','127.0.0.1:25502']
+    caCert = 'classpath:ca.crt'
+    sslCert = 'classpath:ssl.crt'
+    sslKey = 'classpath:ssl.key'
+    peers = ['127.0.0.1:25501']
+    threadNum = 500
 
-[test]
-    enableTestResource = false
+#[[htlc]]
+#    selfPath = 'payment.bcos.htlc'
+#    account1 = 'bcos_default_account'
+#    counterpartyPath = 'payment.fabric.htlc'
+#    account2 = 'fabric_default_account'

@@ -1,36 +1,31 @@
 package com.webank.wecross.restserver.response;
 
 import com.webank.wecross.resource.Resource;
-import java.util.List;
+import com.webank.wecross.resource.ResourceDetail;
+import com.webank.wecross.zone.ZoneManager;
+import java.util.Map;
 
 public class ResourceResponse {
 
-    private Integer errorCode;
-    private String errorMessage;
+    private ResourceDetail[] resourceDetails;
 
-    private List<Resource> resources;
-
-    public Integer getErrorCode() {
-        return errorCode;
+    public void setResourceInfos(ZoneManager zoneManager, boolean ignoreRemote) {
+        Map<String, Resource> resources = zoneManager.getAllResources(ignoreRemote);
+        ResourceDetail[] details = new ResourceDetail[resources.size()];
+        int i = 0;
+        for (String path : resources.keySet()) {
+            ResourceDetail detail = new ResourceDetail();
+            Resource resource = resources.get(path);
+            details[i++] = detail.initResourceDetail(resource, path);
+        }
+        this.resourceDetails = details;
     }
 
-    public void setErrorCode(Integer errorCode) {
-        this.errorCode = errorCode;
+    public void setResourceDetails(ResourceDetail[] resourceDetails) {
+        this.resourceDetails = resourceDetails;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
-
-    public List<Resource> getResources() {
-        return resources;
-    }
-
-    public void setResources(List<Resource> resources) {
-        this.resources = resources;
+    public ResourceDetail[] getResourceDetails() {
+        return resourceDetails;
     }
 }

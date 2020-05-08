@@ -1,8 +1,8 @@
 package com.webank.wecross.test.resource;
 
-import static com.webank.wecross.resource.ResourceInfo.isEqualInfos;
+import static com.webank.wecross.stub.ResourceInfo.isEqualInfos;
 
-import com.webank.wecross.resource.ResourceInfo;
+import com.webank.wecross.stub.ResourceInfo;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Assert;
@@ -35,9 +35,8 @@ public class ResourceInfoTest {
                             + ((id / 100) % 100)
                             + ".test-resource"
                             + id % 100;
-            info.setPath(path);
+            info.setName(path);
             info.setChecksum("0xaabbccdd" + id);
-            info.setDistance(id % 2);
 
             res.put(path, info);
         }
