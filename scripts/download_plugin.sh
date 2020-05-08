@@ -10,10 +10,10 @@ src_dir=$(pwd)'/src/'
 
 
 bcos_stub_url=https://github.com/WeBankFinTech/WeCross-BCOS2-Stub.git
-bcos_stub_branch=master
+bcos_stub_branch=
 
 fabric_stub_url=https://github.com/WeBankFinTech/WeCross-Fabric1-Stub.git
-fabric_stub_branch=master
+fabric_stub_branch=
 
 
 LOG_INFO()

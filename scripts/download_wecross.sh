@@ -10,13 +10,13 @@ deps_dir=$(pwd)'/WeCross/plugin/'
 src_dir=$(pwd)'/src/'
 
 wecross_url=https://github.com/WeBankFinTech/WeCross.git
-wecross_branch=master
+wecross_branch=${default_compatibility_version}
 
 bcos_stub_url=https://github.com/WeBankFinTech/WeCross-BCOS2-Stub.git
-bcos_stub_branch=master
+bcos_stub_branch=${default_compatibility_version}
 
 fabric_stub_url=https://github.com/WeBankFinTech/WeCross-Fabric1-Stub.git
-fabric_stub_branch=master
+fabric_stub_branch=${default_compatibility_version}
 
 
 LOG_INFO()
