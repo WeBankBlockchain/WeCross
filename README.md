@@ -36,7 +36,7 @@
 
 ## 快速开始
 
-阅读[快速入门](https://wecross.readthedocs.io/zh_CN/dev/docs/tutorial/index.html)，从连通两个区块链开始，快速体验WeCross的强大功能。
+阅读[快速入门](https://wecross.readthedocs.io/zh_CN/dev/docs/tutorial/demo.html)，从连通两个区块链开始，快速体验WeCross的强大功能。
 
 ## 技术文档
 
@@ -47,11 +47,11 @@
 - [快速入门](https://wecross.readthedocs.io/zh_CN/latest/docs/tutorial/index.html)
 - [操作手册](https://wecross.readthedocs.io/zh_CN/latest/docs/manual/index.html)
 - [跨链接入](https://wecross.readthedocs.io/zh_CN/latest/docs/stubs/index.html)
+- [开发手册](https://wecross.readthedocs.io/zh_CN/latest/docs/dev/index.html)
+- [跨链事务](https://wecross.readthedocs.io/zh_CN/latest/docs/routine/index.html)
 - [应用场景](https://wecross.readthedocs.io/zh_CN/latest/docs/scenarios/index.html)
 - [FAQ](https://wecross.readthedocs.io/zh_CN/latest/docs/faq/faq.html)
 - [社区](https://wecross.readthedocs.io/zh_CN/latest/docs/community/community.html)
-
-
 
 ## 项目贡献
 
@@ -62,4 +62,3 @@
 ## 社区
 
 联系我们：wecross@webank.com
-
