@@ -22,7 +22,7 @@ repositories {
 }
 
 sourceCompatibility = '1.8'
-version = '1.0.0-rc2-0408-SNAPSHOT'
+version = '1.0.0-rc2'
 
 
 task stubSourceJar(type: Jar) {
@@ -36,6 +36,10 @@ task stubJar(type: Jar) {
     into 'com/webank/wecross/exception', { from 'build/classes/java/main/com/webank/wecross/exception' }
 }
 
+task javadocJar(type: Jar) {
+    // from javadoc
+    classifier = 'javadoc'
+}
 
 publishing {
     publications {
@@ -43,7 +47,7 @@ publishing {
             groupId = 'com.webank'
             artifactId = 'wecross-java-stub'
             from components.java
-            artifacts = [stubJar, stubSourceJar]
+            artifacts = [stubJar, stubSourceJar, javadocJar]
 
             // https://docs.gradle.org/current/dsl/org.gradle.api.publish.maven.MavenPublication.html
             pom {
