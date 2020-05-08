@@ -18,7 +18,7 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew assemble
     - name: Download plugin
-      run: cd dist/ && bash download_plugin.sh BCOS2 ${{ github.ref }} && bash download_plugin.sh Fabric1 ${{ github.ref }} && rm -rf src && cd -
+      run: cd dist/ && bash download_plugin.sh BCOS2 v1.0.0-rc2 && bash download_plugin.sh Fabric1 v1.0.0-rc2 && rm -rf src && cd -
     - name: Pack
       run: mv dist WeCross && tar -zcvf WeCross.tar.gz WeCross
     - name: Checksum
