@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 public class HTLCTaskFactory implements TaskFactory {
     private Logger logger = LoggerFactory.getLogger(HTLCTaskFactory.class);
 
+    @Override
     public List<Task> load(Object... args) {
         @SuppressWarnings("unchecked")
         List<HTLCResourcePair> htlcResourcePairs = (List<HTLCResourcePair>) args[0];

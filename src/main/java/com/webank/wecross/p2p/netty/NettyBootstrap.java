@@ -321,6 +321,7 @@ public class NettyBootstrap {
                                     bootstrap.connect(host.getHost(), host.getPort());
                             channelFuture.addListener(
                                     new ChannelFutureListener() {
+                                        @Override
                                         public void operationComplete(ChannelFuture future) {
                                             if (future.isSuccess()) {
                                                 logger.debug(" connect to {} success", host);
