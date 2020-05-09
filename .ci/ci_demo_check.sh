@@ -109,12 +109,20 @@ EOF
     check_log
 }
 
-main()
+prepare_wecross()
 {
     ./gradlew assemble
-
+    cd dist
+    bash download_plugin.sh BCOS2 v1.0.0-rc2
+    bash download_plugin.sh Fabric1 v1.0.0-rc2
+    cd -
+    
     mv dist demo/WeCross
+}
 
+main()
+{
+    prepare_wecross
     prepare_demo
     demo_test
     htlc_test
