@@ -4,6 +4,7 @@ set -e
 LANG=en_US.utf8
 
 enable_build_from_resource=0
+compatibility_version=
 
 default_compatibility_version=v1.0.0-rc2 # update this every release
 deps_dir=$(pwd)'/WeCross/plugin/'
@@ -37,8 +38,8 @@ help()
     cat << EOF
 Usage:
     -s                              [Optional] Get wecross by: gradle build from github Source Code.
-    -b                              [Optional] Download from certain branch if '-s' is set
-    -t                              [Optional] Download from certain tag if '-s' is set (same as -b)
+    -b                              [Optional] Download from certain branch
+    -t                              [Optional] Download from certain tag (same as -b)
     -h  call for help
 e.g
     bash $0 
@@ -60,11 +61,13 @@ while getopts "b:t:sh" option;do
         wecross_branch=$OPTARG
         bcos_stub_branch=$OPTARG
         fabric_stub_branch=$OPTARG
+        compatibility_version=$OPTARG
     ;;
     t)
         wecross_branch=$OPTARG
         bcos_stub_branch=$OPTARG
         fabric_stub_branch=$OPTARG
+        compatibility_version=$OPTARG
     ;;
     h)  help;;
     esac
@@ -95,7 +98,6 @@ download_wecross_pkg()
 {
     local github_url=https://github.com/WeBankFinTech/WeCross/releases/download/
     local cdn_url=https://www.fisco.com.cn/cdn/wecross/releases/download/
-    local compatibility_version=
     local release_pkg=WeCross.tar.gz
     local release_pkg_checksum_file=WeCross.tar.gz.md5
 

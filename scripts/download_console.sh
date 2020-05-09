@@ -31,8 +31,8 @@ help()
     cat << EOF
 Usage:
     -s                              [Optional] Get wecross console by: gradle build from github Source Code.
-    -b                              [Optional] Download from certain branch if '-s' is set
-    -t                              [Optional] Download from certain tag if '-s' is set (same as -b)
+    -b                              [Optional] Download from certain branch
+    -t                              [Optional] Download from certain tag (same as -b)
     -h  call for help
 e.g
     bash $0 
@@ -52,9 +52,11 @@ while getopts "b:t:sh" option;do
     ;;
     b)
         wecross_console_branch=$OPTARG
+        compatibility_version=$OPTARG
     ;;
     t)
         wecross_console_branch=$OPTARG
+        compatibility_version=$OPTARG
     ;;
     h)  help;;
     esac
@@ -66,7 +68,6 @@ download_wecross_console_pkg()
 {
     local github_url=https://github.com/WeBankFinTech/WeCross-Console/releases/download/
     local cdn_url=https://www.fisco.com.cn/cdn/wecross-console/releases/download/
-    local compatibility_version=
     local release_pkg=WeCross-Console.tar.gz
     local release_pkg_checksum_file=WeCross-Console.tar.gz.md5
 
