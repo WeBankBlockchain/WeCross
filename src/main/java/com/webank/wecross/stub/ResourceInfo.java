@@ -38,7 +38,9 @@ public class ResourceInfo {
     @Override
     public boolean equals(Object obj) {
         try {
-            if (obj == this) return true;
+            if (obj == this) {
+                return true;
+            }
             if (!(obj instanceof ResourceInfo)) {
                 return false;
             }
