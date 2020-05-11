@@ -184,6 +184,7 @@ build_from_source()
     cd ..
 
     mv WeCross-Console/dist ${output_dir}/WeCross-Console
+    chmod +x ${output_dir}/WeCross-Console/*.sh
 
     cd ${output_dir}
 
