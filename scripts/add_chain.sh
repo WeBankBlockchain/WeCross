@@ -8,8 +8,8 @@ help() {
     echo $1
     cat << EOF
 Usage:
-    -t <type>                           [Required] type of account, BCOS2.0 or Fabric1.4
-    -n <name>                           [Required] name of account
+    -t <type>                           [Required] type of chain, BCOS2.0 or Fabric1.4
+    -n <name>                           [Required] name of chain
     -d <dir>                            [Optional] generated target_directory, default conf/chains/
     -h                                  [Optional] Help
 e.g
