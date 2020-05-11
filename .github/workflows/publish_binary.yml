@@ -2,7 +2,7 @@ name: Publish binaries
 
 on:
   release:
-    types: [prereleased, published, created]
+    types: [prereleased]
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
     - name: Download plugin
       run: cd dist/ && bash download_plugin.sh BCOS2 v1.0.0-rc2 && bash download_plugin.sh Fabric1 v1.0.0-rc2 && rm -rf src && cd -
     - name: Pack
-      run: mv dist WeCross && tar -zcvf WeCross.tar.gz WeCross
+      run: chmod +x dist/*.sh && mv dist WeCross && tar -zcvf WeCross.tar.gz WeCross
     - name: Checksum
       run: md5sum WeCross.tar.gz > WeCross.tar.gz.md5
     - name: Upload binaries to release

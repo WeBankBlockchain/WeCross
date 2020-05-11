@@ -215,6 +215,8 @@ build_from_source()
 
     mv WeCross/dist ${output_dir}/WeCross
 
+    chmod +x ${output_dir}/WeCross/*.sh
+
     cd ${output_dir}
 }
 

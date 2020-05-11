@@ -2,7 +2,7 @@ name: Publish demo
 
 on:
   release:
-    types: [prereleased, published, created]
+    types: [prereleased]
 
 jobs:
   build:
@@ -14,6 +14,8 @@ jobs:
 
     - name: Download demo requirements
       run: cd demo/ && bash .prepare.sh && cd -
+    - name: Chmod
+      run: chmod +x demo/*.sh && chmod +x demo/bcos/*.sh && chmod +x demo/fabric/*.sh
     - name: Pack
       run: tar -zcvf demo.tar.gz demo/
     - name: Checksum
