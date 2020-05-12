@@ -112,7 +112,7 @@ download_release_pkg()
     fi
 
     # download 
-    if [ ! -f "${release_pkg}" ] || [ -z "$(md5sum -c ${release_pkg_checksum_file}|grep OK)" ];then
+    if [ ! -f "${release_pkg}" ] || [ "$(md5sum -c ${release_pkg_checksum_file}|echo $?)" -ne "0" ];then
 
         LOG_INFO "Try to download from: ${cdn_url}/${compatibility_version}/${release_pkg}"
         if ! curl --fail -LO ${cdn_url}/${compatibility_version}/${release_pkg}; then
@@ -121,7 +121,7 @@ download_release_pkg()
             curl -C - -LO ${github_url}/${compatibility_version}/${release_pkg}
         fi
 
-        if [ -z "$(md5sum -c ${release_pkg_checksum_file}|grep OK)" ]; then
+        if [ "$(md5sum -c ${release_pkg_checksum_file}|echo $?)" -ne "0" ]; then
             LOG_ERROR "Download package error"
             rm -f ${release_pkg}
             exit 1
