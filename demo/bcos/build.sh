@@ -62,7 +62,7 @@ build_console()
 {
     # Download console
     LOG_INFO "Download console ..."
-    bash ./nodes/127.0.0.1/download_console.sh
+    bash ./nodes/127.0.0.1/download_console.sh -v 1.0.9
 
     # Copy demo HelloWeCross
     cp HelloWeCross.sol console/contracts/solidity/
