@@ -6,7 +6,6 @@ import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.network.p2p.P2PProcessor;
 import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.peer.PeerManager;
-import com.webank.wecross.routine.RoutineExecutor;
 import com.webank.wecross.routine.RoutineManager;
 import com.webank.wecross.zone.ZoneManager;
 import javax.annotation.Resource;
@@ -18,8 +17,6 @@ public class WeCrossHostConfig {
 
     // Task layer
     @Resource private P2PProcessor p2PProcessor;
-
-    @Resource private RoutineExecutor routineExecutor;
 
     // Data layer
     @Resource private ZoneManager zoneManager;
