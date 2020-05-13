@@ -1,6 +1,6 @@
 #!/bin/bash
 
-target_dir=conf/chains/
+target_dir=conf/chains
 type=''
 name=''
 
