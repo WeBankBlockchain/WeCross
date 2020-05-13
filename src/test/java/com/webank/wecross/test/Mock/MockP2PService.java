@@ -1,14 +1,37 @@
 package com.webank.wecross.test.Mock;
 
-import com.webank.wecross.p2p.netty.P2PService;
+import com.webank.wecross.network.NetworkCallback;
+import com.webank.wecross.network.NetworkMessage;
+import com.webank.wecross.network.NetworkResponse;
+import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.peer.Peer;
-import java.util.HashSet;
-import java.util.Set;
+import org.junit.Assert;
 
 public class MockP2PService extends P2PService {
-    private Set<Peer> peers = new HashSet<>();
 
-    public void addPeer(Peer peer) {
-        peers.add(peer);
+    private P2PEngineMessageFilter filter;
+
+    public MockP2PService(P2PEngineMessageFilter filter) {
+        this.filter = filter;
+    }
+
+    public <T> void asyncSendMessage(
+            Peer peer, NetworkMessage<T> msg, NetworkCallback<?> callback) {
+        try {
+            Assert.assertNotEquals(null, filter); // Please set filter beforehand
+
+            checkP2PMessage(msg);
+            checkCallback(callback);
+
+            NetworkResponse response = filter.checkAndResponse(msg);
+
+            executeCallback(callback, 0, "Success", response);
+        } catch (Exception e) {
+            executeCallback(callback, -1, "Error", null);
+        }
+    }
+
+    public void setFilter(P2PEngineMessageFilter filter) {
+        this.filter = filter;
     }
 }

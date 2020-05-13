@@ -1,7 +1,7 @@
 package com.webank.wecross.remote;
 
-import com.webank.wecross.p2p.P2PMessage;
-import com.webank.wecross.p2p.P2PMessageEngine;
+import com.webank.wecross.network.NetworkMessage;
+import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.stub.Connection;
@@ -14,14 +14,14 @@ import java.util.List;
 public class RemoteConnection implements Connection {
     private Peer peer;
     private String path;
-    private P2PMessageEngine p2pEngine;
+    private P2PService p2PService;
 
     @Override
     public Response send(Request request) {
         try {
             String errorHistory = "[";
             try {
-                P2PMessage<Request> p2pReq = new P2PMessage<Request>();
+                NetworkMessage<Request> p2pReq = new NetworkMessage<Request>();
                 p2pReq.setVersion(Versions.currentVersion);
                 p2pReq.setMethod(path.replace(".", "/") + "/transaction");
                 p2pReq.newSeq();
@@ -32,7 +32,7 @@ public class RemoteConnection implements Connection {
                 RemoteConnectionSemaphoreCallback callback =
                         new RemoteConnectionSemaphoreCallback();
 
-                p2pEngine.asyncSendMessage(peer, p2pReq, callback);
+                p2PService.asyncSendMessage(peer, p2pReq, callback);
 
                 return callback.getResponseData();
 
@@ -71,11 +71,11 @@ public class RemoteConnection implements Connection {
         this.path = path;
     }
 
-    public P2PMessageEngine getP2pEngine() {
-        return p2pEngine;
+    public P2PService getP2PService() {
+        return p2PService;
     }
 
-    public void setP2pEngine(P2PMessageEngine p2pEngine) {
-        this.p2pEngine = p2pEngine;
+    public void setP2PService(P2PService p2PService) {
+        this.p2PService = p2PService;
     }
 }

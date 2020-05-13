@@ -52,6 +52,11 @@ wecross_status()
     fi
 }
 
+tail_log()
+{
+    tail -n 30 logs/error.log
+    tail -n 30 start.out
+}
 
 before_start()
 {
@@ -115,6 +120,7 @@ after_start()
         ${STATUS_STARTING})
             kill $(wecross_pid)
             LOG_ERROR "Exceed waiting time. Killed. Please try to start WeCross again"
+            tail_log
             exit 1
             ;;
         ${STATUS_RUNNING})
@@ -123,6 +129,7 @@ after_start()
         ${STATUS_STOPPED})
             LOG_ERROR "WeCross start failed"
             LOG_ERROR "See logs/error.log for details"
+            tail_log
             exit 1
             ;;
         *)

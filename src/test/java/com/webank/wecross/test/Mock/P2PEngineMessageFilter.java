@@ -1,11 +1,11 @@
 package com.webank.wecross.test.Mock;
 
-import com.webank.wecross.p2p.P2PMessage;
-import com.webank.wecross.p2p.engine.P2PResponse;
+import com.webank.wecross.network.NetworkMessage;
+import com.webank.wecross.network.NetworkResponse;
 import org.junit.Assert;
 
 public abstract class P2PEngineMessageFilter {
-    public <T> P2PResponse checkAndResponse(P2PMessage<T> msg) {
+    public <T> NetworkResponse checkAndResponse(NetworkMessage<T> msg) {
         Assert.assertNotEquals(null, msg);
         String method = msg.getMethod();
 
@@ -22,7 +22,7 @@ public abstract class P2PEngineMessageFilter {
         return null;
     }
 
-    public abstract P2PResponse handle1(P2PMessage msg);
+    public abstract NetworkResponse handle1(NetworkMessage msg);
 
-    public abstract P2PResponse handle4(P2PMessage msg);
+    public abstract NetworkResponse handle4(NetworkMessage msg);
 }

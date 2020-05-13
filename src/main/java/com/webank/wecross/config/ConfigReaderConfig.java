@@ -5,6 +5,7 @@ import static com.webank.wecross.utils.ConfigUtils.fileIsExists;
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.network.p2p.netty.factory.P2PConfig;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
@@ -110,12 +111,19 @@ public class ConfigReaderConfig {
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
+        Long threadNum = (Long) p2pMap.get("threadNum");
+        if (threadNum == null) {
+            logger.info("threadNum not set, use default");
+            threadNum = new Long(500);
+        }
+
         p2PConfig.setCaCert(resolver.getResource(caCertPath));
         p2PConfig.setSslCert(resolver.getResource(sslCertPath));
         p2PConfig.setSslKey(resolver.getResource(sslKeyPath));
         p2PConfig.setListenIP(listenIP);
         p2PConfig.setListenPort(listenPort);
         p2PConfig.setPeers(peers);
+        p2PConfig.setThreadNum(threadNum);
 
         return p2PConfig;
     }

@@ -1,8 +1,8 @@
 package com.webank.wecross.host;
 
 import com.webank.wecross.account.AccountManager;
-import com.webank.wecross.p2p.P2PMessage;
-import com.webank.wecross.p2p.netty.P2PService;
+import com.webank.wecross.network.NetworkMessage;
+import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.peer.PeerSeqMessageData;
@@ -24,9 +24,9 @@ public class WeCrossHost {
 
     private ZoneManager zoneManager;
     private PeerManager peerManager;
-    private P2PService p2pService;
     private AccountManager accountManager;
     private RoutineManager routineManager;
+    private P2PService p2PService;
 
     Thread mainLoopThread;
 
@@ -37,7 +37,7 @@ public class WeCrossHost {
 
             /** start netty p2p service */
             System.out.println("Start netty p2p service");
-            p2pService.start();
+            p2PService.start();
 
             // start main loop
             mainLoopThread =
@@ -82,7 +82,7 @@ public class WeCrossHost {
         if (peerManager == null) {
             throw new Exception("peerManager is null");
         }
-        if (p2pService == null) {
+        if (p2PService == null) {
             throw new Exception("p2pService is null");
         }
         if (accountManager == null) {
@@ -96,7 +96,7 @@ public class WeCrossHost {
         PeerSeqMessageData peerSeqMessageData = new PeerSeqMessageData();
         peerSeqMessageData.setSeq(seq);
 
-        P2PMessage<Object> msg = new P2PMessage<>();
+        NetworkMessage<Object> msg = new NetworkMessage<>();
         msg.newSeq();
         msg.setData(peerSeqMessageData);
         msg.setVersion(Versions.currentVersion);
@@ -104,7 +104,7 @@ public class WeCrossHost {
 
         for (Peer peer : peerManager.getPeerInfos().values()) {
             logger.debug("Send peer seq, to peer:{}, seq:{}", peer, msg.getSeq());
-            zoneManager.getP2PEngine().asyncSendMessage(peer, msg, null);
+            zoneManager.getP2PService().asyncSendMessage(peer, msg, null);
         }
     }
 
@@ -197,19 +197,15 @@ public class WeCrossHost {
         this.peerManager = peerManager;
     }
 
-    public P2PService getP2pService() {
-        return p2pService;
-    }
-
-    public void setP2pService(P2PService p2pService) {
-        this.p2pService = p2pService;
-    }
-
     public RoutineManager getRoutineManager() {
         return routineManager;
     }
 
     public void setRoutineManager(RoutineManager routineManager) {
         this.routineManager = routineManager;
+    }
+
+    public void setP2PService(P2PService p2PService) {
+        this.p2PService = p2PService;
     }
 }
