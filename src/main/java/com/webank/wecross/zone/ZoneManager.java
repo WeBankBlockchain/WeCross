@@ -1,7 +1,7 @@
 package com.webank.wecross.zone;
 
 import com.webank.wecross.exception.WeCrossException;
-import com.webank.wecross.p2p.P2PMessageEngine;
+import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.remote.RemoteConnection;
 import com.webank.wecross.resource.Resource;
@@ -24,7 +24,7 @@ public class ZoneManager {
     private Map<String, Zone> zones = new HashMap<>();
     private AtomicInteger seq = new AtomicInteger(1);
     private Logger logger = LoggerFactory.getLogger(ZoneManager.class);
-    private P2PMessageEngine p2pEngine;
+    private P2PService p2PService;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
     private StubManager stubManager;
     BlockHeaderStorageFactory blockHeaderStorageFactory;
@@ -121,7 +121,7 @@ public class ZoneManager {
 
                 Driver driver = stubManager.getStubFactory(resourceInfo.getStubType()).newDriver();
                 RemoteConnection remoteConnection = new RemoteConnection();
-                remoteConnection.setP2pEngine(p2pEngine);
+                remoteConnection.setP2PService(p2PService);
                 remoteConnection.setPeer(peer);
                 remoteConnection.setPath(path.toURI());
 
@@ -296,12 +296,12 @@ public class ZoneManager {
         return resources;
     }
 
-    public P2PMessageEngine getP2PEngine() {
-        return p2pEngine;
+    public P2PService getP2PService() {
+        return p2PService;
     }
 
-    public void setP2PEngine(P2PMessageEngine p2pEngine) {
-        this.p2pEngine = p2pEngine;
+    public void setP2PService(P2PService p2PService) {
+        this.p2PService = p2PService;
     }
 
     public StubManager getStubManager() {

@@ -2,7 +2,7 @@ package com.webank.wecross.peer;
 
 import static com.webank.wecross.stub.ResourceInfo.isEqualInfos;
 
-import com.webank.wecross.p2p.netty.common.Node;
+import com.webank.wecross.network.p2p.netty.common.Node;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.utils.core.SeqUtils;
 import java.util.HashMap;
