@@ -5,8 +5,8 @@ import com.webank.wecross.common.BCManager;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.network.p2p.P2PProcessor;
 import com.webank.wecross.network.p2p.P2PService;
-import com.webank.wecross.network.p2p.netty.NettyService;
 import com.webank.wecross.peer.PeerManager;
+import com.webank.wecross.routine.RoutineExecutor;
 import com.webank.wecross.routine.RoutineManager;
 import com.webank.wecross.zone.ZoneManager;
 import javax.annotation.Resource;
@@ -16,13 +16,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class WeCrossHostConfig {
 
-    // Processor layer
+    // Task layer
     @Resource private P2PProcessor p2PProcessor;
 
-    // Manager layer
-    @Resource private ZoneManager zoneManager;
+    @Resource private RoutineExecutor routineExecutor;
 
-    @Resource private NettyService nettyService;
+    // Data layer
+    @Resource private ZoneManager zoneManager;
 
     @Resource private PeerManager peerManager;
 
@@ -32,7 +32,7 @@ public class WeCrossHostConfig {
 
     @Resource private BCManager bcManager;
 
-    // Service layer
+    // Network layer
     @Resource private P2PService p2PService;
 
     @Bean
@@ -41,10 +41,10 @@ public class WeCrossHostConfig {
 
         WeCrossHost host = new WeCrossHost();
         host.setZoneManager(zoneManager);
-        host.setNettyService(nettyService);
         host.setPeerManager(peerManager);
         host.setAccountManager(accountManager);
         host.setRoutineManager(routineManager);
+        host.setP2PService(p2PService);
 
         // set the p2p engine here to avoid circular reference
         zoneManager.setP2PService(p2PService);

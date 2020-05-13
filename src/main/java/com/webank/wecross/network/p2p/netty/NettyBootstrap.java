@@ -4,7 +4,6 @@ import com.webank.wecross.network.p2p.netty.channel.handler.ChannelHandler;
 import com.webank.wecross.network.p2p.netty.channel.handler.ChannelHandlerCallBack;
 import com.webank.wecross.network.p2p.netty.common.Node;
 import com.webank.wecross.network.p2p.netty.factory.P2PConfig;
-import com.webank.wecross.network.p2p.netty.message.MessageCallBack;
 import com.webank.wecross.network.p2p.netty.message.proto.Message;
 import com.webank.wecross.network.p2p.netty.message.serialize.MessageSerializer;
 import io.netty.bootstrap.Bootstrap;
@@ -59,16 +58,6 @@ public class NettyBootstrap {
     private ChannelHandlerCallBack channelHandlerCallBack;
     private Connections connections = new Connections();
     private P2PConfig config;
-
-    private MessageCallBack messageCallBack;
-
-    public MessageCallBack getMessageCallBack() {
-        return messageCallBack;
-    }
-
-    public void setMessageCallBack(MessageCallBack messageCallBack) {
-        this.messageCallBack = messageCallBack;
-    }
 
     public P2PConfig getConfig() {
         return config;
@@ -154,7 +143,6 @@ public class NettyBootstrap {
      * @throws IOException
      */
     public void start() throws ExecutionException, InterruptedException, IOException {
-        channelHandlerCallBack.setCallBack(messageCallBack);
         channelHandlerCallBack.setConnections(connections);
 
         logger.info(" initialize, config: {}", getConfig());

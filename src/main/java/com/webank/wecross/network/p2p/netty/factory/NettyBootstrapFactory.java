@@ -14,10 +14,10 @@ public class NettyBootstrapFactory {
 
         ChannelHandlerCallBack channelHandlerCallBack = new ChannelHandlerCallBack();
         channelHandlerCallBack.setThreadPool(threadPool);
+        channelHandlerCallBack.setCallBack(messageCallBack);
 
         NettyBootstrap bootstrap = new NettyBootstrap();
         bootstrap.setConfig(p2pConfig);
-        bootstrap.setMessageCallBack(messageCallBack);
         bootstrap.setChannelHandlerCallBack(channelHandlerCallBack);
 
         return bootstrap;
