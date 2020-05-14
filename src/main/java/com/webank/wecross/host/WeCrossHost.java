@@ -124,7 +124,7 @@ public class WeCrossHost {
                 dumpStr +=
                         "[chain="
                                 + entry.getKey()
-                                + ",blockNUmber="
+                                + ",blockNumber="
                                 + entry.getValue().getBlockNumber()
                                 + "]";
             }

@@ -17,6 +17,7 @@ import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 
 public class ResourceTest {
 
@@ -65,6 +66,68 @@ public class ResourceTest {
                         new TransactionContext<TransactionRequest>(
                                 request, null, resourceInfo, null));
         assertEquals(response, r);
+    }
+
+    @Test
+    public void asyncCallAndTransactionTest() throws Exception {
+        Resource resource = new Resource();
+        ResourceInfo resourceInfo = new ResourceInfo();
+        Peer peer0 = new Peer(new Node("", "", 0));
+        Connection connection0 = Mockito.mock(Connection.class);
+        resource.addConnection(peer0, connection0);
+
+        TransactionRequest request = new TransactionRequest();
+        request.setArgs(new String[] {"Hello world!"});
+
+        TransactionResponse response = new TransactionResponse();
+        response.setErrorCode(0);
+
+        Driver driver = Mockito.mock(Driver.class);
+        Mockito.doAnswer(
+                        (Answer<Void>)
+                                invocation -> {
+                                    Driver.Callback callback = invocation.getArgument(2);
+                                    callback.onTransactionResponse(response);
+                                    return null;
+                                })
+                .when(driver)
+                .asyncCall(Mockito.any(), Mockito.any(), Mockito.any(Driver.Callback.class));
+
+        Mockito.doAnswer(
+                        (Answer<Void>)
+                                invocation -> {
+                                    Driver.Callback callback = invocation.getArgument(2);
+                                    callback.onTransactionResponse(response);
+                                    return null;
+                                })
+                .when(driver)
+                .asyncSendTransaction(
+                        Mockito.any(), Mockito.any(), Mockito.any(Driver.Callback.class));
+        resource.setDriver(driver);
+
+        boolean callbackHappend = false;
+        resource.asyncCall(
+                new TransactionContext<TransactionRequest>(request, null, resourceInfo, null),
+                new Resource.Callback() {
+                    @Override
+                    public void onTransactionResponse(TransactionResponse transactionResponse) {
+                        assertEquals(response, transactionResponse);
+
+                        resource.asyncSendTransaction(
+                                new TransactionContext<TransactionRequest>(
+                                        request, null, resourceInfo, null),
+                                new Resource.Callback() {
+                                    @Override
+                                    public void onTransactionResponse(
+                                            TransactionResponse transactionResponse) {
+                                        assertEquals(response, transactionResponse);
+                                        System.out.println("Callback happend");
+                                    }
+                                });
+                    }
+                });
+
+        Thread.sleep(1000);
     }
 
     @Test
