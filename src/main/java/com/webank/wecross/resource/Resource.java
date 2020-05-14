@@ -53,12 +53,42 @@ public class Resource {
         }
     }
 
+    public abstract static class Callback {
+        public abstract void onTransactionResponse(TransactionResponse transactionResponse);
+    }
+
     public TransactionResponse call(TransactionContext<TransactionRequest> request) {
         return driver.call(request, chooseConnection());
     }
 
+    public void asyncCall(
+            TransactionContext<TransactionRequest> request, Resource.Callback callback) {
+        driver.asyncCall(
+                request,
+                chooseConnection(),
+                new Driver.Callback() {
+                    @Override
+                    public void onTransactionResponse(TransactionResponse transactionResponse) {
+                        callback.onTransactionResponse(transactionResponse);
+                    }
+                });
+    }
+
     public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request) {
         return driver.sendTransaction(request, chooseConnection());
+    }
+
+    public void asyncSendTransaction(
+            TransactionContext<TransactionRequest> request, Resource.Callback callback) {
+        driver.asyncSendTransaction(
+                request,
+                chooseConnection(),
+                new Driver.Callback() {
+                    @Override
+                    public void onTransactionResponse(TransactionResponse transactionResponse) {
+                        callback.onTransactionResponse(transactionResponse);
+                    }
+                });
     }
 
     public Response onRemoteTransaction(Request request) {
