@@ -31,32 +31,37 @@ public class RequestProcessor implements Processor {
                     message.getSeq(),
                     content);
 
-            networkProcessor.process(node, content, new NetworkProcessor.Callback() {
-                @Override
-                public void onResponse(String responseContent) {
-                    if (responseContent != null) {
+            networkProcessor.process(
+                    node,
+                    content,
+                    new NetworkProcessor.Callback() {
+                        @Override
+                        public void onResponse(String responseContent) {
+                            if (responseContent != null) {
 
-                        // send response
-                        message.setType(MessageType.RESOURCE_RESPONSE);
-                        message.setData(responseContent.getBytes());
+                                // send response
+                                message.setType(MessageType.RESOURCE_RESPONSE);
+                                message.setData(responseContent.getBytes());
 
-                        MessageSerializer serializer = new MessageSerializer();
-                        ByteBuf byteBuf = ctx.alloc().buffer();
-                        serializer.serialize(message, byteBuf);
-                        ctx.writeAndFlush(byteBuf);
+                                MessageSerializer serializer = new MessageSerializer();
+                                ByteBuf byteBuf = ctx.alloc().buffer();
+                                serializer.serialize(message, byteBuf);
+                                ctx.writeAndFlush(byteBuf);
 
-                        logger.debug(
-                                " resource request, host: {}, seq: {}, response content: {}",
-                                node,
-                                message.getSeq(),
-                                responseContent);
-                    } else {
-                        logger.error(
-                                "response content is null, node: " + node + ", content: " + content);
-                    }
-                }
-            });
-
+                                logger.debug(
+                                        " resource request, host: {}, seq: {}, response content: {}",
+                                        node,
+                                        message.getSeq(),
+                                        responseContent);
+                            } else {
+                                logger.error(
+                                        "response content is null, node: "
+                                                + node
+                                                + ", content: "
+                                                + content);
+                            }
+                        }
+                    });
 
         } catch (Exception e) {
             logger.error(" invalid format, host: {}, e: {}", node, e);

@@ -158,26 +158,24 @@ public class ResourceTest {
         Response response = new Response();
 
         Mockito.doAnswer(
-                (Answer<Void>)
-                        invocation -> {
-                            Connection.Callback callback = invocation.getArgument(1);
-                            callback.onResponse(response);
-                            return null;
-                        })
+                        (Answer<Void>)
+                                invocation -> {
+                                    Connection.Callback callback = invocation.getArgument(1);
+                                    callback.onResponse(response);
+                                    return null;
+                                })
                 .when(connection0)
-                .asyncSend(
-                        Mockito.any(), Mockito.any(Connection.Callback.class));
+                .asyncSend(Mockito.any(), Mockito.any(Connection.Callback.class));
 
         Mockito.doAnswer(
-                (Answer<Void>)
-                        invocation -> {
-                            Connection.Callback callback = invocation.getArgument(1);
-                            callback.onResponse(response);
-                            return null;
-                        })
+                        (Answer<Void>)
+                                invocation -> {
+                                    Connection.Callback callback = invocation.getArgument(1);
+                                    callback.onResponse(response);
+                                    return null;
+                                })
                 .when(connection1)
-                .asyncSend(
-                        Mockito.any(), Mockito.any(Connection.Callback.class));
+                .asyncSend(Mockito.any(), Mockito.any(Connection.Callback.class));
 
         assertEquals(response, resource.onRemoteTransaction(request));
     }

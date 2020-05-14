@@ -34,8 +34,7 @@ public class HTLCResource extends Resource {
     private Path counterpartyPath;
     private String counterpartyAddress;
 
-    public HTLCResource() {
-    }
+    public HTLCResource() {}
 
     public HTLCResource(
             boolean isFresh,
@@ -101,8 +100,8 @@ public class HTLCResource extends Resource {
                         txhash,
                         counterpartyAddress,
                         "lock",
-                        new String[]{h},
-                        new String[]{RoutineDefault.SUCCESS_FLAG});
+                        new String[] {h},
+                        new String[] {RoutineDefault.SUCCESS_FLAG});
 
         if (!weCrossHTLC.verify(getCounterpartyResource(), verifyData)) {
             throw new WeCrossException(
@@ -153,13 +152,17 @@ public class HTLCResource extends Resource {
                 }
             }
         }
-        getSelfResource().onRemoteTransaction(request, new Connection.Callback() {
-            @Override
-            public void onResponse(Response response) {
-                logger.trace("onRemoteTransaction, response: {}", response.toString());
-                callback.onResponse(response);
-            }
-        });
+        getSelfResource()
+                .onRemoteTransaction(
+                        request,
+                        new Connection.Callback() {
+                            @Override
+                            public void onResponse(Response response) {
+                                logger.trace(
+                                        "onRemoteTransaction, response: {}", response.toString());
+                                callback.onResponse(response);
+                            }
+                        });
     }
 
     public boolean isFresh() {

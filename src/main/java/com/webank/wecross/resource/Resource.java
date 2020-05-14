@@ -15,9 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class Resource {
     private String type;
@@ -113,12 +110,14 @@ public class Resource {
     public Response onRemoteTransaction(Request request) {
         CompletableFuture<Response> completableFuture = new CompletableFuture<>();
 
-        onRemoteTransaction(request, new Connection.Callback() {
-            @Override
-            public void onResponse(Response response) {
-                completableFuture.complete(response);
-            }
-        });
+        onRemoteTransaction(
+                request,
+                new Connection.Callback() {
+                    @Override
+                    public void onResponse(Response response) {
+                        completableFuture.complete(response);
+                    }
+                });
 
         try {
             return completableFuture.get();
