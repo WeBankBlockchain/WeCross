@@ -52,15 +52,8 @@ public interface Driver {
             TransactionContext<TransactionRequest> request,
             Connection connection,
             Driver.Callback callback) {
-        Thread thread =
-                new Thread(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                callback.onTransactionResponse(call(request, connection));
-                            }
-                        });
-        thread.start();
+
+        callback.onTransactionResponse(call(request, connection));
     }
 
     /**
@@ -85,16 +78,8 @@ public interface Driver {
             TransactionContext<TransactionRequest> request,
             Connection connection,
             Driver.Callback callback) {
-        Thread thread =
-                new Thread(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                callback.onTransactionResponse(
-                                        sendTransaction(request, connection));
-                            }
-                        });
-        thread.start();
+
+        callback.onTransactionResponse(sendTransaction(request, connection));
     }
 
     /**

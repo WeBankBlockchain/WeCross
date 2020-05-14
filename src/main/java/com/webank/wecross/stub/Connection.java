@@ -25,15 +25,8 @@ public interface Connection {
      * @return
      */
     default void asyncSend(Request request, Connection.Callback callback) {
-        Thread thread =
-                new Thread(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                callback.onResponse(send(request));
-                            }
-                        });
-        thread.start();
+
+        callback.onResponse(send(request));
     }
 
     /**

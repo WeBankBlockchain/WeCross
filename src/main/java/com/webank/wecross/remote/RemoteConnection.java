@@ -87,19 +87,12 @@ public class RemoteConnection implements Connection {
             p2PService.asyncSendMessage(peer, networkMessage, networkCallback);
 
         } catch (Exception e) {
-            Thread thread =
-                    new Thread(
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    Response response = new Response();
-                                    response.setErrorCode(StubQueryStatus.REMOTE_QUERY_FAILED);
-                                    response.setErrorMessage(
-                                            "Async send remote connection exception: "
-                                                    + e.getLocalizedMessage());
-                                    callback.onResponse(response);
-                                }
-                            });
+
+            Response response = new Response();
+            response.setErrorCode(StubQueryStatus.REMOTE_QUERY_FAILED);
+            response.setErrorMessage(
+                    "Async send remote connection exception: " + e.getLocalizedMessage());
+            callback.onResponse(response);
         }
     }
 
