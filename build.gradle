@@ -22,7 +22,7 @@ repositories {
 }
 
 sourceCompatibility = '1.8'
-version = '1.0.0-rc2'
+version = '1.0.0-rc3-0514-SNAPSHOT'
 
 
 task stubSourceJar(type: Jar) {
@@ -81,7 +81,7 @@ publishing {
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
 
-            //*
+            /*
             def NEXUS_USERNAME = ''
             def NEXUS_PASSWORD = ''
             //*/
