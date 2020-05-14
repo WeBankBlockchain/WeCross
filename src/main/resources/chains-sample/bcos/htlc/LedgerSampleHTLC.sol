@@ -1,12 +1,12 @@
 pragma solidity ^0.4.24;
 pragma experimental ABIEncoderV2;
 
-import "./BAC001.sol";
+import "./LedgerSample.sol";
 import "./HTLC.sol";
 
-contract BACHTLC is HTLC, BAC001Holder {
+contract LedgerSampleHTLC is HTLC, LedgerSampleHolder {
 
-    // bac001 asset contract address
+    // asset contract address
     address assetContract;
 
     function init(string[] _ss)
@@ -39,14 +39,14 @@ contract BACHTLC is HTLC, BAC001Holder {
         string memory _hash = _ss[0];
         address sender = getSender(_hash);
         uint amount = getAmount(_hash);
-        if (BAC001(assetContract).allowance(sender, address(this)) < uint(amount))
+        if (LedgerSample(assetContract).allowance(sender, address(this)) < uint(amount))
         {
             result[0] = "insufficient authorized assets";
             return;
         }
 
         // This htlc contract becomes the temporary owner of the assets
-        BAC001(assetContract).sendFrom(sender, address(this), uint(amount),"");
+        LedgerSample(assetContract).sendFrom(sender, address(this), uint(amount),"");
 
         setLockStatus(_hash);
         result[0] = "success";
@@ -70,7 +70,7 @@ contract BACHTLC is HTLC, BAC001Holder {
         // transfer from htlc contract to receiver
         address receiver = getReceiver(_hash);
         uint amount = getAmount(_hash);
-        BAC001(assetContract).send(receiver, uint(amount),"");
+        LedgerSample(assetContract).send(receiver, uint(amount),"");
 
         setUnlockStatus(_hash);
         setSecret(_ss);
@@ -94,7 +94,7 @@ contract BACHTLC is HTLC, BAC001Holder {
         // transfer from htlc contract to sender
         address sender = getSender(_hash);
         uint amount = getAmount(_hash);
-        BAC001(assetContract).send(sender, uint(amount),"");
+        LedgerSample(assetContract).send(sender, uint(amount),"");
 
         setRollbackStatus(_hash);
         result[0] = "success";
@@ -106,7 +106,7 @@ contract BACHTLC is HTLC, BAC001Holder {
     returns(string[] result)
     {
         result = new string[](1);
-        uint b = BAC001(assetContract).balance(stringToAddress(_ss[0]));
+        uint b = LedgerSample(assetContract).balance(stringToAddress(_ss[0]));
         result[0] = uintToString(b);
     }
 }

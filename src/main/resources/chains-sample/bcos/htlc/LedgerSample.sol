@@ -213,26 +213,26 @@ contract Suspendable is SuspenderRole {
     }
 }
 
-contract IBAC001Receiver {
+contract ILedgerSampleReceiver {
     /**
      * @notice Handle the receipt of an NFT
-     * @dev The BAC001 smart contract calls this function on the recipient
+     * @dev The LedgerSample smart contract calls this function on the recipient
      */
-    function onBAC001Received(address operator, address from, uint256 value, bytes memory data)
+    function onLedgerSampleReceived(address operator, address from, uint256 value, bytes memory data)
     public returns (bytes4);
 }
 
-contract BAC001Holder is IBAC001Receiver {
-    function onBAC001Received(address, address, uint256, bytes memory) public returns (bytes4) {
-        return this.onBAC001Received.selector;
+contract LedgerSampleHolder is ILedgerSampleReceiver {
+    function onLedgerSampleReceived(address, address, uint256, bytes memory) public returns (bytes4) {
+        return this.onLedgerSampleReceived.selector;
     }
 }
 
 
 /**
- * @title Standard BAC001 asset
+ * @title Standard LedgerSample asset
  */
-contract BAC001 is IssuerRole, Suspendable {
+contract LedgerSample is IssuerRole, Suspendable {
     using SafeMath for uint256;
     using Address for address;
 
@@ -243,8 +243,8 @@ contract BAC001 is IssuerRole, Suspendable {
     string private _shortName;
     uint8 private  _minUnit;
 
-    // Equals to `bytes4(keccak256("onBAC001Received(address,address,uint256,bytes)"))`
-    bytes4 private constant _BAC001_RECEIVED = 0xc73d16ae;
+    // Equals to `bytes4(keccak256("onLedgerSampleReceived(address,address,uint256,bytes)"))`
+    bytes4 private constant _LedgerSample_RECEIVED = 0xc73d16ae;
 
 
     event Send( address indexed from, address indexed to, uint256 value, bytes data);
@@ -276,13 +276,13 @@ contract BAC001 is IssuerRole, Suspendable {
 
     function send(address to, uint256 value, bytes data) public whenNotSuspended {
         _send(msg.sender, to, value, data);
-        require(_checkOnBAC001Received(msg.sender, to, value, data), "BAC001: send to non BAC001Receiver implementer");
+        // require(_checkOnLedgerSampleReceived(msg.sender, to, value, data), "LedgerSample: send to non LedgerSampleReceiver implementer");
 
     }
 
 //    function safeSend(address to, uint256 value, bytes data) public whenNotSuspended {
 //        send(to, value, data);
-//        require(_checkOnBAC001Received(msg.sender, to, value, data), "BAC001: send to non BAC001Receiver implementer");
+//        require(_checkOnLedgerSampleReceived(msg.sender, to, value, data), "LedgerSample: send to non LedgerSampleReceiver implementer");
 //    }
 
 
@@ -301,7 +301,7 @@ contract BAC001 is IssuerRole, Suspendable {
         _send(from, to, value, data);
         _approve(from, msg.sender, _allowed[from][msg.sender].sub(value));
         //add
-        require(_checkOnBAC001Received(from, to, value, data), "BAC001: send to non BAC001Receiver implementer");
+        // require(_checkOnLedgerSampleReceived(from, to, value, data), "LedgerSample: send to non LedgerSampleReceiver implementer");
 
 
     }
@@ -309,7 +309,7 @@ contract BAC001 is IssuerRole, Suspendable {
 //// safe todo
 //    function safeSendFrom(address from, address to, uint256 value, bytes data) public whenNotSuspended {
 //        sendFrom(from, to, value, data);
-//        require(_checkOnBAC001Received(from, to, value, data), "BAC001: send to non BAC001Receiver implementer");
+//        require(_checkOnLedgerSampleReceived(from, to, value, data), "LedgerSample: send to non LedgerSampleReceiver implementer");
 //    }
 
 
@@ -327,15 +327,15 @@ contract BAC001 is IssuerRole, Suspendable {
     }
 
 
-    function _checkOnBAC001Received(address from, address to, uint256 value, bytes data)
+    function _checkOnLedgerSampleReceived(address from, address to, uint256 value, bytes data)
     internal returns (bool)
     {
         if (!to.isContract()) {
             return true;
         }
 
-        bytes4 retval = IBAC001Receiver(to).onBAC001Received(from, to, value, data);
-        return (retval == _BAC001_RECEIVED);
+        bytes4 retval = ILedgerSampleReceiver(to).onLedgerSampleReceived(from, to, value, data);
+        return (retval == _LedgerSample_RECEIVED);
     }
 
     /**
@@ -394,7 +394,7 @@ contract BAC001 is IssuerRole, Suspendable {
      * @dev Send asset for a specified addresses.
      */
     function _send(address from, address to, uint256 value, bytes data) internal {
-        require(to != address(0), "BAC001: send to the zero address");
+        require(to != address(0), "LedgerSample: send to the zero address");
 
         _balances[from] = _balances[from].sub(value);
         _balances[to] = _balances[to].add(value);
@@ -405,7 +405,7 @@ contract BAC001 is IssuerRole, Suspendable {
      * @dev Internal function that issues an amount of the asset and assigns it to
      */
     function _issue(address account, uint256 value, bytes data) internal {
-        require(account != address(0), "BAC001: issue to the zero address");
+        require(account != address(0), "LedgerSample: issue to the zero address");
 
         _totalAmount = _totalAmount.add(value);
         _balances[account] = _balances[account].add(value);
@@ -416,7 +416,7 @@ contract BAC001 is IssuerRole, Suspendable {
      * @dev Internal function that destroys an amount of the asset of a given
      */
     function _destroy(address account, uint256 value, bytes data) internal {
-        require(account != address(0), "BAC001: destroy from the zero address");
+        require(account != address(0), "LedgerSample: destroy from the zero address");
 
         _totalAmount = _totalAmount.sub(value);
         _balances[account] = _balances[account].sub(value);
@@ -427,8 +427,8 @@ contract BAC001 is IssuerRole, Suspendable {
      * @dev Approve an address to spend another addresses' assets.
      */
     function _approve(address owner, address spender, uint256 value) internal {
-        require(owner != address(0), "BAC001: approve from the zero address");
-        require(spender != address(0), "BAC001: approve to the zero address");
+        require(owner != address(0), "LedgerSample: approve from the zero address");
+        require(spender != address(0), "LedgerSample: approve to the zero address");
 
         _allowed[owner][spender] = value;
         emit Approval( owner, spender, value);
