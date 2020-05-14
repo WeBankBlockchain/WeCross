@@ -1,6 +1,10 @@
 package com.webank.wecross.stub;
 
 public interface Driver {
+    interface Callback {
+        void onTransactionResponse(TransactionResponse transactionResponse);
+    }
+
     /**
      * Decode an encoded transaction request binary data.
      *
@@ -29,10 +33,35 @@ public interface Driver {
      * Call the interface of contract or chaincode
      *
      * @param request the transaction request
+     * @param connection the connection of a chain
      * @return the transaction response
      */
     public TransactionResponse call(
             TransactionContext<TransactionRequest> request, Connection connection);
+
+    /**
+     * Async Call the interface of contract or chaincode Just fake async for compatibility, you need
+     * to override this function
+     *
+     * @param request the transaction request
+     * @param connection the connection of a chain
+     * @param callback the callback class for async call
+     * @return the transaction response
+     */
+    default void asyncCall(
+            TransactionContext<TransactionRequest> request,
+            Connection connection,
+            Driver.Callback callback) {
+        Thread thread =
+                new Thread(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onTransactionResponse(call(request, connection));
+                            }
+                        });
+        thread.start();
+    }
 
     /**
      * Send transaction to the interface of contract or chaincode
@@ -42,6 +71,31 @@ public interface Driver {
      */
     public TransactionResponse sendTransaction(
             TransactionContext<TransactionRequest> request, Connection connection);
+
+    /**
+     * Async transaction the interface of contract or chaincode Just fake async for compatibility,
+     * you need to override this function
+     *
+     * @param request the transaction request
+     * @param connection the connection of a chain
+     * @param callback the callback class for async sendTransaction
+     * @return the transaction response
+     */
+    default void asyncSendTransaction(
+            TransactionContext<TransactionRequest> request,
+            Connection connection,
+            Driver.Callback callback) {
+        Thread thread =
+                new Thread(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onTransactionResponse(
+                                        sendTransaction(request, connection));
+                            }
+                        });
+        thread.start();
+    }
 
     /**
      * Get block number
