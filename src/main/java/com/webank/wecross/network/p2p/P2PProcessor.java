@@ -300,7 +300,7 @@ public class P2PProcessor implements NetworkProcessor {
                                     }
                                 });
 
-                        break;
+                        return;
                     }
                 default:
                     {

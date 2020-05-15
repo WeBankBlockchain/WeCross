@@ -49,7 +49,7 @@ public class RequestProcessor implements Processor {
                                 ctx.writeAndFlush(byteBuf);
 
                                 logger.debug(
-                                        " resource request, host: {}, seq: {}, response content: {}",
+                                        " Response network message, resource request, host: {}, seq: {}, response content: {}",
                                         node,
                                         message.getSeq(),
                                         responseContent);
