@@ -6,6 +6,7 @@ import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
+import com.webank.wecross.stub.StubQueryStatus;
 import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
@@ -13,6 +14,7 @@ import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 public class Resource {
     private String type;
@@ -91,7 +93,7 @@ public class Resource {
                 });
     }
 
-    public Response onRemoteTransaction(Request request) {
+    public void onRemoteTransaction(Request request, Connection.Callback callback) {
         if (driver.isTransaction(request)) {
             TransactionContext<TransactionRequest> transactionRequest =
                     driver.decodeTransactionRequest(request.getData());
@@ -102,7 +104,29 @@ public class Resource {
         }
 
         request.setResourceInfo(resourceInfo);
-        return chooseConnection().send(request);
+        chooseConnection().asyncSend(request, callback);
+    }
+
+    public Response onRemoteTransaction(Request request) {
+        CompletableFuture<Response> completableFuture = new CompletableFuture<>();
+
+        onRemoteTransaction(
+                request,
+                new Connection.Callback() {
+                    @Override
+                    public void onResponse(Response response) {
+                        completableFuture.complete(response);
+                    }
+                });
+
+        try {
+            return completableFuture.get();
+        } catch (Exception e) {
+            Response response = new Response();
+            response.setErrorCode(StubQueryStatus.TIMEOUT);
+            response.setErrorMessage("onRemoteTransaction completableFuture exception: " + e);
+            return response;
+        }
     }
 
     public void registerEventHandler(EventCallback callback) {}

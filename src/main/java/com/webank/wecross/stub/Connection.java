@@ -25,7 +25,6 @@ public interface Connection {
      * @return
      */
     default void asyncSend(Request request, Connection.Callback callback) {
-
         callback.onResponse(send(request));
     }
 

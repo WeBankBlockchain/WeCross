@@ -105,7 +105,6 @@ public class ResourceTest {
                         Mockito.any(), Mockito.any(), Mockito.any(Driver.Callback.class));
         resource.setDriver(driver);
 
-        boolean callbackHappend = false;
         resource.asyncCall(
                 new TransactionContext<TransactionRequest>(request, null, resourceInfo, null),
                 new Resource.Callback() {
@@ -158,8 +157,25 @@ public class ResourceTest {
 
         Response response = new Response();
 
-        Mockito.when(connection0.send(request)).thenReturn(response);
-        Mockito.when(connection1.send(request)).thenReturn(response);
+        Mockito.doAnswer(
+                        (Answer<Void>)
+                                invocation -> {
+                                    Connection.Callback callback = invocation.getArgument(1);
+                                    callback.onResponse(response);
+                                    return null;
+                                })
+                .when(connection0)
+                .asyncSend(Mockito.any(), Mockito.any(Connection.Callback.class));
+
+        Mockito.doAnswer(
+                        (Answer<Void>)
+                                invocation -> {
+                                    Connection.Callback callback = invocation.getArgument(1);
+                                    callback.onResponse(response);
+                                    return null;
+                                })
+                .when(connection1)
+                .asyncSend(Mockito.any(), Mockito.any(Connection.Callback.class));
 
         assertEquals(response, resource.onRemoteTransaction(request));
     }

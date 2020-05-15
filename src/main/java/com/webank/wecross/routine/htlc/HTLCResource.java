@@ -113,7 +113,7 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public Response onRemoteTransaction(Request request) {
+    public void onRemoteTransaction(Request request, Connection.Callback callback) {
         Response response = new Response();
         Driver driver = getDriver();
         if (driver.isTransaction(request)) {
@@ -126,7 +126,7 @@ public class HTLCResource extends Resource {
                 response.setErrorCode(ErrorCode.DECODE_TRANSACTION_REQUEST_ERROR);
                 response.setErrorMessage("decode transaction request failed");
                 logger.info("onRemoteTransaction, response: {}", response.toString());
-                return response;
+                callback.onResponse(response);
             }
 
             TransactionRequest transactionRequest = context.getData();
@@ -139,7 +139,7 @@ public class HTLCResource extends Resource {
                 response.setErrorCode(HTLCErrorCode.NO_PERMISSION);
                 response.setErrorMessage("HTLCResource doesn't allow peers to call " + method);
                 logger.info("onRemoteTransaction, response: {}", response.toString());
-                return response;
+                callback.onResponse(response);
             } else if (transactionRequest.getMethod().equalsIgnoreCase("unlock")) {
                 try {
                     verifyLock(transactionRequest);
@@ -148,13 +148,21 @@ public class HTLCResource extends Resource {
                     response.setErrorCode(HTLCErrorCode.VERIFY_ERROR);
                     response.setErrorMessage(e.getInternalMessage());
                     logger.info("onRemoteTransaction, response: {}", response.toString());
-                    return response;
+                    callback.onResponse(response);
                 }
             }
         }
-        response = getSelfResource().onRemoteTransaction(request);
-        logger.trace("onRemoteTransaction, response: {}", response.toString());
-        return response;
+        getSelfResource()
+                .onRemoteTransaction(
+                        request,
+                        new Connection.Callback() {
+                            @Override
+                            public void onResponse(Response response) {
+                                logger.trace(
+                                        "onRemoteTransaction, response: {}", response.toString());
+                                callback.onResponse(response);
+                            }
+                        });
     }
 
     public boolean isFresh() {

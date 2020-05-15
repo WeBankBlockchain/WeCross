@@ -17,6 +17,7 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.routine.RoutineManager;
 import com.webank.wecross.routine.htlc.HTLCManager;
+import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
@@ -226,8 +227,13 @@ public class P2PProcessor implements NetworkProcessor {
         return response;
     }
 
-    public NetworkResponse<Object> onTransactionMessage(
-            String network, String chain, String resource, String method, String p2pRequestString) {
+    public void onTransactionMessage(
+            String network,
+            String chain,
+            String resource,
+            String method,
+            String p2pRequestString,
+            NetworkProcessor.Callback callback) {
         Path path = new Path();
         path.setNetwork(network);
         path.setChain(chain);
@@ -260,12 +266,41 @@ public class P2PProcessor implements NetworkProcessor {
                                         new TypeReference<NetworkMessage<Request>>() {});
                         p2pRequest.checkP2PMessage(method);
 
-                        Response response =
-                                (Response) resourceObj.onRemoteTransaction(p2pRequest.getData());
+                        resourceObj.onRemoteTransaction(
+                                p2pRequest.getData(),
+                                new Connection.Callback() {
+                                    @Override
+                                    public void onResponse(Response response) {
+                                        networkResponse.setData(response);
+                                        networkResponse.setSeq(p2pRequest.getSeq());
+                                        String responseContent = new String();
+                                        try {
+                                            responseContent =
+                                                    objectMapper.writeValueAsString(
+                                                            networkResponse);
+                                        } catch (Exception e) {
+                                            logger.warn("Process request error:", e);
+                                            NetworkResponse<Object> errorResponse =
+                                                    new NetworkResponse<Object>();
+                                            errorResponse.setSeq(p2pRequest.getSeq());
+                                            errorResponse.setErrorCode(
+                                                    NetworkQueryStatus.INTERNAL_ERROR);
+                                            errorResponse.setMessage(e.getLocalizedMessage());
+                                            try {
+                                                responseContent =
+                                                        objectMapper.writeValueAsString(
+                                                                errorResponse);
+                                            } catch (Exception e1) {
+                                                logger.error(
+                                                        "Can't serialize error response: "
+                                                                + resource.toString());
+                                            }
+                                        }
+                                        callback.onResponse(responseContent);
+                                    }
+                                });
 
-                        networkResponse.setData(response);
-                        networkResponse.setSeq(p2pRequest.getSeq());
-                        break;
+                        return;
                     }
                 default:
                     {
@@ -291,11 +326,16 @@ public class P2PProcessor implements NetworkProcessor {
             networkResponse.setMessage(e.getLocalizedMessage());
         }
 
-        return networkResponse;
+        try {
+            callback.onResponse(objectMapper.writeValueAsString(networkResponse));
+
+        } catch (Exception e1) {
+            logger.error("Can't serialize error response: " + resource.toString());
+        }
     }
 
     @Override
-    public String process(Node node, String content) {
+    public void process(Node node, String content, NetworkProcessor.Callback callback) {
         NetworkMessage<?> networkMessage = new NetworkMessage<>();
         try {
             networkMessage = objectMapper.readValue(content, NetworkMessage.class);
@@ -305,17 +345,17 @@ public class P2PProcessor implements NetworkProcessor {
 
             Peer peerInfo = peerManager.getPeerInfo(node);
 
-            NetworkResponse<Object> networkResponse = new NetworkResponse<>();
             if (r.length == 1) {
                 /** method */
-                networkResponse = onStatusMessage(peerInfo, r[0], content);
+                NetworkResponse<Object> networkResponse = onStatusMessage(peerInfo, r[0], content);
+                callback.onResponse(objectMapper.writeValueAsString(networkResponse));
             } else if (r.length == 4) {
                 /** network/stub/resource/method */
-                networkResponse = onTransactionMessage(r[0], r[1], r[2], r[3], content);
+                onTransactionMessage(r[0], r[1], r[2], r[3], content, callback);
             } else {
                 throw new Exception("invalid method parameter, method: " + method);
             }
-            return objectMapper.writeValueAsString(networkResponse);
+
         } catch (Exception e) {
             logger.error(" invalid format, host: {}, e: {}", node, e);
             NetworkResponse<Object> networkResponse = new NetworkResponse<>();
@@ -324,11 +364,10 @@ public class P2PProcessor implements NetworkProcessor {
             networkResponse.setSeq(networkMessage.getSeq());
             networkResponse.setVersion(networkMessage.getVersion());
             try {
-                return objectMapper.writeValueAsString(networkResponse);
+                callback.onResponse(objectMapper.writeValueAsString(networkResponse));
 
             } catch (Exception e1) {
                 logger.error("writeValueAsString exception: {}, e: {}", node, e1);
-                return null;
             }
         }
     }
