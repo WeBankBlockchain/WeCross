@@ -1,8 +1,11 @@
 package com.webank.wecross.stub;
 
+import com.webank.wecross.exception.TransactionException;
+
 public interface Driver {
     interface Callback {
-        void onTransactionResponse(TransactionResponse transactionResponse);
+        void onTransactionResponse(
+                TransactionException transactionException, TransactionResponse transactionResponse);
     }
 
     /**
@@ -37,7 +40,8 @@ public interface Driver {
      * @return the transaction response
      */
     public TransactionResponse call(
-            TransactionContext<TransactionRequest> request, Connection connection);
+            TransactionContext<TransactionRequest> request, Connection connection)
+            throws TransactionException;
 
     /**
      * Async Call the interface of contract or chaincode Just fake async for compatibility, you need
@@ -52,8 +56,15 @@ public interface Driver {
             TransactionContext<TransactionRequest> request,
             Connection connection,
             Driver.Callback callback) {
-
-        callback.onTransactionResponse(call(request, connection));
+        try {
+            callback.onTransactionResponse(
+                    TransactionException.Builder.newSuccessException(), call(request, connection));
+        } catch (TransactionException e) {
+            callback.onTransactionResponse(e, null);
+        } catch (Exception e) {
+            callback.onTransactionResponse(
+                    TransactionException.Builder.newInternalException(e.getMessage()), null);
+        }
     }
 
     /**
@@ -63,7 +74,8 @@ public interface Driver {
      * @return the transaction response
      */
     public TransactionResponse sendTransaction(
-            TransactionContext<TransactionRequest> request, Connection connection);
+            TransactionContext<TransactionRequest> request, Connection connection)
+            throws TransactionException;
 
     /**
      * Async transaction the interface of contract or chaincode Just fake async for compatibility,
@@ -78,8 +90,16 @@ public interface Driver {
             TransactionContext<TransactionRequest> request,
             Connection connection,
             Driver.Callback callback) {
-
-        callback.onTransactionResponse(sendTransaction(request, connection));
+        try {
+            callback.onTransactionResponse(
+                    TransactionException.Builder.newSuccessException(),
+                    sendTransaction(request, connection));
+        } catch (TransactionException e) {
+            callback.onTransactionResponse(e, null);
+        } catch (Exception e) {
+            callback.onTransactionResponse(
+                    TransactionException.Builder.newInternalException(e.getMessage()), null);
+        }
     }
 
     /**

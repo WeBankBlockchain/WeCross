@@ -1,5 +1,6 @@
 package com.webank.wecross.routine.htlc;
 
+import com.webank.wecross.exception.TransactionException;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.host.WeCrossHost;
@@ -54,12 +55,14 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public TransactionResponse call(TransactionContext<TransactionRequest> request) {
+    public TransactionResponse call(TransactionContext<TransactionRequest> request)
+            throws TransactionException {
         return getSelfResource().call(request);
     }
 
     @Override
-    public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request) {
+    public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request)
+            throws TransactionException {
         try {
             handleSendTransactionRequest(request.getData());
         } catch (WeCrossException e) {
@@ -71,6 +74,10 @@ public class HTLCResource extends Resource {
 
         return getSelfResource().sendTransaction(request);
     }
+
+    // TODO: Add asyncCall (same as implement in Resource.java)
+
+    // TODO: Add asyncSendTransaction (same as implement in Resource.java)
 
     public void handleSendTransactionRequest(TransactionRequest request) throws WeCrossException {
         if (request.getMethod().equals("unlock")) {

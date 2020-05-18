@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.common.NetworkQueryStatus;
+import com.webank.wecross.exception.TransactionException;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.resource.Resource;
@@ -311,6 +312,10 @@ public class RestfulController {
                         break;
                     }
             }
+        } catch (TransactionException e) {
+            logger.warn("TransactionException error", e);
+            restResponse.setErrorCode(NetworkQueryStatus.TRANSACTION_ERROR + e.getErrorCode());
+            restResponse.setMessage(e.getMessage());
         } catch (WeCrossException e) {
             logger.warn("Process request error", e);
             restResponse.setErrorCode(NetworkQueryStatus.EXCEPTION_FLAG + e.getErrorCode());

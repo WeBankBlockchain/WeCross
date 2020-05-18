@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.webank.wecross.exception.TransactionException;
 import com.webank.wecross.network.p2p.netty.common.Node;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Resource;
@@ -15,6 +16,7 @@ import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
@@ -37,7 +39,7 @@ public class ResourceTest {
     }
 
     @Test
-    public void callAndTransactionTest() {
+    public void callAndTransactionTest() throws Exception {
         Resource resource = new Resource();
         ResourceInfo resourceInfo = new ResourceInfo();
         Peer peer0 = new Peer(new Node("", "", 0));
@@ -51,6 +53,7 @@ public class ResourceTest {
         response.setErrorCode(0);
 
         Driver driver = Mockito.mock(Driver.class);
+
         Mockito.when(driver.call(Mockito.any(), Mockito.any())).thenReturn(response);
         Mockito.when(driver.sendTransaction(Mockito.any(), Mockito.any())).thenReturn(response);
         resource.setDriver(driver);
@@ -87,7 +90,9 @@ public class ResourceTest {
                         (Answer<Void>)
                                 invocation -> {
                                     Driver.Callback callback = invocation.getArgument(2);
-                                    callback.onTransactionResponse(response);
+                                    callback.onTransactionResponse(
+                                            TransactionException.Builder.newSuccessException(),
+                                            response);
                                     return null;
                                 })
                 .when(driver)
@@ -97,7 +102,9 @@ public class ResourceTest {
                         (Answer<Void>)
                                 invocation -> {
                                     Driver.Callback callback = invocation.getArgument(2);
-                                    callback.onTransactionResponse(response);
+                                    callback.onTransactionResponse(
+                                            TransactionException.Builder.newSuccessException(),
+                                            response);
                                     return null;
                                 })
                 .when(driver)
@@ -109,8 +116,11 @@ public class ResourceTest {
                 new TransactionContext<TransactionRequest>(request, null, resourceInfo, null),
                 new Resource.Callback() {
                     @Override
-                    public void onTransactionResponse(TransactionResponse transactionResponse) {
-                        assertEquals(response, transactionResponse);
+                    public void onTransactionResponse(
+                            TransactionException transactionException,
+                            TransactionResponse transactionResponse) {
+                        Assert.assertTrue(transactionException.isSuccess());
+                        Assert.assertEquals(response, transactionResponse);
 
                         resource.asyncSendTransaction(
                                 new TransactionContext<TransactionRequest>(
@@ -118,8 +128,10 @@ public class ResourceTest {
                                 new Resource.Callback() {
                                     @Override
                                     public void onTransactionResponse(
+                                            TransactionException transactionException,
                                             TransactionResponse transactionResponse) {
-                                        assertEquals(response, transactionResponse);
+                                        Assert.assertTrue(transactionException.isSuccess());
+                                        Assert.assertEquals(response, transactionResponse);
                                         System.out.println("Callback happend");
                                     }
                                 });
