@@ -16,6 +16,7 @@ import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.TransactionContext;
+import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import org.slf4j.Logger;
@@ -54,12 +55,14 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public TransactionResponse call(TransactionContext<TransactionRequest> request) {
+    public TransactionResponse call(TransactionContext<TransactionRequest> request)
+            throws TransactionException {
         return getSelfResource().call(request);
     }
 
     @Override
-    public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request) {
+    public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request)
+            throws TransactionException {
         try {
             handleSendTransactionRequest(request.getData());
         } catch (WeCrossException e) {
@@ -71,6 +74,10 @@ public class HTLCResource extends Resource {
 
         return getSelfResource().sendTransaction(request);
     }
+
+    // TODO: Add asyncCall (same as implement in Resource.java)
+
+    // TODO: Add asyncSendTransaction (same as implement in Resource.java)
 
     public void handleSendTransactionRequest(TransactionRequest request) throws WeCrossException {
         if (request.getMethod().equals("unlock")) {

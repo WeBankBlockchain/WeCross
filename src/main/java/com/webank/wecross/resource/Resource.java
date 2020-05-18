@@ -8,6 +8,7 @@ import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.StubQueryStatus;
 import com.webank.wecross.stub.TransactionContext;
+import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import java.security.SecureRandom;
@@ -15,8 +16,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Resource {
+    private Logger logger = LoggerFactory.getLogger(Response.class);
     private String type;
     private Driver driver;
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
@@ -56,10 +61,12 @@ public class Resource {
     }
 
     public abstract static class Callback {
-        public abstract void onTransactionResponse(TransactionResponse transactionResponse);
+        public abstract void onTransactionResponse(
+                TransactionException transactionException, TransactionResponse transactionResponse);
     }
 
-    public TransactionResponse call(TransactionContext<TransactionRequest> request) {
+    public TransactionResponse call(TransactionContext<TransactionRequest> request)
+            throws TransactionException {
         return driver.call(request, chooseConnection());
     }
 
@@ -70,13 +77,16 @@ public class Resource {
                 chooseConnection(),
                 new Driver.Callback() {
                     @Override
-                    public void onTransactionResponse(TransactionResponse transactionResponse) {
-                        callback.onTransactionResponse(transactionResponse);
+                    public void onTransactionResponse(
+                            TransactionException transactionException,
+                            TransactionResponse transactionResponse) {
+                        callback.onTransactionResponse(transactionException, transactionResponse);
                     }
                 });
     }
 
-    public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request) {
+    public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request)
+            throws TransactionException {
         return driver.sendTransaction(request, chooseConnection());
     }
 
@@ -87,8 +97,10 @@ public class Resource {
                 chooseConnection(),
                 new Driver.Callback() {
                     @Override
-                    public void onTransactionResponse(TransactionResponse transactionResponse) {
-                        callback.onTransactionResponse(transactionResponse);
+                    public void onTransactionResponse(
+                            TransactionException transactionException,
+                            TransactionResponse transactionResponse) {
+                        callback.onTransactionResponse(transactionException, transactionResponse);
                     }
                 });
     }
@@ -120,11 +132,12 @@ public class Resource {
                 });
 
         try {
-            return completableFuture.get();
+            return completableFuture.get(10, TimeUnit.SECONDS);
         } catch (Exception e) {
             Response response = new Response();
             response.setErrorCode(StubQueryStatus.TIMEOUT);
             response.setErrorMessage("onRemoteTransaction completableFuture exception: " + e);
+            logger.error("onRemoteTransaction timeout, resource: " + getResourceInfo());
             return response;
         }
     }

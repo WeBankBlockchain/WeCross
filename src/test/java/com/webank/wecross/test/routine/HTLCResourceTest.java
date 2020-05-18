@@ -19,7 +19,7 @@ import org.mockito.Mockito;
 
 public class HTLCResourceTest {
     @Test
-    public void sendTransaction() {
+    public void sendTransaction() throws Exception {
         TransactionRequest transactionRequest =
                 new TransactionRequest("unlock", new String[] {"h", "s", "tx", "100"});
         TransactionContext<TransactionRequest> request =

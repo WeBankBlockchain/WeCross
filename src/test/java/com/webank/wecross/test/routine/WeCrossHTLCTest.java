@@ -9,6 +9,7 @@ import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.TransactionContext;
+import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.stub.VerifiedTransaction;
@@ -20,7 +21,7 @@ import org.mockito.Mockito;
 public class WeCrossHTLCTest {
 
     @Test
-    public void callTest() throws WeCrossException {
+    public void callTest() throws WeCrossException, TransactionException {
         HTLCResource mockResource = Mockito.mock(HTLCResource.class);
         TransactionResponse response = new TransactionResponse();
         response.setResult(new String[] {"success"});
@@ -33,7 +34,7 @@ public class WeCrossHTLCTest {
     }
 
     @Test
-    public void sendTransactionTest() throws WeCrossException {
+    public void sendTransactionTest() throws WeCrossException, TransactionException {
         HTLCResource mockResource = Mockito.mock(HTLCResource.class);
         TransactionResponse response = new TransactionResponse();
         response.setResult(new String[] {"success"});
@@ -47,7 +48,7 @@ public class WeCrossHTLCTest {
     }
 
     @Test
-    public void lockTest() throws WeCrossException {
+    public void lockTest() throws WeCrossException, TransactionException {
         HTLCResource mockResource = Mockito.mock(HTLCResource.class);
         TransactionResponse response = new TransactionResponse();
         response.setErrorCode(0);
@@ -61,7 +62,7 @@ public class WeCrossHTLCTest {
     }
 
     @Test
-    public void lockWithVerifyTest() throws WeCrossException {
+    public void lockWithVerifyTest() throws WeCrossException, TransactionException {
         HTLCResource mockResource = Mockito.mock(HTLCResource.class);
         TransactionResponse response = new TransactionResponse();
         response.setErrorCode(0);
@@ -92,7 +93,7 @@ public class WeCrossHTLCTest {
     }
 
     @Test
-    public void unlockTest() throws WeCrossException {
+    public void unlockTest() throws WeCrossException, TransactionException {
         HTLCResource mockResource = Mockito.mock(HTLCResource.class);
         TransactionResponse response = new TransactionResponse();
         response.setErrorCode(0);
@@ -105,7 +106,7 @@ public class WeCrossHTLCTest {
     }
 
     @Test
-    public void unlockWithVerifyTest() throws WeCrossException {
+    public void unlockWithVerifyTest() throws WeCrossException, TransactionException {
         HTLCResource mockResource = Mockito.mock(HTLCResource.class);
         TransactionResponse response = new TransactionResponse();
         response.setErrorCode(0);
@@ -136,7 +137,7 @@ public class WeCrossHTLCTest {
     }
 
     @Test
-    public void getCounterpartyHtlcTest() throws WeCrossException {
+    public void getCounterpartyHtlcTest() throws WeCrossException, TransactionException {
         Resource mockResource = Mockito.mock(Resource.class);
         TransactionResponse response = new TransactionResponse();
         response.setErrorCode(0);
@@ -167,7 +168,7 @@ public class WeCrossHTLCTest {
     }
 
     @Test
-    public void getNewContractTxInfoTest() {
+    public void getNewContractTxInfoTest() throws TransactionException {
         HTLCResource mockResource = Mockito.mock(HTLCResource.class);
         TransactionResponse response = new TransactionResponse();
         response.setResult(new String[] {"null"});
@@ -184,7 +185,7 @@ public class WeCrossHTLCTest {
     }
 
     @Test
-    public void getLockTxInfoTest() throws WeCrossException {
+    public void getLockTxInfoTest() throws WeCrossException, TransactionException {
         HTLCResource mockResource = Mockito.mock(HTLCResource.class);
         TransactionResponse response = new TransactionResponse();
         response.setResult(new String[] {"0x 100"});
@@ -197,7 +198,7 @@ public class WeCrossHTLCTest {
     }
 
     @Test
-    public void htlcCallTest() throws WeCrossException {
+    public void htlcCallTest() throws WeCrossException, TransactionException {
         HTLCResource mockResource = Mockito.mock(HTLCResource.class);
         TransactionResponse response = new TransactionResponse();
         response.setResult(new String[] {"0"});
@@ -235,7 +236,7 @@ public class WeCrossHTLCTest {
     }
 
     @Test
-    public void htlcSendTransactionTest() throws WeCrossException {
+    public void htlcSendTransactionTest() throws WeCrossException, TransactionException {
         HTLCResource mockResource = Mockito.mock(HTLCResource.class);
         TransactionResponse response = new TransactionResponse();
         response.setResult(new String[] {"success"});

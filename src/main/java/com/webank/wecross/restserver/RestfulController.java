@@ -19,6 +19,7 @@ import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.stub.TransactionContext;
+import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
@@ -311,6 +312,10 @@ public class RestfulController {
                         break;
                     }
             }
+        } catch (TransactionException e) {
+            logger.warn("TransactionException error", e);
+            restResponse.setErrorCode(NetworkQueryStatus.TRANSACTION_ERROR + e.getErrorCode());
+            restResponse.setMessage(e.getMessage());
         } catch (WeCrossException e) {
             logger.warn("Process request error", e);
             restResponse.setErrorCode(NetworkQueryStatus.EXCEPTION_FLAG + e.getErrorCode());
