@@ -1,6 +1,5 @@
 package com.webank.wecross.routine.htlc;
 
-import com.webank.wecross.exception.TransactionException;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.host.WeCrossHost;
@@ -17,6 +16,7 @@ import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.TransactionContext;
+import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import org.slf4j.Logger;

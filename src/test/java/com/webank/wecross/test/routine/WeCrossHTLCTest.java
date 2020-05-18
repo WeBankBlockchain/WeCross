@@ -1,6 +1,5 @@
 package com.webank.wecross.test.routine;
 
-import com.webank.wecross.exception.TransactionException;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.htlc.HTLCErrorCode;
@@ -10,6 +9,7 @@ import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.TransactionContext;
+import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.stub.VerifiedTransaction;

@@ -1,6 +1,5 @@
 package com.webank.wecross.resource;
 
-import com.webank.wecross.exception.TransactionException;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
@@ -9,6 +8,7 @@ import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.StubQueryStatus;
 import com.webank.wecross.stub.TransactionContext;
+import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import java.security.SecureRandom;

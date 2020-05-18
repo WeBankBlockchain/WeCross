@@ -1,7 +1,5 @@
 package com.webank.wecross.stub;
 
-import com.webank.wecross.exception.TransactionException;
-
 public interface Driver {
     interface Callback {
         void onTransactionResponse(
