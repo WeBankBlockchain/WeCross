@@ -2,6 +2,7 @@
 
 set -e
 ROOT=$(pwd)/demo/
+PLUGIN_BRANCH=master
 
 LOG_INFO()
 {
@@ -113,8 +114,9 @@ prepare_wecross()
 {
     ./gradlew assemble
     cd dist
-    bash download_plugin.sh BCOS2 dev
-    bash download_plugin.sh Fabric1 dev
+    LOG_INFO "Download plugin from branch: ${PLUGIN_BRANCH}"
+    bash download_plugin.sh BCOS2 ${PLUGIN_BRANCH}
+    bash download_plugin.sh Fabric1 ${PLUGIN_BRANCH}
     cd -
 
     mv dist demo/WeCross
@@ -127,5 +129,13 @@ main()
     demo_test
     htlc_test
 }
+
+if [ -n "${TRAVIS_BRANCH}" ]; then
+    PLUGIN_BRANCH=${TRAVIS_BRANCH}
+fi
+
+if [ -n "${1}" ]; then
+    PLUGIN_BRANCH=${1}
+fi
 
 main
