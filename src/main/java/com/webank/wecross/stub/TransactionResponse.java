@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TransactionResponse {
-    private Integer errorCode;
-    private String errorMessage;
-    private String hash;
+    private Integer errorCode = new Integer(0);
+    private String errorMessage = new String();
+    private String hash = new String();
     private List<String> extraHashes;
     private long blockNumber;
     private String[] result;
