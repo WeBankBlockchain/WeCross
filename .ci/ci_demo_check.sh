@@ -113,8 +113,8 @@ prepare_wecross()
 {
     ./gradlew assemble
     cd dist
-    bash download_plugin.sh BCOS2 master
-    bash download_plugin.sh Fabric1 master
+    bash download_plugin.sh BCOS2 dev
+    bash download_plugin.sh Fabric1 dev
     cd -
 
     mv dist demo/WeCross
