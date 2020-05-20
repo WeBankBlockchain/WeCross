@@ -19,4 +19,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           msg: "$(cat bcos_local_call.txt)"
-          check_for_duplicate_msg: false  # OPTIONAL
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish Performance
+        uses: unsplash/comment-on-pr@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: "hello\n world!"
+
