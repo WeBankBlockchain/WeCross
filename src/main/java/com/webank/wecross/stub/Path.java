@@ -21,6 +21,20 @@ public class Path {
         return obj;
     }
 
+    /**
+     * @param uri
+     * @return
+     */
+    public static Path fromURI(String uri) {
+        String[] sp = uri.split("/");
+        Path obj = new Path();
+        obj.setNetwork(sp[0]);
+        obj.setChain(sp[1]);
+        obj.setResource(sp[2]);
+
+        return obj;
+    }
+
     public String getNetwork() {
         return network;
     }

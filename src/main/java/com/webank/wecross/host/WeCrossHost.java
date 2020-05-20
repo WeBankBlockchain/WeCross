@@ -3,6 +3,7 @@ package com.webank.wecross.host;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.network.NetworkMessage;
 import com.webank.wecross.network.p2p.P2PService;
+import com.webank.wecross.network.rpc.RPCService;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.peer.PeerSeqMessageData;
@@ -27,6 +28,7 @@ public class WeCrossHost {
     private AccountManager accountManager;
     private RoutineManager routineManager;
     private P2PService p2PService;
+    private RPCService rpcService;
 
     Thread mainLoopThread;
 
@@ -38,6 +40,10 @@ public class WeCrossHost {
             /** start netty p2p service */
             System.out.println("Start netty p2p service");
             p2PService.start();
+            /** start netty RPC service */
+            System.out.println("Start netty rpc service");
+            rpcService.getRpcBootstrap().getUriHandlerDispatcher().initialize(this);
+            rpcService.start();
 
             // start main loop
             mainLoopThread =
@@ -84,6 +90,9 @@ public class WeCrossHost {
         }
         if (p2PService == null) {
             throw new Exception("p2pService is null");
+        }
+        if (rpcService == null) {
+            throw new Exception("rpcService is null");
         }
         if (accountManager == null) {
             throw new Exception("accountManager is null");
@@ -207,5 +216,13 @@ public class WeCrossHost {
 
     public void setP2PService(P2PService p2PService) {
         this.p2PService = p2PService;
+    }
+
+    public RPCService getRpcService() {
+        return rpcService;
+    }
+
+    public void setRpcService(RPCService rpcService) {
+        this.rpcService = rpcService;
     }
 }
