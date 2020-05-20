@@ -170,8 +170,8 @@ gen_one_report()
     local report=${1}
     local name=${2}
 
-    echo "## ${name}" > ${report}
-    cat ${name} > ${report}
+    echo "## ${name}" >> ${report}
+    cat ${name} >> ${report}
 }
 
 gen_performance_report()
