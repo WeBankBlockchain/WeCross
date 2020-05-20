@@ -165,10 +165,43 @@ EOF
     cd -
 }
 
+gen_one_report()
+{
+    local report=${1}
+    local name=${2}
+
+    echo "## ${name}" > ${report}
+    cat ${name} > ${report}
+}
+
+gen_performance_report()
+{
+    local report=${ROOT}/performance.md
+
+    echo "# Performance Report" > ${report}
+
+    gen_one_report bcos_local_call.txt ${report}
+
+    gen_one_report bcos_local_sendtx.txt ${report}
+
+    gen_one_report bcos_remote_call.txt ${report}
+
+    gen_one_report bcos_remote_sendtx.txt ${report}
+
+    gen_one_report fabric_local_call.txt ${report}
+
+    gen_one_report fabric_local_sendtx.txt ${report}
+
+    gen_one_report fabric_remote_call.txt ${report}
+
+    gen_one_report fabric_remote_sendtx.txt ${report}
+}
+
 performance_test()
 {
     performance_test_8250
     performance_test_8251
+    gen_performance_report
 }
 
 main()
