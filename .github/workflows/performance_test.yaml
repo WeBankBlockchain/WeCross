@@ -13,10 +13,10 @@ jobs:
       - name: Run test
         run: bash .ci/ci_performance_test.sh
       - uses: harupy/comment-on-pr@master
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            filename: demo/performance.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          filename: demo/performance.md
 
 
 
