@@ -1,0 +1,22 @@
+name: Performance test
+on: pull_request
+jobs:
+  build:
+    name: Performance test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Run test
+        run: bash .ci/ci_performance_test.sh
+
+      - name: Publish Performance
+        uses: unsplash/comment-on-pr@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: "$(cat bcos_local_call.txt)"
+          check_for_duplicate_msg: false  # OPTIONAL

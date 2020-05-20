@@ -16,12 +16,6 @@ LOG_ERROR()
     echo -e "\033[31m[ERROR] ${content}\033[0m"
 }
 
-pr_comment()
-{
-    local content=${1}
-    curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST -d "{\"body\": \"${content}\"}" "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
-}
-
 check_log()
 {
     cd ${ROOT}
@@ -39,6 +33,16 @@ check_log()
         cat ${error_log}
         LOG_ERROR "Error log is ${error_log}"
         exit 1
+    fi
+}
+
+sed_i()
+{
+    if [ "$(uname)" == "Darwin" ]; then
+    # Mac
+        sed -i "" $@
+    else
+        sed -i $@
     fi
 }
 
@@ -102,23 +106,69 @@ update_wecross_sdk()
 }
 
 
-performance_test_bcos_local()
+performance_test_8250()
 {
     cd ${ROOT}/WeCross-Console/
+    cat conf/application.toml
+
     java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.BCOS.BCOSPerformanceTest bcos_user1 call 1000 500 1000 > bcos_local_call.txt
     cat bcos_local_call.txt
-    pr_comment "$(cat bcos_local_call.txt)"
 
     java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.BCOS.BCOSPerformanceTest bcos_user1 sendTransaction 1000 500 1000 > bcos_local_sendtx.txt
     cat bcos_local_sendtx.txt
-    pr_comment "$(cat bcos_local_sendtx.txt)"
 
+    java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.Fabric.FabricPerformanceTest fabric_user1 call 1000 500 1000 > fabric_remote_call.txt
+    cat fabric_remote_call.txt
+
+    java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.Fabric.FabricPerformanceTest fabric_user1 sendTransaction 1000 500 1000 > fabric_remote_sendtx.txt
+    cat fabric_remote_sendtx.txt
 }
 
+performance_test_8251()
+{
+    cd ${ROOT}/WeCross-Console/
+    sed_i "s/8250/8251/g" conf/application.toml
+    cat conf/application.toml
+
+    java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.BCOS.BCOSPerformanceTest bcos_user1 call 1000 500 1000 > bcos_remote_call.txt
+    cat bcos_remote_call.txt
+
+    java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.BCOS.BCOSPerformanceTest bcos_user1 sendTransaction 1000 500 1000 > bcos_remote_sendtx.txt
+    cat bcos_remote_sendtx.txt
+
+    java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.Fabric.FabricPerformanceTest fabric_user1 call 1000 500 1000 > fabric_local_call.txt
+    cat fabric_local_call.txt
+
+    java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.Fabric.FabricPerformanceTest fabric_user1 sendTransaction 1000 500 1000 > fabric_local_sendtx.txt
+    cat fabric_local_sendtx.txt
+}
+
+prepare_performance_test()
+{
+    local fabric_router_dir=${ROOT}/routers-payment/127.0.0.1-8251-25501/
+
+    bash ${ROOT}/fabric/deploy_sacc.sh
+
+    cd ${fabric_router_dir}
+    bash stop.sh
+    cat >>conf/chains/fabric/stub.toml<<EOF
+
+[[resources]]
+    # name cannot be repeated
+    name = 'abac'
+    type = 'FABRIC_CONTRACT'
+    chainCodeName = 'mycc'
+    chainLanguage = 'go'
+    peers=['org1','org2']
+EOF
+    bash start.sh
+    cd -
+}
 
 performance_test()
 {
-    performance_test_bcos_local
+    performance_test_8250
+    performance_test_8251
 }
 
 main()
@@ -127,6 +177,7 @@ main()
     prepare_demo
     demo_test
     update_wecross_sdk
+    prepare_performance_test
     performance_test
 }
 
