@@ -142,8 +142,9 @@ download_release_pkg()
     fi
 
     # download 
-    if [ ! -f "${release_pkg}" ] || [ "$(md5sum -c ${release_pkg_checksum_file}|echo $?)" -ne "0" ];then
-
+    if [ -f "${release_pkg}" ] && [ "$(md5sum -c ${release_pkg_checksum_file}|echo $?)" -eq "0" ];then
+        LOG_INFO "Latest release ${release_pkg} exists."
+    else
         LOG_INFO "Try to download from: ${cdn_url}/${compatibility_version}/${release_pkg}"
         if ! curl --fail -LO ${cdn_url}/${compatibility_version}/${release_pkg}; then
             # If CDN failed, download from github release
@@ -156,9 +157,6 @@ download_release_pkg()
             rm -f ${release_pkg}
             exit 1
         fi
-
-    else
-        LOG_INFO "Latest release ${release_pkg} exists."
     fi
 
     tar -zxf ${release_pkg}
