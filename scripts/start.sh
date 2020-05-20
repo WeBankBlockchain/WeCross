@@ -54,7 +54,7 @@ wecross_status()
 
 tail_log()
 {
-    tail -n 50 logs/error.log
+    tail -n 200 logs/error.log
     tail -n 50 start.out
 }
 
