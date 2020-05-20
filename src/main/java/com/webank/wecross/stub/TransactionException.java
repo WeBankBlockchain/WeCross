@@ -5,6 +5,10 @@ public class TransactionException extends java.lang.Exception {
     public static class ErrorCode {
         public static final int SUCCESS = 0;
 
+        public static final int REMOTE_QUERY_FAILED = StubQueryStatus.REMOTE_QUERY_FAILED; // 100
+
+        public static final int TIMEOUT = StubQueryStatus.TIMEOUT; // 200
+
         public static final int INTERNAL_ERROR = 1001;
 
         // BCOS: 2000 - 2999

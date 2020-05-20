@@ -63,7 +63,7 @@ public class HTLCManagerConfig {
                 htlcTaskInfos.put(selfPath, htlcTaskInfo);
             }
         } catch (Exception e) {
-            logger.error("failed to new HTLCManager: {}", e.getMessage());
+            logger.error("failed to new HTLCManager: {}", e);
             System.exit(-1);
         }
 

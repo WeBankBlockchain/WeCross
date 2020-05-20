@@ -26,9 +26,9 @@ deploy_bcos_htlc()
     cd bcos/console
     rm -rf deploylog.txt
     bash start.sh <<EOF
-deploy BACHTLC
+deploy LedgerSampleHTLC
 EOF
-    BCOS_HTLC=$(grep 'BACHTLC' deploylog.txt | awk '{print $5}')
+    BCOS_HTLC=$(grep 'LedgerSampleHTLC' deploylog.txt | awk '{print $5}')
     cd -
 }
 
@@ -36,18 +36,18 @@ init_bcos_asset()
 {
     LOG_INFO "Init BCOS ledger ..."
 
-    # clone bactool
+    # clone ledger-tool
     cd bcos
-    if [ -e bactool.tar.gz ]; then
-        rm -rf bactool
-        tar -zxf bactool.tar.gz
+    if [ -e ledger-tool.tar.gz ]; then
+        rm -rf ledger-tool
+        tar -zxf ledger-tool.tar.gz
     else
-        git clone --depth 1 https://github.com/Shareong/bactool.git
+        git clone --depth 1 https://github.com/Shareong/ledger-tool.git
     fi
 
-    cd bactool
+    cd ledger-tool
     ./gradlew build
-    cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* ${ROOT}/bcos/bactool/dist/conf
+    cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* ${ROOT}/bcos/ledger-tool/dist/conf
     cd dist
     java -cp 'apps/*:lib/*:conf' Application init 100000000 > tmp.txt
     BCOS_LEDGER=$(grep 'assetAddress:' tmp.txt | awk '{print $2}')
@@ -61,7 +61,7 @@ init_bcos_bcos_htlc()
 
     cd bcos/console
     bash start.sh <<EOF
-call BACHTLC ${BCOS_HTLC} init ["${BCOS_LEDGER}","${FABRIC_HTLC}"]
+call LedgerSampleHTLC ${BCOS_HTLC} init ["${BCOS_LEDGER}","${FABRIC_HTLC}"]
 EOF
     cd -
 }
@@ -144,7 +144,7 @@ config_bcos_sender_account()
 {
     LOG_INFO "Config account for BCOS htlc sender ..."
     mkdir routers-payment/127.0.0.1-8250-25500/conf/accounts/bcos_sender
-    cp bcos/bactool/dist/conf/0x55f934bcbe1e9aef8337f5551142a442fdde781c.pem routers-payment/127.0.0.1-8250-25500/conf/accounts/bcos_sender
+    cp bcos/ledger-tool/dist/conf/0x55f934bcbe1e9aef8337f5551142a442fdde781c.pem routers-payment/127.0.0.1-8250-25500/conf/accounts/bcos_sender
     cat << EOF > routers-payment/127.0.0.1-8250-25500/conf/accounts/bcos_sender/account.toml
 [account]
 type = 'BCOS2.0'
