@@ -8,6 +8,7 @@
 [rpc] # rpc ip & port
     address = '127.0.0.1'
     port = 8250
+    sslOn = true
     caCert = 'classpath:ca.crt'
     sslCert = 'classpath:ssl.crt'
     sslKey = 'classpath:ssl.key'

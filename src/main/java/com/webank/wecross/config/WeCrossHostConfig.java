@@ -5,6 +5,7 @@ import com.webank.wecross.common.BCManager;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.network.p2p.P2PProcessor;
 import com.webank.wecross.network.p2p.P2PService;
+import com.webank.wecross.network.rpc.RPCService;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.routine.RoutineManager;
 import com.webank.wecross.zone.ZoneManager;
@@ -31,6 +32,7 @@ public class WeCrossHostConfig {
 
     // Network layer
     @Resource private P2PService p2PService;
+    @Resource private RPCService rpcService;
 
     @Bean
     public WeCrossHost newWeCrossHost() {
@@ -42,6 +44,7 @@ public class WeCrossHostConfig {
         host.setAccountManager(accountManager);
         host.setRoutineManager(routineManager);
         host.setP2PService(p2PService);
+        host.setRpcService(rpcService);
 
         // set the p2p engine here to avoid circular reference
         zoneManager.setP2PService(p2PService);
