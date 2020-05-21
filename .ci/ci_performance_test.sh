@@ -170,8 +170,13 @@ gen_one_report()
     local report=${1}
     local name=${2}
 
-    echo "## ${name}" >> ${report}
-    cat ${name} >> ${report}
+cat >>${report}<<EOF
+## ${name}
+``` log
+$(cat ${name})
+```
+
+EOF
 }
 
 gen_performance_report()
@@ -180,21 +185,21 @@ gen_performance_report()
 
     echo "# Performance Report" > ${report}
 
-    gen_one_report bcos_local_call.txt ${report}
+    gen_one_report ${report} bcos_local_call.txt
 
-    gen_one_report bcos_local_sendtx.txt ${report}
+    gen_one_report ${report} bcos_local_sendtx.txt
 
-    gen_one_report bcos_remote_call.txt ${report}
+    gen_one_report ${report} bcos_remote_call.txt
 
-    gen_one_report bcos_remote_sendtx.txt ${report}
+    gen_one_report ${report} bcos_remote_sendtx.txt
 
-    gen_one_report fabric_local_call.txt ${report}
+    gen_one_report ${report} fabric_local_call.txt
 
-    gen_one_report fabric_local_sendtx.txt ${report}
+    gen_one_report ${report} fabric_local_sendtx.txt
 
-    gen_one_report fabric_remote_call.txt ${report}
+    gen_one_report ${report} fabric_remote_call.txt
 
-    gen_one_report fabric_remote_sendtx.txt ${report}
+    gen_one_report ${report} fabric_remote_sendtx.txt
 }
 
 performance_test()
