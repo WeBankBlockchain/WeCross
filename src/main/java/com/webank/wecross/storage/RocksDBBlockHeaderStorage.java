@@ -1,5 +1,8 @@
 package com.webank.wecross.storage;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.BiConsumer;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.WriteBatch;
@@ -16,6 +19,8 @@ public class RocksDBBlockHeaderStorage implements BlockHeaderStorage {
     private static final String blockKeyPrefix = "block_";
 
     private Logger logger = LoggerFactory.getLogger(RocksDBBlockHeaderStorage.class);
+
+    private Set<BiConsumer<Long, byte[]>> onBlockHeaderCallbacks = new HashSet<>();
 
     @Override
     public long readBlockNumber() {
@@ -73,6 +78,7 @@ public class RocksDBBlockHeaderStorage implements BlockHeaderStorage {
             WriteOptions writeOptions = new WriteOptions();
 
             rocksDB.write(writeOptions, writeBatch);
+            onBlockHeader(blockNumber, blockHeader);
         } catch (RocksDBException e) {
             logger.error("RocksDB write error", e);
         }
@@ -91,5 +97,16 @@ public class RocksDBBlockHeaderStorage implements BlockHeaderStorage {
     public void close() {
         dbClosed = true;
         rocksDB.close();
+    }
+
+    @Override
+    public void registerOnBlockHeader(BiConsumer<Long, byte[]> fn) {
+        onBlockHeaderCallbacks.add(fn);
+    }
+
+    private void onBlockHeader(long blockNumber, byte[] blockHeader) {
+        for (BiConsumer<Long, byte[]> fn : onBlockHeaderCallbacks) {
+            fn.accept(blockNumber, blockHeader);
+        }
     }
 }

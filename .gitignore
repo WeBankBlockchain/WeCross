@@ -56,3 +56,4 @@ src/test/resources/stubs/
 *.truststore
 db/
 routers/
+null/
