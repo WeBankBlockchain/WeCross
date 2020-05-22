@@ -1,9 +1,11 @@
 package com.webank.wecross.restserver;
 
+import com.webank.wecross.common.NetworkQueryStatus;
+
 public class RestResponse<T> {
-    private String version;
-    private Integer errorCode = 0;
-    private String message;
+    private String version = Versions.currentVersion;
+    private Integer errorCode = NetworkQueryStatus.SUCCESS;
+    private String message = NetworkQueryStatus.getStatusMessage(NetworkQueryStatus.SUCCESS);
     private T data;
 
     public String getVersion() {

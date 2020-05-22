@@ -18,8 +18,6 @@ import com.webank.wecross.peer.Peer;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 public class P2PService implements NetworkService {
     private Logger logger = LoggerFactory.getLogger(P2PService.class);
@@ -140,15 +138,15 @@ public class P2PService implements NetworkService {
         if (callback != null) {}
     }
 
-    protected <T> void checkHttpResponse(ResponseEntity<NetworkResponse<T>> response)
-            throws Exception {
-        if (response == null) {
-            throw new Exception("Remote response null");
-        }
-        if (response.getStatusCode() != HttpStatus.OK) {
-            throw new Exception("Method not exists: " + response.toString());
-        }
-    }
+    //    protected <T> void checkHttpResponse(ResponseEntity<NetworkResponse<T>> response)
+    //            throws Exception {
+    //        if (response == null) {
+    //            throw new Exception("Remote response null");
+    //        }
+    //        if (response.getStatusCode() != HttpStatus.OK) {
+    //            throw new Exception("Method not exists: " + response.toString());
+    //        }
+    //    }
 
     protected void checkPeerResponse(NetworkResponse responseMsg) throws Exception {
         if (responseMsg == null) {
