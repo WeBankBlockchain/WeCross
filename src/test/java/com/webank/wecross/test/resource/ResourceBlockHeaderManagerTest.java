@@ -1,6 +1,8 @@
 package com.webank.wecross.test.resource;
 
+import com.webank.wecross.config.ResourceThreadPoolConfig;
 import com.webank.wecross.resource.ResourceBlockHeaderManager;
+import com.webank.wecross.resource.ResourceBlockHeaderManagerFactory;
 import com.webank.wecross.storage.BlockHeaderStorage;
 import com.webank.wecross.storage.RocksDBBlockHeaderStorageFactory;
 import com.webank.wecross.stub.BlockHeaderManager;
@@ -14,14 +16,18 @@ import org.junit.Test;
 public class ResourceBlockHeaderManagerTest {
     @Test
     public void getBlockHeaderTest() {
+        ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
+                new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
+
+        ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
+                new ResourceBlockHeaderManagerFactory(resourceThreadPool);
         RocksDBBlockHeaderStorageFactory rocksDBBlockHeaderStorageFactory =
                 new RocksDBBlockHeaderStorageFactory();
-
-        ResourceBlockHeaderManager blockHeaderManager = new ResourceBlockHeaderManager();
         BlockHeaderStorage blockHeaderStorage =
                 rocksDBBlockHeaderStorageFactory.newBlockHeaderStorage(
                         "unittest" + System.currentTimeMillis());
-        blockHeaderManager.setBlockHeaderStorage(blockHeaderStorage);
+        ResourceBlockHeaderManager blockHeaderManager =
+                resourceBlockHeaderManagerFactory.build(blockHeaderStorage);
 
         // Test timeout
         Assert.assertTrue(blockHeaderManager.getBlockHeader(0) == null);
@@ -35,14 +41,18 @@ public class ResourceBlockHeaderManagerTest {
 
     @Test
     public void asyncGetBlockHeaderTest() throws Exception {
+        ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
+                new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
+
+        ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
+                new ResourceBlockHeaderManagerFactory(resourceThreadPool);
         RocksDBBlockHeaderStorageFactory rocksDBBlockHeaderStorageFactory =
                 new RocksDBBlockHeaderStorageFactory();
-
-        ResourceBlockHeaderManager blockHeaderManager = new ResourceBlockHeaderManager();
         BlockHeaderStorage blockHeaderStorage =
                 rocksDBBlockHeaderStorageFactory.newBlockHeaderStorage(
                         "unittest" + System.currentTimeMillis());
-        blockHeaderManager.setBlockHeaderStorage(blockHeaderStorage);
+        ResourceBlockHeaderManager blockHeaderManager =
+                resourceBlockHeaderManagerFactory.build(blockHeaderStorage);
 
         // Test timeout
         CompletableFuture<byte[]> timeoutFuture = new CompletableFuture<>();

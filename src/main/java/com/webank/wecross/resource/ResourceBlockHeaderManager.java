@@ -42,11 +42,6 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
     private BlockHeaderCache blockHeaderCache = new BlockHeaderCache(-1, null);
 
     public ResourceBlockHeaderManager() {
-        this.threadPool = new ThreadPoolTaskExecutor();
-        this.threadPool.setCorePoolSize(200);
-        this.threadPool.setMaxPoolSize(500);
-        this.threadPool.setQueueCapacity(5000);
-        this.threadPool.initialize();
 
         clearCallbackTimer = new Timer("clearCallbackTimer");
         clearCallbackTimer.schedule(
@@ -165,7 +160,11 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
         return blockHeaderCallbackTasks;
     }
 
-    public void setBlockHeaderCallbackTasks(Queue<Runnable> blockHeaderCallbackTasks) {
+    private void setBlockHeaderCallbackTasks(Queue<Runnable> blockHeaderCallbackTasks) {
         this.blockHeaderCallbackTasks = blockHeaderCallbackTasks;
+    }
+
+    public void setThreadPool(ThreadPoolTaskExecutor threadPool) {
+        this.threadPool = threadPool;
     }
 }

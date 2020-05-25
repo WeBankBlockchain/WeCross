@@ -6,6 +6,7 @@ import com.webank.wecross.peer.Peer;
 import com.webank.wecross.remote.RemoteConnection;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceBlockHeaderManager;
+import com.webank.wecross.resource.ResourceBlockHeaderManagerFactory;
 import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
@@ -28,6 +29,7 @@ public class ZoneManager {
     private ReadWriteLock lock = new ReentrantReadWriteLock();
     private StubManager stubManager;
     BlockHeaderStorageFactory blockHeaderStorageFactory;
+    private ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory;
 
     public Resource getResource(Path path) {
         lock.readLock().lock();
@@ -149,8 +151,7 @@ public class ZoneManager {
                     resource.setDriver(driver);
 
                     ResourceBlockHeaderManager resourceBlockHeaderManager =
-                            new ResourceBlockHeaderManager();
-                    resourceBlockHeaderManager.setBlockHeaderStorage(chain.getBlockHeaderStorage());
+                            resourceBlockHeaderManagerFactory.build(chain.getBlockHeaderStorage());
 
                     resource.setResourceBlockHeaderManager(resourceBlockHeaderManager);
                     resource.setResourceInfo(resourceInfo);
@@ -317,5 +318,14 @@ public class ZoneManager {
 
     public void setBlockHeaderStorageFactory(BlockHeaderStorageFactory blockHeaderStorageFactory) {
         this.blockHeaderStorageFactory = blockHeaderStorageFactory;
+    }
+
+    public ResourceBlockHeaderManagerFactory getResourceBlockHeaderManagerFactory() {
+        return resourceBlockHeaderManagerFactory;
+    }
+
+    public void setResourceBlockHeaderManagerFactory(
+            ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory) {
+        this.resourceBlockHeaderManagerFactory = resourceBlockHeaderManagerFactory;
     }
 }
