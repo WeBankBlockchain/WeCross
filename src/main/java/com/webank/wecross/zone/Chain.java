@@ -30,7 +30,7 @@ public class Chain {
     private BlockHeader localBlockHeader;
 
     private Object mainLoopLock = new Object();
-    private Timer mainLoopTimer;
+    private Timer mainLoopTimer = new Timer();;
     private static long mainLoopInterval = 1000; // ms
 
     public Chain(String name) {
@@ -52,7 +52,6 @@ public class Chain {
             blockSyncThread.start();
             logger.trace("Block header sync thread started");
 
-            mainLoopTimer = new Timer();
             mainLoopTimer.schedule(
                     new TimerTask() {
                         @Override
@@ -81,6 +80,7 @@ public class Chain {
 
     public void mainLoop() {
         try {
+            loadLocalBlockHeader();
             while (running.get()) {
                 try {
                     fetchBlockHeader();
