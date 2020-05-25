@@ -24,8 +24,8 @@
 
 [advanced]
     [resourceThreadPool]
-        corePoolSize = 200
-        maxPoolSize = 200
+        corePoolSize = 8
+        maxPoolSize = 8
         queueCapacity = 5000
 
 

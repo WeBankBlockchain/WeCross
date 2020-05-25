@@ -2,6 +2,7 @@ package com.webank.wecross.resource;
 
 import com.webank.wecross.storage.BlockHeaderStorage;
 import com.webank.wecross.stub.BlockHeaderManager;
+import com.webank.wecross.zone.Chain;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -18,6 +19,7 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
     private static final long callbackTimeout = 5000; // ms
     private Queue<Runnable> blockHeaderCallbackTasks = new ConcurrentLinkedQueue<>();
     private BlockHeaderStorage blockHeaderStorage;
+    private Chain chain;
     private ThreadPoolTaskExecutor threadPool;
     private Timer clearCallbackTimer;
 
@@ -86,6 +88,8 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
 
     @Override
     public void asyncGetBlockHeader(long blockNumber, BlockHeaderCallback callback) {
+        chain.noteBlockHeaderChange();
+
         long timeout = callbackTimeout + System.currentTimeMillis();
         asyncGetBlockHeaderInternal(blockNumber, callback, timeout);
     }
@@ -166,5 +170,9 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
 
     public void setThreadPool(ThreadPoolTaskExecutor threadPool) {
         this.threadPool = threadPool;
+    }
+
+    public void setChain(Chain chain) {
+        this.chain = chain;
     }
 }

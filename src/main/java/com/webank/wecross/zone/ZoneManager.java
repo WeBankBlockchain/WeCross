@@ -151,7 +151,7 @@ public class ZoneManager {
                     resource.setDriver(driver);
 
                     ResourceBlockHeaderManager resourceBlockHeaderManager =
-                            resourceBlockHeaderManagerFactory.build(chain.getBlockHeaderStorage());
+                            resourceBlockHeaderManagerFactory.build(chain);
 
                     resource.setResourceBlockHeaderManager(resourceBlockHeaderManager);
                     resource.setResourceInfo(resourceInfo);

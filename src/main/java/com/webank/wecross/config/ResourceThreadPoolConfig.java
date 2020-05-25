@@ -34,14 +34,14 @@ public class ResourceThreadPoolConfig {
     public ResourceThreadPool newResourceThreadPool() {
         Long corePoolSize = toml.getLong("advance.resourceThreadPool.corePoolSize");
         if (corePoolSize == null) {
-            logger.debug("[advance.resourceThreadPool.corePoolSize] not set, use default: " + 200);
-            corePoolSize = new Long(200);
+            logger.debug("[advance.resourceThreadPool.corePoolSize] not set, use default: " + 8);
+            corePoolSize = new Long(8);
         }
 
         Long maxPoolSize = toml.getLong("advance.resourceThreadPool.maxPoolSize");
         if (maxPoolSize == null) {
-            logger.debug("[advance.resourceThreadPool.maxPoolSize] not set, use default: " + 200);
-            maxPoolSize = new Long(200);
+            logger.debug("[advance.resourceThreadPool.maxPoolSize] not set, use default: " + 8);
+            maxPoolSize = new Long(8);
         }
 
         Long queueCapacity = toml.getLong("advance.resourceThreadPool.queueCapacity");

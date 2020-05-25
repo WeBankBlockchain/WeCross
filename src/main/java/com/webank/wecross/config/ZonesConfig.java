@@ -144,7 +144,7 @@ public class ZonesConfig {
                 resource.setResourceInfo(resourceInfo);
 
                 ResourceBlockHeaderManager resourceBlockHeaderManager =
-                        resourceBlockHeaderManagerFactory.build(chain.getBlockHeaderStorage());
+                        resourceBlockHeaderManagerFactory.build(chain);
                 resource.setResourceBlockHeaderManager(resourceBlockHeaderManager);
 
                 chain.getResources().put(resourceInfo.getName(), resource);

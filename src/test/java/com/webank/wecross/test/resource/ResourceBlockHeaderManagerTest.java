@@ -6,6 +6,7 @@ import com.webank.wecross.resource.ResourceBlockHeaderManagerFactory;
 import com.webank.wecross.storage.BlockHeaderStorage;
 import com.webank.wecross.storage.RocksDBBlockHeaderStorageFactory;
 import com.webank.wecross.stub.BlockHeaderManager;
+import com.webank.wecross.zone.Chain;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,8 +27,10 @@ public class ResourceBlockHeaderManagerTest {
         BlockHeaderStorage blockHeaderStorage =
                 rocksDBBlockHeaderStorageFactory.newBlockHeaderStorage(
                         "unittest" + System.currentTimeMillis());
+        Chain chain = new Chain("Mock chain");
+        chain.setBlockHeaderStorage(blockHeaderStorage);
         ResourceBlockHeaderManager blockHeaderManager =
-                resourceBlockHeaderManagerFactory.build(blockHeaderStorage);
+                resourceBlockHeaderManagerFactory.build(chain);
 
         // Test timeout
         Assert.assertTrue(blockHeaderManager.getBlockHeader(0) == null);
@@ -51,8 +54,10 @@ public class ResourceBlockHeaderManagerTest {
         BlockHeaderStorage blockHeaderStorage =
                 rocksDBBlockHeaderStorageFactory.newBlockHeaderStorage(
                         "unittest" + System.currentTimeMillis());
+        Chain chain = new Chain("Mock chain");
+        chain.setBlockHeaderStorage(blockHeaderStorage);
         ResourceBlockHeaderManager blockHeaderManager =
-                resourceBlockHeaderManagerFactory.build(blockHeaderStorage);
+                resourceBlockHeaderManagerFactory.build(chain);
 
         // Test timeout
         CompletableFuture<byte[]> timeoutFuture = new CompletableFuture<>();
