@@ -178,13 +178,13 @@ public class ConfigReaderConfig {
             throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
         }
 
-        Integer sslSwitch = (Integer) rpcMap.get("sslSwitch");
+        Long sslSwitch = (Long) rpcMap.get("sslSwitch");
         if (sslSwitch == null) {
-            sslSwitch = RPCConfig.SSLSwitch.SSL_ON_CLIENT_AUTH.getSwh();
+            sslSwitch = Long.valueOf(RPCConfig.SSLSwitch.SSL_ON_CLIENT_AUTH.getSwh());
         }
 
         if (sslSwitch.intValue() == RPCConfig.SSLSwitch.SSL_OFF.getSwh()) {
-            rpcConfig.setSslSwitch(sslSwitch);
+            rpcConfig.setSslSwitch(sslSwitch.intValue());
             rpcConfig.setListenIP(listenIP);
             rpcConfig.setListenPort(listenPort);
             logger.info(" ssl switch close, RPC config: {}", rpcConfig);
@@ -227,7 +227,7 @@ public class ConfigReaderConfig {
         rpcConfig.setSslCert(resolver.getResource(sslCertPath));
         rpcConfig.setSslKey(resolver.getResource(sslKeyPath));
         rpcConfig.setListenIP(listenIP);
-        rpcConfig.setSslSwitch(sslSwitch);
+        rpcConfig.setSslSwitch(sslSwitch.intValue());
         rpcConfig.setListenPort(listenPort);
 
         logger.info(" RPC config: {}", rpcConfig);
