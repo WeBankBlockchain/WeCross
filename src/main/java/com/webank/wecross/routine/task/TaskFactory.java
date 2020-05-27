@@ -1,7 +1,11 @@
 package com.webank.wecross.routine.task;
 
-import java.util.List;
-
 public interface TaskFactory {
-    List<Task> load(Object... args);
+    /**
+     * load tasks for quartz scheduler
+     *
+     * @param contexts context for each task
+     * @return task list
+     */
+    Task[] load(Object[] contexts);
 }
