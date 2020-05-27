@@ -68,17 +68,21 @@ public class RPCBootstrap {
     public SslContext initSslContextForServer(
             org.springframework.core.io.Resource caCrt,
             org.springframework.core.io.Resource nodeCrt,
-            org.springframework.core.io.Resource nodeKey)
+            org.springframework.core.io.Resource nodeKey,
+            int sslSwitch)
             throws IOException {
 
-        SslContext sslCtx =
+        SslContextBuilder sslContextBuilder =
                 SslContextBuilder.forServer(nodeCrt.getInputStream(), nodeKey.getInputStream())
                         .trustManager(caCrt.getInputStream())
-                        .sslProvider(SslProvider.JDK)
-                        .clientAuth(ClientAuth.REQUIRE)
-                        .build();
+                        .sslProvider(SslProvider.JDK);
 
-        return sslCtx;
+        if (sslSwitch == RPCConfig.SSLSwitch.SSL_ON_CLIENT_AUTH.getSwh()) {
+            logger.info(" clientAuth ");
+            sslContextBuilder.clientAuth(ClientAuth.REQUIRE);
+        }
+
+        return sslContextBuilder.build();
     }
 
     /**
@@ -104,10 +108,13 @@ public class RPCBootstrap {
 
         /** Configure to use SSL, construct SslContext. */
         SslContext sslCtx =
-                config.isSslOn()
-                        ? initSslContextForServer(
-                                config.getCaCert(), config.getSslCert(), config.getSslKey())
-                        : null;
+                config.getSslSwitch() == RPCConfig.SSLSwitch.SSL_OFF.getSwh()
+                        ? null
+                        : initSslContextForServer(
+                                config.getCaCert(),
+                                config.getSslCert(),
+                                config.getSslKey(),
+                                config.getSslSwitch());
 
         serverBootstrap
                 .group(bossGroup, workerGroup)
