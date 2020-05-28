@@ -4,9 +4,28 @@ import org.springframework.core.io.Resource;
 
 public class RPCConfig {
 
+    public enum SSLSwitch {
+        SSL_OFF(2),
+        SSL_ON(1),
+        SSL_ON_CLIENT_AUTH(0);
+        private int swh;
+
+        SSLSwitch(int swh) {
+            this.swh = swh;
+        }
+
+        public int getSwh() {
+            return swh;
+        }
+
+        public void setSwh(int swh) {
+            this.swh = swh;
+        }
+    }
+
     private String listenIP;
     private int listenPort;
-    private boolean sslOn;
+    private int sslSwitch = SSLSwitch.SSL_ON_CLIENT_AUTH.getSwh();
 
     private Resource caCert;
     private Resource sslCert;
@@ -52,12 +71,12 @@ public class RPCConfig {
         this.listenPort = listenPort;
     }
 
-    public boolean isSslOn() {
-        return sslOn;
+    public int getSslSwitch() {
+        return sslSwitch;
     }
 
-    public void setSslOn(boolean sslOn) {
-        this.sslOn = sslOn;
+    public void setSslSwitch(int sslSwitch) {
+        this.sslSwitch = sslSwitch;
     }
 
     @Override
@@ -68,8 +87,8 @@ public class RPCConfig {
                 + '\''
                 + ", listenPort="
                 + listenPort
-                + ", sslOn="
-                + sslOn
+                + ", sslSwitch="
+                + sslSwitch
                 + ", caCert="
                 + caCert
                 + ", sslCert="
