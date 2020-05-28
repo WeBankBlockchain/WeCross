@@ -16,7 +16,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 public class ResourceBlockHeaderManager implements BlockHeaderManager {
     private Logger logger = LoggerFactory.getLogger(ResourceBlockHeaderManager.class);
-    private static final long callbackTimeout = 5000; // ms
+    private static final long callbackTimeout = 20000; // ms
     private Queue<Runnable> blockHeaderCallbackTasks = new ConcurrentLinkedQueue<>();
     private BlockHeaderStorage blockHeaderStorage;
     private Chain chain;
