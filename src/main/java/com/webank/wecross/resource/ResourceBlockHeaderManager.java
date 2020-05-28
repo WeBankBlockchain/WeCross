@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 public class ResourceBlockHeaderManager implements BlockHeaderManager {
@@ -138,10 +139,26 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
 
     private void runBlockHeaderCallbackTasks() {
         Queue<Runnable> tasks = getBlockHeaderCallbackTasks();
-        setBlockHeaderCallbackTasks(new ConcurrentLinkedQueue<>());
 
+        ConcurrentLinkedQueue<Runnable> concurrentLinkedQueue = new ConcurrentLinkedQueue<>();
+        setBlockHeaderCallbackTasks(concurrentLinkedQueue);
+
+        boolean writeBack = false;
         for (Runnable task : tasks) {
-            threadPool.execute(task);
+            if (writeBack) {
+                concurrentLinkedQueue.add(task);
+                if (logger.isDebugEnabled()) {
+                    logger.debug(" write task back to queue, task: {}", task);
+                }
+            } else {
+                try {
+                    threadPool.execute(task);
+                } catch (TaskRejectedException e) {
+                    logger.warn(" TaskRejectedException: {}", e);
+                    concurrentLinkedQueue.add(task);
+                    writeBack = true;
+                }
+            }
         }
     }
 
