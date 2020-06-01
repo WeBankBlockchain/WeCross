@@ -54,8 +54,8 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
                         clearTimeoutCallback();
                     }
                 },
-                callbackTimeout,
-                callbackTimeout);
+                callbackTimeout / 10,
+                callbackTimeout / 10);
     }
 
     @Override
@@ -97,6 +97,7 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
 
     private void asyncGetBlockHeaderInternal(
             long blockNumber, BlockHeaderCallback callback, long timeout) {
+
         BlockHeaderCache cache = this.blockHeaderCache;
         if (cache.getBlockNumber() == blockNumber) {
             callback.onBlockHeader(cache.blockHeader);
@@ -108,14 +109,26 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
         } else {
             // async request
             synchronized (this) {
-                getBlockHeaderCallbackTasks()
-                        .add(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        asyncGetBlockHeaderInternal(blockNumber, callback, timeout);
-                                    }
-                                });
+                // Try again in blocking area
+                BlockHeaderCache cacheNow = this.blockHeaderCache;
+                if (cacheNow.getBlockNumber() == blockNumber) {
+                    callback.onBlockHeader(cacheNow.blockHeader);
+                } else if (cacheNow.getBlockNumber() > blockNumber) {
+                    callback.onBlockHeader(this.blockHeaderStorage.readBlockHeader(blockNumber));
+                } else if (System.currentTimeMillis() > timeout) {
+                    logger.warn("asyncGetBlockHeader timeout, number:" + blockNumber);
+                    callback.onBlockHeader(null);
+                } else {
+                    getBlockHeaderCallbackTasks()
+                            .add(
+                                    new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            asyncGetBlockHeaderInternal(
+                                                    blockNumber, callback, timeout);
+                                        }
+                                    });
+                }
             }
         }
     }
