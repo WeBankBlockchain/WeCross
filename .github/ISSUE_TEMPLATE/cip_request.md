@@ -8,36 +8,35 @@ assignees: ''
 ---
 
 
-**背景**
-方案的背景和现状。
+**Description**
+Description of the CIP's current status and background.
 
-**待解决的问题**
-方案预计能解决的问题。
+**Problems to be solve**
+Problems that the CIP is expected to solve.
 
-**使用场景**
-方案适合哪些应用场景，如支付场景、供应链场景、开发部署场景等。
+**Scenario**
+Which scenario are suitable for the CIP, e.g payment, supply chian, development ...
 
-**功能列表**
-方案变更/新增了哪些功能。
+**Features**
+Features need to be changed/added of the CIP.
 
-**模块架构(可选)**
-如果方案的改动涉及一个、多个模块的修改，或是涉及新增模块，在此描述模块的变更和提供模块架构图。
+**Architecture(Optional)**
+If the CIP involves modification of the modules, describe the modules that needs to be changed/added, and provide architecture diagram.
 
-**协议和接口设计(可选)**
-如果方案涉及网络模块的修改，描述需要变更/新增的协议、和协议格式。
+**Network protocol(Optional)**
+If the CIP involves modification of the network module, describe the network protocol that needs to be changed/added.
 
-**数据结构(可选)**
-如果方案涉及存储模块的修改，描述需要变更/新增的存储结构、和新的存储格式。
+**Storage structure(Optional)**
+If the CIP involves modification of the storage module, describe the storage structure that needs to be changed/added.
 
-**时序图(可选)**
-如果方案涉及已有流程的修改，描述需要变更/新增的流程。
+**Process flow diagram(Optional)**
+If the CIP involves modification of an existing process flow, describe the process flow that needs to be changed/added.
 
-**兼容性**
-如果方案变更了已有的接口、数据结构或流程，描述与旧版本的兼容情况。
+**Compatibility**
+If the CIP changes the existing interface, data structure or process flow, describe the compatibility with the old version.
 
-**安全分析**
-描述方案可能涉及的账户、资金和用户信息等安全措施的处理。
+**Security**
+Describe the security measures, consider scenarios such as accounts, funds, or user information.
 
-**版权声明**
-描述方案是否有来自第三方的版权信息。
-
+**Copyright**
+Describe whether the CIP has copyright information from third parties.
