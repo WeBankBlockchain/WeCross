@@ -21,7 +21,7 @@ Which scenario are suitable for the CIP, e.g payment, supply chian, development 
 Features need to be changed/added of the CIP.
 
 **Architecture(Optional)**
-If the CIP involves modification of the modules, describe the modules that needs to be changed/added, and provide architecture diagram.
+If the CIP involves modification of any modules, describe the modules that needs to be changed/added, and provide architecture diagram.
 
 **Network protocol(Optional)**
 If the CIP involves modification of the network module, describe the network protocol that needs to be changed/added.
