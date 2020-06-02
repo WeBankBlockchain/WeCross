@@ -98,27 +98,11 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
     private void asyncGetBlockHeaderInternal(
             long blockNumber, BlockHeaderCallback callback, long timeout) {
 
-        BlockHeaderCache cache = this.blockHeaderCache;
-        if (cache.getBlockNumber() == blockNumber) {
-            callback.onBlockHeader(cache.blockHeader);
-        } else if (cache.getBlockNumber() > blockNumber) {
-            callback.onBlockHeader(this.blockHeaderStorage.readBlockHeader(blockNumber));
-        } else if (System.currentTimeMillis() > timeout) {
-            logger.warn("asyncGetBlockHeader timeout, number:" + blockNumber);
-            callback.onBlockHeader(null);
-        } else {
+        if (!tryGetBlockHeader(blockNumber, callback, timeout)) {
             // async request
             synchronized (this) {
                 // Try again in blocking area
-                BlockHeaderCache cacheNow = this.blockHeaderCache;
-                if (cacheNow.getBlockNumber() == blockNumber) {
-                    callback.onBlockHeader(cacheNow.blockHeader);
-                } else if (cacheNow.getBlockNumber() > blockNumber) {
-                    callback.onBlockHeader(this.blockHeaderStorage.readBlockHeader(blockNumber));
-                } else if (System.currentTimeMillis() > timeout) {
-                    logger.warn("asyncGetBlockHeader timeout, number:" + blockNumber);
-                    callback.onBlockHeader(null);
-                } else {
+                if (!tryGetBlockHeader(blockNumber, callback, timeout)) {
                     getBlockHeaderCallbackTasks()
                             .add(
                                     new Runnable() {
@@ -130,6 +114,35 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
                                     });
                 }
             }
+        }
+    }
+
+    // return callback has called
+    private boolean tryGetBlockHeader(
+            long blockNumber, BlockHeaderCallback callback, long timeout) {
+        BlockHeaderCache cache = this.blockHeaderCache;
+        if (cache.getBlockNumber() < 0) {
+            // Cache has not been initialized
+            byte[] blockHeader = this.blockHeaderStorage.readBlockHeader(blockNumber);
+            if (blockHeader != null) {
+                onBlockHeader(blockNumber, blockHeader);
+                callback.onBlockHeader(blockHeader);
+                return true;
+            }
+        } else if (cache.getBlockNumber() == blockNumber) {
+            callback.onBlockHeader(cache.blockHeader);
+            return true;
+        } else if (cache.getBlockNumber() > blockNumber) {
+            callback.onBlockHeader(this.blockHeaderStorage.readBlockHeader(blockNumber));
+            return true;
+        }
+
+        if (System.currentTimeMillis() > timeout) {
+            logger.warn("asyncGetBlockHeader timeout, number:" + blockNumber);
+            callback.onBlockHeader(null);
+            return true;
+        } else {
+            return false;
         }
     }
 
