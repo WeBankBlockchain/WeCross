@@ -121,7 +121,7 @@ public class ResourceURIHandler implements URIHandler {
                                         transactionRequest,
                                         account,
                                         resourceObj.getResourceInfo(),
-                                        resourceObj.getResourceBlockHeaderManager()),
+                                        resourceObj.getBlockHeaderManager()),
                                 new Resource.Callback() {
                                     @Override
                                     public void onTransactionResponse(
@@ -178,7 +178,7 @@ public class ResourceURIHandler implements URIHandler {
                                         transactionRequest,
                                         account,
                                         resourceObj.getResourceInfo(),
-                                        resourceObj.getResourceBlockHeaderManager()),
+                                        resourceObj.getBlockHeaderManager()),
                                 new Resource.Callback() {
                                     @Override
                                     public void onTransactionResponse(

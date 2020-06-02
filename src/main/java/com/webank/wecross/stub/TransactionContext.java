@@ -1,5 +1,7 @@
 package com.webank.wecross.stub;
 
+import com.webank.wecross.stubmanager.BlockHeaderManager;
+
 public class TransactionContext<T> {
     private T data;
     private Account account;

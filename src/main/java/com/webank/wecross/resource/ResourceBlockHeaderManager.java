@@ -1,7 +1,7 @@
 package com.webank.wecross.resource;
 
 import com.webank.wecross.storage.BlockHeaderStorage;
-import com.webank.wecross.stub.BlockHeaderManager;
+import com.webank.wecross.stubmanager.BlockHeaderManager;
 import com.webank.wecross.zone.Chain;
 import java.util.Queue;
 import java.util.Timer;

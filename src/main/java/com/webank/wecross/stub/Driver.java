@@ -1,5 +1,7 @@
 package com.webank.wecross.stub;
 
+import com.webank.wecross.stubmanager.BlockHeaderManager;
+
 public interface Driver {
     interface Callback {
         void onTransactionResponse(
@@ -129,4 +131,18 @@ public interface Driver {
             long blockNumber,
             BlockHeaderManager blockHeaderManager,
             Connection connection);
+    
+    interface CustomCommandCallback {
+    	void onResponse(
+                TransactionException transactionException, Object response);
+    }
+
+    /**
+     * Custom command
+     * 
+     * @param path
+     * @param args
+     * @param connection
+     */
+    public void asyncCustomCommand(String command, Path path, Object[] args, CustomCommandCallback callback, Connection connection);
 }

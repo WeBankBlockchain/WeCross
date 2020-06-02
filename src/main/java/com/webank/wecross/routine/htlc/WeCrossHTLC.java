@@ -5,7 +5,6 @@ import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.BlockHeaderManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.TransactionContext;
@@ -13,6 +12,8 @@ import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.stub.VerifiedTransaction;
+import com.webank.wecross.stubmanager.BlockHeaderManager;
+
 import java.math.BigInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ public class WeCrossHTLC implements HTLC {
                         request,
                         htlcResource.getAccount(),
                         htlcResource.getResourceInfo(),
-                        htlcResource.getResourceBlockHeaderManager());
+                        htlcResource.getBlockHeaderManager());
         if (!method.equals("getTask")) {
             logger.info("call request: {}, path: {}", request, htlcResource.getSelfPath());
         }
@@ -76,7 +77,7 @@ public class WeCrossHTLC implements HTLC {
                         request,
                         htlcResource.getAccount(),
                         htlcResource.getResourceInfo(),
-                        htlcResource.getResourceBlockHeaderManager());
+                        htlcResource.getBlockHeaderManager());
         logger.info("sendTransaction request: {}, path: {}", request, htlcResource.getSelfPath());
         try {
             TransactionResponse response = htlcResource.sendTransaction(transactionContext);
@@ -124,7 +125,7 @@ public class WeCrossHTLC implements HTLC {
                         request,
                         htlcResource.getAccount(),
                         htlcResource.getResourceInfo(),
-                        htlcResource.getResourceBlockHeaderManager());
+                        htlcResource.getBlockHeaderManager());
         logger.info("lock request: {}, path: {}", request, htlcResource.getSelfPath());
         try {
             TransactionResponse response = htlcResource.sendTransaction(transactionContext);
@@ -204,7 +205,7 @@ public class WeCrossHTLC implements HTLC {
                         request,
                         htlcResource.getAccount(),
                         htlcResource.getResourceInfo(),
-                        htlcResource.getResourceBlockHeaderManager());
+                        htlcResource.getBlockHeaderManager());
         logger.info("unlock request: {}, path: {}", request, htlcResource.getSelfPath());
         try {
             TransactionResponse response = htlcResource.sendTransaction(transactionContext);
@@ -281,7 +282,7 @@ public class WeCrossHTLC implements HTLC {
     public boolean verify(Resource resource, VerifyData verifyData) {
         String txHash = verifyData.getTransactionHash();
         long blockNumber = verifyData.getBlockNumber();
-        BlockHeaderManager blockHeaderManager = resource.getResourceBlockHeaderManager();
+        BlockHeaderManager blockHeaderManager = resource.getBlockHeaderManager();
         Connection connection = resource.chooseConnection();
         Driver driver = resource.getDriver();
 
@@ -302,7 +303,7 @@ public class WeCrossHTLC implements HTLC {
                                     transactionRequest,
                                     account,
                                     resource.getResourceInfo(),
-                                    resource.getResourceBlockHeaderManager()));
+                                    resource.getBlockHeaderManager()));
 
             String[] result = response.getResult();
             if (response.getErrorCode() != 0) {

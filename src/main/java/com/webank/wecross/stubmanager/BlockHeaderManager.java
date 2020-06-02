@@ -1,4 +1,4 @@
-package com.webank.wecross.stub;
+package com.webank.wecross.stubmanager;
 
 public interface BlockHeaderManager {
     public interface BlockHeaderCallback {

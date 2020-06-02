@@ -5,7 +5,7 @@ import com.webank.wecross.resource.ResourceBlockHeaderManager;
 import com.webank.wecross.resource.ResourceBlockHeaderManagerFactory;
 import com.webank.wecross.storage.BlockHeaderStorage;
 import com.webank.wecross.storage.RocksDBBlockHeaderStorageFactory;
-import com.webank.wecross.stub.BlockHeaderManager;
+import com.webank.wecross.stubmanager.BlockHeaderManager;
 import com.webank.wecross.zone.Chain;
 import java.util.Arrays;
 import java.util.HashMap;

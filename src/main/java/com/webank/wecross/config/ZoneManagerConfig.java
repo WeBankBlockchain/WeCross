@@ -2,7 +2,7 @@ package com.webank.wecross.config;
 
 import com.webank.wecross.resource.ResourceBlockHeaderManagerFactory;
 import com.webank.wecross.storage.BlockHeaderStorageFactory;
-import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.Map;

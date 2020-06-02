@@ -50,7 +50,7 @@ public class HTLCSchedulerTest {
                 .thenReturn(new String[] {"0x", "100"});
         Driver mockDriver = Mockito.mock(Driver.class);
         Mockito.when(mockHTLCResource.getDriver()).thenReturn(mockDriver);
-        Mockito.when(mockHTLCResource.getResourceBlockHeaderManager()).thenReturn(null);
+        Mockito.when(mockHTLCResource.getBlockHeaderManager()).thenReturn(null);
         Mockito.when(mockHTLCResource.chooseConnection()).thenReturn(null);
         TransactionRequest request =
                 new TransactionRequest("newContract", new String[] {"hello", "true"});

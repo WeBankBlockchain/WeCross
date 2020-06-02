@@ -6,7 +6,6 @@ import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.ResourceBlockHeaderManager;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Connection;
@@ -19,6 +18,8 @@ import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.stubmanager.BlockHeaderManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -297,14 +298,14 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public ResourceBlockHeaderManager getResourceBlockHeaderManager() {
-        return getSelfResource().getResourceBlockHeaderManager();
+    public BlockHeaderManager getBlockHeaderManager() {
+        return getSelfResource().getBlockHeaderManager();
     }
 
     @Override
-    public void setResourceBlockHeaderManager(
-            ResourceBlockHeaderManager resourceBlockHeaderManager) {
-        getSelfResource().setResourceBlockHeaderManager(resourceBlockHeaderManager);
+    public void setBlockHeaderManager(
+            BlockHeaderManager resourceBlockHeaderManager) {
+        getSelfResource().setBlockHeaderManager(resourceBlockHeaderManager);
     }
 
     @Override

@@ -11,6 +11,8 @@ import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.stubmanager.BlockHeaderManager;
+
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +28,7 @@ public class Resource {
     private Driver driver;
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
     private ResourceInfo resourceInfo;
-    private ResourceBlockHeaderManager resourceBlockHeaderManager;
+    private BlockHeaderManager blockHeaderManager;
     boolean hasLocalConnection = false;
     private Random random = new SecureRandom();
 
@@ -172,13 +174,13 @@ public class Resource {
         this.resourceInfo = resourceInfo;
     }
 
-    public ResourceBlockHeaderManager getResourceBlockHeaderManager() {
-        return resourceBlockHeaderManager;
+    public BlockHeaderManager getBlockHeaderManager() {
+        return blockHeaderManager;
     }
 
-    public void setResourceBlockHeaderManager(
-            ResourceBlockHeaderManager resourceBlockHeaderManager) {
-        this.resourceBlockHeaderManager = resourceBlockHeaderManager;
+    public void setBlockHeaderManager(
+            BlockHeaderManager resourceBlockHeaderManager) {
+        this.blockHeaderManager = resourceBlockHeaderManager;
     }
 
     public boolean isHasLocalConnection() {

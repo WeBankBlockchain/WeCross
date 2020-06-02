@@ -9,7 +9,7 @@ import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.StubFactory;
-import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.utils.ConfigUtils;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
@@ -135,6 +135,7 @@ public class ZonesConfig {
             Chain chain = new Chain(chainName);
             chain.setDriver(stubFactory.newDriver());
             chain.setBlockHeaderStorage(blockHeaderStorageFactory.newBlockHeaderStorage(blockPath));
+            chain.setBlockHeaderManager(resourceBlockHeaderManagerFactory.build(chain));
             for (ResourceInfo resourceInfo : resources) {
                 com.webank.wecross.resource.Resource resource =
                         new com.webank.wecross.resource.Resource();
@@ -143,9 +144,7 @@ public class ZonesConfig {
                 resource.setType(type);
                 resource.setResourceInfo(resourceInfo);
 
-                ResourceBlockHeaderManager resourceBlockHeaderManager =
-                        resourceBlockHeaderManagerFactory.build(chain);
-                resource.setResourceBlockHeaderManager(resourceBlockHeaderManager);
+                resource.setBlockHeaderManager(chain.getBlockHeaderManager());
 
                 chain.getResources().put(resourceInfo.getName(), resource);
                 logger.info(

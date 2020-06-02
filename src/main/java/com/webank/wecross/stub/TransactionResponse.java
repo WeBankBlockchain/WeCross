@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TransactionResponse {
-    private Integer errorCode = new Integer(0);
+    private Integer errorCode = 0;
     private String errorMessage = new String();
     private String hash = new String();
     private List<String> extraHashes;

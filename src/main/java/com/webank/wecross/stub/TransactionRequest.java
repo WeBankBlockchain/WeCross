@@ -1,11 +1,16 @@
 package com.webank.wecross.stub;
 
 import java.util.Arrays;
+import java.util.Map;
 
 public class TransactionRequest {
     private int seq = 0;
     private String method;
     private String[] args;
+    
+    // Optional args
+    // transactionID, peers, etc...
+    private Map<String, String> options;
 
     public TransactionRequest() {}
 
@@ -37,6 +42,14 @@ public class TransactionRequest {
     public void setArgs(String[] args) {
         this.args = args;
     }
+    
+    public Map<String, String> getOptions() {
+		return options;
+	}
+
+	public void setOptions(Map<String, String> options) {
+		this.options = options;
+	}
 
     @Override
     public String toString() {

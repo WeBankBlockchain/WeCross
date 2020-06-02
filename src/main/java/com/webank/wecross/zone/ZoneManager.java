@@ -11,7 +11,7 @@ import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
-import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.utils.core.PathUtils;
 import java.util.HashMap;
 import java.util.Map;
@@ -135,6 +135,11 @@ public class ZoneManager {
                     String blockPath = path.getNetwork() + "." + path.getChain();
                     chain.setBlockHeaderStorage(
                             blockHeaderStorageFactory.newBlockHeaderStorage(blockPath));
+                    ResourceBlockHeaderManager resourceBlockHeaderManager =
+                            resourceBlockHeaderManagerFactory.build(chain);
+                    
+                    chain.setBlockHeaderManager(resourceBlockHeaderManager);
+                    
                     chain.addConnection(peer, remoteConnection);
                     chain.start();
 
@@ -150,10 +155,7 @@ public class ZoneManager {
                     resource = new Resource();
                     resource.setDriver(driver);
 
-                    ResourceBlockHeaderManager resourceBlockHeaderManager =
-                            resourceBlockHeaderManagerFactory.build(chain);
-
-                    resource.setResourceBlockHeaderManager(resourceBlockHeaderManager);
+                    resource.setBlockHeaderManager(chain.getBlockHeaderManager());
                     resource.setResourceInfo(resourceInfo);
 
                     chain.getResources().put(path.getResource(), resource);

@@ -6,6 +6,8 @@ import com.webank.wecross.storage.BlockHeaderStorage;
 import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stubmanager.BlockHeaderManager;
+
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +26,7 @@ public class Chain {
     private Map<String, Resource> resources = new HashMap<String, Resource>();
     private Driver driver;
     private BlockHeaderStorage blockHeaderStorage;
+    private BlockHeaderManager blockHeaderManager;
     private Thread blockSyncThread;
     private AtomicBoolean running = new AtomicBoolean(false);
     private Random random = new SecureRandom();
@@ -253,7 +256,15 @@ public class Chain {
         this.blockHeaderStorage = blockHeaderStorage;
     }
 
-    private void loadLocalBlockHeader() {
+    public BlockHeaderManager getBlockHeaderManager() {
+		return blockHeaderManager;
+	}
+
+	public void setBlockHeaderManager(BlockHeaderManager blockHeaderManager) {
+		this.blockHeaderManager = blockHeaderManager;
+	}
+
+	private void loadLocalBlockHeader() {
         long localBlockNumber = blockHeaderStorage.readBlockNumber();
         if (localBlockNumber < 0) {
             BlockHeader beforeGenesisBlockHeader = new BlockHeader();

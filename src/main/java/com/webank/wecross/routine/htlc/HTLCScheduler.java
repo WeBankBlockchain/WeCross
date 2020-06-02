@@ -115,7 +115,7 @@ public class HTLCScheduler {
                         .getVerifiedTransaction(
                                 info0[0],
                                 Long.parseLong(info0[1]),
-                                selfResource.getResourceBlockHeaderManager(),
+                                selfResource.getBlockHeaderManager(),
                                 selfResource.chooseConnection());
 
         logger.debug(
@@ -142,7 +142,7 @@ public class HTLCScheduler {
                         .getVerifiedTransaction(
                                 info1[0],
                                 Long.parseLong(info1[1]),
-                                counterpartyResource.getResourceBlockHeaderManager(),
+                                counterpartyResource.getBlockHeaderManager(),
                                 counterpartyResource.chooseConnection());
 
         logger.debug(
