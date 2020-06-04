@@ -7,7 +7,6 @@ import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.response.StubResponse;
 import com.webank.wecross.stub.StubManager;
 import com.webank.wecross.zone.ZoneManager;
-import io.netty.handler.codec.http.FullHttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +30,7 @@ public class ListStubsURIHandler implements URIHandler {
     }
 
     @Override
-    public void handle(FullHttpRequest httpRequest, Callback callback) {
+    public void handle(String uri, String method, String content, Callback callback) {
         RestResponse<StubResponse> restResponse = new RestResponse<>();
         //         String content = httpRequest.content().toString(StandardCharsets.UTF_8);
 

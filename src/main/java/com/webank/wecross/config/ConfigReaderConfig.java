@@ -185,6 +185,20 @@ public class ConfigReaderConfig {
             throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
         }
 
+        Long threadNum = (Long) rpcMap.get("threadNum");
+        if (threadNum == null) {
+            threadNum = new Long(16);
+            logger.info("rpc threadNum not set, use default: {}", threadNum);
+        }
+        rpcConfig.setThreadNum(threadNum);
+
+        Long threadQueueCapacity = (Long) rpcMap.get("threadQueueCapacity");
+        if (threadQueueCapacity == null) {
+            threadQueueCapacity = new Long(10000);
+            logger.info("rpc threadQueueCapacity not set, use default: {}", threadQueueCapacity);
+        }
+        rpcConfig.setThreadQueueCapacity(threadQueueCapacity);
+
         Long sslSwitch = (Long) rpcMap.get("sslSwitch");
         if (sslSwitch == null) {
             sslSwitch = Long.valueOf(RPCConfig.SSLSwitch.SSL_ON_CLIENT_AUTH.getSwh());

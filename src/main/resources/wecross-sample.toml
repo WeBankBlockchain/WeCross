@@ -12,6 +12,8 @@
     caCert = 'classpath:ca.crt'
     sslCert = 'classpath:ssl.crt'
     sslKey = 'classpath:ssl.key'
+    threadNum = 16
+    threadQueueCapacity = 10000
 
 [p2p]
     listenIP = '0.0.0.0'

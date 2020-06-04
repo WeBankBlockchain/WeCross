@@ -1,5 +1,6 @@
 package com.webank.wecross.network.rpc.netty;
 
+import com.webank.wecross.network.p2p.netty.factory.ThreadPoolTaskExecutorFactory;
 import com.webank.wecross.network.rpc.URIHandlerDispatcher;
 import com.webank.wecross.network.rpc.netty.handler.HttpServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
@@ -25,6 +26,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /** init RPC service */
 public class RPCBootstrap {
@@ -116,6 +118,10 @@ public class RPCBootstrap {
                                 config.getSslKey(),
                                 config.getSslSwitch());
 
+        ThreadPoolTaskExecutor threadPoolTaskExecutor =
+                ThreadPoolTaskExecutorFactory.build(
+                        config.getThreadNum(), config.getThreadQueueCapacity(), "http-callback");
+
         serverBootstrap
                 .group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
@@ -143,7 +149,9 @@ public class RPCBootstrap {
                                                         TimeUnit.MILLISECONDS),
                                                 new HttpServerCodec(),
                                                 new HttpObjectAggregator(Integer.MAX_VALUE),
-                                                new HttpServerHandler(getUriHandlerDispatcher()));
+                                                new HttpServerHandler(
+                                                        getUriHandlerDispatcher(),
+                                                        threadPoolTaskExecutor));
                             }
                         });
 
