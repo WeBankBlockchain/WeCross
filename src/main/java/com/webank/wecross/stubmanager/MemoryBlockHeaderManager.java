@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.zone.Chain;
@@ -20,9 +21,9 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     private LinkedList<BlockHeader> blockHeaderCache = new LinkedList<BlockHeader>();
     private Chain chain;
     private boolean running = false;
-    private final int MAX_CACHE_SIZE = 10;
+    private int maxCacheSize = 20;
     
-    public void onGetBlockNumber(long blockNumber) {
+    public void onGetBlockNumber(Exception e, long blockNumber) {
     	long current = 0;
     	if(!blockHeaderCache.isEmpty()) {
     		current = blockHeaderCache.peekLast().getNumber();
@@ -33,7 +34,7 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     			chain.getDriver().asyncGetBlockHeader(blockNumber, chain.chooseConnection(), new Driver.GetBlockHeaderCallback() {
 					@Override
 					public void onResponse(Exception e, BlockHeader blockHeader) {
-						onGetBlockHeader(blockHeader, blockNumber);
+						onGetBlockHeader(e, blockHeader, blockNumber);
 					}
 				});
     		}
@@ -41,7 +42,7 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     			chain.getDriver().asyncGetBlockHeader(current + 1, chain.chooseConnection(), new Driver.GetBlockHeaderCallback() {
 					@Override
 					public void onResponse(Exception e, BlockHeader blockHeader) {
-						onGetBlockHeader(blockHeader, blockNumber);
+						onGetBlockHeader(e, blockHeader, blockNumber);
 					}
 				});
     		}
@@ -50,13 +51,13 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     		chain.getDriver().asyncGetBlockNumber(chain.chooseConnection(), new Driver.GetBlockNumberCallback() {
 				@Override
 				public void onResponse(Exception e, long blockNumber) {
-					onGetBlockNumber(blockNumber);
+					onGetBlockNumber(e, blockNumber);
 				}
 			});
     	}
     }
     
-    public void onGetBlockHeader(BlockHeader blockHeader, long target) {
+    public void onGetBlockHeader(Exception e, BlockHeader blockHeader, long target) {
     	blockHeaderCache.add(blockHeader);
     	List<GetBlockHeaderCallback> callbacks = getBlockHaderCallbacks.get(blockHeader.getNumber());
     	if(callbacks != null) {
@@ -71,7 +72,7 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     	}
     	getBlockHaderCallbacks.remove(blockHeader.getNumber());
     	
-    	if(blockHeaderCache.size() > MAX_CACHE_SIZE) {
+    	if(blockHeaderCache.size() > maxCacheSize) {
     		blockHeaderCache.pop();
     	}
     	
@@ -79,7 +80,7 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     		chain.getDriver().asyncGetBlockHeader(blockHeader.getNumber() + 1, chain.chooseConnection(), new Driver.GetBlockHeaderCallback() {
 				@Override
 				public void onResponse(Exception e, BlockHeader blockHeader) {
-					onGetBlockHeader(blockHeader, target);
+					onGetBlockHeader(e, blockHeader, target);
 				}
 			});
     	}
@@ -87,22 +88,48 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     		chain.getDriver().asyncGetBlockNumber(chain.chooseConnection(), new Driver.GetBlockNumberCallback() {
 				@Override
 				public void onResponse(Exception e, long blockNumber) {
-					onGetBlockNumber(blockNumber);
+					onGetBlockNumber(e, blockNumber);
 				}
 			});
     	}
     }
     
+    @Override
     public void start() {
     	if(!running) {
+    		logger.info("MemoryBlockHeaderManager started");
+    		
     		running = true;
     		
     		chain.getDriver().asyncGetBlockNumber(chain.chooseConnection(), new Driver.GetBlockNumberCallback() {
 				@Override
 				public void onResponse(Exception e, long blockNumber) {
-					onGetBlockNumber(blockNumber);
+					onGetBlockNumber(e, blockNumber);
 				}
 			});
+    	}
+    }
+    
+    @Override
+    public void stop() {
+    	if(running) {
+    		logger.info("MemoryBlockHeaderManager stopped");
+    		
+    		running = false;
+    	
+	    	for(List<GetBlockHeaderCallback> callbacks: getBlockHaderCallbacks.values()) {
+	    		for(GetBlockHeaderCallback callback: callbacks) {
+	    			threadPool.execute(new Runnable() {
+						@Override
+						public void run() {
+							callback.onResponse(new WeCrossException(-1, "Operation canceled"), null);
+						}
+					});
+	    		}
+	    	}
+	    	
+	    	blockHeaderCache.clear();
+	    	getBlockHaderCallbacks.clear();
     	}
     }
     
@@ -158,5 +185,21 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
 
 	public void setThreadPool(ThreadPoolTaskExecutor threadPool) {
 		this.threadPool = threadPool;
+	}
+
+	public Chain getChain() {
+		return chain;
+	}
+
+	public void setChain(Chain chain) {
+		this.chain = chain;
+	}
+
+	public int getMaxCacheSize() {
+		return maxCacheSize;
+	}
+
+	public void setMaxCacheSize(int maxCacheSize) {
+		this.maxCacheSize = maxCacheSize;
 	}
 }

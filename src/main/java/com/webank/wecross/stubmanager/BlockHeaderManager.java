@@ -3,6 +3,10 @@ package com.webank.wecross.stubmanager;
 import com.webank.wecross.stub.BlockHeader;
 
 public interface BlockHeaderManager {
+	public void start();
+	
+	public void stop();
+	
 	public interface GetBlockNumberCallback {
 		void onResponse(Exception e, long blockNumber);
 	}
