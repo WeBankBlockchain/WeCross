@@ -1,16 +1,17 @@
 package com.webank.wecross.config;
 
-import com.webank.wecross.resource.ResourceBlockHeaderManagerFactory;
 import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.webank.wecross.stubmanager.MemoryBlockHeaderManagerFactory;
 
 @Configuration
 public class ResourceBlockHeaderManagerFactoryConfig {
     @Resource ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool;
 
     @Bean
-    public ResourceBlockHeaderManagerFactory newResourceBlockHeaderManagerFactory() {
-        return new ResourceBlockHeaderManagerFactory(resourceThreadPool);
+    public MemoryBlockHeaderManagerFactory newResourceBlockHeaderManagerFactory() {
+        return new MemoryBlockHeaderManagerFactory(resourceThreadPool);
     }
 }

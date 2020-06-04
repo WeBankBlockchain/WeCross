@@ -5,12 +5,11 @@ import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.remote.RemoteConnection;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.ResourceBlockHeaderManager;
-import com.webank.wecross.resource.ResourceBlockHeaderManagerFactory;
-import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
+import com.webank.wecross.stubmanager.MemoryBlockHeaderManager;
+import com.webank.wecross.stubmanager.MemoryBlockHeaderManagerFactory;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.utils.core.PathUtils;
 import java.util.HashMap;
@@ -28,8 +27,7 @@ public class ZoneManager {
     private P2PService p2PService;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
     private StubManager stubManager;
-    BlockHeaderStorageFactory blockHeaderStorageFactory;
-    private ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory;
+    private MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory;
 
     public Resource getResource(Path path) {
         lock.readLock().lock();
@@ -57,7 +55,7 @@ public class ZoneManager {
     public Zone getZone(Path path) {
         lock.readLock().lock();
         try {
-            return getZone(path.getNetwork());
+            return getZone(path.getZone());
         } finally {
             lock.readLock().unlock();
         }
@@ -115,10 +113,10 @@ public class ZoneManager {
                     }
                 }
 
-                Zone zone = zones.get(path.getNetwork());
+                Zone zone = zones.get(path.getZone());
                 if (zone == null) {
                     zone = new Zone();
-                    zones.put(path.getNetwork(), zone);
+                    zones.put(path.getZone(), zone);
                 }
 
                 Driver driver = stubManager.getStubFactory(resourceInfo.getStubType()).newDriver();
@@ -132,10 +130,8 @@ public class ZoneManager {
                     chain = new Chain(path.getChain());
                     chain.setDriver(driver);
 
-                    String blockPath = path.getNetwork() + "." + path.getChain();
-                    chain.setBlockHeaderStorage(
-                            blockHeaderStorageFactory.newBlockHeaderStorage(blockPath));
-                    ResourceBlockHeaderManager resourceBlockHeaderManager =
+                    String blockPath = path.getZone() + "." + path.getChain();
+                    MemoryBlockHeaderManager resourceBlockHeaderManager =
                             resourceBlockHeaderManagerFactory.build(chain);
                     
                     chain.setBlockHeaderManager(resourceBlockHeaderManager);
@@ -188,7 +184,7 @@ public class ZoneManager {
                     continue;
                 }
 
-                Zone zone = zones.get(path.getNetwork());
+                Zone zone = zones.get(path.getZone());
                 if (zone == null) {
                     // zone not exists, bug?
                     logger.error("Zone not exists! Peer: {} Path: {}", peer, path);
@@ -218,18 +214,15 @@ public class ZoneManager {
 
                 if (chain.getResources().isEmpty()) {
                     chain.stop();
-                    if (chain.getBlockHeaderStorage() != null) {
-                        chain.getBlockHeaderStorage().close();
-                    }
                     logger.info(
                             "Stop block header sync: {}",
-                            path.getNetwork() + "." + path.getChain());
+                            path.getZone() + "." + path.getChain());
 
                     zone.getChains().remove(path.getChain());
                 }
 
                 if (zone.getChains().isEmpty()) {
-                    zones.remove(path.getNetwork());
+                    zones.remove(path.getZone());
                 }
             }
         } finally {
@@ -314,20 +307,12 @@ public class ZoneManager {
         this.stubManager = stubManager;
     }
 
-    public BlockHeaderStorageFactory getBlockHeaderStorageFactory() {
-        return blockHeaderStorageFactory;
-    }
-
-    public void setBlockHeaderStorageFactory(BlockHeaderStorageFactory blockHeaderStorageFactory) {
-        this.blockHeaderStorageFactory = blockHeaderStorageFactory;
-    }
-
-    public ResourceBlockHeaderManagerFactory getResourceBlockHeaderManagerFactory() {
+    public MemoryBlockHeaderManagerFactory getResourceBlockHeaderManagerFactory() {
         return resourceBlockHeaderManagerFactory;
     }
 
     public void setResourceBlockHeaderManagerFactory(
-            ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory) {
+            MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory) {
         this.resourceBlockHeaderManagerFactory = resourceBlockHeaderManagerFactory;
     }
 }

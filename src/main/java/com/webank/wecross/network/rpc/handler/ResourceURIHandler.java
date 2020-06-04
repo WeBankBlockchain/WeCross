@@ -50,7 +50,7 @@ public class ResourceURIHandler implements URIHandler {
             String[] splits = httpRequest.uri().substring(1).split("/");
 
             Path path = new Path();
-            path.setNetwork(splits[0]);
+            path.setZone(splits[0]);
             path.setChain(splits[1]);
             path.setResource(splits[2]);
 

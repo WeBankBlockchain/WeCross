@@ -108,6 +108,12 @@ public interface Driver {
      * @return block number
      */
     public long getBlockNumber(Connection connection);
+    
+    public interface GetBlockNumberCallback {
+    	public void onResponse(Exception e, long blockNumber);
+    }
+    
+    public void asyncGetBlockNumber(Connection connection, GetBlockNumberCallback callback);
 
     /**
      * Get block header
@@ -116,7 +122,13 @@ public interface Driver {
      * @return BlockHeader
      */
     public byte[] getBlockHeader(long blockNumber, Connection connection);
-
+    
+    public interface GetBlockHeaderCallback {
+    	public void onResponse(Exception e, BlockHeader blockHeader);
+    }
+    
+    public void asyncGetBlockHeader(long blockNumber, Connection connection, GetBlockHeaderCallback callback);
+    
     /**
      * Get verified transaction info of the Chain
      *

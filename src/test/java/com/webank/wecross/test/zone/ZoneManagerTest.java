@@ -7,11 +7,10 @@ import com.webank.wecross.config.ResourceThreadPoolConfig;
 import com.webank.wecross.network.p2p.netty.common.Node;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.ResourceBlockHeaderManagerFactory;
-import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.StubFactory;
+import com.webank.wecross.stubmanager.MemoryBlockHeaderManagerFactory;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
@@ -52,20 +51,13 @@ public class ZoneManagerTest {
         StubManager stubManager = Mockito.mock(StubManager.class);
         Mockito.when(stubManager.getStubFactory(Mockito.anyString())).thenReturn(stubFactory);
 
-        BlockHeaderStorageFactory blockHeaderStorageFactory =
-                Mockito.spy(BlockHeaderStorageFactory.class);
-        Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos"))
-                .thenReturn(null);
-        Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos0"))
-                .thenReturn(null);
         ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
                 new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
-        ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
-                new ResourceBlockHeaderManagerFactory(resourceThreadPool);
+        MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
+                new MemoryBlockHeaderManagerFactory(resourceThreadPool);
 
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setStubManager(stubManager);
-        zoneManager.setBlockHeaderStorageFactory(blockHeaderStorageFactory);
         zoneManager.setResourceBlockHeaderManagerFactory(resourceBlockHeaderManagerFactory);
 
         assertEquals(stubManager, zoneManager.getStubManager());
@@ -142,24 +134,13 @@ public class ZoneManagerTest {
         StubManager stubManager = Mockito.mock(StubManager.class);
         Mockito.when(stubManager.getStubFactory("test")).thenReturn(stubFactory);
 
-        BlockHeaderStorageFactory blockHeaderStorageFactory =
-                Mockito.spy(BlockHeaderStorageFactory.class);
-        Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos"))
-                .thenReturn(null);
-        Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos0"))
-                .thenReturn(null);
-        Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos1"))
-                .thenReturn(null);
-        Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos2"))
-                .thenReturn(null);
         ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
                 new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
-        ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
-                new ResourceBlockHeaderManagerFactory(resourceThreadPool);
+        MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
+                new MemoryBlockHeaderManagerFactory(resourceThreadPool);
 
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setStubManager(stubManager);
-        zoneManager.setBlockHeaderStorageFactory(blockHeaderStorageFactory);
         zoneManager.setResourceBlockHeaderManagerFactory(resourceBlockHeaderManagerFactory);
 
         Peer peer = new Peer(new Node("aaa", "127.0.0.1", 100));
@@ -279,19 +260,13 @@ public class ZoneManagerTest {
         StubManager stubManager = Mockito.mock(StubManager.class);
         Mockito.when(stubManager.getStubFactory("test")).thenReturn(stubFactory);
 
-        BlockHeaderStorageFactory blockHeaderStorageFactory =
-                Mockito.spy(BlockHeaderStorageFactory.class);
-        Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos"))
-                .thenReturn(null);
-
         ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
                 new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
-        ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
-                new ResourceBlockHeaderManagerFactory(resourceThreadPool);
+        MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
+                new MemoryBlockHeaderManagerFactory(resourceThreadPool);
 
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setStubManager(stubManager);
-        zoneManager.setBlockHeaderStorageFactory(blockHeaderStorageFactory);
         zoneManager.setResourceBlockHeaderManagerFactory(resourceBlockHeaderManagerFactory);
 
         // Add resource 1

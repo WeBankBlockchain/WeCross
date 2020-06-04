@@ -1,13 +1,17 @@
 package com.webank.wecross.stubmanager;
 
+import com.webank.wecross.stub.BlockHeader;
+
 public interface BlockHeaderManager {
-    public interface BlockHeaderCallback {
-        void onBlockHeader(byte[] blockHeader);
+	public interface GetBlockNumberCallback {
+		void onResponse(Exception e, long blockNumber);
+	}
+	
+    public void asyncGetBlockNumber(GetBlockNumberCallback callback);
+
+    public interface GetBlockHeaderCallback {
+        void onResponse(Exception e, BlockHeader blockHeader);
     }
-
-    public long getBlockNumber();
-
-    public byte[] getBlockHeader(long blockNumber);
-
-    void asyncGetBlockHeader(long blockNumber, BlockHeaderManager.BlockHeaderCallback callback);
+    
+    void asyncGetBlockHeader(long blockNumber, BlockHeaderManager.GetBlockHeaderCallback callback);
 }

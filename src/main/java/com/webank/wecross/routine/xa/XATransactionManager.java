@@ -1,10 +1,11 @@
 package com.webank.wecross.routine.xa;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.Account;
@@ -28,14 +29,26 @@ public class XATransactionManager {
 		try {
 			Set<Path> chains = resources.parallelStream().map((p) -> {
 				Path path = new Path();
-				path.setNetwork(p.getNetwork());
+				path.setZone(p.getZone());
 				path.setChain(p.getChain());
 				return path;
 			}).distinct().collect(Collectors.toSet());
 			
+			Map<String, List<Path> > zone2path = new HashMap<String, List<Path>>();
 			for(Path path: chains) {
-				Zone zone = zoneManager.getZone(path.getNetwork());
-				Chain chain = zone.getChain(path.getChain());
+				String key = path.getZone() + "." + path.getChain();
+				if(zone2path.get(key) == null) {
+					zone2path.put(key, new ArrayList<Path>());
+				}
+				
+				zone2path.get(key).add(path);
+			}
+			
+			for(Map.Entry<String, List<Path> > entry: zone2path.entrySet()) {
+				Path chainPath = entry.getValue().get(0);
+				
+				Zone zone = zoneManager.getZone(chainPath);
+				Chain chain = zone.getChain(chainPath);
 				Connection connection = chain.chooseConnection();
 				
 				// send prepare transaction

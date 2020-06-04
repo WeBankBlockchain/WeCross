@@ -3,7 +3,7 @@ package com.webank.wecross.stub;
 import java.util.Objects;
 
 public class Path {
-    private String network;
+    private String zone;
     private String chain;
     private String resource;
 
@@ -14,19 +14,19 @@ public class Path {
         }
 
         Path obj = new Path();
-        obj.setNetwork(sp[0]);
+        obj.setZone(sp[0]);
         obj.setChain(sp[1]);
         obj.setResource(sp[2]);
 
         return obj;
     }
 
-    public String getNetwork() {
-        return network;
+    public String getZone() {
+        return zone;
     }
 
-    public void setNetwork(String network) {
-        this.network = network;
+    public void setZone(String zone) {
+        this.zone = zone;
     }
 
     public String getChain() {
@@ -54,22 +54,22 @@ public class Path {
             return false;
         }
         Path path = (Path) o;
-        return Objects.equals(getNetwork(), path.getNetwork())
+        return Objects.equals(getZone(), path.getZone())
                 && Objects.equals(getChain(), path.getChain())
                 && Objects.equals(getResource(), path.getResource());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getNetwork(), getChain(), getResource());
+        return Objects.hash(getZone(), getChain(), getResource());
     }
 
     @Override
     public String toString() {
-        return network + "." + chain + "." + resource;
+        return zone + "." + chain + "." + resource;
     }
 
     public String toURI() {
-        return network + "/" + chain + "/" + resource;
+        return zone + "/" + chain + "/" + resource;
     }
 }

@@ -1,20 +1,18 @@
-package com.webank.wecross.resource;
+package com.webank.wecross.stubmanager;
 
 import com.webank.wecross.config.ResourceThreadPoolConfig;
 import com.webank.wecross.zone.Chain;
 
-public class ResourceBlockHeaderManagerFactory {
+public class MemoryBlockHeaderManagerFactory {
     private ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool;
 
-    public ResourceBlockHeaderManagerFactory(
+    public MemoryBlockHeaderManagerFactory(
             ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool) {
         this.resourceThreadPool = resourceThreadPool;
     }
 
-    public ResourceBlockHeaderManager build(Chain chain) {
-        ResourceBlockHeaderManager resourceBlockHeaderManager = new ResourceBlockHeaderManager();
-        resourceBlockHeaderManager.setBlockHeaderStorage(chain.getBlockHeaderStorage());
-        resourceBlockHeaderManager.setChain(chain);
+    public MemoryBlockHeaderManager build(Chain chain) {
+        MemoryBlockHeaderManager resourceBlockHeaderManager = new MemoryBlockHeaderManager();
         resourceBlockHeaderManager.setThreadPool(resourceThreadPool.getThreadPool());
         return resourceBlockHeaderManager;
     }

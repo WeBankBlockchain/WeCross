@@ -235,7 +235,7 @@ public class P2PProcessor implements NetworkProcessor {
             String p2pRequestString,
             NetworkProcessor.Callback callback) {
         Path path = new Path();
-        path.setNetwork(network);
+        path.setZone(network);
         path.setChain(chain);
         path.setResource(resource);
 
