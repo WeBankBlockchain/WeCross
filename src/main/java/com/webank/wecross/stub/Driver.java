@@ -42,7 +42,7 @@ public interface Driver {
     public TransactionResponse call(
             TransactionContext<TransactionRequest> request, Connection connection)
             throws TransactionException;
-
+    
     /**
      * Async Call the interface of contract or chaincode Just fake async for compatibility, you need
      * to override this function
@@ -52,20 +52,15 @@ public interface Driver {
      * @param callback the callback class for async call
      * @return the transaction response
      */
-    default void asyncCall(
+    void asyncCall(
             TransactionContext<TransactionRequest> request,
             Connection connection,
-            Driver.Callback callback) {
-        try {
-            callback.onTransactionResponse(
-                    TransactionException.Builder.newSuccessException(), call(request, connection));
-        } catch (TransactionException e) {
-            callback.onTransactionResponse(e, null);
-        } catch (Exception e) {
-            callback.onTransactionResponse(
-                    TransactionException.Builder.newInternalException(e.getMessage()), null);
-        }
-    }
+            Driver.Callback callback);
+    
+    void asyncCallByProxy(
+            TransactionContext<TransactionRequest> request,
+            Connection connection,
+            Driver.Callback callback);
 
     /**
      * Send transaction to the interface of contract or chaincode
@@ -76,7 +71,7 @@ public interface Driver {
     public TransactionResponse sendTransaction(
             TransactionContext<TransactionRequest> request, Connection connection)
             throws TransactionException;
-
+    
     /**
      * Async transaction the interface of contract or chaincode Just fake async for compatibility,
      * you need to override this function
@@ -86,29 +81,21 @@ public interface Driver {
      * @param callback the callback class for async sendTransaction
      * @return the transaction response
      */
-    default void asyncSendTransaction(
+    void asyncSendTransaction(
             TransactionContext<TransactionRequest> request,
             Connection connection,
-            Driver.Callback callback) {
-        try {
-            callback.onTransactionResponse(
-                    TransactionException.Builder.newSuccessException(),
-                    sendTransaction(request, connection));
-        } catch (TransactionException e) {
-            callback.onTransactionResponse(e, null);
-        } catch (Exception e) {
-            callback.onTransactionResponse(
-                    TransactionException.Builder.newInternalException(e.getMessage()), null);
-        }
-    }
+            Driver.Callback callback);
+    
+    void asyncSendTransactionByProxy(
+            TransactionContext<TransactionRequest> request,
+            Connection connection,
+            Driver.Callback callback);
 
     /**
      * Get block number
      *
      * @return block number
      */
-    public long getBlockNumber(Connection connection);
-    
     public interface GetBlockNumberCallback {
     	public void onResponse(Exception e, long blockNumber);
     }
@@ -121,8 +108,6 @@ public interface Driver {
      * @param blockNumber
      * @return BlockHeader
      */
-    public byte[] getBlockHeader(long blockNumber, Connection connection);
-    
     public interface GetBlockHeaderCallback {
     	public void onResponse(Exception e, BlockHeader blockHeader);
     }

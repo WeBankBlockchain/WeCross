@@ -21,13 +21,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ZoneManager {
+	private Logger logger = LoggerFactory.getLogger(ZoneManager.class);
     private Map<String, Zone> zones = new HashMap<>();
     private AtomicInteger seq = new AtomicInteger(1);
-    private Logger logger = LoggerFactory.getLogger(ZoneManager.class);
     private P2PService p2PService;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
     private StubManager stubManager;
-    private MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory;
+    private MemoryBlockHeaderManagerFactory memoryBlockHeaderManagerFactory;
 
     public Resource getResource(Path path) {
         lock.readLock().lock();
@@ -35,14 +35,31 @@ public class ZoneManager {
             Zone zone = getZone(path);
 
             if (zone != null) {
-                Chain stub = zone.getChain(path);
+                Chain chain = zone.getChain(path);
 
-                if (stub != null) {
-                    Resource resource = stub.getResources().get(path.getResource());
+                if (chain != null) {
+                    Resource resource = chain.getResources().get(path.getResource());
 
-                    return resource;
+                    if(resource != null) {
+                    	return resource;
+                    }
+                    else {
+                    	ResourceInfo resourceInfo = new ResourceInfo();
+                    	resourceInfo.setName(path.getResource());
+                    	
+                    	// not found, build default resource
+                        resource = new Resource();
+                        resource.setBlockHeaderManager(chain.getBlockHeaderManager());
+                        resource.setDriver(chain.getDriver());
+                        resource.setType("Resource");
+                        resource.setResourceInfo(resourceInfo);
+                        
+                        chain.getResources().put(path.getResource(), resource);
+                        return resource;
+                    }
                 }
             }
+            
             return null;
         } catch (Exception e) {
             logger.debug("Exception: " + e);
@@ -132,7 +149,7 @@ public class ZoneManager {
 
                     String blockPath = path.getZone() + "." + path.getChain();
                     MemoryBlockHeaderManager resourceBlockHeaderManager =
-                            resourceBlockHeaderManagerFactory.build(chain);
+                            memoryBlockHeaderManagerFactory.build(chain);
                     
                     chain.setBlockHeaderManager(resourceBlockHeaderManager);
                     
@@ -308,11 +325,11 @@ public class ZoneManager {
     }
 
     public MemoryBlockHeaderManagerFactory getResourceBlockHeaderManagerFactory() {
-        return resourceBlockHeaderManagerFactory;
+        return memoryBlockHeaderManagerFactory;
     }
 
     public void setResourceBlockHeaderManagerFactory(
             MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory) {
-        this.resourceBlockHeaderManagerFactory = resourceBlockHeaderManagerFactory;
+        this.memoryBlockHeaderManagerFactory = resourceBlockHeaderManagerFactory;
     }
 }
