@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,8 @@ import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.zone.Chain;
 
+import io.netty.util.Timer;
+
 public class MemoryBlockHeaderManager implements BlockHeaderManager {
     private Logger logger = LoggerFactory.getLogger(MemoryBlockHeaderManager.class);
     private ThreadPoolTaskExecutor threadPool;
@@ -21,6 +24,8 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     private LinkedList<BlockHeader> blockHeaderCache = new LinkedList<BlockHeader>();
     private Chain chain;
     private boolean running = false;
+    private Timer timer;
+    private long getBlockNumberDelay = 1000;
     private int maxCacheSize = 20;
     
     public void onGetBlockNumber(Exception e, long blockNumber) {
@@ -34,7 +39,7 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     			chain.getDriver().asyncGetBlockHeader(blockNumber, chain.chooseConnection(), new Driver.GetBlockHeaderCallback() {
 					@Override
 					public void onResponse(Exception e, BlockHeader blockHeader) {
-						onGetBlockHeader(e, blockHeader, blockNumber);
+						onSyncBlockHeader(e, blockHeader, blockNumber);
 					}
 				});
     		}
@@ -42,22 +47,25 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     			chain.getDriver().asyncGetBlockHeader(current + 1, chain.chooseConnection(), new Driver.GetBlockHeaderCallback() {
 					@Override
 					public void onResponse(Exception e, BlockHeader blockHeader) {
-						onGetBlockHeader(e, blockHeader, blockNumber);
+						onSyncBlockHeader(e, blockHeader, blockNumber);
 					}
 				});
     		}
     	}
     	else {
-    		chain.getDriver().asyncGetBlockNumber(chain.chooseConnection(), new Driver.GetBlockNumberCallback() {
-				@Override
-				public void onResponse(Exception e, long blockNumber) {
-					onGetBlockNumber(e, blockNumber);
-				}
-			});
+    		timer.newTimeout((timeout) -> {
+    			chain.getDriver().asyncGetBlockNumber(chain.chooseConnection(), new Driver.GetBlockNumberCallback() {
+    				@Override
+    				public void onResponse(Exception e, long blockNumber) {
+    					onGetBlockNumber(e, blockNumber);
+    				}
+    			});
+    		}, getBlockNumberDelay, TimeUnit.MILLISECONDS);
+    		
     	}
     }
     
-    public void onGetBlockHeader(Exception e, BlockHeader blockHeader, long target) {
+    public void onSyncBlockHeader(Exception e, BlockHeader blockHeader, long target) {
     	blockHeaderCache.add(blockHeader);
     	List<GetBlockHeaderCallback> callbacks = getBlockHaderCallbacks.get(blockHeader.getNumber());
     	if(callbacks != null) {
@@ -80,7 +88,7 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     		chain.getDriver().asyncGetBlockHeader(blockHeader.getNumber() + 1, chain.chooseConnection(), new Driver.GetBlockHeaderCallback() {
 				@Override
 				public void onResponse(Exception e, BlockHeader blockHeader) {
-					onGetBlockHeader(e, blockHeader, target);
+					onSyncBlockHeader(e, blockHeader, target);
 				}
 			});
     	}
@@ -139,10 +147,14 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
 			@Override
 			public void run() {
 				if(blockHeaderCache.isEmpty()) {
-					callback.onResponse(null, 0);
+					threadPool.execute(() -> {
+						callback.onResponse(null, 0);
+					});
 				}
 				else {
-					callback.onResponse(null, blockHeaderCache.peekLast().getNumber());
+					threadPool.execute(() -> {
+						callback.onResponse(null, blockHeaderCache.peekLast().getNumber());
+					});
 				}
 			}
 		});
@@ -150,7 +162,7 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
 
     @Override
     public void asyncGetBlockHeader(long blockNumber, GetBlockHeaderCallback callback) {
-    	if(blockHeaderCache.isEmpty() || blockHeaderCache.peekFirst().getNumber() < blockNumber) {
+    	if(blockHeaderCache.isEmpty() || blockNumber < blockHeaderCache.peekFirst().getNumber()) {
 			chain.getDriver().asyncGetBlockHeader(blockNumber, chain.chooseConnection(), new Driver.GetBlockHeaderCallback() {
 				@Override
 				public void onResponse(Exception e, BlockHeader blockHeader) {
@@ -162,6 +174,8 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     		if(!getBlockHaderCallbacks.containsKey(blockNumber)) {
     			getBlockHaderCallbacks.put(blockNumber, new LinkedList<GetBlockHeaderCallback>());
     		}
+    		
+    		getBlockHaderCallbacks.get(blockNumber).add(callback);
     	}
     	else {
     		for(BlockHeader blockHeader: blockHeaderCache) {
@@ -193,6 +207,22 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
 
 	public void setChain(Chain chain) {
 		this.chain = chain;
+	}
+	
+	public Timer getTimer() {
+		return timer;
+	}
+
+	public void setTimer(Timer timer) {
+		this.timer = timer;
+	}
+	
+	public long getGetBlockNumberDelay() {
+		return getBlockNumberDelay;
+	}
+
+	public void setGetBlockNumberDelay(long getBlockNumberDelay) {
+		this.getBlockNumberDelay = getBlockNumberDelay;
 	}
 
 	public int getMaxCacheSize() {
