@@ -92,6 +92,8 @@ public class URIHandlerDispatcherTest {
         final RestResponse[] restResp = {null};
         uriHandler.handle(
                 null,
+                null,
+                null,
                 new URIHandler.Callback() {
                     @Override
                     public void onResponse(RestResponse restResponse) {

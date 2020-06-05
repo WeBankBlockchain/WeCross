@@ -31,6 +31,9 @@ public class RPCConfig {
     private Resource sslCert;
     private Resource sslKey;
 
+    private Long threadNum;
+    private Long threadQueueCapacity;
+
     public Resource getCaCert() {
         return caCert;
     }
@@ -79,6 +82,22 @@ public class RPCConfig {
         this.sslSwitch = sslSwitch;
     }
 
+    public Long getThreadNum() {
+        return threadNum;
+    }
+
+    public void setThreadNum(Long threadNum) {
+        this.threadNum = threadNum;
+    }
+
+    public Long getThreadQueueCapacity() {
+        return threadQueueCapacity;
+    }
+
+    public void setThreadQueueCapacity(Long threadQueueCapacity) {
+        this.threadQueueCapacity = threadQueueCapacity;
+    }
+
     @Override
     public String toString() {
         return "RPCConfig{"
@@ -95,6 +114,10 @@ public class RPCConfig {
                 + sslCert
                 + ", sslKey="
                 + sslKey
+                + ", threadNum="
+                + threadNum
+                + ", threadQueueCapacity="
+                + threadQueueCapacity
                 + '}';
     }
 }
