@@ -23,13 +23,12 @@
     sslKey = 'classpath:ssl.key'
     peers = ['127.0.0.1:25501']
     threadNum = 16
-    threadQueueCapacity = 10000
+    threadQueueCapacity = 100000
 
-[advanced]
-    [resourceThreadPool]
-        corePoolSize = 8
-        maxPoolSize = 8
-        queueCapacity = 5000
+[advanced.resourceThreadPool]
+    corePoolSize = 8
+    maxPoolSize = 8
+    queueCapacity = 5000
 
 
 #[[htlc]]
