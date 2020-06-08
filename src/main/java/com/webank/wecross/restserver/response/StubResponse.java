@@ -2,7 +2,6 @@ package com.webank.wecross.restserver.response;
 
 import com.webank.wecross.stub.StubFactory;
 import com.webank.wecross.stubmanager.StubManager;
-
 import java.util.Map;
 
 public class StubResponse {

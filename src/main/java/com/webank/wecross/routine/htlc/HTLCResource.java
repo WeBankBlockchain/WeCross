@@ -19,7 +19,6 @@ import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.stubmanager.BlockHeaderManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -303,8 +302,7 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public void setBlockHeaderManager(
-            BlockHeaderManager resourceBlockHeaderManager) {
+    public void setBlockHeaderManager(BlockHeaderManager resourceBlockHeaderManager) {
         getSelfResource().setBlockHeaderManager(resourceBlockHeaderManager);
     }
 

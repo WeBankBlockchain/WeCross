@@ -12,7 +12,6 @@ import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.stubmanager.BlockHeaderManager;
-
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
@@ -109,8 +108,8 @@ public class Resource {
 
     public void onRemoteTransaction(Request request, Connection.Callback callback) {
         if (driver.isTransaction(request)) {
-        	
-        	/*
+
+            /*
             TransactionContext<TransactionRequest> transactionRequest =
                     driver.decodeTransactionRequest(request.getData());
                     */
@@ -181,8 +180,7 @@ public class Resource {
         return blockHeaderManager;
     }
 
-    public void setBlockHeaderManager(
-            BlockHeaderManager resourceBlockHeaderManager) {
+    public void setBlockHeaderManager(BlockHeaderManager resourceBlockHeaderManager) {
         this.blockHeaderManager = resourceBlockHeaderManager;
     }
 

@@ -6,7 +6,6 @@ import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.StubFactory;
-import com.webank.wecross.stubmanager.MemoryBlockHeaderManager;
 import com.webank.wecross.stubmanager.MemoryBlockHeaderManagerFactory;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.utils.ConfigUtils;

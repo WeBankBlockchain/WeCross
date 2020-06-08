@@ -2,10 +2,10 @@ package com.webank.wecross.stub;
 
 public interface StubFactory {
     public String version = "1.0.0";
-    
+
     /**
      * init a stub
-     * 
+     *
      * @param context
      */
     public void init(WeCrossContext context);

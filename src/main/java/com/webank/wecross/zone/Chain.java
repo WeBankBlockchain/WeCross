@@ -5,7 +5,6 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stubmanager.BlockHeaderManager;
-
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
@@ -96,10 +95,10 @@ public class Chain {
     }
 
     public BlockHeaderManager getBlockHeaderManager() {
-		return blockHeaderManager;
-	}
+        return blockHeaderManager;
+    }
 
-	public void setBlockHeaderManager(BlockHeaderManager blockHeaderManager) {
-		this.blockHeaderManager = blockHeaderManager;
-	}
+    public void setBlockHeaderManager(BlockHeaderManager blockHeaderManager) {
+        this.blockHeaderManager = blockHeaderManager;
+    }
 }

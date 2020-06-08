@@ -42,7 +42,7 @@ public interface Driver {
     public TransactionResponse call(
             TransactionContext<TransactionRequest> request, Connection connection)
             throws TransactionException;
-    
+
     /**
      * Async Call the interface of contract or chaincode Just fake async for compatibility, you need
      * to override this function
@@ -56,7 +56,7 @@ public interface Driver {
             TransactionContext<TransactionRequest> request,
             Connection connection,
             Driver.Callback callback);
-    
+
     void asyncCallByProxy(
             TransactionContext<TransactionRequest> request,
             Connection connection,
@@ -71,7 +71,7 @@ public interface Driver {
     public TransactionResponse sendTransaction(
             TransactionContext<TransactionRequest> request, Connection connection)
             throws TransactionException;
-    
+
     /**
      * Async transaction the interface of contract or chaincode Just fake async for compatibility,
      * you need to override this function
@@ -85,7 +85,7 @@ public interface Driver {
             TransactionContext<TransactionRequest> request,
             Connection connection,
             Driver.Callback callback);
-    
+
     void asyncSendTransactionByProxy(
             TransactionContext<TransactionRequest> request,
             Connection connection,
@@ -97,9 +97,9 @@ public interface Driver {
      * @return block number
      */
     public interface GetBlockNumberCallback {
-    	public void onResponse(Exception e, long blockNumber);
+        public void onResponse(Exception e, long blockNumber);
     }
-    
+
     public void asyncGetBlockNumber(Connection connection, GetBlockNumberCallback callback);
 
     /**
@@ -109,11 +109,12 @@ public interface Driver {
      * @return BlockHeader
      */
     public interface GetBlockHeaderCallback {
-    	public void onResponse(Exception e, BlockHeader blockHeader);
+        public void onResponse(Exception e, BlockHeader blockHeader);
     }
-    
-    public void asyncGetBlockHeader(long blockNumber, Connection connection, GetBlockHeaderCallback callback);
-    
+
+    public void asyncGetBlockHeader(
+            long blockNumber, Connection connection, GetBlockHeaderCallback callback);
+
     /**
      * Get verified transaction info of the Chain
      *
@@ -128,18 +129,22 @@ public interface Driver {
             long blockNumber,
             BlockHeaderManager blockHeaderManager,
             Connection connection);
-    
+
     interface CustomCommandCallback {
-    	void onResponse(
-                TransactionException transactionException, Object response);
+        void onResponse(TransactionException transactionException, Object response);
     }
 
     /**
      * Custom command
-     * 
+     *
      * @param path
      * @param args
      * @param connection
      */
-    public void asyncCustomCommand(String command, Path path, Object[] args, CustomCommandCallback callback, Connection connection);
+    public void asyncCustomCommand(
+            String command,
+            Path path,
+            Object[] args,
+            CustomCommandCallback callback,
+            Connection connection);
 }

@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.Map;
 
 public class TransactionRequest {
-	private String path;
+    private String path;
     private String method;
     private String[] args;
-    
+
     // Optional args
     // transactionID, peers, etc...
     private Map<String, Object> options;
@@ -34,20 +34,20 @@ public class TransactionRequest {
     public void setArgs(String[] args) {
         this.args = args;
     }
-    
-    public Map<String, Object> getOptions() {
-		return options;
-	}
 
-	public void setOptions(Map<String, Object> options) {
-		this.options = options;
-	}
+    public Map<String, Object> getOptions() {
+        return options;
+    }
+
+    public void setOptions(Map<String, Object> options) {
+        this.options = options;
+    }
 
     @Override
     public String toString() {
         return "TransactionRequest{"
-        		+ "path='"
-        		+ path
+                + "path='"
+                + path
                 + "', method='"
                 + method
                 + '\''

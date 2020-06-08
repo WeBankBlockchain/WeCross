@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ZoneManager {
-	private Logger logger = LoggerFactory.getLogger(ZoneManager.class);
+    private Logger logger = LoggerFactory.getLogger(ZoneManager.class);
     private Map<String, Zone> zones = new HashMap<>();
     private AtomicInteger seq = new AtomicInteger(1);
     private P2PService p2PService;
@@ -40,26 +40,25 @@ public class ZoneManager {
                 if (chain != null) {
                     Resource resource = chain.getResources().get(path.getResource());
 
-                    if(resource != null) {
-                    	return resource;
-                    }
-                    else {
-                    	ResourceInfo resourceInfo = new ResourceInfo();
-                    	resourceInfo.setName(path.getResource());
-                    	
-                    	// not found, build default resource
+                    if (resource != null) {
+                        return resource;
+                    } else {
+                        ResourceInfo resourceInfo = new ResourceInfo();
+                        resourceInfo.setName(path.getResource());
+
+                        // not found, build default resource
                         resource = new Resource();
                         resource.setBlockHeaderManager(chain.getBlockHeaderManager());
                         resource.setDriver(chain.getDriver());
                         resource.setType("Resource");
                         resource.setResourceInfo(resourceInfo);
-                        
+
                         chain.getResources().put(path.getResource(), resource);
                         return resource;
                     }
                 }
             }
-            
+
             return null;
         } catch (Exception e) {
             logger.debug("Exception: " + e);
@@ -150,9 +149,9 @@ public class ZoneManager {
                     String blockPath = path.getZone() + "." + path.getChain();
                     MemoryBlockHeaderManager resourceBlockHeaderManager =
                             memoryBlockHeaderManagerFactory.build(chain);
-                    
+
                     chain.setBlockHeaderManager(resourceBlockHeaderManager);
-                    
+
                     chain.addConnection(peer, remoteConnection);
                     chain.start();
 
@@ -232,8 +231,7 @@ public class ZoneManager {
                 if (chain.getResources().isEmpty()) {
                     chain.stop();
                     logger.info(
-                            "Stop block header sync: {}",
-                            path.getZone() + "." + path.getChain());
+                            "Stop block header sync: {}", path.getZone() + "." + path.getChain());
 
                     zone.getChains().remove(path.getChain());
                 }
