@@ -134,6 +134,7 @@ public class HTLCResource extends Resource {
                 response.setErrorMessage("decode transaction request failed");
                 logger.info("onRemoteTransaction, response: {}", response.toString());
                 callback.onResponse(response);
+                return;
             }
 
             TransactionRequest transactionRequest = context.getData();
@@ -147,7 +148,10 @@ public class HTLCResource extends Resource {
                 response.setErrorMessage("HTLCResource doesn't allow peers to call " + method);
                 logger.info("onRemoteTransaction, response: {}", response.toString());
                 callback.onResponse(response);
-            } else if (transactionRequest.getMethod().equalsIgnoreCase("unlock")) {
+                return;
+            }
+
+            if (transactionRequest.getMethod().equalsIgnoreCase("unlock")) {
                 try {
                     verifyLock(transactionRequest);
                 } catch (WeCrossException e) {
@@ -156,6 +160,7 @@ public class HTLCResource extends Resource {
                     response.setErrorMessage(e.getInternalMessage());
                     logger.info("onRemoteTransaction, response: {}", response.toString());
                     callback.onResponse(response);
+                    return;
                 }
             }
         }
