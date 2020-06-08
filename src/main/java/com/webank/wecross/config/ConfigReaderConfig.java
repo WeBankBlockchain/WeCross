@@ -141,13 +141,13 @@ public class ConfigReaderConfig {
 
         Long threadNum = (Long) p2pMap.get("threadNum");
         if (threadNum == null) {
-            threadNum = new Long(8);
+            threadNum = new Long(16);
             logger.info("threadNum not set, use default: {}", threadNum);
         }
 
         Long threadQueueCapacity = (Long) p2pMap.get("threadQueueCapacity");
         if (threadQueueCapacity == null) {
-            threadQueueCapacity = new Long(10000);
+            threadQueueCapacity = new Long(100000);
             logger.info("threadQueueCapacity not set, use default: {}", threadQueueCapacity);
         }
 
