@@ -39,6 +39,7 @@ public interface Driver {
      * @param connection the connection of a chain
      * @return the transaction response
      */
+    @Deprecated
     public TransactionResponse call(
             TransactionContext<TransactionRequest> request, Connection connection)
             throws TransactionException;
@@ -68,6 +69,7 @@ public interface Driver {
      * @param request the transaction request
      * @return the transaction response
      */
+    @Deprecated
     public TransactionResponse sendTransaction(
             TransactionContext<TransactionRequest> request, Connection connection)
             throws TransactionException;

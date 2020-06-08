@@ -247,7 +247,8 @@ public class P2PProcessor implements NetworkProcessor {
         logger.debug("request string: {}", p2pRequestString);
 
         try {
-            Resource resourceObj = zoneManager.getResource(path);
+            // Resource resourceObj = zoneManager.getResource(path);
+            Resource resourceObj = zoneManager.fetchResource(path);
             if (resourceObj == null) {
                 logger.warn("Unable to find resource: {}.{}.{}", network, chain, resource);
                 throw new Exception("Resource not found");

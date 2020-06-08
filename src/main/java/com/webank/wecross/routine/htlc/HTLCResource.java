@@ -55,12 +55,6 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public TransactionResponse call(TransactionContext<TransactionRequest> request)
-            throws TransactionException {
-        return getSelfResource().call(request);
-    }
-
-    @Override
     public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request)
             throws TransactionException {
         try {

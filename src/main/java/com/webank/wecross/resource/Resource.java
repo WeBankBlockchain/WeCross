@@ -61,11 +61,12 @@ public class Resource {
         }
     }
 
-    public abstract static class Callback {
-        public abstract void onTransactionResponse(
+    public interface Callback {
+        public void onTransactionResponse(
                 TransactionException transactionException, TransactionResponse transactionResponse);
     }
 
+    @Deprecated
     public TransactionResponse call(TransactionContext<TransactionRequest> request)
             throws TransactionException {
         return driver.call(request, chooseConnection());
@@ -86,6 +87,7 @@ public class Resource {
                 });
     }
 
+    @Deprecated
     public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request)
             throws TransactionException {
         return driver.sendTransaction(request, chooseConnection());
