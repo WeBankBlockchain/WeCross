@@ -1,4 +1,8 @@
-pragma solidity ^0.4.24;
+/* this is a sample ledger
+    @author shuoyanhe
+*/
+
+pragma solidity >=0.4.22 <0.6.0;
 
 library Roles {
     struct Role {
@@ -274,7 +278,7 @@ contract LedgerSample is IssuerRole, Suspendable {
         return _allowed[owner][spender];
     }
 
-    function send(address to, uint256 value, bytes data) public whenNotSuspended {
+    function send(address to, uint256 value, bytes memory data) public whenNotSuspended {
         _send(msg.sender, to, value, data);
         // require(_checkOnLedgerSampleReceived(msg.sender, to, value, data), "LedgerSample: send to non LedgerSampleReceiver implementer");
 
@@ -297,7 +301,7 @@ contract LedgerSample is IssuerRole, Suspendable {
     /**
      * @dev Send assets from one address to another.
      */
-    function sendFrom(address from, address to, uint256 value, bytes data) public whenNotSuspended {
+    function sendFrom(address from, address to, uint256 value, bytes memory data) public whenNotSuspended {
         _send(from, to, value, data);
         _approve(from, msg.sender, _allowed[from][msg.sender].sub(value));
         //add
@@ -313,7 +317,7 @@ contract LedgerSample is IssuerRole, Suspendable {
 //    }
 
 
-    function batchSend(address[] to, uint256[] values, bytes data) public whenNotSuspended {
+    function batchSend(address[] memory to, uint256[] memory values, bytes memory data) public whenNotSuspended {
 
         // MUST Throw on errors
 
@@ -327,7 +331,7 @@ contract LedgerSample is IssuerRole, Suspendable {
     }
 
 
-    function _checkOnLedgerSampleReceived(address from, address to, uint256 value, bytes data)
+    function _checkOnLedgerSampleReceived(address from, address to, uint256 value, bytes memory data)
     internal returns (bool)
     {
         if (!to.isContract()) {
@@ -355,14 +359,14 @@ contract LedgerSample is IssuerRole, Suspendable {
         return true;
     }
 
-    function destroy(uint256 value, bytes data) public {
+    function destroy(uint256 value, bytes memory data) public {
         _destroy(msg.sender, value, data);
     }
 
     /**
      * @dev Burns a specific amount of assets from the target address and decrements allowance.
      */
-    function destroyFrom(address from, uint256 value, bytes data) public {
+    function destroyFrom(address from, uint256 value, bytes  memory data) public {
         _destroyFrom(from, value, data);
     }
 
@@ -386,14 +390,14 @@ contract LedgerSample is IssuerRole, Suspendable {
     }
 
 
-    function issue(address to, uint256 value, bytes data) public onlyIssuer returns (bool) {
+    function issue(address to, uint256 value, bytes memory data) public onlyIssuer returns (bool) {
         _issue(to, value, data);
         return true;
     }
     /**
      * @dev Send asset for a specified addresses.
      */
-    function _send(address from, address to, uint256 value, bytes data) internal {
+    function _send(address from, address to, uint256 value, bytes memory data) internal {
         require(to != address(0), "LedgerSample: send to the zero address");
 
         _balances[from] = _balances[from].sub(value);
@@ -404,7 +408,7 @@ contract LedgerSample is IssuerRole, Suspendable {
     /**
      * @dev Internal function that issues an amount of the asset and assigns it to
      */
-    function _issue(address account, uint256 value, bytes data) internal {
+    function _issue(address account, uint256 value, bytes memory data) internal {
         require(account != address(0), "LedgerSample: issue to the zero address");
 
         _totalAmount = _totalAmount.add(value);
@@ -415,7 +419,7 @@ contract LedgerSample is IssuerRole, Suspendable {
     /**
      * @dev Internal function that destroys an amount of the asset of a given
      */
-    function _destroy(address account, uint256 value, bytes data) internal {
+    function _destroy(address account, uint256 value, bytes memory data) internal {
         require(account != address(0), "LedgerSample: destroy from the zero address");
 
         _totalAmount = _totalAmount.sub(value);
@@ -437,7 +441,7 @@ contract LedgerSample is IssuerRole, Suspendable {
     /**
      * @dev Internal function that destroys an amount of the asset of a given
      */
-    function _destroyFrom(address account, uint256 value, bytes data) internal {
+    function _destroyFrom(address account, uint256 value, bytes memory data) internal {
         _destroy(account, value, data);
         _approve(account, msg.sender, _allowed[account][msg.sender].sub(value));
     }

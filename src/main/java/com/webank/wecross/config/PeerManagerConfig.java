@@ -6,7 +6,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class PeerManagerConfig {
-    private long peerActiveTimeout = 17000; // 17s
+    // 17s
+    private long peerActiveTimeout = 17000;
 
     @Bean
     public PeerManager newPeerManager() {

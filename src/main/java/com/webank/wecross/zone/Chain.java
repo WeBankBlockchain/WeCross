@@ -91,7 +91,7 @@ public class Chain {
                     mainLoopLock.wait();
                 }
             }
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             logger.info("Chain mainLoop interrupted");
         }
     }

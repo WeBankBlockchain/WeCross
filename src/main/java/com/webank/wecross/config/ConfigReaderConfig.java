@@ -141,8 +141,14 @@ public class ConfigReaderConfig {
 
         Long threadNum = (Long) p2pMap.get("threadNum");
         if (threadNum == null) {
-            logger.info("threadNum not set, use default");
-            threadNum = new Long(500);
+            threadNum = new Long(8);
+            logger.info("threadNum not set, use default: {}", threadNum);
+        }
+
+        Long threadQueueCapacity = (Long) p2pMap.get("threadQueueCapacity");
+        if (threadQueueCapacity == null) {
+            threadQueueCapacity = new Long(10000);
+            logger.info("threadQueueCapacity not set, use default: {}", threadQueueCapacity);
         }
 
         p2PConfig.setCaCert(resolver.getResource(caCertPath));
@@ -152,6 +158,7 @@ public class ConfigReaderConfig {
         p2PConfig.setListenPort(listenPort);
         p2PConfig.setPeers(peers);
         p2PConfig.setThreadNum(threadNum);
+        p2PConfig.setThreadQueueCapacity(threadQueueCapacity);
 
         return p2PConfig;
     }
@@ -177,6 +184,20 @@ public class ConfigReaderConfig {
                             + WeCrossDefault.MAIN_CONFIG_FILE;
             throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
         }
+
+        Long threadNum = (Long) rpcMap.get("threadNum");
+        if (threadNum == null) {
+            threadNum = new Long(16);
+            logger.info("rpc threadNum not set, use default: {}", threadNum);
+        }
+        rpcConfig.setThreadNum(threadNum);
+
+        Long threadQueueCapacity = (Long) rpcMap.get("threadQueueCapacity");
+        if (threadQueueCapacity == null) {
+            threadQueueCapacity = new Long(10000);
+            logger.info("rpc threadQueueCapacity not set, use default: {}", threadQueueCapacity);
+        }
+        rpcConfig.setThreadQueueCapacity(threadQueueCapacity);
 
         Long sslSwitch = (Long) rpcMap.get("sslSwitch");
         if (sslSwitch == null) {

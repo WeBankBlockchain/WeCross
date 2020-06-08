@@ -4,7 +4,6 @@ import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.request.StateRequest;
 import com.webank.wecross.restserver.response.StateResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
 
 /** GET/POST /state */
 public class StateURIHandler implements URIHandler {
@@ -26,7 +25,7 @@ public class StateURIHandler implements URIHandler {
     }
 
     @Override
-    public void handle(FullHttpRequest httpRequest, Callback callback) {
+    public void handle(String uri, String method, String content, Callback callback) {
 
         StateResponse stateResponse = host.getState(new StateRequest());
         RestResponse<StateResponse> restResponse = new RestResponse<>();

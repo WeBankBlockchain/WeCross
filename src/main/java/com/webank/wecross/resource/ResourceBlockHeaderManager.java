@@ -12,11 +12,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 public class ResourceBlockHeaderManager implements BlockHeaderManager {
     private Logger logger = LoggerFactory.getLogger(ResourceBlockHeaderManager.class);
-    private static final long callbackTimeout = 5000; // ms
+    private static final long callbackTimeout = 20000; // ms
     private Queue<Runnable> blockHeaderCallbackTasks = new ConcurrentLinkedQueue<>();
     private BlockHeaderStorage blockHeaderStorage;
     private Chain chain;
@@ -53,8 +54,8 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
                         clearTimeoutCallback();
                     }
                 },
-                callbackTimeout,
-                callbackTimeout);
+                callbackTimeout / 10,
+                callbackTimeout / 10);
     }
 
     @Override
@@ -64,7 +65,6 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
 
     @Override
     public byte[] getBlockHeader(long blockNumber) {
-        byte[] data = null;
         CompletableFuture<byte[]> future = new CompletableFuture<>();
         asyncGetBlockHeader(
                 blockNumber,
@@ -96,26 +96,52 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
 
     private void asyncGetBlockHeaderInternal(
             long blockNumber, BlockHeaderCallback callback, long timeout) {
-        BlockHeaderCache cache = this.blockHeaderCache;
-        if (cache.getBlockNumber() == blockNumber) {
-            callback.onBlockHeader(cache.blockHeader);
-        } else if (cache.getBlockNumber() > blockNumber) {
-            callback.onBlockHeader(this.blockHeaderStorage.readBlockHeader(blockNumber));
-        } else if (System.currentTimeMillis() > timeout) {
-            logger.warn("asyncGetBlockHeader timeout, number:" + blockNumber);
-            callback.onBlockHeader(null);
-        } else {
+
+        if (!tryGetBlockHeader(blockNumber, callback, timeout)) {
             // async request
             synchronized (this) {
-                getBlockHeaderCallbackTasks()
-                        .add(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        asyncGetBlockHeaderInternal(blockNumber, callback, timeout);
-                                    }
-                                });
+                // Try again in blocking area
+                if (!tryGetBlockHeader(blockNumber, callback, timeout)) {
+                    getBlockHeaderCallbackTasks()
+                            .add(
+                                    new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            asyncGetBlockHeaderInternal(
+                                                    blockNumber, callback, timeout);
+                                        }
+                                    });
+                }
             }
+        }
+    }
+
+    // return callback has called
+    private boolean tryGetBlockHeader(
+            long blockNumber, BlockHeaderCallback callback, long timeout) {
+        BlockHeaderCache cache = this.blockHeaderCache;
+        if (cache.getBlockNumber() < 0) {
+            // Cache has not been initialized
+            byte[] blockHeader = this.blockHeaderStorage.readBlockHeader(blockNumber);
+            if (blockHeader != null) {
+                onBlockHeader(blockNumber, blockHeader);
+                callback.onBlockHeader(blockHeader);
+                return true;
+            }
+        } else if (cache.getBlockNumber() == blockNumber) {
+            callback.onBlockHeader(cache.blockHeader);
+            return true;
+        } else if (cache.getBlockNumber() > blockNumber) {
+            callback.onBlockHeader(this.blockHeaderStorage.readBlockHeader(blockNumber));
+            return true;
+        }
+
+        if (System.currentTimeMillis() > timeout) {
+            logger.warn("asyncGetBlockHeader timeout, number:" + blockNumber);
+            callback.onBlockHeader(null);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -138,10 +164,26 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
 
     private void runBlockHeaderCallbackTasks() {
         Queue<Runnable> tasks = getBlockHeaderCallbackTasks();
-        setBlockHeaderCallbackTasks(new ConcurrentLinkedQueue<>());
 
+        ConcurrentLinkedQueue<Runnable> concurrentLinkedQueue = new ConcurrentLinkedQueue<>();
+        setBlockHeaderCallbackTasks(concurrentLinkedQueue);
+
+        boolean writeBack = false;
         for (Runnable task : tasks) {
-            threadPool.execute(task);
+            if (writeBack) {
+                concurrentLinkedQueue.add(task);
+                if (logger.isDebugEnabled()) {
+                    logger.debug(" write task back to queue, task: {}", task);
+                }
+            } else {
+                try {
+                    threadPool.execute(task);
+                } catch (TaskRejectedException e) {
+                    logger.warn(" TaskRejectedException: {}", e);
+                    concurrentLinkedQueue.add(task);
+                    writeBack = true;
+                }
+            }
         }
     }
 
