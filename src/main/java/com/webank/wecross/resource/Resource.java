@@ -74,7 +74,7 @@ public class Resource {
 
     public void asyncCall(
             TransactionContext<TransactionRequest> request, Resource.Callback callback) {
-        driver.asyncCall(
+        driver.asyncCallByProxy(
                 request,
                 chooseConnection(),
                 new Driver.Callback() {
@@ -94,7 +94,7 @@ public class Resource {
 
     public void asyncSendTransaction(
             TransactionContext<TransactionRequest> request, Resource.Callback callback) {
-        driver.asyncSendTransaction(
+        driver.asyncSendTransactionByProxy(
                 request,
                 chooseConnection(),
                 new Driver.Callback() {
@@ -109,8 +109,11 @@ public class Resource {
 
     public void onRemoteTransaction(Request request, Connection.Callback callback) {
         if (driver.isTransaction(request)) {
+        	
+        	/*
             TransactionContext<TransactionRequest> transactionRequest =
                     driver.decodeTransactionRequest(request.getData());
+                    */
 
             // TODO: check request
 
