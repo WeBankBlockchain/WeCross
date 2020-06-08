@@ -2,7 +2,6 @@ package com.webank.wecross.routine.htlc;
 
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.exception.WeCrossException.ErrorCode;
-import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Resource;
@@ -19,6 +18,11 @@ import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.stubmanager.BlockHeaderManager;
+import com.webank.wecross.zone.ZoneManager;
+
+import java.util.Set;
+import java.util.HashSet;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,91 +30,209 @@ public class HTLCResource extends Resource {
 
     private Logger logger = LoggerFactory.getLogger(HTLCResource.class);
 
-    private WeCrossHost weCrossHost;
-    private boolean isFresh = false;
-    private Resource freshSelfResource;
-    private Resource freshCounterpartyResource;
-    private Account account;
+    private ZoneManager zoneManager;
     private Path selfPath;
+    private Account account1;
     private Path counterpartyPath;
+    private Account account2;
     private String counterpartyAddress;
+    private static final Set<String> P2P_ACCESS_WHITE_LIST =
+            new HashSet<String>() {
+                {
+                    add("lock");
+                    add("unlock");
+                    add("balanceOf");
+                    add("getNewProposalTxInfo");
+                    add("getCounterpartyHtlcAddress");
+                }
+            };
 
     public HTLCResource() {}
 
-    public HTLCResource(
-            boolean isFresh,
-            Resource freshSelfResource,
-            Resource freshCounterpartyResource,
-            String counterpartyAddress) {
-        this.isFresh = isFresh;
-        this.freshSelfResource = freshSelfResource;
-        this.freshCounterpartyResource = freshCounterpartyResource;
-        this.counterpartyAddress = counterpartyAddress;
-    }
-
-    public HTLCResource(WeCrossHost weCrossHost, Path selfPath, Path counterpartyPath) {
-        this.weCrossHost = weCrossHost;
+    public HTLCResource(ZoneManager zoneManager, Path selfPath, Path counterpartyPath) {
+        this.zoneManager = zoneManager;
         this.selfPath = selfPath;
         this.counterpartyPath = counterpartyPath;
+    }
+
+    interface Callback {
+        void onReturn(WeCrossException exception);
+    }
+
+    @Override
+    public void asyncCall(
+            TransactionContext<TransactionRequest> request, Resource.Callback callback) {
+        getSelfResource().asyncCall(request, callback);
+    }
+
+    @Override
+    public void asyncSendTransaction(
+            TransactionContext<TransactionRequest> request, Resource.Callback callback) {
+        if (getSelfResource().isHasLocalConnection()) {
+            TransactionRequest transactionRequest = request.getData();
+            if (RoutineDefault.UNLOCK_METHOD.equals(transactionRequest.getMethod())) {
+                handleUnlockRequest(
+                        request.getData(),
+                        exception -> {
+                            if (exception != null) {
+                                TransactionResponse transactionResponse = new TransactionResponse();
+                                transactionResponse.setErrorCode(exception.getErrorCode());
+                                transactionResponse.setErrorMessage(exception.getMessage());
+                                callback.onTransactionResponse(
+                                        new TransactionException(0, null), transactionResponse);
+                            } else {
+                                getSelfResource().asyncSendTransaction(request, callback);
+                            }
+                        });
+            } else {
+                getSelfResource().asyncSendTransaction(request, callback);
+            }
+        } else {
+            getSelfResource().asyncSendTransaction(request, callback);
+        }
+    }
+
+    private void handleUnlockRequest(TransactionRequest request, Callback callback) {
+        String[] args = request.getArgs();
+        if (args == null || args.length != 2) {
+            callback.onReturn(new WeCrossException(HTLCErrorCode.UNLOCK_ERROR, "incomplete args"));
+            return;
+        }
+
+        String hash = args[0];
+        HTLC htlc = new AssetHTLC();
+        htlc.getProposalInfo(
+                getSelfResource(),
+                account1,
+                hash,
+                (exception, result) -> {
+                    if (exception != null) {
+                        callback.onReturn(exception);
+                        return;
+                    }
+
+                    if (result == null || RoutineDefault.NULL_FLAG.equals(result)) {
+                        callback.onReturn(
+                                new WeCrossException(
+                                        HTLCErrorCode.UNLOCK_ERROR, "proposal not found"));
+                        return;
+                    }
+
+                    HTLCProposal proposal;
+                    try {
+                        // decode proposal
+                        proposal = htlc.decodeProposal(result.split(RoutineDefault.SPLIT_REGEX));
+                    } catch (WeCrossException e) {
+                        callback.onReturn(
+                                new WeCrossException(
+                                        HTLCErrorCode.UNLOCK_ERROR, "failed to decode proposal"));
+                        return;
+                    }
+
+                    if (!proposal.isInitiator() && !proposal.isCounterpartyUnlocked()) {
+                        // participant will unlock initiator firstly
+                        unlockCounterparty(
+                                request,
+                                exception1 -> {
+                                    if (exception1 != null) {
+                                        callback.onReturn(exception1);
+                                        return;
+                                    }
+
+                                    logger.trace("Participant unlocks initiator successfully!");
+                                    htlc.setCounterpartyUnlockState(
+                                            getSelfResource(),
+                                            account1,
+                                            hash,
+                                            (exception2, result2) -> callback.onReturn(exception2));
+                                });
+                    } else {
+                        callback.onReturn(null);
+                    }
+                });
+    }
+
+    private void unlockCounterparty(TransactionRequest request, Callback callback) {
+        logger.trace("Participant receives a unlock request, and unlocks initiator firstly!");
+        TransactionContext<TransactionRequest> transactionContext =
+                new TransactionContext<>(
+                        request,
+                        account2,
+                        getCounterpartyResource().getResourceInfo(),
+                        getCounterpartyResource().getBlockHeaderManager());
+        getCounterpartyResource()
+                .asyncSendTransaction(
+                        transactionContext,
+                        new Resource.Callback() {
+                            @Override
+                            public void onTransactionResponse(
+                                    TransactionException transactionException,
+                                    TransactionResponse transactionResponse) {
+                                if (transactionException != null
+                                        && !transactionException.isSuccess()) {
+                                    callback.onReturn(
+                                            new WeCrossException(
+                                                    HTLCErrorCode.UNLOCK_ERROR,
+                                                    "participant failed to unlock initiator"));
+                                    logger.error(
+                                            "UNLOCK_INITIATOR_ERROR: {}, {}",
+                                            transactionException.getErrorCode(),
+                                            transactionException.getMessage());
+                                    return;
+                                }
+
+                                if (transactionResponse.getErrorCode() != 0) {
+                                    callback.onReturn(
+                                            new WeCrossException(
+                                                    HTLCErrorCode.UNLOCK_ERROR,
+                                                    "participant failed to unlock initiator"));
+                                    logger.error(
+                                            "UNLOCK_INITIATOR_ERROR: {}, {}",
+                                            transactionResponse.getErrorCode(),
+                                            transactionResponse.getErrorMessage());
+                                    return;
+                                }
+
+                                try {
+                                    verifyUnlock(transactionResponse, request.getArgs());
+                                } catch (WeCrossException e) {
+                                    callback.onReturn(e);
+                                    return;
+                                }
+
+                                callback.onReturn(null);
+                            }
+                        });
+    }
+
+    private void verifyUnlock(TransactionResponse transactionResponse, String[] args)
+            throws WeCrossException {
+        HTLC htlc = new AssetHTLC();
+
+        VerifyData verifyData =
+                new VerifyData(
+                        transactionResponse.getBlockNumber(),
+                        transactionResponse.getHash(),
+                        counterpartyAddress,
+                        RoutineDefault.UNLOCK_METHOD,
+                        args,
+                        new String[] {RoutineDefault.SUCCESS_FLAG});
+
+        if (!htlc.verifyHtlcTransaction(getCounterpartyResource(), verifyData)) {
+            throw new WeCrossException(ErrorCode.HTLC_ERROR, "participant failed to verify unlock");
+        }
+    }
+
+    @Override
+    public TransactionResponse call(TransactionContext<TransactionRequest> request)
+            throws TransactionException {
+        return getSelfResource().call(request);
     }
 
     @Override
     public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request)
             throws TransactionException {
-        try {
-            handleSendTransactionRequest(request.getData());
-        } catch (WeCrossException e) {
-            TransactionResponse transactionResponse = new TransactionResponse();
-            transactionResponse.setErrorCode(e.getErrorCode());
-            transactionResponse.setErrorMessage(e.getMessage());
-            return transactionResponse;
-        }
-
         return getSelfResource().sendTransaction(request);
-    }
-
-    // TODO: Add asyncCall (same as implement in Resource.java)
-
-    // TODO: Add asyncSendTransaction (same as implement in Resource.java)
-
-    public void handleSendTransactionRequest(TransactionRequest request) throws WeCrossException {
-        if (request.getMethod().equals("unlock")) {
-            verifyLock(request);
-        }
-    }
-
-    public void verifyLock(TransactionRequest request) throws WeCrossException {
-        String[] args = request.getArgs();
-        if (args == null || args.length != 4) {
-            throw new WeCrossException(
-                    ErrorCode.HTLC_ERROR,
-                    "error in unlock",
-                    HTLCErrorCode.REQUEST_ERROR,
-                    "info of lock transaction not found");
-        }
-
-        // args: h, s, txHash, blockNumber
-        String h = args[0];
-        String txhash = args[2];
-        long bolckNumber = Long.parseLong(args[3]);
-        WeCrossHTLC weCrossHTLC = new WeCrossHTLC();
-
-        VerifyData verifyData =
-                new VerifyData(
-                        bolckNumber,
-                        txhash,
-                        counterpartyAddress,
-                        "lock",
-                        new String[] {h},
-                        new String[] {RoutineDefault.SUCCESS_FLAG});
-
-        if (!weCrossHTLC.verify(getCounterpartyResource(), verifyData)) {
-            throw new WeCrossException(
-                    ErrorCode.HTLC_ERROR,
-                    "error in unlock",
-                    HTLCErrorCode.VERIFY_ERROR,
-                    "verify lock faileds");
-        }
     }
 
     @Override
@@ -118,7 +240,7 @@ public class HTLCResource extends Resource {
         Response response = new Response();
         Driver driver = getDriver();
         if (driver.isTransaction(request)) {
-            logger.info("onRemoteTransaction, request: {}", request.toString());
+            logger.trace("onRemoteTransaction, request: {}", request);
 
             TransactionContext<TransactionRequest> context =
                     driver.decodeTransactionRequest(request.getData());
@@ -126,76 +248,73 @@ public class HTLCResource extends Resource {
             if (context == null) {
                 response.setErrorCode(ErrorCode.DECODE_TRANSACTION_REQUEST_ERROR);
                 response.setErrorMessage("decode transaction request failed");
-                logger.info("onRemoteTransaction, response: {}", response.toString());
+                logger.trace("onRemoteTransaction, response: {}", response);
                 callback.onResponse(response);
+                return;
             }
 
             TransactionRequest transactionRequest = context.getData();
-            logger.info(
-                    "onRemoteTransaction, transactionRequest: {}", transactionRequest.toString());
+            logger.trace("onRemoteTransaction, transactionRequest: {}", transactionRequest);
 
             String method = transactionRequest.getMethod();
-            if (method.equalsIgnoreCase("getSecret") || method.equalsIgnoreCase("init")) {
+            if (RoutineDefault.UNLOCK_METHOD.equals(method)) {
+                handleUnlockRequest(
+                        transactionRequest,
+                        exception -> {
+                            if (exception != null) {
+                                Response response1 = new Response();
+                                response1.setErrorCode(exception.getErrorCode());
+                                response1.setErrorMessage(exception.getMessage());
+                                logger.trace("onRemoteTransaction, response: {}", response1);
+                                callback.onResponse(response1);
+                            } else {
+                                getSelfResource()
+                                        .onRemoteTransaction(
+                                                request,
+                                                response1 -> {
+                                                    logger.trace(
+                                                            "onRemoteTransaction, response: {}",
+                                                            response1);
+                                                    callback.onResponse(response1);
+                                                });
+                            }
+                        });
+                return;
+            }
+
+            if (!P2P_ACCESS_WHITE_LIST.contains(method)) {
                 response = new Response();
                 response.setErrorCode(HTLCErrorCode.NO_PERMISSION);
                 response.setErrorMessage("HTLCResource doesn't allow peers to call " + method);
-                logger.info("onRemoteTransaction, response: {}", response.toString());
+                logger.trace("onRemoteTransaction, response: {}", response);
                 callback.onResponse(response);
-            } else if (transactionRequest.getMethod().equalsIgnoreCase("unlock")) {
-                try {
-                    verifyLock(transactionRequest);
-                } catch (WeCrossException e) {
-                    response = new Response();
-                    response.setErrorCode(HTLCErrorCode.VERIFY_ERROR);
-                    response.setErrorMessage(e.getInternalMessage());
-                    logger.info("onRemoteTransaction, response: {}", response.toString());
-                    callback.onResponse(response);
-                }
+                return;
             }
         }
+
         getSelfResource()
                 .onRemoteTransaction(
                         request,
-                        new Connection.Callback() {
-                            @Override
-                            public void onResponse(Response response) {
-                                logger.trace(
-                                        "onRemoteTransaction, response: {}", response.toString());
-                                callback.onResponse(response);
-                            }
+                        response2 -> {
+                            logger.trace("onRemoteTransaction, response: {}", response2);
+                            callback.onResponse(response2);
                         });
     }
 
-    public boolean isFresh() {
-        return isFresh;
-    }
-
-    public void setFresh(boolean fresh) {
-        isFresh = fresh;
-    }
-
     public Resource getSelfResource() {
-        if (isFresh) {
-            return freshSelfResource;
-        } else {
-            return weCrossHost.getZoneManager().getResource(selfPath);
-        }
+        return zoneManager.getResource(selfPath);
     }
 
     public Resource getCounterpartyResource() {
-        if (isFresh) {
-            return freshCounterpartyResource;
-        } else {
-            return weCrossHost.getZoneManager().getResource(counterpartyPath);
-        }
+        return zoneManager.getResource(counterpartyPath);
     }
 
-    public WeCrossHost getWeCrossHost() {
-        return weCrossHost;
+    public ZoneManager getZoneManager() {
+        return zoneManager;
     }
 
-    public void setWeCrossHost(WeCrossHost weCrossHost) {
-        this.weCrossHost = weCrossHost;
+    public void setZoneManager(ZoneManager zoneManager) {
+        this.zoneManager = zoneManager;
     }
 
     public Path getSelfPath() {
@@ -206,6 +325,14 @@ public class HTLCResource extends Resource {
         this.selfPath = selfPath;
     }
 
+    public Account getAccount1() {
+        return account1;
+    }
+
+    public void setAccount1(Account account1) {
+        this.account1 = account1;
+    }
+
     public Path getCounterpartyPath() {
         return counterpartyPath;
     }
@@ -214,12 +341,12 @@ public class HTLCResource extends Resource {
         this.counterpartyPath = counterpartyPath;
     }
 
-    public Account getAccount() {
-        return account;
+    public Account getAccount2() {
+        return account2;
     }
 
-    public void setAccount(Account account) {
-        this.account = account;
+    public void setAccount2(Account account2) {
+        this.account2 = account2;
     }
 
     public String getCounterpartyAddress() {
@@ -308,18 +435,16 @@ public class HTLCResource extends Resource {
     @Override
     public String toString() {
         return "HTLCResource{"
-                + "isFresh="
-                + isFresh
-                + ", freshSelfResource="
-                + freshSelfResource
-                + ", freshCounterpartyResource="
-                + freshCounterpartyResource
-                + ", account="
-                + account
+                + "zoneManager="
+                + zoneManager
                 + ", selfPath="
                 + selfPath
+                + ", account1="
+                + account1
                 + ", counterpartyPath="
                 + counterpartyPath
+                + ", account2="
+                + account2
                 + ", counterpartyAddress='"
                 + counterpartyAddress
                 + '\''

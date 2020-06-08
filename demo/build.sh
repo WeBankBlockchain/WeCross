@@ -299,11 +299,15 @@ download_wecross()
 download_wecross_console()
 {
     LOG_INFO "Download WeCross Console ..."
-    if [ -e download_console.sh ];then
-        bash download_console.sh -t v1.0.0-rc2
-    else
-        bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_console.sh) -t v1.0.0-rc2
-    fi
+#    if [ -e download_console.sh ];then
+#        bash download_console.sh -t v1.0.0-rc2
+#    else
+#        bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_console.sh) -t v1.0.0-rc2
+#    fi
+    git clone https://github.com/WeBankFinTech/WeCross-Console.git
+    cd WeCross-Console && git checkout dev
+    gradle build -x test && cp -r dist ../dist
+    cd .. && rm -rf WeCross-Console && mv dist WeCross-Console
 }
 
 main()

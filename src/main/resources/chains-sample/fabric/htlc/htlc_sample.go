@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/peer"
@@ -10,6 +11,7 @@ const (
 	LedgerChainCodeNameKey    = "LedgerChainCodeName"
 	LedgerChainCodeChannelKey = "LedgerChainCodeChannel"
 	SugarAccountKeyPrefix     = "S-%s"
+	SuccessFlag               = "success"
 )
 
 type HtlcChaincode struct {
@@ -22,6 +24,24 @@ func (a *HtlcChaincode) Init(stub shim.ChaincodeStubInterface) (res peer.Respons
 			res = shim.Error(r.Error())
 		}
 	}()
+
+	var freeIndexStack [Size] int
+	var proposalList [Size] string
+	for i := 0; i < Size; i++ {
+		proposalList[i] = NullFlag
+		freeIndexStack[i] = Size - i - 1
+	}
+	var proposals = Proposals{
+		FreeIndexStack: freeIndexStack,
+		ProposalList: proposalList,
+		Depth: Size,
+	}
+
+	p, err := json.Marshal(&proposals)
+	checkError(err)
+
+	err = stub.PutState(ProposalsKey, p)
+	checkError(err)
 
 	fn, args := stub.GetFunctionAndParameters()
 
@@ -39,63 +59,45 @@ func (a *HtlcChaincode) Invoke(stub shim.ChaincodeStubInterface) (res peer.Respo
 	defer func() {
 		if r, ok := recover().(error); ok {
 			// return error message
-			res = shim.Success([]byte(r.Error()))
+			res = shim.Error(r.Error())
 		}
 	}()
 
 	fcn, args := stub.GetFunctionAndParameters()
 
 	switch fcn {
-	case "newContract":
-		res = a.newContract(stub, args)
-	case "setNewContractTxInfo":
-		res = a.setNewContractTxInfo(stub, args)
-	case "getNewContractTxInfo":
-		res = a.getNewContractTxInfo(stub, args)
-	case "getContract":
-		res = a.getContract(stub, args)
-	case "setSecret":
-		res = a.setSecret(stub, args)
-	case "getSecret":
-		res = a.getSecret(stub, args)
+	case "init":
+		res = a.init(stub, args)
 	case "lock":
 		res = a.lock(stub, args)
 	case "unlock":
 		res = a.unlock(stub, args)
 	case "rollback":
 		res = a.rollback(stub, args)
-	case "setLockTxInfo":
-		res = a.setLockTxInfo(stub, args)
-	case "getLockTxInfo":
-		res = a.getLockTxInfo(stub, args)
-	case "getCounterpartyHtlc":
-		res = a.getCounterpartyHtlc(stub, args)
-	case "getTask":
-		res = a.getTask(stub, args)
-	case "deleteTask":
-		res = a.deleteTask(stub, args)
-	case "getSelfTimelock":
-		res = a.getSelfTimelock(stub, args)
-	case "getCounterpartyTimelock":
-		res = a.getCounterpartyTimelock(stub, args)
-	case "getSelfLockStatus":
-		res = a.getSelfLockStatus(stub, args)
-	case "getCounterpartyLockStatus":
-		res = a.getCounterpartyLockStatus(stub, args)
-	case "setCounterpartyLockStatus":
-		res = a.setCounterpartyLockStatus(stub, args)
-	case "getSelfUnlockStatus":
-		res = a.getSelfUnlockStatus(stub, args)
-	case "getCounterpartyUnlockStatus":
-		res = a.getCounterpartyUnlockStatus(stub, args)
-	case "setCounterpartyUnlockStatus":
-		res = a.setCounterpartyUnlockStatus(stub, args)
-	case "getSelfRollbackStatus":
-		res = a.getSelfRollbackStatus(stub, args)
-	case "getCounterpartyRollbackStatus":
-		res = a.getCounterpartyRollbackStatus(stub, args)
-	case "setCounterpartyRollbackStatus":
-		res = a.setCounterpartyRollbackStatus(stub, args)
+	case "getCounterpartyHtlcAddress":
+		res = a.getCounterpartyHtlcAddress(stub, args)
+	case "newProposal":
+		res = a.newProposal(stub, args)
+	case "setNewProposalTxInfo":
+		res = a.setNewProposalTxInfo(stub, args)
+	case "getNewProposalTxInfo":
+		res = a.getNewProposalTxInfo(stub, args)
+	case "getNegotiatedData":
+		res = a.getNegotiatedData(stub, args)
+	case "getProposalInfo":
+		res = a.getProposalInfo(stub, args)
+	case "setSecret":
+		res = a.setSecret(stub, args)
+	case "getProposalIDs":
+		res = a.getProposalIDs(stub, args)
+	case "deleteProposalID":
+		res = a.deleteProposalID(stub, args)
+	case "setCounterpartyLockState":
+		res = a.setCounterpartyLockState(stub, args)
+	case "setCounterpartyUnlockState":
+		res = a.setCounterpartyUnlockState(stub, args)
+	case "setCounterpartyRollbackState":
+		res = a.setCounterpartyRollbackState(stub, args)
 	case "balanceOf":
 		res = a.balanceOf(stub, args)
 	default:
@@ -124,46 +126,55 @@ func (a *HtlcChaincode) init(stub shim.ChaincodeStubInterface, args []string) pe
 
 	a.MyHTLC.init(stub, counterpartyHtlc)
 
-	return shim.Success([]byte("success"))
+	return shim.Success([]byte(SuccessFlag))
 }
 
-func (a *HtlcChaincode) newContract(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (a *HtlcChaincode) newProposal(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 10 {
 		return shim.Error("invalid arguments")
 	}
 
 	hash, role, sender0, receiver0, amount0, timelock0, sender1, receiver1, amount1, timelock1 :=
 		args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]
-	a.MyHTLC.newContract(stub, hash, role, sender0, receiver0, amount0, timelock0, sender1, receiver1, amount1, timelock1)
-	return shim.Success([]byte("success"))
+	a.MyHTLC.newProposal(stub, hash, role, sender0, receiver0, amount0, timelock0, sender1, receiver1, amount1, timelock1)
+	return shim.Success([]byte(SuccessFlag))
 }
 
-func (a *HtlcChaincode) setNewContractTxInfo(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (a *HtlcChaincode) setNewProposalTxInfo(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 3 {
 		return shim.Error("invalid arguments")
 	}
 
 	hash, txHash, blockNum := args[0], args[1], args[2]
-	a.MyHTLC.setNewContractTxInfo(stub, hash, txHash, blockNum)
-	return shim.Success([]byte("success"))
+	a.MyHTLC.setNewProposalTxInfo(stub, hash, txHash, blockNum)
+	return shim.Success([]byte(SuccessFlag))
 }
 
-func (a *HtlcChaincode) getNewContractTxInfo(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (a *HtlcChaincode) getNewProposalTxInfo(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error("invalid arguments")
 	}
 
 	hash := args[0]
-	return shim.Success(a.MyHTLC.getNewContractTxInfo(stub, hash))
+	return shim.Success(a.MyHTLC.getNewProposalTxInfo(stub, hash))
 }
 
-func (a *HtlcChaincode) getContract(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (a *HtlcChaincode) getNegotiatedData(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error("invalid arguments")
 	}
 
 	hash := args[0]
-	return shim.Success(a.MyHTLC.getContract(stub, hash))
+	return shim.Success(a.MyHTLC.getNegotiatedData(stub, hash))
+}
+
+func (a *HtlcChaincode) getProposalInfo(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) != 1 {
+		return shim.Error("invalid arguments")
+	}
+
+	hash := args[0]
+	return shim.Success(a.MyHTLC.getProposalInfo(stub, hash))
 }
 
 func (a *HtlcChaincode) setSecret(stub shim.ChaincodeStubInterface, args []string) peer.Response {
@@ -173,16 +184,7 @@ func (a *HtlcChaincode) setSecret(stub shim.ChaincodeStubInterface, args []strin
 
 	hash, secret := args[0], args[1]
 	a.MyHTLC.setSecret(stub, hash, secret)
-	return shim.Success([]byte("success"))
-}
-
-func (a *HtlcChaincode) getSecret(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 1 {
-		return shim.Error("invalid arguments")
-	}
-
-	hash := args[0]
-	return shim.Success(a.MyHTLC.getSecret(stub, hash))
+	return shim.Success([]byte(SuccessFlag))
 }
 
 func (a *HtlcChaincode) lock(stub shim.ChaincodeStubInterface, args []string) peer.Response {
@@ -198,8 +200,8 @@ func (a *HtlcChaincode) lock(stub shim.ChaincodeStubInterface, args []string) pe
 		return shim.Success([]byte(result))
 	}
 
-	var cd ContractData
-	a.MyHTLC.getSelfContractData(stub, hash, &cd)
+	var pd ProposalData
+	a.MyHTLC.getSelfProposalData(stub, hash, &pd)
 	cname, err := stub.GetState(LedgerChainCodeNameKey)
 	if err != nil {
 		return shim.Error(err.Error())
@@ -208,9 +210,9 @@ func (a *HtlcChaincode) lock(stub shim.ChaincodeStubInterface, args []string) pe
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	trans := [][]byte{[]byte("escrowToSugar"), []byte(cd.Sender), []byte(hash), uint64ToBytes(cd.Amount)}
+	trans := [][]byte{[]byte("escrowToSugar"), []byte(pd.Sender), []byte(hash), uint64ToBytes(pd.Amount)}
 	response := stub.InvokeChaincode(string(cname), trans, string(channel))
-	if response.Status != 200 {
+	if response.Status != shim.OK {
 		return shim.Success([]byte(response.Message))
 	}
 
@@ -219,9 +221,9 @@ func (a *HtlcChaincode) lock(stub shim.ChaincodeStubInterface, args []string) pe
 		return shim.Error(err.Error())
 	}
 
-	cd.Locked = true
-	a.MyHTLC.setSelfContractData(stub, hash, &cd)
-	return shim.Success([]byte("success"))
+	pd.Locked = true
+	a.MyHTLC.setSelfProposalData(stub, hash, &pd)
+	return shim.Success([]byte(SuccessFlag))
 }
 
 func (a *HtlcChaincode) unlock(stub shim.ChaincodeStubInterface, args []string) peer.Response {
@@ -237,8 +239,8 @@ func (a *HtlcChaincode) unlock(stub shim.ChaincodeStubInterface, args []string) 
 		return shim.Success([]byte(result))
 	}
 
-	var cd ContractData
-	a.MyHTLC.getSelfContractData(stub, hash, &cd)
+	var pd ProposalData
+	a.MyHTLC.getSelfProposalData(stub, hash, &pd)
 	sa, err := stub.GetState(getSugarAccountKey(hash))
 	if err != nil {
 		return shim.Error(err.Error())
@@ -251,16 +253,16 @@ func (a *HtlcChaincode) unlock(stub shim.ChaincodeStubInterface, args []string) 
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	trans := [][]byte{[]byte("withdrawFromSugarAccount"), sa, []byte(cd.Receiver), []byte(secret)}
+	trans := [][]byte{[]byte("withdrawFromSugarAccount"), sa, []byte(pd.Receiver), []byte(secret)}
 	response := stub.InvokeChaincode(string(cname), trans, string(channel))
-	if response.Status != 200 {
+	if response.Status != shim.OK {
 		return shim.Success([]byte(response.Message))
 	}
 
-	cd.Unlocked = true
-	cd.Secret = secret
-	a.MyHTLC.setSelfContractData(stub, hash, &cd)
-	return shim.Success([]byte("success"))
+	pd.Unlocked = true
+	pd.Secret = secret
+	a.MyHTLC.setSelfProposalData(stub, hash, &pd)
+	return shim.Success([]byte(SuccessFlag))
 }
 
 func (a *HtlcChaincode) rollback(stub shim.ChaincodeStubInterface, args []string) peer.Response {
@@ -276,8 +278,8 @@ func (a *HtlcChaincode) rollback(stub shim.ChaincodeStubInterface, args []string
 		return shim.Success([]byte(result))
 	}
 
-	var cd ContractData
-	a.MyHTLC.getSelfContractData(stub, hash, &cd)
+	var pd ProposalData
+	a.MyHTLC.getSelfProposalData(stub, hash, &pd)
 	sa, err := stub.GetState(getSugarAccountKey(hash))
 	if err != nil {
 		return shim.Error(err.Error())
@@ -290,154 +292,64 @@ func (a *HtlcChaincode) rollback(stub shim.ChaincodeStubInterface, args []string
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	trans := [][]byte{[]byte("withdrawFromSugarAccount"), sa, []byte(cd.Sender)}
+	trans := [][]byte{[]byte("withdrawFromSugarAccount"), sa, []byte(pd.Sender)}
 	response := stub.InvokeChaincode(string(cname), trans, string(channel))
-	if response.Status != 200 {
+	if response.Status != shim.OK {
 		return shim.Success([]byte(response.Message))
 	}
 
-	cd.Rolledback = true
-	a.MyHTLC.setSelfContractData(stub, hash, &cd)
-	return shim.Success([]byte("success"))
+	pd.Rolledback = true
+	a.MyHTLC.setSelfProposalData(stub, hash, &pd)
+	return shim.Success([]byte(SuccessFlag))
 }
 
-func (a *HtlcChaincode) setLockTxInfo(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 3 {
-		return shim.Error("invalid arguments")
-	}
-
-	hash, txHash, blockNum := args[0], args[1], args[2]
-	a.MyHTLC.setLockTxInfo(stub, hash, txHash, blockNum)
-	return shim.Success([]byte("success"))
+func (a *HtlcChaincode) getCounterpartyHtlcAddress(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	return shim.Success(a.MyHTLC.getCounterpartyHtlcAddress(stub))
 }
 
-func (a *HtlcChaincode) getLockTxInfo(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (a *HtlcChaincode) getProposalIDs(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	return shim.Success(a.MyHTLC.getProposalIDs(stub))
+}
+
+func (a *HtlcChaincode) deleteProposalID(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error("invalid arguments")
 	}
 
 	hash := args[0]
-	return shim.Success(a.MyHTLC.getLockTxInfo(stub, hash))
+	a.MyHTLC.deleteProposalID(stub, hash)
+	return shim.Success([]byte(SuccessFlag))
 }
 
-func (a *HtlcChaincode) getCounterpartyHtlc(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	return shim.Success(a.MyHTLC.getCounterpartyHtlc(stub))
-}
-
-func (a *HtlcChaincode) getTask(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	return shim.Success(a.MyHTLC.getTask(stub))
-}
-
-func (a *HtlcChaincode) deleteTask(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (a *HtlcChaincode) setCounterpartyLockState(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error("invalid arguments")
 	}
 
 	hash := args[0]
-	a.MyHTLC.deleteTask(stub, hash)
-	return shim.Success([]byte("success"))
+	a.MyHTLC.setCounterpartyLockState(stub, hash)
+	return shim.Success([]byte(SuccessFlag))
 }
 
-func (a *HtlcChaincode) getSelfTimelock(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+
+func (a *HtlcChaincode) setCounterpartyUnlockState(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error("invalid arguments")
 	}
 
 	hash := args[0]
-	return shim.Success(a.MyHTLC.getSelfTimelock(stub, hash))
+	a.MyHTLC.setCounterpartyUnlockState(stub, hash)
+	return shim.Success([]byte(SuccessFlag))
 }
 
-func (a *HtlcChaincode) getCounterpartyTimelock(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (a *HtlcChaincode) setCounterpartyRollbackState(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error("invalid arguments")
 	}
 
 	hash := args[0]
-	return shim.Success(a.MyHTLC.getCounterpartyTimelock(stub, hash))
-}
-
-func (a *HtlcChaincode) getSelfLockStatus(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 1 {
-		return shim.Error("invalid arguments")
-	}
-
-	hash := args[0]
-	return shim.Success(a.MyHTLC.getSelfLockStatus(stub, hash))
-}
-
-func (a *HtlcChaincode) getCounterpartyLockStatus(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 1 {
-		return shim.Error("invalid arguments")
-	}
-
-	hash := args[0]
-	return shim.Success(a.MyHTLC.getCounterpartyLockStatus(stub, hash))
-}
-
-func (a *HtlcChaincode) setCounterpartyLockStatus(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 1 {
-		return shim.Error("invalid arguments")
-	}
-
-	hash := args[0]
-	a.MyHTLC.setCounterpartyLockStatus(stub, hash)
-	return shim.Success([]byte("success"))
-}
-
-func (a *HtlcChaincode) getSelfUnlockStatus(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 1 {
-		return shim.Error("invalid arguments")
-	}
-
-	hash := args[0]
-	return shim.Success(a.MyHTLC.getSelfUnlockStatus(stub, hash))
-}
-
-func (a *HtlcChaincode) getCounterpartyUnlockStatus(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 1 {
-		return shim.Error("invalid arguments")
-	}
-
-	hash := args[0]
-	return shim.Success(a.MyHTLC.getCounterpartyUnlockStatus(stub, hash))
-}
-
-func (a *HtlcChaincode) setCounterpartyUnlockStatus(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 1 {
-		return shim.Error("invalid arguments")
-	}
-
-	hash := args[0]
-	a.MyHTLC.setCounterpartyUnlockStatus(stub, hash)
-	return shim.Success([]byte("success"))
-}
-
-func (a *HtlcChaincode) getSelfRollbackStatus(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 1 {
-		return shim.Error("invalid arguments")
-	}
-
-	hash := args[0]
-	return shim.Success(a.MyHTLC.getSelfRollbackStatus(stub, hash))
-}
-
-func (a *HtlcChaincode) getCounterpartyRollbackStatus(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 1 {
-		return shim.Error("invalid arguments")
-	}
-
-	hash := args[0]
-	return shim.Success(a.MyHTLC.getCounterpartyRollbackStatus(stub, hash))
-}
-
-func (a *HtlcChaincode) setCounterpartyRollbackStatus(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 1 {
-		return shim.Error("invalid arguments")
-	}
-
-	hash := args[0]
-	a.MyHTLC.setCounterpartyRollbackStatus(stub, hash)
-	return shim.Success([]byte("success"))
+	a.MyHTLC.setCounterpartyRollbackState(stub, hash)
+	return shim.Success([]byte(SuccessFlag))
 }
 
 func (a *HtlcChaincode) balanceOf(stub shim.ChaincodeStubInterface, args []string) peer.Response {

@@ -88,7 +88,6 @@ public class MessageCallBack {
 
         } catch (Exception e) {
             logger.error(" invalid message, host: {}, ctx: {}, e: {}", node, hashCode, e);
-
         } finally {
             byteBuf.release();
         }

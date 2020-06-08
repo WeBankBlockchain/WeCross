@@ -17,8 +17,6 @@ import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
-import java.nio.charset.StandardCharsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,17 +41,15 @@ public class ResourceURIHandler implements URIHandler {
     }
 
     @Override
-    public void handle(FullHttpRequest httpRequest, Callback callback) {
+    public void handle(String uri, String httpMethod, String content, Callback callback) {
         RestResponse<Object> restResponse = new RestResponse<>();
         try {
-            String content = httpRequest.content().toString(StandardCharsets.UTF_8);
-            String[] splits = httpRequest.uri().substring(1).split("/");
+            String[] splits = uri.substring(1).split("/");
 
             Path path = new Path();
             path.setZone(splits[0]);
             path.setChain(splits[1]);
             path.setResource(splits[2]);
-
             String method = splits[3];
 
             if (logger.isDebugEnabled()) {

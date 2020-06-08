@@ -30,7 +30,10 @@ public class P2PServiceConfig {
     @Bean
     public P2PService newP2PService() {
         ThreadPoolTaskExecutor threadPool =
-                ThreadPoolTaskExecutorFactory.build(p2pConfig.getThreadNum(), "netty-p2p");
+                ThreadPoolTaskExecutorFactory.build(
+                        p2pConfig.getThreadNum(),
+                        p2pConfig.getThreadQueueCapacity(),
+                        "p2p-callback");
         SeqMapper seqMapper = SeqMapperFactory.build();
         MessageCallBack messageCallback =
                 MessageCallbackFactory.build(seqMapper, peerManager, zoneManager);

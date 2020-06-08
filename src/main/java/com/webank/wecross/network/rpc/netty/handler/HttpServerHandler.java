@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /** */
 public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> {
@@ -35,10 +36,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
     private static final Logger logger = LoggerFactory.getLogger(HttpServerHandler.class);
 
     private URIHandlerDispatcher uriHandlerDispatcher;
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    public HttpServerHandler(URIHandlerDispatcher uriHandlerDispatcher) {
+    public HttpServerHandler(
+            URIHandlerDispatcher uriHandlerDispatcher,
+            ThreadPoolTaskExecutor threadPoolTaskExecutor) {
         this.setUriHandlerDispatcher(uriHandlerDispatcher);
+        this.setThreadPoolTaskExecutor(threadPoolTaskExecutor);
     }
 
     public URIHandlerDispatcher getUriHandlerDispatcher() {
@@ -57,6 +62,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
         String uri = fullHttpRequest.uri();
         HttpMethod method = fullHttpRequest.method();
         HttpVersion httpVersion = fullHttpRequest.protocolVersion();
+        String content = fullHttpRequest.content().toString(StandardCharsets.UTF_8);
         boolean keepAlive = HttpUtil.isKeepAlive(httpRequest);
         long currentTimeMillis = System.currentTimeMillis();
 
@@ -88,55 +94,65 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         }
 
-        uriHandler.handle(
-                fullHttpRequest,
-                new URIHandler.Callback() {
-                    @Override
-                    public void onResponse(RestResponse restResponse) {
+        threadPoolTaskExecutor.execute(
+                () ->
+                        uriHandler.handle(
+                                uri,
+                                method.toString(),
+                                content,
+                                new URIHandler.Callback() {
+                                    @Override
+                                    public void onResponse(RestResponse restResponse) {
 
-                        // check if connection active
-                        if (!ctx.channel().isActive()) {
-                            long currentTimeMillis1 = System.currentTimeMillis();
-                            logger.warn(
-                                    " ctx: {} not active, cost: {} ",
-                                    System.identityHashCode(ctx),
-                                    (currentTimeMillis1 - currentTimeMillis));
-                            return;
-                        }
+                                        // check if connection active
+                                        if (!ctx.channel().isActive()) {
+                                            long currentTimeMillis1 = System.currentTimeMillis();
+                                            logger.warn(
+                                                    " ctx: {} not active, cost: {} ",
+                                                    System.identityHashCode(ctx),
+                                                    (currentTimeMillis1 - currentTimeMillis));
+                                            return;
+                                        }
 
-                        String content = "";
-                        try {
-                            content = objectMapper.writeValueAsString(restResponse);
-                        } catch (JsonProcessingException e) {
-                            logger.warn(" e: {}", e);
-                            return;
-                        }
+                                        String content = "";
+                                        try {
+                                            content = objectMapper.writeValueAsString(restResponse);
+                                        } catch (JsonProcessingException e) {
+                                            logger.warn(" e: {}", e);
+                                            return;
+                                        }
 
-                        if (logger.isDebugEnabled()) {
-                            logger.debug(" ===>>> content: {}", content);
-                        }
+                                        if (logger.isDebugEnabled()) {
+                                            logger.debug(" ===>>> content: {}", content);
+                                        }
 
-                        FullHttpResponse response =
-                                new DefaultFullHttpResponse(
-                                        HttpVersion.HTTP_1_1,
-                                        HttpResponseStatus.OK,
-                                        Unpooled.wrappedBuffer(content.getBytes()));
+                                        FullHttpResponse response =
+                                                new DefaultFullHttpResponse(
+                                                        HttpVersion.HTTP_1_1,
+                                                        HttpResponseStatus.OK,
+                                                        Unpooled.wrappedBuffer(content.getBytes()));
 
-                        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");
-                        response.headers()
-                                .set(
-                                        HttpHeaderNames.CONTENT_LENGTH,
-                                        response.content().readableBytes());
+                                        response.headers()
+                                                .set(
+                                                        HttpHeaderNames.CONTENT_TYPE,
+                                                        "application/json");
+                                        response.headers()
+                                                .set(
+                                                        HttpHeaderNames.CONTENT_LENGTH,
+                                                        response.content().readableBytes());
 
-                        if (keepAlive) {
-                            response.headers()
-                                    .set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-                            ctx.writeAndFlush(response);
-                        } else {
-                            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-                        }
-                    }
-                });
+                                        if (keepAlive) {
+                                            response.headers()
+                                                    .set(
+                                                            HttpHeaderNames.CONNECTION,
+                                                            HttpHeaderValues.KEEP_ALIVE);
+                                            ctx.writeAndFlush(response);
+                                        } else {
+                                            ctx.writeAndFlush(response)
+                                                    .addListener(ChannelFutureListener.CLOSE);
+                                        }
+                                    }
+                                }));
     }
 
     @Override
@@ -235,5 +251,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
 
         ctx.disconnect();
         ctx.close();
+    }
+
+    public ThreadPoolTaskExecutor getThreadPoolTaskExecutor() {
+        return threadPoolTaskExecutor;
+    }
+
+    public void setThreadPoolTaskExecutor(ThreadPoolTaskExecutor threadPoolTaskExecutor) {
+        this.threadPoolTaskExecutor = threadPoolTaskExecutor;
     }
 }

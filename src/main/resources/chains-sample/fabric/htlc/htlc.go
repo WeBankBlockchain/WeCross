@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"crypto/x509"
+	"encoding/binary"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
@@ -13,18 +14,22 @@ import (
 )
 
 const (
-	TaskKey                    = "HTLCTask"
-	InitiatorKeyPrefix         = "I-%s"
-	ParticipantKeyPrefix       = "P-%s"
-	CounterpartyHtlcKey        = "CounterpartyHtlcKey"
-	LockTxInfoKeyPrefix        = "LockTxHash-%s"
-	NewContractTxInfoKeyPrefix = "NewContractTxHash-%s"
+	RoleKey                    = "Role-%s"
+	IndexKey                   = "Index-%s"
+	ProposalsKey               = "HTLCProposals"
+	InitiatorKeyPrefix         = "Initiator-%s"
+	ParticipantKeyPrefix       = "Participant-%s"
+	CounterpartyHtlcAddressKey = "CounterpartyHtlcAddressKey"
+	NewProposalTxInfoKeyPrefix = "NewProposalTxHash-%s"
+	Size                       = 1024 // capacity of proposal list
+	NullFlag                   = "null"
+	SplitSymbol                = "##"
 )
 
 type HTLC struct {
 }
 
-type ContractData struct {
+type ProposalData struct {
 	Secret     string `json:"secret"`
 	Sender     string `json:"sender"`
 	Receiver   string `json:"receiver"`
@@ -35,172 +40,46 @@ type ContractData struct {
 	Rolledback bool   `json:"rolledback"`
 }
 
-type Tasks struct {
-	Num       int      `json:"num"`
-	TaskQueue []string `json:"taskQueue"`
+type Proposals struct {
+	FreeIndexStack [Size]int    `json:"freeIndexStack"`
+	ProposalList   [Size]string `json:"proposalList"`
+	Depth          int          `json:"depth"`
 }
 
 func (h *HTLC) getRole(stub shim.ChaincodeStubInterface, hash string) bool {
-	role, err := stub.GetState(hash)
+	role, err := stub.GetState(getRoleKey(hash))
 	checkError(err)
 
 	if role == nil {
-		panic(errors.New("hash not found"))
+		panic(errors.New("proposal not exists"))
 	}
 
 	return string(role) == "true"
 }
 
-func (h *HTLC) init(stub shim.ChaincodeStubInterface, counterpartyHtlc string) {
-	err := stub.PutState(CounterpartyHtlcKey, []byte(counterpartyHtlc))
+func (h *HTLC) getIndex(stub shim.ChaincodeStubInterface, hash string) int {
+	index, err := stub.GetState(getIndexKey(hash))
 	checkError(err)
+
+	if index == nil {
+		panic(errors.New("proposal not exists"))
+	}
+
+	return bytesToInt(index)
 }
 
-func (h *HTLC) newContract(stub shim.ChaincodeStubInterface, hash, role, sender0, receiver0, amount0, timelock0, sender1, receiver1, amount1, timelock1 string) {
-	if isExisted(stub, hash) {
-		panic(errors.New("hash as contract-id existed"))
-	}
-
-	if !rightTimelock(stub, timelock0, timelock1) {
-		panic(errors.New("illegal timelocks"))
-	}
-
-	err := stub.PutState(hash, []byte(role))
+func (h *HTLC) init(stub shim.ChaincodeStubInterface, counterpartyHtlcAddress string) {
+	err := stub.PutState(CounterpartyHtlcAddressKey, []byte(counterpartyHtlcAddress))
 	checkError(err)
-
-	sender := getTxOrigin(stub)
-	if string(role) == "true" {
-		if sender != sender0 {
-			panic(errors.New("only sender can new a contract"))
-		}
-	} else {
-		if sender != sender1 {
-			panic(errors.New("only sender can new a contract"))
-		}
-	}
-
-	var initiator = &ContractData{
-		Secret:     "null",
-		Sender:     sender0,
-		Receiver:   receiver0,
-		Amount:     stringToUint64(amount0),
-		Timelock:   stringToUint64(timelock0),
-		Locked:     false,
-		Unlocked:   false,
-		Rolledback: false,
-	}
-
-	initiatorInfo, err := json.Marshal(initiator)
-	checkError(err)
-
-	err = stub.PutState(getInitiatorKey(hash), initiatorInfo)
-	checkError(err)
-
-	var participant = &ContractData{
-		Secret:     "null",
-		Sender:     sender1,
-		Receiver:   receiver1,
-		Amount:     stringToUint64(amount1),
-		Timelock:   stringToUint64(timelock1),
-		Locked:     false,
-		Unlocked:   false,
-		Rolledback: false,
-	}
-
-	participantInfo, err := json.Marshal(participant)
-	checkError(err)
-
-	err = stub.PutState(getParticipantKey(hash), participantInfo)
-	checkError(err)
-
-	h.addTask(stub, hash)
-}
-
-func (h *HTLC) setNewContractTxInfo(stub shim.ChaincodeStubInterface, hash, txHash, blockNum string) {
-	err := stub.PutState(getNewContractTxInfoKey(hash), []byte(txHash+" "+blockNum))
-	checkError(err)
-
-}
-
-func (h *HTLC) getNewContractTxInfo(stub shim.ChaincodeStubInterface, hash string) []byte {
-	txInfo, err := stub.GetState(getNewContractTxInfoKey(hash))
-	checkError(err)
-
-	if txInfo == nil {
-		return []byte("null")
-	} else {
-		return txInfo
-	}
-}
-
-func (h *HTLC) getContract(stub shim.ChaincodeStubInterface, hash string) []byte {
-	cdInfo, err := stub.GetState(getInitiatorKey(hash))
-	checkError(err)
-
-	var cdi ContractData
-	err = json.Unmarshal(cdInfo, &cdi)
-	checkError(err)
-
-	cdInfo, err = stub.GetState(getParticipantKey(hash))
-	checkError(err)
-
-	var cdp ContractData
-	err = json.Unmarshal(cdInfo, &cdp)
-	checkError(err)
-
-	return []byte(cdi.Sender + " " + cdi.Receiver + " " + uint64ToString(cdi.Amount) + " " + uint64ToString(cdi.Timelock) + " " +
-		cdp.Sender + " " + cdp.Receiver + " " + uint64ToString(cdp.Amount) + " " + uint64ToString(cdp.Timelock))
-}
-
-func (h *HTLC) setSecret(stub shim.ChaincodeStubInterface, hash, secret string) {
-	if !hashMatched(hash, secret) {
-		panic(errors.New("hash not matched"))
-	}
-
-	if h.getRole(stub, hash) {
-		cdInfo, err := stub.GetState(getInitiatorKey(hash))
-		checkError(err)
-
-		var cd ContractData
-		err = json.Unmarshal(cdInfo, &cd)
-		checkError(err)
-
-		cd.Secret = secret
-		cdInfo, err = json.Marshal(&cd)
-		checkError(err)
-
-		err = stub.PutState(getInitiatorKey(hash), cdInfo)
-		checkError(err)
-	} else {
-		cdInfo, err := stub.GetState(getParticipantKey(hash))
-		checkError(err)
-
-		var cd ContractData
-		err = json.Unmarshal(cdInfo, &cd)
-		checkError(err)
-
-		cd.Secret = secret
-		cdInfo, err = json.Marshal(&cd)
-		checkError(err)
-
-		err = stub.PutState(getParticipantKey(hash), cdInfo)
-		checkError(err)
-	}
-}
-
-func (h *HTLC) getSecret(stub shim.ChaincodeStubInterface, hash string) []byte {
-	var cd ContractData
-	h.getSelfContractData(stub, hash, &cd)
-	return []byte(cd.Secret)
 }
 
 func (h *HTLC) lock(stub shim.ChaincodeStubInterface, hash string) string {
-	if !taskIsExisted(stub, hash) {
-		return "task not exists"
+	if !proposalIsExisted(stub, hash) {
+		return "proposal not exists"
 	}
 
-	var cd ContractData
-	h.getSelfContractData(stub, hash, &cd)
+	var cd ProposalData
+	h.getSelfProposalData(stub, hash, &cd)
 
 	if cd.Locked {
 		return "done"
@@ -219,12 +98,12 @@ func (h *HTLC) lock(stub shim.ChaincodeStubInterface, hash string) string {
 }
 
 func (h *HTLC) unlock(stub shim.ChaincodeStubInterface, hash, secret string) string {
-	if !taskIsExisted(stub, hash) {
-		return "task not exists"
+	if !proposalIsExisted(stub, hash) {
+		return "proposal not exists"
 	}
 
-	var cd ContractData
-	h.getSelfContractData(stub, hash, &cd)
+	var cd ProposalData
+	h.getSelfProposalData(stub, hash, &cd)
 
 	if cd.Unlocked {
 		return "done"
@@ -251,12 +130,12 @@ func (h *HTLC) unlock(stub shim.ChaincodeStubInterface, hash, secret string) str
 }
 
 func (h *HTLC) rollback(stub shim.ChaincodeStubInterface, hash string) string {
-	if !taskIsExisted(stub, hash) {
-		return "task not exists"
+	if !proposalIsExisted(stub, hash) {
+		return "proposal not exists"
 	}
 
-	var cd ContractData
-	h.getSelfContractData(stub, hash, &cd)
+	var cd ProposalData
+	h.getSelfProposalData(stub, hash, &cd)
 
 	if cd.Rolledback {
 		return "done"
@@ -281,175 +160,255 @@ func (h *HTLC) rollback(stub shim.ChaincodeStubInterface, hash string) string {
 	return "continue"
 }
 
-func (h *HTLC) setLockTxInfo(stub shim.ChaincodeStubInterface, hash, txHash, blockNum string) {
-	err := stub.PutState(getLockTxInfoKeyKey(hash), []byte(txHash+" "+blockNum))
-	checkError(err)
-}
-
-func (h *HTLC) getLockTxInfo(stub shim.ChaincodeStubInterface, hash string) []byte {
-	txInfo, err := stub.GetState(getLockTxInfoKeyKey(hash))
-	checkError(err)
-
-	if txInfo == nil {
-		return []byte("null")
-	} else {
-		return txInfo
-	}
-}
-
-func (h *HTLC) getCounterpartyHtlc(stub shim.ChaincodeStubInterface) []byte {
-	counterpartyHtlc, err := stub.GetState(CounterpartyHtlcKey)
+func (h *HTLC) getCounterpartyHtlcAddress(stub shim.ChaincodeStubInterface) []byte {
+	counterpartyHtlc, err := stub.GetState(CounterpartyHtlcAddressKey)
 	checkError(err)
 
 	return counterpartyHtlc
 }
 
-func (h *HTLC) addTask(stub shim.ChaincodeStubInterface, hash string) {
+func (h *HTLC) newProposal(stub shim.ChaincodeStubInterface, hash, role, sender0, receiver0, amount0, timelock0, sender1, receiver1, amount1, timelock1 string) {
+	var proposals Proposals
+	h.getProposals(stub, &proposals)
 
-	t, err := stub.GetState(TaskKey)
+	if proposals.Depth == 0 {
+		panic(errors.New("the proposal queue is full, one moment please"))
+	}
+
+	if proposalIsExisted(stub, hash) {
+		panic(errors.New("proposal existed"))
+	}
+
+	if !rightTimelock(stub, timelock0, timelock1) {
+		panic(errors.New("illegal timelocks"))
+	}
+
+	err := stub.PutState(getRoleKey(hash), []byte(role))
 	checkError(err)
 
-	var tasks Tasks
-	if t == nil {
-		tasks = Tasks{
-			Num:       1,
-			TaskQueue: []string{hash},
+	sender := getTxOrigin(stub)
+	if role == "true" {
+		if sender != sender0 {
+			panic(errors.New("only sender can new a proposal"))
 		}
 	} else {
-		err = json.Unmarshal(t, &tasks)
-		tasks.Num++
-		tasks.TaskQueue = append(tasks.TaskQueue, hash)
+		if sender != sender1 {
+			panic(errors.New("only sender can new a proposal"))
+		}
 	}
 
-	t, err = json.Marshal(&tasks)
+	var initiator = &ProposalData{
+		Secret:     "null",
+		Sender:     sender0,
+		Receiver:   receiver0,
+		Amount:     stringToUint64(amount0),
+		Timelock:   stringToUint64(timelock0),
+		Locked:     false,
+		Unlocked:   false,
+		Rolledback: false,
+	}
+
+	initiatorInfo, err := json.Marshal(initiator)
 	checkError(err)
 
-	err = stub.PutState(TaskKey, t)
+	err = stub.PutState(getInitiatorKey(hash), initiatorInfo)
 	checkError(err)
+
+	var participant = &ProposalData{
+		Secret:     "null",
+		Sender:     sender1,
+		Receiver:   receiver1,
+		Amount:     stringToUint64(amount1),
+		Timelock:   stringToUint64(timelock1),
+		Locked:     false,
+		Unlocked:   false,
+		Rolledback: false,
+	}
+
+	participantInfo, err := json.Marshal(participant)
+	checkError(err)
+
+	err = stub.PutState(getParticipantKey(hash), participantInfo)
+	checkError(err)
+
+	// pre add proposal
+	depth := proposals.Depth
+	index := proposals.FreeIndexStack[depth-1]
+	proposals.Depth--
+	err = stub.PutState(getIndexKey(hash), intToBytes(index))
+	checkError(err)
+
+	if role == "false" {
+		// add proposal
+		proposals.ProposalList[index] = hash
+	}
+
+	h.setProposals(stub, &proposals)
 }
 
-func (h *HTLC) getTask(stub shim.ChaincodeStubInterface) []byte {
-	t, err := stub.GetState(TaskKey)
+func (h *HTLC) setNewProposalTxInfo(stub shim.ChaincodeStubInterface, hash, txHash, blockNum string) {
+	err := stub.PutState(getNewProposalTxInfoKey(hash), []byte(txHash+SplitSymbol+blockNum))
 	checkError(err)
 
-	if t == nil {
-		return []byte("null")
-	}
-
-	var tasks Tasks
-	err = json.Unmarshal(t, &tasks)
-	checkError(err)
-
-	if tasks.Num == 0 {
-		return []byte("null")
-	}
-
-	return []byte(tasks.TaskQueue[0])
 }
 
-func (h *HTLC) deleteTask(stub shim.ChaincodeStubInterface, hash string) {
-	t, err := stub.GetState(TaskKey)
+func (h *HTLC) getNewProposalTxInfo(stub shim.ChaincodeStubInterface, hash string) []byte {
+	txInfo, err := stub.GetState(getNewProposalTxInfoKey(hash))
 	checkError(err)
 
-	if t == nil {
-		panic(errors.New("there is no task"))
+	if txInfo == nil {
+		return []byte(NullFlag)
+	} else {
+		return txInfo
 	}
+}
 
-	var tasks Tasks
-	err = json.Unmarshal(t, &tasks)
+func (h *HTLC) getNegotiatedData(stub shim.ChaincodeStubInterface, hash string) []byte {
+	pInfo, err := stub.GetState(getInitiatorKey(hash))
 	checkError(err)
 
-	if tasks.Num == 0 {
-		panic(errors.New("there is no task"))
+	if pInfo == nil {
+		return []byte(NullFlag)
 	}
 
-	if tasks.TaskQueue[0] != hash {
+	var pi ProposalData
+	err = json.Unmarshal(pInfo, &pi)
+	checkError(err)
+
+	pInfo, err = stub.GetState(getParticipantKey(hash))
+	checkError(err)
+
+	var pp ProposalData
+	err = json.Unmarshal(pInfo, &pp)
+	checkError(err)
+
+	return []byte(pi.Sender + SplitSymbol + pi.Receiver + SplitSymbol + uint64ToString(pi.Amount) + SplitSymbol + uint64ToString(pi.Timelock) + SplitSymbol +
+		pp.Sender + SplitSymbol + pp.Receiver + SplitSymbol + uint64ToString(pp.Amount) + SplitSymbol + uint64ToString(pp.Timelock))
+}
+
+func (h *HTLC) getProposalInfo(stub shim.ChaincodeStubInterface, hash string) []byte {
+	pInfo, err := stub.GetState(getInitiatorKey(hash))
+	checkError(err)
+
+	if pInfo == nil {
+		return []byte(NullFlag)
+	}
+
+	var ip ProposalData
+	err = json.Unmarshal(pInfo, &ip)
+	checkError(err)
+
+	pInfo, err = stub.GetState(getParticipantKey(hash))
+	checkError(err)
+
+	var pp ProposalData
+	err = json.Unmarshal(pInfo, &pp)
+	checkError(err)
+
+	if h.getRole(stub, hash) {
+		return []byte("true" + SplitSymbol + ip.Secret + SplitSymbol + uint64ToString(ip.Timelock) + SplitSymbol + boolToString(ip.Locked) + SplitSymbol + boolToString(ip.Unlocked) + SplitSymbol + boolToString(ip.Rolledback) +
+			SplitSymbol + uint64ToString(pp.Timelock) + SplitSymbol + boolToString(pp.Locked) + SplitSymbol + boolToString(pp.Unlocked) + SplitSymbol + boolToString(pp.Rolledback))
+	} else {
+		return []byte("false" + SplitSymbol + NullFlag + SplitSymbol + uint64ToString(pp.Timelock) + SplitSymbol + boolToString(pp.Locked) + SplitSymbol + boolToString(pp.Unlocked) + SplitSymbol + boolToString(pp.Rolledback) +
+			SplitSymbol + uint64ToString(ip.Timelock) + SplitSymbol + boolToString(ip.Locked) + SplitSymbol + boolToString(ip.Unlocked) + SplitSymbol + boolToString(ip.Rolledback))
+	}
+}
+
+func (h *HTLC) setSecret(stub shim.ChaincodeStubInterface, hash, secret string) {
+	if !hashMatched(hash, secret) {
+		panic(errors.New("hash not matched"))
+	}
+
+	if h.getRole(stub, hash) {
+		cdInfo, err := stub.GetState(getInitiatorKey(hash))
+		checkError(err)
+
+		var cd ProposalData
+		err = json.Unmarshal(cdInfo, &cd)
+		checkError(err)
+
+		cd.Secret = secret
+		cdInfo, err = json.Marshal(&cd)
+		checkError(err)
+
+		err = stub.PutState(getInitiatorKey(hash), cdInfo)
+		checkError(err)
+
+		// add proposal
+		var proposals Proposals
+		h.getProposals(stub, &proposals)
+
+		index := h.getIndex(stub, hash)
+		proposals.ProposalList[index] = hash
+		h.setProposals(stub, &proposals)
+
+	} else {
+		cdInfo, err := stub.GetState(getParticipantKey(hash))
+		checkError(err)
+
+		var cd ProposalData
+		err = json.Unmarshal(cdInfo, &cd)
+		checkError(err)
+
+		cd.Secret = secret
+		cdInfo, err = json.Marshal(&cd)
+		checkError(err)
+
+		err = stub.PutState(getParticipantKey(hash), cdInfo)
+		checkError(err)
+	}
+}
+
+func (h *HTLC) getProposalIDs(stub shim.ChaincodeStubInterface) []byte {
+	var proposals Proposals
+	h.getProposals(stub, &proposals)
+	result := proposals.ProposalList[0]
+	for i := 1; i < Size; i++ {
+		result = result + SplitSymbol + proposals.ProposalList[i]
+	}
+
+	return []byte(result)
+}
+
+func (h *HTLC) deleteProposalID(stub shim.ChaincodeStubInterface, hash string) {
+	index := h.getIndex(stub, hash)
+
+	var proposals Proposals
+	h.getProposals(stub, &proposals)
+
+	if hash != proposals.ProposalList[index] {
 		panic(errors.New("invalid operation"))
 	}
 
-	if tasks.Num == 1 {
-		tasks.TaskQueue = []string{}
-	} else {
-		tasks.TaskQueue = tasks.TaskQueue[1:]
-	}
-	tasks.Num--
-	t, err = json.Marshal(&tasks)
-	checkError(err)
+	proposals.ProposalList[index] = NullFlag
+	proposals.FreeIndexStack[proposals.Depth] = index
+	proposals.Depth++
 
-	err = stub.PutState(TaskKey, t)
-	checkError(err)
+	h.setProposals(stub, &proposals)
 }
 
-func (h *HTLC) getSelfTimelock(stub shim.ChaincodeStubInterface, hash string) []byte {
-	var cd ContractData
-	h.getSelfContractData(stub, hash, &cd)
-	return uint64ToBytes(cd.Timelock)
-}
-
-func (h *HTLC) getCounterpartyTimelock(stub shim.ChaincodeStubInterface, hash string) []byte {
-	var cd ContractData
-	h.getCounterpartyContractData(stub, hash, &cd)
-	return uint64ToBytes(cd.Timelock)
-}
-
-func (h *HTLC) getSelfLockStatus(stub shim.ChaincodeStubInterface, hash string) []byte {
-	var cd ContractData
-	h.getSelfContractData(stub, hash, &cd)
-	return boolToBytes(cd.Locked)
-}
-
-func (h *HTLC) getCounterpartyLockStatus(stub shim.ChaincodeStubInterface, hash string) []byte {
-	var cd ContractData
-	h.getCounterpartyContractData(stub, hash, &cd)
-	return boolToBytes(cd.Locked)
-}
-
-func (h *HTLC) setCounterpartyLockStatus(stub shim.ChaincodeStubInterface, hash string) {
-	var cd ContractData
-	h.getCounterpartyContractData(stub, hash, &cd)
+func (h *HTLC) setCounterpartyLockState(stub shim.ChaincodeStubInterface, hash string) {
+	var cd ProposalData
+	h.getCounterpartyProposalData(stub, hash, &cd)
 	cd.Locked = true
-	h.setCounterpartyContractData(stub, hash, &cd)
+	h.setCounterpartyProposalData(stub, hash, &cd)
 }
 
-func (h *HTLC) getSelfUnlockStatus(stub shim.ChaincodeStubInterface, hash string) []byte {
-	var cd ContractData
-	h.getSelfContractData(stub, hash, &cd)
-	return boolToBytes(cd.Unlocked)
-}
-
-func (h *HTLC) getCounterpartyUnlockStatus(stub shim.ChaincodeStubInterface, hash string) []byte {
-	var cd ContractData
-	h.getCounterpartyContractData(stub, hash, &cd)
-	return boolToBytes(cd.Unlocked)
-}
-
-func (h *HTLC) setCounterpartyUnlockStatus(stub shim.ChaincodeStubInterface, hash string) {
-	var cd ContractData
-	h.getCounterpartyContractData(stub, hash, &cd)
+func (h *HTLC) setCounterpartyUnlockState(stub shim.ChaincodeStubInterface, hash string) {
+	var cd ProposalData
+	h.getCounterpartyProposalData(stub, hash, &cd)
 	cd.Unlocked = true
-	h.setCounterpartyContractData(stub, hash, &cd)
+	h.setCounterpartyProposalData(stub, hash, &cd)
 }
 
-func (h *HTLC) getSelfRollbackStatus(stub shim.ChaincodeStubInterface, hash string) []byte {
-	var cd ContractData
-	h.getSelfContractData(stub, hash, &cd)
-	return boolToBytes(cd.Rolledback)
-}
-
-func (h *HTLC) getCounterpartyRollbackStatus(stub shim.ChaincodeStubInterface, hash string) []byte {
-	var cd ContractData
-	h.getCounterpartyContractData(stub, hash, &cd)
-	return boolToBytes(cd.Rolledback)
-}
-
-func (h *HTLC) setCounterpartyRollbackStatus(stub shim.ChaincodeStubInterface, hash string) {
-	var cd ContractData
-	h.getCounterpartyContractData(stub, hash, &cd)
+func (h *HTLC) setCounterpartyRollbackState(stub shim.ChaincodeStubInterface, hash string) {
+	var cd ProposalData
+	h.getCounterpartyProposalData(stub, hash, &cd)
 	cd.Rolledback = true
-	h.setCounterpartyContractData(stub, hash, &cd)
+	h.setCounterpartyProposalData(stub, hash, &cd)
 }
 
-func (h *HTLC) getSelfContractData(stub shim.ChaincodeStubInterface, hash string, cd *ContractData) {
+func (h *HTLC) getSelfProposalData(stub shim.ChaincodeStubInterface, hash string, pd *ProposalData) {
 	var cdInfo []byte
 	var err error
 	if h.getRole(stub, hash) {
@@ -458,12 +417,12 @@ func (h *HTLC) getSelfContractData(stub shim.ChaincodeStubInterface, hash string
 		cdInfo, err = stub.GetState(getParticipantKey(hash))
 	}
 	checkError(err)
-	err = json.Unmarshal(cdInfo, &cd)
+	err = json.Unmarshal(cdInfo, pd)
 	checkError(err)
 }
 
-func (h *HTLC) setSelfContractData(stub shim.ChaincodeStubInterface, hash string, cd *ContractData) {
-	cdInfo, err := json.Marshal(cd)
+func (h *HTLC) setSelfProposalData(stub shim.ChaincodeStubInterface, hash string, pd *ProposalData) {
+	cdInfo, err := json.Marshal(pd)
 	if h.getRole(stub, hash) {
 		err = stub.PutState(getInitiatorKey(hash), cdInfo)
 	} else {
@@ -472,7 +431,22 @@ func (h *HTLC) setSelfContractData(stub shim.ChaincodeStubInterface, hash string
 	checkError(err)
 }
 
-func (h *HTLC) getCounterpartyContractData(stub shim.ChaincodeStubInterface, hash string, cd *ContractData) {
+func (h *HTLC) getProposals(stub shim.ChaincodeStubInterface, ps *Proposals) {
+	psInfo, err := stub.GetState(ProposalsKey)
+	checkError(err)
+
+	err = json.Unmarshal(psInfo, ps)
+	checkError(err)
+}
+
+func (h *HTLC) setProposals(stub shim.ChaincodeStubInterface, ps *Proposals) {
+	psInfo, err := json.Marshal(ps)
+
+	err = stub.PutState(ProposalsKey, psInfo)
+	checkError(err)
+}
+
+func (h *HTLC) getCounterpartyProposalData(stub shim.ChaincodeStubInterface, hash string, pd *ProposalData) {
 	var cdInfo []byte
 	var err error
 	if !h.getRole(stub, hash) {
@@ -481,18 +455,26 @@ func (h *HTLC) getCounterpartyContractData(stub shim.ChaincodeStubInterface, has
 		cdInfo, err = stub.GetState(getParticipantKey(hash))
 	}
 	checkError(err)
-	err = json.Unmarshal(cdInfo, &cd)
+	err = json.Unmarshal(cdInfo, pd)
 	checkError(err)
 }
 
-func (h *HTLC) setCounterpartyContractData(stub shim.ChaincodeStubInterface, hash string, cd *ContractData) {
-	cdInfo, err := json.Marshal(cd)
+func (h *HTLC) setCounterpartyProposalData(stub shim.ChaincodeStubInterface, hash string, pd *ProposalData) {
+	cdInfo, err := json.Marshal(pd)
 	if !h.getRole(stub, hash) {
 		err = stub.PutState(getInitiatorKey(hash), cdInfo)
 	} else {
 		err = stub.PutState(getParticipantKey(hash), cdInfo)
 	}
 	checkError(err)
+}
+
+func getRoleKey(hash string) string {
+	return fmt.Sprintf(RoleKey, hash)
+}
+
+func getIndexKey(hash string) string {
+	return fmt.Sprintf(IndexKey, hash)
 }
 
 func getInitiatorKey(hash string) string {
@@ -503,17 +485,12 @@ func getParticipantKey(hash string) string {
 	return fmt.Sprintf(ParticipantKeyPrefix, hash)
 }
 
-func getLockTxInfoKeyKey(hash string) string {
-	return fmt.Sprintf(LockTxInfoKeyPrefix, hash)
+func getNewProposalTxInfoKey(hash string) string {
+	return fmt.Sprintf(NewProposalTxInfoKeyPrefix, hash)
 }
 
-func getNewContractTxInfoKey(hash string) string {
-	return fmt.Sprintf(NewContractTxInfoKeyPrefix, hash)
-}
-
-func taskIsExisted(stub shim.ChaincodeStubInterface, hash string) bool {
-	return isExisted(stub, hash) &&
-		isExisted(stub, getInitiatorKey(hash)) &&
+func proposalIsExisted(stub shim.ChaincodeStubInterface, hash string) bool {
+	return isExisted(stub, getInitiatorKey(hash)) &&
 		isExisted(stub, getParticipantKey(hash))
 }
 
@@ -545,6 +522,32 @@ func getTxOrigin(stub shim.ChaincodeStubInterface) string {
 	}
 
 	return cert.Subject.CommonName
+}
+
+func boolToString(b bool) string {
+	if b {
+		return "true"
+	} else {
+		return "false"
+	}
+}
+
+func intToBytes(n int) []byte {
+	x := int32(n)
+	bytesBuffer := bytes.NewBuffer([]byte{})
+	err := binary.Write(bytesBuffer, binary.BigEndian, x)
+	checkError(err)
+
+	return bytesBuffer.Bytes()
+}
+
+func bytesToInt(b []byte) int {
+	bytesBuffer := bytes.NewBuffer(b)
+	var x int32
+	err := binary.Read(bytesBuffer, binary.BigEndian, &x)
+	checkError(err)
+
+	return int(x)
 }
 
 func stringToUint64(s string) uint64 {
@@ -590,5 +593,5 @@ func rightTimelock(stub shim.ChaincodeStubInterface, timelock0, timelock1 string
 	t1 := stringToUint64(timelock1)
 	timeStamp, err := stub.GetTxTimestamp()
 	checkError(err)
-	return t0 > (t1+200) && t1 > (uint64(timeStamp.Seconds)+200)
+	return t1 > (t0+200) && t0 > (uint64(timeStamp.Seconds)+200)
 }

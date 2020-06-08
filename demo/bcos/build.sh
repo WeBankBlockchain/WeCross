@@ -35,7 +35,7 @@ build_bcos_chain()
 
     # Build chain
     LOG_INFO "Build chain ..."
-    echo "127.0.0.1:4 agency1 1,2,3" >ipconf
+    echo "127.0.0.1:4 agency1 1" >ipconf
 
     # build chain
     if [ "$(uname)" == "Darwin" ]; then

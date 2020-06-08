@@ -24,6 +24,7 @@ public class P2PConfig {
     private List<String> peers;
 
     private Long threadNum;
+    private Long threadQueueCapacity;
 
     public List<String> getPeers() {
         return peers;
@@ -73,25 +74,12 @@ public class P2PConfig {
         this.listenPort = listenPort;
     }
 
-    @Override
-    public String toString() {
-        return "P2PConfig{"
-                + "listenIP='"
-                + listenIP
-                + '\''
-                + ", listenPort="
-                + listenPort
-                + ", caCert="
-                + caCert
-                + ", sslCert="
-                + sslCert
-                + ", sslKey="
-                + sslKey
-                + ", peers="
-                + peers
-                + ", threadNum="
-                + threadNum
-                + '}';
+    public void setThreadQueueCapacity(Long threadQueueCapacity) {
+        this.threadQueueCapacity = threadQueueCapacity;
+    }
+
+    public Long getThreadQueueCapacity() {
+        return threadQueueCapacity;
     }
 
     /**
@@ -133,6 +121,29 @@ public class P2PConfig {
         }
 
         return hostSet;
+    }
+
+    @Override
+    public String toString() {
+        return "P2PConfig{"
+                + "listenIP='"
+                + listenIP
+                + '\''
+                + ", listenPort="
+                + listenPort
+                + ", caCert="
+                + caCert
+                + ", sslCert="
+                + sslCert
+                + ", sslKey="
+                + sslKey
+                + ", peers="
+                + peers
+                + ", threadNum="
+                + threadNum
+                + ", threadQueueCapacity="
+                + threadQueueCapacity
+                + '}';
     }
 
     /** check if P2PConfig valid */

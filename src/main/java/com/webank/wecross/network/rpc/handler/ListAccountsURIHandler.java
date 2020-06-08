@@ -10,8 +10,6 @@ import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.response.AccountResponse;
 import com.webank.wecross.stub.Account;
-import io.netty.handler.codec.http.FullHttpRequest;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,11 +37,9 @@ public class ListAccountsURIHandler implements URIHandler {
     }
 
     @Override
-    public void handle(FullHttpRequest httpRequest, Callback callback) {
+    public void handle(String uri, String method, String content, Callback callback) {
 
         RestResponse<AccountResponse> restResponse = new RestResponse<>();
-        String content = httpRequest.content().toString(StandardCharsets.UTF_8);
-
         if (logger.isDebugEnabled()) {
             logger.debug(" request string: {}", content);
         }

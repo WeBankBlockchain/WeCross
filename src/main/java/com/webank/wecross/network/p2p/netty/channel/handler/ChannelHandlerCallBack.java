@@ -14,6 +14,7 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.security.cert.X509Certificate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
@@ -129,13 +130,18 @@ public class ChannelHandlerCallBack {
         if (threadPool == null) {
             callBack.onConnect(ctx, node);
         } else {
-            threadPool.execute(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            callBack.onConnect(ctx, node);
-                        }
-                    });
+            try {
+                threadPool.execute(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                callBack.onConnect(ctx, node);
+                            }
+                        });
+            } catch (TaskRejectedException e) {
+                logger.warn(" TaskRejectedException: {} ", e);
+                callBack.onConnect(ctx, node);
+            }
         }
     }
 
@@ -159,13 +165,18 @@ public class ChannelHandlerCallBack {
         if (threadPool == null) {
             callBack.onDisconnect(ctx, node);
         } else {
-            threadPool.execute(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            callBack.onDisconnect(ctx, node);
-                        }
-                    });
+            try {
+                threadPool.execute(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                callBack.onDisconnect(ctx, node);
+                            }
+                        });
+            } catch (TaskRejectedException e) {
+                logger.warn(" TaskRejectedException: {} ", e);
+                callBack.onDisconnect(ctx, node);
+            }
         }
     }
 
@@ -178,13 +189,17 @@ public class ChannelHandlerCallBack {
         if (threadPool == null) {
             callBack.onMessage(ctx, node, message);
         } else {
-            threadPool.execute(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            callBack.onMessage(ctx, node, message);
-                        }
-                    });
+            try {
+                threadPool.execute(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                callBack.onMessage(ctx, node, message);
+                            }
+                        });
+            } catch (TaskRejectedException e) {
+                logger.warn(" TaskRejectedException : {}, message: {}", e, message);
+            }
         }
     }
 }

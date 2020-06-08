@@ -10,8 +10,6 @@ import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.request.ResourceRequest;
 import com.webank.wecross.restserver.response.ResourceResponse;
 import com.webank.wecross.zone.ZoneManager;
-import io.netty.handler.codec.http.FullHttpRequest;
-import java.nio.charset.StandardCharsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +33,8 @@ public class ListResourcesURIHandler implements URIHandler {
     }
 
     @Override
-    public void handle(FullHttpRequest httpRequest, Callback callback) {
+    public void handle(String uri, String method, String content, Callback callback) {
         RestResponse<ResourceResponse> restResponse = new RestResponse<>();
-        String content = httpRequest.content().toString(StandardCharsets.UTF_8);
 
         if (logger.isDebugEnabled()) {
             logger.debug(" request string: {}", content);
