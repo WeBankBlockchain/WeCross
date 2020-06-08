@@ -29,7 +29,15 @@ public class ZoneManager {
     private StubManager stubManager;
     private MemoryBlockHeaderManagerFactory memoryBlockHeaderManagerFactory;
 
+    public Resource fetchResource(Path path) {
+        return getResource(path, true);
+    }
+
     public Resource getResource(Path path) {
+        return getResource(path, false);
+    }
+
+    public Resource getResource(Path path, boolean create) {
         lock.readLock().lock();
         try {
             Zone zone = getZone(path);
@@ -43,18 +51,23 @@ public class ZoneManager {
                     if (resource != null) {
                         return resource;
                     } else {
-                        ResourceInfo resourceInfo = new ResourceInfo();
-                        resourceInfo.setName(path.getResource());
+                        if (create) {
+                            ResourceInfo resourceInfo = new ResourceInfo();
+                            resourceInfo.setName(path.getResource());
+                            resourceInfo.setChecksum(path.toURI());
 
-                        // not found, build default resource
-                        resource = new Resource();
-                        resource.setBlockHeaderManager(chain.getBlockHeaderManager());
-                        resource.setDriver(chain.getDriver());
-                        resource.setType("Resource");
-                        resource.setResourceInfo(resourceInfo);
+                            // not found, build default resource
+                            resource = new Resource();
+                            resource.setBlockHeaderManager(chain.getBlockHeaderManager());
+                            resource.setDriver(chain.getDriver());
+                            resource.setType("Resource");
+                            resource.setResourceInfo(resourceInfo);
 
-                        chain.getResources().put(path.getResource(), resource);
-                        return resource;
+                            chain.getResources().put(path.getResource(), resource);
+                            return resource;
+                        } else {
+                            return null;
+                        }
                     }
                 }
             }
