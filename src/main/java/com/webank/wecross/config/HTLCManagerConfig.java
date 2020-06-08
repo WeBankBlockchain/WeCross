@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class HTLCManagerConfig {
-    private Logger logger = LoggerFactory.getLogger(ConfigReaderConfig.class);
+    private Logger logger = LoggerFactory.getLogger(HTLCManagerConfig.class);
 
     @Resource Toml toml;
 
