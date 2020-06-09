@@ -133,7 +133,7 @@ public interface Driver {
             Connection connection);
 
     interface CustomCommandCallback {
-        void onResponse(TransactionException transactionException, Object response);
+        void onResponse(Exception error, Object response);
     }
 
     /**
@@ -141,12 +141,18 @@ public interface Driver {
      *
      * @param path
      * @param args
+     * @param account
+     * @param blockHeaderManager
      * @param connection
+     * @param callback
      */
     public void asyncCustomCommand(
             String command,
             Path path,
             Object[] args,
-            CustomCommandCallback callback,
-            Connection connection);
+            Account account,
+            BlockHeaderManager blockHeaderManager,
+            Connection connection,
+            CustomCommandCallback callback
+            );
 }

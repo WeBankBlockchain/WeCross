@@ -24,7 +24,7 @@ public class XATransactionManager {
 	ObjectMapper objectMapper = new ObjectMapper();
     private ZoneManager zoneManager;
 
-    interface Callback {
+    public interface Callback {
         public void onResponse(Exception e, int result);
     }
     
@@ -60,7 +60,10 @@ public class XATransactionManager {
                 	args[i + 1] = entry.getValue().get(i).toURI();
                 }
                 transactionRequest.setArgs(args);
-                Resource resource = zoneManager.getResource(Path.decode("WeCrossProxy"));
+                
+                Path proxyPath = new Path(chainPath);
+                proxyPath.setResource("WeCrossProxy");
+                Resource resource = zoneManager.getResource(proxyPath);
                 
                 TransactionContext<TransactionRequest> transactionContext = new TransactionContext<TransactionRequest>(transactionRequest, account, resource.getResourceInfo(), chain.getBlockHeaderManager());
 
@@ -92,7 +95,10 @@ public class XATransactionManager {
                 transactionRequest.setMethod("commitTransaction");
                 String[] args = new String[] {transactionID};
                 transactionRequest.setArgs(args);
-                Resource resource = zoneManager.getResource(Path.decode("WeCrossProxy"));
+                
+                Path proxyPath = new Path(chainPath);
+                proxyPath.setResource("WeCrossProxy");
+                Resource resource = zoneManager.getResource(proxyPath);
                 
                 TransactionContext<TransactionRequest> transactionContext = new TransactionContext<TransactionRequest>(transactionRequest, account, resource.getResourceInfo(), chain.getBlockHeaderManager());
 
@@ -124,7 +130,10 @@ public class XATransactionManager {
                 transactionRequest.setMethod("rollbackTransaction");
                 String[] args = new String[] {transactionID};
                 transactionRequest.setArgs(args);
-                Resource resource = zoneManager.getResource(Path.decode("WeCrossProxy"));
+                
+                Path proxyPath = new Path(chainPath);
+                proxyPath.setResource("WeCrossProxy");
+                Resource resource = zoneManager.getResource(proxyPath);
                 
                 TransactionContext<TransactionRequest> transactionContext = new TransactionContext<TransactionRequest>(transactionRequest, account, resource.getResourceInfo(), chain.getBlockHeaderManager());
 
@@ -159,7 +168,10 @@ public class XATransactionManager {
 	        transactionRequest.setMethod("getTransactionInfo");
 	        String[] args = new String[] {transactionID};
 	        transactionRequest.setArgs(args);
-	        Resource resource = zoneManager.getResource(Path.decode("WeCrossProxy"));
+	        
+	        Path proxyPath = new Path(path);
+            proxyPath.setResource("WeCrossProxy");
+	        Resource resource = zoneManager.getResource(proxyPath);
 	        
 	        TransactionContext<TransactionRequest> transactionContext = new TransactionContext<TransactionRequest>(transactionRequest, account, resource.getResourceInfo(), chain.getBlockHeaderManager());
 	
@@ -190,4 +202,12 @@ public class XATransactionManager {
     		callback.onResponse(new WeCrossException(-1, "GetTransactionInfo error", e), null);
     	}
     }
+
+	public ZoneManager getZoneManager() {
+		return zoneManager;
+	}
+
+	public void setZoneManager(ZoneManager zoneManager) {
+		this.zoneManager = zoneManager;
+	}
 }

@@ -1,6 +1,7 @@
 package com.webank.wecross.stub;
 
 import java.util.List;
+import java.util.Map;
 
 public interface Connection {
 
@@ -34,4 +35,11 @@ public interface Connection {
      * @return resources
      */
     List<ResourceInfo> getResources();
+    
+    /**
+     * get properties
+     * 
+     * @return Map<String, String>
+     */
+    Map<String, String> getProperties();
 }
