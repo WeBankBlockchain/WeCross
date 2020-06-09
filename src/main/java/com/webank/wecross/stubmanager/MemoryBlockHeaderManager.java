@@ -2,6 +2,7 @@ package com.webank.wecross.stubmanager;
 
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.BlockHeader;
+import com.webank.wecross.stub.BlockHeaderManager;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.zone.Chain;
 import io.netty.util.Timer;

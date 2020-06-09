@@ -20,13 +20,13 @@ public class Path {
 
         return obj;
     }
-    
+
     public Path() {}
-    
+
     public Path(Path path) {
-    	this.zone = path.getZone();
-    	this.chain = path.getChain();
-    	this.resource = path.getResource();
+        this.zone = path.getZone();
+        this.chain = path.getChain();
+        this.resource = path.getResource();
     }
 
     public String getZone() {

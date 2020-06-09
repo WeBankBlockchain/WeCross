@@ -102,11 +102,11 @@ public class RemoteConnection implements Connection {
     public List<ResourceInfo> getResources() {
         return null;
     }
-    
+
     @Override
-	public Map<String, String> getProperties() {
-		return properties;
-	}
+    public Map<String, String> getProperties() {
+        return properties;
+    }
 
     public Peer getPeer() {
         return peer;

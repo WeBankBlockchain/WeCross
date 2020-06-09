@@ -1,6 +1,7 @@
 package com.webank.wecross.resource;
 
 import com.webank.wecross.peer.Peer;
+import com.webank.wecross.stub.BlockHeaderManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Request;
@@ -11,7 +12,7 @@ import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
-import com.webank.wecross.stubmanager.BlockHeaderManager;
+
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;

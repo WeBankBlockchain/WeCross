@@ -35,10 +35,10 @@ public interface Connection {
      * @return resources
      */
     List<ResourceInfo> getResources();
-    
+
     /**
      * get properties
-     * 
+     *
      * @return Map<String, String>
      */
     Map<String, String> getProperties();

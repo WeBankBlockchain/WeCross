@@ -1,6 +1,4 @@
-package com.webank.wecross.stubmanager;
-
-import com.webank.wecross.stub.BlockHeader;
+package com.webank.wecross.stub;
 
 public interface BlockHeaderManager {
     public void start();
