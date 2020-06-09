@@ -5,7 +5,6 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.BlockHeaderManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
-
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;

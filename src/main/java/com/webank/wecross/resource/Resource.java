@@ -12,7 +12,6 @@ import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
-
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;

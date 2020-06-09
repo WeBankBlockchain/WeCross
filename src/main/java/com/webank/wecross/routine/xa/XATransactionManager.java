@@ -56,7 +56,7 @@ public class XATransactionManager {
                 String[] args = new String[entry.getValue().size() + 1];
                 args[0] = transactionID;
                 for (int i = 0; i < entry.getValue().size(); ++i) {
-                    args[i + 1] = entry.getValue().get(i).toURI();
+                    args[i + 1] = entry.getValue().get(i).toString();
                 }
                 transactionRequest.setArgs(args);
 
@@ -75,13 +75,18 @@ public class XATransactionManager {
                         transactionContext,
                         (error, response) -> {
                             if (error != null) {
-                                logger.error("Send prepare transaction error", error);
+                                logger.error("Send prepare transaction system error", error);
 
                                 callback.onResponse(error, -1);
                                 return;
                             }
 
-                            callback.onResponse(null, 0);
+                            int errorCode = Integer.parseInt(response.getResult()[0]);
+                            if (errorCode != 0) {
+                                logger.error("Send prepare transaction proxy error: {}", errorCode);
+                            }
+
+                            callback.onResponse(null, errorCode);
                         });
             }
         } catch (Exception e) {
@@ -127,7 +132,12 @@ public class XATransactionManager {
                                 return;
                             }
 
-                            callback.onResponse(null, 0);
+                            int errorCode = Integer.parseInt(response.getResult()[0]);
+                            if (errorCode != 0) {
+                                logger.error("Send prepare transaction proxy error: {}", errorCode);
+                            }
+
+                            callback.onResponse(null, errorCode);
                         });
             }
         } catch (Exception e) {
@@ -173,7 +183,12 @@ public class XATransactionManager {
                                 return;
                             }
 
-                            callback.onResponse(null, 0);
+                            int errorCode = Integer.parseInt(response.getResult()[0]);
+                            if (errorCode != 0) {
+                                logger.error("Send prepare transaction proxy error: {}", errorCode);
+                            }
+
+                            callback.onResponse(null, errorCode);
                         });
             }
         } catch (Exception e) {
