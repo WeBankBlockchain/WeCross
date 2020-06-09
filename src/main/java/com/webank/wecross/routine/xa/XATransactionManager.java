@@ -1,29 +1,27 @@
 package com.webank.wecross.routine.xa;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.TransactionContext;
-import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
-import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.Chain;
-import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class XATransactionManager {
 	private Logger logger = LoggerFactory.getLogger(XATransactionManager.class);
+	ObjectMapper objectMapper = new ObjectMapper();
     private ZoneManager zoneManager;
 
     interface Callback {
@@ -79,27 +77,20 @@ public class XATransactionManager {
             }
         } catch (Exception e) {
         	logger.error("Prepare error", e);
+        	
+        	callback.onResponse(new WeCrossException(-1, "Prepare error", e), -1);
         }
     };
 
-    public void asyncCommit(String transactionID, Account account, Callback callback) {
+    public void asyncCommit(String transactionID, Account account, Set<Path> chains, Callback callback) {
     	try {
-        	// Map<String, List<Path>> zone2Path = getChainPaths(resources);
-    		Map<String, List<Path>> zone2Path = new HashMap<>();
-
-            for (Map.Entry<String, List<Path>> entry : zone2Path.entrySet()) {
-                Path chainPath = entry.getValue().get(0);
-
+            for (Path chainPath: chains) {
                 Chain chain = zoneManager.getZone(chainPath).getChain(chainPath);
 
                 // send prepare transaction
                 TransactionRequest transactionRequest = new TransactionRequest();
                 transactionRequest.setMethod("commitTransaction");
-                String[] args = new String[entry.getValue().size() + 1];
-                args[0] = transactionID;
-                for(int i=0; i<entry.getValue().size(); ++i) {
-                	args[i + 1] = entry.getValue().get(i).toURI();
-                }
+                String[] args = new String[] {transactionID};
                 transactionRequest.setArgs(args);
                 Resource resource = zoneManager.getResource(Path.decode("WeCrossProxy"));
                 
@@ -107,9 +98,9 @@ public class XATransactionManager {
 
                 resource.asyncSendTransaction(transactionContext, (error, response) -> {
                 	if(error != null) {
-                		logger.error("Send prepare transaction error", error);
+                		logger.error("Send commit transaction error", error);
                 		
-                		callback.onResponse(error, -1);
+                		callback.onResponse(new WeCrossException(-1, "Send commit transaction error", error), -1);
                 		return;
                 	}
                 	
@@ -117,16 +108,86 @@ public class XATransactionManager {
                 });
             }
         } catch (Exception e) {
-        	logger.error("Prepare error", e);
+        	logger.error("Commit error", e);
+        	
+        	callback.onResponse(new WeCrossException(-1, "Commit error", e), -1);
         }
     };
 
-    public void asyncRollback(String transactionID, Account account, Callback callback) {}
+    public void asyncRollback(String transactionID, Account account, Set<Path> chains, Callback callback) {
+    	try {
+            for (Path chainPath: chains) {
+                Chain chain = zoneManager.getZone(chainPath).getChain(chainPath);
 
-    interface TransactionHistoryCallback {
-        public void onResponse(List<XATransactionStep> transactionSteps);
+                // send rollback transaction
+                TransactionRequest transactionRequest = new TransactionRequest();
+                transactionRequest.setMethod("rollbackTransaction");
+                String[] args = new String[] {transactionID};
+                transactionRequest.setArgs(args);
+                Resource resource = zoneManager.getResource(Path.decode("WeCrossProxy"));
+                
+                TransactionContext<TransactionRequest> transactionContext = new TransactionContext<TransactionRequest>(transactionRequest, account, resource.getResourceInfo(), chain.getBlockHeaderManager());
+
+                resource.asyncSendTransaction(transactionContext, (error, response) -> {
+                	if(error != null) {
+                		logger.error("Send rollback transaction error", error);
+                		
+                		callback.onResponse(new WeCrossException(-1, "Send rollback transaction error", error), -1);
+                		return;
+                	}
+                	
+                	callback.onResponse(null, 0);
+                });
+            }
+        } catch (Exception e) {
+        	logger.error("Rollback error", e);
+        	
+        	callback.onResponse(new WeCrossException(-1, "Rollback error", e), -1);
+        }
     }
 
-    public void asyncGetTransactionHistory(
-            String transactionID, TransactionHistoryCallback callback) {}
+    interface GetTransactionInfoCallback {
+        public void onResponse(Exception e, XATransactionInfo xaTransactionInfo);
+    }
+
+    public void asyncGetTransactionInfo(
+            String transactionID, Path path, Account account, GetTransactionInfoCallback callback) {
+    	try {
+	    	Chain chain = zoneManager.getZone(path).getChain(path);
+	    	
+	        TransactionRequest transactionRequest = new TransactionRequest();
+	        transactionRequest.setMethod("getTransactionInfo");
+	        String[] args = new String[] {transactionID};
+	        transactionRequest.setArgs(args);
+	        Resource resource = zoneManager.getResource(Path.decode("WeCrossProxy"));
+	        
+	        TransactionContext<TransactionRequest> transactionContext = new TransactionContext<TransactionRequest>(transactionRequest, account, resource.getResourceInfo(), chain.getBlockHeaderManager());
+	
+	        resource.asyncCall(transactionContext, (error, response) -> {
+	        	if(error != null) {
+	        		logger.error("Send prepare transaction error", error);
+	        		
+	        		callback.onResponse(new WeCrossException(-1, "GetTransactionInfo error", error), null);
+	        		return;
+	        	}
+	        	
+	        	// decode return value
+				try {
+					XATransactionInfo xaTransactionInfo = objectMapper.readValue(response.getResult()[0], XATransactionInfo.class);
+					
+					callback.onResponse(null, xaTransactionInfo);
+				} catch (Exception e) {
+					logger.error("Decode transactionInfo json error", e);
+					
+					callback.onResponse(new WeCrossException(-1, "Decode transactionInfo json error", e), null);
+					return;
+				}
+	        });
+    	}
+    	catch(Exception e) {
+    		logger.error("GetTransactionInfo error", e);
+    		
+    		callback.onResponse(new WeCrossException(-1, "GetTransactionInfo error", e), null);
+    	}
+    }
 }
