@@ -109,7 +109,7 @@ public interface Driver {
      * @return BlockHeader
      */
     public interface GetBlockHeaderCallback {
-        public void onResponse(Exception e, BlockHeader blockHeader);
+        public void onResponse(Exception e, byte[] blockHeader);
     }
 
     public void asyncGetBlockHeader(
@@ -124,11 +124,16 @@ public interface Driver {
      * @param connection
      * @return null if the transaction has not been verified
      */
-    public VerifiedTransaction getVerifiedTransaction(
+    public interface GetVerifiedTransactionCallback {
+        public void onResponse(Exception e, VerifiedTransaction verifiedTransaction);
+    }
+
+    public void asyncGetVerifiedTransaction(
             String transactionHash,
             long blockNumber,
             BlockHeaderManager blockHeaderManager,
-            Connection connection);
+            Connection connection,
+            GetVerifiedTransactionCallback callback);
 
     interface CustomCommandCallback {
         void onResponse(Exception error, Object response);

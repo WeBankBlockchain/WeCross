@@ -20,17 +20,43 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     private ThreadPoolTaskExecutor threadPool;
     private Map<Long, List<GetBlockHeaderCallback>> getBlockHaderCallbacks =
             new HashMap<Long, List<GetBlockHeaderCallback>>();
-    private LinkedList<BlockHeader> blockHeaderCache = new LinkedList<BlockHeader>();
+    private LinkedList<BlockHeaderData> blockHeaderCache = new LinkedList<BlockHeaderData>();
     private Chain chain;
     private boolean running = false;
     private Timer timer;
     private long getBlockNumberDelay = 1000;
     private int maxCacheSize = 20;
 
+    public class BlockHeaderData {
+        private BlockHeader blockHeader;
+        private byte[] data;
+
+        public BlockHeaderData(BlockHeader blockHeader, byte[] data) {
+            this.blockHeader = blockHeader;
+            this.data = data;
+        }
+
+        public BlockHeader getBlockHeader() {
+            return blockHeader;
+        }
+
+        public void setBlockHeader(BlockHeader blockHeader) {
+            this.blockHeader = blockHeader;
+        }
+
+        public byte[] getData() {
+            return data;
+        }
+
+        public void setData(byte[] data) {
+            this.data = data;
+        }
+    }
+
     public void onGetBlockNumber(Exception e, long blockNumber) {
         long current = 0;
         if (!blockHeaderCache.isEmpty()) {
-            current = blockHeaderCache.peekLast().getNumber();
+            current = blockHeaderCache.peekLast().getBlockHeader().getNumber();
         }
 
         if (current < blockNumber) {
@@ -39,22 +65,24 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
                         .asyncGetBlockHeader(
                                 blockNumber,
                                 chain.chooseConnection(),
-                                new Driver.GetBlockHeaderCallback() {
-                                    @Override
-                                    public void onResponse(Exception e, BlockHeader blockHeader) {
-                                        onSyncBlockHeader(e, blockHeader, blockNumber);
-                                    }
+                                (error, data) -> {
+                                    onSyncBlockHeader(
+                                            error,
+                                            chain.getDriver().decodeBlockHeader(data),
+                                            data,
+                                            blockNumber);
                                 });
             } else {
                 chain.getDriver()
                         .asyncGetBlockHeader(
                                 current + 1,
                                 chain.chooseConnection(),
-                                new Driver.GetBlockHeaderCallback() {
-                                    @Override
-                                    public void onResponse(Exception e, BlockHeader blockHeader) {
-                                        onSyncBlockHeader(e, blockHeader, blockNumber);
-                                    }
+                                (error, data) -> {
+                                    onSyncBlockHeader(
+                                            error,
+                                            chain.getDriver().decodeBlockHeader(data),
+                                            data,
+                                            blockNumber);
                                 });
             }
         } else {
@@ -75,8 +103,8 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
         }
     }
 
-    public void onSyncBlockHeader(Exception e, BlockHeader blockHeader, long target) {
-        blockHeaderCache.add(blockHeader);
+    public void onSyncBlockHeader(Exception e, BlockHeader blockHeader, byte[] data, long target) {
+        blockHeaderCache.add(new BlockHeaderData(blockHeader, data));
         List<GetBlockHeaderCallback> callbacks =
                 getBlockHaderCallbacks.get(blockHeader.getNumber());
         if (callbacks != null) {
@@ -85,7 +113,7 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
                         new Runnable() {
                             @Override
                             public void run() {
-                                callback.onResponse(null, blockHeader);
+                                callback.onResponse(null, data);
                             }
                         });
             }
@@ -101,11 +129,12 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
                     .asyncGetBlockHeader(
                             blockHeader.getNumber() + 1,
                             chain.chooseConnection(),
-                            new Driver.GetBlockHeaderCallback() {
-                                @Override
-                                public void onResponse(Exception e, BlockHeader blockHeader) {
-                                    onSyncBlockHeader(e, blockHeader, target);
-                                }
+                            (error, blockData) -> {
+                                onSyncBlockHeader(
+                                        e,
+                                        chain.getDriver().decodeBlockHeader(blockData),
+                                        blockData,
+                                        target);
                             });
         } else {
             chain.getDriver()
@@ -179,7 +208,11 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
                             threadPool.execute(
                                     () -> {
                                         callback.onResponse(
-                                                null, blockHeaderCache.peekLast().getNumber());
+                                                null,
+                                                blockHeaderCache
+                                                        .peekLast()
+                                                        .getBlockHeader()
+                                                        .getNumber());
                                     });
                         }
                     }
@@ -188,31 +221,29 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
 
     @Override
     public void asyncGetBlockHeader(long blockNumber, GetBlockHeaderCallback callback) {
-        if (blockHeaderCache.isEmpty() || blockNumber < blockHeaderCache.peekFirst().getNumber()) {
+        if (blockHeaderCache.isEmpty()
+                || blockNumber < blockHeaderCache.peekFirst().getBlockHeader().getNumber()) {
             chain.getDriver()
                     .asyncGetBlockHeader(
                             blockNumber,
                             chain.chooseConnection(),
-                            new Driver.GetBlockHeaderCallback() {
-                                @Override
-                                public void onResponse(Exception e, BlockHeader blockHeader) {
-                                    callback.onResponse(e, blockHeader);
-                                }
+                            (error, data) -> {
+                                callback.onResponse(error, data);
                             });
-        } else if (blockNumber > blockHeaderCache.peekLast().getNumber()) {
+        } else if (blockNumber > blockHeaderCache.peekLast().getBlockHeader().getNumber()) {
             if (!getBlockHaderCallbacks.containsKey(blockNumber)) {
                 getBlockHaderCallbacks.put(blockNumber, new LinkedList<GetBlockHeaderCallback>());
             }
 
             getBlockHaderCallbacks.get(blockNumber).add(callback);
         } else {
-            for (BlockHeader blockHeader : blockHeaderCache) {
-                if (blockHeader.getNumber() == blockNumber) {
+            for (BlockHeaderData blockHeader : blockHeaderCache) {
+                if (blockHeader.getBlockHeader().getNumber() == blockNumber) {
                     threadPool.execute(
                             new Runnable() {
                                 @Override
                                 public void run() {
-                                    callback.onResponse(null, blockHeader);
+                                    callback.onResponse(null, blockHeader.getData());
                                 }
                             });
 

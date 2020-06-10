@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Driver.GetBlockHeaderCallback;
@@ -17,17 +18,26 @@ import io.netty.util.Timer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 public class MemoryBlockHeaderManagerTest {
-    public BlockHeader buildBlockHeader(long number) {
-        BlockHeader blockHeader = new BlockHeader();
-        blockHeader.setNumber(number);
+    private ObjectMapper objectMapper = new ObjectMapper();
 
-        return blockHeader;
+    public byte[] buildBlockHeader(long number) {
+        try {
+            BlockHeader blockHeader = new BlockHeader();
+            blockHeader.setNumber(number);
+
+            return objectMapper.writeValueAsBytes(blockHeader);
+        } catch (Exception e) {
+            Assert.assertNotNull(null);
+        }
+
+        return null;
     }
 
     @Test
@@ -55,6 +65,14 @@ public class MemoryBlockHeaderManagerTest {
                                 })
                 .when(driver)
                 .asyncGetBlockNumber(Mockito.any(), Mockito.any());
+
+        Mockito.when(driver.decodeBlockHeader(Mockito.any()))
+                .thenAnswer(
+                        (Answer<BlockHeader>)
+                                invocation -> {
+                                    byte[] data = invocation.getArgument(0);
+                                    return objectMapper.readValue(data, BlockHeader.class);
+                                });
 
         Mockito.doAnswer(
                         (Answer<Void>)
@@ -105,7 +123,7 @@ public class MemoryBlockHeaderManagerTest {
                 21,
                 (e, blockHeader) -> {
                     assertNull(e);
-                    assertEquals(21, blockHeader.getNumber());
+                    assertEquals(21, driver.decodeBlockHeader(blockHeader).getNumber());
                 });
 
         Mockito.doAnswer(
@@ -156,7 +174,8 @@ public class MemoryBlockHeaderManagerTest {
             memoryBlockHeaderManager.asyncGetBlockHeader(
                     i,
                     (error, blockHeader) -> {
-                        assertEquals(requestNumber, blockHeader.getNumber());
+                        assertEquals(
+                                requestNumber, driver.decodeBlockHeader(blockHeader).getNumber());
                     });
         }
 
@@ -166,7 +185,7 @@ public class MemoryBlockHeaderManagerTest {
         memoryBlockHeaderManager.asyncGetBlockHeader(
                 150,
                 (error, blockHeader) -> {
-                    assertEquals(150, blockHeader.getNumber());
+                    assertEquals(150, driver.decodeBlockHeader(blockHeader).getNumber());
                     flags.add(false);
                 });
 

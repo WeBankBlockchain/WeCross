@@ -9,9 +9,8 @@ import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.ZoneManager;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -26,12 +25,12 @@ public class XATransactionManager {
         public void onResponse(Exception e, int result);
     }
 
-    public Map<String, List<Path>> getChainPaths(List<Path> resources) {
-        Map<String, List<Path>> zone2Path = new HashMap<String, List<Path>>();
+    public Map<String, Set<Path>> getChainPaths(Set<Path> resources) {
+        Map<String, Set<Path>> zone2Path = new HashMap<String, Set<Path>>();
         for (Path path : resources) {
             String key = path.getZone() + "." + path.getChain();
             if (zone2Path.get(key) == null) {
-                zone2Path.put(key, new ArrayList<Path>());
+                zone2Path.put(key, new HashSet<Path>());
             }
 
             zone2Path.get(key).add(path);
@@ -41,12 +40,12 @@ public class XATransactionManager {
     }
 
     public void asyncPrepare(
-            String transactionID, Account account, List<Path> resources, Callback callback) {
+            String transactionID, Account account, Set<Path> resources, Callback callback) {
         try {
-            Map<String, List<Path>> zone2Path = getChainPaths(resources);
+            Map<String, Set<Path>> zone2Path = getChainPaths(resources);
 
-            for (Map.Entry<String, List<Path>> entry : zone2Path.entrySet()) {
-                Path chainPath = entry.getValue().get(0);
+            for (Map.Entry<String, Set<Path>> entry : zone2Path.entrySet()) {
+                Path chainPath = entry.getValue().iterator().next();
 
                 Chain chain = zoneManager.getZone(chainPath).getChain(chainPath);
 
@@ -54,9 +53,11 @@ public class XATransactionManager {
                 TransactionRequest transactionRequest = new TransactionRequest();
                 transactionRequest.setMethod("startTransaction");
                 String[] args = new String[entry.getValue().size() + 1];
+                int i = 0;
                 args[0] = transactionID;
-                for (int i = 0; i < entry.getValue().size(); ++i) {
-                    args[i + 1] = entry.getValue().get(i).toString();
+                for (Path path : entry.getValue()) {
+                    args[i + 1] = path.toString();
+                    ++i;
                 }
                 transactionRequest.setArgs(args);
 
@@ -198,7 +199,7 @@ public class XATransactionManager {
         }
     }
 
-    interface GetTransactionInfoCallback {
+    public interface GetTransactionInfoCallback {
         public void onResponse(Exception e, XATransactionInfo xaTransactionInfo);
     }
 

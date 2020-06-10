@@ -1,13 +1,12 @@
 package com.webank.wecross.routine.xa;
 
-import java.util.List;
-
 public class XATransactionStep {
     private int seq;
+    private String contract;
     private String path;
-    private String realAddress;
-    private String method;
-    private List<byte[]> args;
+    private int timestamp;
+    private String func;
+    private String args;
 
     public int getSeq() {
         return seq;
@@ -15,6 +14,14 @@ public class XATransactionStep {
 
     public void setSeq(int seq) {
         this.seq = seq;
+    }
+
+    public String getContract() {
+        return contract;
+    }
+
+    public void setContract(String contract) {
+        this.contract = contract;
     }
 
     public String getPath() {
@@ -25,27 +32,27 @@ public class XATransactionStep {
         this.path = path;
     }
 
-    public String getRealAddress() {
-        return realAddress;
+    public int getTimestamp() {
+        return timestamp;
     }
 
-    public void setRealAddress(String realAddress) {
-        this.realAddress = realAddress;
+    public void setTimestamp(int timestamp) {
+        this.timestamp = timestamp;
     }
 
-    public String getMethod() {
-        return method;
+    public String getFunc() {
+        return func;
     }
 
-    public void setMethod(String method) {
-        this.method = method;
+    public void setFunc(String func) {
+        this.func = func;
     }
 
-    public List<byte[]> getArgs() {
+    public String getArgs() {
         return args;
     }
 
-    public void setArgs(List<byte[]> args) {
+    public void setArgs(String args) {
         this.args = args;
     }
 }

@@ -288,6 +288,8 @@ public class ZoneManager {
         return resources;
     }
 
+    public void getResourcesInfo() {}
+
     public Map<String, ResourceInfo> getAllResourcesInfo(boolean ignoreRemote) {
         Map<String, ResourceInfo> resources = new HashMap<String, ResourceInfo>();
 

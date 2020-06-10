@@ -12,7 +12,6 @@ import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
-import com.webank.wecross.stub.VerifiedTransaction;
 import java.math.BigInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,10 +161,13 @@ public class AssetHTLC implements HTLC {
         Connection connection = resource.chooseConnection();
         Driver driver = resource.getDriver();
 
+        /*
         VerifiedTransaction verifiedTransaction =
                 driver.getVerifiedTransaction(txHash, blockNumber, blockHeaderManager, connection);
 
         return verifyData.verify(verifiedTransaction);
+        */
+        return false; // TODO fix this
     }
 
     @Override
