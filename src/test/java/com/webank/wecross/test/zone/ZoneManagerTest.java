@@ -6,11 +6,13 @@ import static org.junit.Assert.assertNull;
 import com.webank.wecross.config.ResourceThreadPoolConfig;
 import com.webank.wecross.network.p2p.netty.common.Node;
 import com.webank.wecross.peer.Peer;
+import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.StubFactory;
 import com.webank.wecross.stubmanager.MemoryBlockHeaderManagerFactory;
 import com.webank.wecross.stubmanager.StubManager;
+import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.ChainInfo;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
@@ -110,26 +112,6 @@ public class ZoneManagerTest {
         Map<String, ChainInfo> allResources2 = zoneManager.getAllChainsInfo(false);
         System.out.println(allResources2);
         Assert.assertEquals(3, allResources2.size());
-
-        /*
-        // test for different peer
-        ChainInfo resourceInfo2 = new ChainInfo();
-        resourceInfo2.setName("contract0");
-        resourceInfo2.setStubType("test");
-
-        Peer peer2 = new Peer(new Node("bbb", "127.0.0.1", 100));
-
-        Map<String, ResourceInfo> resources2 = new HashMap<String, ResourceInfo>();
-        resources2.put("payment.bcos0.contract0", resourceInfo2);
-        zoneManager.addRemoteChains(peer2, resources2);
-
-        Map<String, ResourceInfo> allResources3 = zoneManager.getAllChainsInfo(false);
-        System.out.println(allResources3);
-        Assert.assertEquals(12, allResources3.size());
-        */
-
-        // Resource resource2 = zoneManager.getResource(Path.decode("payment.bcos0.contract0"));
-        // Assert.assertEquals(2, resource2.getPeers().size());
     }
 
     @Test
@@ -222,49 +204,72 @@ public class ZoneManagerTest {
 
         allResources = zoneManager.getAllChainsInfo(false);
         Assert.assertEquals(2, allResources.size()); // all 2 connection remove 1
+    }
 
-        /*
-        Zone zone = zoneManager.getZone("payment");
-        Chain stub = zone.getChain("bcos2");
-        Assert.assertNull(stub);
+    @Test
+    public void testGetResource() throws Exception {
+        StubFactory stubFactory = Mockito.spy(StubFactory.class);
+        Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
+        Mockito.when(stubFactory.newDriver()).thenReturn(null);
 
-        // fatal test
-        ChainInfo resourceInfo = new ChainInfo();
-        resourceInfo.setName("payment.bcos2.aaa");
+        StubManager stubManager = Mockito.mock(StubManager.class);
+        Mockito.when(stubManager.getStubFactory("test")).thenReturn(stubFactory);
 
-        Map<String, ChainInfo> resources = new HashMap<String, ChainInfo>();
-        resources.put("payment.bcos2.aaa", resourceInfo);
-        zoneManager.removeRemoteChains(peer2, resources);
+        ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
+                new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
+        MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
+                new MemoryBlockHeaderManagerFactory(resourceThreadPool);
 
-        resources.clear();
-        resources.put("payment.bcos1.contract0", resourceInfo);
-        // resourceInfo.setName("payment.bcos1.contract0");
-        zoneManager.removeRemoteChains(peer2, resources);
+        ZoneManager zoneManager = new ZoneManager();
+        zoneManager.setStubManager(stubManager);
+        zoneManager.setResourceBlockHeaderManagerFactory(resourceBlockHeaderManagerFactory);
 
-        resources.clear();
-        resources.put("payment.bcos1.abc", resourceInfo);
-        // resourceInfo.setName("payment.bcos1.abc");
-        zoneManager.removeRemoteChains(peer2, resources);
+        Peer peer = new Peer(new Node("aaa", "127.0.0.1", 100));
 
-        resources.clear();
-        resources.put("payment1.bcos4.abc", resourceInfo);
-        // resourceInfo.setName("payment1.bcos4.abc");
-        zoneManager.removeRemoteChains(peer2, resources);
+        for (int i = 0; i < 3; i++) {
+            ChainInfo chainInfo = new ChainInfo();
+            chainInfo.setName("chain" + i);
+            chainInfo.setStubType("test");
 
-        resources.clear();
-        resources.put("payment.abc", resourceInfo);
-        // resourceInfo.setName("payment.abc");
-        zoneManager.removeRemoteChains(peer2, resources);
+            Map<String, String> properties = new HashMap<String, String>();
+            properties.put("key", "value");
+            chainInfo.setProperties(properties);
+            chainInfo.setResources(new ArrayList<ResourceInfo>());
 
-        for (Map.Entry<String, ChainInfo> entry :
-                zoneManager.getAllChainsInfo(false).entrySet()) {
-            resources = new HashMap<String, ChainInfo>();
-            resources.put(entry.getKey(), entry.getValue());
-            zoneManager.removeRemoteChains(peer, resources);
+            for (int j = 0; j < 4; j++) {
+                ResourceInfo resourceInfo = new ResourceInfo();
+                resourceInfo.setName("resource" + j);
+                resourceInfo.setStubType("test");
+
+                chainInfo.getResources().add(resourceInfo);
+            }
+
+            String path = "payment.chain" + i;
+            Map<String, ChainInfo> chains = new HashMap<String, ChainInfo>();
+            chains.put(path, chainInfo);
+
+            zoneManager.addRemoteChains(peer, chains);
         }
 
-        Assert.assertEquals(0, zoneManager.getZones().size());
-        */
+        Map<String, ChainInfo> allResources = zoneManager.getAllChainsInfo(false);
+        Assert.assertEquals(3, allResources.size());
+
+        Chain chain = zoneManager.getChain(Path.decode("payment.chain0"));
+
+        Resource resource = zoneManager.getResource(Path.decode("payment.chain0.resource0"));
+        Assert.assertFalse(resource.isTemporary());
+        Assert.assertEquals(chain.getConnection(), resource.getConnection());
+
+        resource = zoneManager.getResource(Path.decode("payment.chain0.resource4"));
+        Assert.assertNull(resource);
+
+        resource = zoneManager.fetchResource(Path.decode("payment.chain0.resource4"));
+        Assert.assertTrue(resource.isTemporary());
+
+        Assert.assertEquals(chain.getConnection(), resource.getConnection());
+
+        Map<String, Resource> resources = zoneManager.getAllResources(false);
+        Assert.assertEquals(13, resources.size());
     }
 
     @Test

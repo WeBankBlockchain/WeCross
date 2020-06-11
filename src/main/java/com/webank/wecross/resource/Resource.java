@@ -32,6 +32,10 @@ public class Resource {
     boolean isTemporary = false;
     private Random random = new SecureRandom();
 
+    public Map<Peer, Connection> getConnection() {
+        return connections;
+    }
+
     public void setConnection(Map<Peer, Connection> connections) {
         this.connections = connections;
     }
