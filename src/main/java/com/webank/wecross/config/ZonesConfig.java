@@ -10,6 +10,7 @@ import com.webank.wecross.stubmanager.MemoryBlockHeaderManagerFactory;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.utils.ConfigUtils;
 import com.webank.wecross.zone.Chain;
+import com.webank.wecross.zone.ChainInfo;
 import com.webank.wecross.zone.Zone;
 import java.io.File;
 import java.util.HashMap;
@@ -127,8 +128,13 @@ public class ZonesConfig {
 
             List<ResourceInfo> resources = connection.getResources();
 
-            String blockPath = zone + "." + chainName;
-            Chain chain = new Chain(chainName);
+            ChainInfo chainInfo = new ChainInfo();
+            chainInfo.setName(chainName);
+            chainInfo.setProperties(connection.getProperties());
+            chainInfo.setStubType(type);
+            chainInfo.setResources(resources);
+
+            Chain chain = new Chain(chainInfo);
             chain.setDriver(stubFactory.newDriver());
             chain.setBlockHeaderManager(resourceBlockHeaderManagerFactory.build(chain));
             for (ResourceInfo resourceInfo : resources) {

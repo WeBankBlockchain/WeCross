@@ -9,14 +9,16 @@ public class Path {
 
     public static Path decode(String path) throws Exception {
         String[] sp = path.split("\\.");
-        if (sp.length < 3) {
+        if (sp.length < 2) {
             throw new Exception("Decode path error: " + path);
         }
 
         Path obj = new Path();
         obj.setZone(sp[0]);
         obj.setChain(sp[1]);
-        obj.setResource(sp[2]);
+        if (sp.length > 2) {
+            obj.setResource(sp[2]);
+        }
 
         return obj;
     }

@@ -35,7 +35,7 @@ public class ResourceThreadPoolConfig {
     public ResourceThreadPool newResourceThreadPool() {
         Long corePoolSize = toml.getLong("advance.resourceThreadPool.corePoolSize");
         if (corePoolSize == null) {
-            corePoolSize = new Long(8);
+            corePoolSize = (long) 8;
             logger.debug(
                     "[advance.resourceThreadPool.corePoolSize] not set, use default: "
                             + corePoolSize);

@@ -16,6 +16,7 @@ public interface Connection {
      * @param request
      * @return
      */
+    @Deprecated
     Response send(Request request);
 
     /**

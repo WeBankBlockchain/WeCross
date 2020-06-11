@@ -108,6 +108,10 @@ public class RemoteConnection implements Connection {
         return properties;
     }
 
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
+
     public Peer getPeer() {
         return peer;
     }

@@ -14,8 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Chain {
-    private String name;
     private Logger logger = LoggerFactory.getLogger(Chain.class);
+    private ChainInfo chainInfo;
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
     boolean hasLocalConnection = false;
     private Map<String, Resource> resources = new HashMap<String, Resource>();
@@ -24,8 +24,8 @@ public class Chain {
     private AtomicBoolean running = new AtomicBoolean(false);
     private Random random = new SecureRandom();
 
-    public Chain(String name) {
-        this.name = name;
+    public Chain(ChainInfo chainInfo) {
+        this.chainInfo = chainInfo;
     }
 
     public void start() {
@@ -42,6 +42,18 @@ public class Chain {
                 logger.error("Thread interrupt", e);
             }
         }
+    }
+
+    public ChainInfo getChainInfo() {
+        return chainInfo;
+    }
+
+    public void setChainInfo(ChainInfo chainInfo) {
+        this.chainInfo = chainInfo;
+    }
+
+    public Map<Peer, Connection> getConnection() {
+        return connections;
     }
 
     public void addConnection(Peer peer, Connection connection) {
