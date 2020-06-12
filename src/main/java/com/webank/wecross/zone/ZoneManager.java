@@ -84,7 +84,8 @@ public class ZoneManager {
                             resource.setConnection(chain.getConnection());
                             resource.setTemporary(true);
 
-                            chain.getResources().put(path.getResource(), resource);
+                            // TODO: comment?
+                            // chain.getResources().put(path.getResource(), resource);
                             return resource;
                         } else {
                             return null;

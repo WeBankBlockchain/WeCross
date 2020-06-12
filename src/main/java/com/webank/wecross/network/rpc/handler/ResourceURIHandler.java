@@ -169,6 +169,7 @@ public class ResourceURIHandler implements URIHandler {
                         logger.trace(
                                 "call request: {}, account: {}", transactionRequest, accountName);
 
+                        // TODO: byProxy
                         resourceObj.asyncCall(
                                 new TransactionContext<>(
                                         transactionRequest,
