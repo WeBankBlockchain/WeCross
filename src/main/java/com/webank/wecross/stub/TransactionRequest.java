@@ -19,6 +19,14 @@ public class TransactionRequest {
         this.args = args;
     }
 
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
     public String getMethod() {
         return method;
     }
