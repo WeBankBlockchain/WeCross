@@ -7,36 +7,35 @@ assignees: ''
 
 ---
 
+**Background**
+Please describe this CIP's background.
 
-**Description**
-Description of the CIP's current status and background.
+**Problem Description**
+Please describe which problems this CIP aims to solve.
 
-**Problems to be solve**
-Problems that the CIP is expected to solve.
-
-**Scenario**
-Which scenario are suitable for the CIP, e.g payment, supply chian, development ...
+**Potential Use Cases**
+Please describe potential use cases of this CIP, e.g. payment, supply chain, utility, etc.
 
 **Features**
-Features need to be changed/added of the CIP.
+Please describe which features need to be changed/added of this CIP.
 
-**Architecture(Optional)**
-If the CIP involves modification of any modules, describe the modules that needs to be changed/added, and provide architecture diagram.
+**Module Design(Optional)**
+If this CIP involves modification of any modules, please describe the modules that needs to be changed/added, and provide the new module design diagram.
 
 **Network protocol(Optional)**
-If the CIP involves modification of the network module, describe the network protocol that needs to be changed/added.
+If this CIP involves modification of any network protocols, please describe the network protocol that needs to be changed/added. 
 
-**Storage structure(Optional)**
-If the CIP involves modification of the storage module, describe the storage structure that needs to be changed/added.
+**Storage Schema(Optional)**
+If this CIP involves modification of the storage schema, please describe the storage schema that needs to be changed/added. 
 
 **Process flow diagram(Optional)**
-If the CIP involves modification of an existing process flow, describe the process flow that needs to be changed/added.
+If this CIP involves modification of any existing process flow, please describe the process flow that needs to be changed/added. 
+
+**Risk Analysis (Optional)**
+Please describe the potential risks and suggested countermeasures. 
 
 **Compatibility**
-If the CIP changes the existing interface, data structure or process flow, describe the compatibility with the old version.
+If this CIP changes the existing interface, data structure or process flow, please describe the new compatibility requirements. 
 
-**Security**
-Describe the security measures, consider scenarios such as accounts, funds, or user information.
-
-**Copyright**
-Describe whether the CIP has copyright information from third parties.
+**Copyright Waiver**
+All CIPs must be in the public domain.
