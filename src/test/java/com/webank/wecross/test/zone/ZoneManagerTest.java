@@ -269,7 +269,7 @@ public class ZoneManagerTest {
         Assert.assertEquals(chain.getConnection(), resource.getConnection());
 
         Map<String, Resource> resources = zoneManager.getAllResources(false);
-        Assert.assertEquals(13, resources.size());
+        Assert.assertEquals(12, resources.size());
     }
 
     @Test
