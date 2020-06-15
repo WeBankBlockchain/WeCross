@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class HTLCManagerConfig {
-    private Logger logger = LoggerFactory.getLogger(ConfigReaderConfig.class);
+    private Logger logger = LoggerFactory.getLogger(HTLCManagerConfig.class);
 
     @Resource Toml toml;
 
@@ -63,7 +63,7 @@ public class HTLCManagerConfig {
                 htlcTaskInfos.put(selfPath, htlcTaskInfo);
             }
         } catch (Exception e) {
-            logger.error("failed to new HTLCManager: {}", e.getMessage());
+            logger.error("failed to new HTLCManager: {}", e);
             System.exit(-1);
         }
 

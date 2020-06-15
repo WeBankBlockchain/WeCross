@@ -8,9 +8,12 @@
 [rpc] # rpc ip & port
     address = '127.0.0.1'
     port = 8250
+    sslOn = true
     caCert = 'classpath:ca.crt'
     sslCert = 'classpath:ssl.crt'
     sslKey = 'classpath:ssl.key'
+    threadNum = 16
+    threadQueueCapacity = 10000
 
 [p2p]
     listenIP = '0.0.0.0'
@@ -19,7 +22,14 @@
     sslCert = 'classpath:ssl.crt'
     sslKey = 'classpath:ssl.key'
     peers = ['127.0.0.1:25501']
-    threadNum = 500
+    threadNum = 16
+    threadQueueCapacity = 100000
+
+[advanced.resourceThreadPool]
+    corePoolSize = 8
+    maxPoolSize = 8
+    queueCapacity = 5000
+
 
 #[[htlc]]
 #    selfPath = 'payment.bcos.htlc'

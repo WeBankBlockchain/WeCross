@@ -3,10 +3,9 @@ package com.webank.wecross.config;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.common.BCManager;
 import com.webank.wecross.host.WeCrossHost;
-import com.webank.wecross.p2p.MessageType;
-import com.webank.wecross.p2p.P2PMessageEngine;
-import com.webank.wecross.p2p.RequestProcessor;
-import com.webank.wecross.p2p.netty.P2PService;
+import com.webank.wecross.network.p2p.P2PProcessor;
+import com.webank.wecross.network.p2p.P2PService;
+import com.webank.wecross.network.rpc.RPCService;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.routine.RoutineManager;
 import com.webank.wecross.zone.ZoneManager;
@@ -17,13 +16,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class WeCrossHostConfig {
 
+    // Task layer
+    @Resource private P2PProcessor p2PProcessor;
+
+    // Data layer
     @Resource private ZoneManager zoneManager;
 
-    @Resource private P2PService p2pService;
-
     @Resource private PeerManager peerManager;
-
-    @Resource private P2PMessageEngine p2pMessageEngine;
 
     @Resource private RoutineManager routineManager;
 
@@ -31,27 +30,27 @@ public class WeCrossHostConfig {
 
     @Resource private BCManager bcManager;
 
+    // Network layer
+    @Resource private P2PService p2PService;
+    @Resource private RPCService rpcService;
+
     @Bean
     public WeCrossHost newWeCrossHost() {
         System.out.println("Initializing WeCrossHost ...");
 
         WeCrossHost host = new WeCrossHost();
         host.setZoneManager(zoneManager);
-        host.setP2pService(p2pService);
         host.setPeerManager(peerManager);
         host.setAccountManager(accountManager);
         host.setRoutineManager(routineManager);
+        host.setP2PService(p2PService);
+        host.setRpcService(rpcService);
 
         // set the p2p engine here to avoid circular reference
-        zoneManager.setP2PEngine(p2pMessageEngine);
-        RequestProcessor processor =
-                (RequestProcessor)
-                        p2pService
-                                .getInitializer()
-                                .getMessageCallBack()
-                                .getProcessor(MessageType.RESOURCE_REQUEST);
-        processor.setP2pEngine(p2pMessageEngine);
-        processor.setRoutineManager(routineManager);
+        zoneManager.setP2PService(p2PService);
+
+        // Service layer set processor
+        p2PService.setNetworkProcessor(p2PProcessor);
 
         host.start();
         return host;

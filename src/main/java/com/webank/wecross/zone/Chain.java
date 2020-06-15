@@ -10,6 +10,8 @@ import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,10 @@ public class Chain {
     private Random random = new SecureRandom();
     private BlockHeader localBlockHeader;
 
+    private Object mainLoopLock = new Object();
+    private Timer mainLoopTimer = new Timer();;
+    private static long mainLoopInterval = 1000; // ms
+
     public Chain(String name) {
         this.name = name;
     }
@@ -40,21 +46,21 @@ public class Chain {
                             new Runnable() {
                                 @Override
                                 public void run() {
-                                    loadLocalBlockHeader();
-                                    logger.trace("Block header sync thread started");
-                                    while (running.get()) {
-                                        try {
-                                            Thread.sleep(1000);
-
-                                            fetchBlockHeader();
-                                        } catch (Exception e) {
-                                            logger.warn("Get block header exception", e);
-                                        }
-                                    }
+                                    mainLoop();
                                 }
                             });
-
             blockSyncThread.start();
+            logger.trace("Block header sync thread started");
+
+            mainLoopTimer.schedule(
+                    new TimerTask() {
+                        @Override
+                        public void run() {
+                            noteMainLoop();
+                        }
+                    },
+                    mainLoopInterval,
+                    mainLoopInterval);
         }
     }
 
@@ -70,6 +76,34 @@ public class Chain {
                 logger.error("Thread interrupt", e);
             }
         }
+    }
+
+    public void mainLoop() {
+        try {
+            loadLocalBlockHeader();
+            while (running.get()) {
+                try {
+                    fetchBlockHeader();
+                } catch (Exception e) {
+                    logger.warn("Get block header exception", e);
+                }
+                synchronized (mainLoopLock) {
+                    mainLoopLock.wait();
+                }
+            }
+        } catch (Exception e) {
+            logger.info("Chain mainLoop interrupted");
+        }
+    }
+
+    public void noteMainLoop() {
+        synchronized (mainLoopLock) {
+            mainLoopLock.notifyAll();
+        }
+    }
+
+    public void noteBlockHeaderChange() {
+        noteMainLoop();
     }
 
     public void fetchBlockHeader() {

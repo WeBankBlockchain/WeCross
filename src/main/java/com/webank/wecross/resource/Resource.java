@@ -6,15 +6,22 @@ import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
+import com.webank.wecross.stub.StubQueryStatus;
 import com.webank.wecross.stub.TransactionContext;
+import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Resource {
+    private Logger logger = LoggerFactory.getLogger(Response.class);
     private String type;
     private Driver driver;
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
@@ -53,15 +60,52 @@ public class Resource {
         }
     }
 
-    public TransactionResponse call(TransactionContext<TransactionRequest> request) {
+    public abstract static class Callback {
+        public abstract void onTransactionResponse(
+                TransactionException transactionException, TransactionResponse transactionResponse);
+    }
+
+    public TransactionResponse call(TransactionContext<TransactionRequest> request)
+            throws TransactionException {
         return driver.call(request, chooseConnection());
     }
 
-    public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request) {
+    public void asyncCall(
+            TransactionContext<TransactionRequest> request, Resource.Callback callback) {
+        driver.asyncCall(
+                request,
+                chooseConnection(),
+                new Driver.Callback() {
+                    @Override
+                    public void onTransactionResponse(
+                            TransactionException transactionException,
+                            TransactionResponse transactionResponse) {
+                        callback.onTransactionResponse(transactionException, transactionResponse);
+                    }
+                });
+    }
+
+    public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request)
+            throws TransactionException {
         return driver.sendTransaction(request, chooseConnection());
     }
 
-    public Response onRemoteTransaction(Request request) {
+    public void asyncSendTransaction(
+            TransactionContext<TransactionRequest> request, Resource.Callback callback) {
+        driver.asyncSendTransaction(
+                request,
+                chooseConnection(),
+                new Driver.Callback() {
+                    @Override
+                    public void onTransactionResponse(
+                            TransactionException transactionException,
+                            TransactionResponse transactionResponse) {
+                        callback.onTransactionResponse(transactionException, transactionResponse);
+                    }
+                });
+    }
+
+    public void onRemoteTransaction(Request request, Connection.Callback callback) {
         if (driver.isTransaction(request)) {
             TransactionContext<TransactionRequest> transactionRequest =
                     driver.decodeTransactionRequest(request.getData());
@@ -72,7 +116,30 @@ public class Resource {
         }
 
         request.setResourceInfo(resourceInfo);
-        return chooseConnection().send(request);
+        chooseConnection().asyncSend(request, callback);
+    }
+
+    public Response onRemoteTransaction(Request request) {
+        CompletableFuture<Response> completableFuture = new CompletableFuture<>();
+
+        onRemoteTransaction(
+                request,
+                new Connection.Callback() {
+                    @Override
+                    public void onResponse(Response response) {
+                        completableFuture.complete(response);
+                    }
+                });
+
+        try {
+            return completableFuture.get(10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            Response response = new Response();
+            response.setErrorCode(StubQueryStatus.TIMEOUT);
+            response.setErrorMessage("onRemoteTransaction completableFuture exception: " + e);
+            logger.error("onRemoteTransaction timeout, resource: " + getResourceInfo());
+            return response;
+        }
     }
 
     public void registerEventHandler(EventCallback callback) {}

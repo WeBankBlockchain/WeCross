@@ -1,6 +1,6 @@
 package com.webank.wecross.test.peer;
 
-import com.webank.wecross.p2p.netty.common.Node;
+import com.webank.wecross.network.p2p.netty.common.Node;
 import com.webank.wecross.peer.PeerManager;
 import org.junit.Assert;
 import org.junit.Test;

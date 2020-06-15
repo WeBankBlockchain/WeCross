@@ -3,9 +3,11 @@ package com.webank.wecross.test.zone;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import com.webank.wecross.p2p.netty.common.Node;
+import com.webank.wecross.config.ResourceThreadPoolConfig;
+import com.webank.wecross.network.p2p.netty.common.Node;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.resource.ResourceBlockHeaderManagerFactory;
 import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
@@ -56,10 +58,15 @@ public class ZoneManagerTest {
                 .thenReturn(null);
         Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos0"))
                 .thenReturn(null);
+        ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
+                new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
+        ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
+                new ResourceBlockHeaderManagerFactory(resourceThreadPool);
 
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setStubManager(stubManager);
         zoneManager.setBlockHeaderStorageFactory(blockHeaderStorageFactory);
+        zoneManager.setResourceBlockHeaderManagerFactory(resourceBlockHeaderManagerFactory);
 
         assertEquals(stubManager, zoneManager.getStubManager());
 
@@ -145,10 +152,15 @@ public class ZoneManagerTest {
                 .thenReturn(null);
         Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos2"))
                 .thenReturn(null);
+        ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
+                new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
+        ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
+                new ResourceBlockHeaderManagerFactory(resourceThreadPool);
 
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setStubManager(stubManager);
         zoneManager.setBlockHeaderStorageFactory(blockHeaderStorageFactory);
+        zoneManager.setResourceBlockHeaderManagerFactory(resourceBlockHeaderManagerFactory);
 
         Peer peer = new Peer(new Node("aaa", "127.0.0.1", 100));
 
@@ -272,9 +284,15 @@ public class ZoneManagerTest {
         Mockito.when(blockHeaderStorageFactory.newBlockHeaderStorage("payment.bcos"))
                 .thenReturn(null);
 
+        ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
+                new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
+        ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
+                new ResourceBlockHeaderManagerFactory(resourceThreadPool);
+
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setStubManager(stubManager);
         zoneManager.setBlockHeaderStorageFactory(blockHeaderStorageFactory);
+        zoneManager.setResourceBlockHeaderManagerFactory(resourceBlockHeaderManagerFactory);
 
         // Add resource 1
         String path = "payment.bcos.aaaaa";

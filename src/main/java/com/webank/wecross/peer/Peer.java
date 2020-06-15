@@ -1,6 +1,6 @@
 package com.webank.wecross.peer;
 
-import com.webank.wecross.p2p.netty.common.Node;
+import com.webank.wecross.network.p2p.netty.common.Node;
 import com.webank.wecross.stub.ResourceInfo;
 import java.util.HashMap;
 import java.util.Map;

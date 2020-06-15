@@ -13,6 +13,10 @@ public class NetworkQueryStatus {
     public static final int INTERNAL_ERROR = 20000;
     public static final int METHOD_ERROR = 20001;
 
+    // 50000+ is transaction error for sendTransaction and call
+    // Restful error code = 50000 + TransactionException.ErrorCode
+    public static final int TRANSACTION_ERROR = 50000;
+
     public static String getStatusMessage(int status) {
         return getStatusMessage(status, "Error code: " + status);
     }

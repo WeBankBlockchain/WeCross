@@ -16,6 +16,7 @@ import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.TransactionContext;
+import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import org.slf4j.Logger;
@@ -54,12 +55,14 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public TransactionResponse call(TransactionContext<TransactionRequest> request) {
+    public TransactionResponse call(TransactionContext<TransactionRequest> request)
+            throws TransactionException {
         return getSelfResource().call(request);
     }
 
     @Override
-    public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request) {
+    public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request)
+            throws TransactionException {
         try {
             handleSendTransactionRequest(request.getData());
         } catch (WeCrossException e) {
@@ -71,6 +74,10 @@ public class HTLCResource extends Resource {
 
         return getSelfResource().sendTransaction(request);
     }
+
+    // TODO: Add asyncCall (same as implement in Resource.java)
+
+    // TODO: Add asyncSendTransaction (same as implement in Resource.java)
 
     public void handleSendTransactionRequest(TransactionRequest request) throws WeCrossException {
         if (request.getMethod().equals("unlock")) {
@@ -113,7 +120,7 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public Response onRemoteTransaction(Request request) {
+    public void onRemoteTransaction(Request request, Connection.Callback callback) {
         Response response = new Response();
         Driver driver = getDriver();
         if (driver.isTransaction(request)) {
@@ -126,7 +133,8 @@ public class HTLCResource extends Resource {
                 response.setErrorCode(ErrorCode.DECODE_TRANSACTION_REQUEST_ERROR);
                 response.setErrorMessage("decode transaction request failed");
                 logger.info("onRemoteTransaction, response: {}", response.toString());
-                return response;
+                callback.onResponse(response);
+                return;
             }
 
             TransactionRequest transactionRequest = context.getData();
@@ -139,8 +147,11 @@ public class HTLCResource extends Resource {
                 response.setErrorCode(HTLCErrorCode.NO_PERMISSION);
                 response.setErrorMessage("HTLCResource doesn't allow peers to call " + method);
                 logger.info("onRemoteTransaction, response: {}", response.toString());
-                return response;
-            } else if (transactionRequest.getMethod().equalsIgnoreCase("unlock")) {
+                callback.onResponse(response);
+                return;
+            }
+
+            if (transactionRequest.getMethod().equalsIgnoreCase("unlock")) {
                 try {
                     verifyLock(transactionRequest);
                 } catch (WeCrossException e) {
@@ -148,13 +159,22 @@ public class HTLCResource extends Resource {
                     response.setErrorCode(HTLCErrorCode.VERIFY_ERROR);
                     response.setErrorMessage(e.getInternalMessage());
                     logger.info("onRemoteTransaction, response: {}", response.toString());
-                    return response;
+                    callback.onResponse(response);
+                    return;
                 }
             }
         }
-        response = getSelfResource().onRemoteTransaction(request);
-        logger.trace("onRemoteTransaction, response: {}", response.toString());
-        return response;
+        getSelfResource()
+                .onRemoteTransaction(
+                        request,
+                        new Connection.Callback() {
+                            @Override
+                            public void onResponse(Response response) {
+                                logger.trace(
+                                        "onRemoteTransaction, response: {}", response.toString());
+                                callback.onResponse(response);
+                            }
+                        });
     }
 
     public boolean isFresh() {
