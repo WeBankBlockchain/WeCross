@@ -22,7 +22,7 @@ repositories {
 }
 
 sourceCompatibility = '1.8'
-version = '1.0.0-rc3-0615-SNAPSHOT'
+version = '1.0.0-rc3'
 
 
 task stubSourceJar(type: Jar) {
