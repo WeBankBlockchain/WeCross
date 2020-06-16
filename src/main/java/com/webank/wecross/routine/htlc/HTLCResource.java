@@ -177,6 +177,18 @@ public class HTLCResource extends Resource {
                         });
     }
 
+    @Override
+    public void asyncCall(
+            TransactionContext<TransactionRequest> request, Resource.Callback callback) {
+        getSelfResource().asyncCall(request, callback);
+    }
+
+    @Override
+    public void asyncSendTransaction(
+            TransactionContext<TransactionRequest> request, Resource.Callback callback) {
+        getSelfResource().asyncSendTransaction(request, callback);
+    }
+
     public boolean isFresh() {
         return isFresh;
     }
