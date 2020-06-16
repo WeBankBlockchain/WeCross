@@ -83,6 +83,7 @@ publishing {
 
             def NEXUS_USERNAME = ''
             def NEXUS_PASSWORD = ''
+			
             credentials {
                 username = NEXUS_USERNAME
                 password = NEXUS_PASSWORD
