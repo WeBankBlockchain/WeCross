@@ -28,7 +28,7 @@
 [advanced.resourceThreadPool]
     corePoolSize = 8
     maxPoolSize = 8
-    queueCapacity = 5000
+    threadQueueCapacity = 5000
 
 
 #[[htlc]]

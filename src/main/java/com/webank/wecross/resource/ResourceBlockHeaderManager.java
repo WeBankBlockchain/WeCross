@@ -65,7 +65,6 @@ public class ResourceBlockHeaderManager implements BlockHeaderManager {
 
     @Override
     public byte[] getBlockHeader(long blockNumber) {
-        byte[] data = null;
         CompletableFuture<byte[]> future = new CompletableFuture<>();
         asyncGetBlockHeader(
                 blockNumber,

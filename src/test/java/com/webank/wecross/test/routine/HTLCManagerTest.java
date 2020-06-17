@@ -3,7 +3,7 @@ package com.webank.wecross.test.routine;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.htlc.HTLCManager;
 import com.webank.wecross.routine.htlc.HTLCResource;
-import com.webank.wecross.routine.htlc.HTLCTaskInfo;
+import com.webank.wecross.routine.htlc.HTLCTaskData;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.HashMap;
@@ -25,13 +25,26 @@ public class HTLCManagerTest {
                 mockResource,
                 htlcManager.filterHTLCResource(mockZoneManager, mockPath, mockResource));
 
-        HTLCTaskInfo htlcTaskInfo = new HTLCTaskInfo("a.b.c", "a", "0x", "a.b.c", "b", "0x");
-        Map<String, HTLCTaskInfo> htlcTaskInfos = new HashMap<>();
-        htlcTaskInfos.put("a.b.c", htlcTaskInfo);
-        htlcManager.setHtlcTaskInfos(htlcTaskInfos);
+        HTLCTaskData htlcTaskData = new HTLCTaskData();
+        htlcTaskData.setSelfPath(Path.decode("a.b.c"));
+        Map<String, HTLCTaskData> htlcTaskDataMap = new HashMap<>();
+        htlcTaskDataMap.put("a.b.c", htlcTaskData);
+        htlcManager.setHtlcTaskDataMap(htlcTaskDataMap);
         Mockito.when(mockZoneManager.getResource(Mockito.any(Path.class))).thenReturn(mockResource);
         Assert.assertEquals(
                 HTLCResource.class,
                 htlcManager.filterHTLCResource(mockZoneManager, mockPath, mockResource).getClass());
+    }
+
+    @Test
+    public void initHTLCResourcePairsTest() throws Exception {
+        HTLCTaskData htlcTaskData = new HTLCTaskData();
+        htlcTaskData.setSelfPath(Path.decode("a.b.c"));
+        Map<String, HTLCTaskData> htlcTaskDataMap = new HashMap<>();
+        htlcTaskDataMap.put("a.b.c", htlcTaskData);
+        HTLCManager htlcManager = new HTLCManager();
+        htlcManager.setHtlcTaskDataMap(htlcTaskDataMap);
+        htlcManager.initHTLCResourcePairs(null);
+        Assert.assertEquals(1, htlcManager.getHtlcResourcePairs().length);
     }
 }

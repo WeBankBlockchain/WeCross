@@ -1,50 +1,42 @@
 package com.webank.wecross.routine.htlc;
 
+import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.routine.task.Task;
 import com.webank.wecross.routine.task.TaskFactory;
-import java.util.ArrayList;
-import java.util.List;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HTLCTaskFactory implements TaskFactory {
-    private Logger logger = LoggerFactory.getLogger(HTLCTaskFactory.class);
 
     @Override
-    public List<Task> load(Object... args) {
-        @SuppressWarnings("unchecked")
-        List<HTLCResourcePair> htlcResourcePairs = (List<HTLCResourcePair>) args[0];
-        List<Task> tasks = new ArrayList<>();
-        int num = htlcResourcePairs.size();
-        for (int i = 0; i < num; i++) {
-            HTLCResourcePair htlcResourcePair = htlcResourcePairs.get(i);
-            logger.debug("HTLCResourcePair: {}", htlcResourcePair.toString());
-
+    public Task[] load(Object[] contexts) {
+        Task[] tasks = new Task[contexts.length];
+        int num = 0;
+        for (Object context : contexts) {
+            HTLCResourcePair htlcResourcePair = (HTLCResourcePair) context;
             String jobName = htlcResourcePair.getSelfHTLCResource().getSelfPath().toString();
-            JobDetail jobDetail = loadHTLCJobDetail(jobName, "HTLC", htlcResourcePair);
+            JobDetail jobDetail = loadHtlcJobDetail(jobName, htlcResourcePair);
 
-            // execute per 2 seconds
+            // execute per 1 seconds
             Trigger trigger =
                     TriggerBuilder.newTrigger()
                             .withIdentity(jobName, Scheduler.DEFAULT_GROUP)
                             .withSchedule(
                                     SimpleScheduleBuilder.simpleSchedule()
-                                            .withIntervalInSeconds(2)
+                                            .withIntervalInMilliseconds(
+                                                    RoutineDefault.POLLING_INTERVAL)
                                             .repeatForever())
                             .build();
-            tasks.add(new Task(trigger, jobDetail));
+            tasks[num++] = new Task(trigger, jobDetail);
         }
         return tasks;
     }
 
-    public JobDetail loadHTLCJobDetail(
-            String jobName, String dataKey, HTLCResourcePair htlcResourcePair) {
+    private JobDetail loadHtlcJobDetail(String jobName, HTLCResourcePair htlcResourcePair) {
         // create job
         JobDetail jobDetail =
                 JobBuilder.newJob(HTLCJob.class)
@@ -52,7 +44,7 @@ public class HTLCTaskFactory implements TaskFactory {
                         .build();
 
         // send args to job context
-        jobDetail.getJobDataMap().putIfAbsent(dataKey, htlcResourcePair);
+        jobDetail.getJobDataMap().putIfAbsent(RoutineDefault.HTLC_JOB_DATA_KEY, htlcResourcePair);
         return jobDetail;
     }
 }
