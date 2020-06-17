@@ -80,11 +80,11 @@ check_bcos_avaliable()
     # 30300,20200,8545
     check_port_avaliable 30300 BCOS-P2P
     check_port_avaliable 20200 BCOS-Channel
-    check_port_avaliable 8542 BCOS-RPC
+    check_port_avaliable 8545 BCOS-RPC
 
     check_port_avaliable 30301 BCOS-P2P
     check_port_avaliable 20201 BCOS-Channel
-    check_port_avaliable 8543 BCOS-RPC
+    check_port_avaliable 8546 BCOS-RPC
 }
 
 
