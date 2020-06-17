@@ -12,7 +12,6 @@ import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
-import com.webank.wecross.stub.VerifiedTransaction;
 import java.math.BigInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,14 +157,17 @@ public class AssetHTLC implements HTLC {
     public boolean verifyHtlcTransaction(Resource resource, VerifyData verifyData) {
         String txHash = verifyData.getTransactionHash();
         long blockNumber = verifyData.getBlockNumber();
-        BlockHeaderManager blockHeaderManager = resource.getResourceBlockHeaderManager();
+        BlockHeaderManager blockHeaderManager = resource.getBlockHeaderManager();
         Connection connection = resource.chooseConnection();
         Driver driver = resource.getDriver();
 
+        /*
         VerifiedTransaction verifiedTransaction =
                 driver.getVerifiedTransaction(txHash, blockNumber, blockHeaderManager, connection);
 
         return verifyData.verify(verifiedTransaction);
+        */
+        return false; // TODO fix this
     }
 
     @Override
@@ -280,7 +282,7 @@ public class AssetHTLC implements HTLC {
                         request,
                         account,
                         resource.getResourceInfo(),
-                        resource.getResourceBlockHeaderManager());
+                        resource.getBlockHeaderManager());
         logger.trace(
                 "htlc request: {}, resource name: {}",
                 request,

@@ -1,6 +1,7 @@
-package com.webank.wecross.stub;
+package com.webank.wecross.stubmanager;
 
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.stub.StubFactory;
 import java.util.HashMap;
 import java.util.Map;
 

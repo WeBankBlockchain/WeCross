@@ -263,14 +263,17 @@ public class HTLCScheduler {
                     }
 
                     String[] info0 = selfTxInfo.split(RoutineDefault.SPLIT_REGEX);
+                    /*
                     VerifiedTransaction verifiedTransaction0 =
                             selfResource
                                     .getDriver()
                                     .getVerifiedTransaction(
                                             info0[0],
                                             Long.parseLong(info0[1]),
-                                            selfResource.getResourceBlockHeaderManager(),
+                                            selfResource.getBlockHeaderManager(),
                                             selfResource.chooseConnection());
+                                            */
+                    VerifiedTransaction verifiedTransaction0 = null; // TODO fix this
 
                     if (verifiedTransaction0 == null) {
                         logger.error(
@@ -335,6 +338,7 @@ public class HTLCScheduler {
                                                 args,
                                                 output);
 
+                                /*
                                 VerifiedTransaction verifiedTransaction1 =
                                         counterpartyResource
                                                 .getDriver()
@@ -342,8 +346,10 @@ public class HTLCScheduler {
                                                         info1[0],
                                                         Long.parseLong(info1[1]),
                                                         counterpartyResource
-                                                                .getResourceBlockHeaderManager(),
+                                                                .getBlockHeaderManager(),
                                                         counterpartyResource.chooseConnection());
+                                                        */
+                                VerifiedTransaction verifiedTransaction1 = null; // TODO fix this
 
                                 if (verifiedTransaction1 == null) {
                                     logger.error(

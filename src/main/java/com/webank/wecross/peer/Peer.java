@@ -1,14 +1,14 @@
 package com.webank.wecross.peer;
 
 import com.webank.wecross.network.p2p.netty.common.Node;
-import com.webank.wecross.stub.ResourceInfo;
+import com.webank.wecross.zone.ChainInfo;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Peer {
     Node node;
     private int seq = 0;
-    private Map<String, ResourceInfo> resourceInfos = new HashMap<String, ResourceInfo>();
+    private Map<String, ChainInfo> chainInfos = new HashMap<String, ChainInfo>();
     private long lastActiveTimestamp = System.currentTimeMillis();
 
     public Peer(Node node) {
@@ -31,9 +31,9 @@ public class Peer {
         this.seq = seq;
     }
 
-    public synchronized void setResources(int seq, Map<String, ResourceInfo> resourceInfos) {
+    public synchronized void setChainInfos(int seq, Map<String, ChainInfo> chainInfos) {
         this.setSeq(seq);
-        this.resourceInfos = resourceInfos;
+        this.chainInfos = chainInfos;
     }
 
     public void noteAlive() {
@@ -48,12 +48,12 @@ public class Peer {
         return lastActiveTimestamp;
     }
 
-    public Map<String, ResourceInfo> getResourceInfos() {
-        return resourceInfos;
+    public Map<String, ChainInfo> getChainInfos() {
+        return chainInfos;
     }
 
-    public void setResourceInfos(Map<String, ResourceInfo> resourceInfos) {
-        this.resourceInfos = resourceInfos;
+    public void setChainInfos(Map<String, ChainInfo> chainInfos) {
+        this.chainInfos = chainInfos;
     }
 
     @Override

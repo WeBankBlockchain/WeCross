@@ -2,65 +2,35 @@ package com.webank.wecross.zone;
 
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.storage.BlockHeaderStorage;
-import com.webank.wecross.stub.BlockHeader;
+import com.webank.wecross.stub.BlockHeaderManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Chain {
-    private String name;
     private Logger logger = LoggerFactory.getLogger(Chain.class);
+    private ChainInfo chainInfo;
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
     boolean hasLocalConnection = false;
     private Map<String, Resource> resources = new HashMap<String, Resource>();
     private Driver driver;
-    private BlockHeaderStorage blockHeaderStorage;
-    private Thread blockSyncThread;
+    private BlockHeaderManager blockHeaderManager;
     private AtomicBoolean running = new AtomicBoolean(false);
     private Random random = new SecureRandom();
-    private BlockHeader localBlockHeader;
 
-    private Object mainLoopLock = new Object();
-    private Timer mainLoopTimer = new Timer();;
-    private static long mainLoopInterval = 1000; // ms
-
-    public Chain(String name) {
-        this.name = name;
+    public Chain(ChainInfo chainInfo) {
+        this.chainInfo = chainInfo;
     }
 
     public void start() {
         if (!running.get()) {
             running.set(true);
-
-            blockSyncThread =
-                    new Thread(
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    mainLoop();
-                                }
-                            });
-            blockSyncThread.start();
-            logger.trace("Block header sync thread started");
-
-            mainLoopTimer.schedule(
-                    new TimerTask() {
-                        @Override
-                        public void run() {
-                            noteMainLoop();
-                        }
-                    },
-                    mainLoopInterval,
-                    mainLoopInterval);
         }
     }
 
@@ -68,131 +38,22 @@ public class Chain {
         if (running.get()) {
             running.set(false);
             try {
-                logger.trace("Stoping block header sync thread...");
-                blockSyncThread.interrupt();
-                blockSyncThread.join();
-                logger.trace("Block header sync thread stopped");
             } catch (Exception e) {
                 logger.error("Thread interrupt", e);
             }
         }
     }
 
-    public void mainLoop() {
-        try {
-            loadLocalBlockHeader();
-            while (running.get()) {
-                try {
-                    fetchBlockHeader();
-                } catch (Exception e) {
-                    logger.warn("Get block header exception", e);
-                }
-                synchronized (mainLoopLock) {
-                    mainLoopLock.wait();
-                }
-            }
-        } catch (Exception e) {
-            logger.info("Chain mainLoop interrupted");
-        }
+    public ChainInfo getChainInfo() {
+        return chainInfo;
     }
 
-    public void noteMainLoop() {
-        synchronized (mainLoopLock) {
-            mainLoopLock.notifyAll();
-        }
+    public void setChainInfo(ChainInfo chainInfo) {
+        this.chainInfo = chainInfo;
     }
 
-    public void noteBlockHeaderChange() {
-        noteMainLoop();
-    }
-
-    public void fetchBlockHeader() {
-        Connection connection = chooseConnection();
-
-        logger.trace("Fetch block header: {}", connection);
-        if (connection != null) {
-
-            long remoteBlockNumber = driver.getBlockNumber(connection);
-
-            long localBlockNumber = localBlockHeader.getNumber();
-
-            if (remoteBlockNumber < 0) {
-                logger.warn(
-                        "Remote blockNumber({}), remote router access failed.",
-                        localBlockNumber,
-                        remoteBlockNumber);
-                return;
-            } else if (remoteBlockNumber < localBlockNumber) {
-                logger.error(
-                        "Local blockNumber({}) is bigger than remote blockNumber({}), please remove ./db carefully and try again.",
-                        localBlockNumber,
-                        remoteBlockNumber);
-                return;
-            } else if (remoteBlockNumber == localBlockNumber) {
-                logger.trace(
-                        "Chain({}) blockNumber({}) is up to date", this.name, remoteBlockNumber);
-            } else {
-                fetchBlockHeaderByNumber(remoteBlockNumber);
-            }
-        }
-    }
-
-    public void fetchBlockHeaderByNumber(long number) {
-        long localBlockNumber = localBlockHeader.getNumber();
-        if (number <= localBlockNumber) {
-            return;
-        }
-        synchronized (this) {
-            localBlockNumber = localBlockHeader.getNumber();
-            if (number <= localBlockNumber) {
-                return;
-            }
-
-            String localBlockHash = localBlockHeader.getHash();
-            Connection connection = chooseConnection();
-
-            for (long blockNumber = localBlockNumber + 1; blockNumber <= number; ++blockNumber) {
-                byte[] blockBytes = driver.getBlockHeader(blockNumber, connection);
-                if (blockBytes == null) {
-                    logger.error(
-                            "Could not get block header, please start the router which has chain({})",
-                            name);
-                    break;
-                }
-
-                BlockHeader blockHeader = driver.decodeBlockHeader(blockBytes);
-                if (localBlockNumber >= 0) {
-                    if (blockHeader.getNumber() != localBlockHeader.getNumber() + 1
-                            || !blockHeader.getPrevHash().equals(localBlockHeader.getHash())) {
-                        logger.error(
-                                "Fetched block couldn't be the next block, localBlockNumber: {} localBlockHash: {} fetchedBlockNumber: {} fetchedBlockPrevHash: {}, please check the router which has chain({}) is the same chain?",
-                                localBlockNumber,
-                                localBlockHash,
-                                blockHeader.getNumber(),
-                                blockHeader.getPrevHash(),
-                                name);
-                        break;
-                    }
-                }
-
-                blockHeaderStorage.writeBlockHeader(blockNumber, blockBytes);
-                localBlockHeader = blockHeader; // Must update header after write in db
-
-                logger.debug("Commit blockHeader: {}", localBlockHeader.toString());
-            }
-        }
-    }
-
-    public long getBlockNumber() {
-        return blockHeaderStorage.readBlockNumber();
-    }
-
-    public BlockHeader getBlockHeader(int blockNumber) {
-        return driver.decodeBlockHeader(blockHeaderStorage.readBlockHeader(blockNumber));
-    }
-
-    public void putBlockHeader(int blockNumber, byte[] blockHeader) {
-        blockHeaderStorage.writeBlockHeader(blockNumber, blockHeader);
+    public Map<Peer, Connection> getConnection() {
+        return connections;
     }
 
     public void addConnection(Peer peer, Connection connection) {
@@ -245,24 +106,11 @@ public class Chain {
         this.driver = driver;
     }
 
-    public BlockHeaderStorage getBlockHeaderStorage() {
-        return blockHeaderStorage;
+    public BlockHeaderManager getBlockHeaderManager() {
+        return blockHeaderManager;
     }
 
-    public void setBlockHeaderStorage(BlockHeaderStorage blockHeaderStorage) {
-        this.blockHeaderStorage = blockHeaderStorage;
-    }
-
-    private void loadLocalBlockHeader() {
-        long localBlockNumber = blockHeaderStorage.readBlockNumber();
-        if (localBlockNumber < 0) {
-            BlockHeader beforeGenesisBlockHeader = new BlockHeader();
-            beforeGenesisBlockHeader.setNumber(-1);
-            beforeGenesisBlockHeader.setHash("");
-            localBlockHeader = beforeGenesisBlockHeader;
-        } else {
-            byte[] blockHeaderBytes = blockHeaderStorage.readBlockHeader(localBlockNumber);
-            localBlockHeader = driver.decodeBlockHeader(blockHeaderBytes);
-        }
+    public void setBlockHeaderManager(BlockHeaderManager blockHeaderManager) {
+        this.blockHeaderManager = blockHeaderManager;
     }
 }

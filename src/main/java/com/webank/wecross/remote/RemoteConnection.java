@@ -13,11 +13,13 @@ import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.StubQueryStatus;
 import java.util.List;
+import java.util.Map;
 
 public class RemoteConnection implements Connection {
     private Peer peer;
     private String path;
     private P2PService p2PService;
+    private Map<String, String> properties;
 
     @Override
     public Response send(Request request) {
@@ -99,6 +101,15 @@ public class RemoteConnection implements Connection {
     @Override
     public List<ResourceInfo> getResources() {
         return null;
+    }
+
+    @Override
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
     }
 
     public Peer getPeer() {

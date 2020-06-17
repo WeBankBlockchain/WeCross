@@ -3,15 +3,14 @@ package com.webank.wecross.config;
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
-import com.webank.wecross.resource.ResourceBlockHeaderManager;
-import com.webank.wecross.resource.ResourceBlockHeaderManagerFactory;
-import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.StubFactory;
-import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.stubmanager.MemoryBlockHeaderManagerFactory;
+import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.utils.ConfigUtils;
 import com.webank.wecross.zone.Chain;
+import com.webank.wecross.zone.ChainInfo;
 import com.webank.wecross.zone.Zone;
 import java.io.File;
 import java.util.HashMap;
@@ -31,9 +30,7 @@ public class ZonesConfig {
 
     @Resource StubManager stubManager;
 
-    @Resource BlockHeaderStorageFactory blockHeaderStorageFactory;
-
-    @Resource ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory;
+    @Resource MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory;
 
     @Bean
     public Map<String, Zone> newZoneMap() {
@@ -131,10 +128,15 @@ public class ZonesConfig {
 
             List<ResourceInfo> resources = connection.getResources();
 
-            String blockPath = zone + "." + chainName;
-            Chain chain = new Chain(chainName);
+            ChainInfo chainInfo = new ChainInfo();
+            chainInfo.setName(chainName);
+            chainInfo.setProperties(connection.getProperties());
+            chainInfo.setStubType(type);
+            chainInfo.setResources(resources);
+
+            Chain chain = new Chain(chainInfo);
             chain.setDriver(stubFactory.newDriver());
-            chain.setBlockHeaderStorage(blockHeaderStorageFactory.newBlockHeaderStorage(blockPath));
+            chain.setBlockHeaderManager(resourceBlockHeaderManagerFactory.build(chain));
             for (ResourceInfo resourceInfo : resources) {
                 com.webank.wecross.resource.Resource resource =
                         new com.webank.wecross.resource.Resource();
@@ -143,9 +145,7 @@ public class ZonesConfig {
                 resource.setType(type);
                 resource.setResourceInfo(resourceInfo);
 
-                ResourceBlockHeaderManager resourceBlockHeaderManager =
-                        resourceBlockHeaderManagerFactory.build(chain);
-                resource.setResourceBlockHeaderManager(resourceBlockHeaderManager);
+                resource.setBlockHeaderManager(chain.getBlockHeaderManager());
 
                 chain.getResources().put(resourceInfo.getName(), resource);
                 logger.info(

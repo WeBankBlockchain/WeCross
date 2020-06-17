@@ -6,7 +6,7 @@ import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.p2p.netty.factory.P2PConfig;
 import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.stubmanager.StubManager;
 import java.io.IOException;
 import java.util.Objects;
 import javax.annotation.Resource;

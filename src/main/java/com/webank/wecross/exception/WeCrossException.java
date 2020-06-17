@@ -40,6 +40,11 @@ public class WeCrossException extends java.lang.Exception {
         this.errorCode = errorCode;
     }
 
+    public WeCrossException(Integer errorCode, String message, Throwable cause) {
+        super(message, cause);
+        this.errorCode = errorCode;
+    }
+
     public WeCrossException(
             Integer errorCode, String message, Integer internalErrorCode, String internalMessage) {
         super(message);
