@@ -131,6 +131,13 @@ prepare_wecross_console()
     cd -
 }
 
+prepare_bcos()
+{
+    cd ${ROOT}/bcos/
+    echo "127.0.0.1:2 agency1 1" > ipconf
+    cd -
+}
+
 prepare_htlc()
 {
     cd ${ROOT}/bcos/
@@ -150,6 +157,7 @@ main()
 {
     prepare_wecross
     prepare_wecross_console
+    prepare_bcos
     prepare_htlc
     prepare_demo
     demo_test
