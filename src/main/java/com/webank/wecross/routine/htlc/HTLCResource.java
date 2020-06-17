@@ -5,9 +5,9 @@ import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.ResourceBlockHeaderManager;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.Account;
+import com.webank.wecross.stub.BlockHeaderManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
@@ -157,7 +157,7 @@ public class HTLCResource extends Resource {
                         request,
                         account2,
                         getCounterpartyResource().getResourceInfo(),
-                        getCounterpartyResource().getResourceBlockHeaderManager());
+                        getCounterpartyResource().getBlockHeaderManager());
         getCounterpartyResource()
                 .asyncSendTransaction(
                         transactionContext,
@@ -416,14 +416,13 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public ResourceBlockHeaderManager getResourceBlockHeaderManager() {
-        return getSelfResource().getResourceBlockHeaderManager();
+    public BlockHeaderManager getBlockHeaderManager() {
+        return getSelfResource().getBlockHeaderManager();
     }
 
     @Override
-    public void setResourceBlockHeaderManager(
-            ResourceBlockHeaderManager resourceBlockHeaderManager) {
-        getSelfResource().setResourceBlockHeaderManager(resourceBlockHeaderManager);
+    public void setBlockHeaderManager(BlockHeaderManager resourceBlockHeaderManager) {
+        getSelfResource().setBlockHeaderManager(resourceBlockHeaderManager);
     }
 
     @Override

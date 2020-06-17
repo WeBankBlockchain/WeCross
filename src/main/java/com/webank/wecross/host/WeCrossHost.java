@@ -134,7 +134,7 @@ public class WeCrossHost {
                         "[chain="
                                 + entry.getKey()
                                 + ",blockNumber="
-                                + entry.getValue().getBlockNumber()
+                                // + entry.getValue().getBlockNumber()
                                 + "]";
             }
         }

@@ -5,7 +5,7 @@ import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.response.StubResponse;
-import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.zone.ZoneManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

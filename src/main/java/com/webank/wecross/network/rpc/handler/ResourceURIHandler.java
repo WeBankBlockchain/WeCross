@@ -47,7 +47,7 @@ public class ResourceURIHandler implements URIHandler {
             String[] splits = uri.substring(1).split("/");
 
             Path path = new Path();
-            path.setNetwork(splits[0]);
+            path.setZone(splits[0]);
             path.setChain(splits[1]);
             path.setResource(splits[2]);
             String method = splits[3];
@@ -117,7 +117,7 @@ public class ResourceURIHandler implements URIHandler {
                                         transactionRequest,
                                         account,
                                         resourceObj.getResourceInfo(),
-                                        resourceObj.getResourceBlockHeaderManager()),
+                                        resourceObj.getBlockHeaderManager()),
                                 new Resource.Callback() {
                                     @Override
                                     public void onTransactionResponse(
@@ -169,12 +169,13 @@ public class ResourceURIHandler implements URIHandler {
                         logger.trace(
                                 "call request: {}, account: {}", transactionRequest, accountName);
 
+                        // TODO: byProxy
                         resourceObj.asyncCall(
                                 new TransactionContext<>(
                                         transactionRequest,
                                         account,
                                         resourceObj.getResourceInfo(),
-                                        resourceObj.getResourceBlockHeaderManager()),
+                                        resourceObj.getBlockHeaderManager()),
                                 new Resource.Callback() {
                                     @Override
                                     public void onTransactionResponse(
