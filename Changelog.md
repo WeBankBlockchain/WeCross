@@ -1,3 +1,17 @@
+### v1.0.0-rc3
+
+(2020-06-16)
+
+**新增**
+
+* Driver新增异步API定义：asyncCall、asyncSendTransaction，采用异步的方式调用插件接口
+
+**更新**
+
+* P2P通信：Router间的通信更新为异步的方式
+* RPC接口：将性能较差的spring boot tomcat替换成netty的http server
+* HTLC：适配Driver的异步API，采用异步的方式进行调用
+
 ### v1.0.0-rc2
 
 (2020-05-12)
