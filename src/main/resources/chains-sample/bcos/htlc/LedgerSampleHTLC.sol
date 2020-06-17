@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity >=0.4.22 <0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "./LedgerSample.sol";
@@ -9,61 +9,62 @@ contract LedgerSampleHTLC is HTLC, LedgerSampleHolder {
     // asset contract address
     address assetContract;
 
-    function init(string[] _ss)
-    public
-    returns (string[] result)
+    /*
+        @param: assetContract | counterpartyHtlcAddress
+    */
+    function init(string[] memory _ss) public
+    returns (string[] memory result)
     {
         result = new string[](1);
         string[] memory ss = new string[](1);
         ss[0] = _ss[1];
         result = super.init(ss);
-        if(!equal(result[0], "success")) {
-            return;
-        }
         assetContract = stringToAddress(_ss[0]);
     }
 
-    function lock(string[] _ss)
-    public
-    returns (string[] result)
+    /*
+        @param: hash
+    */
+    function lock(string[] memory _ss) public
+    returns (string[] memory result)
     {
         result = new string[](1);
         result = super.lock(_ss);
-        if(equal(result[0], "done")) {
-            result[0] = "success";
-            return;
-        } else if (!equal(result[0], "continue")) {
-            return;
+        if(sameString(result[0], "done")) {
+            result[0] = successFlag;
+            return result;
+        } else if (!sameString(result[0], "continue")) {
+            return result;
         }
 
         string memory _hash = _ss[0];
         address sender = getSender(_hash);
         uint amount = getAmount(_hash);
-        if (LedgerSample(assetContract).allowance(sender, address(this)) < uint(amount))
-        {
+        if (LedgerSample(assetContract).allowance(sender, address(this)) < uint(amount)) {
             result[0] = "insufficient authorized assets";
-            return;
+            return result;
         }
 
         // This htlc contract becomes the temporary owner of the assets
         LedgerSample(assetContract).sendFrom(sender, address(this), uint(amount),"");
 
-        setLockStatus(_hash);
-        result[0] = "success";
+        setLockState(_hash);
+        result[0] = successFlag;
     }
 
-
-    function unlock(string[] _ss)
-    public
-    returns (string[] result)
+    /*
+        @param: hash | secret
+    */
+    function unlock(string[] memory _ss) public
+    returns (string[] memory result)
     {
         result = new string[](1);
         result = super.unlock(_ss);
-        if(equal(result[0], "done")) {
-            result[0] = "success";
-            return;
-        } else if (!equal(result[0], "continue")) {
-            return;
+        if(sameString(result[0], "done")) {
+            result[0] = successFlag;
+            return result;
+        } else if (!sameString(result[0], "continue")) {
+            return result;
         }
 
         string memory _hash = _ss[0];
@@ -72,22 +73,24 @@ contract LedgerSampleHTLC is HTLC, LedgerSampleHolder {
         uint amount = getAmount(_hash);
         LedgerSample(assetContract).send(receiver, uint(amount),"");
 
-        setUnlockStatus(_hash);
+        setUnlockState(_hash);
         setSecret(_ss);
-        result[0] = "success";
+        result[0] = successFlag;
     }
 
-    function rollback(string[] _ss)
-    public
-    returns (string[] result)
+    /*
+        @param: hash
+    */
+    function rollback(string[] memory _ss) public
+    returns (string[] memory result)
     {
         result = new string[](1);
         result = super.rollback(_ss);
-        if(equal(result[0], "done")) {
-            result[0] = "success";
-            return;
-        } else if (!equal(result[0], "continue")) {
-            return;
+        if(sameString(result[0], "done")) {
+            result[0] = successFlag;
+            return result;
+        } else if (!sameString(result[0], "continue")) {
+            return result;
         }
 
         string memory _hash = _ss[0];
@@ -96,17 +99,18 @@ contract LedgerSampleHTLC is HTLC, LedgerSampleHolder {
         uint amount = getAmount(_hash);
         LedgerSample(assetContract).send(sender, uint(amount),"");
 
-        setRollbackStatus(_hash);
-        result[0] = "success";
+        setRollbackState(_hash);
+        result[0] = successFlag;
     }
 
-    function balanceOf(string[] _ss)
-    public
-    view
-    returns(string[] result)
+    /*
+        @param: address
+    */
+    function balanceOf(string[] memory _ss) public view
+    returns(string[] memory result)
     {
         result = new string[](1);
         uint b = LedgerSample(assetContract).balance(stringToAddress(_ss[0]));
-        result[0] = uintToString(b);
+        result[0] = uint256ToString(b);
     }
 }
