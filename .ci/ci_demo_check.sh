@@ -125,9 +125,9 @@ prepare_wecross()
 
 prepare_wecross_console()
 {
-    cd ${ROOT}
+    cd ${ROOT}/
     LOG_INFO "Download wecross console from branch: ${PLUGIN_BRANCH}"
-    bash download_console.sh -s -t ${PLUGIN_BRANCH}
+    bash WeCross/download_console.sh -s -t ${PLUGIN_BRANCH}
     cd -
 }
 
@@ -143,12 +143,12 @@ prepare_htlc()
     cd ${ROOT}/bcos/
     LOG_INFO "Download ledger-tool from branch: ${PLUGIN_BRANCH}"
     git clone --depth 1 -b ${PLUGIN_BRANCH} https://github.com/Shareong/ledger-tool.git
-    cd cd ledger-tool
+    cd ledger-tool
     ./gradlew assemble
     mv dist ledger-tool
     tar -zcf ledger-tool.tar.gz ledger-tool
-    mv ledger-tool.tar.gz cd ${ROOT}/bcos/
-    cd cd ${ROOT}/bcos/
+    mv ledger-tool.tar.gz ${ROOT}/bcos/
+    cd ${ROOT}/bcos/
     rm -rf ledger-tool
     cd ${ROOT}
 }

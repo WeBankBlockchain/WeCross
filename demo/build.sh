@@ -85,14 +85,6 @@ check_bcos_avaliable()
     check_port_avaliable 30301 BCOS-P2P
     check_port_avaliable 20201 BCOS-Channel
     check_port_avaliable 8543 BCOS-RPC
-
-    check_port_avaliable 30302 BCOS-P2P
-    check_port_avaliable 20202 BCOS-Channel
-    check_port_avaliable 8544 BCOS-RPC
-
-    check_port_avaliable 30303 BCOS-P2P
-    check_port_avaliable 20203 BCOS-Channel
-    check_port_avaliable 8545 BCOS-RPC
 }
 
 
@@ -172,8 +164,6 @@ check_bcos()
 {
     check_process bcos/nodes/127.0.0.1/node0/../fisco-bcos
     check_process bcos/nodes/127.0.0.1/node1/../fisco-bcos
-    check_process bcos/nodes/127.0.0.1/node2/../fisco-bcos
-    check_process bcos/nodes/127.0.0.1/node3/../fisco-bcos
 }
 
 check_fabric()
