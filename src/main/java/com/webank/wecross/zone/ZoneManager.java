@@ -344,7 +344,11 @@ public class ZoneManager {
 
                     String chainName = PathUtils.toPureName(chainEntry.getKey());
 
-                    chains.put(chainName, chainEntry.getValue().getChainInfo());
+                    Path path = new Path();
+                    path.setZone(zoneEntry.getKey());
+                    path.setChain(chainName);
+
+                    chains.put(path.toString(), chainEntry.getValue().getChainInfo());
                 }
             }
         } finally {
