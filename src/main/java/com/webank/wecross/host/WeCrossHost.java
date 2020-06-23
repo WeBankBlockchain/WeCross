@@ -12,6 +12,7 @@ import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.restserver.request.StateRequest;
 import com.webank.wecross.restserver.response.StateResponse;
 import com.webank.wecross.routine.RoutineManager;
+import com.webank.wecross.routine.xa.XATransactionManager;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
@@ -29,6 +30,7 @@ public class WeCrossHost {
     private RoutineManager routineManager;
     private P2PService p2PService;
     private RPCService rpcService;
+    private XATransactionManager xaTransactionManager;
 
     Thread mainLoopThread;
 
@@ -224,5 +226,13 @@ public class WeCrossHost {
 
     public void setRpcService(RPCService rpcService) {
         this.rpcService = rpcService;
+    }
+
+    public XATransactionManager getXaTransactionManager() {
+        return xaTransactionManager;
+    }
+
+    public void setXaTransactionManager(XATransactionManager xaTransactionManager) {
+        this.xaTransactionManager = xaTransactionManager;
     }
 }

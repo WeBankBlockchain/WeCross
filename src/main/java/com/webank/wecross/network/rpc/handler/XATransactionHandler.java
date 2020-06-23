@@ -1,8 +1,6 @@
 package com.webank.wecross.network.rpc.handler;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.common.NetworkQueryStatus;
@@ -12,7 +10,6 @@ import com.webank.wecross.routine.xa.XATransactionInfo;
 import com.webank.wecross.routine.xa.XATransactionManager;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +18,9 @@ import org.slf4j.LoggerFactory;
 
 public class XATransactionHandler implements URIHandler {
     private Logger logger = LoggerFactory.getLogger(XATransactionHandler.class);
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private AccountManager accountManager;
+    private XATransactionManager xaTransactionManager;
 
     public class XAPrepareRequest {
         private String transactionID;
@@ -154,15 +154,11 @@ public class XATransactionHandler implements URIHandler {
         }
     }
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private AccountManager accountManager;
-    private XATransactionManager xaTransactionManager;
-
     @Override
     public void handle(String uri, String httpMethod, String content, Callback callback) {
-        try {
-            RestResponse<Object> restResponse = new RestResponse<Object>();
+        RestResponse<Object> restResponse = new RestResponse<Object>();
 
+        try {
             String method = uri.substring(1);
 
             switch (method) {
@@ -245,7 +241,7 @@ public class XATransactionHandler implements URIHandler {
                                 paths,
                                 (e, result) -> {
                                     if (e != null) {
-                                        logger.error("Error while startTransaction", e);
+                                        logger.error("Error while commitTransaction", e);
 
                                         restResponse.setErrorCode(
                                                 NetworkQueryStatus.TRANSACTION_ERROR);
@@ -294,7 +290,7 @@ public class XATransactionHandler implements URIHandler {
                                 paths,
                                 (e, result) -> {
                                     if (e != null) {
-                                        logger.error("Error while startTransaction", e);
+                                        logger.error("Error while rollbackTransaction", e);
 
                                         restResponse.setErrorCode(
                                                 NetworkQueryStatus.TRANSACTION_ERROR);
@@ -326,7 +322,6 @@ public class XATransactionHandler implements URIHandler {
                         try {
                             path = Path.decode(xaRequest.getData().getChain());
                         } catch (Exception e) {
-
                         }
 
                         xaTransactionManager.asyncGetTransactionInfo(
@@ -335,7 +330,7 @@ public class XATransactionHandler implements URIHandler {
                                 account,
                                 (e, info) -> {
                                     if (e != null) {
-                                        logger.error("Error while startTransaction", e);
+                                        logger.error("Error while getTransactionInfo", e);
 
                                         restResponse.setErrorCode(
                                                 NetworkQueryStatus.TRANSACTION_ERROR);
@@ -355,12 +350,28 @@ public class XATransactionHandler implements URIHandler {
                         break;
                     }
             }
-        } catch (JsonParseException e) {
-            // TODO Auto-generated catch block
-        } catch (JsonMappingException e) {
-            // TODO Auto-generated catch block
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
+        } catch (Exception e) {
+            logger.error("Error while process xa", e);
+
+            restResponse.setErrorCode(NetworkQueryStatus.TRANSACTION_ERROR);
+            restResponse.setMessage("Error while startTransaction");
+            callback.onResponse(restResponse);
         }
+    }
+
+    public AccountManager getAccountManager() {
+        return accountManager;
+    }
+
+    public void setAccountManager(AccountManager accountManager) {
+        this.accountManager = accountManager;
+    }
+
+    public XATransactionManager getXaTransactionManager() {
+        return xaTransactionManager;
+    }
+
+    public void setXaTransactionManager(XATransactionManager xaTransactionManager) {
+        this.xaTransactionManager = xaTransactionManager;
     }
 }
