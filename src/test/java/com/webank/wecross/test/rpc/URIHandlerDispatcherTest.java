@@ -1,6 +1,7 @@
 package com.webank.wecross.test.rpc;
 
 import com.webank.wecross.common.NetworkQueryStatus;
+import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.network.rpc.URIHandlerDispatcher;
 import com.webank.wecross.network.rpc.handler.URIHandler;
 import com.webank.wecross.network.rpc.netty.URIMethod;
@@ -9,12 +10,17 @@ import com.webank.wecross.restserver.Versions;
 import java.util.Objects;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class URIHandlerDispatcherTest {
     @Test
     public void URIHandlerDispatcherTest() throws Exception {
+        WeCrossHost host = Mockito.mock(WeCrossHost.class);
+        Mockito.when(host.getAccountManager()).thenReturn(null);
+        Mockito.when(host.getXaTransactionManager()).thenReturn(null);
+
         URIHandlerDispatcher uriHandlerDispatcher = new URIHandlerDispatcher();
-        uriHandlerDispatcher.initializeRequestMapper(null);
+        uriHandlerDispatcher.initializeRequestMapper(host);
         Assert.assertTrue(uriHandlerDispatcher.getRequestURIMapper().size() == 12);
 
         Assert.assertTrue(
@@ -84,8 +90,12 @@ public class URIHandlerDispatcherTest {
 
     @Test
     public void TestURIHandlerTest() throws Exception {
+        WeCrossHost host = Mockito.mock(WeCrossHost.class);
+        Mockito.when(host.getAccountManager()).thenReturn(null);
+        Mockito.when(host.getXaTransactionManager()).thenReturn(null);
+
         URIHandlerDispatcher uriHandlerDispatcher = new URIHandlerDispatcher();
-        uriHandlerDispatcher.initializeRequestMapper(null);
+        uriHandlerDispatcher.initializeRequestMapper(host);
 
         URIHandler uriHandler = uriHandlerDispatcher.matchURIHandler(new URIMethod("GET", "/test"));
 
