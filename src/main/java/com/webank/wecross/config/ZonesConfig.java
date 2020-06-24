@@ -4,6 +4,7 @@ import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.Connection;
+import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.StubFactory;
 import com.webank.wecross.stubmanager.MemoryBlockHeaderManagerFactory;
@@ -118,30 +119,34 @@ public class ZonesConfig {
 
                 throw new WeCrossException(-1, "Cannot find stub type: " + type);
             }
-            Connection connection = stubFactory.newConnection(stubPath);
+            Connection localConnection = stubFactory.newConnection(stubPath);
 
-            if (connection == null) {
-                logger.error("Init connection: {}-{} failed", stubPath, type);
+            if (localConnection == null) {
+                logger.error("Init localConnection: {}-{} failed", stubPath, type);
 
-                throw new WeCrossException(-1, "Init connection failed");
+                throw new WeCrossException(-1, "Init localConnection failed");
             }
 
-            List<ResourceInfo> resources = connection.getResources();
+            List<ResourceInfo> resources = localConnection.getResources();
 
             ChainInfo chainInfo = new ChainInfo();
             chainInfo.setName(chainName);
-            chainInfo.setProperties(connection.getProperties());
+            chainInfo.setProperties(localConnection.getProperties());
             chainInfo.setStubType(type);
             chainInfo.setResources(resources);
 
-            Chain chain = new Chain(chainInfo);
+            Driver driver = stubFactory.newDriver();
+
+            Chain chain =
+                    new Chain(
+                            chainInfo.getName(), chainInfo.getStubType(), driver, localConnection);
             chain.setDriver(stubFactory.newDriver());
             chain.setBlockHeaderManager(resourceBlockHeaderManagerFactory.build(chain));
             for (ResourceInfo resourceInfo : resources) {
                 com.webank.wecross.resource.Resource resource =
                         new com.webank.wecross.resource.Resource();
                 resource.setDriver(chain.getDriver());
-                resource.addConnection(null, connection);
+                resource.addConnection(null, localConnection);
                 resource.setType(type);
                 resource.setResourceInfo(resourceInfo);
 
@@ -155,10 +160,7 @@ public class ZonesConfig {
                         resource.getResourceInfo().getName(),
                         resource.getResourceInfo());
             }
-            chain.addConnection(null, connection);
 
-            chain.start();
-            logger.info("Start block header sync: {}", zone + "." + chainName);
             stubMap.put(chainName, chain);
         }
 
