@@ -4,6 +4,7 @@ import com.webank.wecross.network.p2p.netty.common.Node;
 import com.webank.wecross.zone.ChainInfo;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Peer {
     Node node;
@@ -59,5 +60,18 @@ public class Peer {
     @Override
     public String toString() {
         return this.node.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Peer)) return false;
+        Peer peer = (Peer) o;
+        return getNode().equals(peer.getNode());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getNode());
     }
 }

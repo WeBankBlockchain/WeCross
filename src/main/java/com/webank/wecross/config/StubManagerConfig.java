@@ -47,7 +47,7 @@ public class StubManagerConfig {
                                     .getAnnotationAttributes(Stub.class.getName());
                     String name = (String) attributes.get("value");
 
-                    if (stubManager.hasDriver(name)) {
+                    if (stubManager.hasFactory(name)) {
                         throw new Exception(
                                 "Duplicate stub plugin["
                                         + name

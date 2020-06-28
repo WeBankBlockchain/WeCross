@@ -159,15 +159,15 @@ public class ZoneManagerTest {
             zoneManager.addRemoteChains(peer, chains);
         }
 
-        Map<String, ChainInfo> allResources = zoneManager.getAllChainsInfo(false);
-        Assert.assertEquals(3, allResources.size());
+        Map<String, ChainInfo> allChainsInfo = zoneManager.getAllChainsInfo(false);
+        Assert.assertEquals(3, allChainsInfo.size());
 
         ChainInfo removeChain = new ChainInfo();
         removeChain.setName("bcos0");
         removeChain.setResources(new ArrayList<ResourceInfo>());
 
-        Map<String, ChainInfo> removeResources = new HashMap<String, ChainInfo>();
-        removeResources.put("payment.bcos0", removeChain);
+        Map<String, ChainInfo> removeChainInfos = new HashMap<String, ChainInfo>();
+        removeChainInfos.put("payment.bcos0", removeChain);
 
         for (int i = 0; i < 4; ++i) {
             ResourceInfo resourceInfo = new ResourceInfo();
@@ -177,15 +177,15 @@ public class ZoneManagerTest {
             removeChain.getResources().add(resourceInfo);
         }
 
-        zoneManager.removeRemoteChains(peer, removeResources, false);
+        zoneManager.removeRemoteChains(peer, removeChainInfos, false);
 
-        allResources = zoneManager.getAllChainsInfo(false);
-        Assert.assertEquals(3, allResources.size()); // all resources removed, 1 connection left
+        allChainsInfo = zoneManager.getAllChainsInfo(false);
+        Assert.assertEquals(3, allChainsInfo.size()); // all resources removed, 1 connection left
 
         removeChain.getResources().clear();
-        zoneManager.removeRemoteChains(peer, removeResources, true);
-        allResources = zoneManager.getAllChainsInfo(false);
-        Assert.assertEquals(2, allResources.size()); // connection removed, 1 connection left
+        zoneManager.removeRemoteChains(peer, removeChainInfos, true);
+        allChainsInfo = zoneManager.getAllChainsInfo(false);
+        Assert.assertEquals(2, allChainsInfo.size()); // connection removed, 1 connection left
 
         ChainInfo resourceInfo2 = new ChainInfo();
         resourceInfo2.setName("bcos1");
@@ -198,12 +198,12 @@ public class ZoneManagerTest {
         zoneManager.addRemoteChains(peer2, chains2);
 
         // removeResource.setName("payment.bcos1.contract1");
-        removeResources.clear();
-        removeResources.put("payment.bcos1", removeChain);
-        zoneManager.removeRemoteChains(peer2, removeResources, true);
+        removeChainInfos.clear();
+        removeChainInfos.put("payment.bcos1", removeChain);
+        zoneManager.removeRemoteChains(peer2, removeChainInfos, true);
 
-        allResources = zoneManager.getAllChainsInfo(false);
-        Assert.assertEquals(2, allResources.size()); // all 2 connection remove 1
+        allChainsInfo = zoneManager.getAllChainsInfo(false);
+        Assert.assertEquals(2, allChainsInfo.size()); // all 2 connection remove 1
     }
 
     @Test
@@ -258,7 +258,7 @@ public class ZoneManagerTest {
 
         Resource resource = zoneManager.getResource(Path.decode("payment.chain0.resource0"));
         Assert.assertFalse(resource.isTemporary());
-        Assert.assertEquals(chain.getConnection(), resource.getConnection());
+        Assert.assertEquals(chain.getConnections().keySet(), resource.getConnections().keySet());
 
         resource = zoneManager.getResource(Path.decode("payment.chain0.resource4"));
         Assert.assertNull(resource);
@@ -266,7 +266,7 @@ public class ZoneManagerTest {
         resource = zoneManager.fetchResource(Path.decode("payment.chain0.resource4"));
         Assert.assertTrue(resource.isTemporary());
 
-        Assert.assertEquals(chain.getConnection(), resource.getConnection());
+        Assert.assertEquals(chain.getConnections().keySet(), resource.getConnections().keySet());
 
         Map<String, Resource> resources = zoneManager.getAllResources(false);
         Assert.assertEquals(12, resources.size());

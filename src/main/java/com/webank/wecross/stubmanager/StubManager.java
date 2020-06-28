@@ -6,29 +6,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StubManager {
-    private Map<String, StubFactory> drivers = new HashMap<>();
+    private Map<String, StubFactory> stubFactories = new HashMap<>();
 
     public void addStubFactory(String type, StubFactory stubFactory) {
-        drivers.put(type, stubFactory);
+        stubFactories.put(type, stubFactory);
     }
 
     public StubFactory getStubFactory(String type) throws WeCrossException {
-        if (!drivers.containsKey(type)) {
+        if (!stubFactories.containsKey(type)) {
             throw new WeCrossException(-1, "Stub plugin[" + type + "] not found!");
         }
 
-        return drivers.get(type);
+        return stubFactories.get(type);
     }
 
-    public Map<String, StubFactory> getDrivers() {
-        return drivers;
+    public Map<String, StubFactory> getStubFactories() {
+        return stubFactories;
     }
 
-    public void setDrivers(Map<String, StubFactory> drivers) {
-        this.drivers = drivers;
+    public void setStubFactories(Map<String, StubFactory> stubFactories) {
+        this.stubFactories = stubFactories;
     }
 
-    public boolean hasDriver(String type) {
-        return drivers.containsKey(type);
+    public boolean hasFactory(String type) {
+        return stubFactories.containsKey(type);
     }
 }

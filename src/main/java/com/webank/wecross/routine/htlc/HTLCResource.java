@@ -66,7 +66,7 @@ public class HTLCResource extends Resource {
     @Override
     public void asyncSendTransaction(
             TransactionContext<TransactionRequest> request, Resource.Callback callback) {
-        if (getSelfResource().isHasLocalConnection()) {
+        if (getSelfResource().hasLocalConnection()) {
             TransactionRequest transactionRequest = request.getData();
             if (RoutineDefault.UNLOCK_METHOD.equals(transactionRequest.getMethod())) {
                 handleUnlockRequest(
@@ -426,8 +426,8 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public boolean isHasLocalConnection() {
-        return getSelfResource().isHasLocalConnection();
+    public boolean hasLocalConnection() {
+        return getSelfResource().hasLocalConnection();
     }
 
     @Override

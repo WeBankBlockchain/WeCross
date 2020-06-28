@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 public class Request {
     private int type;
+    private String path;
     private byte[] data;
     private ResourceInfo resourceInfo;
 
@@ -31,11 +32,22 @@ public class Request {
         this.resourceInfo = resourceInfo;
     }
 
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
     @Override
     public String toString() {
         return "Request{"
                 + "type="
                 + type
+                + ", path='"
+                + path
+                + '\''
                 + ", data="
                 + Arrays.toString(data)
                 + ", resourceInfo="

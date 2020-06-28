@@ -114,7 +114,7 @@ public class WeCrossHost {
         msg.setMethod("seq");
 
         for (Peer peer : peerManager.getPeerInfos().values()) {
-            logger.debug("Send peer seq, to peer:{}, seq:{}", peer, msg.getSeq());
+            logger.debug("Send peer seq, to peer:{}, seq:{}", peer, seq);
             zoneManager.getP2PService().asyncSendMessage(peer, msg, null);
         }
     }
@@ -136,7 +136,7 @@ public class WeCrossHost {
                         "[chain="
                                 + entry.getKey()
                                 + ",blockNumber="
-                                // + entry.getValue().getBlockNumber()
+                                + entry.getValue().getBlockNumber()
                                 + "]";
             }
         }
@@ -155,7 +155,7 @@ public class WeCrossHost {
 
             String path = entry.getKey();
             dumpStr += path;
-            if (entry.getValue().isHasLocalConnection()) {
+            if (entry.getValue().hasLocalConnection()) {
                 dumpStr += "(local)";
             } else {
                 dumpStr += "(remote)";
