@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.utils.ObjectMapperFactory;
 
+
 public abstract class NetworkCallback<T> {
     private TypeReference<?> typeReference;
     protected int status;

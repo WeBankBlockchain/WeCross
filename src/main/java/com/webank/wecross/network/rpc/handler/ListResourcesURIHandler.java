@@ -9,6 +9,7 @@ import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.request.ResourceRequest;
 import com.webank.wecross.restserver.response.ResourceResponse;
+import com.webank.wecross.utils.ObjectMapperFactory;
 import com.webank.wecross.zone.ZoneManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

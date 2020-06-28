@@ -6,7 +6,6 @@ import com.webank.wecross.network.rpc.URIHandlerDispatcher;
 import com.webank.wecross.network.rpc.handler.URIHandler;
 import com.webank.wecross.network.rpc.netty.URIMethod;
 import com.webank.wecross.restserver.RestResponse;
-import com.webank.wecross.utils.ObjectMapperFactory;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;

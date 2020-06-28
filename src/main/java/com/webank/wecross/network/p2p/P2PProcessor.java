@@ -22,6 +22,7 @@ import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
+import com.webank.wecross.utils.ObjectMapperFactory;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.Map;
 import org.slf4j.Logger;
