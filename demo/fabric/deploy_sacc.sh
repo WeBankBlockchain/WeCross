@@ -8,7 +8,6 @@ echo "Add this resource configuration into corresponding chains/<fabric chain>/s
 
 [[resources]]
     # name cannot be repeated
-    name = 'sacc'
     type = 'FABRIC_CONTRACT'
     chainCodeName = 'sacc'
     chainLanguage = 'go'

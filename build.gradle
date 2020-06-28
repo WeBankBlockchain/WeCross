@@ -21,9 +21,8 @@ repositories {
     maven { url 'https://dl.bintray.com/ethereum/maven/' }
 }
 
-
 sourceCompatibility = '1.8'
-version = '1.0.0-rc4-06111-SNAPSHOT'
+version = '1.0.0-rc4-06231-SNAPSHOT'
 
 
 task stubSourceJar(type: Jar) {
@@ -81,10 +80,11 @@ publishing {
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-
+            
+            //*
             def NEXUS_USERNAME = ''
             def NEXUS_PASSWORD = ''
-			
+            //*/
             credentials {
                 username = NEXUS_USERNAME
                 password = NEXUS_PASSWORD

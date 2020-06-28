@@ -32,7 +32,7 @@ public class Resource {
     boolean isTemporary = false;
     private Random random = new SecureRandom();
 
-    public Map<Peer, Connection> getConnection() {
+    public Map<Peer, Connection> getConnections() {
         return connections;
     }
 
@@ -195,7 +195,7 @@ public class Resource {
         this.blockHeaderManager = resourceBlockHeaderManager;
     }
 
-    public boolean isHasLocalConnection() {
+    public boolean hasLocalConnection() {
         return hasLocalConnection;
     }
 
@@ -205,5 +205,9 @@ public class Resource {
 
     public void setTemporary(boolean isTemporary) {
         this.isTemporary = isTemporary;
+    }
+
+    public boolean isOnlyLocal() {
+        return hasLocalConnection && connections.size() == 1;
     }
 }

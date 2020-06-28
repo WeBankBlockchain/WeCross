@@ -20,6 +20,7 @@ public class RemoteConnection implements Connection {
     private String path;
     private P2PService p2PService;
     private Map<String, String> properties;
+    private ConnectionEventHandler eventHandler;
 
     @Override
     public Response send(Request request) {
@@ -29,7 +30,7 @@ public class RemoteConnection implements Connection {
             networkMessage.setMethod(path.replace(".", "/") + "/transaction");
             networkMessage.newSeq();
 
-            request.setResourceInfo(null);
+            request.setResourceInfo(null); // will be set in dest router, left null here
             networkMessage.setData(request);
 
             RemoteConnectionSemaphoreCallback callback = new RemoteConnectionSemaphoreCallback();
@@ -106,6 +107,11 @@ public class RemoteConnection implements Connection {
     @Override
     public Map<String, String> getProperties() {
         return properties;
+    }
+
+    @Override
+    public void setConnectionEventHandler(ConnectionEventHandler eventHandler) {
+        this.eventHandler = eventHandler;
     }
 
     public void setProperties(Map<String, String> properties) {

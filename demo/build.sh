@@ -80,19 +80,11 @@ check_bcos_avaliable()
     # 30300,20200,8545
     check_port_avaliable 30300 BCOS-P2P
     check_port_avaliable 20200 BCOS-Channel
-    check_port_avaliable 8542 BCOS-RPC
+    check_port_avaliable 8545 BCOS-RPC
 
     check_port_avaliable 30301 BCOS-P2P
     check_port_avaliable 20201 BCOS-Channel
-    check_port_avaliable 8543 BCOS-RPC
-
-    check_port_avaliable 30302 BCOS-P2P
-    check_port_avaliable 20202 BCOS-Channel
-    check_port_avaliable 8544 BCOS-RPC
-
-    check_port_avaliable 30303 BCOS-P2P
-    check_port_avaliable 20203 BCOS-Channel
-    check_port_avaliable 8545 BCOS-RPC
+    check_port_avaliable 8546 BCOS-RPC
 }
 
 
@@ -172,8 +164,6 @@ check_bcos()
 {
     check_process bcos/nodes/127.0.0.1/node0/../fisco-bcos
     check_process bcos/nodes/127.0.0.1/node1/../fisco-bcos
-    check_process bcos/nodes/127.0.0.1/node2/../fisco-bcos
-    check_process bcos/nodes/127.0.0.1/node3/../fisco-bcos
 }
 
 check_fabric()
@@ -290,24 +280,20 @@ download_wecross()
     # Download
     LOG_INFO "Download WeCross ..."
     if [ -e download_wecross.sh ];then
-        bash download_wecross.sh -t v1.0.0-rc2
+        bash download_wecross.sh -t v1.0.0-rc3
     else
-        bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0-rc2
+        bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0-rc3
     fi
 }
 
 download_wecross_console()
 {
     LOG_INFO "Download WeCross Console ..."
-#    if [ -e download_console.sh ];then
-#        bash download_console.sh -t v1.0.0-rc2
-#    else
-#        bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_console.sh) -t v1.0.0-rc2
-#    fi
-    git clone https://github.com/WeBankFinTech/WeCross-Console.git
-    cd WeCross-Console && git checkout dev
-    gradle build -x test && cp -r dist ../dist
-    cd .. && rm -rf WeCross-Console && mv dist WeCross-Console
+    if [ -e download_console.sh ];then
+        bash download_console.sh -t v1.0.0-rc3
+    else
+        bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_console.sh) -t v1.0.0-rc3
+    fi
 }
 
 main()

@@ -1,13 +1,14 @@
 package com.webank.wecross.zone;
 
 import com.webank.wecross.stub.ResourceInfo;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 public class ChainInfo {
     private String name;
     private String stubType;
-    private List<ResourceInfo> resources;
+    private List<ResourceInfo> resources = new LinkedList<>();
     private Map<String, String> properties;
 
     public String getName() {

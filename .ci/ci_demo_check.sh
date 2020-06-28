@@ -122,9 +122,43 @@ prepare_wecross()
     mv dist demo/WeCross
 }
 
+
+prepare_wecross_console()
+{
+    cd ${ROOT}/
+    LOG_INFO "Download wecross console from branch: ${PLUGIN_BRANCH}"
+    bash WeCross/download_console.sh -s -t ${PLUGIN_BRANCH}
+    cd -
+}
+
+prepare_bcos()
+{
+    cd ${ROOT}/bcos/
+    echo "127.0.0.1:2 agency1 1" > ipconf
+    cd -
+}
+
+prepare_htlc()
+{
+    cd ${ROOT}/bcos/
+    LOG_INFO "Download ledger-tool from branch: ${PLUGIN_BRANCH}"
+    git clone --depth 1 -b ${PLUGIN_BRANCH} https://github.com/Shareong/ledger-tool.git
+    cd ledger-tool
+    ./gradlew assemble
+    mv dist ledger-tool
+    tar -zcf ledger-tool.tar.gz ledger-tool
+    mv ledger-tool.tar.gz ${ROOT}/bcos/
+    cd ${ROOT}/bcos/
+    rm -rf ledger-tool
+    cd ${ROOT}
+}
+
 main()
 {
     prepare_wecross
+    prepare_wecross_console
+    prepare_bcos
+    prepare_htlc
     prepare_demo
     demo_test
     htlc_test

@@ -16,7 +16,7 @@ public class StubResponse {
     }
 
     public void setStubTypes(StubManager stubManager) {
-        Map<String, StubFactory> stubMap = stubManager.getDrivers();
+        Map<String, StubFactory> stubMap = stubManager.getStubFactories();
         this.stubTypes = stubMap.keySet().toArray(new String[stubMap.size()]);
     }
 }
