@@ -22,7 +22,7 @@ public class ListAccountsURIHandler implements URIHandler {
     private static final Logger logger = LoggerFactory.getLogger(ListAccountsURIHandler.class);
 
     private WeCrossHost host;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     public ListAccountsURIHandler(WeCrossHost host) {
         this.host = host;

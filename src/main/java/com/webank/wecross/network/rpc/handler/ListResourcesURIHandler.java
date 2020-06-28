@@ -18,7 +18,7 @@ public class ListResourcesURIHandler implements URIHandler {
     private static final Logger logger = LoggerFactory.getLogger(ListResourcesURIHandler.class);
 
     private WeCrossHost host;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     public ListResourcesURIHandler(WeCrossHost host) {
         this.host = host;

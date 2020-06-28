@@ -15,7 +15,7 @@ public class ListStubsURIHandler implements URIHandler {
     private static final Logger logger = LoggerFactory.getLogger(ListStubsURIHandler.class);
 
     private WeCrossHost host;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     public ListStubsURIHandler(WeCrossHost host) {
         this.host = host;

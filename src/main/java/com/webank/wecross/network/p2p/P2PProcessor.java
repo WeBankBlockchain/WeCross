@@ -34,7 +34,7 @@ public class P2PProcessor implements NetworkProcessor {
     private ZoneManager zoneManager;
     private P2PService p2PService;
     private RoutineManager routineManager;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     public PeerManager getPeerManager() {
         return peerManager;
