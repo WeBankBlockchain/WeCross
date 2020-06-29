@@ -53,6 +53,14 @@ public class Chain {
         }
     }
 
+    public void start() {
+        blockHeaderManager.start();
+    }
+
+    public void stop() {
+        blockHeaderManager.stop();
+    }
+
     public ChainInfo getChainInfo() {
         ChainInfo chainInfo = new ChainInfo();
         chainInfo.setName(name);
@@ -156,8 +164,8 @@ public class Chain {
             return connection;
         }
 
-        if (connections.size() == 1) {
-            return (Connection) connections.values().toArray()[0];
+        if (connections.size() == 0) {
+            return null;
         } else {
             int index = random.nextInt(connections.size());
             return (Connection) connections.values().toArray()[index];

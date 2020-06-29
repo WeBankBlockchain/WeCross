@@ -22,7 +22,7 @@ repositories {
 }
 
 sourceCompatibility = '1.8'
-version = '1.0.0-rc4-06231-SNAPSHOT'
+version = '1.0.0-rc4-06291-SNAPSHOT'
 
 
 task stubSourceJar(type: Jar) {
@@ -141,7 +141,7 @@ sourceSets {
 
 jar {
     destinationDir file('dist/apps')
-    archiveName project.name + '.jar'
+    archiveName project.name + "-" + project.version + '.jar'
     exclude '**/*.toml'
     exclude '**/*.xml'
     exclude '**/*.properties'
