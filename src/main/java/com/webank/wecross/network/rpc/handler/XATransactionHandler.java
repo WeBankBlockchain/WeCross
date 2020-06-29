@@ -10,7 +10,9 @@ import com.webank.wecross.routine.xa.XATransactionInfo;
 import com.webank.wecross.routine.xa.XATransactionManager;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -25,6 +27,7 @@ public class XATransactionHandler implements URIHandler {
     public class XAPrepareRequest {
         private String transactionID;
         private List<String> resources;
+        private List<String> accounts;
 
         public String getTransactionID() {
             return transactionID;
@@ -40,6 +43,14 @@ public class XATransactionHandler implements URIHandler {
 
         public void setResources(List<String> resources) {
             this.resources = resources;
+        }
+
+        public List<String> getAccounts() {
+            return accounts;
+        }
+
+        public void setAccounts(List<String> accounts) {
+            this.accounts = accounts;
         }
     }
 
@@ -58,6 +69,7 @@ public class XATransactionHandler implements URIHandler {
     public class XACommitRequest {
         private String transactionID;
         private List<String> chains;
+        private List<String> accounts;
 
         public String getTransactionID() {
             return transactionID;
@@ -73,6 +85,14 @@ public class XATransactionHandler implements URIHandler {
 
         public void setChains(List<String> chains) {
             this.chains = chains;
+        }
+
+        public List<String> getAccounts() {
+            return accounts;
+        }
+
+        public void setAccounts(List<String> accounts) {
+            this.accounts = accounts;
         }
     }
 
@@ -91,6 +111,7 @@ public class XATransactionHandler implements URIHandler {
     public class XARollbackRequest {
         private String transactionID;
         private List<String> chains;
+        private List<String> accounts;
 
         public String getTransactionID() {
             return transactionID;
@@ -106,6 +127,14 @@ public class XATransactionHandler implements URIHandler {
 
         public void setChains(List<String> chains) {
             this.chains = chains;
+        }
+
+        public List<String> getAccounts() {
+            return accounts;
+        }
+
+        public void setAccounts(List<String> accounts) {
+            this.accounts = accounts;
         }
     }
 
@@ -123,7 +152,8 @@ public class XATransactionHandler implements URIHandler {
 
     public class XAGetTransactionInfoRequest {
         private String transactionID;
-        private String chain;
+        private List<String> chains;
+        private List<String> accounts;
 
         public String getTransactionID() {
             return transactionID;
@@ -133,12 +163,20 @@ public class XATransactionHandler implements URIHandler {
             this.transactionID = transactionID;
         }
 
-        public String getChain() {
-            return chain;
+        public List<String> getChains() {
+            return chains;
         }
 
-        public void setChain(String chain) {
-            this.chain = chain;
+        public void setChains(List<String> chains) {
+            this.chains = chains;
+        }
+
+        public List<String> getAccounts() {
+            return accounts;
+        }
+
+        public void setAccounts(List<String> accounts) {
+            this.accounts = accounts;
         }
     }
 
@@ -169,7 +207,13 @@ public class XATransactionHandler implements URIHandler {
                                         content,
                                         new TypeReference<RestRequest<XAPrepareRequest>>() {});
 
-                        Account account = accountManager.getAccount(xaRequest.getAccountName());
+                        List<String> accounts = xaRequest.getData().getAccounts();
+                        Map<String, Account> accountMap = new HashMap<>();
+                        for (String account : accounts) {
+                            accountMap.put(
+                                    accountManager.getAccount(account).getType(),
+                                    accountManager.getAccount(account));
+                        }
 
                         Set<Path> paths =
                                 xaRequest
@@ -189,7 +233,7 @@ public class XATransactionHandler implements URIHandler {
 
                         xaTransactionManager.asyncPrepare(
                                 xaRequest.getData().getTransactionID(),
-                                account,
+                                accountMap,
                                 paths,
                                 (e, result) -> {
                                     if (e != null) {
@@ -217,7 +261,13 @@ public class XATransactionHandler implements URIHandler {
                                         content,
                                         new TypeReference<RestRequest<XACommitRequest>>() {});
 
-                        Account account = accountManager.getAccount(xaRequest.getAccountName());
+                        List<String> accounts = xaRequest.getData().getAccounts();
+                        Map<String, Account> accountMap = new HashMap<>();
+                        for (String account : accounts) {
+                            accountMap.put(
+                                    accountManager.getAccount(account).getType(),
+                                    accountManager.getAccount(account));
+                        }
 
                         Set<Path> paths =
                                 xaRequest
@@ -237,7 +287,7 @@ public class XATransactionHandler implements URIHandler {
 
                         xaTransactionManager.asyncCommit(
                                 xaRequest.getData().getTransactionID(),
-                                account,
+                                accountMap,
                                 paths,
                                 (e, result) -> {
                                     if (e != null) {
@@ -259,14 +309,20 @@ public class XATransactionHandler implements URIHandler {
 
                         break;
                     }
-                case "rollback":
+                case "rollbackTransaction":
                     {
                         RestRequest<XARollbackRequest> xaRequest =
                                 objectMapper.readValue(
                                         content,
                                         new TypeReference<RestRequest<XARollbackRequest>>() {});
 
-                        Account account = accountManager.getAccount(xaRequest.getAccountName());
+                        List<String> accounts = xaRequest.getData().getAccounts();
+                        Map<String, Account> accountMap = new HashMap<>();
+                        for (String account : accounts) {
+                            accountMap.put(
+                                    accountManager.getAccount(account).getType(),
+                                    accountManager.getAccount(account));
+                        }
 
                         Set<Path> paths =
                                 xaRequest
@@ -286,7 +342,7 @@ public class XATransactionHandler implements URIHandler {
 
                         xaTransactionManager.asyncRollback(
                                 xaRequest.getData().getTransactionID(),
-                                account,
+                                accountMap,
                                 paths,
                                 (e, result) -> {
                                     if (e != null) {
@@ -316,18 +372,34 @@ public class XATransactionHandler implements URIHandler {
                                         new TypeReference<
                                                 RestRequest<XAGetTransactionInfoRequest>>() {});
 
-                        Account account = accountManager.getAccount(xaRequest.getAccountName());
-
-                        Path path = null;
-                        try {
-                            path = Path.decode(xaRequest.getData().getChain());
-                        } catch (Exception e) {
+                        List<String> accounts = xaRequest.getData().getAccounts();
+                        Map<String, Account> accountMap = new HashMap<>();
+                        for (String account : accounts) {
+                            accountMap.put(
+                                    accountManager.getAccount(account).getType(),
+                                    accountManager.getAccount(account));
                         }
+
+                        Set<Path> paths =
+                                xaRequest
+                                        .getData()
+                                        .getChains()
+                                        .parallelStream()
+                                        .map(
+                                                (s) -> {
+                                                    try {
+                                                        return Path.decode(s);
+                                                    } catch (Exception e) {
+                                                        logger.error("error", e);
+                                                        return null;
+                                                    }
+                                                })
+                                        .collect(Collectors.toSet());
 
                         xaTransactionManager.asyncGetTransactionInfo(
                                 xaRequest.getData().getTransactionID(),
-                                path,
-                                account,
+                                accountMap,
+                                paths,
                                 (e, info) -> {
                                     if (e != null) {
                                         logger.error("Error while getTransactionInfo", e);
