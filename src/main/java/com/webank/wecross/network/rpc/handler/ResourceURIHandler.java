@@ -17,6 +17,7 @@ import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.zone.Chain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,24 @@ public class ResourceURIHandler implements URIHandler {
         this.host = host;
     }
 
+    private Resource getResource(Path path) {
+        Resource resourceObj;
+        try {
+            resourceObj = host.getResource(path);
+        } catch (Exception e) {
+            logger.error("getResource error", e);
+            return null;
+        }
+        if (resourceObj == null) {
+            logger.warn("Unable to find resource: {}", path);
+        } else {
+            HTLCManager htlcManager = host.getRoutineManager().getHtlcManager();
+            resourceObj = htlcManager.filterHTLCResource(host.getZoneManager(), path, resourceObj);
+        }
+
+        return resourceObj;
+    }
+
     @Override
     public void handle(String uri, String httpMethod, String content, Callback callback) {
         RestResponse<Object> restResponse = new RestResponse<>();
@@ -49,26 +68,25 @@ public class ResourceURIHandler implements URIHandler {
             Path path = new Path();
             path.setZone(splits[0]);
             path.setChain(splits[1]);
-            path.setResource(splits[2]);
-            String method = splits[3];
+
+            String method = "";
+            if (splits.length > 3) {
+                path.setResource(splits[2]);
+                method = splits[3];
+            } else {
+                method = splits[2];
+            }
 
             if (logger.isDebugEnabled()) {
                 logger.debug("request path: {}, method: {}, string: {}", path, method, content);
             }
 
             AccountManager accountManager = host.getAccountManager();
-            Resource resourceObj = host.getResource(path);
-            if (resourceObj == null) {
-                logger.warn("Unable to find resource: {}", path);
-            } else {
-                HTLCManager htlcManager = host.getRoutineManager().getHtlcManager();
-                resourceObj =
-                        htlcManager.filterHTLCResource(host.getZoneManager(), path, resourceObj);
-            }
 
             switch (method) {
                 case "status":
                     {
+                        Resource resourceObj = getResource(path);
                         if (resourceObj == null) {
                             restResponse.setData("not exists");
                         } else {
@@ -78,6 +96,7 @@ public class ResourceURIHandler implements URIHandler {
                     }
                 case "detail":
                     {
+                        Resource resourceObj = getResource(path);
                         if (resourceObj == null) {
                             throw new WeCrossException(
                                     WeCrossException.ErrorCode.RESOURCE_ERROR,
@@ -92,6 +111,7 @@ public class ResourceURIHandler implements URIHandler {
                     }
                 case "sendTransaction":
                     {
+                        Resource resourceObj = getResource(path);
                         if (resourceObj == null) {
                             throw new WeCrossException(
                                     WeCrossException.ErrorCode.RESOURCE_ERROR,
@@ -149,6 +169,7 @@ public class ResourceURIHandler implements URIHandler {
                     }
                 case "call":
                     {
+                        Resource resourceObj = getResource(path);
                         if (resourceObj == null) {
                             throw new WeCrossException(
                                     WeCrossException.ErrorCode.RESOURCE_ERROR,
@@ -205,6 +226,17 @@ public class ResourceURIHandler implements URIHandler {
                         // Response Will be returned in the callback
                         return;
                     }
+                case "custom":
+                    {
+                        Chain chain =
+                                host.getZoneManager()
+                                        .getZone(path.getZone())
+                                        .getChain(path.getChain());
+                        // chain.getDriver().asyncCustomCommand(command, path, args, account,
+                        // blockHeaderManager, connection, callback);
+                        // RestRequest<TransactionRequest>
+                        break;
+                    }
                 default:
                     {
                         logger.warn("Unsupported method: {}", method);
@@ -213,10 +245,6 @@ public class ResourceURIHandler implements URIHandler {
                         break;
                     }
             }
-        } catch (TransactionException e) {
-            logger.warn("TransactionException error", e);
-            restResponse.setErrorCode(NetworkQueryStatus.TRANSACTION_ERROR + e.getErrorCode());
-            restResponse.setMessage(e.getMessage());
         } catch (WeCrossException e) {
             logger.warn("Process request error", e);
             restResponse.setErrorCode(NetworkQueryStatus.EXCEPTION_FLAG + e.getErrorCode());

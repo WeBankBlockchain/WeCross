@@ -10,6 +10,7 @@ import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,33 @@ public class XATransactionManager {
         return zone2Path;
     }
 
+    private Callback getReduceCallback(int size, Callback callback) {
+        AtomicInteger finished = new AtomicInteger();
+        List<Exception> fatals = new LinkedList<Exception>();
+
+        Callback reduceCallback =
+                (error, result) -> {
+                    if (error != null) {
+                        logger.error("Process error!", error);
+                        fatals.add(error);
+                    }
+
+                    int current = finished.addAndGet(1);
+                    if (current == size) {
+                        // all finished
+                        if (fatals.size() > 0) {
+                            logger.error("Failed in progress", fatals);
+
+                            callback.onResponse(new WeCrossException(-1, "Failed in progress"), -1);
+                        } else {
+                            callback.onResponse(null, 0);
+                        }
+                    }
+                };
+
+        return reduceCallback;
+    }
+
     public void asyncPrepare(
             String transactionID,
             Map<String, Account> accounts,
@@ -43,6 +71,8 @@ public class XATransactionManager {
             Callback callback) {
         try {
             Map<String, Set<Path>> zone2Path = getChainPaths(resources);
+
+            Callback reduceCallback = getReduceCallback(zone2Path.size(), callback);
 
             for (Map.Entry<String, Set<Path>> entry : zone2Path.entrySet()) {
                 Path chainPath = entry.getValue().iterator().next();
@@ -69,7 +99,7 @@ public class XATransactionManager {
                 if (Objects.isNull(account)) {
                     String errorMsg = "account with type '" + resource.getType() + "' not found";
                     logger.error(errorMsg);
-                    callback.onResponse(new Exception(errorMsg), -1);
+                    reduceCallback.onResponse(new Exception(errorMsg), -1);
                     return;
                 }
 
@@ -86,7 +116,7 @@ public class XATransactionManager {
                             if (error != null) {
                                 logger.error("Send prepare transaction system error", error);
 
-                                callback.onResponse(error, -1);
+                                reduceCallback.onResponse(error, -1);
                                 return;
                             }
 
@@ -95,7 +125,7 @@ public class XATransactionManager {
                                 logger.error("Send prepare transaction proxy error: {}", errorCode);
                             }
 
-                            callback.onResponse(null, errorCode);
+                            reduceCallback.onResponse(null, errorCode);
                         });
             }
         } catch (Exception e) {
@@ -111,6 +141,8 @@ public class XATransactionManager {
             Set<Path> chains,
             Callback callback) {
         try {
+            Callback reduceCallback = getReduceCallback(chains.size(), callback);
+
             for (Path chainPath : chains) {
                 Chain chain = zoneManager.getZone(chainPath).getChain(chainPath);
 
@@ -128,7 +160,7 @@ public class XATransactionManager {
                 if (Objects.isNull(account)) {
                     String errorMsg = "account with type '" + resource.getType() + "' not found";
                     logger.error(errorMsg);
-                    callback.onResponse(new Exception(errorMsg), -1);
+                    reduceCallback.onResponse(new Exception(errorMsg), -1);
                     return;
                 }
 
@@ -145,7 +177,7 @@ public class XATransactionManager {
                             if (error != null) {
                                 logger.error("Send commit transaction error", error);
 
-                                callback.onResponse(
+                                reduceCallback.onResponse(
                                         new WeCrossException(
                                                 -1, "Send commit transaction error", error),
                                         -1);
@@ -157,7 +189,7 @@ public class XATransactionManager {
                                 logger.error("Send prepare transaction proxy error: {}", errorCode);
                             }
 
-                            callback.onResponse(null, errorCode);
+                            reduceCallback.onResponse(null, errorCode);
                         });
             }
         } catch (Exception e) {
@@ -173,6 +205,8 @@ public class XATransactionManager {
             Set<Path> chains,
             Callback callback) {
         try {
+            Callback reduceCallback = getReduceCallback(chains.size(), callback);
+
             for (Path chainPath : chains) {
                 Chain chain = zoneManager.getZone(chainPath).getChain(chainPath);
 
@@ -190,7 +224,7 @@ public class XATransactionManager {
                 if (Objects.isNull(account)) {
                     String errorMsg = "account with type '" + resource.getType() + "' not found";
                     logger.error(errorMsg);
-                    callback.onResponse(new Exception(errorMsg), -1);
+                    reduceCallback.onResponse(new Exception(errorMsg), -1);
                     return;
                 }
 
@@ -207,7 +241,7 @@ public class XATransactionManager {
                             if (error != null) {
                                 logger.error("Send rollback transaction error", error);
 
-                                callback.onResponse(
+                                reduceCallback.onResponse(
                                         new WeCrossException(
                                                 -1, "Send rollback transaction error", error),
                                         -1);
@@ -219,7 +253,7 @@ public class XATransactionManager {
                                 logger.error("Send prepare transaction proxy error: {}", errorCode);
                             }
 
-                            callback.onResponse(null, errorCode);
+                            reduceCallback.onResponse(null, errorCode);
                         });
             }
         } catch (Exception e) {
@@ -233,71 +267,120 @@ public class XATransactionManager {
         public void onResponse(Exception e, XATransactionInfo xaTransactionInfo);
     }
 
+    private GetTransactionInfoCallback getTransactionInfoReduceCallback(
+            int size, GetTransactionInfoCallback callback) {
+        AtomicInteger finished = new AtomicInteger();
+        List<Exception> fatals = new LinkedList<Exception>();
+        List<XATransactionInfo> infos = new LinkedList<XATransactionInfo>();
+
+        GetTransactionInfoCallback reduceCallback =
+                (error, info) -> {
+                    if (error != null) {
+                        logger.error("Get transactionInfo error in progress", error);
+                        fatals.add(error);
+                    } else {
+                        infos.add(info);
+                    }
+
+                    int current = finished.addAndGet(1);
+                    if (current == size) {
+                        if (infos.isEmpty()) {
+                            logger.error("Empty result");
+                            callback.onResponse(new WeCrossException(-1, "Empty result"), null);
+
+                            return;
+                        }
+
+                        if (infos.size() < size) {
+                            logger.warn("GetTransactionInfo missing some steps");
+                        }
+
+                        List<XATransactionStep> allSteps = new ArrayList<XATransactionStep>();
+                        for (XATransactionInfo returnInfo : infos) {
+                            allSteps.addAll(returnInfo.getTransactionSteps());
+                        }
+
+                        allSteps.sort(
+                                (left, right) -> {
+                                    return Integer.compare(left.getSeq(), right.getSeq());
+                                });
+
+                        XATransactionInfo xaTransactionInfo = infos.get(0);
+                        xaTransactionInfo.setTransactionSteps(allSteps);
+
+                        callback.onResponse(null, xaTransactionInfo);
+                    }
+                };
+
+        return reduceCallback;
+    }
+
     public void asyncGetTransactionInfo(
             String transactionID,
             Map<String, Account> accounts,
             Set<Path> chains,
             GetTransactionInfoCallback callback) {
-
-        // todo handle paths
-        Path path = chains.iterator().next();
-
         try {
-            Chain chain = zoneManager.getZone(path).getChain(path);
+            GetTransactionInfoCallback reduceCallback =
+                    getTransactionInfoReduceCallback(chains.size(), callback);
 
-            TransactionRequest transactionRequest = new TransactionRequest();
-            transactionRequest.setMethod("getTransactionInfo");
-            String[] args = new String[] {transactionID};
-            transactionRequest.setArgs(args);
+            for (Path path : chains) {
+                Chain chain = zoneManager.getZone(path).getChain(path);
 
-            Path proxyPath = new Path(path);
-            proxyPath.setResource("WeCrossProxy");
-            Resource resource = zoneManager.getResource(proxyPath);
+                TransactionRequest transactionRequest = new TransactionRequest();
+                transactionRequest.setMethod("getTransactionInfo");
+                String[] args = new String[] {transactionID};
+                transactionRequest.setArgs(args);
 
-            Account account = accounts.get(resource.getType());
-            if (Objects.isNull(account)) {
-                String errorMsg = "account with type '" + resource.getType() + "' not found";
-                logger.error(errorMsg);
-                callback.onResponse(new Exception(errorMsg), null);
-                return;
+                Path proxyPath = new Path(path);
+                proxyPath.setResource("WeCrossProxy");
+                Resource resource = zoneManager.getResource(proxyPath);
+
+                Account account = accounts.get(resource.getType());
+                if (Objects.isNull(account)) {
+                    String errorMsg = "account with type '" + resource.getType() + "' not found";
+                    logger.error(errorMsg);
+                    reduceCallback.onResponse(new Exception(errorMsg), null);
+                    return;
+                }
+
+                TransactionContext<TransactionRequest> transactionContext =
+                        new TransactionContext<TransactionRequest>(
+                                transactionRequest,
+                                account,
+                                resource.getResourceInfo(),
+                                chain.getBlockHeaderManager());
+
+                resource.asyncCall(
+                        transactionContext,
+                        (error, response) -> {
+                            if (error != null) {
+                                logger.error("Send prepare transaction error", error);
+
+                                reduceCallback.onResponse(
+                                        new WeCrossException(-1, "GetTransactionInfo error", error),
+                                        null);
+                                return;
+                            }
+
+                            // decode return value
+                            try {
+                                XATransactionInfo xaTransactionInfo =
+                                        objectMapper.readValue(
+                                                response.getResult()[0], XATransactionInfo.class);
+
+                                reduceCallback.onResponse(null, xaTransactionInfo);
+                            } catch (Exception e) {
+                                logger.error("Decode transactionInfo json error", e);
+
+                                reduceCallback.onResponse(
+                                        new WeCrossException(
+                                                -1, "Decode transactionInfo json error", e),
+                                        null);
+                                return;
+                            }
+                        });
             }
-
-            TransactionContext<TransactionRequest> transactionContext =
-                    new TransactionContext<TransactionRequest>(
-                            transactionRequest,
-                            account,
-                            resource.getResourceInfo(),
-                            chain.getBlockHeaderManager());
-
-            resource.asyncCall(
-                    transactionContext,
-                    (error, response) -> {
-                        if (error != null) {
-                            logger.error("Send prepare transaction error", error);
-
-                            callback.onResponse(
-                                    new WeCrossException(-1, "GetTransactionInfo error", error),
-                                    null);
-                            return;
-                        }
-
-                        // decode return value
-                        try {
-                            XATransactionInfo xaTransactionInfo =
-                                    objectMapper.readValue(
-                                            response.getResult()[0], XATransactionInfo.class);
-
-                            callback.onResponse(null, xaTransactionInfo);
-                        } catch (Exception e) {
-                            logger.error("Decode transactionInfo json error", e);
-
-                            callback.onResponse(
-                                    new WeCrossException(
-                                            -1, "Decode transactionInfo json error", e),
-                                    null);
-                            return;
-                        }
-                    });
         } catch (Exception e) {
             logger.error("GetTransactionInfo error", e);
 
