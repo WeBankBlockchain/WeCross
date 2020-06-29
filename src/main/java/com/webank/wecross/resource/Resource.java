@@ -62,8 +62,8 @@ public class Resource {
     }
 
     public Connection chooseConnection() {
-        if (connections.size() == 1) {
-            return (Connection) connections.values().toArray()[0];
+        if (connections == null || connections.size() == 0) {
+            return null;
         } else {
             int index = random.nextInt(connections.size());
             return (Connection) connections.values().toArray()[index];
