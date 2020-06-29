@@ -8,15 +8,20 @@ import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.stub.BlockHeader;
+import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Driver.GetBlockHeaderCallback;
 import com.webank.wecross.stub.Driver.GetBlockNumberCallback;
+import com.webank.wecross.stub.Request;
+import com.webank.wecross.stub.ResourceInfo;
+import com.webank.wecross.stub.Response;
 import com.webank.wecross.stubmanager.MemoryBlockHeaderManager;
 import com.webank.wecross.zone.Chain;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.junit.Assert;
 import org.junit.Test;
@@ -93,7 +98,28 @@ public class MemoryBlockHeaderManagerTest {
 
         Chain chain = Mockito.mock(Chain.class);
         Mockito.when(chain.getDriver()).thenReturn(driver);
-        Mockito.when(chain.chooseConnection()).thenReturn(null);
+        Mockito.when(chain.chooseConnection())
+                .thenReturn(
+                        new Connection() {
+                            @Override
+                            public Response send(Request request) {
+                                return null;
+                            }
+
+                            @Override
+                            public List<ResourceInfo> getResources() {
+                                return null;
+                            }
+
+                            @Override
+                            public Map<String, String> getProperties() {
+                                return null;
+                            }
+
+                            @Override
+                            public void setConnectionEventHandler(
+                                    ConnectionEventHandler eventHandler) {}
+                        });
 
         Timer timer = new HashedWheelTimer();
 

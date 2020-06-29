@@ -268,6 +268,7 @@ public class ZoneManager {
                 }
 
                 if (chain.getPeers().isEmpty()) {
+                    chain.stop();
                     zone.getChains().remove(chainPath.getChain());
                 }
 
