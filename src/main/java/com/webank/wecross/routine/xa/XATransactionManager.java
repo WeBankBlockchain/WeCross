@@ -9,10 +9,7 @@ import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.ZoneManager;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +37,10 @@ public class XATransactionManager {
     }
 
     public void asyncPrepare(
-            String transactionID, Account account, Set<Path> resources, Callback callback) {
+            String transactionID,
+            Map<String, Account> accounts,
+            Set<Path> resources,
+            Callback callback) {
         try {
             Map<String, Set<Path>> zone2Path = getChainPaths(resources);
 
@@ -64,6 +64,14 @@ public class XATransactionManager {
                 Path proxyPath = new Path(chainPath);
                 proxyPath.setResource("WeCrossProxy");
                 Resource resource = zoneManager.getResource(proxyPath);
+
+                Account account = accounts.get(resource.getType());
+                if (Objects.isNull(account)) {
+                    String errorMsg = "account with type '" + resource.getType() + "' not found";
+                    logger.error(errorMsg);
+                    callback.onResponse(new Exception(errorMsg), -1);
+                    return;
+                }
 
                 TransactionContext<TransactionRequest> transactionContext =
                         new TransactionContext<TransactionRequest>(
@@ -98,7 +106,10 @@ public class XATransactionManager {
     };
 
     public void asyncCommit(
-            String transactionID, Account account, Set<Path> chains, Callback callback) {
+            String transactionID,
+            Map<String, Account> accounts,
+            Set<Path> chains,
+            Callback callback) {
         try {
             for (Path chainPath : chains) {
                 Chain chain = zoneManager.getZone(chainPath).getChain(chainPath);
@@ -112,6 +123,14 @@ public class XATransactionManager {
                 Path proxyPath = new Path(chainPath);
                 proxyPath.setResource("WeCrossProxy");
                 Resource resource = zoneManager.getResource(proxyPath);
+
+                Account account = accounts.get(resource.getType());
+                if (Objects.isNull(account)) {
+                    String errorMsg = "account with type '" + resource.getType() + "' not found";
+                    logger.error(errorMsg);
+                    callback.onResponse(new Exception(errorMsg), -1);
+                    return;
+                }
 
                 TransactionContext<TransactionRequest> transactionContext =
                         new TransactionContext<TransactionRequest>(
@@ -149,7 +168,10 @@ public class XATransactionManager {
     };
 
     public void asyncRollback(
-            String transactionID, Account account, Set<Path> chains, Callback callback) {
+            String transactionID,
+            Map<String, Account> accounts,
+            Set<Path> chains,
+            Callback callback) {
         try {
             for (Path chainPath : chains) {
                 Chain chain = zoneManager.getZone(chainPath).getChain(chainPath);
@@ -163,6 +185,14 @@ public class XATransactionManager {
                 Path proxyPath = new Path(chainPath);
                 proxyPath.setResource("WeCrossProxy");
                 Resource resource = zoneManager.getResource(proxyPath);
+
+                Account account = accounts.get(resource.getType());
+                if (Objects.isNull(account)) {
+                    String errorMsg = "account with type '" + resource.getType() + "' not found";
+                    logger.error(errorMsg);
+                    callback.onResponse(new Exception(errorMsg), -1);
+                    return;
+                }
 
                 TransactionContext<TransactionRequest> transactionContext =
                         new TransactionContext<TransactionRequest>(
@@ -204,7 +234,14 @@ public class XATransactionManager {
     }
 
     public void asyncGetTransactionInfo(
-            String transactionID, Path path, Account account, GetTransactionInfoCallback callback) {
+            String transactionID,
+            Map<String, Account> accounts,
+            Set<Path> chains,
+            GetTransactionInfoCallback callback) {
+
+        // todo handle paths
+        Path path = chains.iterator().next();
+
         try {
             Chain chain = zoneManager.getZone(path).getChain(path);
 
@@ -216,6 +253,14 @@ public class XATransactionManager {
             Path proxyPath = new Path(path);
             proxyPath.setResource("WeCrossProxy");
             Resource resource = zoneManager.getResource(proxyPath);
+
+            Account account = accounts.get(resource.getType());
+            if (Objects.isNull(account)) {
+                String errorMsg = "account with type '" + resource.getType() + "' not found";
+                logger.error(errorMsg);
+                callback.onResponse(new Exception(errorMsg), null);
+                return;
+            }
 
             TransactionContext<TransactionRequest> transactionContext =
                     new TransactionContext<TransactionRequest>(

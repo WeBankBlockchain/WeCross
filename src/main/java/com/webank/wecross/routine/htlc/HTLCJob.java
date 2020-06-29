@@ -3,8 +3,8 @@ package com.webank.wecross.routine.htlc;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.Path;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -27,8 +27,19 @@ public class HTLCJob implements Job {
     private void handleProposals(HTLCResourcePair htlcResourcePair) {
         // get unfinished htlc proposal
         String[] proposalIds = getProposalIDs(htlcResourcePair);
-        AtomicInteger counter = new AtomicInteger(0);
+        if (proposalIds.length == 0) {
+            return;
+        }
+
+        Semaphore semaphore = new Semaphore(proposalIds.length, true);
         for (String proposalId : proposalIds) {
+            try {
+                semaphore.acquire();
+            } catch (InterruptedException e) {
+                logger.warn("Interrupted,", e);
+                Thread.currentThread().interrupt();
+            }
+
             if (!RoutineDefault.NULL_FLAG.equals(proposalId)) {
                 Path path = htlcResourcePair.getSelfHTLCResource().getSelfPath();
                 logger.trace("Start handling htlc proposal: {}, path: {}", proposalId, path);
@@ -56,20 +67,19 @@ public class HTLCJob implements Job {
                                             exception.getInternalMessage());
                                 }
                             }
-                            counter.getAndIncrement();
+                            semaphore.release();
                         });
             } else {
-                counter.getAndIncrement();
+                semaphore.release();
             }
         }
 
         try {
-            // A new round starts if and only if the current round is completed
-            while (counter.get() != proposalIds.length) {
-                Thread.sleep(RoutineDefault.POLLING_INTERVAL / 10);
-            }
-        } catch (Exception e) {
-            logger.warn("interrupted", e);
+            // wait until job is finished
+            semaphore.acquire();
+        } catch (InterruptedException e) {
+            logger.warn("Interrupted,", e);
+            Thread.currentThread().interrupt();
         }
     }
 
