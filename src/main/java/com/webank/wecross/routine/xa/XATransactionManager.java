@@ -39,7 +39,7 @@ public class XATransactionManager {
 
     private Callback getReduceCallback(int size, Callback callback) {
         AtomicInteger finished = new AtomicInteger();
-        List<Exception> fatals = new LinkedList<Exception>();
+        List<Exception> fatals = Collections.synchronizedList(new LinkedList<Exception>());
 
         Callback reduceCallback =
                 (error, result) -> {
@@ -270,8 +270,9 @@ public class XATransactionManager {
     private GetTransactionInfoCallback getTransactionInfoReduceCallback(
             int size, GetTransactionInfoCallback callback) {
         AtomicInteger finished = new AtomicInteger();
-        List<Exception> fatals = new LinkedList<Exception>();
-        List<XATransactionInfo> infos = new LinkedList<XATransactionInfo>();
+        List<Exception> fatals = Collections.synchronizedList(new LinkedList<Exception>());
+        List<XATransactionInfo> infos =
+                Collections.synchronizedList(new LinkedList<XATransactionInfo>());
 
         GetTransactionInfoCallback reduceCallback =
                 (error, info) -> {
