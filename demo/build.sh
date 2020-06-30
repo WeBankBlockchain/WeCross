@@ -247,7 +247,7 @@ config_router_8250()
     config_bcos_stub_toml conf/chains/bcos/stub.toml ${hello_address}
 
     # deploy proxy
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment check chains/bcos
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/bcos bcos_user1
 
     cd -
 }
