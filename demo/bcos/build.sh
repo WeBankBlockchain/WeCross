@@ -79,7 +79,7 @@ deploy_contract()
 {
     cd console
     bash start.sh <<EOF
-    deploy HelloWeCross
+    deployByCNS HelloWeCross 1.0
 EOF
     hello_address=$(grep 'HelloWeCross' deploylog.txt | awk '{print $5}')
     cd -
