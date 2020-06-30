@@ -160,8 +160,8 @@ public class ZonesConfig {
                         resource.getResourceInfo().getName(),
                         resource.getResourceInfo());
             }
-
             stubMap.put(chainName, chain);
+            chain.start();
         }
 
         return stubMap;

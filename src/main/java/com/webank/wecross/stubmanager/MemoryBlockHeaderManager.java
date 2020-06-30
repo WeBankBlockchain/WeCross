@@ -3,6 +3,7 @@ package com.webank.wecross.stubmanager;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.BlockHeader;
 import com.webank.wecross.stub.BlockHeaderManager;
+import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.zone.Chain;
 import io.netty.util.Timeout;
@@ -171,12 +172,14 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
 
     @Override
     public void start() {
-        if (running.compareAndSet(false, true)) {
+        Connection connection = chain.chooseConnection();
+        Driver driver = chain.getDriver();
+        if (connection != null && driver != null && running.compareAndSet(false, true)) {
             logger.info("MemoryBlockHeaderManager started");
 
             chain.getDriver()
                     .asyncGetBlockNumber(
-                            chain.chooseConnection(),
+                            connection,
                             new Driver.GetBlockNumberCallback() {
                                 @Override
                                 public void onResponse(Exception e, long blockNumber) {

@@ -206,6 +206,7 @@ public class ZoneManager {
 
                     chain.addRemoteResource(peer, resourceInfo, remoteConnection);
                 }
+                chain.start();
             }
         } catch (WeCrossException e) {
             logger.error("Add remote resource error", e);
@@ -267,6 +268,7 @@ public class ZoneManager {
                 }
 
                 if (chain.getPeers().isEmpty()) {
+                    chain.stop();
                     zone.getChains().remove(chainPath.getChain());
                 }
 
