@@ -85,27 +85,23 @@ public class ZoneManager {
                             resource.setType("TemporaryResource");
                             resource.setResourceInfo(resourceInfo);
 
-                            Map<Peer, Connection> connections = new HashMap<>();
+                            Connection localConnection = chain.getLocalConnection();
+                            if (localConnection != null) {
+                                resource.addConnection(null, localConnection);
+                            } else {
 
-                            Set<Peer> peers = chain.getPeers();
-                            for (Peer peer : peers) {
-                                Connection connection;
-                                if (peer == null && chain.getLocalConnection() != null) {
-                                    connection = chain.getLocalConnection();
-                                } else {
+                                Set<Peer> peers = chain.getPeers();
+                                for (Peer peer : peers) {
                                     RemoteConnection remoteConnection = new RemoteConnection();
                                     remoteConnection.setP2PService(p2PService);
                                     remoteConnection.setPeer(peer);
                                     remoteConnection.setPath(path.toURI());
                                     remoteConnection.setProperties(
                                             chain.getChainInfo().getProperties());
-                                    connection = remoteConnection;
+                                    resource.addConnection(peer, remoteConnection);
                                 }
-
-                                connections.put(peer, connection);
                             }
 
-                            resource.setConnection(connections);
                             resource.setTemporary(true);
 
                             // TODO: comment?

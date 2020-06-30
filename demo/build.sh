@@ -246,6 +246,9 @@ config_router_8250()
     # modify stub.toml
     config_bcos_stub_toml conf/chains/bcos/stub.toml ${hello_address}
 
+    # deploy proxy
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment check chains/bcos
+
     cd -
 }
 
@@ -277,7 +280,7 @@ config_router_8251()
     bash add_chain.sh -t Fabric1.4 -n fabric -d conf/chains
     cp ${fabric_demo_dir}/certs/chains/fabric/* conf/chains/fabric/
 
-    # WeCrossProxy Chaincode
+    # deploy proxy
     java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy chains/fabric fabric_admin_org1 Org1
     java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy chains/fabric fabric_admin_org2 Org2
 
