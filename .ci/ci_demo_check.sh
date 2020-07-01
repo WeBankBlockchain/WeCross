@@ -57,10 +57,10 @@ listResources
 listAccounts
 call payment.bcos.HelloWeCross bcos_user1 get
 sendTransaction payment.bcos.HelloWeCross bcos_user1 set Tom
-call payment.fabric.abac fabric_user1 query a
-sendTransaction payment.fabric.abac fabric_user1 invoke a b 10
-call payment.fabric.abac fabric_user1 query a
-call payment.fabric.abac fabric_user1 query b
+call payment.fabric.mycc fabric_user1 query a
+sendTransaction payment.fabric.mycc fabric_user1 invoke a b 10
+call payment.fabric.mycc fabric_user1 query a
+call payment.fabric.mycc fabric_user1 query b
 quit
 EOF
     cd ..
