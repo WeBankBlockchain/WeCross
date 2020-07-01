@@ -218,6 +218,9 @@ public class Resource {
 
     public void setTemporary(boolean isTemporary) {
         this.isTemporary = isTemporary;
+        if (isTemporary) {
+            resourceInfo.getProperties().put("isTemporary", "true");
+        }
     }
 
     public boolean isOnlyLocal() {
