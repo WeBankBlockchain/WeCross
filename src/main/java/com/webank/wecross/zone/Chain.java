@@ -28,6 +28,7 @@ public class Chain {
     private Logger logger = LoggerFactory.getLogger(Chain.class);
 
     // chain Info
+    private String zoneName;
     private String name;
     private String stubType;
     private Map<String, String> properties;
@@ -41,8 +42,14 @@ public class Chain {
     private Random random = new SecureRandom();
     private ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    public Chain(String name, String stubType, Driver driver, Connection localConnection) {
+    public Chain(
+            String zoneName,
+            String name,
+            String stubType,
+            Driver driver,
+            Connection localConnection) {
 
+        this.zoneName = zoneName;
         this.name = name;
         this.stubType = stubType;
         this.driver = driver;
@@ -281,6 +288,11 @@ public class Chain {
                     resources.put(newResourceName, resource);
                 }
 
+                Path path = new Path();
+                path.setZone(zoneName);
+                path.setChain(name);
+                path.setResource(newResourceName);
+                resource.setPath(path);
                 resource.setType(stubType);
                 resource.setTemporary(false);
                 resource.setResourceInfo(newResourceInfo);
@@ -316,6 +328,12 @@ public class Chain {
                 resource = new Resource();
                 resources.put(newName, resource);
             }
+
+            Path path = new Path();
+            path.setZone(zoneName);
+            path.setChain(name);
+            path.setResource(newName);
+            resource.setPath(path);
             resource.setType(stubType);
             resource.setTemporary(false);
             resource.setResourceInfo(resourceInfo);

@@ -139,7 +139,11 @@ public class ZonesConfig {
 
             Chain chain =
                     new Chain(
-                            chainInfo.getName(), chainInfo.getStubType(), driver, localConnection);
+                            zone,
+                            chainInfo.getName(),
+                            chainInfo.getStubType(),
+                            driver,
+                            localConnection);
             chain.setDriver(stubFactory.newDriver());
             chain.setBlockHeaderManager(resourceBlockHeaderManagerFactory.build(chain));
             for (ResourceInfo resourceInfo : resources) {

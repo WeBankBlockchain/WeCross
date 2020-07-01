@@ -581,7 +581,7 @@ contract HTLC {
     {
         uint256 t0 = stringToUint256(_t0);
         uint256 t1 = stringToUint256(_t1);
-        return t1 > (t0 + 200) && t0 > (now / 1000 + 200);
+        return t0 > (t1 + 200) && t1 > (now / 1000 + 200);
     }
 
     function sameString(string memory _str1, string memory _str2) internal pure

@@ -5,6 +5,7 @@ import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.BlockHeaderManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
@@ -27,6 +28,7 @@ public class Resource {
     private String type;
     private Driver driver;
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
+    private Path path;
     private ResourceInfo resourceInfo;
     private BlockHeaderManager blockHeaderManager;
     boolean hasLocalConnection = false;
@@ -71,6 +73,10 @@ public class Resource {
         }
     }
 
+    public void setPath(Path path) {
+        this.path = path;
+    }
+
     public interface Callback {
         public void onTransactionResponse(
                 TransactionException transactionException, TransactionResponse transactionResponse);
@@ -81,14 +87,14 @@ public class Resource {
             throws TransactionException {
         TransactionContext<TransactionRequest> context =
                 new TransactionContext<>(
-                        request, account, this.resourceInfo, this.blockHeaderManager);
+                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
         return driver.call(context, chooseConnection());
     }
 
     public void asyncCall(TransactionRequest request, Account account, Resource.Callback callback) {
         TransactionContext<TransactionRequest> context =
                 new TransactionContext<>(
-                        request, account, this.resourceInfo, this.blockHeaderManager);
+                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
 
         driver.asyncCallByProxy(
                 context,
@@ -108,7 +114,7 @@ public class Resource {
             throws TransactionException {
         TransactionContext<TransactionRequest> context =
                 new TransactionContext<>(
-                        request, account, this.resourceInfo, this.blockHeaderManager);
+                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
         return driver.sendTransaction(context, chooseConnection());
     }
 
@@ -116,7 +122,7 @@ public class Resource {
             TransactionRequest request, Account account, Resource.Callback callback) {
         TransactionContext<TransactionRequest> context =
                 new TransactionContext<>(
-                        request, account, this.resourceInfo, this.blockHeaderManager);
+                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
         driver.asyncSendTransactionByProxy(
                 context,
                 chooseConnection(),

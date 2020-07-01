@@ -3,17 +3,19 @@ package com.webank.wecross.stub;
 public class TransactionContext<T> {
     private T data;
     private Account account;
-    // private Path path;
+    private Path path;
     private ResourceInfo resourceInfo;
     private BlockHeaderManager blockHeaderManager;
 
     public TransactionContext(
             T data,
             Account account,
+            Path path,
             ResourceInfo resourceInfo,
             BlockHeaderManager blockHeaderManager) {
         this.data = data;
         this.account = account;
+        this.path = path;
         this.resourceInfo = resourceInfo;
         this.blockHeaderManager = blockHeaderManager;
     }
@@ -62,5 +64,13 @@ public class TransactionContext<T> {
                 + ", blockHeaderManager="
                 + blockHeaderManager
                 + '}';
+    }
+
+    public Path getPath() {
+        return path;
+    }
+
+    public void setPath(Path path) {
+        this.path = path;
     }
 }
