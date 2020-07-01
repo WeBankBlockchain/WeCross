@@ -158,10 +158,10 @@ main()
     prepare_wecross
     prepare_wecross_console
     prepare_bcos
-    prepare_htlc
+    # prepare_htlc
     prepare_demo
     demo_test
-    htlc_test
+    # htlc_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then

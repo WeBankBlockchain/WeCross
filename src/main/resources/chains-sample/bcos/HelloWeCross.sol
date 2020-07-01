@@ -4,7 +4,12 @@ pragma experimental ABIEncoderV2;
 contract HelloWeCross {
     string[] ss = ["Talk is cheap", "Show me the code"];
 
-    function set(string[] memory _ss) public returns (string[] memory) {
+    function set(string memory _s) public returns (string[] memory) {
+        ss = [_s];
+        return ss;
+    }
+
+    function setArray(string[] memory _ss) public returns (string[] memory) {
         ss = _ss;
         return ss;
     }
