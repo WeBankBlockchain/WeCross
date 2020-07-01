@@ -26,7 +26,7 @@ deploy_bcos_htlc()
     cd bcos/console
     rm -rf deploylog.txt
     bash start.sh <<EOF
-deploy LedgerSampleHTLC
+deployByCNS LedgerSampleHTLC 1.0
 EOF
     BCOS_HTLC=$(grep 'LedgerSampleHTLC' deploylog.txt | awk '{print $5}')
     cd -

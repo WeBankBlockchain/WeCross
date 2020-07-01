@@ -14,7 +14,6 @@ import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.routine.htlc.HTLCManager;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
@@ -134,11 +133,8 @@ public class ResourceURIHandler implements URIHandler {
                                 accountName);
 
                         resourceObj.asyncSendTransaction(
-                                new TransactionContext<>(
-                                        transactionRequest,
-                                        account,
-                                        resourceObj.getResourceInfo(),
-                                        resourceObj.getBlockHeaderManager()),
+                                transactionRequest,
+                                account,
                                 new Resource.Callback() {
                                     @Override
                                     public void onTransactionResponse(
@@ -193,11 +189,8 @@ public class ResourceURIHandler implements URIHandler {
 
                         // TODO: byProxy
                         resourceObj.asyncCall(
-                                new TransactionContext<>(
-                                        transactionRequest,
-                                        account,
-                                        resourceObj.getResourceInfo(),
-                                        resourceObj.getBlockHeaderManager()),
+                                transactionRequest,
+                                account,
                                 new Resource.Callback() {
                                     @Override
                                     public void onTransactionResponse(

@@ -71,10 +71,10 @@ public class AssetHTLC implements HTLC {
             String method,
             String[] args,
             Callback callback) {
-        TransactionContext<TransactionRequest> request =
-                packTransactionRequest(htlcResource, htlcResource.getAccount1(), method, args);
+        TransactionRequest request = new TransactionRequest(method, args);
         htlcResource.asyncSendTransaction(
                 request,
+                htlcResource.getAccount1(),
                 new Resource.Callback() {
                     @Override
                     public void onTransactionResponse(
@@ -243,34 +243,39 @@ public class AssetHTLC implements HTLC {
 
     private void call(
             Resource resource, Account account, String method, String[] args, Callback callback) {
-        TransactionContext<TransactionRequest> request =
-                packTransactionRequest(resource, account, method, args);
+        TransactionRequest request = new TransactionRequest(method, args);
+
         resource.asyncCall(
-                request, newTransactionCallback(RoutineDefault.CALL_TYPE, method, callback));
+                request,
+                account,
+                newTransactionCallback(RoutineDefault.CALL_TYPE, method, callback));
     }
 
     private void call(HTLCResource htlcResource, String method, String[] args, Callback callback) {
-        TransactionContext<TransactionRequest> request =
-                packTransactionRequest(htlcResource, htlcResource.getAccount1(), method, args);
+        TransactionRequest request = new TransactionRequest(method, args);
+
         htlcResource.asyncCall(
-                request, newTransactionCallback(RoutineDefault.CALL_TYPE, method, callback));
+                request,
+                htlcResource.getAccount1(),
+                newTransactionCallback(RoutineDefault.CALL_TYPE, method, callback));
     }
 
     private void sendTransaction(
             Resource resource, Account account, String method, String[] args, Callback callback) {
-        TransactionContext<TransactionRequest> request =
-                packTransactionRequest(resource, account, method, args);
+        TransactionRequest request = new TransactionRequest(method, args);
+
         resource.asyncSendTransaction(
                 request,
+                account,
                 newTransactionCallback(RoutineDefault.SEND_TRANSACTION_TYPE, method, callback));
     }
 
     private void sendTransaction(
             HTLCResource htlcResource, String method, String[] args, Callback callback) {
-        TransactionContext<TransactionRequest> request =
-                packTransactionRequest(htlcResource, htlcResource.getAccount1(), method, args);
+        TransactionRequest request = new TransactionRequest(method, args);
         htlcResource.asyncSendTransaction(
                 request,
+                htlcResource.getAccount1(),
                 newTransactionCallback(RoutineDefault.SEND_TRANSACTION_TYPE, method, callback));
     }
 

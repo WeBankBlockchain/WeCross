@@ -74,7 +74,7 @@ public class HTLCManagerConfig {
 
     public void checkHTLCResources(String path) throws Exception {
         com.webank.wecross.resource.Resource selfResource =
-                zoneManager.getResource(Path.decode(path));
+                zoneManager.fetchResource(Path.decode(path));
         if (selfResource == null) {
             throw new Exception("HTLC resource: " + path + " not found");
         }
