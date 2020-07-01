@@ -6,6 +6,7 @@ import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
+import com.webank.wecross.network.rpc.CustomCommandRequest;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceDetail;
 import com.webank.wecross.restserver.RestRequest;
@@ -83,7 +84,7 @@ public class ResourceURIHandler implements URIHandler {
 
             AccountManager accountManager = host.getAccountManager();
 
-            switch (method) {
+            switch (method.toLowerCase()) {
                 case "status":
                     {
                         Resource resourceObj = getResource(path);
@@ -109,7 +110,7 @@ public class ResourceURIHandler implements URIHandler {
                         }
                         break;
                     }
-                case "sendTransaction":
+                case "sendtransaction":
                     {
                         Resource resourceObj = getResource(path);
                         if (resourceObj == null) {
@@ -226,16 +227,36 @@ public class ResourceURIHandler implements URIHandler {
                         // Response Will be returned in the callback
                         return;
                     }
-                case "custom":
+                case "customcommand":
                     {
                         Chain chain =
                                 host.getZoneManager()
                                         .getZone(path.getZone())
                                         .getChain(path.getChain());
-                        // chain.getDriver().asyncCustomCommand(command, path, args, account,
-                        // blockHeaderManager, connection, callback);
-                        // RestRequest<TransactionRequest>
-                        break;
+
+                        RestRequest<CustomCommandRequest> restRequest =
+                                objectMapper.readValue(
+                                        content,
+                                        new TypeReference<RestRequest<CustomCommandRequest>>() {});
+
+                        String accountName = restRequest.getAccount();
+                        Account account = accountManager.getAccount(accountName);
+
+                        chain.getDriver()
+                                .asyncCustomCommand(
+                                        restRequest.getData().getCommand(),
+                                        path,
+                                        restRequest.getData().getArgs().toArray(),
+                                        account,
+                                        chain.getBlockHeaderManager(),
+                                        chain.chooseConnection(),
+                                        (e, response) -> {
+                                            restResponse.setData(response);
+
+                                            callback.onResponse(restResponse);
+                                        });
+
+                        return;
                     }
                 default:
                     {

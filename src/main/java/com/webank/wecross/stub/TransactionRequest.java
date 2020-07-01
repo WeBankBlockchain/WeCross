@@ -11,7 +11,7 @@ public class TransactionRequest {
 
     // Optional args
     // transactionID, peers, etc...
-    private Map<String, Object> options = new HashMap<>();
+    private Map<String, Object> options = new HashMap<String, Object>();
 
     public TransactionRequest() {}
 
