@@ -45,7 +45,7 @@ public class ResourceURIHandler implements URIHandler {
     private Resource getResource(Path path) {
         Resource resourceObj;
         try {
-            resourceObj = host.getResource(path);
+            resourceObj = host.getZoneManager().fetchResource(path);
         } catch (Exception e) {
             logger.error("getResource error", e);
             return null;
@@ -126,7 +126,7 @@ public class ResourceURIHandler implements URIHandler {
                         restRequest.checkRestRequest(path.toString(), method);
 
                         TransactionRequest transactionRequest = restRequest.getData();
-                        String accountName = restRequest.getAccountName();
+                        String accountName = restRequest.getAccount();
                         Account account = accountManager.getAccount(accountName);
                         logger.trace(
                                 "sendTransaction request: {}, account: {}",
@@ -186,7 +186,7 @@ public class ResourceURIHandler implements URIHandler {
 
                         TransactionRequest transactionRequest = restRequest.getData();
 
-                        String accountName = restRequest.getAccountName();
+                        String accountName = restRequest.getAccount();
                         Account account = accountManager.getAccount(accountName);
                         logger.trace(
                                 "call request: {}, account: {}", transactionRequest, accountName);
@@ -239,7 +239,7 @@ public class ResourceURIHandler implements URIHandler {
                                         content,
                                         new TypeReference<RestRequest<CustomCommandRequest>>() {});
 
-                        String accountName = restRequest.getAccountName();
+                        String accountName = restRequest.getAccount();
                         Account account = accountManager.getAccount(accountName);
 
                         chain.getDriver()
