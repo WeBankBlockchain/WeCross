@@ -5,6 +5,7 @@ import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.StubFactory;
 import com.webank.wecross.stubmanager.MemoryBlockHeaderManagerFactory;
@@ -149,6 +150,11 @@ public class ZonesConfig {
             for (ResourceInfo resourceInfo : resources) {
                 com.webank.wecross.resource.Resource resource =
                         new com.webank.wecross.resource.Resource();
+                Path path = new Path();
+                path.setZone(zone);
+                path.setChain(chainInfo.getName());
+                path.setResource(resourceInfo.getName());
+                resource.setPath(path);
                 resource.setDriver(chain.getDriver());
                 resource.addConnection(null, localConnection);
                 resource.setType(type);
