@@ -284,10 +284,10 @@ contract LedgerSample is IssuerRole, Suspendable {
 
     }
 
-//    function safeSend(address to, uint256 value, bytes data) public whenNotSuspended {
-//        send(to, value, data);
-//        require(_checkOnLedgerSampleReceived(msg.sender, to, value, data), "LedgerSample: send to non LedgerSampleReceiver implementer");
-//    }
+    //    function safeSend(address to, uint256 value, bytes data) public whenNotSuspended {
+    //        send(to, value, data);
+    //        require(_checkOnLedgerSampleReceived(msg.sender, to, value, data), "LedgerSample: send to non LedgerSampleReceiver implementer");
+    //    }
 
 
     /**
@@ -310,11 +310,11 @@ contract LedgerSample is IssuerRole, Suspendable {
 
     }
 
-//// safe todo
-//    function safeSendFrom(address from, address to, uint256 value, bytes data) public whenNotSuspended {
-//        sendFrom(from, to, value, data);
-//        require(_checkOnLedgerSampleReceived(from, to, value, data), "LedgerSample: send to non LedgerSampleReceiver implementer");
-//    }
+    //// safe todo
+    //    function safeSendFrom(address from, address to, uint256 value, bytes data) public whenNotSuspended {
+    //        sendFrom(from, to, value, data);
+    //        require(_checkOnLedgerSampleReceived(from, to, value, data), "LedgerSample: send to non LedgerSampleReceiver implementer");
+    //    }
 
 
     function batchSend(address[] memory to, uint256[] memory values, bytes memory data) public whenNotSuspended {
