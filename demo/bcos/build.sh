@@ -43,7 +43,7 @@ build_bcos_chain()
     if [ "$(uname)" == "Darwin" ]; then
         # Mac
         if [ -e fisco-bcos-macOS.tar.gz ];then
-            rm ./fisco-bcos
+            rm -f ./fisco-bcos
             tar -zxvf fisco-bcos-macOS.tar.gz
             ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos
         else
@@ -52,7 +52,7 @@ build_bcos_chain()
     else
         # Other
         if [ -e fisco-bcos.tar.gz ];then
-            rm ./fisco-bcos
+            rm -f ./fisco-bcos
             tar -zxvf fisco-bcos.tar.gz
             ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos
         else
