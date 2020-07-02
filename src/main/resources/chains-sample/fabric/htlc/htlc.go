@@ -593,5 +593,5 @@ func rightTimelock(stub shim.ChaincodeStubInterface, timelock0, timelock1 string
 	t1 := stringToUint64(timelock1)
 	timeStamp, err := stub.GetTxTimestamp()
 	checkError(err)
-	return t1 > (t0+200) && t0 > (uint64(timeStamp.Seconds)+200)
+	return t0 > (t1+200) && t1 > (uint64(timeStamp.Seconds)+200)
 }

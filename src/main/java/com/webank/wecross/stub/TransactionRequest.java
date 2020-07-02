@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TransactionRequest {
-    private String path;
     private String method;
     private String[] args;
 
@@ -18,14 +17,6 @@ public class TransactionRequest {
     public TransactionRequest(String method, String[] args) {
         this.method = method;
         this.args = args;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public String getMethod() {
@@ -55,10 +46,7 @@ public class TransactionRequest {
     @Override
     public String toString() {
         return "TransactionRequest{"
-                + "path='"
-                + path
-                + '\''
-                + ", method='"
+                + "method='"
                 + method
                 + '\''
                 + ", args="

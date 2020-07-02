@@ -22,7 +22,7 @@ repositories {
 }
 
 sourceCompatibility = '1.8'
-version = '1.0.0-rc4-06301-SNAPSHOT'
+version = '1.0.0-rc4-07010-SNAPSHOT'
 
 
 task stubSourceJar(type: Jar) {
@@ -120,6 +120,7 @@ configurations.all {
 dependencies {
     compile 'org.quartz-scheduler:quartz:2.3.2'
     compile 'com.moandjiezana.toml:toml4j:0.7.2'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.11.0' // must not lower than 2.11.0 to support abi translate
     compile 'org.springframework.boot:spring-boot-starter-log4j2:2.1.13.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-actuator:2.1.13.RELEASE'
     compile 'org.springframework.boot:spring-boot-configuration-processor:2.1.4.RELEASE'

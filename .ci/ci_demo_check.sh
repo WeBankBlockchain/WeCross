@@ -57,10 +57,10 @@ listResources
 listAccounts
 call payment.bcos.HelloWeCross bcos_user1 get
 sendTransaction payment.bcos.HelloWeCross bcos_user1 set Tom
-call payment.fabric.abac fabric_user1 query a
-sendTransaction payment.fabric.abac fabric_user1 invoke a b 10
-call payment.fabric.abac fabric_user1 query a
-call payment.fabric.abac fabric_user1 query b
+call payment.fabric.mycc fabric_user1 query a
+sendTransaction payment.fabric.mycc fabric_user1 invoke a b 10
+call payment.fabric.mycc fabric_user1 query a
+call payment.fabric.mycc fabric_user1 query b
 quit
 EOF
     cd ..
@@ -77,16 +77,16 @@ htlc_test()
 
     cd WeCross-Console/
     bash start.sh <<EOF
-call payment.bcos.htlc bcos_sender balanceOf 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf
-newHTLCProposal payment.bcos.htlc bcos_sender bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 9dda9a5e175a919ee98ff0198927b0a765ef96cf917144b589bb8e510e04843c true 0x55f934bcbe1e9aef8337f5551142a442fdde781c 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000000000 Admin@org1.example.com User1@org1.example.com 500 2000010000
+call payment.bcos.LedgerSampleHTLC bcos_sender balanceOf 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf
+newHTLCProposal payment.bcos.LedgerSampleHTLC bcos_sender ["bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11","9dda9a5e175a919ee98ff0198927b0a765ef96cf917144b589bb8e510e04843c","true","0x55f934bcbe1e9aef8337f5551142a442fdde781c","0x2b5ad5c4795c026514f8317c7a215e218dccd6cf","700","2000000000","Admin@org1.example.com","User1@org1.example.com","500","2000010000"]
 quit
 EOF
     cd ..
 
     cd WeCross-Console-8251/
     bash start.sh <<EOF
-call payment.fabric.htlc fabric_admin balanceOf User1@org1.example.com
-newHTLCProposal payment.fabric.htlc fabric_admin bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 null false 0x55f934bcbe1e9aef8337f5551142a442fdde781c 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000000000 Admin@org1.example.com User1@org1.example.com 500 2000010000
+call payment.fabric.LedgerSampleHTLC fabric_admin balanceOf User1@org1.example.com
+newHTLCProposal payment.fabric.LedgerSampleHTLC fabric_admin bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 null false 0x55f934bcbe1e9aef8337f5551142a442fdde781c 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000000000 Admin@org1.example.com User1@org1.example.com 500 2000010000
 quit
 EOF
     cd ..
@@ -95,14 +95,14 @@ EOF
 
     cd WeCross-Console/
     bash start.sh <<EOF
-call payment.bcos.htlc bcos_sender balanceOf 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf
+call payment.bcos.LedgerSampleHTLC bcos_sender balanceOf 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf
 quit
 EOF
     cd ..
 
     cd WeCross-Console-8251/
     bash start.sh <<EOF
-call payment.fabric.htlc fabric_admin balanceOf User1@org1.example.com
+call payment.fabric.LedgerSampleHTLC fabric_admin balanceOf User1@org1.example.com
 quit
 EOF
     cd ..
@@ -158,10 +158,10 @@ main()
     prepare_wecross
     prepare_wecross_console
     prepare_bcos
-    prepare_htlc
+    # prepare_htlc
     prepare_demo
     demo_test
-    htlc_test
+    # htlc_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then

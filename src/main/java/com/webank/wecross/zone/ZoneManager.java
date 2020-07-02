@@ -80,6 +80,7 @@ public class ZoneManager {
 
                             // not found, build default resource
                             resource = new Resource();
+                            resource.setPath(path);
                             resource.setBlockHeaderManager(chain.getBlockHeaderManager());
                             resource.setDriver(chain.getDriver());
                             resource.setType("TemporaryResource");
@@ -179,7 +180,13 @@ public class ZoneManager {
                 if (chain == null) {
                     Driver driver = stubManager.getStubFactory(chainInfo.getStubType()).newDriver();
 
-                    chain = new Chain(chainInfo.getName(), chainInfo.getStubType(), driver, null);
+                    chain =
+                            new Chain(
+                                    chainPath.getZone(),
+                                    chainInfo.getName(),
+                                    chainInfo.getStubType(),
+                                    driver,
+                                    null);
                     MemoryBlockHeaderManager resourceBlockHeaderManager =
                             memoryBlockHeaderManagerFactory.build(chain);
 

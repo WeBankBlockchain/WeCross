@@ -5,6 +5,8 @@ set -e
 LANG=en_US.utf8
 ROOT=$(cd "$(dirname "$0")";pwd)
 WECROSS_ROOT=${ROOT}/../
+BCOS_VERSION=v2.5.0
+BCOS_CONSOLE_VERSION=v1.0.10
 
 LOG_INFO()
 {
@@ -32,11 +34,18 @@ prepare_bcos()
     cd ${ROOT}/bcos/
     # Download
     LOG_INFO "Download build_chain.sh ..."
-    Download https://github.com/FISCO-BCOS/FISCO-BCOS/raw/master/tools/build_chain.sh
+    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/build_chain.sh
     chmod u+x build_chain.sh
+
+    LOG_INFO "Download fisco-bcos binary"
+    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos.tar.gz
+    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos-macOS.tar.gz
 
     LOG_INFO "Download HelloWeCross.sol ..."
     cp ${WECROSS_ROOT}/src/main/resources/chains-sample/bcos/HelloWeCross.sol ./
+
+    LOG_INFO "Download FISCO-BCOS console"
+    Download https://github.com/FISCO-BCOS/console/releases/download/${BCOS_CONSOLE_VERSION}/console.tar.gz
 
     LOG_INFO "Download ledger-tool ..."
     git clone --depth 1 https://github.com/Shareong/ledger-tool.git
@@ -53,7 +62,6 @@ prepare_fabric()
     LOG_INFO "Download fabric tools ..."
     Download https://github.com/hyperledger/fabric/releases/download/v1.4.6/hyperledger-fabric-darwin-amd64-1.4.6.tar.gz
     Download https://github.com/hyperledger/fabric/releases/download/v1.4.6/hyperledger-fabric-linux-amd64-1.4.6.tar.gz
-
 
     LOG_INFO "Download fabric samples ..."
     Download https://github.com/hyperledger/fabric-samples/archive/v1.4.4.tar.gz

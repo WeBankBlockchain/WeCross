@@ -6,7 +6,7 @@ ROOT=$(pwd)
 BCOS_LEDGER=
 BCOS_HTLC=
 FABRIC_LEDGER=ledger_sample
-FABRIC_HTLC=htlc
+FABRIC_HTLC=LedgerSampleHTLC
 DOCKER_ID=
 
 LOG_INFO()
@@ -26,7 +26,7 @@ deploy_bcos_htlc()
     cd bcos/console
     rm -rf deploylog.txt
     bash start.sh <<EOF
-deploy LedgerSampleHTLC
+deployByCNS LedgerSampleHTLC 1.0
 EOF
     BCOS_HTLC=$(grep 'LedgerSampleHTLC' deploylog.txt | awk '{print $5}')
     cd -
@@ -101,18 +101,18 @@ update_wecross_config()
     cat >>routers-payment/127.0.0.1-8250-25500/conf/wecross.toml<<EOF
 
 [[htlc]]
-    selfPath = 'payment.bcos.htlc'
+    selfPath = 'payment.bcos.LedgerSampleHTLC'
     account1 = 'bcos_default_account'
-    counterpartyPath = 'payment.fabric.htlc'
+    counterpartyPath = 'payment.fabric.LedgerSampleHTLC'
     account2 = 'fabric_default_account'
 EOF
 
     cat >>routers-payment/127.0.0.1-8251-25501/conf/wecross.toml<<EOF
 
 [[htlc]]
-    selfPath = 'payment.fabric.htlc'
+    selfPath = 'payment.fabric.LedgerSampleHTLC'
     account1 = 'fabric_default_account'
-    counterpartyPath = 'payment.bcos.htlc'
+    counterpartyPath = 'payment.bcos.LedgerSampleHTLC'
     account2 = 'bcos_default_account'
 EOF
 }
@@ -124,7 +124,7 @@ update_chains_config()
 
 [[resources]]
     # name cannot be repeated
-    name = 'htlc'
+    name = 'LedgerSampleHTLC'
     type = 'BCOS_CONTRACT' # BCOS_CONTRACT or BCOS_SM_CONTRACT
     contractAddress = '${BCOS_HTLC}'
 EOF
@@ -133,7 +133,7 @@ EOF
 
 [[resources]]
     # name cannot be repeated
-    name = 'htlc'
+    name = 'LedgerSampleHTLC'
     type = 'FABRIC_CONTRACT'
     chainCodeName = '${FABRIC_HTLC}'
     chainLanguage = "go"
@@ -199,8 +199,8 @@ main()
 
     LOG_INFO "Config htlc successfully!\n"
     LOG_INFO "Now, you can make a cross-chain transfer by WeCross console using following command!\n"
-    echo -e "[BCOS  user ]: newHTLCProposal payment.bcos.htlc bcos_sender bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 9dda9a5e175a919ee98ff0198927b0a765ef96cf917144b589bb8e510e04843c true 0x55f934bcbe1e9aef8337f5551142a442fdde781c 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
-\n[Fabric user]: newHTLCProposal payment.fabric.htlc fabric_admin bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 null false 0x55f934bcbe1e9aef8337f5551142a442fdde781c 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
+    echo -e "[BCOS  user ]: newHTLCProposal payment.bcos.LedgerSampleHTLC bcos_sender bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 9dda9a5e175a919ee98ff0198927b0a765ef96cf917144b589bb8e510e04843c true 0x55f934bcbe1e9aef8337f5551142a442fdde781c 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
+\n[Fabric user]: newHTLCProposal payment.fabric.LedgerSampleHTLC fabric_admin bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 null false 0x55f934bcbe1e9aef8337f5551142a442fdde781c 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
 "
 }
 

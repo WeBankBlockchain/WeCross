@@ -9,6 +9,7 @@ import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
@@ -42,6 +43,9 @@ public class ResourceTest {
     public void callAndTransactionTest() throws Exception {
         Resource resource = new Resource();
         ResourceInfo resourceInfo = new ResourceInfo();
+        resource.setResourceInfo(resourceInfo);
+        resource.setPath(Path.decode("a.b.HelloWorld"));
+
         Peer peer0 = new Peer(new Node("", "", 0));
         Connection connection0 = Mockito.mock(Connection.class);
         resource.addConnection(peer0, connection0);
@@ -58,16 +62,10 @@ public class ResourceTest {
         Mockito.when(driver.sendTransaction(Mockito.any(), Mockito.any())).thenReturn(response);
         resource.setDriver(driver);
 
-        TransactionResponse r =
-                resource.call(
-                        new TransactionContext<TransactionRequest>(
-                                request, null, resourceInfo, null));
+        TransactionResponse r = resource.call(request, null);
         assertEquals(response, r);
 
-        r =
-                resource.sendTransaction(
-                        new TransactionContext<TransactionRequest>(
-                                request, null, resourceInfo, null));
+        r = resource.sendTransaction(request, null);
         assertEquals(response, r);
     }
 
@@ -78,6 +76,8 @@ public class ResourceTest {
         Peer peer0 = new Peer(new Node("", "", 0));
         Connection connection0 = Mockito.mock(Connection.class);
         resource.addConnection(peer0, connection0);
+        resource.setResourceInfo(resourceInfo);
+        resource.setPath(Path.decode("a.b.HelloWorld"));
 
         TransactionRequest request = new TransactionRequest();
         request.setArgs(new String[] {"Hello world!"});
@@ -113,7 +113,8 @@ public class ResourceTest {
         resource.setDriver(driver);
 
         resource.asyncCall(
-                new TransactionContext<TransactionRequest>(request, null, resourceInfo, null),
+                request,
+                null,
                 new Resource.Callback() {
                     @Override
                     public void onTransactionResponse(
@@ -123,8 +124,8 @@ public class ResourceTest {
                         Assert.assertEquals(response, transactionResponse);
 
                         resource.asyncSendTransaction(
-                                new TransactionContext<TransactionRequest>(
-                                        request, null, resourceInfo, null),
+                                request,
+                                null,
                                 new Resource.Callback() {
                                     @Override
                                     public void onTransactionResponse(
@@ -142,8 +143,9 @@ public class ResourceTest {
     }
 
     @Test
-    public void onRemoteTransactionTest() {
+    public void onRemoteTransactionTest() throws Exception {
         Resource resource = new Resource();
+        resource.setPath(Path.decode("a.b.HelloWorld"));
 
         Peer peer0 = new Peer(new Node("", "", 0));
         Connection connection0 = Mockito.mock(Connection.class);
@@ -161,7 +163,7 @@ public class ResourceTest {
         Mockito.when(driver.decodeTransactionRequest("Helloworld".getBytes()))
                 .thenReturn(
                         new TransactionContext<TransactionRequest>(
-                                transactionRequest, null, null, null));
+                                transactionRequest, null, Path.decode("a.b.c"), null, null));
         resource.setDriver(driver);
 
         Request request = new Request();

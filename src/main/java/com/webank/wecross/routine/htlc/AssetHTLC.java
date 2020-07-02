@@ -8,11 +8,13 @@ import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.BlockHeaderManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
-import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.stub.VerifiedTransaction;
 import java.math.BigInteger;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,10 +73,10 @@ public class AssetHTLC implements HTLC {
             String method,
             String[] args,
             Callback callback) {
-        TransactionContext<TransactionRequest> request =
-                packTransactionRequest(htlcResource, htlcResource.getAccount1(), method, args);
+        TransactionRequest request = new TransactionRequest(method, args);
         htlcResource.asyncSendTransaction(
                 request,
+                htlcResource.getAccount1(),
                 new Resource.Callback() {
                     @Override
                     public void onTransactionResponse(
@@ -161,13 +163,31 @@ public class AssetHTLC implements HTLC {
         Connection connection = resource.chooseConnection();
         Driver driver = resource.getDriver();
 
-        /*
-        VerifiedTransaction verifiedTransaction =
-                driver.getVerifiedTransaction(txHash, blockNumber, blockHeaderManager, connection);
+        CompletableFuture<VerifiedTransaction> future = new CompletableFuture<>();
+        driver.asyncGetVerifiedTransaction(
+                txHash,
+                blockNumber,
+                blockHeaderManager,
+                connection,
+                new Driver.GetVerifiedTransactionCallback() {
+                    @Override
+                    public void onResponse(Exception e, VerifiedTransaction verifiedTransaction) {
+                        if (e != null) {
+                            logger.error("asyncGetVerifiedTransaction exception: " + e);
+                            future.complete(null);
+                        } else {
+                            future.complete(verifiedTransaction);
+                        }
+                    }
+                });
 
-        return verifyData.verify(verifiedTransaction);
-        */
-        return false; // TODO fix this
+        try {
+            VerifiedTransaction verifiedTransaction = future.get(30, TimeUnit.SECONDS);
+            return verifyData.verify(verifiedTransaction);
+        } catch (Exception e) {
+            logger.error("asyncGetVerifiedTransaction timeout: " + e);
+            return false;
+        }
     }
 
     @Override
@@ -243,51 +263,40 @@ public class AssetHTLC implements HTLC {
 
     private void call(
             Resource resource, Account account, String method, String[] args, Callback callback) {
-        TransactionContext<TransactionRequest> request =
-                packTransactionRequest(resource, account, method, args);
+        TransactionRequest request = new TransactionRequest(method, args);
+
         resource.asyncCall(
-                request, newTransactionCallback(RoutineDefault.CALL_TYPE, method, callback));
+                request,
+                account,
+                newTransactionCallback(RoutineDefault.CALL_TYPE, method, callback));
     }
 
     private void call(HTLCResource htlcResource, String method, String[] args, Callback callback) {
-        TransactionContext<TransactionRequest> request =
-                packTransactionRequest(htlcResource, htlcResource.getAccount1(), method, args);
+        TransactionRequest request = new TransactionRequest(method, args);
+
         htlcResource.asyncCall(
-                request, newTransactionCallback(RoutineDefault.CALL_TYPE, method, callback));
+                request,
+                htlcResource.getAccount1(),
+                newTransactionCallback(RoutineDefault.CALL_TYPE, method, callback));
     }
 
     private void sendTransaction(
             Resource resource, Account account, String method, String[] args, Callback callback) {
-        TransactionContext<TransactionRequest> request =
-                packTransactionRequest(resource, account, method, args);
+        TransactionRequest request = new TransactionRequest(method, args);
+
         resource.asyncSendTransaction(
                 request,
+                account,
                 newTransactionCallback(RoutineDefault.SEND_TRANSACTION_TYPE, method, callback));
     }
 
     private void sendTransaction(
             HTLCResource htlcResource, String method, String[] args, Callback callback) {
-        TransactionContext<TransactionRequest> request =
-                packTransactionRequest(htlcResource, htlcResource.getAccount1(), method, args);
+        TransactionRequest request = new TransactionRequest(method, args);
         htlcResource.asyncSendTransaction(
                 request,
+                htlcResource.getAccount1(),
                 newTransactionCallback(RoutineDefault.SEND_TRANSACTION_TYPE, method, callback));
-    }
-
-    private TransactionContext<TransactionRequest> packTransactionRequest(
-            Resource resource, Account account, String method, String[] args) {
-        TransactionRequest request = new TransactionRequest(method, args);
-        TransactionContext<TransactionRequest> transactionContext =
-                new TransactionContext<>(
-                        request,
-                        account,
-                        resource.getResourceInfo(),
-                        resource.getBlockHeaderManager());
-        logger.trace(
-                "htlc request: {}, resource name: {}",
-                request,
-                resource.getResourceInfo().getName());
-        return transactionContext;
     }
 
     private Resource.Callback newTransactionCallback(

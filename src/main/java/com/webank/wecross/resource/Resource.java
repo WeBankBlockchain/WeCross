@@ -1,9 +1,11 @@
 package com.webank.wecross.resource;
 
 import com.webank.wecross.peer.Peer;
+import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.BlockHeaderManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
@@ -26,6 +28,7 @@ public class Resource {
     private String type;
     private Driver driver;
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
+    private Path path;
     private ResourceInfo resourceInfo;
     private BlockHeaderManager blockHeaderManager;
     boolean hasLocalConnection = false;
@@ -70,21 +73,31 @@ public class Resource {
         }
     }
 
+    public void setPath(Path path) {
+        this.path = path;
+    }
+
     public interface Callback {
         public void onTransactionResponse(
                 TransactionException transactionException, TransactionResponse transactionResponse);
     }
 
     @Deprecated
-    public TransactionResponse call(TransactionContext<TransactionRequest> request)
+    public TransactionResponse call(TransactionRequest request, Account account)
             throws TransactionException {
-        return driver.call(request, chooseConnection());
+        TransactionContext<TransactionRequest> context =
+                new TransactionContext<>(
+                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
+        return driver.call(context, chooseConnection());
     }
 
-    public void asyncCall(
-            TransactionContext<TransactionRequest> request, Resource.Callback callback) {
+    public void asyncCall(TransactionRequest request, Account account, Resource.Callback callback) {
+        TransactionContext<TransactionRequest> context =
+                new TransactionContext<>(
+                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
+
         driver.asyncCallByProxy(
-                request,
+                context,
                 chooseConnection(),
                 new Driver.Callback() {
                     @Override
@@ -97,15 +110,21 @@ public class Resource {
     }
 
     @Deprecated
-    public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request)
+    public TransactionResponse sendTransaction(TransactionRequest request, Account account)
             throws TransactionException {
-        return driver.sendTransaction(request, chooseConnection());
+        TransactionContext<TransactionRequest> context =
+                new TransactionContext<>(
+                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
+        return driver.sendTransaction(context, chooseConnection());
     }
 
     public void asyncSendTransaction(
-            TransactionContext<TransactionRequest> request, Resource.Callback callback) {
+            TransactionRequest request, Account account, Resource.Callback callback) {
+        TransactionContext<TransactionRequest> context =
+                new TransactionContext<>(
+                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
         driver.asyncSendTransactionByProxy(
-                request,
+                context,
                 chooseConnection(),
                 new Driver.Callback() {
                     @Override
@@ -205,6 +224,9 @@ public class Resource {
 
     public void setTemporary(boolean isTemporary) {
         this.isTemporary = isTemporary;
+        if (isTemporary) {
+            resourceInfo.getProperties().put("isTemporary", "true");
+        }
     }
 
     public boolean isOnlyLocal() {

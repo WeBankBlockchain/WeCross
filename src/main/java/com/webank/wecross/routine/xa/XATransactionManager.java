@@ -5,7 +5,6 @@ import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.ZoneManager;
@@ -103,15 +102,9 @@ public class XATransactionManager {
                     return;
                 }
 
-                TransactionContext<TransactionRequest> transactionContext =
-                        new TransactionContext<TransactionRequest>(
-                                transactionRequest,
-                                account,
-                                resource.getResourceInfo(),
-                                chain.getBlockHeaderManager());
-
                 resource.asyncSendTransaction(
-                        transactionContext,
+                        transactionRequest,
+                        account,
                         (error, response) -> {
                             if (error != null) {
                                 logger.error("Send prepare transaction system error", error);
@@ -164,15 +157,9 @@ public class XATransactionManager {
                     return;
                 }
 
-                TransactionContext<TransactionRequest> transactionContext =
-                        new TransactionContext<TransactionRequest>(
-                                transactionRequest,
-                                account,
-                                resource.getResourceInfo(),
-                                chain.getBlockHeaderManager());
-
                 resource.asyncSendTransaction(
-                        transactionContext,
+                        transactionRequest,
+                        account,
                         (error, response) -> {
                             if (error != null) {
                                 logger.error("Send commit transaction error", error);
@@ -228,15 +215,9 @@ public class XATransactionManager {
                     return;
                 }
 
-                TransactionContext<TransactionRequest> transactionContext =
-                        new TransactionContext<TransactionRequest>(
-                                transactionRequest,
-                                account,
-                                resource.getResourceInfo(),
-                                chain.getBlockHeaderManager());
-
                 resource.asyncSendTransaction(
-                        transactionContext,
+                        transactionRequest,
+                        account,
                         (error, response) -> {
                             if (error != null) {
                                 logger.error("Send rollback transaction error", error);
@@ -345,15 +326,9 @@ public class XATransactionManager {
                     return;
                 }
 
-                TransactionContext<TransactionRequest> transactionContext =
-                        new TransactionContext<TransactionRequest>(
-                                transactionRequest,
-                                account,
-                                resource.getResourceInfo(),
-                                chain.getBlockHeaderManager());
-
                 resource.asyncCall(
-                        transactionContext,
+                        transactionRequest,
+                        account,
                         (error, response) -> {
                             if (error != null) {
                                 logger.error("Send prepare transaction error", error);

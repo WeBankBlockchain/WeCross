@@ -42,14 +42,18 @@ build_bcos_chain()
     # build chain
     if [ "$(uname)" == "Darwin" ]; then
         # Mac
-        if [ -e fisco-bcos-mac ];then
-            ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos-mac
+        if [ -e fisco-bcos-macOS.tar.gz ];then
+            rm -f ./fisco-bcos
+            tar -zxvf fisco-bcos-macOS.tar.gz
+            ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos
         else
             ./build_chain.sh -f ipconf -p 30300,20200,8545
         fi
     else
         # Other
-        if [ -e fisco-bcos ];then
+        if [ -e fisco-bcos.tar.gz ];then
+            rm -f ./fisco-bcos
+            tar -zxvf fisco-bcos.tar.gz
             ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos
         else
             ./build_chain.sh -f ipconf -p 30300,20200,8545
@@ -64,7 +68,12 @@ build_console()
 {
     # Download console
     LOG_INFO "Download console ..."
-    bash ./nodes/127.0.0.1/download_console.sh -v 1.0.9
+    if [ -e console.tar.gz ]; then
+        rm -rf console
+        tar -zxvf console.tar.gz
+    else
+        bash ./nodes/127.0.0.1/download_console.sh -v 1.0.10
+    fi
 
     # Copy demo HelloWeCross
     cp HelloWeCross.sol console/contracts/solidity/

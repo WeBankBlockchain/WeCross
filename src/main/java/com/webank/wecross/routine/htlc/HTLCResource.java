@@ -58,19 +58,18 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public void asyncCall(
-            TransactionContext<TransactionRequest> request, Resource.Callback callback) {
-        getSelfResource().asyncCall(request, callback);
+    public void asyncCall(TransactionRequest request, Account account, Resource.Callback callback) {
+        getSelfResource().asyncCall(request, account, callback);
     }
 
     @Override
     public void asyncSendTransaction(
-            TransactionContext<TransactionRequest> request, Resource.Callback callback) {
+            TransactionRequest request, Account account, Resource.Callback callback) {
         if (getSelfResource().hasLocalConnection()) {
-            TransactionRequest transactionRequest = request.getData();
+            TransactionRequest transactionRequest = request;
             if (RoutineDefault.UNLOCK_METHOD.equals(transactionRequest.getMethod())) {
                 handleUnlockRequest(
-                        request.getData(),
+                        request,
                         exception -> {
                             if (exception != null) {
                                 TransactionResponse transactionResponse = new TransactionResponse();
@@ -79,14 +78,14 @@ public class HTLCResource extends Resource {
                                 callback.onTransactionResponse(
                                         new TransactionException(0, null), transactionResponse);
                             } else {
-                                getSelfResource().asyncSendTransaction(request, callback);
+                                getSelfResource().asyncSendTransaction(request, account, callback);
                             }
                         });
             } else {
-                getSelfResource().asyncSendTransaction(request, callback);
+                getSelfResource().asyncSendTransaction(request, account, callback);
             }
         } else {
-            getSelfResource().asyncSendTransaction(request, callback);
+            getSelfResource().asyncSendTransaction(request, account, callback);
         }
     }
 
@@ -152,15 +151,11 @@ public class HTLCResource extends Resource {
 
     private void unlockCounterparty(TransactionRequest request, Callback callback) {
         logger.trace("Participant receives a unlock request, and unlocks initiator firstly!");
-        TransactionContext<TransactionRequest> transactionContext =
-                new TransactionContext<>(
-                        request,
-                        account2,
-                        getCounterpartyResource().getResourceInfo(),
-                        getCounterpartyResource().getBlockHeaderManager());
+
         getCounterpartyResource()
                 .asyncSendTransaction(
-                        transactionContext,
+                        request,
+                        account2,
                         new Resource.Callback() {
                             @Override
                             public void onTransactionResponse(
@@ -222,15 +217,15 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public TransactionResponse call(TransactionContext<TransactionRequest> request)
+    public TransactionResponse call(TransactionRequest request, Account account)
             throws TransactionException {
-        return getSelfResource().call(request);
+        return getSelfResource().call(request, account);
     }
 
     @Override
-    public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request)
+    public TransactionResponse sendTransaction(TransactionRequest request, Account account)
             throws TransactionException {
-        return getSelfResource().sendTransaction(request);
+        return getSelfResource().sendTransaction(request, account);
     }
 
     @Override
