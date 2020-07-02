@@ -68,7 +68,12 @@ build_console()
 {
     # Download console
     LOG_INFO "Download console ..."
-    bash ./nodes/127.0.0.1/download_console.sh -v 1.0.9
+    if [ -e console.tar.gz ]; then
+        rm -rf console
+        tar -zxvf console.tar.gz
+    else
+        bash ./nodes/127.0.0.1/download_console.sh -v 1.0.10
+    fi
 
     # Copy demo HelloWeCross
     cp HelloWeCross.sol console/contracts/solidity/

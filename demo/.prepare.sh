@@ -6,6 +6,7 @@ LANG=en_US.utf8
 ROOT=$(cd "$(dirname "$0")";pwd)
 WECROSS_ROOT=${ROOT}/../
 BCOS_VERSION=v2.5.0
+BCOS_CONSOLE_VERSION=v1.0.10
 
 LOG_INFO()
 {
@@ -42,6 +43,9 @@ prepare_bcos()
 
     LOG_INFO "Download HelloWeCross.sol ..."
     cp ${WECROSS_ROOT}/src/main/resources/chains-sample/bcos/HelloWeCross.sol ./
+
+    LOG_INFO "Download FISCO-BCOS console"
+    Download https://github.com/FISCO-BCOS/console/releases/download/${BCOS_CONSOLE_VERSION}/console.tar.gz
 
     LOG_INFO "Download ledger-tool ..."
     git clone --depth 1 https://github.com/Shareong/ledger-tool.git
