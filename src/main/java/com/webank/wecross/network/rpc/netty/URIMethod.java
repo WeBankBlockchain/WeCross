@@ -34,7 +34,9 @@ public class URIMethod {
         }
 
         // /network/stub/resource/method
-        return uri.startsWith("/") && uri.substring(1).split("/").length == 4;
+        // /network/stub/method
+        int count = uri.substring(1).split("/").length;
+        return uri.startsWith("/") && (count == 4 || count == 3);
     }
 
     @Override
