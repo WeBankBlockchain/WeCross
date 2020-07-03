@@ -53,7 +53,7 @@ contract HTLC {
     /*
         @param: counterpartyHtlcAddress
     */
-    function init(string memory _counterpartyHtlcAddress) public
+    function setup(string memory _counterpartyHtlcAddress) public
     returns (string memory result)
     {
         counterpartyHtlcAddress = _counterpartyHtlcAddress;

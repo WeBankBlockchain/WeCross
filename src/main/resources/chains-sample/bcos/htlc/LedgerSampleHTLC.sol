@@ -15,7 +15,7 @@ contract LedgerSampleHTLC is HTLC, LedgerSampleHolder {
     function init(string memory _assetContract, string memory _counterpartyHtlcAddress) public
     returns (string memory result)
     {
-        result = super.init(_counterpartyHtlcAddress);
+        result = super.setup(_counterpartyHtlcAddress);
         assetContract = stringToAddress(_assetContract);
     }
 
@@ -33,7 +33,6 @@ contract LedgerSampleHTLC is HTLC, LedgerSampleHolder {
             return result;
         }
 
-        string memory _hash = _hash;
         address sender = getSender(_hash);
         uint amount = getAmount(_hash);
         if (LedgerSample(assetContract).allowance(sender, address(this)) < uint(amount)) {
