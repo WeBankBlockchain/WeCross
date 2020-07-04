@@ -83,7 +83,7 @@ public class ZoneManager {
                             resource.setPath(path);
                             resource.setBlockHeaderManager(chain.getBlockHeaderManager());
                             resource.setDriver(chain.getDriver());
-                            resource.setType("TemporaryResource");
+                            resource.setStubType(chain.getStubType());
                             resource.setResourceInfo(resourceInfo);
 
                             Connection localConnection = chain.getLocalConnection();

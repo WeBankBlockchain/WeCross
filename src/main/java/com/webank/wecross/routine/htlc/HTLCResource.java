@@ -378,13 +378,13 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public String getType() {
-        return getSelfResource().getType();
+    public String getStubType() {
+        return getSelfResource().getStubType();
     }
 
     @Override
-    public void setType(String type) {
-        getSelfResource().setType(type);
+    public void setStubType(String type) {
+        getSelfResource().setStubType(type);
     }
 
     @Override

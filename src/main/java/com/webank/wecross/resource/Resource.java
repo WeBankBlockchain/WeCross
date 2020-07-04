@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class Resource {
     private Logger logger = LoggerFactory.getLogger(Response.class);
-    private String type;
+    private String stubType;
     private Driver driver;
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
     private Path path;
@@ -34,6 +34,8 @@ public class Resource {
     boolean hasLocalConnection = false;
     boolean isTemporary = false;
     private Random random = new SecureRandom();
+
+    public static final String RAW_TRANSACTION = "RAW_TRANSACTION";
 
     public Map<Peer, Connection> getConnections() {
         return connections;
@@ -99,18 +101,35 @@ public class Resource {
         TransactionContext<TransactionRequest> context =
                 new TransactionContext<>(
                         request, account, this.path, this.resourceInfo, this.blockHeaderManager);
-
-        driver.asyncCallByProxy(
-                context,
-                chooseConnection(),
-                new Driver.Callback() {
-                    @Override
-                    public void onTransactionResponse(
-                            TransactionException transactionException,
-                            TransactionResponse transactionResponse) {
-                        callback.onTransactionResponse(transactionException, transactionResponse);
-                    }
-                });
+        boolean isRawTransaction =
+                (boolean) request.getOptions().getOrDefault(RAW_TRANSACTION, false);
+        if (isRawTransaction) {
+            driver.asyncCall(
+                    context,
+                    chooseConnection(),
+                    new Driver.Callback() {
+                        @Override
+                        public void onTransactionResponse(
+                                TransactionException transactionException,
+                                TransactionResponse transactionResponse) {
+                            callback.onTransactionResponse(
+                                    transactionException, transactionResponse);
+                        }
+                    });
+        } else {
+            driver.asyncCallByProxy(
+                    context,
+                    chooseConnection(),
+                    new Driver.Callback() {
+                        @Override
+                        public void onTransactionResponse(
+                                TransactionException transactionException,
+                                TransactionResponse transactionResponse) {
+                            callback.onTransactionResponse(
+                                    transactionException, transactionResponse);
+                        }
+                    });
+        }
     }
 
     @Deprecated
@@ -127,17 +146,35 @@ public class Resource {
         TransactionContext<TransactionRequest> context =
                 new TransactionContext<>(
                         request, account, this.path, this.resourceInfo, this.blockHeaderManager);
-        driver.asyncSendTransactionByProxy(
-                context,
-                chooseConnection(),
-                new Driver.Callback() {
-                    @Override
-                    public void onTransactionResponse(
-                            TransactionException transactionException,
-                            TransactionResponse transactionResponse) {
-                        callback.onTransactionResponse(transactionException, transactionResponse);
-                    }
-                });
+        boolean isRawTransaction =
+                (boolean) request.getOptions().getOrDefault(RAW_TRANSACTION, false);
+        if (isRawTransaction) {
+            driver.asyncSendTransaction(
+                    context,
+                    chooseConnection(),
+                    new Driver.Callback() {
+                        @Override
+                        public void onTransactionResponse(
+                                TransactionException transactionException,
+                                TransactionResponse transactionResponse) {
+                            callback.onTransactionResponse(
+                                    transactionException, transactionResponse);
+                        }
+                    });
+        } else {
+            driver.asyncSendTransactionByProxy(
+                    context,
+                    chooseConnection(),
+                    new Driver.Callback() {
+                        @Override
+                        public void onTransactionResponse(
+                                TransactionException transactionException,
+                                TransactionResponse transactionResponse) {
+                            callback.onTransactionResponse(
+                                    transactionException, transactionResponse);
+                        }
+                    });
+        }
     }
 
     public void onRemoteTransaction(Request request, Connection.Callback callback) {
@@ -182,12 +219,12 @@ public class Resource {
 
     public void registerEventHandler(EventCallback callback) {}
 
-    public String getType() {
-        return type;
+    public String getStubType() {
+        return stubType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setStubType(String type) {
+        this.stubType = type;
     }
 
     public String getChecksum() {
