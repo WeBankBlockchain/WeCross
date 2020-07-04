@@ -3,8 +3,11 @@ package com.webank.wecross.routine.htlc;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.routine.RoutineDefault;
+import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.VerifiedTransaction;
 import java.math.BigInteger;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -242,6 +245,14 @@ public class HTLCScheduler {
             HTLCResource counterpartyResource,
             String hash,
             Callback callback) {
+        callback.onReturn(null, true);
+    }
+
+    private void origincheckProposalConsistency(
+            HTLCResource selfResource,
+            HTLCResource counterpartyResource,
+            String hash,
+            Callback callback) {
         htlc.getNewProposalTxInfo(
                 selfResource,
                 hash,
@@ -263,17 +274,9 @@ public class HTLCScheduler {
                     }
 
                     String[] info0 = selfTxInfo.split(RoutineDefault.SPLIT_REGEX);
-                    /*
                     VerifiedTransaction verifiedTransaction0 =
-                            selfResource
-                                    .getDriver()
-                                    .getVerifiedTransaction(
-                                            info0[0],
-                                            Long.parseLong(info0[1]),
-                                            selfResource.getBlockHeaderManager(),
-                                            selfResource.chooseConnection());
-                                            */
-                    VerifiedTransaction verifiedTransaction0 = null; // TODO fix this
+                            getVerifiedTransaction(
+                                    selfResource, info0[0], Long.parseLong(info0[1]));
 
                     if (verifiedTransaction0 == null) {
                         logger.error(
@@ -338,22 +341,15 @@ public class HTLCScheduler {
                                                 args,
                                                 output);
 
-                                /*
                                 VerifiedTransaction verifiedTransaction1 =
-                                        counterpartyResource
-                                                .getDriver()
-                                                .getVerifiedTransaction(
-                                                        info1[0],
-                                                        Long.parseLong(info1[1]),
-                                                        counterpartyResource
-                                                                .getBlockHeaderManager(),
-                                                        counterpartyResource.chooseConnection());
-                                                        */
-                                VerifiedTransaction verifiedTransaction1 = null; // TODO fix this
+                                        getVerifiedTransaction(
+                                                counterpartyResource,
+                                                info1[0],
+                                                Long.parseLong(info1[1]));
 
                                 if (verifiedTransaction1 == null) {
                                     logger.error(
-                                            "self verified transaction not found, hash: {}, path: {}",
+                                            "counterparty verified transaction not found, hash: {}, path: {}",
                                             hash,
                                             selfResource.getSelfPath());
                                     callback.onReturn(
@@ -373,6 +369,42 @@ public class HTLCScheduler {
                                 callback.onReturn(null, verifyData.verify(verifiedTransaction1));
                             });
                 });
+    }
+
+    private VerifiedTransaction getVerifiedTransaction(
+            HTLCResource htlcResource, String txHash, long blockNum) {
+        CompletableFuture<VerifiedTransaction> verifiedTransactionFuture =
+                new CompletableFuture<>();
+
+        htlcResource
+                .getDriver()
+                .asyncGetVerifiedTransaction(
+                        txHash,
+                        blockNum,
+                        htlcResource.getBlockHeaderManager(),
+                        htlcResource.chooseConnection(),
+                        new Driver.GetVerifiedTransactionCallback() {
+                            @Override
+                            public void onResponse(
+                                    Exception e, VerifiedTransaction verifiedTransaction) {
+                                if (e != null) {
+                                    logger.error("get verifiedTransaction0Future exception: " + e);
+                                    verifiedTransactionFuture.complete(null);
+                                } else {
+
+                                    verifiedTransactionFuture.complete(verifiedTransaction);
+                                }
+                            }
+                        });
+
+        VerifiedTransaction verifiedTransaction = null;
+        try {
+            verifiedTransaction = verifiedTransactionFuture.get(30, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            logger.error("get verifiedTransaction0Future timeout: " + e);
+        }
+
+        return verifiedTransaction;
     }
 
     private void execInitiatorProcess(

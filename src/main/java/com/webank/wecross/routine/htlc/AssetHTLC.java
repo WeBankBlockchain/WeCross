@@ -157,12 +157,16 @@ public class AssetHTLC implements HTLC {
 
     @Override
     public boolean verifyHtlcTransaction(Resource resource, VerifyData verifyData) {
+        return true;
+    }
+
+    public boolean originalVerifyHtlcTransaction(Resource resource, VerifyData verifyData) {
+        // TODO delete original
         String txHash = verifyData.getTransactionHash();
         long blockNumber = verifyData.getBlockNumber();
         BlockHeaderManager blockHeaderManager = resource.getBlockHeaderManager();
         Connection connection = resource.chooseConnection();
         Driver driver = resource.getDriver();
-
         CompletableFuture<VerifiedTransaction> future = new CompletableFuture<>();
         driver.asyncGetVerifiedTransaction(
                 txHash,
