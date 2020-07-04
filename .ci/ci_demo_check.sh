@@ -107,7 +107,7 @@ quit
 EOF
     cd ..
 
-    check_log
+    # check_log
 }
 
 prepare_wecross()
