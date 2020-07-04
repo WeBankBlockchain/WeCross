@@ -157,7 +157,7 @@ public class ZonesConfig {
                 resource.setPath(path);
                 resource.setDriver(chain.getDriver());
                 resource.addConnection(null, localConnection);
-                resource.setType(type);
+                resource.setStubType(type);
                 resource.setResourceInfo(resourceInfo);
 
                 resource.setBlockHeaderManager(chain.getBlockHeaderManager());

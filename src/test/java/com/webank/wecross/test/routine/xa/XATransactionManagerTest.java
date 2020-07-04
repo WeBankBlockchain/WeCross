@@ -79,7 +79,7 @@ public class XATransactionManagerTest {
                 .when(proxyResource)
                 .asyncSendTransaction(Mockito.any(), Mockito.any(), Mockito.any());
 
-        Mockito.when(proxyResource.getType()).thenReturn("test");
+        Mockito.when(proxyResource.getStubType()).thenReturn("test");
 
         ZoneManager zoneManager = Mockito.mock(ZoneManager.class);
         Mockito.when(zoneManager.getZone(Mockito.any(Path.class))).thenReturn(zone);
@@ -99,7 +99,7 @@ public class XATransactionManagerTest {
         resources.add(Path.decode("a.c.c1"));
         resources.add(Path.decode("a.c.c2"));
 
-        xaTransactionManager.asyncPrepare(
+        xaTransactionManager.asyncStartTransaction(
                 transactionID,
                 accounts,
                 resources,
@@ -128,7 +128,7 @@ public class XATransactionManagerTest {
                 .when(proxyResource)
                 .asyncSendTransaction(Mockito.any(), Mockito.any(), Mockito.any());
 
-        xaTransactionManager.asyncPrepare(
+        xaTransactionManager.asyncStartTransaction(
                 transactionID,
                 accounts,
                 resources,
@@ -218,7 +218,7 @@ public class XATransactionManagerTest {
                         })
                 .when(proxyResource)
                 .asyncSendTransaction(Mockito.any(), Mockito.any(), Mockito.any());
-        Mockito.when(proxyResource.getType()).thenReturn("test");
+        Mockito.when(proxyResource.getStubType()).thenReturn("test");
 
         ZoneManager zoneManager = Mockito.mock(ZoneManager.class);
         Mockito.when(zoneManager.getZone(Mockito.any(Path.class))).thenReturn(zone);
@@ -238,7 +238,7 @@ public class XATransactionManagerTest {
         resources.add(Path.decode("a.c.c1"));
         resources.add(Path.decode("a.c.c2"));
 
-        xaTransactionManager.asyncCommit(
+        xaTransactionManager.asyncCommitTransaction(
                 transactionID,
                 accounts,
                 resources,
@@ -267,7 +267,7 @@ public class XATransactionManagerTest {
                 .when(proxyResource)
                 .asyncSendTransaction(Mockito.any(), Mockito.any(), Mockito.any());
 
-        xaTransactionManager.asyncCommit(
+        xaTransactionManager.asyncCommitTransaction(
                 transactionID,
                 accounts,
                 resources,
@@ -357,7 +357,7 @@ public class XATransactionManagerTest {
                         })
                 .when(proxyResource)
                 .asyncSendTransaction(Mockito.any(), Mockito.any(), Mockito.any());
-        Mockito.when(proxyResource.getType()).thenReturn("test");
+        Mockito.when(proxyResource.getStubType()).thenReturn("test");
 
         ZoneManager zoneManager = Mockito.mock(ZoneManager.class);
         Mockito.when(zoneManager.getZone(Mockito.any(Path.class))).thenReturn(zone);
@@ -523,7 +523,7 @@ public class XATransactionManagerTest {
                         })
                 .when(proxyResource)
                 .asyncCall(Mockito.any(), Mockito.any(), Mockito.any());
-        Mockito.when(proxyResource.getType()).thenReturn("test");
+        Mockito.when(proxyResource.getStubType()).thenReturn("test");
 
         ZoneManager zoneManager = Mockito.mock(ZoneManager.class);
         Mockito.when(zoneManager.getZone(Mockito.any(Path.class))).thenReturn(zone);

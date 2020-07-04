@@ -227,6 +227,16 @@ public class ResourceURIHandler implements URIHandler {
                                         .getZone(path.getZone())
                                         .getChain(path.getChain());
 
+                        if (chain == null) {
+                            throw new WeCrossException(
+                                    -1,
+                                    "Chain: "
+                                            + path.getZone()
+                                            + "."
+                                            + path.getChain()
+                                            + " not found!");
+                        }
+
                         RestRequest<CustomCommandRequest> restRequest =
                                 objectMapper.readValue(
                                         content,
