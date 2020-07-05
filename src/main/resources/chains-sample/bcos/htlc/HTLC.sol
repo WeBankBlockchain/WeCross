@@ -53,328 +53,311 @@ contract HTLC {
     /*
         @param: counterpartyHtlcAddress
     */
-    function init(string[] memory _ss) public
-    returns (string[] memory result)
+    function setup(string memory _counterpartyHtlcAddress) public
+    returns (string memory result)
     {
-        result = new string[](1);
-        counterpartyHtlcAddress = _ss[0];
-        result[0] = successFlag;
+        counterpartyHtlcAddress = _counterpartyHtlcAddress;
+        result = successFlag;
     }
 
     /*  please override it
         @param: hash
     */
-    function lock(string[] memory _ss) public
-    returns (string[] memory result)
+    function lock(string memory _hash) public
+    returns (string memory result)
     {
-        result = new string[](1);
-
-        if (!proposalIsExisted(_ss[0])) {
-           result[0] = "proposal not exists";
-           return result;
-        }
-
-        if(getLockState(_ss[0])) {
-            result[0] = "done";
+        if (!proposalIsExisted(_hash)) {
+            result = "proposal not exists";
             return result;
         }
 
-        uint256 timelock = getTimelock(_ss[0]);
-        if(getRollbackState(_ss[0]) || timelock <= (now / 1000)) {
-            result[0] = "has rolled back";
+        if(getLockState(_hash)) {
+            result = "done";
             return result;
         }
 
-        result[0] = "continue";
+        uint256 timelock = getTimelock(_hash);
+        if(getRollbackState(_hash) || timelock <= (now / 1000)) {
+            result = "has rolled back";
+            return result;
+        }
+
+        result = "continue";
     }
 
     /*  please override it
         @param: hash | secret
     */
-    function unlock(string[] memory _ss) public
-    returns (string[] memory result)
+    function unlock(string memory _hash, string memory _secret) public
+    returns (string memory result)
     {
-        string memory _hash = _ss[0];
-        string memory _secret = _ss[1];
-        result = new string[](1);
-
         if (!proposalIsExisted(_hash)) {
-           result[0] = "proposal not exists";
-           return result;
+            result = "proposal not exists";
+            return result;
         }
 
         if (getUnlockState(_hash)) {
-           result[0] = "done";
-           return result;
+            result = "done";
+            return result;
         }
 
         if(!hashMatched(_hash, _secret)) {
-           result[0] = "hash not matched";
-           return result;
+            result = "hash not matched";
+            return result;
         }
 
         if (!getLockState(_hash)) {
-           result[0] = "can not unlock until lock is done";
-           return result;
+            result = "can not unlock until lock is done";
+            return result;
         }
 
         uint256 timelock = getTimelock(_hash);
         if(getRollbackState(_hash) || timelock <= (now / 1000)) {
-            result[0] = "has rolled back";
+            result = "has rolled back";
             return result;
         }
 
-        result[0] = "continue";
+        result = "continue";
     }
 
     /*  please override it
         @param: hash
     */
-    function rollback(string[] memory _ss) public
-    returns (string[] memory result)
+    function rollback(string memory _hash) public
+    returns (string memory result)
     {
-        result = new string[](1);
-
-        if (!proposalIsExisted(_ss[0])) {
-           result[0] = "proposal not exists";
-           return result;
-        }
-
-        if (getRollbackState(_ss[0])) {
-           result[0] = "done";
-           return result;
-        }
-
-        uint256 timelock = getTimelock(_ss[0]);
-        if(timelock > (now / 1000)) {
-            result[0] = "not_yet";
+        if (!proposalIsExisted(_hash)) {
+            result = "proposal not exists";
             return result;
         }
 
-        if (!getLockState(_ss[0])) {
-           result[0] = "no need to rollback unless lock is done";
-           return result;
+        if (getRollbackState(_hash)) {
+            result = "done";
+            return result;
         }
 
-        if (getUnlockState(_ss[0])) {
-           result[0] = "can not rollback if unlock is done";
-           return result;
+        uint256 timelock = getTimelock(_hash);
+        if(timelock > (now / 1000)) {
+            result = "not_yet";
+            return result;
         }
 
-        result[0] = "continue";
+        if (!getLockState(_hash)) {
+            result = "no need to rollback unless lock is done";
+            return result;
+        }
+
+        if (getUnlockState(_hash)) {
+            result = "can not rollback if unlock is done";
+            return result;
+        }
+
+        result = "continue";
     }
 
     function getCounterpartyHtlcAddress() public view
-    returns (string[] memory result)
+    returns (string memory result)
     {
-        result = new string[](1);
-        result[0] = counterpartyHtlcAddress;
+        result = counterpartyHtlcAddress;
     }
 
-     /*
-        @param:
-        hash | role |
-        sender0 | receiver0 | amount0 | timelock0 |
-        sender1 | receiver1 | amount1 | timelock1 |
+    /*
+       @param:
+       hash | role |
+       sender0 | receiver0 | amount0 | timelock0 |
+       sender1 | receiver1 | amount1 | timelock1 |
 
-    */
-    function newProposal(string[] memory _ss) public
-    returns (string[] memory result)
+   */
+    function newProposal(string memory _hash, string memory _role,string memory _sender0,string memory _receiver0,string memory _amount0,string memory _timelock0,string memory _sender1,string memory _receiver1,string memory _amount1,string memory _timelock1) public
+    returns (string memory result)
     {
-        result = new string[](1);
         if(depth == 0) {
-            result[0] = "the proposal queue is full, one moment please";
+            result = "the proposal queue is full, one moment please";
             return result;
         }
 
-        if (proposalIsExisted(_ss[0])) {
-            result[0] = "proposal existed";
+        if (proposalIsExisted(_hash)) {
+            result = "proposal existed";
             return result;
         }
 
-        if(!rightTimelock(_ss[5], _ss[9])) {
-            result[0] = "illegal timelocks";
+        if(!rightTimelock(_timelock0, _timelock1)) {
+            result = "illegal timelocks";
             return result;
         }
 
-        if(sameString(_ss[1], "true")) {
-            htlcRoles[_ss[0]] = true;
-            if(stringToAddress(_ss[2]) != tx.origin) {
-                result[0] = "only sender can new a proposal";
+        if(sameString(_role, "true")) {
+            htlcRoles[_hash] = true;
+            if(stringToAddress(_sender0) != tx.origin) {
+                result = "only sender can new a proposal";
                 return result;
             }
             // initiator is not listed until secret is written
-            preAddProposal(_ss[0]);
+            preAddProposal(_hash);
 
         } else {
-            htlcRoles[_ss[0]] = false;
-            if(stringToAddress(_ss[6]) != tx.origin) {
-                result[0] = "only sender can new a proposal";
+            htlcRoles[_hash] = false;
+            if(stringToAddress(_sender1) != tx.origin) {
+                result = "only sender can new a proposal";
                 return result;
             }
-            preAddProposal(_ss[0]);
-            addProposal(_ss[0]);
+            preAddProposal(_hash);
+            addProposal(_hash);
         }
 
-        initiators[_ss[0]] = ProposalData(
+        initiators[_hash] = ProposalData(
             nullFlag,
-            _ss[2],
-            _ss[3],
-            _ss[4],
-            _ss[5],
+            _sender0,
+            _receiver0,
+            _amount0,
+            _timelock0,
             false,
             false,
             false
         );
 
-        participants[_ss[0]] = ProposalData(
+        participants[_hash] = ProposalData(
             nullFlag,
-            _ss[6],
-            _ss[7],
-            _ss[8],
-            _ss[9],
+            _sender1,
+            _receiver1,
+            _amount1,
+            _timelock1,
             false,
             false,
             false
         );
-        result[0] = successFlag;
+        result = successFlag;
     }
 
     /*
         @param: hash | tx-hash | blockNum
     */
-    function setNewProposalTxInfo(string[] memory _ss) public
+    function setNewProposalTxInfo(string memory _hash, string memory _txHash, string memory _blockNum) public
     {
-        newProposalTxInfos[_ss[0]] = string(abi.encodePacked(
-            _ss[1],
-            splitSymbol,
-            _ss[2])
-            );
+        newProposalTxInfos[_hash] = string(abi.encodePacked(
+                _txHash,
+                splitSymbol,
+                _blockNum)
+        );
     }
 
     /*
         @param: hash
     */
-    function getNewProposalTxInfo(string[] memory _ss) public view
-    returns (string[] memory result)
+    function getNewProposalTxInfo(string memory _hash) public view
+    returns (string memory result)
     {
-        result = new string[](1);
-        string memory info = newProposalTxInfos[_ss[0]];
+        string memory info = newProposalTxInfos[_hash];
         if(bytes(info).length == 0) {
-            result[0] = nullFlag;
+            result = nullFlag;
         } else {
-            result[0] = info;
+            result = info;
         }
     }
 
     /*
         @param: hash
     */
-    function getNegotiatedData(string[] memory _ss) public view
-    returns (string[] memory result)
+    function getNegotiatedData(string memory _hash) public view
+    returns (string memory result)
     {
-        result = new string[](1);
-
-        if (!proposalIsExisted(_ss[0])) {
-           result[0] = "proposal not exists";
-           return result;
+        if (!proposalIsExisted(_hash)) {
+            result = "proposal not exists";
+            return result;
         }
 
-        result[0] = string(abi.encodePacked(
-            initiators[_ss[0]].sender,
-            "##",
-            initiators[_ss[0]].receiver,
-            "##",
-            initiators[_ss[0]].amount,
-            "##",
-            initiators[_ss[0]].timelock,
-            "##",
-            participants[_ss[0]].sender,
-            "##",
-            participants[_ss[0]].receiver,
-            "##",
-            participants[_ss[0]].amount,
-            "##",
-            participants[_ss[0]].timelock)
+        result = string(abi.encodePacked(
+                initiators[_hash].sender,
+                "##",
+                initiators[_hash].receiver,
+                "##",
+                initiators[_hash].amount,
+                "##",
+                initiators[_hash].timelock,
+                "##",
+                participants[_hash].sender,
+                "##",
+                participants[_hash].receiver,
+                "##",
+                participants[_hash].amount,
+                "##",
+                participants[_hash].timelock)
+        );
+    }
+
+    /*
+        @param: hash
+    */
+    function getProposalInfo(string memory _hash) public view
+    returns (string memory result)
+    {
+        if (!proposalIsExisted(_hash)) {
+            result = nullFlag;
+            return result;
+        }
+
+        if(htlcRoles[_hash]) {
+            result = string(abi.encodePacked(
+                    "true##",
+                    initiators[_hash].secret,
+                    "##",
+                    initiators[_hash].timelock,
+                    "##",
+                    boolToString(initiators[_hash].locked),
+                    "##",
+                    boolToString(initiators[_hash].unlocked),
+                    "##",
+                    boolToString(initiators[_hash].rolledback),
+                    "##",
+                    participants[_hash].timelock,
+                    "##",
+                    boolToString(participants[_hash].locked),
+                    "##",
+                    boolToString(participants[_hash].unlocked),
+                    "##",
+                    boolToString(participants[_hash].rolledback))
             );
-    }
-
-    /*
-        @param: hash
-    */
-    function getProposalInfo(string[] memory _ss) public view
-    returns (string[] memory result)
-    {
-        result = new string[](1);
-
-        if (!proposalIsExisted(_ss[0])) {
-           result[0] = nullFlag;
-           return result;
-        }
-
-        if(htlcRoles[_ss[0]]) {
-            result[0] = string(abi.encodePacked(
-                "true##",
-                initiators[_ss[0]].secret,
-                "##",
-                initiators[_ss[0]].timelock,
-                "##",
-                boolToString(initiators[_ss[0]].locked),
-                "##",
-                boolToString(initiators[_ss[0]].unlocked),
-                "##",
-                boolToString(initiators[_ss[0]].rolledback),
-                "##",
-                participants[_ss[0]].timelock,
-                "##",
-                boolToString(participants[_ss[0]].locked),
-                "##",
-                boolToString(participants[_ss[0]].unlocked),
-                "##",
-                boolToString(participants[_ss[0]].rolledback))
-                );
         } else {
-            result[0] = string(abi.encodePacked(
-                "false##null##",
-                participants[_ss[0]].timelock,
-                "##",
-                boolToString(participants[_ss[0]].locked),
-                "##",
-                boolToString(participants[_ss[0]].unlocked),
-                "##",
-                boolToString(participants[_ss[0]].rolledback),
-                "##",
-                initiators[_ss[0]].timelock,
-                "##",
-                boolToString(initiators[_ss[0]].locked),
-                "##",
-                boolToString(initiators[_ss[0]].unlocked),
-                "##",
-                boolToString(initiators[_ss[0]].rolledback))
-                );
+            result = string(abi.encodePacked(
+                    "false##null##",
+                    participants[_hash].timelock,
+                    "##",
+                    boolToString(participants[_hash].locked),
+                    "##",
+                    boolToString(participants[_hash].unlocked),
+                    "##",
+                    boolToString(participants[_hash].rolledback),
+                    "##",
+                    initiators[_hash].timelock,
+                    "##",
+                    boolToString(initiators[_hash].locked),
+                    "##",
+                    boolToString(initiators[_hash].unlocked),
+                    "##",
+                    boolToString(initiators[_hash].rolledback))
+            );
         }
     }
 
     /*
         @param: hash | secret
     */
-    function setSecret(string[] memory _ss) public
-    returns (string[] memory result)
+    function setSecret(string memory _hash, string memory _secret) public
+    returns (string memory result)
     {
-        result = new string[](1);
-        if(!hashMatched(_ss[0], _ss[1])) {
-            result[0] = "hash not matched";
+        if(!hashMatched(_hash, _secret)) {
+            result = "hash not matched";
             return result;
         }
 
-        if(htlcRoles[_ss[0]]) {
-            initiators[_ss[0]].secret = _ss[1];
+        if(htlcRoles[_hash]) {
+            initiators[_hash].secret = _secret;
         } else {
-            participants[_ss[0]].secret = _ss[1];
+            participants[_hash].secret = _secret;
         }
 
-        addProposal(_ss[0]);
-        result[0] = successFlag;
+        addProposal(_hash);
+        result = successFlag;
     }
 
     function preAddProposal(string memory _id) internal
@@ -392,33 +375,31 @@ contract HTLC {
     }
 
     function getProposalIDs() public view
-    returns (string[] memory result)
+    returns (string memory result)
     {
-        result = new string[](1);
-        result[0] = proposalList[0];
+        result = proposalList[0];
         for(uint256 i = 1; i < size; i++) {
-            result[0] = string(abi.encodePacked(result[0], splitSymbol, proposalList[i]));
+            result = string(abi.encodePacked(result, splitSymbol, proposalList[i]));
         }
     }
 
     /*
         @param: proposal id
     */
-    function deleteProposalID(string[] memory _ss) public
-    returns (string[] memory result)
+    function deleteProposalID(string memory _id) public
+    returns (string memory result)
     {
-        result = new string[](1);
-        uint256 index = proposalIndexs[_ss[0]];
+        uint256 index = proposalIndexs[_id];
 
-        if(!sameString(proposalList[index], _ss[0])) {
-            result[0] = "invalid operation";
+        if(!sameString(proposalList[index], _id)) {
+            result = "invalid operation";
             return result;
         }
 
         proposalList[index] = nullFlag;
         freeIndexStack[depth] = index;
         depth = depth + 1;
-        result[0] = successFlag;
+        result = successFlag;
     }
 
     function getIndex(string memory _hash) public view
@@ -430,40 +411,40 @@ contract HTLC {
     /*
         @param: hash
     */
-    function setCounterpartyLockState(string[] memory _ss) public
+    function setCounterpartyLockState(string memory _hash) public
     {
-        if(!htlcRoles[_ss[0]]) {
-            initiators[_ss[0]].locked = true;
+        if(!htlcRoles[_hash]) {
+            initiators[_hash].locked = true;
         } else {
-            participants[_ss[0]].locked = true;
+            participants[_hash].locked = true;
         }
     }
 
     /*
         @param: hash
     */
-    function setCounterpartyUnlockState(string[] memory _ss) public
+    function setCounterpartyUnlockState(string memory _hash) public
     {
-        if(!htlcRoles[_ss[0]]) {
-            initiators[_ss[0]].unlocked = true;
+        if(!htlcRoles[_hash]) {
+            initiators[_hash].unlocked = true;
         } else {
-            participants[_ss[0]].unlocked = true;
+            participants[_hash].unlocked = true;
         }
     }
 
     /*
         @param: hash
     */
-    function setCounterpartyRollbackState(string[] memory _ss) public
+    function setCounterpartyRollbackState(string memory _hash) public
     {
-        if(!htlcRoles[_ss[0]]) {
-            initiators[_ss[0]].rolledback = true;
+        if(!htlcRoles[_hash]) {
+            initiators[_hash].rolledback = true;
         } else {
-            participants[_ss[0]].rolledback = true;
+            participants[_hash].rolledback = true;
         }
     }
 
-     // the following functions are internal
+    // the following functions are internal
     function getSender(string memory _hash) internal view
     returns (address)
     {
@@ -573,7 +554,7 @@ contract HTLC {
     returns (bool)
     {
         return (bytes(initiators[_hash].sender).length > 0 &&
-                bytes(participants[_hash].sender).length > 0);
+        bytes(participants[_hash].sender).length > 0);
     }
 
     function rightTimelock(string memory _t0, string memory _t1) internal view
@@ -607,7 +588,7 @@ contract HTLC {
             } else if ((b1 >= 65) && (b1 <= 70)) {
                 b1 -= 55;
             } else if ((b1 >= 48) && (b1 <= 57)) {
-            b1 -= 48;
+                b1 -= 48;
             }
 
             if ((b2 >= 97) && (b2 <= 102)) {
@@ -694,13 +675,13 @@ contract HTLC {
     returns (string memory)
     {
 
-       bytes memory result = new bytes(_bts32.length);
+        bytes memory result = new bytes(_bts32.length);
 
-       uint256 len = _bts32.length;
-       for(uint256 i = 0; i < len; i++) {
-           result[i] = _bts32[i];
-       }
+        uint256 len = _bts32.length;
+        for(uint256 i = 0; i < len; i++) {
+            result[i] = _bts32[i];
+        }
 
-       return string(result);
+        return string(result);
     }
 }

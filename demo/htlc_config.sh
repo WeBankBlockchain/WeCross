@@ -42,8 +42,7 @@ init_bcos_asset()
         rm -rf ledger-tool
         tar -zxf ledger-tool.tar.gz
     else
-        git clone --depth 1 https://github.com/Shareong/ledger-tool.git
-        git checkout dev
+        git clone -b dev --depth 1 https://github.com/Shareong/ledger-tool.git
     fi
 
     cd ledger-tool
@@ -62,7 +61,7 @@ init_bcos_bcos_htlc()
 
     cd bcos/console
     bash start.sh <<EOF
-call LedgerSampleHTLC ${BCOS_HTLC} init ["${BCOS_LEDGER}","${FABRIC_HTLC}"]
+call LedgerSampleHTLC ${BCOS_HTLC} init "${BCOS_LEDGER}" "${FABRIC_HTLC}"
 EOF
     cd -
 }
