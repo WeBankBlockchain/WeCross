@@ -23,11 +23,11 @@ public class VerifyDataTest {
         TransactionResponse response = new TransactionResponse();
         response.setResult(new String[] {"hello", "world"});
         VerifiedTransaction verifiedTransaction =
-                new VerifiedTransaction(100, "0x", "0x", request, response);
+                new VerifiedTransaction(100, "0x", null, "0x", request, response);
         Assert.assertEquals(true, verifyData.verify(verifiedTransaction));
 
         VerifiedTransaction unVerifiedTransaction =
-                new VerifiedTransaction(1000, null, "0xx", request, response);
+                new VerifiedTransaction(1000, null, null, "0xx", request, response);
         Assert.assertEquals(false, verifyData.verify(unVerifiedTransaction));
     }
 }
