@@ -379,6 +379,7 @@ public class HTLCScheduler {
         htlcResource
                 .getDriver()
                 .asyncGetVerifiedTransaction(
+                        null, // TODO: add expect path
                         txHash,
                         blockNum,
                         htlcResource.getBlockHeaderManager(),
