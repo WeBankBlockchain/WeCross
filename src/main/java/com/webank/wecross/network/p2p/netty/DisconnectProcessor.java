@@ -20,8 +20,10 @@ public class DisconnectProcessor implements Processor {
     @Override
     public void process(ChannelHandlerContext ctx, Node node, Message message) {
         Peer peer = peerManager.getPeerInfo(node);
-        zoneManager.removeRemoteChains(peer, peer.getChainInfos(), true);
-        peerManager.removePeerInfo(node);
+        if (peer != null) {
+            zoneManager.removeRemoteChains(peer, peer.getChainInfos(), true);
+            peerManager.removePeerInfo(node);
+        }
     }
 
     public PeerManager getPeerManager() {
