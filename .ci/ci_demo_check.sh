@@ -58,10 +58,9 @@ listAccounts
 call payment.bcos.HelloWorld bcos_user1 get
 sendTransaction payment.bcos.HelloWorld bcos_user1 set Tom
 call payment.bcos.HelloWorld bcos_user1 get
-call payment.fabric.mycc fabric_user1 query a
-sendTransaction payment.fabric.mycc fabric_user1 invoke a b 10
-call payment.fabric.mycc fabric_user1 query a
-call payment.fabric.mycc fabric_user1 query b
+call payment.fabric.sacc fabric_user1 query a
+sendTransaction payment.fabric.sacc fabric_user1 set a 666
+call payment.fabric.sacc fabric_user1 query a
 quit
 EOF
     cd ..
