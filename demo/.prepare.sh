@@ -47,10 +47,10 @@ prepare_bcos()
     # LOG_INFO "Download FISCO-BCOS console"
     # Download https://github.com/FISCO-BCOS/console/releases/download/${BCOS_CONSOLE_VERSION}/console.tar.gz
 
-    LOG_INFO "Download ledger-tool ..."
-    git clone --depth 1 https://github.com/Shareong/ledger-tool.git
-    tar -zcf ledger-tool.tar.gz ledger-tool
-    rm -rf ledger-tool
+    # LOG_INFO "Download ledger-tool ..."
+    # git clone --depth 1 https://github.com/Shareong/ledger-tool.git
+    # tar -zcf ledger-tool.tar.gz ledger-tool
+    # rm -rf ledger-tool
 
     cd -
 }
