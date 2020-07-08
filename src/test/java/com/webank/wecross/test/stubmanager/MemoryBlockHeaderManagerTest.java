@@ -137,7 +137,7 @@ public class MemoryBlockHeaderManagerTest {
 
         memoryBlockHeaderManager.start();
 
-        Thread.sleep(300);
+        Thread.sleep(3000);
 
         memoryBlockHeaderManager.asyncGetBlockNumber(
                 (e, number) -> {
@@ -166,7 +166,7 @@ public class MemoryBlockHeaderManagerTest {
                 .when(driver)
                 .asyncGetBlockNumber(Mockito.any(), Mockito.any());
 
-        Thread.sleep(300);
+        Thread.sleep(3000);
 
         // Test sync block
 
@@ -248,7 +248,7 @@ public class MemoryBlockHeaderManagerTest {
                 .when(driver)
                 .asyncGetBlockNumber(Mockito.any(), Mockito.any());
 
-        Thread.sleep(300);
+        Thread.sleep(3000);
 
         assertFalse(flags.isEmpty());
 
