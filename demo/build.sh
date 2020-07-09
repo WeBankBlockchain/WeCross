@@ -330,7 +330,7 @@ deploy_fabric_sample_resource()
     bash start.sh <<EOF
     fabricInstall payment.fabric.sacc fabric_admin_org1 1.0 Org1 GO_LANG
     fabricInstall payment.fabric.sacc fabric_admin_org2 1.0 Org2 GO_LANG
-    fabricInstantiate payment.fabric.sacc fabric_admin 1.0 ["Org1","Org2"] GO_LANG OR("Org1MSP.peer","Org2MSP.peer") ["a","10"]
+    fabricInstantiate payment.fabric.sacc fabric_admin 1.0 ["Org1","Org2"] GO_LANG policy.yaml ["a","10"]
 quit
 EOF
     # wait the chaincode instantiate
