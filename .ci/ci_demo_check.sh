@@ -55,12 +55,12 @@ demo_test()
     bash start.sh <<EOF
 listResources
 listAccounts
-call payment.bcos.HelloWeCross bcos_user1 get
-sendTransaction payment.bcos.HelloWeCross bcos_user1 set Tom
-call payment.fabric.mycc fabric_user1 query a
-sendTransaction payment.fabric.mycc fabric_user1 invoke a b 10
-call payment.fabric.mycc fabric_user1 query a
-call payment.fabric.mycc fabric_user1 query b
+call payment.bcos.HelloWorld bcos_user1 get
+sendTransaction payment.bcos.HelloWorld bcos_user1 set Tom
+call payment.bcos.HelloWorld bcos_user1 get
+call payment.fabric.sacc fabric_user1 query a
+sendTransaction payment.fabric.sacc fabric_user1 set a 666
+call payment.fabric.sacc fabric_user1 query a
 quit
 EOF
     cd ..
@@ -107,7 +107,7 @@ quit
 EOF
     cd ..
 
-    # check_log
+    check_log
 }
 
 prepare_wecross()
@@ -158,10 +158,10 @@ main()
     prepare_wecross
     prepare_wecross_console
     prepare_bcos
-    prepare_htlc
+    # prepare_htlc
     prepare_demo
     demo_test
-    htlc_test
+    # htlc_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then

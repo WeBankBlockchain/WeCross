@@ -1,7 +1,6 @@
 package com.webank.wecross.network.rpc.netty;
 
 import java.util.Objects;
-import org.apache.logging.log4j.util.Strings;
 
 public class URIMethod {
     private String uri;
@@ -29,7 +28,7 @@ public class URIMethod {
     }
 
     public boolean isResourceURI() {
-        if (Strings.isEmpty(uri)) {
+        if (uri == null || uri.length() == 0) {
             return false;
         }
 

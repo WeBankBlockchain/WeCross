@@ -77,6 +77,10 @@ public class Resource {
         this.path = path;
     }
 
+    public Path getPath() {
+        return path;
+    }
+
     public interface Callback {
         public void onTransactionResponse(
                 TransactionException transactionException, TransactionResponse transactionResponse);

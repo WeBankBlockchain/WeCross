@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.1;
 pragma experimental ABIEncoderV2;
 
 contract HelloWeCross {
@@ -14,13 +14,13 @@ contract HelloWeCross {
         return ss;
     }
 
-    function getAndClear() public constant returns(string[] memory) {
+    function getAndClear() public returns(string[] memory) {
         string[] memory _ss = ss;
         ss.length = 0;
         return _ss;
     }
 
-    function get() public constant returns(string[] memory) {
+    function get() public view returns(string[] memory) {
         return ss;
     }
 }

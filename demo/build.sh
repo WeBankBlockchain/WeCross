@@ -105,8 +105,6 @@ build_bcos()
     cd ${ROOT}/bcos
     bash build.sh
 
-    hello_address=$(grep 'HelloWorld' console/deploylog.txt | awk 'END {print $5}')
-
     cd ${ROOT}
 }
 
@@ -242,9 +240,9 @@ config_router_8250()
     bash add_chain.sh -t BCOS2.0 -n bcos -d conf/chains
     # copy cert
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/bcos/
-    hello_address=$(grep 'HelloWeCross' ${bcos_demo_dir}/console/deploylog.txt | awk 'END {print $5}')
+    # hello_address=$(grep 'HelloWeCross' ${bcos_demo_dir}/console/deploylog.txt | awk 'END {print $5}')
     # modify stub.toml
-    config_bcos_stub_toml conf/chains/bcos/stub.toml ${hello_address}
+    # config_bcos_stub_toml conf/chains/bcos/stub.toml ${hello_address}
 
     # deploy proxy
     java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/bcos bcos_user1
@@ -308,6 +306,59 @@ download_wecross_console()
     fi
 }
 
+deploy_bcos_sample_resource()
+{
+    # deploy from 8250
+    LOG_INFO "Deploy bcos contract HelloWorld"
+    cd ${ROOT}/WeCross-Console/
+    sed_i  's/8251/8250/g'  conf/application.toml
+
+    bash start.sh <<EOF
+bcosDeploy payment.bcos.HelloWorld bcos_user1 conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
+quit
+EOF
+    cd -
+}
+
+deploy_fabric_sample_resource()
+{
+    # deploy from 8250
+    LOG_INFO "Deploy fabric chaincode sacc"
+    cd ${ROOT}/WeCross-Console/
+    sed_i  's/8250/8251/g'  conf/application.toml
+
+    bash start.sh <<EOF
+    fabricInstall payment.fabric.sacc fabric_admin_org1 1.0 Org1 GO_LANG
+    fabricInstall payment.fabric.sacc fabric_admin_org2 1.0 Org2 GO_LANG
+    fabricInstantiate payment.fabric.sacc fabric_admin 1.0 ["Org1","Org2"] GO_LANG policy.yaml ["a","10"]
+quit
+EOF
+    # wait the chaincode instantiate
+    try_times=80
+    i=0
+    echo -e "\033[32msacc chaincode is instantiating ...\033[0m\c"
+    while [ ! -n "$(docker ps |grep sacc |awk '{print $1}')" ]
+    do
+        sleep 1
+
+        ((i=i+1))
+        if [ $i -lt ${try_times} ]; then
+            echo -e "\033[32m.\033[0m\c"
+        else
+            LOG_ERROR "Instantiate sacc timeout!"
+            exit 1
+        fi
+    done
+
+    cd -
+}
+
+deploy_sample_resource()
+{
+    deploy_fabric_sample_resource
+    deploy_bcos_sample_resource
+}
+
 main()
 {
     check_env
@@ -357,11 +408,13 @@ EOF
 
     check_wecross_network
 
+    deploy_sample_resource
+
     LOG_INFO "Success! WeCross demo network is running. Framework:"
     echo -e "
       FISCO BCOS                    Fabric
      (4node pbft)              (first-network)
-   (HelloWeCross.sol)             (abac.go)
+    (HelloWorld.sol)              (sacc.go)
            |                          |
            |                          |
     WeCross Router <----------> WeCross Router

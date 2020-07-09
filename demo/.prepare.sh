@@ -41,16 +41,16 @@ prepare_bcos()
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos.tar.gz
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos-macOS.tar.gz
 
-    LOG_INFO "Download HelloWeCross.sol ..."
-    cp ${WECROSS_ROOT}/src/main/resources/chains-sample/bcos/HelloWeCross.sol ./
+    # LOG_INFO "Download HelloWeCross.sol ..."
+    # cp ${WECROSS_ROOT}/src/main/resources/chains-sample/bcos/HelloWeCross.sol ./
 
-    LOG_INFO "Download FISCO-BCOS console"
-    Download https://github.com/FISCO-BCOS/console/releases/download/${BCOS_CONSOLE_VERSION}/console.tar.gz
+    # LOG_INFO "Download FISCO-BCOS console"
+    # Download https://github.com/FISCO-BCOS/console/releases/download/${BCOS_CONSOLE_VERSION}/console.tar.gz
 
-    LOG_INFO "Download ledger-tool ..."
-    git clone --depth 1 https://github.com/Shareong/ledger-tool.git
-    tar -zcf ledger-tool.tar.gz ledger-tool
-    rm -rf ledger-tool
+    # LOG_INFO "Download ledger-tool ..."
+    # git clone --depth 1 https://github.com/Shareong/ledger-tool.git
+    # tar -zcf ledger-tool.tar.gz ledger-tool
+    # rm -rf ledger-tool
 
     cd -
 }
@@ -79,10 +79,14 @@ prepare_wecross()
 
 main()
 {
+    if [ -n "$1" ]; then
+        WECROSS_ROOT=$1/
+    fi
+
     prepare_bcos
     prepare_fabric
     prepare_wecross
 }
 
-main
+main $@
 

@@ -169,6 +169,7 @@ public class AssetHTLC implements HTLC {
         Driver driver = resource.getDriver();
         CompletableFuture<VerifiedTransaction> future = new CompletableFuture<>();
         driver.asyncGetVerifiedTransaction(
+                null, // TODO: add expect path
                 txHash,
                 blockNumber,
                 blockHeaderManager,
