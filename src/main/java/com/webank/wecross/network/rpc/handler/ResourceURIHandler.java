@@ -18,6 +18,7 @@ import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.Chain;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -244,7 +245,13 @@ public class ResourceURIHandler implements URIHandler {
                                         chain.getBlockHeaderManager(),
                                         chain.chooseConnection(),
                                         (e, response) -> {
-                                            restResponse.setData(response);
+                                            if (Objects.nonNull(e)) {
+                                                restResponse.setErrorCode(
+                                                        NetworkQueryStatus.INTERNAL_ERROR);
+                                                restResponse.setMessage(e.getMessage());
+                                            } else {
+                                                restResponse.setData(response);
+                                            }
 
                                             callback.onResponse(restResponse);
                                         });
