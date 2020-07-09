@@ -3,7 +3,7 @@
 **WeCross**是由微众银行自主研发并完全开源的区块链跨链协作平台，致力于促进跨行业、机构和地域的跨区块链信任传递和商业合作。WeCross不局限于满足同构区块链平行扩展后的可信数据交换需求，还进一步探索解决异构区块链之间因底层架构、数据结构、接口协议、安全机制等多维异构性导致无法互联互通问题的有效方案。
 
 [![CodeFactor](https://www.codefactor.io/repository/github/webankfintech/wecross/badge)](https://www.codefactor.io/repository/github/webankfintech/wecross) [![Build Status](https://travis-ci.org/WeBankFinTech/WeCross.svg?branch=dev)](https://travis-ci.org/WeBankFinTech/WeCross) [![codecov](https://codecov.io/gh/WeBankFinTech/WeCross/branch/dev/graph/badge.svg)](https://codecov.io/gh/WeBankFinTech/WeCross) [![Latest release](https://img.shields.io/github/release/WeBankFinTech/WeCross.svg)](https://github.com/WeBankFinTech/WeCross/releases/latest)
- ![](https://img.shields.io/github/license/WeBankFinTech/WeCross) 
+ ![](https://img.shields.io/github/license/WeBankFinTech/WeCross)
 
 ## WeCross整体架构设计
 
@@ -20,13 +20,13 @@
 
 ## WeCross四大技术
 
-- **通用区块链接口**：本着“求同存异”、“聚焦最大公约数”的基本思路，通用区块链接口对交易、智能合约与资产等数据进行抽象包装，设计统一的资源范式，设计普适跨链场景的抽象区块数据结构，为异构区块链的交互建立数据协议一致的基础，实现“一次适配，随处可用”的效果。 
+- **通用区块链接口**：本着“求同存异”、“聚焦最大公约数”的基本思路，通用区块链接口对交易、智能合约与资产等数据进行抽象包装，设计统一的资源范式，设计普适跨链场景的抽象区块数据结构，为异构区块链的交互建立数据协议一致的基础，实现“一次适配，随处可用”的效果。
 
 
-- **异构链互联协议**： 尽管各家区块链平台的内部架构、网络模型和共识逻辑有很大差异，但这些区块链平台的对外接口存在共性。异构链互联协议通过分析主流区块链平台交互方式的共性点，提炼一种通用的区块链接入范式与跨链交互模型。 
+- **异构链互联协议**： 尽管各家区块链平台的内部架构、网络模型和共识逻辑有很大差异，但这些区块链平台的对外接口存在共性。异构链互联协议通过分析主流区块链平台交互方式的共性点，提炼一种通用的区块链接入范式与跨链交互模型。
 
 
-- **可信事务机制**：区块链内部的安全机制在面对跨区块链调度时会突破安全边界，无法实现可信与事务。可信事务机制提出数据互信机制和跨链事务机制，解决区块链可信问题和交易事务性的问题。 
+- **可信事务机制**：区块链内部的安全机制在面对跨区块链调度时会突破安全边界，无法实现可信与事务。可信事务机制提出数据互信机制和跨链事务机制，解决区块链可信问题和交易事务性的问题。
 
 
 - **多边跨域治理**：多边跨域治理是一套完整的区块链多边治理方案，支持多个区块链按照其业务需求，以不同的网络拓扑来组建跨链分区。
@@ -36,7 +36,7 @@
 
 ## 快速开始
 
-阅读[快速入门](https://wecross.readthedocs.io/zh_CN/dev/docs/tutorial/demo.html)，从连通两个区块链开始，快速体验WeCross的强大功能。
+阅读[快速入门](https://wecross.readthedocs.io/zh_CN/latest/docs/tutorial/demo.html)，从连通两个区块链开始，快速体验WeCross的强大功能。
 
 ## 技术文档
 
