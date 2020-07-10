@@ -10,12 +10,11 @@ import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.response.AccountResponse;
 import com.webank.wecross.stub.Account;
+import com.webank.wecross.utils.ObjectMapperFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.webank.wecross.utils.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
