@@ -17,6 +17,7 @@ import com.webank.wecross.network.p2p.netty.response.StatusCode;
 import com.webank.wecross.peer.Peer;
 import java.io.IOException;
 
+import com.webank.wecross.utils.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
