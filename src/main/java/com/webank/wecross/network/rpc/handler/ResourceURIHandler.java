@@ -17,6 +17,7 @@ import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.utils.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,7 @@ public class ResourceURIHandler implements URIHandler {
     private static final Logger logger = LoggerFactory.getLogger(ResourceURIHandler.class);
 
     private WeCrossHost host;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     public ResourceURIHandler(WeCrossHost host) {
         this.host = host;

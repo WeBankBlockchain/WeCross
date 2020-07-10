@@ -10,6 +10,7 @@ import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.response.AccountResponse;
 import com.webank.wecross.stub.Account;
+import com.webank.wecross.utils.ObjectMapperFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +23,7 @@ public class ListAccountsURIHandler implements URIHandler {
     private static final Logger logger = LoggerFactory.getLogger(ListAccountsURIHandler.class);
 
     private WeCrossHost host;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     public ListAccountsURIHandler(WeCrossHost host) {
         this.host = host;

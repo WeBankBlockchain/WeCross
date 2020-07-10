@@ -22,6 +22,7 @@ import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
+import com.webank.wecross.utils.ObjectMapperFactory;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -34,7 +35,7 @@ public class P2PProcessor implements NetworkProcessor {
     private ZoneManager zoneManager;
     private P2PService p2PService;
     private RoutineManager routineManager;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     public PeerManager getPeerManager() {
         return peerManager;
