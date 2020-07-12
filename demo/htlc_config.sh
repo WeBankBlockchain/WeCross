@@ -3,11 +3,15 @@ set -e
 LANG=en_US.utf8
 ROOT=$(pwd)
 
+version=$RANDOM
 BCOS_LEDGER=
 BCOS_HTLC=
-FABRIC_LEDGER=ledger_sample
+FABRIC_LEDGER=LedgerSample
 FABRIC_HTLC=LedgerSampleHTLC
 DOCKER_ID=
+
+## address = 0x55f934bcbe1e9aef8337f5551142a442fdde781c
+BCOS_SENDER=$(echo "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tDQpNSUdFQWdFQU1CQUdCeXFHU000OUFnRUdCU3VCQkFBS0JHMHdhd0lCQVFRZzk3b2dnSysxdVpHZFpiWkdXSUhDDQpwR0gwSVU3Q2ZQUWZXRDNlM0lsZWR4R2hSQU5DQUFRbUhLU3d4bVZKRWRubWRKVVlHOUlLeitjYVE5blRiT2tmDQpDaW1JcmR4ZmhZMjF2c2tybUZVck5sYU5yRE1INE9wQysrZHRsbHE5UXh2dmFUbEltMjJ4DQotLS0tLUVORCBQUklWQVRFIEtFWS0tLS0t" | base64 -D)
 
 LOG_INFO()
 {
@@ -15,53 +19,44 @@ LOG_INFO()
     echo -e "\033[32m[INFO] ${content}\033[0m"
 }
 
-deploy_bcos_htlc()
+config_bcos_sender_account()
 {
-    LOG_INFO "Deploy BCOS htlc contract ..."
-
-    # copy contracts
-    cp WeCross/conf/chains-sample/bcos/htlc/* bcos/console/contracts/solidity
-
-    # deploy htlc
-    cd bcos/console
-    rm -rf deploylog.txt
-    bash start.sh <<EOF
-deployByCNS LedgerSampleHTLC 1.0
+    LOG_INFO "Config account for BCOS htlc sender ..."
+    mkdir routers-payment/127.0.0.1-8250-25500/conf/accounts/bcos_sender
+    cat >>account.key<<EOF
+${BCOS_SENDER}
 EOF
-    BCOS_HTLC=$(grep 'LedgerSampleHTLC' deploylog.txt | awk '{print $5}')
-    cd -
+    mv sender.key routers-payment/127.0.0.1-8250-25500/conf/accounts/bcos_sender
+    cat << EOF > routers-payment/127.0.0.1-8250-25500/conf/accounts/bcos_sender/account.toml
+[account]
+type = 'BCOS2.0'
+accountFile = 'account.key'
+EOF
 }
 
-init_bcos_asset()
-{
-    LOG_INFO "Init BCOS ledger ..."
-
-    # clone ledger-tool
-    cd bcos
-    if [ -e ledger-tool.tar.gz ]; then
-        rm -rf ledger-tool
-        tar -zxf ledger-tool.tar.gz
-    else
-        git clone -b dev --depth 1 https://github.com/Shareong/ledger-tool.git
-    fi
-
-    cd ledger-tool
-    ./gradlew build
-    cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* ${ROOT}/bcos/ledger-tool/dist/conf
-    cd dist
-    java -cp 'apps/*:lib/*:conf' Application init 100000000 > tmp.txt
-    BCOS_LEDGER=$(grep 'assetAddress:' tmp.txt | awk '{print $2}')
-    java -cp 'apps/*:lib/*:conf' Application approve ${BCOS_LEDGER} ${BCOS_HTLC} 100000000
-    cd ${ROOT}
-}
-
-init_bcos_bcos_htlc()
+init_bcos_htlc()
 {
     LOG_INFO "Init BCOS htlc ..."
 
-    cd bcos/console
+    cd WeCross-Console
     bash start.sh <<EOF
-call LedgerSampleHTLC ${BCOS_HTLC} init "${BCOS_LEDGER}" "${FABRIC_HTLC}"
+bcosDeploy payment.bcos.LedgerSample bcos_sender conf/contracts/solidity/LedgerSample.sol LedgerSample ${version} htlc token 1 100000000
+quit
+EOF
+  var1=$(cat logs/info.log | grep data=0x | awk 'END{print $11}')
+  BCOS_LEDGER=$(echo ${var1:5:42})
+
+    bash start.sh <<EOF
+bcosDeploy payment.bcos.LedgerSampleHTLC bcos_sender conf/contracts/solidity/LedgerSampleHTLC.sol LedgerSampleHTLC ${version}
+quit
+EOF
+  var2=$(cat logs/info.log | grep data=0x | awk 'END{print $11}')
+  BCOS_HTLC=$(echo ${var2:5:42})
+
+  bash start.sh <<EOF
+sendTransaction payment.bcos.LedgerSample bcos_sender approve ${BCOS_HTLC} 1000000
+sendTransaction payment.bcos.LedgerSampleHTLC bcos_sender init ${BCOS_LEDGER} ${FABRIC_HTLC}
+quit
 EOF
     cd -
 }
@@ -73,8 +68,8 @@ copy_fabric_chaincode()
     docker ps -a|grep cli > tmp.txt
     DOCKER_ID=$(grep 'fabric' tmp.txt | awk '{print $1}')
 
-    docker cp WeCross/conf/chains-sample/fabric/ledger ${DOCKER_ID}:/opt/gopath/src/github.com/chaincode/ledger
-    docker cp WeCross/conf/chains-sample/fabric/htlc ${DOCKER_ID}:/opt/gopath/src/github.com/chaincode/htlc
+    docker cp WeCross-Console/conf/contracts/chaincode/ledger ${DOCKER_ID}:/opt/gopath/src/github.com/chaincode/ledger
+    docker cp WeCross-Console/conf/contracts/chaincode/htlc ${DOCKER_ID}:/opt/gopath/src/github.com/chaincode/htlc
 }
 
 install_fabric_chaincode()
@@ -82,12 +77,12 @@ install_fabric_chaincode()
     LOG_INFO "Install Fabric chaincode ..."
 
     # install ledger
-    docker exec -it cli peer chaincode install -n ${FABRIC_LEDGER} -v 1.0 -p github.com/chaincode/ledger/
-    docker exec -it cli peer chaincode instantiate -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n ${FABRIC_LEDGER} -l golang -v 1.0 -c '{"Args":["init","HTLCoin","htc","100000000"]}' -P 'OR ('\''Org1MSP.peer'\'','\''Org2MSP.peer'\'')'
+    docker exec -it cli peer chaincode install -n ${FABRIC_LEDGER} -v ${version} -p github.com/chaincode/ledger/
+    docker exec -it cli peer chaincode instantiate -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n ${FABRIC_LEDGER} -l golang -v ${version} -c '{"Args":["init","HTLCoin","htc","100000000"]}' -P 'OR ('\''Org1MSP.peer'\'','\''Org2MSP.peer'\'')'
 
     # install htlc
-    docker exec -it cli peer chaincode install -n ${FABRIC_HTLC} -v 1.0 -p github.com/chaincode/htlc/
-    docker exec -it cli peer chaincode instantiate -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n ${FABRIC_HTLC} -l golang -v 1.0 -c '{"Args":["init",'"\"${FABRIC_LEDGER}\"","\"mychannel\"","\"${BCOS_HTLC}\""']}'
+    docker exec -it cli peer chaincode install -n ${FABRIC_HTLC} -v ${version} -p github.com/chaincode/htlc/
+    docker exec -it cli peer chaincode instantiate -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n ${FABRIC_HTLC} -l golang -v ${version} -c '{"Args":["init",'"\"${FABRIC_LEDGER}\"","\"mychannel\"","\"${BCOS_HTLC}\""']}'
 
     # approve
     docker exec -it cli peer chaincode invoke -C mychannel -n ${FABRIC_LEDGER} -c '{"Args":["createEscrowAccount","1000000"]}' -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
@@ -140,18 +135,6 @@ EOF
 EOF
 }
 
-config_bcos_sender_account()
-{
-    LOG_INFO "Config account for BCOS htlc sender ..."
-    mkdir routers-payment/127.0.0.1-8250-25500/conf/accounts/bcos_sender
-    cp bcos/ledger-tool/dist/conf/0x55f934bcbe1e9aef8337f5551142a442fdde781c.pem routers-payment/127.0.0.1-8250-25500/conf/accounts/bcos_sender
-    cat << EOF > routers-payment/127.0.0.1-8250-25500/conf/accounts/bcos_sender/account.toml
-[account]
-type = 'BCOS2.0'
-accountFile = '0x55f934bcbe1e9aef8337f5551142a442fdde781c.pem'
-EOF
-}
-
 copy_console()
 {
     LOG_INFO "Copy console for router-8251 ..."
@@ -178,20 +161,22 @@ restart_router()
     cd ${ROOT}/routers-payment/127.0.0.1-8251-25501/
     bash stop.sh
     bash start.sh
+
+    cd ${ROOT}
 }
 
 main()
 {
-    deploy_bcos_htlc
-    init_bcos_asset
-    init_bcos_bcos_htlc
+    config_bcos_sender_account
+    restart_router
+
+    init_bcos_htlc
 
     copy_fabric_chaincode
     install_fabric_chaincode
 
     update_wecross_config
     update_chains_config
-    config_bcos_sender_account
 
     copy_console
     restart_router
