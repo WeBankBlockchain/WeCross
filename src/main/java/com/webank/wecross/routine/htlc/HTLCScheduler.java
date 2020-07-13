@@ -3,7 +3,6 @@ package com.webank.wecross.routine.htlc;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.routine.RoutineDefault;
-import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.VerifiedTransaction;
 import java.math.BigInteger;
 import java.util.concurrent.CompletableFuture;
@@ -245,14 +244,6 @@ public class HTLCScheduler {
             HTLCResource counterpartyResource,
             String hash,
             Callback callback) {
-        callback.onReturn(null, true);
-    }
-
-    private void origincheckProposalConsistency(
-            HTLCResource selfResource,
-            HTLCResource counterpartyResource,
-            String hash,
-            Callback callback) {
         htlc.getNewProposalTxInfo(
                 selfResource,
                 hash,
@@ -336,8 +327,7 @@ public class HTLCScheduler {
                                         new VerifyData(
                                                 Long.parseLong(info1[1]),
                                                 info1[0],
-                                                selfResource.getCounterpartyAddress(),
-                                                "newContract",
+                                                "newProposal",
                                                 args,
                                                 output);
 
@@ -379,22 +369,18 @@ public class HTLCScheduler {
         htlcResource
                 .getDriver()
                 .asyncGetVerifiedTransaction(
-                        null, // TODO: add expect path
+                        htlcResource.getSelfPath(),
                         txHash,
                         blockNum,
                         htlcResource.getBlockHeaderManager(),
                         htlcResource.chooseConnection(),
-                        new Driver.GetVerifiedTransactionCallback() {
-                            @Override
-                            public void onResponse(
-                                    Exception e, VerifiedTransaction verifiedTransaction) {
-                                if (e != null) {
-                                    logger.error("get verifiedTransaction0Future exception: " + e);
-                                    verifiedTransactionFuture.complete(null);
-                                } else {
+                        (e, verifiedTransaction) -> {
+                            if (e != null) {
+                                logger.error("get verifiedTransaction0Future exception: " + e);
+                                verifiedTransactionFuture.complete(null);
+                            } else {
 
-                                    verifiedTransactionFuture.complete(verifiedTransaction);
-                                }
+                                verifiedTransactionFuture.complete(verifiedTransaction);
                             }
                         });
 
@@ -475,7 +461,6 @@ public class HTLCScheduler {
         if (!proposal.isCounterpartyLocked()) {
             htlc.lockCounterparty(
                     counterpartyResource,
-                    selfResource.getCounterpartyAddress(),
                     hash,
                     (exception, result) -> {
                         if (exception != null) {
@@ -532,7 +517,6 @@ public class HTLCScheduler {
 
                     htlc.unlockCounterparty(
                             counterpartyResource,
-                            selfResource.getCounterpartyAddress(),
                             hash,
                             proposal.getSecret(),
                             (exception1, result1) -> {

@@ -1,8 +1,10 @@
 package com.webank.wecross.routine.htlc;
 
 import com.webank.wecross.stub.TransactionRequest;
+import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.stub.VerifiedTransaction;
 import java.util.Arrays;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +13,6 @@ public class VerifyData {
 
     private long blockNumber;
     private String transactionHash;
-    private String realAddress;
     private String method;
     private String[] args;
     private String[] result;
@@ -19,13 +20,11 @@ public class VerifyData {
     public VerifyData(
             long blockNumber,
             String transactionHash,
-            String realAddress,
             String method,
             String[] args,
             String[] result) {
         this.blockNumber = blockNumber;
         this.transactionHash = transactionHash;
-        this.realAddress = realAddress;
         this.method = method;
         this.args = args;
         this.result = result;
@@ -37,18 +36,24 @@ public class VerifyData {
             return false;
         }
 
-        logger.debug(transaction.toString());
-        logger.debug(this.toString());
+        if (logger.isDebugEnabled()) {
+            logger.debug(transaction.toString());
+            logger.debug(this.toString());
+        }
 
         TransactionRequest request = transaction.getTransactionRequest();
+        TransactionResponse response = transaction.getTransactionResponse();
+        if (Objects.isNull(request) || Objects.isNull(response)) {
+            logger.error("verify transaction failed, detail:\n{}\n{}", transaction, this);
+            return false;
+        }
+
         boolean isEqual =
                 getBlockNumber() == transaction.getBlockNumber()
                         && getTransactionHash().equals(transaction.getTransactionHash())
-                        && getRealAddress().equals(transaction.getRealAddress())
-                        //                && getMethod().verify(request.getMethod())
+                        && getMethod().equals(request.getMethod())
                         && Arrays.equals(getArgs(), request.getArgs())
-                        && Arrays.equals(
-                                getResult(), transaction.getTransactionResponse().getResult());
+                        && Arrays.equals(getResult(), response.getResult());
         if (!isEqual) {
             logger.error("verify transaction failed, detail:\n{}\n{}", transaction, this);
         }
@@ -62,9 +67,6 @@ public class VerifyData {
                 + blockNumber
                 + ", transactionHash='"
                 + transactionHash
-                + '\''
-                + ", realAddress='"
-                + realAddress
                 + '\''
                 + ", method='"
                 + method
@@ -90,14 +92,6 @@ public class VerifyData {
 
     public void setTransactionHash(String transactionHash) {
         this.transactionHash = transactionHash;
-    }
-
-    public String getRealAddress() {
-        return realAddress;
-    }
-
-    public void setRealAddress(String realAddress) {
-        this.realAddress = realAddress;
     }
 
     public String getMethod() {

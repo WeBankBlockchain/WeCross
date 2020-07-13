@@ -209,7 +209,6 @@ public class HTLCResource extends Resource {
                 new VerifyData(
                         transactionResponse.getBlockNumber(),
                         transactionResponse.getHash(),
-                        counterpartyAddress,
                         RoutineDefault.UNLOCK_METHOD,
                         args,
                         new String[] {RoutineDefault.SUCCESS_FLAG});
