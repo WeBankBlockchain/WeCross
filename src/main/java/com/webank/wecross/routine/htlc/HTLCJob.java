@@ -32,18 +32,19 @@ public class HTLCJob implements Job {
         }
 
         Semaphore semaphore = new Semaphore(proposalIds.length, true);
-        for (String proposalId : proposalIds) {
-            try {
-                semaphore.acquire();
-            } catch (InterruptedException e) {
-                logger.warn("Interrupted,", e);
-                Thread.currentThread().interrupt();
-            }
+        try {
+            semaphore.acquire(proposalIds.length);
+        } catch (InterruptedException e) {
+            logger.warn("Interrupted,", e);
+            Thread.currentThread().interrupt();
+        }
 
+        for (String proposalId : proposalIds) {
             if (!RoutineDefault.NULL_FLAG.equals(proposalId)) {
                 Path path = htlcResourcePair.getSelfHTLCResource().getSelfPath();
-                logger.trace("Start handling htlc proposal: {}, path: {}", proposalId, path);
-
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Start handling htlc proposal: {}, path: {}", proposalId, path);
+                }
                 HTLCScheduler htlcScheduler = new HTLCScheduler(htlcResourcePair.getHtlc());
                 htlcScheduler.start(
                         htlcResourcePair,
@@ -54,10 +55,12 @@ public class HTLCJob implements Job {
                                         == HTLCErrorCode.GET_PROPOSAL_TX_INFO_ERROR) {
                                     // This is a common situation because it's impossible for both
                                     // parties to create proposals at the same time
-                                    logger.trace(
-                                            "Failed to handle current proposal: {}, path: {}, errorMessage: tx-info of proposal not found",
-                                            proposalId,
-                                            path);
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(
+                                                "Failed to handle current proposal: {}, path: {}, errorMessage: tx-info of proposal not found",
+                                                proposalId,
+                                                path);
+                                    }
                                 } else {
                                     logger.error(
                                             "Failed to handle current proposal: {}, path: {}, errorMessage: {}, internalMessage: {}",
@@ -76,7 +79,7 @@ public class HTLCJob implements Job {
 
         try {
             // wait until job is finished
-            semaphore.acquire();
+            semaphore.acquire(proposalIds.length);
         } catch (InterruptedException e) {
             logger.warn("Interrupted,", e);
             Thread.currentThread().interrupt();
