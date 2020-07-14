@@ -49,7 +49,7 @@ cross_roup_demo_test()
 {
     cd ${ROOT}
 
-    bash build_cross_group.sh n
+    bash build_cross_groups.sh n
 
     cd WeCross-Console/
     bash start.sh <<EOF
