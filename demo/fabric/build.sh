@@ -128,3 +128,5 @@ cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com
 cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem ${fabric_admin_org2_dir}/account.crt
 
 remove_mycc
+
+LOG_INFO "SUCCESS: Build Fabric demo finish."
