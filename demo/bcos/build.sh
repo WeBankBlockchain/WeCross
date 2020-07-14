@@ -97,6 +97,7 @@ EOF
 main()
 {
     build_bcos_chain
+    LOG_INFO "SUCCESS: Build FISCO BCOS demo finish."
 }
 
 main

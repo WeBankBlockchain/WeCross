@@ -87,6 +87,14 @@ check_bcos_avaliable()
     check_port_avaliable 8546 BCOS-RPC
 }
 
+check_wecross_avaliable()
+{
+    check_port_avaliable 8250 WeCross-8250-25500
+    check_port_avaliable 25500 WeCross-8250-25500
+    check_port_avaliable 8251 WeCross-8251-25501
+    check_port_avaliable 25501 WeCross-8251-25501
+}
+
 
 check_env()
 {
@@ -97,6 +105,7 @@ check_env()
     check_docker_service
     check_fabric_avaliable
     check_bcos_avaliable
+    check_wecross_avaliable
 }
 
 build_bcos()
