@@ -337,9 +337,9 @@ deploy_fabric_sample_resource()
     sed_i  's/8250/8251/g'  conf/application.toml
 
     bash start.sh <<EOF
-    fabricInstall payment.fabric.sacc fabric_admin_org1 1.0 Org1 GO_LANG
-    fabricInstall payment.fabric.sacc fabric_admin_org2 1.0 Org2 GO_LANG
-    fabricInstantiate payment.fabric.sacc fabric_admin 1.0 ["Org1","Org2"] GO_LANG policy.yaml ["a","10"]
+    fabricInstall payment.fabric.sacc fabric_admin_org1 Org1 contracts/chaincode/sacc 1.0 GO_LANG
+    fabricInstall payment.fabric.sacc fabric_admin_org2 Org2 contracts/chaincode/sacc 1.0 GO_LANG
+    fabricInstantiate payment.fabric.sacc fabric_admin ["Org1","Org2"] contracts/chaincode/sacc 1.0 GO_LANG policy.yaml ["a","10"]
 quit
 EOF
     # wait the chaincode instantiate
