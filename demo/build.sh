@@ -298,20 +298,32 @@ download_wecross()
 {
     # Download
     LOG_INFO "Download WeCross ..."
-    if [ -e download_wecross.sh ];then
-        bash download_wecross.sh -t v1.0.0-rc3
+
+    local name=./WeCross
+    if [ -d "${name}"  ]; then
+        LOG_INFO "${name} exists."
     else
-        bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0-rc3
+        if [ -e download_wecross.sh ];then
+            bash download_wecross.sh -t v1.0.0-rc3
+        else
+            bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0-rc3
+        fi
     fi
 }
 
 download_wecross_console()
 {
     LOG_INFO "Download WeCross Console ..."
-    if [ -e download_console.sh ];then
-        bash download_console.sh -t v1.0.0-rc3
+
+    local name=./WeCross-Console
+    if [ -d "${name}"  ]; then
+        LOG_INFO "${name} exists."
     else
-        bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_console.sh) -t v1.0.0-rc3
+        if [ -e download_console.sh ];then
+            bash download_console.sh -t v1.0.0-rc3
+        else
+            bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_console.sh) -t v1.0.0-rc3
+        fi
     fi
 }
 
