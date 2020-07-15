@@ -557,12 +557,12 @@ public class HTLCScheduler {
 
                     if (state) {
                         logger.info(
-                                "current proposal succeeded: {}, path: {}",
+                                "Current proposal succeeded: {}, path: {}",
                                 hash,
                                 htlcResource.getSelfPath());
                     } else {
                         logger.info(
-                                "current proposal failed: {}, path: {}",
+                                "Current proposal failed: {}, path: {}",
                                 hash,
                                 htlcResource.getSelfPath());
                     }
