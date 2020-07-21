@@ -18,6 +18,8 @@ import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.Chain;
+import com.webank.wecross.zone.Zone;
+import com.webank.wecross.zone.ZoneManager;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -223,10 +225,24 @@ public class ResourceURIHandler implements URIHandler {
                     }
                 case "customcommand":
                     {
-                        Chain chain =
-                                host.getZoneManager()
-                                        .getZone(path.getZone())
-                                        .getChain(path.getChain());
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("zone: {}, chain: {}", path.getZone(), path.getChain());
+                        }
+
+                        ZoneManager zoneManager = host.getZoneManager();
+                        Zone zone = zoneManager.getZone(path.getZone());
+                        if (Objects.isNull(zone)) {
+                            throw new WeCrossException(
+                                    WeCrossException.ErrorCode.INTERNAL_ERROR,
+                                    " zone not exist, zone: " + path.getZone());
+                        }
+
+                        Chain chain = zone.getChain(path.getChain());
+                        if (Objects.isNull(chain)) {
+                            throw new WeCrossException(
+                                    WeCrossException.ErrorCode.INTERNAL_ERROR,
+                                    " chain not exist, chain: " + path.getChain());
+                        }
 
                         if (chain == null) {
                             throw new WeCrossException(
@@ -245,6 +261,11 @@ public class ResourceURIHandler implements URIHandler {
 
                         String accountName = restRequest.getAccount();
                         Account account = accountManager.getAccount(accountName);
+                        if (Objects.isNull(account)) {
+                            throw new WeCrossException(
+                                    WeCrossException.ErrorCode.INTERNAL_ERROR,
+                                    " account not exist, account: " + accountName);
+                        }
 
                         chain.getDriver()
                                 .asyncCustomCommand(
