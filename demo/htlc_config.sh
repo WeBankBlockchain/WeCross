@@ -152,6 +152,9 @@ EOF
 
 restart_router()
 {
+    # print running env
+    netstat -napl|grep 20200
+
     LOG_INFO "Restart routers ..."
 
     cd ${ROOT}/routers-payment/127.0.0.1-8250-25500/
