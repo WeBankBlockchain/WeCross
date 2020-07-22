@@ -57,7 +57,6 @@ public class XATransactionManagerTest {
                                 for (String path : request.getArgs()) {
                                     paths.add(path);
                                 }
-                                Assert.assertEquals(request.getArgs().length, paths.size());
                                 if (request.getArgs()[1].startsWith("a.b")) {
                                     Assert.assertTrue(paths.contains("a.b.c1"));
                                     Assert.assertTrue(paths.contains("a.b.c2"));
@@ -83,9 +82,9 @@ public class XATransactionManagerTest {
 
         ZoneManager zoneManager = Mockito.mock(ZoneManager.class);
         Mockito.when(zoneManager.getZone(Mockito.any(Path.class))).thenReturn(zone);
-        Mockito.when(zoneManager.getResource(Path.decode("a.b.WeCrossProxy")))
+        Mockito.when(zoneManager.fetchResource(Path.decode("a.b.WeCrossProxy")))
                 .thenReturn(proxyResource);
-        Mockito.when(zoneManager.getResource(Path.decode("a.c.WeCrossProxy")))
+        Mockito.when(zoneManager.fetchResource(Path.decode("a.c.WeCrossProxy")))
                 .thenReturn(proxyResource);
 
         XATransactionManager xaTransactionManager = new XATransactionManager();
@@ -139,42 +138,6 @@ public class XATransactionManagerTest {
                         Assert.assertEquals(-1, result);
                     }
                 });
-
-        /*
-               Mockito.doAnswer(
-                               new Answer<Object>() {
-                                   @Override
-                                   public Object answer(InvocationOnMock invocation) throws Throwable {
-                                       TransactionContext<TransactionRequest> context =
-                                               invocation.getArgument(0);
-                                       Resource.Callback callback = invocation.getArgument(1);
-
-                                       TransactionResponse transactionResponse = new
-        TransactionResponse();
-                                       transactionResponse.setErrorCode(0);
-                                       transactionResponse.setErrorMessage("");
-                                       transactionResponse.setResult(new String[] {"100"});
-
-                                       callback.onTransactionResponse(null, transactionResponse);
-
-                                       return null;
-                                   }
-                               })
-                       .when(proxyResource)
-                       .asyncSendTransaction(Mockito.any(), Mockito.any());
-
-               xaTransactionManager.asyncPrepare(
-                       transactionID,
-                       accounts,
-                       resources,
-                       new Callback() {
-                           @Override
-                           public void onResponse(Exception e, int result) {
-                               Assert.assertNull(e);
-                               Assert.assertEquals(100, result);
-                           }
-                       });
-                       */
     }
 
     @Test
@@ -222,9 +185,9 @@ public class XATransactionManagerTest {
 
         ZoneManager zoneManager = Mockito.mock(ZoneManager.class);
         Mockito.when(zoneManager.getZone(Mockito.any(Path.class))).thenReturn(zone);
-        Mockito.when(zoneManager.getResource(Path.decode("a.b.WeCrossProxy")))
+        Mockito.when(zoneManager.fetchResource(Path.decode("a.b.WeCrossProxy")))
                 .thenReturn(proxyResource);
-        Mockito.when(zoneManager.getResource(Path.decode("a.c.WeCrossProxy")))
+        Mockito.when(zoneManager.fetchResource(Path.decode("a.c.WeCrossProxy")))
                 .thenReturn(proxyResource);
 
         XATransactionManager xaTransactionManager = new XATransactionManager();
@@ -278,42 +241,6 @@ public class XATransactionManagerTest {
                         Assert.assertEquals(-1, result);
                     }
                 });
-
-        /*
-               Mockito.doAnswer(
-                               new Answer<Object>() {
-                                   @Override
-                                   public Object answer(InvocationOnMock invocation) throws Throwable {
-                                       TransactionContext<TransactionRequest> context =
-                                               invocation.getArgument(0);
-                                       Resource.Callback callback = invocation.getArgument(1);
-
-                                       TransactionResponse transactionResponse = new
-        TransactionResponse();
-                                       transactionResponse.setErrorCode(0);
-                                       transactionResponse.setErrorMessage("");
-                                       transactionResponse.setResult(new String[] {"100"});
-
-                                       callback.onTransactionResponse(null, transactionResponse);
-
-                                       return null;
-                                   }
-                               })
-                       .when(proxyResource)
-                       .asyncSendTransaction(Mockito.any(), Mockito.any());
-
-               xaTransactionManager.asyncCommit(
-                       transactionID,
-                       accounts,
-                       resources,
-                       new Callback() {
-                           @Override
-                           public void onResponse(Exception e, int result) {
-                               Assert.assertNull(e);
-                               Assert.assertEquals(100, result);
-                           }
-                       });
-                       */
     }
 
     @Test
@@ -361,9 +288,9 @@ public class XATransactionManagerTest {
 
         ZoneManager zoneManager = Mockito.mock(ZoneManager.class);
         Mockito.when(zoneManager.getZone(Mockito.any(Path.class))).thenReturn(zone);
-        Mockito.when(zoneManager.getResource(Path.decode("a.b.WeCrossProxy")))
+        Mockito.when(zoneManager.fetchResource(Path.decode("a.b.WeCrossProxy")))
                 .thenReturn(proxyResource);
-        Mockito.when(zoneManager.getResource(Path.decode("a.c.WeCrossProxy")))
+        Mockito.when(zoneManager.fetchResource(Path.decode("a.c.WeCrossProxy")))
                 .thenReturn(proxyResource);
 
         XATransactionManager xaTransactionManager = new XATransactionManager();
