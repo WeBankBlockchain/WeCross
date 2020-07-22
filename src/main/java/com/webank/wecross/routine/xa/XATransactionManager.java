@@ -6,7 +6,6 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.TransactionRequest;
-import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -52,8 +51,11 @@ public class XATransactionManager {
                         // all finished
                         if (fatals.size() > 0) {
                             logger.error("Failed in progress", fatals);
-
-                            callback.onResponse(new WeCrossException(-1, "Failed in progress"), -1);
+                            StringBuffer errorMsg = new StringBuffer("errors:");
+                            for (Exception e : fatals) {
+                                errorMsg.append(" " + e.getMessage());
+                            }
+                            callback.onResponse(new Exception(errorMsg.toString()), -1);
                         } else {
                             callback.onResponse(null, 0);
                         }
@@ -77,9 +79,6 @@ public class XATransactionManager {
 
             for (Map.Entry<String, Set<Path>> entry : zone2Path.entrySet()) {
                 Path chainPath = entry.getValue().iterator().next();
-
-                Chain chain = zoneManager.getZone(chainPath).getChain(chainPath);
-
                 // send prepare transaction
                 TransactionRequest transactionRequest = new TransactionRequest();
                 transactionRequest.setMethod("startTransaction");
@@ -120,7 +119,7 @@ public class XATransactionManager {
                         account,
                         (error, response) -> {
                             if (error != null) {
-                                logger.error("Send prepare transaction system error", error);
+                                logger.error("startTransaction failed, ", error);
 
                                 reduceCallback.onResponse(error, -1);
                                 return;
@@ -128,20 +127,18 @@ public class XATransactionManager {
 
                             if (response.getErrorCode() != 0) {
                                 logger.error(
-                                        "Send startTransaction chain error: {} {}",
+                                        "startTransaction failed: {} {}",
                                         response.getErrorCode(),
                                         response.getErrorMessage());
 
                                 reduceCallback.onResponse(
-                                        new WeCrossException(
-                                                -1, "Send startTransaction chain error"),
-                                        -1);
+                                        new Exception(response.getErrorMessage()), -1);
                                 return;
                             }
 
                             int errorCode = Integer.parseInt(response.getResult()[0]);
                             if (errorCode != 0) {
-                                logger.error("Send prepare transaction proxy error: {}", errorCode);
+                                logger.error("startTransaction failed: {}", errorCode);
                             }
 
                             reduceCallback.onResponse(null, errorCode);
@@ -150,7 +147,7 @@ public class XATransactionManager {
         } catch (Exception e) {
             logger.error("Prepare error", e);
 
-            callback.onResponse(new WeCrossException(-1, "Prepare error", e), -1);
+            callback.onResponse(new Exception("Undefined error"), -1);
         }
     };
 
@@ -165,8 +162,6 @@ public class XATransactionManager {
             Callback reduceCallback = getReduceCallback(chains.size(), callback);
 
             for (Path chainPath : chains) {
-                Chain chain = zoneManager.getZone(chainPath).getChain(chainPath);
-
                 // send prepare transaction
                 TransactionRequest transactionRequest = new TransactionRequest();
                 transactionRequest.setMethod("commitTransaction");
@@ -192,18 +187,26 @@ public class XATransactionManager {
                         account,
                         (error, response) -> {
                             if (error != null) {
-                                logger.error("Send commit transaction error", error);
+                                logger.error("commitTransaction failed, ", error);
+
+                                reduceCallback.onResponse(error, -1);
+                                return;
+                            }
+
+                            if (response.getErrorCode() != 0) {
+                                logger.error(
+                                        "commitTransaction failed: {} {}",
+                                        response.getErrorCode(),
+                                        response.getErrorMessage());
 
                                 reduceCallback.onResponse(
-                                        new WeCrossException(
-                                                -1, "Send commit transaction error", error),
-                                        -1);
+                                        new Exception(response.getErrorMessage()), -1);
                                 return;
                             }
 
                             int errorCode = Integer.parseInt(response.getResult()[0]);
                             if (errorCode != 0) {
-                                logger.error("Send prepare transaction proxy error: {}", errorCode);
+                                logger.error("commitTransaction failed: {}", errorCode);
                             }
 
                             reduceCallback.onResponse(null, errorCode);
@@ -212,7 +215,7 @@ public class XATransactionManager {
         } catch (Exception e) {
             logger.error("Commit error", e);
 
-            callback.onResponse(new WeCrossException(-1, "Commit error", e), -1);
+            callback.onResponse(new Exception("Undefined error"), -1);
         }
     };
 
@@ -225,8 +228,6 @@ public class XATransactionManager {
             Callback reduceCallback = getReduceCallback(chains.size(), callback);
 
             for (Path chainPath : chains) {
-                Chain chain = zoneManager.getZone(chainPath).getChain(chainPath);
-
                 // send rollback transaction
                 TransactionRequest transactionRequest = new TransactionRequest();
                 transactionRequest.setMethod("rollbackTransaction");
@@ -252,18 +253,26 @@ public class XATransactionManager {
                         account,
                         (error, response) -> {
                             if (error != null) {
-                                logger.error("Send rollback transaction error", error);
+                                logger.error("rollbackTransaction failed, ", error);
+
+                                reduceCallback.onResponse(error, -1);
+                                return;
+                            }
+
+                            if (response.getErrorCode() != 0) {
+                                logger.error(
+                                        "rollbackTransaction failed: {} {}",
+                                        response.getErrorCode(),
+                                        response.getErrorMessage());
 
                                 reduceCallback.onResponse(
-                                        new WeCrossException(
-                                                -1, "Send rollback transaction error", error),
-                                        -1);
+                                        new Exception(response.getErrorMessage()), -1);
                                 return;
                             }
 
                             int errorCode = Integer.parseInt(response.getResult()[0]);
                             if (errorCode != 0) {
-                                logger.error("Send prepare transaction proxy error: {}", errorCode);
+                                logger.error("rollbackTransaction failed: {}", errorCode);
                             }
 
                             reduceCallback.onResponse(null, errorCode);
@@ -272,7 +281,7 @@ public class XATransactionManager {
         } catch (Exception e) {
             logger.error("Rollback error", e);
 
-            callback.onResponse(new WeCrossException(-1, "Rollback error", e), -1);
+            callback.onResponse(new Exception("Undefined error"), -1);
         }
     }
 
@@ -306,7 +315,7 @@ public class XATransactionManager {
                         }
 
                         if (infos.size() < size) {
-                            logger.warn("GetTransactionInfo missing some steps");
+                            logger.warn("Get transactionInfo missing some steps");
                         }
 
                         List<XATransactionStep> allSteps = new ArrayList<XATransactionStep>();
@@ -339,8 +348,6 @@ public class XATransactionManager {
                     getTransactionInfoReduceCallback(chains.size(), callback);
 
             for (Path path : chains) {
-                Chain chain = zoneManager.getZone(path).getChain(path);
-
                 TransactionRequest transactionRequest = new TransactionRequest();
                 transactionRequest.setMethod("getTransactionInfo");
                 String[] args = new String[] {transactionID};
@@ -349,7 +356,7 @@ public class XATransactionManager {
 
                 Path proxyPath = new Path(path);
                 proxyPath.setResource("WeCrossProxy");
-                Resource resource = zoneManager.getResource(proxyPath);
+                Resource resource = zoneManager.fetchResource(proxyPath);
 
                 Account account = accounts.get(resource.getStubType());
                 if (Objects.isNull(account)) {

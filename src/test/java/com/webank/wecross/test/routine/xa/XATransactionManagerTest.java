@@ -454,9 +454,9 @@ public class XATransactionManagerTest {
 
         ZoneManager zoneManager = Mockito.mock(ZoneManager.class);
         Mockito.when(zoneManager.getZone(Mockito.any(Path.class))).thenReturn(zone);
-        Mockito.when(zoneManager.getResource(Path.decode("a.b.WeCrossProxy")))
+        Mockito.when(zoneManager.fetchResource(Path.decode("a.b.WeCrossProxy")))
                 .thenReturn(proxyResource);
-        Mockito.when(zoneManager.getResource(Path.decode("a.c.WeCrossProxy")))
+        Mockito.when(zoneManager.fetchResource(Path.decode("a.c.WeCrossProxy")))
                 .thenReturn(proxyResource);
 
         XATransactionManager xaTransactionManager = new XATransactionManager();

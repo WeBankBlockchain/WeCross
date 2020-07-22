@@ -82,4 +82,24 @@ public class RestRequest<T> {
     public void setData(T data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        return "RestRequest{"
+                + "version='"
+                + version
+                + '\''
+                + ", path='"
+                + path
+                + '\''
+                + ", method='"
+                + method
+                + '\''
+                + ", account='"
+                + account
+                + '\''
+                + ", data="
+                + data
+                + '}';
+    }
 }
