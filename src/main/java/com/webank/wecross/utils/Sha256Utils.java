@@ -4,7 +4,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.bouncycastle.util.encoders.Hex;
 
-public class HashUtils {
+public class Sha256Utils {
     /**
      * Generates SHA-256 digest for the given {@code input}.
      *

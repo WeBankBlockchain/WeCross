@@ -6,7 +6,7 @@ import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.ResourceInfo;
-import com.webank.wecross.utils.HashUtils;
+import com.webank.wecross.utils.Sha256Utils;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +96,7 @@ public class ChainInfo {
         } catch (Exception e) {
             throw new WeCrossException(GET_CHAIN_CHECKSUM_ERROR, e.getMessage(), e.getCause());
         }
-        String checksum = HashUtils.sha256String(genesisBlockHeader);
+        String checksum = Sha256Utils.sha256String(genesisBlockHeader);
         return checksum;
     }
 }
