@@ -69,7 +69,7 @@ public class XATransactionManager {
             Set<Path> resources,
             Callback callback) {
         try {
-            logger.info("Start transaction, accounts: {}, resources: {}", accounts, resources);
+            logger.info("Start transaction, resources: {}", resources);
 
             Map<String, Set<Path>> zone2Path = getChainPaths(resources);
 
@@ -160,7 +160,7 @@ public class XATransactionManager {
             Set<Path> chains,
             Callback callback) {
         try {
-            logger.info("Commit transaction, accounts: {}, chains: {}", accounts, chains);
+            logger.info("Commit transaction, chains: {}", chains);
 
             Callback reduceCallback = getReduceCallback(chains.size(), callback);
 

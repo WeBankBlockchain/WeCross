@@ -21,7 +21,7 @@ public class URIHandlerDispatcherTest {
 
         URIHandlerDispatcher uriHandlerDispatcher = new URIHandlerDispatcher();
         uriHandlerDispatcher.initializeRequestMapper(host);
-        Assert.assertTrue(uriHandlerDispatcher.getRequestURIMapper().size() == 12);
+        Assert.assertTrue(uriHandlerDispatcher.getRequestURIMapper().size() == 15);
 
         Assert.assertTrue(
                 Objects.nonNull(
