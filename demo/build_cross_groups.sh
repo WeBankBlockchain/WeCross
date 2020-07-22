@@ -333,6 +333,9 @@ EOF
     config_router_8250 ${ROOT}/routers-payment/127.0.0.1-8250-25500/
     config_router_8251 ${ROOT}/routers-payment/127.0.0.1-8251-25501/
 
+    # print running env
+    netstat -napl|grep 20200
+
     # Start up routers
     cd ${ROOT}/routers-payment/127.0.0.1-8250-25500/
     bash start.sh
