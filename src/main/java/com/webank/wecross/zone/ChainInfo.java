@@ -99,4 +99,19 @@ public class ChainInfo {
         String checksum = Sha256Utils.sha256String(genesisBlockHeader);
         return checksum;
     }
+
+    @Override
+    public String toString() {
+        return "ChainInfo{"
+                + "name='"
+                + name
+                + '\''
+                + ", stubType='"
+                + stubType
+                + '\''
+                + ", checksum='"
+                + checksum
+                + '\''
+                + '}';
+    }
 }
