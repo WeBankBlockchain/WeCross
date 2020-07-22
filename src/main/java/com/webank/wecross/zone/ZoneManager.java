@@ -191,6 +191,16 @@ public class ZoneManager {
                     chain.setBlockHeaderManager(resourceBlockHeaderManager);
 
                     zone.getChains().put(chainPath.getChain(), chain);
+                } else {
+                    // verify checksum
+                    ChainInfo oldChainInfo = chain.getChainInfo();
+                    if (!oldChainInfo.getChecksum().equals(chainInfo.getChecksum())) {
+                        logger.error(
+                                "Chain checksum is not the same: old:{}, receive:{}",
+                                oldChainInfo,
+                                chainInfo);
+                        continue;
+                    }
                 }
 
                 for (ResourceInfo resourceInfo : chainInfo.getResources()) {
