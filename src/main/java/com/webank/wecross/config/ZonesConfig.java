@@ -18,6 +18,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,6 +115,16 @@ public class ZonesConfig {
                 throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
             }
 
+            String configureChainName = stubToml.getString("common.name");
+            if (Objects.isNull(configureChainName) || !chainName.equals(configureChainName)) {
+                String errorMessage =
+                        "name = '"
+                                + configureChainName
+                                + "' in [common] item is not the same as the dir name: "
+                                + chainName;
+                throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
+            }
+
             StubFactory stubFactory = stubManager.getStubFactory(type);
             if (stubFactory == null) {
                 logger.error("Can not find stub type: {}", type);
@@ -128,15 +139,15 @@ public class ZonesConfig {
                 throw new WeCrossException(-1, "Init localConnection failed");
             }
 
+            Driver driver = stubFactory.newDriver();
             List<ResourceInfo> resources = localConnection.getResources();
+            String checksum = ChainInfo.buildChecksum(driver, localConnection);
 
             ChainInfo chainInfo = new ChainInfo();
             chainInfo.setName(chainName);
             chainInfo.setProperties(localConnection.getProperties());
             chainInfo.setStubType(type);
             chainInfo.setResources(resources);
-
-            Driver driver = stubFactory.newDriver();
 
             Chain chain =
                     new Chain(
