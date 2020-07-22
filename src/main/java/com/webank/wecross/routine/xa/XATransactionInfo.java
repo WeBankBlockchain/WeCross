@@ -67,4 +67,25 @@ public class XATransactionInfo {
     public void setTransactionSteps(List<XATransactionStep> transactionSteps) {
         this.transactionSteps = transactionSteps;
     }
+
+    @Override
+    public String toString() {
+        return "XATransactionInfo{"
+                + "transactionID='"
+                + transactionID
+                + '\''
+                + ", status="
+                + status
+                + ", startTimestamp="
+                + startTimestamp
+                + ", commitTimestamp="
+                + commitTimestamp
+                + ", rollbackTimestamp="
+                + rollbackTimestamp
+                + ", paths="
+                + paths
+                + ", transactionSteps="
+                + transactionSteps
+                + '}';
+    }
 }

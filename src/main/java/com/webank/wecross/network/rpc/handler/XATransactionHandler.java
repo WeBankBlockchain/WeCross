@@ -6,7 +6,6 @@ import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
-import com.webank.wecross.routine.xa.XATransactionInfo;
 import com.webank.wecross.routine.xa.XATransactionManager;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
@@ -54,18 +53,6 @@ public class XATransactionHandler implements URIHandler {
         }
     }
 
-    public static class XAStartTransactionResponse {
-        private int result;
-
-        public int getResult() {
-            return result;
-        }
-
-        public void setResult(int result) {
-            this.result = result;
-        }
-    }
-
     public static class XACommitTransactionRequest {
         private String transactionID;
         private List<String> paths;
@@ -93,18 +80,6 @@ public class XATransactionHandler implements URIHandler {
 
         public void setAccounts(List<String> accounts) {
             this.accounts = accounts;
-        }
-    }
-
-    public static class XACommitTransactionResponse {
-        private int result;
-
-        public int getResult() {
-            return result;
-        }
-
-        public void setResult(int result) {
-            this.result = result;
         }
     }
 
@@ -138,21 +113,9 @@ public class XATransactionHandler implements URIHandler {
         }
     }
 
-    public static class XARollbackTransactionResponse {
-        private int result;
-
-        public int getResult() {
-            return result;
-        }
-
-        public void setResult(int result) {
-            this.result = result;
-        }
-    }
-
     public static class XAGetTransactionInfoRequest {
         private String transactionID;
-        private List<String> chains;
+        private List<String> paths;
         private List<String> accounts;
 
         public String getTransactionID() {
@@ -163,12 +126,12 @@ public class XATransactionHandler implements URIHandler {
             this.transactionID = transactionID;
         }
 
-        public List<String> getChains() {
-            return chains;
+        public List<String> getPaths() {
+            return paths;
         }
 
-        public void setChains(List<String> chains) {
-            this.chains = chains;
+        public void setPaths(List<String> paths) {
+            this.paths = paths;
         }
 
         public List<String> getAccounts() {
@@ -177,18 +140,6 @@ public class XATransactionHandler implements URIHandler {
 
         public void setAccounts(List<String> accounts) {
             this.accounts = accounts;
-        }
-    }
-
-    public static class XAGetTransactionInfoResponse {
-        private XATransactionInfo info;
-
-        public XATransactionInfo getInfo() {
-            return info;
-        }
-
-        public void setInfo(XATransactionInfo info) {
-            this.info = info;
         }
     }
 
@@ -242,19 +193,16 @@ public class XATransactionHandler implements URIHandler {
 
                                         restResponse.setErrorCode(
                                                 NetworkQueryStatus.TRANSACTION_ERROR);
-                                        restResponse.setMessage("Error while startTransaction");
+                                        restResponse.setMessage(e.getMessage());
                                         callback.onResponse(restResponse);
 
                                         return;
                                     }
 
-                                    XAStartTransactionResponse response =
-                                            new XAStartTransactionResponse();
-                                    response.setResult(result);
-
+                                    restResponse.setData(result);
                                     callback.onResponse(restResponse);
                                 });
-                        break;
+                        return;
                     }
                 case "commitTransaction":
                     {
@@ -298,20 +246,17 @@ public class XATransactionHandler implements URIHandler {
 
                                         restResponse.setErrorCode(
                                                 NetworkQueryStatus.TRANSACTION_ERROR);
-                                        restResponse.setMessage("Error while startTransaction");
+                                        restResponse.setMessage(e.getMessage());
                                         callback.onResponse(restResponse);
 
                                         return;
                                     }
 
-                                    XACommitTransactionResponse response =
-                                            new XACommitTransactionResponse();
-                                    response.setResult(result);
-
+                                    restResponse.setData(result);
                                     callback.onResponse(restResponse);
                                 });
 
-                        break;
+                        return;
                     }
                 case "rollbackTransaction":
                     {
@@ -355,20 +300,17 @@ public class XATransactionHandler implements URIHandler {
 
                                         restResponse.setErrorCode(
                                                 NetworkQueryStatus.TRANSACTION_ERROR);
-                                        restResponse.setMessage("Error while startTransaction");
+                                        restResponse.setMessage(e.getMessage());
                                         callback.onResponse(restResponse);
 
                                         return;
                                     }
 
-                                    XARollbackTransactionResponse response =
-                                            new XARollbackTransactionResponse();
-                                    response.setResult(result);
-
+                                    restResponse.setData(result);
                                     callback.onResponse(restResponse);
                                 });
 
-                        break;
+                        return;
                     }
                 case "getTransactionInfo":
                     {
@@ -389,7 +331,7 @@ public class XATransactionHandler implements URIHandler {
                         Set<Path> paths =
                                 xaRequest
                                         .getData()
-                                        .getChains()
+                                        .getPaths()
                                         .parallelStream()
                                         .map(
                                                 (s) -> {
@@ -412,29 +354,35 @@ public class XATransactionHandler implements URIHandler {
 
                                         restResponse.setErrorCode(
                                                 NetworkQueryStatus.TRANSACTION_ERROR);
-                                        restResponse.setMessage("Error while startTransaction");
+                                        restResponse.setMessage(e.getMessage());
                                         callback.onResponse(restResponse);
 
                                         return;
                                     }
 
-                                    XAGetTransactionInfoResponse response =
-                                            new XAGetTransactionInfoResponse();
-                                    response.setInfo(info);
-
+                                    restResponse.setData(info.toString());
                                     callback.onResponse(restResponse);
                                 });
 
+                        return;
+                    }
+                default:
+                    {
+                        logger.warn("Unsupported method: {}", method);
+                        restResponse.setErrorCode(NetworkQueryStatus.METHOD_ERROR);
+                        restResponse.setMessage("Unsupported method: " + method);
                         break;
                     }
             }
+
         } catch (Exception e) {
             logger.error("Error while process xa", e);
 
             restResponse.setErrorCode(NetworkQueryStatus.TRANSACTION_ERROR);
-            restResponse.setMessage("Error while startTransaction");
-            callback.onResponse(restResponse);
+            restResponse.setMessage("Undefined error");
         }
+
+        callback.onResponse(restResponse);
     }
 
     public AccountManager getAccountManager() {
