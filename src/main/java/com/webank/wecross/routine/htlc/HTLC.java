@@ -22,28 +22,21 @@ public interface HTLC {
      * lock counterpart asset with transaction verification
      *
      * @param htlcResource counterpart htlc resource
-     * @param address counterpart htlc contract address
      * @param hash hash of secret, also the proposal id
      * @param callback a callback interface
      */
-    void lockCounterparty(
-            HTLCResource htlcResource, String address, String hash, Callback callback);
+    void lockCounterparty(HTLCResource htlcResource, String hash, Callback callback);
 
     /**
      * unlock counterpart asset with transaction verification
      *
      * @param htlcResource counterpart htlc resource
-     * @param address counterpart htlc contract address
      * @param hash hash of secret, also the proposal id
      * @param secret secret
      * @param callback a callback interface
      */
     void unlockCounterparty(
-            HTLCResource htlcResource,
-            String address,
-            String hash,
-            String secret,
-            Callback callback);
+            HTLCResource htlcResource, String hash, String secret, Callback callback);
 
     /**
      * rollback self asset

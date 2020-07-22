@@ -105,8 +105,6 @@ public class ZoneManager {
 
                             resource.setTemporary(true);
 
-                            // TODO: comment?
-                            // chain.getResources().put(path.getResource(), resource);
                             return resource;
                         } else {
                             return null;

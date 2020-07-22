@@ -23,24 +23,32 @@ matrix:
             os: linux
             dist: xenial
             sudo: required
+            script: |
+                bash .ci/ci_check.sh && bash .ci/ci_cross_groups_demo_check.sh
 
         -   language: java
             jdk: openjdk9
             os: linux
             dist: xenial
             sudo: required
+            script: |
+                bash .ci/ci_check.sh && bash .ci/ci_demo_check.sh
 
         -   language: java
             jdk: openjdk10
             os: linux
             dist: xenial
             sudo: required
+            script: |
+                bash .ci/ci_check.sh && bash .ci/ci_cross_groups_demo_check.sh
 
         -   language: java
             jdk: openjdk11
             os: linux
             dist: xenial
             sudo: required
+            script: |
+                bash .ci/ci_check.sh && bash .ci/ci_demo_check.sh
 
         #-   language: java
         #    jdk: openjdk11

@@ -5,6 +5,8 @@ import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.VerifiedTransaction;
 import java.math.BigInteger;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -263,17 +265,9 @@ public class HTLCScheduler {
                     }
 
                     String[] info0 = selfTxInfo.split(RoutineDefault.SPLIT_REGEX);
-                    /*
                     VerifiedTransaction verifiedTransaction0 =
-                            selfResource
-                                    .getDriver()
-                                    .getVerifiedTransaction(
-                                            info0[0],
-                                            Long.parseLong(info0[1]),
-                                            selfResource.getBlockHeaderManager(),
-                                            selfResource.chooseConnection());
-                                            */
-                    VerifiedTransaction verifiedTransaction0 = null; // TODO fix this
+                            getVerifiedTransaction(
+                                    selfResource, info0[0], Long.parseLong(info0[1]));
 
                     if (verifiedTransaction0 == null) {
                         logger.error(
@@ -333,27 +327,19 @@ public class HTLCScheduler {
                                         new VerifyData(
                                                 Long.parseLong(info1[1]),
                                                 info1[0],
-                                                selfResource.getCounterpartyAddress(),
-                                                "newContract",
+                                                "newProposal",
                                                 args,
                                                 output);
 
-                                /*
                                 VerifiedTransaction verifiedTransaction1 =
-                                        counterpartyResource
-                                                .getDriver()
-                                                .getVerifiedTransaction(
-                                                        info1[0],
-                                                        Long.parseLong(info1[1]),
-                                                        counterpartyResource
-                                                                .getBlockHeaderManager(),
-                                                        counterpartyResource.chooseConnection());
-                                                        */
-                                VerifiedTransaction verifiedTransaction1 = null; // TODO fix this
+                                        getVerifiedTransaction(
+                                                counterpartyResource,
+                                                info1[0],
+                                                Long.parseLong(info1[1]));
 
                                 if (verifiedTransaction1 == null) {
                                     logger.error(
-                                            "self verified transaction not found, hash: {}, path: {}",
+                                            "counterparty verified transaction not found, hash: {}, path: {}",
                                             hash,
                                             selfResource.getSelfPath());
                                     callback.onReturn(
@@ -373,6 +359,39 @@ public class HTLCScheduler {
                                 callback.onReturn(null, verifyData.verify(verifiedTransaction1));
                             });
                 });
+    }
+
+    private VerifiedTransaction getVerifiedTransaction(
+            HTLCResource htlcResource, String txHash, long blockNum) {
+        CompletableFuture<VerifiedTransaction> verifiedTransactionFuture =
+                new CompletableFuture<>();
+
+        htlcResource
+                .getDriver()
+                .asyncGetVerifiedTransaction(
+                        htlcResource.getSelfPath(),
+                        txHash,
+                        blockNum,
+                        htlcResource.getBlockHeaderManager(),
+                        htlcResource.chooseConnection(),
+                        (e, verifiedTransaction) -> {
+                            if (e != null) {
+                                logger.error("get verifiedTransaction0Future exception: " + e);
+                                verifiedTransactionFuture.complete(null);
+                            } else {
+
+                                verifiedTransactionFuture.complete(verifiedTransaction);
+                            }
+                        });
+
+        VerifiedTransaction verifiedTransaction = null;
+        try {
+            verifiedTransaction = verifiedTransactionFuture.get(30, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            logger.error("get verifiedTransaction0Future timeout: " + e);
+        }
+
+        return verifiedTransaction;
     }
 
     private void execInitiatorProcess(
@@ -442,7 +461,6 @@ public class HTLCScheduler {
         if (!proposal.isCounterpartyLocked()) {
             htlc.lockCounterparty(
                     counterpartyResource,
-                    selfResource.getCounterpartyAddress(),
                     hash,
                     (exception, result) -> {
                         if (exception != null) {
@@ -499,7 +517,6 @@ public class HTLCScheduler {
 
                     htlc.unlockCounterparty(
                             counterpartyResource,
-                            selfResource.getCounterpartyAddress(),
                             hash,
                             proposal.getSecret(),
                             (exception1, result1) -> {
@@ -540,12 +557,12 @@ public class HTLCScheduler {
 
                     if (state) {
                         logger.info(
-                                "current proposal succeeded: {}, path: {}",
+                                "Current proposal succeeded: {}, path: {}",
                                 hash,
                                 htlcResource.getSelfPath());
                     } else {
                         logger.info(
-                                "current proposal failed: {}, path: {}",
+                                "Current proposal failed: {}, path: {}",
                                 hash,
                                 htlcResource.getSelfPath());
                     }

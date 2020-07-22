@@ -37,6 +37,9 @@ public class HTLCResource extends Resource {
     private static final Set<String> P2P_ACCESS_WHITE_LIST =
             new HashSet<String>() {
                 {
+                    // TODO: optimize this, this method is not belongs to HTLC
+                    add("selectByName");
+
                     add("lock");
                     add("unlock");
                     add("balanceOf");
@@ -206,7 +209,6 @@ public class HTLCResource extends Resource {
                 new VerifyData(
                         transactionResponse.getBlockNumber(),
                         transactionResponse.getHash(),
-                        counterpartyAddress,
                         RoutineDefault.UNLOCK_METHOD,
                         args,
                         new String[] {RoutineDefault.SUCCESS_FLAG});

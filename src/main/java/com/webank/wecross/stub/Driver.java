@@ -108,27 +108,25 @@ public interface Driver {
      * @param blockNumber
      * @return BlockHeader
      */
+    public void asyncGetBlockHeader(
+            long blockNumber, Connection connection, GetBlockHeaderCallback callback);
+
     public interface GetBlockHeaderCallback {
         public void onResponse(Exception e, byte[] blockHeader);
     }
 
-    public void asyncGetBlockHeader(
-            long blockNumber, Connection connection, GetBlockHeaderCallback callback);
-
     /**
      * Get verified transaction info of the Chain
      *
+     * @param expectPath
      * @param transactionHash
      * @param blockNumber
      * @param blockHeaderManager
      * @param connection
      * @return null if the transaction has not been verified
      */
-    public interface GetVerifiedTransactionCallback {
-        public void onResponse(Exception e, VerifiedTransaction verifiedTransaction);
-    }
-
     public void asyncGetVerifiedTransaction(
+            Path expectPath,
             String transactionHash,
             long blockNumber,
             BlockHeaderManager blockHeaderManager,
@@ -137,6 +135,10 @@ public interface Driver {
 
     interface CustomCommandCallback {
         void onResponse(Exception error, Object response);
+    }
+
+    public interface GetVerifiedTransactionCallback {
+        public void onResponse(Exception e, VerifiedTransaction verifiedTransaction);
     }
 
     /**

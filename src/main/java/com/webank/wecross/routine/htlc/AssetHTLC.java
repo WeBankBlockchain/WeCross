@@ -45,34 +45,21 @@ public class AssetHTLC implements HTLC {
     }
 
     @Override
-    public void lockCounterparty(
-            HTLCResource htlcResource, String address, String hash, Callback callback) {
+    public void lockCounterparty(HTLCResource htlcResource, String hash, Callback callback) {
         transferWithValidation(
-                htlcResource, address, RoutineDefault.LOCK_METHOD, new String[] {hash}, callback);
+                htlcResource, RoutineDefault.LOCK_METHOD, new String[] {hash}, callback);
     }
 
     @Override
     public void unlockCounterparty(
-            HTLCResource htlcResource,
-            String address,
-            String hash,
-            String secret,
-            Callback callback) {
+            HTLCResource htlcResource, String hash, String secret, Callback callback) {
         transferWithValidation(
-                htlcResource,
-                address,
-                RoutineDefault.UNLOCK_METHOD,
-                new String[] {hash, secret},
-                callback);
+                htlcResource, RoutineDefault.UNLOCK_METHOD, new String[] {hash, secret}, callback);
     }
 
     // lock or unlock with validation
     private void transferWithValidation(
-            HTLCResource htlcResource,
-            String address,
-            String method,
-            String[] args,
-            Callback callback) {
+            HTLCResource htlcResource, String method, String[] args, Callback callback) {
         TransactionRequest request = new TransactionRequest(method, args);
         htlcResource.asyncSendTransaction(
                 request,
@@ -129,7 +116,6 @@ public class AssetHTLC implements HTLC {
                                 new VerifyData(
                                         transactionResponse.getBlockNumber(),
                                         transactionResponse.getHash(),
-                                        address,
                                         method,
                                         args,
                                         new String[] {RoutineDefault.SUCCESS_FLAG});
@@ -162,9 +148,9 @@ public class AssetHTLC implements HTLC {
         BlockHeaderManager blockHeaderManager = resource.getBlockHeaderManager();
         Connection connection = resource.chooseConnection();
         Driver driver = resource.getDriver();
-
         CompletableFuture<VerifiedTransaction> future = new CompletableFuture<>();
         driver.asyncGetVerifiedTransaction(
+                resource.getPath(),
                 txHash,
                 blockNumber,
                 blockHeaderManager,
