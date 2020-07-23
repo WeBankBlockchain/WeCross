@@ -290,7 +290,7 @@ public class ZoneManager {
                     chain.stop();
                     zone.getChains().remove(chainPath.getChain());
                 }
-                
+
                 if (zone.getChains().isEmpty()) {
                     zones.remove(chainPath.getZone());
                 }
