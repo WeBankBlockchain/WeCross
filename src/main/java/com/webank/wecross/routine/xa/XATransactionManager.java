@@ -118,7 +118,7 @@ public class XATransactionManager {
                         transactionRequest,
                         account,
                         (error, response) -> {
-                            if (error != null) {
+                            if (error != null && !error.isSuccess()) {
                                 logger.error("startTransaction failed, ", error);
 
                                 reduceCallback.onResponse(error, -1);
@@ -186,7 +186,7 @@ public class XATransactionManager {
                         transactionRequest,
                         account,
                         (error, response) -> {
-                            if (error != null) {
+                            if (error != null && !error.isSuccess()) {
                                 logger.error("commitTransaction failed, ", error);
 
                                 reduceCallback.onResponse(error, -1);
@@ -252,7 +252,7 @@ public class XATransactionManager {
                         transactionRequest,
                         account,
                         (error, response) -> {
-                            if (error != null) {
+                            if (error != null && !error.isSuccess()) {
                                 logger.error("rollbackTransaction failed, ", error);
 
                                 reduceCallback.onResponse(error, -1);
@@ -371,7 +371,7 @@ public class XATransactionManager {
                         transactionRequest,
                         account,
                         (error, response) -> {
-                            if (error != null) {
+                            if (error != null && !error.isSuccess()) {
                                 logger.error("Send prepare transaction error", error);
 
                                 reduceCallback.onResponse(
