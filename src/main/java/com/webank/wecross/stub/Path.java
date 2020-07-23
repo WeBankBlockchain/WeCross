@@ -31,6 +31,13 @@ public class Path {
         this.resource = path.getResource();
     }
 
+    public Path(String str) throws Exception {
+        Path path = Path.decode(str);
+        this.zone = path.zone;
+        this.chain = path.chain;
+        this.resource = path.resource;
+    }
+
     public String getZone() {
         return zone;
     }

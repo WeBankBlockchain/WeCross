@@ -382,9 +382,19 @@ public class XATransactionManager {
 
                             // decode return value
                             try {
+                                // remove unseem char
+                                String rawJSON = response.getResult()[0];
+                                StringBuffer buffer = new StringBuffer();
+                                for (int i = 0; i < rawJSON.length(); ++i) {
+                                    char c = rawJSON.charAt(i);
+                                    if (c != 0x0) {
+                                        buffer.append(c);
+                                    }
+                                }
+
                                 XATransactionInfo xaTransactionInfo =
                                         objectMapper.readValue(
-                                                response.getResult()[0], XATransactionInfo.class);
+                                                buffer.toString(), XATransactionInfo.class);
 
                                 reduceCallback.onResponse(null, xaTransactionInfo);
                             } catch (Exception e) {
