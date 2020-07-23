@@ -273,9 +273,11 @@ public class ZoneManager {
                     zone.getChains().remove(chainPath.getChain());
                 }
 
+                /*
                 if (zone.getChains().isEmpty()) {
                     zones.remove(chainPath.getZone());
                 }
+                */
             }
         } finally {
             lock.writeLock().unlock();
