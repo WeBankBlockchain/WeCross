@@ -36,6 +36,17 @@ check_log()
     fi
 }
 
+check_console_log()
+{
+    local log_file=$1
+
+    if [ "$(grep TxError ${log_file} |wc -l)" -ne "0" ];then
+        grep TxError ${log_file}
+        LOG_ERROR "Console TxError log is ${log_file}"
+        exit 1
+    fi
+}
+
 ensure_bcos_nodes_running()
 {
     bash ${ROOT}/bcos/nodes/127.0.0.1/start_all.sh
@@ -73,6 +84,8 @@ EOF
     cd ..
 
     check_log
+    check_console_log ${ROOT}/WeCross-Console/logs/warn.log
+
 }
 
 # htlc test
@@ -119,6 +132,8 @@ EOF
     cd ..
 
     check_log
+    check_console_log ${ROOT}/WeCross-Console/logs/warn.log
+    check_console_log ${ROOT}/WeCross-Console-8251/logs/warn.log
 }
 
 prepare_wecross()
