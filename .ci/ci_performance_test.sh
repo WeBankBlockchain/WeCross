@@ -51,28 +51,34 @@ prepare_demo()
     cd -
 }
 
-demo_test()
+cross_group_demo_test()
 {
     cd ${ROOT}
 
-    bash build.sh n
+    bash build_cross_groups.sh n
 
     cd WeCross-Console/
     bash start.sh <<EOF
 listResources
 listAccounts
-call payment.bcos.HelloWeCross bcos_user1 get
-sendTransaction payment.bcos.HelloWeCross bcos_user1 set Tom
-call payment.fabric.abac fabric_user1 query a
-sendTransaction payment.fabric.abac fabric_user1 invoke a b 10
-call payment.fabric.abac fabric_user1 query a
-call payment.fabric.abac fabric_user1 query b
+call payment.group1.HelloWorldGroup1 bcos_user1 get
+sendTransaction payment.group1.HelloWorldGroup1 bcos_user1 set Tom
+call payment.group1.HelloWorldGroup1 bcos_user1 get
+call payment.group2.HelloWorldGroup2 bcos_user1 get
+sendTransaction payment.group2.HelloWorldGroup2 bcos_user1 set Jerry
+call payment.group2.HelloWorldGroup2 bcos_user1 get
 quit
 EOF
     cd ..
 
     check_log
 }
+
+demo_test()
+{
+    cross_group_demo_test
+}
+
 
 prepare_wecross()
 {

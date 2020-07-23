@@ -25,11 +25,6 @@
     threadNum = 16
     threadQueueCapacity = 100000
 
-[advanced.resourceThreadPool]
-    corePoolSize = 8
-    maxPoolSize = 8
-    threadQueueCapacity = 5000
-
 
 #[[htlc]]
 #    selfPath = 'payment.bcos.htlc'

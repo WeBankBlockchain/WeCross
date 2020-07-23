@@ -36,6 +36,11 @@ check_log()
     fi
 }
 
+ensure_bcos_nodes_running()
+{
+    bash ${ROOT}/bcos/nodes/127.0.0.1/start_all.sh
+}
+
 prepare_demo()
 {
     cd ${ROOT}
@@ -50,6 +55,8 @@ demo_test()
     cd ${ROOT}
 
     bash build.sh n
+
+    ensure_bcos_nodes_running
 
     cd WeCross-Console/
     bash start.sh <<EOF
@@ -76,6 +83,8 @@ htlc_test()
     bash htlc_config.sh
 
     sleep 10
+
+    ensure_bcos_nodes_running
 
     cd WeCross-Console-8251/
     bash start.sh <<EOF
