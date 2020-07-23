@@ -286,14 +286,11 @@ public class ZoneManager {
                     chain.removePeers(peer);
                 }
 
-                if (chain.getPeers().isEmpty()) {
+                if (chain.getPeers().isEmpty() && !chain.hasLocalConnection()) {
                     chain.stop();
                     zone.getChains().remove(chainPath.getChain());
                 }
 
-                if (zone.getChains().isEmpty()) {
-                    zones.remove(chainPath.getZone());
-                }
                 changed = true;
             }
         } finally {
