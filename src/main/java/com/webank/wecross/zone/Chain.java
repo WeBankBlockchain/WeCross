@@ -31,6 +31,7 @@ public class Chain {
     private String name;
     private String stubType;
     private Map<String, String> properties;
+    private String checksum;
 
     private Connection localConnection;
     private Set<Peer> peers = new HashSet<>();
@@ -40,16 +41,12 @@ public class Chain {
     private Random random = new SecureRandom();
     private ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    public Chain(
-            String zoneName,
-            String name,
-            String stubType,
-            Driver driver,
-            Connection localConnection) {
+    public Chain(String zoneName, ChainInfo chainInfo, Driver driver, Connection localConnection) {
 
         this.zoneName = zoneName;
-        this.name = name;
-        this.stubType = stubType;
+        this.name = chainInfo.getName();
+        this.stubType = chainInfo.getStubType();
+        this.checksum = chainInfo.getChecksum();
         this.driver = driver;
         this.localConnection = localConnection;
 
@@ -71,6 +68,7 @@ public class Chain {
         chainInfo.setName(name);
         chainInfo.setStubType(stubType);
         chainInfo.setProperties(properties);
+        chainInfo.setChecksum(checksum);
 
         List<ResourceInfo> resourceInfos = getAllResourcesInfo(true);
         chainInfo.setResources(resourceInfos);

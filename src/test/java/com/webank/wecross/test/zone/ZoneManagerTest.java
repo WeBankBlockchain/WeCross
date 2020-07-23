@@ -153,6 +153,8 @@ public class ZoneManagerTest {
             }
 
             String path = "payment.bcos" + i;
+            String chainChecksum = "chainChecksum-" + i;
+            chainInfo.setChecksum(chainChecksum);
             Map<String, ChainInfo> chains = new HashMap<String, ChainInfo>();
             chains.put(path, chainInfo);
 
@@ -165,6 +167,7 @@ public class ZoneManagerTest {
         ChainInfo removeChain = new ChainInfo();
         removeChain.setName("bcos0");
         removeChain.setResources(new ArrayList<ResourceInfo>());
+        removeChain.setChecksum("chainChecksum-0");
 
         Map<String, ChainInfo> removeChainInfos = new HashMap<String, ChainInfo>();
         removeChainInfos.put("payment.bcos0", removeChain);
@@ -190,6 +193,7 @@ public class ZoneManagerTest {
         ChainInfo resourceInfo2 = new ChainInfo();
         resourceInfo2.setName("bcos1");
         resourceInfo2.setStubType("test");
+        resourceInfo2.setChecksum("chainChecksum-1");
 
         Peer peer2 = new Peer(new Node("bbb", "127.0.0.1", 100));
 
@@ -292,9 +296,11 @@ public class ZoneManagerTest {
 
         // Add resource 1
         String path = "payment.bcos";
+        String chainChecksum = "0xaabbccddeeffgg";
         ChainInfo chainInfo = new ChainInfo();
         chainInfo.setStubType("test");
         chainInfo.setName(path);
+        chainInfo.setChecksum(chainChecksum);
         Peer peer = new Peer(new Node("bbb", "127.0.0.1", 100));
         Map<String, ChainInfo> chains = new HashMap<String, ChainInfo>();
         chains.put(path, chainInfo);
@@ -306,6 +312,7 @@ public class ZoneManagerTest {
         ChainInfo chainInfo2 = new ChainInfo();
         chainInfo2.setStubType("test");
         chainInfo2.setName(path);
+        chainInfo2.setChecksum(chainChecksum);
 
         Map<String, ChainInfo> chains2 = new HashMap<String, ChainInfo>();
         chains2.put(path, chainInfo2);

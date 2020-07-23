@@ -36,6 +36,11 @@ check_log()
     fi
 }
 
+ensure_bcos_nodes_running()
+{
+    bash ${ROOT}/bcos/nodes/127.0.0.1/start_all.sh
+}
+
 prepare_demo()
 {
     cd ${ROOT}
@@ -45,11 +50,13 @@ prepare_demo()
     cd -
 }
 
-cross_roup_demo_test()
+cross_group_demo_test()
 {
     cd ${ROOT}
 
     bash build_cross_groups.sh n
+
+    ensure_bcos_nodes_running
 
     cd WeCross-Console/
     bash start.sh <<EOF
@@ -95,7 +102,7 @@ main()
     prepare_wecross
     prepare_wecross_console
     prepare_demo
-    cross_roup_demo_test
+    cross_group_demo_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then

@@ -12,6 +12,8 @@ public class WeCrossException extends java.lang.Exception {
         public static final int ILLEGAL_SYMBOL = 103;
         public static final int DIR_NOT_EXISTS = 104;
         public static final int REPEATED_KEY = 105;
+        public static final int INVALID_ACCOUNT = 106;
+        public static final int GET_CHAIN_CHECKSUM_ERROR = 107;
 
         // exception in http
         public static final int VERSION_ERROR = 201;

@@ -154,8 +154,9 @@ public class ZoneManager {
         return seq.intValue();
     }
 
-    public void addRemoteChains(Peer peer, Map<String, ChainInfo> chainInfos) throws Exception {
+    public boolean addRemoteChains(Peer peer, Map<String, ChainInfo> chainInfos) throws Exception {
         lock.writeLock().lock();
+        boolean changed = false;
         try {
             for (Map.Entry<String, ChainInfo> entry : chainInfos.entrySet()) {
                 Path chainPath;
@@ -178,19 +179,23 @@ public class ZoneManager {
                 if (chain == null) {
                     Driver driver = stubManager.getStubFactory(chainInfo.getStubType()).newDriver();
 
-                    chain =
-                            new Chain(
-                                    chainPath.getZone(),
-                                    chainInfo.getName(),
-                                    chainInfo.getStubType(),
-                                    driver,
-                                    null);
+                    chain = new Chain(chainPath.getZone(), chainInfo, driver, null);
                     MemoryBlockHeaderManager resourceBlockHeaderManager =
                             memoryBlockHeaderManagerFactory.build(chain);
 
                     chain.setBlockHeaderManager(resourceBlockHeaderManager);
 
                     zone.getChains().put(chainPath.getChain(), chain);
+                } else {
+                    // verify checksum
+                    ChainInfo oldChainInfo = chain.getChainInfo();
+                    if (!oldChainInfo.getChecksum().equals(chainInfo.getChecksum())) {
+                        logger.error(
+                                "addRemoteChains: Chain checksum is not the same: old:{}, receive:{}",
+                                oldChainInfo.toString(),
+                                chainInfo.toString());
+                        continue;
+                    }
                 }
 
                 for (ResourceInfo resourceInfo : chainInfo.getResources()) {
@@ -208,6 +213,7 @@ public class ZoneManager {
                     chain.addRemoteResource(peer, resourceInfo, remoteConnection);
                 }
                 chain.start();
+                changed = true;
             }
         } catch (WeCrossException e) {
             logger.error("Add remote resource error", e);
@@ -215,14 +221,17 @@ public class ZoneManager {
         } finally {
             lock.writeLock().unlock();
         }
+        return changed;
     }
 
-    public void removeRemoteChains(
+    public boolean removeRemoteChains(
             Peer peer, Map<String, ChainInfo> chains, boolean removeChainPeer) {
         lock.writeLock().lock();
+        boolean changed = false; // return
         try {
             for (Map.Entry<String, ChainInfo> entry : chains.entrySet()) {
                 Path chainPath;
+                ChainInfo chainInfo = entry.getValue();
                 try {
                     chainPath = Path.decode(entry.getKey());
                 } catch (Exception e) {
@@ -244,8 +253,17 @@ public class ZoneManager {
                     continue;
                 }
 
-                if (entry.getValue().getResources() != null) {
-                    for (ResourceInfo resourceInfo : entry.getValue().getResources()) {
+                ChainInfo oldChainInfo = chain.getChainInfo();
+                if (!oldChainInfo.getChecksum().equals(chainInfo.getChecksum())) {
+                    logger.error(
+                            "removeRemoteChains: Chain checksum is not the same: old:{}, receive:{}",
+                            oldChainInfo.toString(),
+                            chainInfo.toString());
+                    continue;
+                }
+
+                if (chainInfo.getResources() != null) {
+                    for (ResourceInfo resourceInfo : chainInfo.getResources()) {
                         Resource resource = chain.getResource(resourceInfo.getName());
 
                         if (resource == null) {
@@ -276,10 +294,12 @@ public class ZoneManager {
                 if (zone.getChains().isEmpty()) {
                     zones.remove(chainPath.getZone());
                 }
+                changed = true;
             }
         } finally {
             lock.writeLock().unlock();
         }
+        return changed;
     }
 
     public Map<String, Resource> getAllResources(boolean ignoreRemote) {
