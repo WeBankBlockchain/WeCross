@@ -128,6 +128,7 @@ after_start()
             ;;
         ${STATUS_STOPPED})
             LOG_ERROR "WeCross start failed"
+            netstat -napl
             LOG_ERROR "See logs/error.log for details"
             tail_log
             exit 1
