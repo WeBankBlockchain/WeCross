@@ -6,9 +6,10 @@ import java.util.List;
 public class XATransactionInfo {
     private String transactionID;
     private int status;
-    private int startTimestamp;
-    private int commitTimestamp;
-    private int rollbackTimestamp;
+    private String startTimestamp;
+    private String commitTimestamp;
+    private String rollbackTimestamp;
+    private List<String> allPaths;
     private List<Path> paths;
     private List<XATransactionStep> transactionSteps;
 
@@ -28,28 +29,36 @@ public class XATransactionInfo {
         this.status = status;
     }
 
-    public int getStartTimestamp() {
+    public String getStartTimestamp() {
         return startTimestamp;
     }
 
-    public void setStartTimestamp(int startTimestamp) {
+    public void setStartTimestamp(String startTimestamp) {
         this.startTimestamp = startTimestamp;
     }
 
-    public int getCommitTimestamp() {
+    public String getCommitTimestamp() {
         return commitTimestamp;
     }
 
-    public void setCommitTimestamp(int commitTimestamp) {
+    public void setCommitTimestamp(String commitTimestamp) {
         this.commitTimestamp = commitTimestamp;
     }
 
-    public int getRollbackTimestamp() {
+    public String getRollbackTimestamp() {
         return rollbackTimestamp;
     }
 
-    public void setRollbackTimestamp(int rollbackTimestamp) {
+    public void setRollbackTimestamp(String rollbackTimestamp) {
         this.rollbackTimestamp = rollbackTimestamp;
+    }
+
+    public List<String> getAllPaths() {
+        return allPaths;
+    }
+
+    public void setAllPaths(List<String> allPaths) {
+        this.allPaths = allPaths;
     }
 
     public List<Path> getPaths() {
