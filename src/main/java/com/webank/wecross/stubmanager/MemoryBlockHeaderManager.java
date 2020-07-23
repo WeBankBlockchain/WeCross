@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -78,11 +79,7 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
                                 blockNumber,
                                 chain.chooseConnection(),
                                 (error, data) -> {
-                                    onSyncBlockHeader(
-                                            error,
-                                            chain.getDriver().decodeBlockHeader(data),
-                                            data,
-                                            blockNumber);
+                                    onSyncBlockHeader(error, data, blockNumber);
                                 });
             } else {
                 chain.getDriver()
@@ -90,37 +87,27 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
                                 current + 1,
                                 chain.chooseConnection(),
                                 (error, data) -> {
-                                    onSyncBlockHeader(
-                                            error,
-                                            chain.getDriver().decodeBlockHeader(data),
-                                            data,
-                                            blockNumber);
+                                    onSyncBlockHeader(error, data, blockNumber);
                                 });
             }
         } else {
-            timeout =
-                    timer.newTimeout(
-                            (timeout) -> {
-                                chain.getDriver()
-                                        .asyncGetBlockNumber(
-                                                chain.chooseConnection(),
-                                                new Driver.GetBlockNumberCallback() {
-                                                    @Override
-                                                    public void onResponse(
-                                                            Exception e, long blockNumber) {
-                                                        onGetBlockNumber(e, blockNumber);
-                                                    }
-                                                });
-                            },
-                            getBlockNumberDelay,
-                            TimeUnit.MILLISECONDS);
+            waitAndSyncBlock(getGetBlockNumberDelay());
         }
     }
 
-    public void onSyncBlockHeader(Exception e, BlockHeader blockHeader, byte[] data, long target) {
+    public void onSyncBlockHeader(Exception e, byte[] data, long target) {
+        if (Objects.nonNull(e)) {
+            logger.warn("On block header exception: ", e);
+            waitAndSyncBlock(getGetBlockNumberDelay());
+            return;
+        }
+
+        BlockHeader blockHeader = chain.getDriver().decodeBlockHeader(data);
+
         lock.writeLock().lock();
 
         try {
+
             blockHeaderCache.add(new BlockHeaderData(blockHeader, data));
             List<GetBlockHeaderCallback> callbacks =
                     getBlockHaderCallbacks.get(blockHeader.getNumber());
@@ -151,23 +138,30 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
                             blockHeader.getNumber() + 1,
                             chain.chooseConnection(),
                             (error, blockData) -> {
-                                onSyncBlockHeader(
-                                        e,
-                                        chain.getDriver().decodeBlockHeader(blockData),
-                                        blockData,
-                                        target);
+                                onSyncBlockHeader(error, blockData, target);
                             });
         } else {
-            chain.getDriver()
-                    .asyncGetBlockNumber(
-                            chain.chooseConnection(),
-                            new Driver.GetBlockNumberCallback() {
-                                @Override
-                                public void onResponse(Exception e, long blockNumber) {
-                                    onGetBlockNumber(e, blockNumber);
-                                }
-                            });
+            waitAndSyncBlock(0);
         }
+    }
+
+    private void waitAndSyncBlock(long delay) {
+        timeout =
+                timer.newTimeout(
+                        (timeout) -> {
+                            chain.getDriver()
+                                    .asyncGetBlockNumber(
+                                            chain.chooseConnection(),
+                                            new Driver.GetBlockNumberCallback() {
+                                                @Override
+                                                public void onResponse(
+                                                        Exception e, long blockNumber) {
+                                                    onGetBlockNumber(e, blockNumber);
+                                                }
+                                            });
+                        },
+                        delay,
+                        TimeUnit.MILLISECONDS);
     }
 
     @Override
