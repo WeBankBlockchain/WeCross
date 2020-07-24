@@ -259,6 +259,7 @@ public class MemoryBlockHeaderManagerTest {
                     assertEquals("Operation canceled", error.getMessage());
                 });
 
+        Thread.sleep(10000); // Sleep for finish
         memoryBlockHeaderManager.stop();
     }
 }
