@@ -259,7 +259,20 @@ public class MemoryBlockHeaderManagerTest {
                     assertEquals("Operation canceled", error.getMessage());
                 });
 
-        Thread.sleep(10000); // Sleep for finish
+        waitingForAllDone(threadPool, "last");
         memoryBlockHeaderManager.stop();
+    }
+
+    private void waitingForAllDone(ThreadPoolTaskExecutor threadPool, String prefix)
+            throws InterruptedException {
+        int waitingTimes = 0;
+        long taskNum;
+        do {
+            taskNum = threadPool.getThreadPoolExecutor().getQueue().size();
+            waitingTimes++;
+            System.out.println(prefix + " waiting[" + waitingTimes + "], taskNum: " + taskNum);
+            Thread.sleep(1000);
+            Assert.assertTrue(waitingTimes < 60); // 1 min
+        } while (taskNum > 0);
     }
 }
