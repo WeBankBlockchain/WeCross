@@ -5,6 +5,7 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceDetail;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.ZoneManager;
+import java.util.LinkedList;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +22,14 @@ public class ResourceResponse {
     public void setResourceInfos(
             ZoneManager zoneManager, boolean ignoreRemote, boolean ignoreProxy) {
         Map<String, Resource> resources = zoneManager.getAllResources(ignoreRemote);
-        ResourceDetail[] details = new ResourceDetail[resources.size()];
-        int i = 0;
+        LinkedList<ResourceDetail> details = new LinkedList<>();
         for (String path : resources.keySet()) {
 
             try {
-                if (Path.decode(path).getResource().equals(WeCrossDefault.WECROSS_PROXY_NAME)) {
+                if (ignoreProxy
+                        && Path.decode(path)
+                                .getResource()
+                                .equals(WeCrossDefault.WECROSS_PROXY_NAME)) {
                     continue;
                 }
             } catch (Exception e) {
@@ -35,9 +38,9 @@ public class ResourceResponse {
 
             ResourceDetail detail = new ResourceDetail();
             Resource resource = resources.get(path);
-            details[i++] = detail.initResourceDetail(resource, path);
+            details.add(detail.initResourceDetail(resource, path));
         }
-        this.resourceDetails = details;
+        this.resourceDetails = details.toArray(new ResourceDetail[] {});
     }
 
     public void setResourceDetails(ResourceDetail[] resourceDetails) {
