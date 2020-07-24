@@ -171,7 +171,7 @@ main()
     prepare_bcos
     prepare_demo
     demo_test
-    # htlc_test
+    htlc_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then
