@@ -51,9 +51,9 @@ public class XATransactionManager {
                         // all finished
                         if (fatals.size() > 0) {
                             logger.error("Failed in progress", fatals);
-                            StringBuffer errorMsg = new StringBuffer("errors:");
+                            StringBuffer errorMsg = new StringBuffer();
                             for (Exception e : fatals) {
-                                errorMsg.append(" " + e.getMessage());
+                                errorMsg.append(e.getMessage() + " ");
                             }
                             callback.onResponse(new Exception(errorMsg.toString()), -1);
                         } else {
