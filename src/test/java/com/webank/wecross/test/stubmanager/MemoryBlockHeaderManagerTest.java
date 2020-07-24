@@ -248,7 +248,7 @@ public class MemoryBlockHeaderManagerTest {
                 .when(driver)
                 .asyncGetBlockNumber(Mockito.any(), Mockito.any());
 
-        Thread.sleep(3000);
+        Thread.sleep(10000);
 
         assertFalse(flags.isEmpty());
 
