@@ -54,8 +54,8 @@ wecross_status()
 
 tail_log()
 {
-    LOG_INFO "Debug log"
-    cat logs/debug.log
+    # LOG_INFO "Debug log"
+    # cat logs/debug.log
     LOG_INFO "Error log"
     tail -n 1000 logs/error.log
     LOG_INFO "Start log"
@@ -132,7 +132,6 @@ after_start()
             ;;
         ${STATUS_STOPPED})
             LOG_ERROR "WeCross start failed"
-            netstat -napl
             LOG_ERROR "See logs/error.log for details"
             tail_log
             exit 1
