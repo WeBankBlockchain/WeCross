@@ -55,7 +55,7 @@ wecross_status()
 tail_log()
 {
     LOG_INFO "Debug log"
-    cat logs/debug/log
+    cat logs/debug.log
     LOG_INFO "Error log"
     tail -n 1000 logs/error.log
     LOG_INFO "Start log"
