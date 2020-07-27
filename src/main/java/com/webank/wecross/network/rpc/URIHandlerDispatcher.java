@@ -67,6 +67,7 @@ public class URIHandlerDispatcher {
         registerURIHandler(new URIMethod("POST", "/commitTransaction"), xaTransactionHandler);
         registerURIHandler(new URIMethod("POST", "/rollbackTransaction"), xaTransactionHandler);
         registerURIHandler(new URIMethod("POST", "/getTransactionInfo"), xaTransactionHandler);
+        registerURIHandler(new URIMethod("POST", "/getTransactionIDs"), xaTransactionHandler);
 
         ResourceURIHandler resourceURIHandler = new ResourceURIHandler(host);
         registerURIHandler(RESOURCE_URIMETHOD, resourceURIHandler);

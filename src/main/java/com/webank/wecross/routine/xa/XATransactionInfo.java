@@ -1,6 +1,5 @@
 package com.webank.wecross.routine.xa;
 
-import com.webank.wecross.stub.Path;
 import java.util.List;
 
 public class XATransactionInfo {
@@ -10,7 +9,6 @@ public class XATransactionInfo {
     private String commitTimestamp;
     private String rollbackTimestamp;
     private List<String> allPaths;
-    private List<Path> paths;
     private List<XATransactionStep> transactionSteps;
 
     public String getTransactionID() {
@@ -61,14 +59,6 @@ public class XATransactionInfo {
         this.allPaths = allPaths;
     }
 
-    public List<Path> getPaths() {
-        return paths;
-    }
-
-    public void setPaths(List<Path> paths) {
-        this.paths = paths;
-    }
-
     public List<XATransactionStep> getTransactionSteps() {
         return transactionSteps;
     }
@@ -92,7 +82,7 @@ public class XATransactionInfo {
                 + ", rollbackTimestamp="
                 + rollbackTimestamp
                 + ", paths="
-                + paths
+                + allPaths
                 + ", transactionSteps="
                 + transactionSteps
                 + '}';

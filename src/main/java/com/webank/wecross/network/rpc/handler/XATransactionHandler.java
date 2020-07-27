@@ -4,15 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.common.NetworkQueryStatus;
+import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.routine.xa.XATransactionManager;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.webank.wecross.stub.TransactionRequest;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,6 +139,27 @@ public class XATransactionHandler implements URIHandler {
 
         public void setAccounts(List<String> accounts) {
             this.accounts = accounts;
+        }
+    }
+
+    public static class XAGetTransactionIDRequest {
+        private String path;
+        private String account;
+
+        public String getPath() {
+            return path;
+        }
+
+        public void setPath(String path) {
+            this.path = path;
+        }
+
+        public String getAccount() {
+            return account;
+        }
+
+        public void setAccount(String account) {
+            this.account = account;
         }
     }
 
@@ -361,6 +381,73 @@ public class XATransactionHandler implements URIHandler {
                                     }
 
                                     restResponse.setData(info.toString());
+                                    callback.onResponse(restResponse);
+                                });
+
+                        return;
+                    }
+                case "getTransactionIDs":
+                    {
+                        RestRequest<XAGetTransactionIDRequest> xaRequest =
+                                objectMapper.readValue(
+                                        content,
+                                        new TypeReference<
+                                                RestRequest<XAGetTransactionIDRequest>>() {});
+
+                        Path path = Path.decode(xaRequest.getData().getPath());
+                        Path proxyPath = new Path(path);
+                        proxyPath.setResource("WeCrossProxy");
+                        Resource resource =
+                                xaTransactionManager.getZoneManager().fetchResource(proxyPath);
+
+                        Account account =
+                                accountManager.getAccount(xaRequest.getData().getAccount());
+                        if (Objects.isNull(account)) {
+                            String errorMsg =
+                                    "account not found: " + xaRequest.getData().getAccount();
+                            logger.error(errorMsg);
+
+                            restResponse.setErrorCode(NetworkQueryStatus.ACCOUNT_ERROR);
+                            restResponse.setMessage(errorMsg);
+                            return;
+                        }
+
+                        TransactionRequest transactionRequest = new TransactionRequest();
+                        transactionRequest.setMethod("getTransactionIDs");
+                        transactionRequest.getOptions().put(Resource.RAW_TRANSACTION, true);
+
+                        resource.asyncCall(
+                                transactionRequest,
+                                account,
+                                (error, response) -> {
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(
+                                                "getTransactionIDs response: {}, exception: ",
+                                                response,
+                                                error);
+                                    }
+
+                                    if (error != null && !error.isSuccess()) {
+                                        restResponse.setErrorCode(
+                                                NetworkQueryStatus.TRANSACTION_ERROR
+                                                        + error.getErrorCode());
+                                        restResponse.setMessage(error.getMessage());
+                                    }
+
+                                    if (response.getErrorCode() != 0) {
+                                        logger.error(
+                                                "getTransactionIDs failed: {} {}",
+                                                response.getErrorCode(),
+                                                response.getErrorMessage());
+
+                                        restResponse.setErrorCode(
+                                                NetworkQueryStatus.TRANSACTION_ERROR
+                                                        + response.getErrorCode());
+                                        restResponse.setMessage(response.getErrorMessage());
+                                        return;
+                                    }
+
+                                    restResponse.setData(response.getResult()[0].trim().split(" "));
                                     callback.onResponse(restResponse);
                                 });
 

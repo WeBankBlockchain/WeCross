@@ -55,4 +55,27 @@ public class XATransactionStep {
     public void setArgs(String args) {
         this.args = args;
     }
+
+    @Override
+    public String toString() {
+        return "XATransactionStep{"
+                + "seq="
+                + seq
+                + ", contract='"
+                + contract
+                + '\''
+                + ", path='"
+                + path
+                + '\''
+                + ", timestamp='"
+                + timestamp
+                + '\''
+                + ", func='"
+                + func
+                + '\''
+                + ", args='"
+                + args
+                + '\''
+                + '}';
+    }
 }
