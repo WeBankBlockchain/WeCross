@@ -1,5 +1,6 @@
 package com.webank.wecross.routine.xa;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
@@ -14,7 +15,9 @@ import org.slf4j.LoggerFactory;
 
 public class XATransactionManager {
     private Logger logger = LoggerFactory.getLogger(XATransactionManager.class);
-    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper =
+            new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
     private ZoneManager zoneManager;
 
     public interface Callback {
@@ -42,7 +45,7 @@ public class XATransactionManager {
         Callback reduceCallback =
                 (error, result) -> {
                     if (error != null) {
-                        logger.error("Process error!", error);
+                        logger.error("process error!", error);
                         fatals.add(error);
                     }
 
@@ -50,10 +53,10 @@ public class XATransactionManager {
                     if (current == size) {
                         // all finished
                         if (fatals.size() > 0) {
-                            logger.error("Failed in progress", fatals);
-                            StringBuffer errorMsg = new StringBuffer();
+                            logger.error("failed in progress", fatals);
+                            StringBuffer errorMsg = new StringBuffer("error occurred,");
                             for (Exception e : fatals) {
-                                errorMsg.append(e.getMessage() + " ");
+                                errorMsg.append(" " + "[" + e.getMessage() + "]");
                             }
                             callback.onResponse(new Exception(errorMsg.toString()), -1);
                         } else {
@@ -71,7 +74,7 @@ public class XATransactionManager {
             Set<Path> resources,
             Callback callback) {
         try {
-            logger.info("Start transaction, resources: {}", resources);
+            logger.info("startTransaction, resources: {}", resources);
 
             Map<String, Set<Path>> zone2Path = getChainPaths(resources);
 
@@ -145,9 +148,9 @@ public class XATransactionManager {
                         });
             }
         } catch (Exception e) {
-            logger.error("Prepare error", e);
+            logger.error("startTransaction error", e);
 
-            callback.onResponse(new Exception("Undefined error"), -1);
+            callback.onResponse(new Exception("undefined error"), -1);
         }
     };
 
@@ -157,7 +160,7 @@ public class XATransactionManager {
             Set<Path> chains,
             Callback callback) {
         try {
-            logger.info("Commit transaction, chains: {}", chains);
+            logger.info("commitTransaction, chains: {}", chains);
 
             Callback reduceCallback = getReduceCallback(chains.size(), callback);
 
@@ -213,9 +216,9 @@ public class XATransactionManager {
                         });
             }
         } catch (Exception e) {
-            logger.error("Commit error", e);
+            logger.error("commitTransaction error", e);
 
-            callback.onResponse(new Exception("Undefined error"), -1);
+            callback.onResponse(new Exception("undefined error"), -1);
         }
     };
 
@@ -279,9 +282,9 @@ public class XATransactionManager {
                         });
             }
         } catch (Exception e) {
-            logger.error("Rollback error", e);
+            logger.error("rollbackTransaction error", e);
 
-            callback.onResponse(new Exception("Undefined error"), -1);
+            callback.onResponse(new Exception("undefined error"), -1);
         }
     }
 
@@ -299,7 +302,7 @@ public class XATransactionManager {
         GetTransactionInfoCallback reduceCallback =
                 (error, info) -> {
                     if (error != null) {
-                        logger.error("Get transactionInfo error in progress", error);
+                        logger.error("getTransactionInfo error in progress", error);
                         fatals.add(error);
                     } else {
                         infos.add(info);
@@ -308,14 +311,14 @@ public class XATransactionManager {
                     int current = finished.addAndGet(1);
                     if (current == size) {
                         if (infos.isEmpty()) {
-                            logger.error("Empty result");
-                            callback.onResponse(new WeCrossException(-1, "Empty result"), null);
+                            logger.error("empty result");
+                            callback.onResponse(new WeCrossException(-1, "empty result"), null);
 
                             return;
                         }
 
                         if (infos.size() < size) {
-                            logger.warn("Get transactionInfo missing some steps");
+                            logger.warn("getTransactionInfo missing some steps");
                         }
 
                         List<XATransactionStep> allSteps = new ArrayList<XATransactionStep>();
@@ -372,10 +375,10 @@ public class XATransactionManager {
                         account,
                         (error, response) -> {
                             if (error != null && !error.isSuccess()) {
-                                logger.error("Send prepare transaction error", error);
+                                logger.error("getTransactionInfo error", error);
 
                                 reduceCallback.onResponse(
-                                        new WeCrossException(-1, "GetTransactionInfo error", error),
+                                        new WeCrossException(-1, "getTransactionInfo error", error),
                                         null);
                                 return;
                             }
@@ -384,6 +387,11 @@ public class XATransactionManager {
                             try {
                                 // remove unseem char
                                 String rawJSON = response.getResult()[0];
+
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug("transaction info: {}", rawJSON);
+                                }
+
                                 StringBuffer buffer = new StringBuffer();
                                 for (int i = 0; i < rawJSON.length(); ++i) {
                                     char c = rawJSON.charAt(i);
@@ -398,20 +406,20 @@ public class XATransactionManager {
 
                                 reduceCallback.onResponse(null, xaTransactionInfo);
                             } catch (Exception e) {
-                                logger.error("Decode transactionInfo json error", e);
+                                logger.error("decode transactionInfo json error", e);
 
                                 reduceCallback.onResponse(
                                         new WeCrossException(
-                                                -1, "Decode transactionInfo json error", e),
+                                                -1, "decode transactionInfo json error", e),
                                         null);
                                 return;
                             }
                         });
             }
         } catch (Exception e) {
-            logger.error("GetTransactionInfo error", e);
+            logger.error("getTransactionInfo error", e);
 
-            callback.onResponse(new WeCrossException(-1, "GetTransactionInfo error", e), null);
+            callback.onResponse(new WeCrossException(-1, "getTransactionInfo error", e), null);
         }
     }
 

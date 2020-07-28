@@ -220,6 +220,13 @@ gen_conf()
     sslCert = 'classpath:ssl.crt'
     sslKey = 'classpath:ssl.key'
     peers = [${5}]
+
+#[[htlc]]
+#    selfPath = 'payment.bcos.htlc'
+#    account1 = 'bcos_default_account'
+#    counterpartyPath = 'payment.fabric.htlc'
+#    account2 = 'fabric_default_account'
+
 EOF
 }
 

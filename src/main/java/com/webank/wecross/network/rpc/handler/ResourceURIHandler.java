@@ -130,6 +130,15 @@ public class ResourceURIHandler implements URIHandler {
                         TransactionRequest transactionRequest = restRequest.getData();
                         String accountName = restRequest.getAccount();
                         Account account = accountManager.getAccount(accountName);
+                        if (Objects.isNull(account)) {
+                            String errorMsg = "account not found: " + accountName;
+                            logger.error(errorMsg);
+
+                            restResponse.setErrorCode(NetworkQueryStatus.ACCOUNT_ERROR);
+                            restResponse.setMessage(errorMsg);
+                            return;
+                        }
+
                         logger.trace(
                                 "sendTransaction request: {}, account: {}",
                                 transactionRequest,
@@ -187,6 +196,15 @@ public class ResourceURIHandler implements URIHandler {
 
                         String accountName = restRequest.getAccount();
                         Account account = accountManager.getAccount(accountName);
+                        if (Objects.isNull(account)) {
+                            String errorMsg = "account not found: " + accountName;
+                            logger.error(errorMsg);
+
+                            restResponse.setErrorCode(NetworkQueryStatus.ACCOUNT_ERROR);
+                            restResponse.setMessage(errorMsg);
+                            return;
+                        }
+
                         logger.trace(
                                 "call request: {}, account: {}", transactionRequest, accountName);
 
@@ -262,9 +280,12 @@ public class ResourceURIHandler implements URIHandler {
                         String accountName = restRequest.getAccount();
                         Account account = accountManager.getAccount(accountName);
                         if (Objects.isNull(account)) {
-                            throw new WeCrossException(
-                                    WeCrossException.ErrorCode.INTERNAL_ERROR,
-                                    " account not exist, account: " + accountName);
+                            String errorMsg = "account not found: " + accountName;
+                            logger.error(errorMsg);
+
+                            restResponse.setErrorCode(NetworkQueryStatus.ACCOUNT_ERROR);
+                            restResponse.setMessage(errorMsg);
+                            return;
                         }
 
                         chain.getDriver()
