@@ -15,6 +15,7 @@ matrix:
             before_cache:
             cache:
             before_install:
+            name: "security scan"
             script: |
                 bash .ci/ci_check_commit.sh
 
