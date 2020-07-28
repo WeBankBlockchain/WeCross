@@ -41,6 +41,10 @@ prepare_bcos()
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos.tar.gz
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos-macOS.tar.gz
 
+    LOG_INFO "Download tassl requirements"
+    Download https://github.com/FISCO-BCOS/LargeFiles/raw/master/tools/tassl.tar.gz
+    Download https://github.com/FISCO-BCOS/LargeFiles/raw/master/tools/tassl_mac.tar.gz
+
     # LOG_INFO "Download HelloWeCross.sol ..."
     # cp ${WECROSS_ROOT}/src/main/resources/chains-sample/bcos/HelloWeCross.sol ./
 
