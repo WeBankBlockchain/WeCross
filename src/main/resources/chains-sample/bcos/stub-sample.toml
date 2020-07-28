@@ -1,11 +1,10 @@
 [common]
     name = 'bcos' # stub must be same with directory name
-    type = 'BCOS2.0' # BCOS
+    type = 'BCOS2.0' # BCOS2.0 or GM_BCOS2.0
 
 [chain]
     groupId = 1 # default 1
     chainId = 1 # default 1
-    enableGM = false # default false
 
 [channelService]
     caCert = 'ca.crt'
