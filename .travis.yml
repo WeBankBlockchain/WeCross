@@ -27,7 +27,7 @@ matrix:
             script: |
                 bash .ci/ci_check.sh && bash .ci/ci_cross_groups_demo_check.sh
 
-        - language: java
+        -   language: java
             jdk: openjdk11
             os: linux
             dist: xenial
