@@ -23,7 +23,7 @@ matrix:
             os: linux
             dist: xenial
             sudo: required
-            name: 2 groups
+            name: "2 groups"
             script: |
                 bash .ci/ci_check.sh && bash .ci/ci_cross_groups_demo_check.sh
 
@@ -32,7 +32,7 @@ matrix:
             os: linux
             dist: xenial
             sudo: required
-            name: normal & gm
+            name: "normal & gm"
             script: |
                 bash .ci/ci_check.sh && bash .ci/ci_cross_gm_demo_check.sh
 
@@ -41,7 +41,7 @@ matrix:
             os: linux
             dist: xenial
             sudo: required
-            name: bcos2.0 & fabric1.4
+            name: "bcos2.0 & fabric1.4"
             script: |
                 bash .ci/ci_check.sh && bash .ci/ci_demo_check.sh
 
