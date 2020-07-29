@@ -136,6 +136,7 @@ public class ResourceURIHandler implements URIHandler {
 
                             restResponse.setErrorCode(NetworkQueryStatus.ACCOUNT_ERROR);
                             restResponse.setMessage(errorMsg);
+                            callback.onResponse(restResponse);
                             return;
                         }
 
@@ -202,6 +203,7 @@ public class ResourceURIHandler implements URIHandler {
 
                             restResponse.setErrorCode(NetworkQueryStatus.ACCOUNT_ERROR);
                             restResponse.setMessage(errorMsg);
+                            callback.onResponse(restResponse);
                             return;
                         }
 
@@ -285,6 +287,7 @@ public class ResourceURIHandler implements URIHandler {
 
                             restResponse.setErrorCode(NetworkQueryStatus.ACCOUNT_ERROR);
                             restResponse.setMessage(errorMsg);
+                            callback.onResponse(restResponse);
                             return;
                         }
 

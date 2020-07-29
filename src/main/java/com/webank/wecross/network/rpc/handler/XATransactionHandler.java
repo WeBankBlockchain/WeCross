@@ -409,6 +409,7 @@ public class XATransactionHandler implements URIHandler {
 
                             restResponse.setErrorCode(NetworkQueryStatus.ACCOUNT_ERROR);
                             restResponse.setMessage(errorMsg);
+                            callback.onResponse(restResponse);
                             return;
                         }
 
