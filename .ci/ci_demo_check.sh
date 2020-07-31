@@ -141,7 +141,7 @@ EOF
 {
     cd ${ROOT}
 
-    bash 2pc_config.sh
+    bash 2pc_config.sh n
 
     cd WeCross-Console/
     bash start.sh <<EOF
