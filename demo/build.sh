@@ -216,7 +216,7 @@ clear_ask()
 
 console_ask()
 {
-    read -p "Start WeCross console? [Y/n]" ans
+    read -p "Start WeCross Console? [Y/n]" ans
     case "$ans" in
     y | Y | "")
     cd ${ROOT}/WeCross-Console && ./start.sh
