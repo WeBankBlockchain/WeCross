@@ -162,9 +162,7 @@ execTransaction payment.fabric.evidence fabric_user1 101 1 newEvidence evidence0
 call payment.bcos.evidence bcos_user1 queryEvidence evidence0
 call payment.fabric.evidence fabric_user1 queryEvidence evidence0
 sendTransaction payment.bcos.evidence bcos_user1 newEvidence evidence0 "I'm TomDD"
-sendTransaction payment.fabric.evidence fabric_user1 newEvidence evidence0 "I'm JerryDD"
 call payment.bcos.evidence bcos_user1 queryEvidence evidence0
-call payment.fabric.evidence fabric_user1 queryEvidence evidence0
 rollbackTransaction 101 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
 
 call payment.bcos.evidence bcos_user1 queryEvidence evidence0
