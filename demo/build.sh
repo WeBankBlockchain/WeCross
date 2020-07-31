@@ -288,8 +288,7 @@ config_router_8251()
     cp ${fabric_demo_dir}/certs/chains/fabric/* conf/chains/fabric/
 
     # deploy proxy
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy chains/fabric fabric_admin_org1 Org1
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy chains/fabric fabric_admin_org2 Org2
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy chains/fabric
 
     cd -
 }
