@@ -5,8 +5,6 @@ import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.VerifiedTransaction;
 import java.math.BigInteger;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -265,81 +263,14 @@ public class HTLCScheduler {
                     }
 
                     String[] info0 = selfTxInfo.split(RoutineDefault.SPLIT_REGEX);
-                    VerifiedTransaction verifiedTransaction0 =
-                            getVerifiedTransaction(
-                                    selfResource, info0[0], Long.parseLong(info0[1]));
-
-                    if (verifiedTransaction0 == null) {
-                        logger.error(
-                                "self verified transaction not found, hash: {}, path: {}",
-                                hash,
-                                selfResource.getSelfPath());
-                        callback.onReturn(
-                                new WeCrossException(
-                                        ErrorCode.HTLC_ERROR,
-                                        "GET_NEW_PROPOSAL_TX_INFO_ERROR",
-                                        HTLCErrorCode.GET_PROPOSAL_TX_INFO_ERROR,
-                                        "self verified transaction not found"),
-                                false);
-                        return;
-                    }
-
-                    logger.trace(
-                            "verifiedTransaction for self transfer contract: {}",
-                            verifiedTransaction0);
-
-                    // construct new args, args: [hash] , [role] ...
-                    String[] args = verifiedTransaction0.getTransactionRequest().getArgs();
-                    if (RoutineDefault.TRUE_FLAG.equals(args[1])) {
-                        args[1] = RoutineDefault.FALSE_FLAG;
-                    } else {
-                        args[1] = RoutineDefault.TRUE_FLAG;
-                    }
-
-                    // construct new outputs
-                    String[] output = verifiedTransaction0.getTransactionResponse().getResult();
-
-                    htlc.getNewProposalTxInfo(
-                            counterpartyResource,
-                            hash,
-                            (exception1, counterpartyTxInfo) -> {
-                                if (exception1 != null) {
-                                    callback.onReturn(exception1, false);
-                                    return;
-                                }
-
-                                if (counterpartyTxInfo == null
-                                        || RoutineDefault.NULL_FLAG.equals(counterpartyTxInfo)) {
-                                    callback.onReturn(
-                                            new WeCrossException(
-                                                    ErrorCode.HTLC_ERROR,
-                                                    "GET_NEW_PROPOSAL_TX_INFO_ERROR",
-                                                    HTLCErrorCode.GET_PROPOSAL_TX_INFO_ERROR,
-                                                    "counterparty tx-info of proposal not found"),
-                                            false);
-                                    return;
-                                }
-
-                                String[] info1 =
-                                        counterpartyTxInfo.split(RoutineDefault.SPLIT_REGEX);
-
-                                VerifyData verifyData =
-                                        new VerifyData(
-                                                Long.parseLong(info1[1]),
-                                                info1[0],
-                                                "newProposal",
-                                                args,
-                                                output);
-
-                                VerifiedTransaction verifiedTransaction1 =
-                                        getVerifiedTransaction(
-                                                counterpartyResource,
-                                                info1[0],
-                                                Long.parseLong(info1[1]));
-
-                                if (verifiedTransaction1 == null) {
+                    getVerifiedTransaction(
+                            selfResource,
+                            info0[0],
+                            Long.parseLong(info0[1]),
+                            (exception0, verifiedTransaction0) -> {
+                                if (exception0 != null || verifiedTransaction0 == null) {
                                     logger.error(
-                                            "counterparty verified transaction not found, hash: {}, path: {}",
+                                            "self verified transaction not found, hash: {}, path: {}",
                                             hash,
                                             selfResource.getSelfPath());
                                     callback.onReturn(
@@ -347,25 +278,107 @@ public class HTLCScheduler {
                                                     ErrorCode.HTLC_ERROR,
                                                     "GET_NEW_PROPOSAL_TX_INFO_ERROR",
                                                     HTLCErrorCode.GET_PROPOSAL_TX_INFO_ERROR,
-                                                    "counterparty verified transaction not found"),
+                                                    "self verified transaction not found"),
                                             false);
                                     return;
                                 }
 
                                 logger.trace(
-                                        "verifiedTransaction for counterparty transfer contract: {}",
-                                        verifiedTransaction1);
+                                        "verifiedTransaction for self transfer contract: {}",
+                                        verifiedTransaction0);
 
-                                callback.onReturn(null, verifyData.verify(verifiedTransaction1));
+                                // construct new args, args: [hash] , [role] ...
+                                String[] args =
+                                        verifiedTransaction0.getTransactionRequest().getArgs();
+                                if (RoutineDefault.TRUE_FLAG.equals(args[1])) {
+                                    args[1] = RoutineDefault.FALSE_FLAG;
+                                } else {
+                                    args[1] = RoutineDefault.TRUE_FLAG;
+                                }
+
+                                // construct new outputs
+                                String[] output =
+                                        verifiedTransaction0.getTransactionResponse().getResult();
+
+                                htlc.getNewProposalTxInfo(
+                                        counterpartyResource,
+                                        hash,
+                                        (infoException, counterpartyTxInfo) -> {
+                                            if (infoException != null) {
+                                                callback.onReturn(infoException, false);
+                                                return;
+                                            }
+
+                                            if (counterpartyTxInfo == null
+                                                    || RoutineDefault.NULL_FLAG.equals(
+                                                            counterpartyTxInfo)) {
+                                                callback.onReturn(
+                                                        new WeCrossException(
+                                                                ErrorCode.HTLC_ERROR,
+                                                                "GET_NEW_PROPOSAL_TX_INFO_ERROR",
+                                                                HTLCErrorCode
+                                                                        .GET_PROPOSAL_TX_INFO_ERROR,
+                                                                "counterparty tx-info of proposal not found"),
+                                                        false);
+                                                return;
+                                            }
+
+                                            String[] info1 =
+                                                    counterpartyTxInfo.split(
+                                                            RoutineDefault.SPLIT_REGEX);
+
+                                            VerifyData verifyData =
+                                                    new VerifyData(
+                                                            Long.parseLong(info1[1]),
+                                                            info1[0],
+                                                            "newProposal",
+                                                            args,
+                                                            output);
+
+                                            getVerifiedTransaction(
+                                                    counterpartyResource,
+                                                    info1[0],
+                                                    Long.parseLong(info1[1]),
+                                                    (exception1, verifiedTransaction1) -> {
+                                                        if (exception1 != null
+                                                                || verifiedTransaction1 == null) {
+                                                            logger.error(
+                                                                    "counterparty verified transaction not found, hash: {}, path: {}",
+                                                                    hash,
+                                                                    selfResource.getSelfPath());
+                                                            callback.onReturn(
+                                                                    new WeCrossException(
+                                                                            ErrorCode.HTLC_ERROR,
+                                                                            "GET_NEW_PROPOSAL_TX_INFO_ERROR",
+                                                                            HTLCErrorCode
+                                                                                    .GET_PROPOSAL_TX_INFO_ERROR,
+                                                                            "counterparty verified transaction not found"),
+                                                                    false);
+                                                            return;
+                                                        }
+                                                        logger.trace(
+                                                                "verifiedTransaction for counterparty transfer contract: {}",
+                                                                verifiedTransaction1);
+
+                                                        callback.onReturn(
+                                                                null,
+                                                                verifyData.verify(
+                                                                        verifiedTransaction1));
+                                                    });
+                                        });
                             });
                 });
     }
 
-    private VerifiedTransaction getVerifiedTransaction(
-            HTLCResource htlcResource, String txHash, long blockNum) {
-        CompletableFuture<VerifiedTransaction> verifiedTransactionFuture =
-                new CompletableFuture<>();
+    private interface GetVerifiedTransactionCallback {
+        void onReturn(WeCrossException exception, VerifiedTransaction result);
+    }
 
+    private void getVerifiedTransaction(
+            HTLCResource htlcResource,
+            String txHash,
+            long blockNum,
+            GetVerifiedTransactionCallback callback) {
         htlcResource
                 .getDriver()
                 .asyncGetVerifiedTransaction(
@@ -374,24 +387,19 @@ public class HTLCScheduler {
                         blockNum,
                         htlcResource.getBlockHeaderManager(),
                         htlcResource.chooseConnection(),
-                        (e, verifiedTransaction) -> {
-                            if (e != null) {
-                                logger.error("get verifiedTransaction0Future exception: " + e);
-                                verifiedTransactionFuture.complete(null);
+                        (exception, verifiedTransaction) -> {
+                            if (exception != null) {
+                                logger.error(
+                                        "get verifiedTransaction0Future exception, ", exception);
+                                callback.onReturn(
+                                        new WeCrossException(
+                                                ErrorCode.HTLC_ERROR,
+                                                "GET_VERIFIED_TRANSACTION_ERROR"),
+                                        null);
                             } else {
-
-                                verifiedTransactionFuture.complete(verifiedTransaction);
+                                callback.onReturn(null, verifiedTransaction);
                             }
                         });
-
-        VerifiedTransaction verifiedTransaction = null;
-        try {
-            verifiedTransaction = verifiedTransactionFuture.get(30, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            logger.error("get verifiedTransaction0Future timeout: " + e);
-        }
-
-        return verifiedTransaction;
     }
 
     private void execInitiatorProcess(
