@@ -159,50 +159,53 @@ public class HTLCResource extends Resource {
                 .asyncSendTransaction(
                         request,
                         account2,
-                        new Resource.Callback() {
-                            @Override
-                            public void onTransactionResponse(
-                                    TransactionException transactionException,
-                                    TransactionResponse transactionResponse) {
-                                if (transactionException != null
-                                        && !transactionException.isSuccess()) {
-                                    callback.onReturn(
-                                            new WeCrossException(
-                                                    HTLCErrorCode.UNLOCK_ERROR,
-                                                    "participant failed to unlock initiator"));
-                                    logger.error(
-                                            "UNLOCK_INITIATOR_ERROR: {}, {}",
-                                            transactionException.getErrorCode(),
-                                            transactionException.getMessage());
-                                    return;
-                                }
-
-                                if (transactionResponse.getErrorCode() != 0) {
-                                    callback.onReturn(
-                                            new WeCrossException(
-                                                    HTLCErrorCode.UNLOCK_ERROR,
-                                                    "participant failed to unlock initiator"));
-                                    logger.error(
-                                            "UNLOCK_INITIATOR_ERROR: {}, {}",
-                                            transactionResponse.getErrorCode(),
-                                            transactionResponse.getErrorMessage());
-                                    return;
-                                }
-
-                                try {
-                                    verifyUnlock(transactionResponse, request.getArgs());
-                                } catch (WeCrossException e) {
-                                    callback.onReturn(e);
-                                    return;
-                                }
-
-                                callback.onReturn(null);
+                        (transactionException, transactionResponse) -> {
+                            if (transactionException != null && !transactionException.isSuccess()) {
+                                callback.onReturn(
+                                        new WeCrossException(
+                                                HTLCErrorCode.UNLOCK_ERROR,
+                                                "participant failed to unlock initiator"));
+                                logger.error(
+                                        "UNLOCK_INITIATOR_ERROR: {}, {}",
+                                        transactionException.getErrorCode(),
+                                        transactionException.getMessage());
+                                return;
                             }
+
+                            if (transactionResponse.getErrorCode() != 0) {
+                                callback.onReturn(
+                                        new WeCrossException(
+                                                HTLCErrorCode.UNLOCK_ERROR,
+                                                "participant failed to unlock initiator"));
+                                logger.error(
+                                        "UNLOCK_INITIATOR_ERROR: {}, {}",
+                                        transactionResponse.getErrorCode(),
+                                        transactionResponse.getErrorMessage());
+                                return;
+                            }
+
+                            verifyUnlock(
+                                    transactionResponse,
+                                    request.getArgs(),
+                                    (exception, result) -> {
+                                        if (exception != null || !result) {
+                                            callback.onReturn(
+                                                    new WeCrossException(
+                                                            ErrorCode.HTLC_ERROR,
+                                                            "participant failed to verify unlock"));
+                                        } else {
+                                            callback.onReturn(null);
+                                        }
+                                    });
                         });
     }
 
-    private void verifyUnlock(TransactionResponse transactionResponse, String[] args)
-            throws WeCrossException {
+    interface VerifyUnlockCallback {
+        void onReturn(WeCrossException exception, boolean result);
+    }
+
+    private void verifyUnlock(
+            TransactionResponse transactionResponse, String[] args, VerifyUnlockCallback callback) {
         HTLC htlc = new AssetHTLC();
 
         VerifyData verifyData =
@@ -213,9 +216,20 @@ public class HTLCResource extends Resource {
                         args,
                         new String[] {RoutineDefault.SUCCESS_FLAG});
 
-        if (!htlc.verifyHtlcTransaction(getCounterpartyResource(), verifyData)) {
-            throw new WeCrossException(ErrorCode.HTLC_ERROR, "participant failed to verify unlock");
-        }
+        htlc.verifyHtlcTransaction(
+                getCounterpartyResource(),
+                verifyData,
+                (exception, result) -> {
+                    if (exception != null) {
+                        logger.error("failed to verify unlock,", exception);
+                        callback.onReturn(
+                                new WeCrossException(
+                                        ErrorCode.HTLC_ERROR, exception.getInternalMessage()),
+                                false);
+                    } else {
+                        callback.onReturn(null, result);
+                    }
+                });
     }
 
     @Override

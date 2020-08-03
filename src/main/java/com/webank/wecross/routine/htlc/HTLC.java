@@ -9,6 +9,10 @@ public interface HTLC {
         void onReturn(WeCrossException exception, String result);
     }
 
+    interface VerifyCallback {
+        void onReturn(WeCrossException exception, boolean result);
+    }
+
     /**
      * lock self asset
      *
@@ -52,9 +56,9 @@ public interface HTLC {
      *
      * @param counterpartyResource counterparty resource
      * @param verifyData expected transaction data
-     * @return result of verification
      */
-    boolean verifyHtlcTransaction(Resource counterpartyResource, VerifyData verifyData);
+    void verifyHtlcTransaction(
+            Resource counterpartyResource, VerifyData verifyData, VerifyCallback callback);
 
     /**
      * get counterparty htlc contract address
