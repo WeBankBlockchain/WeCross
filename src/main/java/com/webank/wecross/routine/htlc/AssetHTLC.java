@@ -325,7 +325,11 @@ public class AssetHTLC implements HTLC {
                     HTLCErrorCode.TRANSACTION_ERROR,
                     response.getErrorMessage());
         }
-        logger.trace("{} response: {}", type, response);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("{} response: {}", type, response);
+        }
+
         String[] result = response.getResult();
         if (result == null || result.length == 0) {
             return null;

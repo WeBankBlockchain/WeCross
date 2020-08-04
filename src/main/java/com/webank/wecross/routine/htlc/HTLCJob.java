@@ -39,8 +39,12 @@ public class HTLCJob implements Job {
             Thread.currentThread().interrupt();
         }
 
+        boolean printTimeCost = false;
+        long startTime = System.currentTimeMillis();
+
         for (String proposalId : proposalIds) {
             if (!RoutineDefault.NULL_FLAG.equals(proposalId)) {
+                printTimeCost = true;
                 Path path = htlcResourcePair.getSelfHTLCResource().getSelfPath();
                 if (logger.isDebugEnabled()) {
                     logger.debug("Start handling htlc proposal: {}, path: {}", proposalId, path);
@@ -80,6 +84,12 @@ public class HTLCJob implements Job {
         try {
             // wait until job is finished
             semaphore.acquire(proposalIds.length);
+            if (printTimeCost) {
+                long endTime = System.currentTimeMillis();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("current round of htlc: {} ms", endTime - startTime);
+                }
+            }
         } catch (InterruptedException e) {
             logger.warn("Interrupted,", e);
             Thread.currentThread().interrupt();

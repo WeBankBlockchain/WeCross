@@ -112,6 +112,12 @@ public class Resource {
                         public void onTransactionResponse(
                                 TransactionException transactionException,
                                 TransactionResponse transactionResponse) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug(
+                                        "asyncCall response: {}, exception: ",
+                                        transactionResponse,
+                                        transactionException);
+                            }
                             callback.onTransactionResponse(
                                     transactionException, transactionResponse);
                         }
@@ -125,6 +131,12 @@ public class Resource {
                         public void onTransactionResponse(
                                 TransactionException transactionException,
                                 TransactionResponse transactionResponse) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug(
+                                        "asyncCall response: {}, exception: ",
+                                        transactionResponse,
+                                        transactionException);
+                            }
                             callback.onTransactionResponse(
                                     transactionException, transactionResponse);
                         }
@@ -157,6 +169,12 @@ public class Resource {
                         public void onTransactionResponse(
                                 TransactionException transactionException,
                                 TransactionResponse transactionResponse) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug(
+                                        "asyncCall response: {}, exception: ",
+                                        transactionResponse,
+                                        transactionException);
+                            }
                             callback.onTransactionResponse(
                                     transactionException, transactionResponse);
                         }
@@ -170,6 +188,12 @@ public class Resource {
                         public void onTransactionResponse(
                                 TransactionException transactionException,
                                 TransactionResponse transactionResponse) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug(
+                                        "asyncCall response: {}, exception: ",
+                                        transactionResponse,
+                                        transactionException);
+                            }
                             callback.onTransactionResponse(
                                     transactionException, transactionResponse);
                         }
