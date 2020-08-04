@@ -93,7 +93,7 @@ htlc_test()
 {
     cd ${ROOT}
 
-    bash htlc_config.sh
+    bash -x htlc_config.sh
 
     sleep 10
 
@@ -159,9 +159,9 @@ call payment.fabric.evidence fabric_user1 queryEvidence evidence0
 startTransaction 101 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
 execTransaction payment.bcos.evidence bcos_user1 101 1 newEvidence evidence1 "I'm TomGG"
 execTransaction payment.fabric.evidence fabric_user1 101 1 newEvidence evidence1 "I'm JerryMM"
-call payment.bcos.evidence bcos_user1 queryEvidence evidence1
-call payment.fabric.evidence fabric_user1 queryEvidence evidence1
-call payment.bcos.evidence bcos_user1 queryEvidence evidence1
+callTransaction payment.bcos.evidence bcos_user1 101 queryEvidence evidence1
+callTransaction payment.fabric.evidence fabric_user1 101 queryEvidence evidence1
+callTransaction payment.bcos.evidence bcos_user1 101 queryEvidence evidence1
 rollbackTransaction 101 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
 
 call payment.bcos.evidence bcos_user1 queryEvidence evidence1

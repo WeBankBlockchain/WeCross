@@ -19,9 +19,12 @@ public class XATransactionManager {
             new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private ZoneManager zoneManager;
+    private static final int GET_ALL = 0;
+    private static final int GET_FINISHED = 1;
+    private static final int GET_UNFINISHED = 2;
 
-    public interface Callback {
-        public void onResponse(Exception e, int result);
+    public interface ReduceCallback {
+        void onResponse(WeCrossException e, int result);
     }
 
     public Map<String, Set<Path>> getChainPaths(Set<Path> resources) {
@@ -38,15 +41,16 @@ public class XATransactionManager {
         return zone2Path;
     }
 
-    private Callback getReduceCallback(int size, Callback callback) {
+    private ReduceCallback getReduceCallback(int size, ReduceCallback callback) {
         AtomicInteger finished = new AtomicInteger();
-        List<Exception> fatals = Collections.synchronizedList(new LinkedList<Exception>());
+        List<WeCrossException> fatals =
+                Collections.synchronizedList(new LinkedList<WeCrossException>());
 
-        Callback reduceCallback =
-                (error, result) -> {
-                    if (error != null) {
-                        logger.error("process error!", error);
-                        fatals.add(error);
+        ReduceCallback reduceCallback =
+                (exception, result) -> {
+                    if (exception != null) {
+                        logger.error("process error!", exception);
+                        fatals.add(exception);
                     }
 
                     int current = finished.addAndGet(1);
@@ -58,7 +62,10 @@ public class XATransactionManager {
                             for (Exception e : fatals) {
                                 errorMsg.append(" " + "[" + e.getMessage() + "]");
                             }
-                            callback.onResponse(new Exception(errorMsg.toString()), -1);
+                            callback.onResponse(
+                                    new WeCrossException(
+                                            fatals.get(0).getErrorCode(), errorMsg.toString()),
+                                    -1);
                         } else {
                             callback.onResponse(null, 0);
                         }
@@ -72,13 +79,13 @@ public class XATransactionManager {
             String transactionID,
             Map<String, Account> accounts,
             Set<Path> resources,
-            Callback callback) {
+            ReduceCallback callback) {
         try {
             logger.info("startTransaction, resources: {}", resources);
 
             Map<String, Set<Path>> zone2Path = getChainPaths(resources);
 
-            Callback reduceCallback = getReduceCallback(zone2Path.size(), callback);
+            ReduceCallback reduceCallback = getReduceCallback(zone2Path.size(), callback);
 
             for (Map.Entry<String, Set<Path>> entry : zone2Path.entrySet()) {
                 Path chainPath = entry.getValue().iterator().next();
@@ -113,18 +120,24 @@ public class XATransactionManager {
                     String errorMsg =
                             "account with type '" + resource.getStubType() + "' not found";
                     logger.error(errorMsg);
-                    reduceCallback.onResponse(new Exception(errorMsg), -1);
+                    reduceCallback.onResponse(
+                            new WeCrossException(XAErrorCode.START_TRANSACTION_ERROR, errorMsg),
+                            -1);
                     return;
                 }
 
                 resource.asyncSendTransaction(
                         transactionRequest,
                         account,
-                        (error, response) -> {
-                            if (error != null && !error.isSuccess()) {
-                                logger.error("startTransaction failed, ", error);
+                        (exception, response) -> {
+                            if (exception != null && !exception.isSuccess()) {
+                                logger.error("startTransaction failed, ", exception);
 
-                                reduceCallback.onResponse(error, -1);
+                                reduceCallback.onResponse(
+                                        new WeCrossException(
+                                                XAErrorCode.START_TRANSACTION_ERROR,
+                                                exception.getMessage()),
+                                        -1);
                                 return;
                             }
 
@@ -135,7 +148,10 @@ public class XATransactionManager {
                                         response.getErrorMessage());
 
                                 reduceCallback.onResponse(
-                                        new Exception(response.getErrorMessage()), -1);
+                                        new WeCrossException(
+                                                XAErrorCode.START_TRANSACTION_ERROR,
+                                                response.getErrorMessage()),
+                                        -1);
                                 return;
                             }
 
@@ -149,20 +165,20 @@ public class XATransactionManager {
             }
         } catch (Exception e) {
             logger.error("startTransaction error", e);
-
-            callback.onResponse(new Exception("undefined error"), -1);
+            callback.onResponse(
+                    new WeCrossException(XAErrorCode.UNDEFINED_ERROR, "undefined error"), -1);
         }
-    };
+    }
 
     public void asyncCommitTransaction(
             String transactionID,
             Map<String, Account> accounts,
             Set<Path> chains,
-            Callback callback) {
+            ReduceCallback callback) {
         try {
             logger.info("commitTransaction, chains: {}", chains);
 
-            Callback reduceCallback = getReduceCallback(chains.size(), callback);
+            ReduceCallback reduceCallback = getReduceCallback(chains.size(), callback);
 
             for (Path chainPath : chains) {
                 // send prepare transaction
@@ -181,18 +197,24 @@ public class XATransactionManager {
                     String errorMsg =
                             "account with type '" + resource.getStubType() + "' not found";
                     logger.error(errorMsg);
-                    reduceCallback.onResponse(new Exception(errorMsg), -1);
+                    reduceCallback.onResponse(
+                            new WeCrossException(XAErrorCode.COMMIT_TRANSACTION_ERROR, errorMsg),
+                            -1);
                     return;
                 }
 
                 resource.asyncSendTransaction(
                         transactionRequest,
                         account,
-                        (error, response) -> {
-                            if (error != null && !error.isSuccess()) {
-                                logger.error("commitTransaction failed, ", error);
+                        (exception, response) -> {
+                            if (exception != null && !exception.isSuccess()) {
+                                logger.error("commitTransaction failed, ", exception);
 
-                                reduceCallback.onResponse(error, -1);
+                                reduceCallback.onResponse(
+                                        new WeCrossException(
+                                                XAErrorCode.COMMIT_TRANSACTION_ERROR,
+                                                exception.getMessage()),
+                                        -1);
                                 return;
                             }
 
@@ -203,7 +225,10 @@ public class XATransactionManager {
                                         response.getErrorMessage());
 
                                 reduceCallback.onResponse(
-                                        new Exception(response.getErrorMessage()), -1);
+                                        new WeCrossException(
+                                                XAErrorCode.COMMIT_TRANSACTION_ERROR,
+                                                response.getErrorMessage()),
+                                        -1);
                                 return;
                             }
 
@@ -217,8 +242,8 @@ public class XATransactionManager {
             }
         } catch (Exception e) {
             logger.error("commitTransaction error", e);
-
-            callback.onResponse(new Exception("undefined error"), -1);
+            callback.onResponse(
+                    new WeCrossException(XAErrorCode.UNDEFINED_ERROR, "undefined error"), -1);
         }
     };
 
@@ -226,9 +251,9 @@ public class XATransactionManager {
             String transactionID,
             Map<String, Account> accounts,
             Set<Path> chains,
-            Callback callback) {
+            ReduceCallback callback) {
         try {
-            Callback reduceCallback = getReduceCallback(chains.size(), callback);
+            ReduceCallback reduceCallback = getReduceCallback(chains.size(), callback);
 
             for (Path chainPath : chains) {
                 // send rollback transaction
@@ -247,18 +272,24 @@ public class XATransactionManager {
                     String errorMsg =
                             "account with type '" + resource.getStubType() + "' not found";
                     logger.error(errorMsg);
-                    reduceCallback.onResponse(new Exception(errorMsg), -1);
+                    reduceCallback.onResponse(
+                            new WeCrossException(XAErrorCode.COMMIT_TRANSACTION_ERROR, errorMsg),
+                            -1);
                     return;
                 }
 
                 resource.asyncSendTransaction(
                         transactionRequest,
                         account,
-                        (error, response) -> {
-                            if (error != null && !error.isSuccess()) {
-                                logger.error("rollbackTransaction failed, ", error);
+                        (exception, response) -> {
+                            if (exception != null && !exception.isSuccess()) {
+                                logger.error("rollbackTransaction failed, ", exception);
 
-                                reduceCallback.onResponse(error, -1);
+                                reduceCallback.onResponse(
+                                        new WeCrossException(
+                                                XAErrorCode.ROLLBACK_TRANSACTION_ERROR,
+                                                exception.getMessage()),
+                                        -1);
                                 return;
                             }
 
@@ -269,7 +300,10 @@ public class XATransactionManager {
                                         response.getErrorMessage());
 
                                 reduceCallback.onResponse(
-                                        new Exception(response.getErrorMessage()), -1);
+                                        new WeCrossException(
+                                                XAErrorCode.ROLLBACK_TRANSACTION_ERROR,
+                                                response.getErrorMessage()),
+                                        -1);
                                 return;
                             }
 
@@ -283,27 +317,28 @@ public class XATransactionManager {
             }
         } catch (Exception e) {
             logger.error("rollbackTransaction error", e);
-
-            callback.onResponse(new Exception("undefined error"), -1);
+            callback.onResponse(
+                    new WeCrossException(XAErrorCode.UNDEFINED_ERROR, "undefined error"), -1);
         }
     }
 
     public interface GetTransactionInfoCallback {
-        public void onResponse(Exception e, XATransactionInfo xaTransactionInfo);
+        void onResponse(WeCrossException e, XATransactionInfo xaTransactionInfo);
     }
 
     private GetTransactionInfoCallback getTransactionInfoReduceCallback(
             int size, GetTransactionInfoCallback callback) {
         AtomicInteger finished = new AtomicInteger();
-        List<Exception> fatals = Collections.synchronizedList(new LinkedList<Exception>());
+        List<WeCrossException> fatals =
+                Collections.synchronizedList(new LinkedList<WeCrossException>());
         List<XATransactionInfo> infos =
                 Collections.synchronizedList(new LinkedList<XATransactionInfo>());
 
         GetTransactionInfoCallback reduceCallback =
-                (error, info) -> {
-                    if (error != null) {
-                        logger.error("getTransactionInfo error in progress", error);
-                        fatals.add(error);
+                (exception, info) -> {
+                    if (exception != null) {
+                        logger.error("getTransactionInfo error in progress", exception);
+                        fatals.add(exception);
                     } else {
                         infos.add(info);
                     }
@@ -312,7 +347,10 @@ public class XATransactionManager {
                     if (current == size) {
                         if (infos.isEmpty()) {
                             logger.error("empty result");
-                            callback.onResponse(new WeCrossException(-1, "empty result"), null);
+                            callback.onResponse(
+                                    new WeCrossException(
+                                            XAErrorCode.GET_TRANSACTION_INFO_ERROR, "empty result"),
+                                    null);
 
                             return;
                         }
@@ -366,19 +404,37 @@ public class XATransactionManager {
                     String errorMsg =
                             "account with type '" + resource.getStubType() + "' not found";
                     logger.error(errorMsg);
-                    reduceCallback.onResponse(new Exception(errorMsg), null);
+                    reduceCallback.onResponse(
+                            new WeCrossException(XAErrorCode.GET_TRANSACTION_INFO_ERROR, errorMsg),
+                            null);
                     return;
                 }
 
                 resource.asyncCall(
                         transactionRequest,
                         account,
-                        (error, response) -> {
-                            if (error != null && !error.isSuccess()) {
-                                logger.error("getTransactionInfo error", error);
+                        (exception, response) -> {
+                            if (exception != null && !exception.isSuccess()) {
+                                logger.error("getTransactionInfo error", exception);
 
                                 reduceCallback.onResponse(
-                                        new WeCrossException(-1, "getTransactionInfo error", error),
+                                        new WeCrossException(
+                                                XAErrorCode.GET_TRANSACTION_INFO_ERROR,
+                                                exception.getMessage()),
+                                        null);
+                                return;
+                            }
+
+                            if (response.getErrorCode() != 0) {
+                                logger.error(
+                                        "getTransactionInfo failed: {} {}",
+                                        response.getErrorCode(),
+                                        response.getErrorMessage());
+
+                                reduceCallback.onResponse(
+                                        new WeCrossException(
+                                                XAErrorCode.GET_TRANSACTION_INFO_ERROR,
+                                                response.getErrorMessage()),
                                         null);
                                 return;
                             }
@@ -418,9 +474,139 @@ public class XATransactionManager {
             }
         } catch (Exception e) {
             logger.error("getTransactionInfo error", e);
-
-            callback.onResponse(new WeCrossException(-1, "getTransactionInfo error", e), null);
+            callback.onResponse(
+                    new WeCrossException(XAErrorCode.UNDEFINED_ERROR, "undefined error"), null);
         }
+    }
+
+    public interface GetTransactionIDsCallback {
+        void onResponse(WeCrossException e, String[] result);
+    }
+
+    public void asyncGetTransactionIDs(
+            Resource proxyResource,
+            Account account,
+            int option,
+            GetTransactionIDsCallback callback) {
+        TransactionRequest transactionRequest = new TransactionRequest();
+        transactionRequest.getOptions().put(Resource.RAW_TRANSACTION, true);
+
+        try {
+            if (option == GET_ALL || option == GET_FINISHED) {
+                if (option == GET_ALL) {
+                    transactionRequest.setMethod("getAllTransactionIDs");
+                } else {
+                    transactionRequest.setMethod("getFinishedTransactionIDs");
+                }
+
+                proxyResource.asyncCall(
+                        transactionRequest,
+                        account,
+                        (exception, response) -> {
+                            if (exception != null && !exception.isSuccess()) {
+                                callback.onResponse(
+                                        new WeCrossException(
+                                                XAErrorCode.GET_TRANSACTION_IDS_ERROR,
+                                                exception.getMessage()),
+                                        null);
+                                return;
+                            }
+
+                            if (response.getErrorCode() != 0) {
+                                callback.onResponse(
+                                        new WeCrossException(
+                                                XAErrorCode.GET_TRANSACTION_IDS_ERROR,
+                                                response.getErrorMessage()),
+                                        null);
+                                return;
+                            }
+                            callback.onResponse(null, response.getResult()[0].trim().split(" "));
+                        });
+            } else if (option == GET_UNFINISHED) {
+                asyncGetUnfinishedTransactionIDs(proxyResource, account, callback);
+            } else {
+                logger.error("getTransactionIDs error, undefined option: {}", option);
+                callback.onResponse(
+                        new WeCrossException(
+                                XAErrorCode.GET_TRANSACTION_IDS_ERROR,
+                                "undefined option: " + option),
+                        null);
+            }
+        } catch (Exception e) {
+            logger.error("getTransactionIDs error", e);
+            callback.onResponse(
+                    new WeCrossException(XAErrorCode.UNDEFINED_ERROR, "undefined error"), null);
+        }
+    }
+
+    public void asyncGetUnfinishedTransactionIDs(
+            Resource proxyResource, Account account, GetTransactionIDsCallback callback) {
+        TransactionRequest transactionRequest = new TransactionRequest();
+        transactionRequest.getOptions().put(Resource.RAW_TRANSACTION, true);
+        // get all ids
+        transactionRequest.setMethod("getAllTransactionIDs");
+        proxyResource.asyncCall(
+                transactionRequest,
+                account,
+                (exception, response) -> {
+                    if (exception != null && !exception.isSuccess()) {
+                        callback.onResponse(
+                                new WeCrossException(
+                                        XAErrorCode.GET_TRANSACTION_IDS_ERROR,
+                                        exception.getMessage()),
+                                null);
+                        return;
+                    }
+
+                    if (response.getErrorCode() != 0) {
+                        callback.onResponse(
+                                new WeCrossException(
+                                        XAErrorCode.GET_TRANSACTION_IDS_ERROR,
+                                        response.getErrorMessage()),
+                                null);
+                        return;
+                    }
+
+                    // get finished ids
+                    transactionRequest.setMethod("getFinishedTransactionIDs");
+                    proxyResource.asyncCall(
+                            transactionRequest,
+                            account,
+                            (exception1, response1) -> {
+                                if (exception1 != null && !exception1.isSuccess()) {
+                                    callback.onResponse(
+                                            new WeCrossException(
+                                                    XAErrorCode.GET_TRANSACTION_IDS_ERROR,
+                                                    exception1.getMessage()),
+                                            null);
+                                    return;
+                                }
+
+                                if (response1.getErrorCode() != 0) {
+                                    callback.onResponse(
+                                            new WeCrossException(
+                                                    XAErrorCode.GET_TRANSACTION_IDS_ERROR,
+                                                    response1.getErrorMessage()),
+                                            null);
+                                    return;
+                                }
+
+                                Set<String> allIDs =
+                                        new HashSet<>(
+                                                Arrays.asList(
+                                                        response.getResult()[0].trim().split(" ")));
+                                Set<String> finishedIDs =
+                                        new HashSet<>(
+                                                Arrays.asList(
+                                                        response1
+                                                                .getResult()[0]
+                                                                .trim()
+                                                                .split(" ")));
+                                allIDs.removeAll(finishedIDs);
+
+                                callback.onResponse(null, allIDs.toArray(new String[0]));
+                            });
+                });
     }
 
     public ZoneManager getZoneManager() {

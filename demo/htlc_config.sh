@@ -43,14 +43,14 @@ init_bcos_htlc()
 bcosDeploy payment.bcos.ledger bcos_sender conf/contracts/solidity/LedgerSample.sol LedgerSample ${version} htlc token 1 100000000
 quit
 EOF
-  var1=$(cat logs/info.log | grep data=0x | awk 'END{print $11}')
+  var1=$(cat logs/debug.log | grep data=0x | awk 'END{print $11}')
   BCOS_LEDGER=$(echo ${var1:5:42})
 
     bash start.sh <<EOF
 bcosDeploy payment.bcos.htlc bcos_sender conf/contracts/solidity/LedgerSampleHTLC.sol LedgerSampleHTLC ${version}
 quit
 EOF
-  var2=$(cat logs/info.log | grep data=0x | awk 'END{print $11}')
+  var2=$(cat logs/debug.log | grep data=0x | awk 'END{print $11}')
   BCOS_HTLC=$(echo ${var2:5:42})
 
   bash start.sh <<EOF

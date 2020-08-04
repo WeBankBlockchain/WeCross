@@ -1,8 +1,9 @@
 package com.webank.wecross.test.routine.xa;
 
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.xa.XATransactionManager;
-import com.webank.wecross.routine.xa.XATransactionManager.Callback;
+import com.webank.wecross.routine.xa.XATransactionManager.ReduceCallback;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.BlockHeaderManager;
 import com.webank.wecross.stub.Path;
@@ -102,9 +103,9 @@ public class XATransactionManagerTest {
                 transactionID,
                 accounts,
                 resources,
-                new Callback() {
+                new ReduceCallback() {
                     @Override
-                    public void onResponse(Exception e, int result) {
+                    public void onResponse(WeCrossException e, int result) {
                         Assert.assertNull(e);
                         Assert.assertEquals(0, result);
                     }
@@ -131,9 +132,9 @@ public class XATransactionManagerTest {
                 transactionID,
                 accounts,
                 resources,
-                new Callback() {
+                new ReduceCallback() {
                     @Override
-                    public void onResponse(Exception e, int result) {
+                    public void onResponse(WeCrossException e, int result) {
                         Assert.assertNotNull(e);
                         Assert.assertEquals(-1, result);
                     }
@@ -205,9 +206,9 @@ public class XATransactionManagerTest {
                 transactionID,
                 accounts,
                 resources,
-                new Callback() {
+                new ReduceCallback() {
                     @Override
-                    public void onResponse(Exception e, int result) {
+                    public void onResponse(WeCrossException e, int result) {
                         Assert.assertNull(e);
                         Assert.assertEquals(0, result);
                     }
@@ -234,9 +235,9 @@ public class XATransactionManagerTest {
                 transactionID,
                 accounts,
                 resources,
-                new Callback() {
+                new ReduceCallback() {
                     @Override
-                    public void onResponse(Exception e, int result) {
+                    public void onResponse(WeCrossException e, int result) {
                         Assert.assertNotNull(e);
                         Assert.assertEquals(-1, result);
                     }
@@ -308,9 +309,9 @@ public class XATransactionManagerTest {
                 transactionID,
                 accounts,
                 resources,
-                new Callback() {
+                new ReduceCallback() {
                     @Override
-                    public void onResponse(Exception e, int result) {
+                    public void onResponse(WeCrossException e, int result) {
                         Assert.assertNull(e);
                         Assert.assertEquals(0, result);
                     }
@@ -337,9 +338,9 @@ public class XATransactionManagerTest {
                 transactionID,
                 accounts,
                 resources,
-                new Callback() {
+                new ReduceCallback() {
                     @Override
-                    public void onResponse(Exception e, int result) {
+                    public void onResponse(WeCrossException e, int result) {
                         Assert.assertNotNull(e);
                         Assert.assertEquals(-1, result);
                     }

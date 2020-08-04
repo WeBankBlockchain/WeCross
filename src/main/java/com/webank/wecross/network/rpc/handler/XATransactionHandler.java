@@ -10,7 +10,6 @@ import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.routine.xa.XATransactionManager;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.TransactionRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -145,6 +144,7 @@ public class XATransactionHandler implements URIHandler {
     public static class XAGetTransactionIDRequest {
         private String path;
         private String account;
+        private int option;
 
         public String getPath() {
             return path;
@@ -160,6 +160,14 @@ public class XATransactionHandler implements URIHandler {
 
         public void setAccount(String account) {
             this.account = account;
+        }
+
+        public int getOption() {
+            return option;
+        }
+
+        public void setOption(int option) {
+            this.option = option;
         }
     }
 
@@ -212,7 +220,7 @@ public class XATransactionHandler implements URIHandler {
                                         logger.error("Error while startTransaction", e);
 
                                         restResponse.setErrorCode(
-                                                NetworkQueryStatus.TRANSACTION_ERROR);
+                                                NetworkQueryStatus.XA_ERROR + e.getErrorCode());
                                         restResponse.setMessage(e.getMessage());
                                         callback.onResponse(restResponse);
 
@@ -265,7 +273,7 @@ public class XATransactionHandler implements URIHandler {
                                         logger.error("Error while commitTransaction", e);
 
                                         restResponse.setErrorCode(
-                                                NetworkQueryStatus.TRANSACTION_ERROR);
+                                                NetworkQueryStatus.XA_ERROR + e.getErrorCode());
                                         restResponse.setMessage(e.getMessage());
                                         callback.onResponse(restResponse);
 
@@ -319,7 +327,7 @@ public class XATransactionHandler implements URIHandler {
                                         logger.error("Error while rollbackTransaction", e);
 
                                         restResponse.setErrorCode(
-                                                NetworkQueryStatus.TRANSACTION_ERROR);
+                                                NetworkQueryStatus.XA_ERROR + e.getErrorCode());
                                         restResponse.setMessage(e.getMessage());
                                         callback.onResponse(restResponse);
 
@@ -373,7 +381,7 @@ public class XATransactionHandler implements URIHandler {
                                         logger.error("Error while getTransactionInfo", e);
 
                                         restResponse.setErrorCode(
-                                                NetworkQueryStatus.TRANSACTION_ERROR);
+                                                NetworkQueryStatus.XA_ERROR + e.getErrorCode());
                                         restResponse.setMessage(e.getMessage());
                                         callback.onResponse(restResponse);
 
@@ -413,42 +421,21 @@ public class XATransactionHandler implements URIHandler {
                             return;
                         }
 
-                        TransactionRequest transactionRequest = new TransactionRequest();
-                        transactionRequest.setMethod("getTransactionIDs");
-                        transactionRequest.getOptions().put(Resource.RAW_TRANSACTION, true);
-
-                        resource.asyncCall(
-                                transactionRequest,
+                        xaTransactionManager.asyncGetTransactionIDs(
+                                resource,
                                 account,
-                                (error, response) -> {
-                                    if (logger.isDebugEnabled()) {
-                                        logger.debug(
-                                                "getTransactionIDs response: {}, exception: ",
-                                                response,
-                                                error);
-                                    }
-
-                                    if (error != null && !error.isSuccess()) {
+                                xaRequest.getData().getOption(),
+                                (exception, ids) -> {
+                                    if (Objects.nonNull(exception)) {
                                         restResponse.setErrorCode(
-                                                NetworkQueryStatus.TRANSACTION_ERROR
-                                                        + error.getErrorCode());
-                                        restResponse.setMessage(error.getMessage());
-                                    }
-
-                                    if (response.getErrorCode() != 0) {
-                                        logger.error(
-                                                "getTransactionIDs failed: {} {}",
-                                                response.getErrorCode(),
-                                                response.getErrorMessage());
-
-                                        restResponse.setErrorCode(
-                                                NetworkQueryStatus.TRANSACTION_ERROR
-                                                        + response.getErrorCode());
-                                        restResponse.setMessage(response.getErrorMessage());
+                                                NetworkQueryStatus.XA_ERROR
+                                                        + exception.getErrorCode());
+                                        restResponse.setMessage(exception.getMessage());
+                                        callback.onResponse(restResponse);
                                         return;
                                     }
 
-                                    restResponse.setData(response.getResult()[0].trim().split(" "));
+                                    restResponse.setData(ids);
                                     callback.onResponse(restResponse);
                                 });
 
