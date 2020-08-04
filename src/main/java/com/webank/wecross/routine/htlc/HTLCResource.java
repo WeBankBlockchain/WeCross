@@ -38,8 +38,14 @@ public class HTLCResource extends Resource {
             new HashSet<String>() {
                 {
                     // TODO: optimize this, this method is not belongs to HTLC
-                    add("selectByName");
+                    // */
+                    // for performance test, remove before releasing
+                    add("newProposal");
+                    add("setNewProposalTxInfo");
+                    add("setSecret");
+                    // */
 
+                    add("selectByName");
                     add("lock");
                     add("unlock");
                     add("balanceOf");
@@ -139,7 +145,12 @@ public class HTLCResource extends Resource {
                                         return;
                                     }
 
-                                    logger.trace("Participant unlocks initiator successfully!");
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(
+                                                "Participant unlocks initiator successfully, request: {}",
+                                                request);
+                                    }
+
                                     htlc.setCounterpartyUnlockState(
                                             getSelfResource(),
                                             account1,
@@ -153,8 +164,11 @@ public class HTLCResource extends Resource {
     }
 
     private void unlockCounterparty(TransactionRequest request, Callback callback) {
-        logger.trace("Participant receives a unlock request, and unlocks initiator firstly!");
-
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "Participant receives a unlock request, and unlocks initiator firstly, request: {}",
+                    request);
+        }
         getCounterpartyResource()
                 .asyncSendTransaction(
                         request,
@@ -249,7 +263,9 @@ public class HTLCResource extends Resource {
         Response response = new Response();
         Driver driver = getDriver();
         if (driver.isTransaction(request)) {
-            logger.trace("onRemoteTransaction, request: {}", request);
+            if (logger.isDebugEnabled()) {
+                logger.debug("onRemoteTransaction, request: {}", request);
+            }
 
             TransactionContext<TransactionRequest> context =
                     driver.decodeTransactionRequest(request.getData());
@@ -257,13 +273,18 @@ public class HTLCResource extends Resource {
             if (context == null) {
                 response.setErrorCode(ErrorCode.DECODE_TRANSACTION_REQUEST_ERROR);
                 response.setErrorMessage("decode transaction request failed");
-                logger.trace("onRemoteTransaction, response: {}", response);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("onRemoteTransaction, response: {}", response);
+                }
+
                 callback.onResponse(response);
                 return;
             }
 
             TransactionRequest transactionRequest = context.getData();
-            logger.trace("onRemoteTransaction, transactionRequest: {}", transactionRequest);
+            if (logger.isDebugEnabled()) {
+                logger.debug("onRemoteTransaction, transactionRequest: {}", transactionRequest);
+            }
 
             String method = transactionRequest.getMethod();
             if (RoutineDefault.UNLOCK_METHOD.equals(method)) {
@@ -274,16 +295,20 @@ public class HTLCResource extends Resource {
                                 Response response1 = new Response();
                                 response1.setErrorCode(exception.getErrorCode());
                                 response1.setErrorMessage(exception.getMessage());
-                                logger.trace("onRemoteTransaction, response: {}", response1);
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug("onRemoteTransaction, response: {}", response1);
+                                }
                                 callback.onResponse(response1);
                             } else {
                                 getSelfResource()
                                         .onRemoteTransaction(
                                                 request,
                                                 response1 -> {
-                                                    logger.trace(
-                                                            "onRemoteTransaction, response: {}",
-                                                            response1);
+                                                    if (logger.isDebugEnabled()) {
+                                                        logger.debug(
+                                                                "onRemoteTransaction, response: {}",
+                                                                response1);
+                                                    }
                                                     callback.onResponse(response1);
                                                 });
                             }
@@ -295,7 +320,10 @@ public class HTLCResource extends Resource {
                 response = new Response();
                 response.setErrorCode(HTLCErrorCode.NO_PERMISSION);
                 response.setErrorMessage("HTLCResource doesn't allow peers to call " + method);
-                logger.trace("onRemoteTransaction, response: {}", response);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("onRemoteTransaction, response: {}", response);
+                }
+
                 callback.onResponse(response);
                 return;
             }
@@ -305,7 +333,10 @@ public class HTLCResource extends Resource {
                 .onRemoteTransaction(
                         request,
                         response2 -> {
-                            logger.trace("onRemoteTransaction, response: {}", response2);
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("onRemoteTransaction, response: {}", response2);
+                            }
+
                             callback.onResponse(response2);
                         });
     }
@@ -364,6 +395,11 @@ public class HTLCResource extends Resource {
 
     public void setCounterpartyAddress(String counterpartyAddress) {
         this.counterpartyAddress = counterpartyAddress;
+    }
+
+    @Override
+    public Path getPath() {
+        return selfPath;
     }
 
     @Override
