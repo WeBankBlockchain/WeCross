@@ -136,6 +136,46 @@ EOF
     check_console_log ${ROOT}/WeCross-Console-8251/logs/warn.log
 }
 
+# 2pc test
+2pc_test()
+{
+    cd ${ROOT}
+
+    bash 2pc_config.sh n
+
+    cd WeCross-Console/
+    bash start.sh <<EOF
+call payment.bcos.evidence bcos_user1 queryEvidence evidence0
+call payment.fabric.evidence fabric_user1 queryEvidence evidence0
+
+startTransaction 100 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
+execTransaction payment.bcos.evidence bcos_user1 100 1 newEvidence evidence0 "I'm Tom"
+execTransaction payment.fabric.evidence fabric_user1 100 1 newEvidence evidence0 "I'm Jerry"
+commitTransaction 100 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
+
+call payment.bcos.evidence bcos_user1 queryEvidence evidence0
+call payment.fabric.evidence fabric_user1 queryEvidence evidence0
+
+startTransaction 101 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
+execTransaction payment.bcos.evidence bcos_user1 101 1 newEvidence evidence1 "I'm TomGG"
+execTransaction payment.fabric.evidence fabric_user1 101 1 newEvidence evidence1 "I'm JerryMM"
+call payment.bcos.evidence bcos_user1 queryEvidence evidence1
+call payment.fabric.evidence fabric_user1 queryEvidence evidence1
+call payment.bcos.evidence bcos_user1 queryEvidence evidence1
+rollbackTransaction 101 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
+
+call payment.bcos.evidence bcos_user1 queryEvidence evidence1
+call payment.fabric.evidence fabric_user1 queryEvidence evidence1
+
+quit
+EOF
+
+    cd -
+
+    check_log
+    check_console_log ${ROOT}/WeCross-Console/logs/warn.log
+}
+
 prepare_wecross()
 {
     ./gradlew assemble
@@ -172,6 +212,7 @@ main()
     prepare_demo
     demo_test
     htlc_test
+    2pc_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then
