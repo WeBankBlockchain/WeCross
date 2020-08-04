@@ -157,16 +157,15 @@ call payment.bcos.evidence bcos_user1 queryEvidence evidence0
 call payment.fabric.evidence fabric_user1 queryEvidence evidence0
 
 startTransaction 101 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
-execTransaction payment.bcos.evidence bcos_user1 101 1 newEvidence evidence0 "I'm TomGG"
-execTransaction payment.fabric.evidence fabric_user1 101 1 newEvidence evidence0 "I'm JerryMM"
-call payment.bcos.evidence bcos_user1 queryEvidence evidence0
-call payment.fabric.evidence fabric_user1 queryEvidence evidence0
-sendTransaction payment.bcos.evidence bcos_user1 newEvidence evidence0 "I'm TomDD"
-call payment.bcos.evidence bcos_user1 queryEvidence evidence0
+execTransaction payment.bcos.evidence bcos_user1 101 1 newEvidence evidence1 "I'm TomGG"
+execTransaction payment.fabric.evidence fabric_user1 101 1 newEvidence evidence1 "I'm JerryMM"
+call payment.bcos.evidence bcos_user1 queryEvidence evidence1
+call payment.fabric.evidence fabric_user1 queryEvidence evidence1
+call payment.bcos.evidence bcos_user1 queryEvidence evidence1
 rollbackTransaction 101 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
 
-call payment.bcos.evidence bcos_user1 queryEvidence evidence0
-call payment.fabric.evidence fabric_user1 queryEvidence evidence0
+call payment.bcos.evidence bcos_user1 queryEvidence evidence1
+call payment.fabric.evidence fabric_user1 queryEvidence evidence1
 
 quit
 EOF
