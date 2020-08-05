@@ -81,8 +81,7 @@ deploy_fabric_2pc_evidence_chiancode()
 
     bash start.sh <<EOF
     fabricInstall payment.fabric.evidence fabric_admin_org1 Org1 contracts/chaincode/EvidenceSample2PC 1.0 GO_LANG
-    fabricInstall payment.fabric.evidence fabric_admin_org2 Org2 contracts/chaincode/EvidenceSample2PC 1.0 GO_LANG
-    fabricInstantiate payment.fabric.evidence fabric_admin ["Org1","Org2"] contracts/chaincode/EvidenceSample2PC 1.0 GO_LANG default []
+    fabricInstantiate payment.fabric.evidence fabric_admin ["Org1"] contracts/chaincode/EvidenceSample2PC 1.0 GO_LANG default []
 quit
 EOF
     # wait the chaincode instantiate
