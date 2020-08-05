@@ -212,7 +212,7 @@ main()
     prepare_demo
     demo_test
     htlc_test
-    2pc_test
+    #  2pc_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then
