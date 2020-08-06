@@ -19,7 +19,10 @@ LOG_ERROR()
 pr_comment()
 {
     local content=${1}
-    curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST -d "{\"body\": \"${content}\"}" "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
+    local pr_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+    LOG_INFO "PR: ${pr_number}"
+    LOG_INFO "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
+    curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST -d "{\"body\": \"${content}\"}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${pr_number}/comments"
 }
 
 check_log()
@@ -55,18 +58,15 @@ cross_group_demo_test()
 {
     cd ${ROOT}
 
-    bash build_cross_groups.sh n
+    bash build_single_bcos.sh n
 
     cd WeCross-Console/
     bash start.sh <<EOF
 listResources
 listAccounts
-call payment.group1.HelloWorldGroup1 bcos_user1 get
-sendTransaction payment.group1.HelloWorldGroup1 bcos_user1 set Tom
-call payment.group1.HelloWorldGroup1 bcos_user1 get
-call payment.group2.HelloWorldGroup2 bcos_user1 get
-sendTransaction payment.group2.HelloWorldGroup2 bcos_user1 set Jerry
-call payment.group2.HelloWorldGroup2 bcos_user1 get
+call payment.bcos.HelloWeCross bcos_user1 get
+sendTransaction payment.bcos.HelloWeCross bcos_user1 set ["Tom"]
+call payment.bcos.HelloWeCross bcos_user1 get
 quit
 EOF
     cd ..
@@ -92,6 +92,14 @@ prepare_wecross()
     mv dist demo/WeCross
 }
 
+prepare_wecross_console()
+{
+    cd ${ROOT}/
+    LOG_INFO "Download wecross console from branch: ${PLUGIN_BRANCH}"
+    bash WeCross/download_console.sh -s -t ${PLUGIN_BRANCH}
+    cd -
+}
+
 update_wecross_sdk()
 {
     local dest_dir=${ROOT}/WeCross-Console/lib/
@@ -111,13 +119,13 @@ update_wecross_sdk()
 performance_test_bcos_local()
 {
     cd ${ROOT}/WeCross-Console/
-    java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.BCOS.BCOSPerformanceTest bcos_user1 call 1000 500 1000 > bcos_local_call.txt
+    java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.BCOS.BCOSPerformanceTest payment.bcos.HelloWeCross bcos_user1 call 1000 500 1000 > bcos_local_call.txt
     cat bcos_local_call.txt
-    pr_comment "$(cat bcos_local_call.txt)"
+    #pr_comment "$(cat bcos_local_call.txt)"
 
-    java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.BCOS.BCOSPerformanceTest bcos_user1 sendTransaction 1000 500 1000 > bcos_local_sendtx.txt
+    java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.BCOS.BCOSPerformanceTest payment.bcos.HelloWeCross bcos_user1 sendTransaction 1000 500 1000 > bcos_local_sendtx.txt
     cat bcos_local_sendtx.txt
-    pr_comment "$(cat bcos_local_sendtx.txt)"
+    #pr_comment "$(cat bcos_local_sendtx.txt)"
 
 }
 
@@ -129,16 +137,14 @@ performance_test()
 
 main()
 {
+    LOG_INFO "Run with branch: " ${PLUGIN_BRANCH}
     prepare_wecross
+    prepare_wecross_console
     prepare_demo
     demo_test
     update_wecross_sdk
     performance_test
 }
-
-if [ -n "${TRAVIS_BRANCH}" ]; then
-    PLUGIN_BRANCH=${TRAVIS_BRANCH}
-fi
 
 if [ -n "${1}" ]; then
     PLUGIN_BRANCH=${1}
