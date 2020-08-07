@@ -139,8 +139,8 @@ publish_test_result()
     local md_file=$(echo ${txt_file} | cut -d . -f1).md
     txt_to_markdown ${txt_file}
     cat ${md_file}
-    #cp ${md_file} ${OUTPUT_DIR}/
-    pr_comment_file ${md_file}
+    cp ${md_file} ${OUTPUT_DIR}/
+    #pr_comment_file ${md_file}
 }
 
 performance_test_bcos_local()

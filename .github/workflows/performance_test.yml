@@ -16,14 +16,14 @@ jobs:
       - name: Run test
         run: bash .ci/ci_performance_test.sh ${GITHUB_BASE_REF}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.COMMENT_PR_SECRET }}
       - uses: harupy/comment-on-pr@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.COMMENT_PR_SECRET }}
         with:
           filename: bcos_local_call.md
       - uses: harupy/comment-on-pr@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.COMMENT_PR_SECRET }}
         with:
           filename: bcos_local_sendtx.md

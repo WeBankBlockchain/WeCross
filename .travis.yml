@@ -49,14 +49,14 @@ matrix:
             script: |
                 bash .ci/ci_check.sh && bash .ci/ci_demo_check.sh
 
-        -   language: java
-            jdk: openjdk11
-            os: linux
-            dist: xenial
-            sudo: required
-            name: "performance test"
-            script: |
-                bash .ci/ci_performance_test.sh
+        #-   language: java
+        #    jdk: openjdk11
+        #    os: linux
+        #    dist: xenial
+        #    sudo: required
+        #    name: "performance test"
+        #    script: |
+        #        bash .ci/ci_performance_test.sh
 
         #-   language: java
         #    jdk: openjdk14
