@@ -123,6 +123,7 @@ txt_to_markdown()
     local md_file_name=$(echo ${txt_file_name} | cut -d . -f1).md
     cat << EOF > ${md_file_name}
 \`\`\`
+Enviroment: github action machine
 $(cat ${txt_file_name})
 \`\`\`
 EOF
@@ -131,7 +132,7 @@ EOF
 publish_test_result()
 {
     local txt_file=${1}
-    local md_file=$(echo ${txt_file} | cut -d . -f).md
+    local md_file=$(echo ${txt_file} | cut -d . -f1).md
     txt_to_markdown ${txt_file}
     cat ${md_file}
     cp ${md_file} ${OUTPUT_DIR}/
