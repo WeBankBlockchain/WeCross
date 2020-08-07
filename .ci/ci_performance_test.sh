@@ -18,7 +18,7 @@ LOG_ERROR()
 pr_comment_file()
 {
         local content="$(cat ${1}|sed ':label;N;s/\n/\\n/g;b label')"
-        curl -nso /dev/null -X POST -d "{\"body\": \"${content}\"}" "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
+        curl -n -X POST -d "{\"body\": \"${content}\"}" "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
 }
 
 pr_comment_github()
