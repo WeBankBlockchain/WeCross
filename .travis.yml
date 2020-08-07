@@ -6,6 +6,9 @@ branches:
 services:
     - docker
 
+deploy:
+    github_token: $GITHUB_TOKEN
+
 matrix:
     fast_finish: true
     include:
