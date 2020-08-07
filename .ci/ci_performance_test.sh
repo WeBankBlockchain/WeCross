@@ -3,6 +3,7 @@
 set -e
 ROOT=$(pwd)/demo/
 PLUGIN_BRANCH=master
+OUTPUT_DIR=$(pwd)/.github/workflows/
 
 LOG_INFO()
 {
@@ -116,19 +117,38 @@ update_wecross_sdk()
 }
 
 
+txt_to_markdown()
+{
+    local txt_file_name=${1}
+    local md_file_name=$(echo ${txt_file_name} | cut -d . -f).md
+        cat << EOF > ${md_file_name}
+```
+$(cat ${txt_file_name})
+```
+EOF
+}
+
+publish_test_result()
+{
+    local txt_file=${1}
+    local md_file=$(echo ${txt_file} | cut -d . -f).md
+    txt_to_markdown ${txt_file}
+    cat ${md_file}
+    cp ${md_file} ${OUTPUT_DIR}/
+}
+
 performance_test_bcos_local()
 {
     cd ${ROOT}/WeCross-Console/
     java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.BCOS.BCOSPerformanceTest payment.bcos.HelloWeCross bcos_user1 call 1000 500 1000 > bcos_local_call.txt
-    cat bcos_local_call.txt
+    publish_test_result bcos_local_call.txt
     #pr_comment "$(cat bcos_local_call.txt)"
 
     java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.BCOS.BCOSPerformanceTest payment.bcos.HelloWeCross bcos_user1 sendTransaction 1000 500 1000 > bcos_local_sendtx.txt
-    cat bcos_local_sendtx.txt
+    publish_test_result bcos_local_sendtx.txt
     #pr_comment "$(cat bcos_local_sendtx.txt)"
 
 }
-
 
 performance_test()
 {

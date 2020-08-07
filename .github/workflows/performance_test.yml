@@ -21,9 +21,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          filename: demo/WeCross-Console/bcos_local_call.txt
+          filename: bcos_local_call.md
       - uses: harupy/comment-on-pr@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          filename: demo/WeCross-Console/bcos_local_sendtx.txt
+          filename: bcos_local_sendtx.md
