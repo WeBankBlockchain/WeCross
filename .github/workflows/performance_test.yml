@@ -19,11 +19,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: harupy/comment-on-pr@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ORIGIN_GITHUB_TOKEN }}
         with:
           filename: bcos_local_call.md
       - uses: harupy/comment-on-pr@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ORIGIN_GITHUB_TOKEN }}
         with:
           filename: bcos_local_sendtx.md

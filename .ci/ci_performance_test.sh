@@ -141,11 +141,11 @@ publish_test_result()
 performance_test_bcos_local()
 {
     cd ${ROOT}/WeCross-Console/
-    java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.BCOS.BCOSPerformanceTest payment.bcos.HelloWeCross bcos_user1 call 10000 500 500 > bcos_local_call.txt
+    java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.BCOS.BCOSPerformanceTest payment.bcos.HelloWeCross bcos_user1 call 20000 1000 500 > bcos_local_call.txt
     publish_test_result bcos_local_call.txt
     #pr_comment "$(cat bcos_local_call.txt)"
 
-    java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.BCOS.BCOSPerformanceTest payment.bcos.HelloWeCross bcos_user1 sendTransaction 10000 500 500 > bcos_local_sendtx.txt
+    java -cp conf/:lib/*:apps/* com.webank.wecrosssdk.performance.BCOS.BCOSPerformanceTest payment.bcos.HelloWeCross bcos_user1 sendTransaction 10000 400 500 > bcos_local_sendtx.txt
     publish_test_result bcos_local_sendtx.txt
     #pr_comment "$(cat bcos_local_sendtx.txt)"
 
