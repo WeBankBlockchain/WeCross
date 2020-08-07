@@ -40,14 +40,6 @@ check_log()
         LOG_ERROR "Error log is ${error_log}"
         exit 1
     fi
-
-    error_log=routers-payment/127.0.0.1-8251-25501/logs/error.log
-    LOG_INFO "Check log ${error_log}"
-    if [ "$(grep ERROR ${error_log} |wc -l)" -ne "0" ];then
-        cat ${error_log}
-        LOG_ERROR "Error log is ${error_log}"
-        exit 1
-    fi
 }
 
 prepare_demo()
