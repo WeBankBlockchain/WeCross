@@ -7,20 +7,18 @@ OUTPUT_DIR=$(pwd)/.github/workflows/
 
 LOG_INFO()
 {
-    local content=${1}
-    echo -e "\033[32m[INFO] ${content}\033[0m"
+    echo -e "\033[32m[INFO] $@\033[0m"
 }
 
 LOG_ERROR()
 {
-    local content=${1}
-    echo -e "\033[31m[ERROR] ${content}\033[0m"
+    echo -e "\033[31m[ERROR] $@\033[0m"
 }
 
-pr_comment()
+pr_comment_file()
 {
-    local content=${1}
-    curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST -d "{\"body\": \"${content}\"}" "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
+        local content="$(cat ${1}|sed ':label;N;s/\n/\\n/g;b label')"
+        curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST -d "{\"body\": \"${content}\"}" "https://api.github.com/repos/WeBankFintech/WeCross/issues/325/comments"
 }
 
 pr_comment_github()
@@ -142,7 +140,7 @@ publish_test_result()
     txt_to_markdown ${txt_file}
     cat ${md_file}
     #cp ${md_file} ${OUTPUT_DIR}/
-    pr_comment "$(cat ${md_file})"
+    pr_comment_file ${md_file}
 }
 
 performance_test_bcos_local()
