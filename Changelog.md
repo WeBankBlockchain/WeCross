@@ -19,7 +19,7 @@
 **更新**
 
 * 区块头同步逻辑更新：去除区块头落盘、router重启拉取最新区块头
-* HTLC更新：使用WeCross-Console替代ledger-tool来初始化资产
+* HTLC更新：提案处理异步化、使用WeCross-Console替代ledger-tool来初始化资产
 
 ### v1.0.0-rc3
 
