@@ -120,11 +120,11 @@ update_wecross_sdk()
 txt_to_markdown()
 {
     local txt_file_name=${1}
-    local md_file_name=$(echo ${txt_file_name} | cut -d . -f).md
-        cat << EOF > ${md_file_name}
-```
+    local md_file_name=$(echo ${txt_file_name} | cut -d . -f1).md
+    cat << EOF > ${md_file_name}
+\`\`\`
 $(cat ${txt_file_name})
-```
+\`\`\`
 EOF
 }
 
