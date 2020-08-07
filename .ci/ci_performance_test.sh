@@ -17,13 +17,13 @@ LOG_ERROR()
 
 pr_comment_file()
 {
-        local content="$(cat ${1}|sed ':label;N;s/\n/\\n/g;b label')"
-        curl -n -X POST -d "{\"body\": \"${content}\"}" "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
+    local content="$(cat ${1}|sed ':label;N;s/\n/\\n/g;b label')"
+    curl -n -X POST -d "{\"body\": \"${content}\"}" "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
 }
 
-pr_comment_github()
+pr_comment_file_github()
 {
-    local content=${1}
+    local content="$(cat ${1}|sed ':label;N;s/\n/\\n/g;b label')"
     local pr_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
     LOG_INFO "PR: ${pr_number}"
     LOG_INFO "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
@@ -132,7 +132,7 @@ publish_test_result()
     txt_to_markdown ${txt_file}
     cat ${md_file}
     cp ${md_file} ${OUTPUT_DIR}/
-    #pr_comment_file ${md_file}
+    pr_comment_file_github ${md_file}
 }
 
 performance_test_bcos_local()
