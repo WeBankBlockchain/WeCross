@@ -293,7 +293,7 @@ public class HTLCResource extends Resource {
                         exception -> {
                             if (exception != null) {
                                 Response response1 = new Response();
-                                response1.setErrorCode(exception.getErrorCode());
+                                response1.setErrorCode(ErrorCode.HTLC_ERROR);
                                 response1.setErrorMessage(exception.getMessage());
                                 if (logger.isDebugEnabled()) {
                                     logger.debug("onRemoteTransaction, response: {}", response1);
@@ -318,7 +318,7 @@ public class HTLCResource extends Resource {
 
             if (!P2P_ACCESS_WHITE_LIST.contains(method)) {
                 response = new Response();
-                response.setErrorCode(HTLCErrorCode.NO_PERMISSION);
+                response.setErrorCode(ErrorCode.HTLC_ERROR);
                 response.setErrorMessage("HTLCResource doesn't allow peers to call " + method);
                 if (logger.isDebugEnabled()) {
                     logger.debug("onRemoteTransaction, response: {}", response);
