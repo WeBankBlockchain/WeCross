@@ -6,6 +6,12 @@ branches:
 services:
     - docker
 
+addons:
+    sonarcloud:
+        organization: "WeBankFinTech"
+        token:
+            secure: "z00JR+UVceD+7xslpXsxrR2kieUnCFM5L/K7mpONVkj97bkLa5vhjO8I8ijqzpIcaN1XV4xaYlJtvn4blkJ7bqcq8RoS1cZmXmltKSyArPEuAXu+whokKK7vhyP+i9juhi4m6aA+6cVbUwWpml7NMElrBtHAoz69FUReavDaghP/VZG7VBCRlo+YFH3y443nPpDQ+Oa24kYUK/JZzzn9G+ZUljUp9wo9gKkQF80HYf1+hTkfahnnqHCKx131Cfb5bx1KMtnVFUD2+xzIpesnkRfqmwxyftsTRzwz5gtCvaqVsa03POPnprvEPDyWXA+0D9lg92C7TWDmZt6n5Oo+yCPHs4OkEB794sPBM6HUWWi3TQvIS471NIoAwRogBMfz3Fc8fsForEjqSIAL/ZkxlbVk/QDFPId263pN2V28zDJ5g5apfg4/7H3A77wEXmTtY0UWw3bmUu4WdRnv+1WyQWGuL8KFk4OKPasIo+IGtdgDoZy2WV7cm6nl3F+N6LQfphnqlZzZTS9CxBPPmj9cDjvtr2iyKqZDF5i1eD8LQMQjdyzlHR8Tn0ME7oRjLiOZvjmhPwesgm9+Y5PrMtlJrkqi+VJs2rw07e2USHbCQplAD8dEgo1xRfVNb6ciMD6sBWqYuwy2jBF5crX195joT/k+tvALw0IXcjB4QoHuSzY=" # encrypted value of your token
+            
 matrix:
     fast_finish: true
     include:
@@ -70,7 +76,7 @@ cache:
 before_install:
     - gradle wrapper
 script: |
-    bash .ci/ci_check.sh && bash .ci/ci_demo_check.sh
+    ./gradlew sonarqube && bash .ci/ci_check.sh && bash .ci/ci_demo_check.sh
 
 after_success:
     - bash <(curl -s https://codecov.io/bash)
