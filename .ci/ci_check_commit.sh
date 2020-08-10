@@ -3,7 +3,7 @@
 set -e
 
 scan_code_script="cobra/cobra.py -f json -o /tmp/report.json -t "
-ignore_files=(sh crt key json toml)
+ignore_files=(sh crt key json toml performance_test.yml)
 
 LOG_ERROR() {
     content=${1}
