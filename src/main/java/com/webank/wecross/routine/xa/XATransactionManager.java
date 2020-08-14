@@ -123,7 +123,7 @@ public class XATransactionManager {
                     reduceCallback.onResponse(
                             new WeCrossException(XAErrorCode.START_TRANSACTION_ERROR, errorMsg),
                             -1);
-                    return;
+                    continue;
                 }
 
                 resource.asyncSendTransaction(
@@ -200,7 +200,7 @@ public class XATransactionManager {
                     reduceCallback.onResponse(
                             new WeCrossException(XAErrorCode.COMMIT_TRANSACTION_ERROR, errorMsg),
                             -1);
-                    return;
+                    continue;
                 }
 
                 resource.asyncSendTransaction(
@@ -273,9 +273,9 @@ public class XATransactionManager {
                             "Account with type '" + resource.getStubType() + "' not found";
                     logger.error(errorMsg);
                     reduceCallback.onResponse(
-                            new WeCrossException(XAErrorCode.COMMIT_TRANSACTION_ERROR, errorMsg),
+                            new WeCrossException(XAErrorCode.ROLLBACK_TRANSACTION_ERROR, errorMsg),
                             -1);
-                    return;
+                    continue;
                 }
 
                 resource.asyncSendTransaction(
@@ -407,7 +407,7 @@ public class XATransactionManager {
                     reduceCallback.onResponse(
                             new WeCrossException(XAErrorCode.GET_TRANSACTION_INFO_ERROR, errorMsg),
                             null);
-                    return;
+                    continue;
                 }
 
                 resource.asyncCall(
