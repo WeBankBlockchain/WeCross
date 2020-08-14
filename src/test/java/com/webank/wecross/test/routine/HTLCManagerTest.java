@@ -30,7 +30,8 @@ public class HTLCManagerTest {
         Map<String, HTLCTaskData> htlcTaskDataMap = new HashMap<>();
         htlcTaskDataMap.put("a.b.c", htlcTaskData);
         htlcManager.setHtlcTaskDataMap(htlcTaskDataMap);
-        Mockito.when(mockZoneManager.getResource(Mockito.any(Path.class))).thenReturn(mockResource);
+        Mockito.when(mockZoneManager.fetchResource(Mockito.any(Path.class)))
+                .thenReturn(mockResource);
         Assert.assertEquals(
                 HTLCResource.class,
                 htlcManager.filterHTLCResource(mockZoneManager, mockPath, mockResource).getClass());

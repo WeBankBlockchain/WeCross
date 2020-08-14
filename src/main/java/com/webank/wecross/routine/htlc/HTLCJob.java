@@ -61,9 +61,20 @@ public class HTLCJob implements Job {
                                     // parties to create proposals at the same time
                                     if (logger.isDebugEnabled()) {
                                         logger.debug(
-                                                "Failed to handle current proposal: {}, path: {}, errorMessage: tx-info of proposal not found",
+                                                "Failed to handle current proposal: {}, path: {}, errorMessage: {}",
                                                 proposalId,
-                                                path);
+                                                path,
+                                                exception.getInternalMessage());
+                                    }
+                                } else if (exception.getInternalErrorCode()
+                                        == HTLCErrorCode.NO_COUNTERPARTY_RESOURCE) {
+                                    // just started
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(
+                                                "Failed to handle current proposal: {}, path: {}, errorMessage: {}",
+                                                proposalId,
+                                                path,
+                                                exception.getInternalMessage());
                                     }
                                 } else {
                                     logger.error(

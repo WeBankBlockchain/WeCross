@@ -81,7 +81,8 @@ public class HTLCManagerConfig {
     }
 
     private String getCounterpartyHtlcAddress(String iPath, String accountName) throws Exception {
-        com.webank.wecross.resource.Resource resource = zoneManager.getResource(Path.decode(iPath));
+        com.webank.wecross.resource.Resource resource =
+                zoneManager.fetchResource(Path.decode(iPath));
         Account account = accountManager.getAccount(accountName);
         return getCounterpartyHtlcAddress(resource, account);
     }

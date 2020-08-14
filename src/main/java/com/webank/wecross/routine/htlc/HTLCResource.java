@@ -342,11 +342,11 @@ public class HTLCResource extends Resource {
     }
 
     public Resource getSelfResource() {
-        return zoneManager.getResource(selfPath);
+        return zoneManager.fetchResource(selfPath);
     }
 
     public Resource getCounterpartyResource() {
-        return zoneManager.getResource(counterpartyPath);
+        return zoneManager.fetchResource(counterpartyPath);
     }
 
     public ZoneManager getZoneManager() {
