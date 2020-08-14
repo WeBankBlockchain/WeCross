@@ -21,7 +21,7 @@ public class WeCrossException extends java.lang.Exception {
         public static final int RESOURCE_ERROR = 203;
         public static final int METHOD_ERROR = 204;
         public static final int DECODE_TRANSACTION_REQUEST_ERROR = 205;
-        public static final int UNSUPPORTED_TYPE = 206;
+        public static final int ACCOUNT_ERROR = 206;
 
         // other
         public static final int HTLC_ERROR = 301;
