@@ -109,6 +109,10 @@ public class ChainInfo {
                 + ", stubType='"
                 + stubType
                 + '\''
+                + ", resources="
+                + resources
+                + ", properties="
+                + properties
                 + ", checksum='"
                 + checksum
                 + '\''
