@@ -117,30 +117,6 @@ build_bcos()
     cd ${ROOT}
 }
 
-
-config_bcos_stub_toml()
-{
-    local file=${1}
-    local contractAddress=${2}
-
-    # delete resources sample
-    local start=$(grep -n 'resources is' ${file} | awk -F ":" '{print $1}')
-    local end=$(wc -l ${file} |awk '{print $1}')
-    sed_i "${start},${end}d" ${file} #delete line: [start, end]
-
-    # add real sample
-    cat << EOF > ${file}
-$(cat ${file})
-# resources is a list
-[[resources]]
-    # name must be unique
-    name = 'HelloWeCross'
-    type = 'BCOS_CONTRACT'
-    contractAddress = '${contractAddress}'
-EOF
-
-}
-
 build_fabric()
 {
     LOG_INFO "Build Fabric ..."
@@ -249,9 +225,6 @@ config_router_8250()
     bash add_chain.sh -t BCOS2.0 -n bcos -d conf/chains
     # copy cert
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/bcos/
-    # hello_address=$(grep 'HelloWeCross' ${bcos_demo_dir}/console/deploylog.txt | awk 'END {print $5}')
-    # modify stub.toml
-    # config_bcos_stub_toml conf/chains/bcos/stub.toml ${hello_address}
 
     # deploy proxy
     java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/bcos bcos_user1
