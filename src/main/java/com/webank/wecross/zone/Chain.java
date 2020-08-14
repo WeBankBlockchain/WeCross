@@ -52,6 +52,8 @@ public class Chain {
 
         if (localConnection != null) {
             this.properties = localConnection.getProperties();
+        } else {
+            this.properties = chainInfo.getProperties();
         }
     }
 

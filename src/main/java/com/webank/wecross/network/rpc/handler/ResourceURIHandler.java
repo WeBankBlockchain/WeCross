@@ -7,6 +7,7 @@ import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.network.rpc.CustomCommandRequest;
+import com.webank.wecross.network.rpc.RequestUtils;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceDetail;
 import com.webank.wecross.restserver.RestRequest;
@@ -114,12 +115,6 @@ public class ResourceURIHandler implements URIHandler {
                     }
                 case "sendtransaction":
                     {
-                        Resource resourceObj = getResource(path);
-                        if (resourceObj == null) {
-                            throw new WeCrossException(
-                                    WeCrossException.ErrorCode.RESOURCE_ERROR,
-                                    "Resource not found");
-                        }
                         RestRequest<TransactionRequest> restRequest =
                                 objectMapper.readValue(
                                         content,
@@ -130,15 +125,8 @@ public class ResourceURIHandler implements URIHandler {
                         TransactionRequest transactionRequest = restRequest.getData();
                         String accountName = restRequest.getAccount();
                         Account account = accountManager.getAccount(accountName);
-                        if (Objects.isNull(account)) {
-                            String errorMsg = "account not found: " + accountName;
-                            logger.error(errorMsg);
-
-                            restResponse.setErrorCode(NetworkQueryStatus.ACCOUNT_ERROR);
-                            restResponse.setMessage(errorMsg);
-                            callback.onResponse(restResponse);
-                            return;
-                        }
+                        Resource resourceObj = getResource(path);
+                        RequestUtils.checkAccountAndResource(account, resourceObj);
 
                         logger.trace(
                                 "sendTransaction request: {}, account: {}",
@@ -179,13 +167,6 @@ public class ResourceURIHandler implements URIHandler {
                     }
                 case "call":
                     {
-                        Resource resourceObj = getResource(path);
-                        if (resourceObj == null) {
-                            throw new WeCrossException(
-                                    WeCrossException.ErrorCode.RESOURCE_ERROR,
-                                    "Resource not found");
-                        }
-
                         RestRequest<TransactionRequest> restRequest =
                                 objectMapper.readValue(
                                         content,
@@ -197,15 +178,8 @@ public class ResourceURIHandler implements URIHandler {
 
                         String accountName = restRequest.getAccount();
                         Account account = accountManager.getAccount(accountName);
-                        if (Objects.isNull(account)) {
-                            String errorMsg = "account not found: " + accountName;
-                            logger.error(errorMsg);
-
-                            restResponse.setErrorCode(NetworkQueryStatus.ACCOUNT_ERROR);
-                            restResponse.setMessage(errorMsg);
-                            callback.onResponse(restResponse);
-                            return;
-                        }
+                        Resource resourceObj = getResource(path);
+                        RequestUtils.checkAccountAndResource(account, resourceObj);
 
                         logger.trace(
                                 "call request: {}, account: {}", transactionRequest, accountName);
@@ -282,13 +256,18 @@ public class ResourceURIHandler implements URIHandler {
                         String accountName = restRequest.getAccount();
                         Account account = accountManager.getAccount(accountName);
                         if (Objects.isNull(account)) {
-                            String errorMsg = "account not found: " + accountName;
-                            logger.error(errorMsg);
+                            throw new WeCrossException(
+                                    WeCrossException.ErrorCode.ACCOUNT_ERROR, "Account not found");
+                        }
 
-                            restResponse.setErrorCode(NetworkQueryStatus.ACCOUNT_ERROR);
-                            restResponse.setMessage(errorMsg);
-                            callback.onResponse(restResponse);
-                            return;
+                        if (!account.getType().equals(chain.getStubType())) {
+                            throw new WeCrossException(
+                                    WeCrossException.ErrorCode.ACCOUNT_ERROR,
+                                    "Account type '"
+                                            + account.getType()
+                                            + "' does not match the stub type '"
+                                            + chain.getStubType()
+                                            + "'");
                         }
 
                         chain.getDriver()
