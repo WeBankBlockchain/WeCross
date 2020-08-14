@@ -49,7 +49,7 @@ public class XATransactionManager {
         ReduceCallback reduceCallback =
                 (exception, result) -> {
                     if (exception != null) {
-                        logger.error("process error!", exception);
+                        logger.error("Process error!", exception);
                         fatals.add(exception);
                     }
 
@@ -57,8 +57,8 @@ public class XATransactionManager {
                     if (current == size) {
                         // all finished
                         if (fatals.size() > 0) {
-                            logger.error("failed in progress", fatals);
-                            StringBuffer errorMsg = new StringBuffer("error occurred,");
+                            logger.error("Failed in progress", fatals);
+                            StringBuffer errorMsg = new StringBuffer("Error occurred,");
                             for (Exception e : fatals) {
                                 errorMsg.append(" " + "[" + e.getMessage() + "]");
                             }
@@ -81,7 +81,7 @@ public class XATransactionManager {
             Set<Path> resources,
             ReduceCallback callback) {
         try {
-            logger.info("startTransaction, resources: {}", resources);
+            logger.info("StartTransaction, resources: {}", resources);
 
             Map<String, Set<Path>> zone2Path = getChainPaths(resources);
 
@@ -118,7 +118,7 @@ public class XATransactionManager {
                 Account account = accounts.get(resource.getStubType());
                 if (Objects.isNull(account)) {
                     String errorMsg =
-                            "account with type '" + resource.getStubType() + "' not found";
+                            "Account with type '" + resource.getStubType() + "' not found";
                     logger.error(errorMsg);
                     reduceCallback.onResponse(
                             new WeCrossException(XAErrorCode.START_TRANSACTION_ERROR, errorMsg),
@@ -131,7 +131,7 @@ public class XATransactionManager {
                         account,
                         (exception, response) -> {
                             if (exception != null && !exception.isSuccess()) {
-                                logger.error("startTransaction failed, ", exception);
+                                logger.error("StartTransaction failed, ", exception);
 
                                 reduceCallback.onResponse(
                                         new WeCrossException(
@@ -143,7 +143,7 @@ public class XATransactionManager {
 
                             if (response.getErrorCode() != 0) {
                                 logger.error(
-                                        "startTransaction failed: {} {}",
+                                        "StartTransaction failed: {} {}",
                                         response.getErrorCode(),
                                         response.getErrorMessage());
 
@@ -157,16 +157,16 @@ public class XATransactionManager {
 
                             int errorCode = Integer.parseInt(response.getResult()[0]);
                             if (errorCode != 0) {
-                                logger.error("startTransaction failed: {}", errorCode);
+                                logger.error("StartTransaction failed: {}", errorCode);
                             }
 
                             reduceCallback.onResponse(null, errorCode);
                         });
             }
         } catch (Exception e) {
-            logger.error("startTransaction error", e);
+            logger.error("StartTransaction error", e);
             callback.onResponse(
-                    new WeCrossException(XAErrorCode.UNDEFINED_ERROR, "undefined error"), -1);
+                    new WeCrossException(XAErrorCode.UNDEFINED_ERROR, "Undefined error"), -1);
         }
     }
 
@@ -176,7 +176,7 @@ public class XATransactionManager {
             Set<Path> chains,
             ReduceCallback callback) {
         try {
-            logger.info("commitTransaction, chains: {}", chains);
+            logger.info("CommitTransaction, chains: {}", chains);
 
             ReduceCallback reduceCallback = getReduceCallback(chains.size(), callback);
 
@@ -195,7 +195,7 @@ public class XATransactionManager {
                 Account account = accounts.get(resource.getStubType());
                 if (Objects.isNull(account)) {
                     String errorMsg =
-                            "account with type '" + resource.getStubType() + "' not found";
+                            "Account with type '" + resource.getStubType() + "' not found";
                     logger.error(errorMsg);
                     reduceCallback.onResponse(
                             new WeCrossException(XAErrorCode.COMMIT_TRANSACTION_ERROR, errorMsg),
@@ -208,7 +208,7 @@ public class XATransactionManager {
                         account,
                         (exception, response) -> {
                             if (exception != null && !exception.isSuccess()) {
-                                logger.error("commitTransaction failed, ", exception);
+                                logger.error("CommitTransaction failed, ", exception);
 
                                 reduceCallback.onResponse(
                                         new WeCrossException(
@@ -220,7 +220,7 @@ public class XATransactionManager {
 
                             if (response.getErrorCode() != 0) {
                                 logger.error(
-                                        "commitTransaction failed: {} {}",
+                                        "CommitTransaction failed: {} {}",
                                         response.getErrorCode(),
                                         response.getErrorMessage());
 
@@ -234,16 +234,16 @@ public class XATransactionManager {
 
                             int errorCode = Integer.parseInt(response.getResult()[0]);
                             if (errorCode != 0) {
-                                logger.error("commitTransaction failed: {}", errorCode);
+                                logger.error("CommitTransaction failed: {}", errorCode);
                             }
 
                             reduceCallback.onResponse(null, errorCode);
                         });
             }
         } catch (Exception e) {
-            logger.error("commitTransaction error", e);
+            logger.error("CommitTransaction error", e);
             callback.onResponse(
-                    new WeCrossException(XAErrorCode.UNDEFINED_ERROR, "undefined error"), -1);
+                    new WeCrossException(XAErrorCode.UNDEFINED_ERROR, "Undefined error"), -1);
         }
     };
 
@@ -270,7 +270,7 @@ public class XATransactionManager {
                 Account account = accounts.get(resource.getStubType());
                 if (Objects.isNull(account)) {
                     String errorMsg =
-                            "account with type '" + resource.getStubType() + "' not found";
+                            "Account with type '" + resource.getStubType() + "' not found";
                     logger.error(errorMsg);
                     reduceCallback.onResponse(
                             new WeCrossException(XAErrorCode.COMMIT_TRANSACTION_ERROR, errorMsg),
@@ -283,7 +283,7 @@ public class XATransactionManager {
                         account,
                         (exception, response) -> {
                             if (exception != null && !exception.isSuccess()) {
-                                logger.error("rollbackTransaction failed, ", exception);
+                                logger.error("RollbackTransaction failed, ", exception);
 
                                 reduceCallback.onResponse(
                                         new WeCrossException(
@@ -295,7 +295,7 @@ public class XATransactionManager {
 
                             if (response.getErrorCode() != 0) {
                                 logger.error(
-                                        "rollbackTransaction failed: {} {}",
+                                        "RollbackTransaction failed: {} {}",
                                         response.getErrorCode(),
                                         response.getErrorMessage());
 
@@ -309,16 +309,16 @@ public class XATransactionManager {
 
                             int errorCode = Integer.parseInt(response.getResult()[0]);
                             if (errorCode != 0) {
-                                logger.error("rollbackTransaction failed: {}", errorCode);
+                                logger.error("RollbackTransaction failed: {}", errorCode);
                             }
 
                             reduceCallback.onResponse(null, errorCode);
                         });
             }
         } catch (Exception e) {
-            logger.error("rollbackTransaction error", e);
+            logger.error("RollbackTransaction error", e);
             callback.onResponse(
-                    new WeCrossException(XAErrorCode.UNDEFINED_ERROR, "undefined error"), -1);
+                    new WeCrossException(XAErrorCode.UNDEFINED_ERROR, "Undefined error"), -1);
         }
     }
 
@@ -337,7 +337,7 @@ public class XATransactionManager {
         GetTransactionInfoCallback reduceCallback =
                 (exception, info) -> {
                     if (exception != null) {
-                        logger.error("getTransactionInfo error in progress", exception);
+                        logger.error("GetTransactionInfo error in progress", exception);
                         fatals.add(exception);
                     } else {
                         infos.add(info);
@@ -346,17 +346,17 @@ public class XATransactionManager {
                     int current = finished.addAndGet(1);
                     if (current == size) {
                         if (infos.isEmpty()) {
-                            logger.error("empty result");
+                            logger.error("Empty result");
                             callback.onResponse(
                                     new WeCrossException(
-                                            XAErrorCode.GET_TRANSACTION_INFO_ERROR, "empty result"),
+                                            XAErrorCode.GET_TRANSACTION_INFO_ERROR, "Empty result"),
                                     null);
 
                             return;
                         }
 
                         if (infos.size() < size) {
-                            logger.warn("getTransactionInfo missing some steps");
+                            logger.warn("GetTransactionInfo missing some steps");
                         }
 
                         List<XATransactionStep> allSteps = new ArrayList<XATransactionStep>();
@@ -402,7 +402,7 @@ public class XATransactionManager {
                 Account account = accounts.get(resource.getStubType());
                 if (Objects.isNull(account)) {
                     String errorMsg =
-                            "account with type '" + resource.getStubType() + "' not found";
+                            "Account with type '" + resource.getStubType() + "' not found";
                     logger.error(errorMsg);
                     reduceCallback.onResponse(
                             new WeCrossException(XAErrorCode.GET_TRANSACTION_INFO_ERROR, errorMsg),
@@ -415,7 +415,7 @@ public class XATransactionManager {
                         account,
                         (exception, response) -> {
                             if (exception != null && !exception.isSuccess()) {
-                                logger.error("getTransactionInfo error", exception);
+                                logger.error("GetTransactionInfo error", exception);
 
                                 reduceCallback.onResponse(
                                         new WeCrossException(
@@ -427,7 +427,7 @@ public class XATransactionManager {
 
                             if (response.getErrorCode() != 0) {
                                 logger.error(
-                                        "getTransactionInfo failed: {} {}",
+                                        "GetTransactionInfo failed: {} {}",
                                         response.getErrorCode(),
                                         response.getErrorMessage());
 
@@ -445,7 +445,7 @@ public class XATransactionManager {
                                 String rawJSON = response.getResult()[0];
 
                                 if (logger.isDebugEnabled()) {
-                                    logger.debug("transaction info: {}", rawJSON);
+                                    logger.debug("Transaction info: {}", rawJSON);
                                 }
 
                                 StringBuffer buffer = new StringBuffer();
@@ -462,20 +462,20 @@ public class XATransactionManager {
 
                                 reduceCallback.onResponse(null, xaTransactionInfo);
                             } catch (Exception e) {
-                                logger.error("decode transactionInfo json error", e);
+                                logger.error("Decode transactionInfo json error", e);
 
                                 reduceCallback.onResponse(
                                         new WeCrossException(
-                                                -1, "decode transactionInfo json error", e),
+                                                -1, "Decode transactionInfo json error", e),
                                         null);
                                 return;
                             }
                         });
             }
         } catch (Exception e) {
-            logger.error("getTransactionInfo error", e);
+            logger.error("GetTransactionInfo error", e);
             callback.onResponse(
-                    new WeCrossException(XAErrorCode.UNDEFINED_ERROR, "undefined error"), null);
+                    new WeCrossException(XAErrorCode.UNDEFINED_ERROR, "Undefined error"), null);
         }
     }
 
@@ -525,17 +525,17 @@ public class XATransactionManager {
             } else if (option == GET_UNFINISHED) {
                 asyncGetUnfinishedTransactionIDs(proxyResource, account, callback);
             } else {
-                logger.error("getTransactionIDs error, undefined option: {}", option);
+                logger.error("GetTransactionIDs error, undefined option: {}", option);
                 callback.onResponse(
                         new WeCrossException(
                                 XAErrorCode.GET_TRANSACTION_IDS_ERROR,
-                                "undefined option: " + option),
+                                "Undefined option: " + option),
                         null);
             }
         } catch (Exception e) {
-            logger.error("getTransactionIDs error", e);
+            logger.error("GetTransactionIDs error", e);
             callback.onResponse(
-                    new WeCrossException(XAErrorCode.UNDEFINED_ERROR, "undefined error"), null);
+                    new WeCrossException(XAErrorCode.UNDEFINED_ERROR, "Undefined error"), null);
         }
     }
 

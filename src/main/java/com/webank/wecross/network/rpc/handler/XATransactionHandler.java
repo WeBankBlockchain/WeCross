@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.common.NetworkQueryStatus;
+import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.network.rpc.RequestUtils;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
@@ -195,26 +197,10 @@ public class XATransactionHandler implements URIHandler {
                                     accountManager.getAccount(account));
                         }
 
-                        Set<Path> paths =
-                                xaRequest
-                                        .getData()
-                                        .getPaths()
-                                        .parallelStream()
-                                        .map(
-                                                (s) -> {
-                                                    try {
-                                                        return Path.decode(s);
-                                                    } catch (Exception e) {
-                                                        logger.error("error", e);
-                                                        return null;
-                                                    }
-                                                })
-                                        .collect(Collectors.toSet());
-
                         xaTransactionManager.asyncStartTransaction(
                                 xaRequest.getData().getTransactionID(),
                                 accountMap,
-                                paths,
+                                listPathsToSet(xaRequest.getData().getPaths()),
                                 (e, result) -> {
                                     if (e != null) {
                                         logger.error("Error while startTransaction", e);
@@ -248,26 +234,10 @@ public class XATransactionHandler implements URIHandler {
                                     accountManager.getAccount(account));
                         }
 
-                        Set<Path> paths =
-                                xaRequest
-                                        .getData()
-                                        .getPaths()
-                                        .parallelStream()
-                                        .map(
-                                                (s) -> {
-                                                    try {
-                                                        return Path.decode(s);
-                                                    } catch (Exception e) {
-                                                        logger.error("error", e);
-                                                        return null;
-                                                    }
-                                                })
-                                        .collect(Collectors.toSet());
-
                         xaTransactionManager.asyncCommitTransaction(
                                 xaRequest.getData().getTransactionID(),
                                 accountMap,
-                                paths,
+                                listPathsToSet(xaRequest.getData().getPaths()),
                                 (e, result) -> {
                                     if (e != null) {
                                         logger.error("Error while commitTransaction", e);
@@ -302,26 +272,10 @@ public class XATransactionHandler implements URIHandler {
                                     accountManager.getAccount(account));
                         }
 
-                        Set<Path> paths =
-                                xaRequest
-                                        .getData()
-                                        .getPaths()
-                                        .parallelStream()
-                                        .map(
-                                                (s) -> {
-                                                    try {
-                                                        return Path.decode(s);
-                                                    } catch (Exception e) {
-                                                        logger.error("error", e);
-                                                        return null;
-                                                    }
-                                                })
-                                        .collect(Collectors.toSet());
-
                         xaTransactionManager.asyncRollback(
                                 xaRequest.getData().getTransactionID(),
                                 accountMap,
-                                paths,
+                                listPathsToSet(xaRequest.getData().getPaths()),
                                 (e, result) -> {
                                     if (e != null) {
                                         logger.error("Error while rollbackTransaction", e);
@@ -356,26 +310,10 @@ public class XATransactionHandler implements URIHandler {
                                     accountManager.getAccount(account));
                         }
 
-                        Set<Path> paths =
-                                xaRequest
-                                        .getData()
-                                        .getPaths()
-                                        .parallelStream()
-                                        .map(
-                                                (s) -> {
-                                                    try {
-                                                        return Path.decode(s);
-                                                    } catch (Exception e) {
-                                                        logger.error("error", e);
-                                                        return null;
-                                                    }
-                                                })
-                                        .collect(Collectors.toSet());
-
                         xaTransactionManager.asyncGetTransactionInfo(
                                 xaRequest.getData().getTransactionID(),
                                 accountMap,
-                                paths,
+                                listPathsToSet(xaRequest.getData().getPaths()),
                                 (e, info) -> {
                                     if (e != null) {
                                         logger.error("Error while getTransactionInfo", e);
@@ -410,16 +348,7 @@ public class XATransactionHandler implements URIHandler {
 
                         Account account =
                                 accountManager.getAccount(xaRequest.getData().getAccount());
-                        if (Objects.isNull(account)) {
-                            String errorMsg =
-                                    "account not found: " + xaRequest.getData().getAccount();
-                            logger.error(errorMsg);
-
-                            restResponse.setErrorCode(NetworkQueryStatus.ACCOUNT_ERROR);
-                            restResponse.setMessage(errorMsg);
-                            callback.onResponse(restResponse);
-                            return;
-                        }
+                        RequestUtils.checkAccountAndResource(account, resource);
 
                         xaTransactionManager.asyncGetTransactionIDs(
                                 resource,
@@ -449,15 +378,31 @@ public class XATransactionHandler implements URIHandler {
                         break;
                     }
             }
-
+        } catch (WeCrossException e) {
+            logger.error("Error while process xa", e);
+            restResponse.setErrorCode(NetworkQueryStatus.EXCEPTION_FLAG + e.getErrorCode());
+            restResponse.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.error("Error while process xa", e);
-
-            restResponse.setErrorCode(NetworkQueryStatus.TRANSACTION_ERROR);
+            restResponse.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
             restResponse.setMessage("Undefined error");
         }
 
         callback.onResponse(restResponse);
+    }
+
+    private Set<Path> listPathsToSet(List<String> paths) {
+        return paths.parallelStream()
+                .map(
+                        (s) -> {
+                            try {
+                                return Path.decode(s);
+                            } catch (Exception e) {
+                                logger.error("error", e);
+                                return null;
+                            }
+                        })
+                .collect(Collectors.toSet());
     }
 
     public AccountManager getAccountManager() {
