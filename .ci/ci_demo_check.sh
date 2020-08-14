@@ -36,6 +36,22 @@ check_log()
     fi
 }
 
+check_console_log()
+{
+    local log_file=$1
+
+    if [ "$(grep TxError ${log_file} |wc -l)" -ne "0" ];then
+        grep TxError ${log_file}
+        LOG_ERROR "Console TxError log is ${log_file}"
+        exit 1
+    fi
+}
+
+ensure_bcos_nodes_running()
+{
+    bash ${ROOT}/bcos/nodes/127.0.0.1/start_all.sh
+}
+
 prepare_demo()
 {
     cd ${ROOT}
@@ -51,21 +67,25 @@ demo_test()
 
     bash build.sh n
 
+    ensure_bcos_nodes_running
+
     cd WeCross-Console/
     bash start.sh <<EOF
 listResources
 listAccounts
-call payment.bcos.HelloWeCross bcos_user1 get
-sendTransaction payment.bcos.HelloWeCross bcos_user1 set Tom
-call payment.fabric.abac fabric_user1 query a
-sendTransaction payment.fabric.abac fabric_user1 invoke a b 10
-call payment.fabric.abac fabric_user1 query a
-call payment.fabric.abac fabric_user1 query b
+call payment.bcos.HelloWorld bcos_user1 get
+sendTransaction payment.bcos.HelloWorld bcos_user1 set Tom
+call payment.bcos.HelloWorld bcos_user1 get
+call payment.fabric.sacc fabric_user1 query a
+sendTransaction payment.fabric.sacc fabric_user1 set a 666
+call payment.fabric.sacc fabric_user1 query a
 quit
 EOF
     cd ..
 
     check_log
+    check_console_log ${ROOT}/WeCross-Console/logs/warn.log
+
 }
 
 # htlc test
@@ -73,25 +93,29 @@ htlc_test()
 {
     cd ${ROOT}
 
-    bash htlc_config.sh
+    bash -x htlc_config.sh
 
-    cd WeCross-Console/
-    bash start.sh <<EOF
-call payment.bcos.htlc bcos_sender balanceOf 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf
-newHTLCTransferProposal payment.bcos.htlc bcos_sender bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 9dda9a5e175a919ee98ff0198927b0a765ef96cf917144b589bb8e510e04843c true 0x55f934bcbe1e9aef8337f5551142a442fdde781c 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
-quit
-EOF
-    cd ..
+    sleep 10
+
+    ensure_bcos_nodes_running
 
     cd WeCross-Console-8251/
     bash start.sh <<EOF
 call payment.fabric.htlc fabric_admin balanceOf User1@org1.example.com
-newHTLCTransferProposal payment.fabric.htlc fabric_admin bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 null false 0x55f934bcbe1e9aef8337f5551142a442fdde781c 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
+newHTLCProposal payment.fabric.htlc fabric_admin bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 null false 0x55f934bcbe1e9aef8337f5551142a442fdde781c 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
 quit
 EOF
     cd ..
 
-    sleep 30
+    cd WeCross-Console/
+    bash start.sh <<EOF
+call payment.bcos.htlc bcos_sender balanceOf 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf
+newHTLCProposal payment.bcos.htlc bcos_sender bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 9dda9a5e175a919ee98ff0198927b0a765ef96cf917144b589bb8e510e04843c true 0x55f934bcbe1e9aef8337f5551142a442fdde781c 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
+quit
+EOF
+    cd ..
+
+    sleep 20
 
     cd WeCross-Console/
     bash start.sh <<EOF
@@ -108,6 +132,48 @@ EOF
     cd ..
 
     check_log
+    check_console_log ${ROOT}/WeCross-Console/logs/warn.log
+    check_console_log ${ROOT}/WeCross-Console-8251/logs/warn.log
+}
+
+# 2pc test
+2pc_test()
+{
+    cd ${ROOT}
+
+    bash 2pc_config.sh n
+
+    cd WeCross-Console/
+    bash start.sh <<EOF
+call payment.bcos.evidence bcos_user1 queryEvidence evidence0
+call payment.fabric.evidence fabric_user1 queryEvidence evidence0
+
+startTransaction 100 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
+execTransaction payment.bcos.evidence bcos_user1 100 1 newEvidence evidence0 "I'm Tom"
+execTransaction payment.fabric.evidence fabric_user1 100 1 newEvidence evidence0 "I'm Jerry"
+commitTransaction 100 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
+
+call payment.bcos.evidence bcos_user1 queryEvidence evidence0
+call payment.fabric.evidence fabric_user1 queryEvidence evidence0
+
+startTransaction 101 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
+execTransaction payment.bcos.evidence bcos_user1 101 1 newEvidence evidence1 "I'm TomGG"
+execTransaction payment.fabric.evidence fabric_user1 101 1 newEvidence evidence1 "I'm JerryMM"
+callTransaction payment.bcos.evidence bcos_user1 101 queryEvidence evidence1
+callTransaction payment.fabric.evidence fabric_user1 101 queryEvidence evidence1
+callTransaction payment.bcos.evidence bcos_user1 101 queryEvidence evidence1
+rollbackTransaction 101 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
+
+call payment.bcos.evidence bcos_user1 queryEvidence evidence1
+call payment.fabric.evidence fabric_user1 queryEvidence evidence1
+
+quit
+EOF
+
+    cd -
+
+    check_log
+    check_console_log ${ROOT}/WeCross-Console/logs/warn.log
 }
 
 prepare_wecross()
@@ -122,12 +188,31 @@ prepare_wecross()
     mv dist demo/WeCross
 }
 
+
+prepare_wecross_console()
+{
+    cd ${ROOT}/
+    LOG_INFO "Download wecross console from branch: ${PLUGIN_BRANCH}"
+    bash WeCross/download_console.sh -s -t ${PLUGIN_BRANCH}
+    cd -
+}
+
+prepare_bcos()
+{
+    cd ${ROOT}/bcos/
+    echo "127.0.0.1:2 agency1 1" > ipconf
+    cd -
+}
+
 main()
 {
     prepare_wecross
+    prepare_wecross_console
+    prepare_bcos
     prepare_demo
     demo_test
     htlc_test
+    2pc_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then

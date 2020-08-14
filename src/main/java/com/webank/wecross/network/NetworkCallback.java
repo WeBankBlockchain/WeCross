@@ -3,14 +3,13 @@ package com.webank.wecross.network;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.wecross.utils.ObjectMapperFactory;
 
 public abstract class NetworkCallback<T> {
     private TypeReference<?> typeReference;
     protected int status;
     protected String message;
     protected NetworkResponse<T> data;
-    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     public void execute() {
         this.onResponse(status, message, data);

@@ -80,19 +80,19 @@ check_bcos_avaliable()
     # 30300,20200,8545
     check_port_avaliable 30300 BCOS-P2P
     check_port_avaliable 20200 BCOS-Channel
-    check_port_avaliable 8542 BCOS-RPC
+    check_port_avaliable 8545 BCOS-RPC
 
     check_port_avaliable 30301 BCOS-P2P
     check_port_avaliable 20201 BCOS-Channel
-    check_port_avaliable 8543 BCOS-RPC
+    check_port_avaliable 8546 BCOS-RPC
+}
 
-    check_port_avaliable 30302 BCOS-P2P
-    check_port_avaliable 20202 BCOS-Channel
-    check_port_avaliable 8544 BCOS-RPC
-
-    check_port_avaliable 30303 BCOS-P2P
-    check_port_avaliable 20203 BCOS-Channel
-    check_port_avaliable 8545 BCOS-RPC
+check_wecross_avaliable()
+{
+    check_port_avaliable 8250 WeCross-8250-25500
+    check_port_avaliable 25500 WeCross-8250-25500
+    check_port_avaliable 8251 WeCross-8251-25501
+    check_port_avaliable 25501 WeCross-8251-25501
 }
 
 
@@ -105,6 +105,7 @@ check_env()
     check_docker_service
     check_fabric_avaliable
     check_bcos_avaliable
+    check_wecross_avaliable
 }
 
 build_bcos()
@@ -113,33 +114,7 @@ build_bcos()
     cd ${ROOT}/bcos
     bash build.sh
 
-    hello_address=$(grep 'HelloWorld' console/deploylog.txt | awk 'END {print $5}')
-
     cd ${ROOT}
-}
-
-
-config_bcos_stub_toml()
-{
-    local file=${1}
-    local contractAddress=${2}
-
-    # delete resources sample
-    local start=$(grep -n 'resources is' ${file} | awk -F ":" '{print $1}')
-    local end=$(wc -l ${file} |awk '{print $1}')
-    sed_i "${start},${end}d" ${file} #delete line: [start, end]
-
-    # add real sample
-    cat << EOF > ${file}
-$(cat ${file})
-# resources is a list
-[[resources]]
-    # name must be unique
-    name = 'HelloWeCross'
-    type = 'BCOS_CONTRACT'
-    contractAddress = '${contractAddress}'
-EOF
-
 }
 
 build_fabric()
@@ -172,8 +147,6 @@ check_bcos()
 {
     check_process bcos/nodes/127.0.0.1/node0/../fisco-bcos
     check_process bcos/nodes/127.0.0.1/node1/../fisco-bcos
-    check_process bcos/nodes/127.0.0.1/node2/../fisco-bcos
-    check_process bcos/nodes/127.0.0.1/node3/../fisco-bcos
 }
 
 check_fabric()
@@ -219,7 +192,7 @@ clear_ask()
 
 console_ask()
 {
-    read -p "Start WeCross console? [Y/n]" ans
+    read -p "Start WeCross Console? [Y/n]" ans
     case "$ans" in
     y | Y | "")
     cd ${ROOT}/WeCross-Console && ./start.sh
@@ -252,9 +225,9 @@ config_router_8250()
     bash add_chain.sh -t BCOS2.0 -n bcos -d conf/chains
     # copy cert
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/bcos/
-    hello_address=$(grep 'HelloWeCross' ${bcos_demo_dir}/console/deploylog.txt | awk 'END {print $5}')
-    # modify stub.toml
-    config_bcos_stub_toml conf/chains/bcos/stub.toml ${hello_address}
+
+    # deploy proxy
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/bcos bcos_user1
 
     cd -
 }
@@ -273,6 +246,11 @@ config_router_8251()
 
     bash add_account.sh -t Fabric1.4 -n fabric_admin -d conf/accounts
     cp ${fabric_demo_dir}/certs/accounts/fabric_admin/* conf/accounts/fabric_admin/
+    bash add_account.sh -t Fabric1.4 -n fabric_admin_org1 -d conf/accounts
+    cp ${fabric_demo_dir}/certs/accounts/fabric_admin_org1/* conf/accounts/fabric_admin_org1/
+    bash add_account.sh -t Fabric1.4 -n fabric_admin_org2 -d conf/accounts
+    cp ${fabric_demo_dir}/certs/accounts/fabric_admin_org2/* conf/accounts/fabric_admin_org2/
+    sed_i  's/Org1MSP/Org2MSP/g'  conf/accounts/fabric_admin_org2/account.toml
     bash add_account.sh -t Fabric1.4 -n fabric_default_account -d conf/accounts
     cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_default_account/
     bash add_account.sh -t Fabric1.4 -n fabric_user1 -d conf/accounts
@@ -282,6 +260,9 @@ config_router_8251()
     bash add_chain.sh -t Fabric1.4 -n fabric -d conf/chains
     cp ${fabric_demo_dir}/certs/chains/fabric/* conf/chains/fabric/
 
+    # deploy proxy
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy chains/fabric
+
     cd -
 }
 
@@ -289,28 +270,93 @@ download_wecross()
 {
     # Download
     LOG_INFO "Download WeCross ..."
-    if [ -e download_wecross.sh ];then
-        bash download_wecross.sh -t v1.0.0-rc3
+
+    local name=./WeCross
+    if [ -d "${name}"  ]; then
+        LOG_INFO "${name} exists."
     else
-        bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0-rc3
+        if [ -e download_wecross.sh ];then
+            bash download_wecross.sh -t v1.0.0-rc3
+        else
+            bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0-rc3
+        fi
     fi
 }
 
 download_wecross_console()
 {
     LOG_INFO "Download WeCross Console ..."
-    if [ -e download_console.sh ];then
-        bash download_console.sh -t v1.0.0-rc3
+
+    local name=./WeCross-Console
+    if [ -d "${name}"  ]; then
+        LOG_INFO "${name} exists."
     else
-        bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_console.sh) -t v1.0.0-rc3
+        if [ -e download_console.sh ];then
+            bash download_console.sh -t v1.0.0-rc3
+        else
+            bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_console.sh) -t v1.0.0-rc3
+        fi
     fi
+}
+
+deploy_bcos_sample_resource()
+{
+    # deploy from 8250
+    LOG_INFO "Deploy bcos contract HelloWorld"
+    cd ${ROOT}/WeCross-Console/
+    sed_i  's/8251/8250/g'  conf/application.toml
+
+    bash start.sh <<EOF
+bcosDeploy payment.bcos.HelloWorld bcos_user1 conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
+quit
+EOF
+    cd -
+}
+
+deploy_fabric_sample_resource()
+{
+    # deploy from 8250
+    LOG_INFO "Deploy fabric chaincode sacc"
+    cd ${ROOT}/WeCross-Console/
+    sed_i  's/8250/8251/g'  conf/application.toml
+
+    bash start.sh <<EOF
+    fabricInstall payment.fabric.sacc fabric_admin_org1 Org1 contracts/chaincode/sacc 1.0 GO_LANG
+    fabricInstall payment.fabric.sacc fabric_admin_org2 Org2 contracts/chaincode/sacc 1.0 GO_LANG
+    fabricInstantiate payment.fabric.sacc fabric_admin ["Org1","Org2"] contracts/chaincode/sacc 1.0 GO_LANG policy.yaml ["a","10"]
+quit
+EOF
+    # wait the chaincode instantiate
+    try_times=80
+    i=0
+    echo -e "\033[32msacc chaincode is instantiating ...\033[0m\c"
+    while [ ! -n "$(docker ps |grep sacc |awk '{print $1}')" ]
+    do
+        sleep 1
+
+        ((i=i+1))
+        if [ $i -lt ${try_times} ]; then
+            echo -e "\033[32m.\033[0m\c"
+        else
+            LOG_ERROR "Instantiate sacc timeout!"
+            exit 1
+        fi
+    done
+
+    cd -
+}
+
+deploy_sample_resource()
+{
+    deploy_fabric_sample_resource
+    deploy_bcos_sample_resource
 }
 
 main()
 {
-    check_env
-
     clear_ask
+
+    check_env
 
     download_wecross
     download_wecross_console
@@ -344,6 +390,9 @@ EOF
     config_router_8250 ${ROOT}/routers-payment/127.0.0.1-8250-25500/ ${ROOT}/fabric ${ROOT}/bcos
     config_router_8251 ${ROOT}/routers-payment/127.0.0.1-8251-25501/ ${ROOT}/fabric
 
+    # print running env
+    netstat -napl|grep 20200
+
     # Start up routers
     cd ${ROOT}/routers-payment/127.0.0.1-8250-25500/
     bash start.sh
@@ -355,11 +404,13 @@ EOF
 
     check_wecross_network
 
+    deploy_sample_resource
+
     LOG_INFO "Success! WeCross demo network is running. Framework:"
     echo -e "
       FISCO BCOS                    Fabric
      (4node pbft)              (first-network)
-   (HelloWeCross.sol)             (abac.go)
+    (HelloWorld.sol)              (sacc.go)
            |                          |
            |                          |
     WeCross Router <----------> WeCross Router

@@ -1,8 +1,12 @@
 package com.webank.wecross.stub;
 
 import java.util.List;
+import java.util.Map;
 
 public interface Connection {
+    public interface ConnectionEventHandler {
+        void onResourcesChange(List<ResourceInfo> resourceInfos);
+    }
 
     // Callback for asyncSend
     interface Callback {
@@ -15,6 +19,7 @@ public interface Connection {
      * @param request
      * @return
      */
+    @Deprecated
     Response send(Request request);
 
     /**
@@ -34,4 +39,19 @@ public interface Connection {
      * @return resources
      */
     List<ResourceInfo> getResources();
+
+    /**
+     * get properties
+     *
+     * @return Map<String , String>
+     */
+    Map<String, String> getProperties();
+
+    /**
+     * set the callback of connection events
+     *
+     * @param eventHandler
+     * @return
+     */
+    void setConnectionEventHandler(ConnectionEventHandler eventHandler);
 }

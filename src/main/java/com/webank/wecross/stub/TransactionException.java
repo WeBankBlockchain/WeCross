@@ -35,7 +35,7 @@ public class TransactionException extends java.lang.Exception {
 
     public static class Builder {
         public static TransactionException newSuccessException() {
-            return new TransactionException(ErrorCode.SUCCESS, "Sucess");
+            return new TransactionException(ErrorCode.SUCCESS, "Success");
         }
 
         public static TransactionException newInternalException(String message) {

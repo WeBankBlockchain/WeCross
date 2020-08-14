@@ -97,7 +97,7 @@ parallel_download()
 download_wecross_pkg()
 {
     local github_url=https://github.com/WeBankFinTech/WeCross/releases/download/
-    local cdn_url=https://www.fisco.com.cn/cdn/wecross/releases/download/
+    local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross/
     local release_pkg=WeCross.tar.gz
     local release_pkg_checksum_file=WeCross.tar.gz.md5
 

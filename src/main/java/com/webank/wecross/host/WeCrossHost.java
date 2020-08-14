@@ -12,6 +12,7 @@ import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.restserver.request.StateRequest;
 import com.webank.wecross.restserver.response.StateResponse;
 import com.webank.wecross.routine.RoutineManager;
+import com.webank.wecross.routine.xa.XATransactionManager;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
@@ -29,6 +30,7 @@ public class WeCrossHost {
     private RoutineManager routineManager;
     private P2PService p2PService;
     private RPCService rpcService;
+    private XATransactionManager xaTransactionManager;
 
     Thread mainLoopThread;
 
@@ -112,7 +114,7 @@ public class WeCrossHost {
         msg.setMethod("seq");
 
         for (Peer peer : peerManager.getPeerInfos().values()) {
-            logger.debug("Send peer seq, to peer:{}, seq:{}", peer, msg.getSeq());
+            logger.debug("Send peer seq, to peer:{}, seq:{}", peer, seq);
             zoneManager.getP2PService().asyncSendMessage(peer, msg, null);
         }
     }
@@ -153,7 +155,7 @@ public class WeCrossHost {
 
             String path = entry.getKey();
             dumpStr += path;
-            if (entry.getValue().isHasLocalConnection()) {
+            if (entry.getValue().hasLocalConnection()) {
                 dumpStr += "(local)";
             } else {
                 dumpStr += "(remote)";
@@ -224,5 +226,13 @@ public class WeCrossHost {
 
     public void setRpcService(RPCService rpcService) {
         this.rpcService = rpcService;
+    }
+
+    public XATransactionManager getXaTransactionManager() {
+        return xaTransactionManager;
+    }
+
+    public void setXaTransactionManager(XATransactionManager xaTransactionManager) {
+        this.xaTransactionManager = xaTransactionManager;
     }
 }

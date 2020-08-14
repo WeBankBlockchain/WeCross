@@ -1,232 +1,80 @@
 package com.webank.wecross.zone;
 
 import com.webank.wecross.peer.Peer;
+import com.webank.wecross.remote.RemoteConnection;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.storage.BlockHeaderStorage;
-import com.webank.wecross.stub.BlockHeader;
+import com.webank.wecross.stub.BlockHeaderManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stub.Path;
+import com.webank.wecross.stub.ResourceInfo;
 import java.security.SecureRandom;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Chain {
-    private String name;
     private Logger logger = LoggerFactory.getLogger(Chain.class);
-    private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
-    boolean hasLocalConnection = false;
+
+    // chain Info
+    private String zoneName;
+    private String name;
+    private String stubType;
+    private Map<String, String> properties;
+    private String checksum;
+
+    private Connection localConnection;
+    private Set<Peer> peers = new HashSet<>();
     private Map<String, Resource> resources = new HashMap<String, Resource>();
     private Driver driver;
-    private BlockHeaderStorage blockHeaderStorage;
-    private Thread blockSyncThread;
-    private AtomicBoolean running = new AtomicBoolean(false);
+    private BlockHeaderManager blockHeaderManager;
     private Random random = new SecureRandom();
-    private BlockHeader localBlockHeader;
+    private ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    private Object mainLoopLock = new Object();
-    private Timer mainLoopTimer = new Timer();;
-    private static long mainLoopInterval = 1000; // ms
+    public Chain(String zoneName, ChainInfo chainInfo, Driver driver, Connection localConnection) {
 
-    public Chain(String name) {
-        this.name = name;
+        this.zoneName = zoneName;
+        this.name = chainInfo.getName();
+        this.stubType = chainInfo.getStubType();
+        this.checksum = chainInfo.getChecksum();
+        this.driver = driver;
+        this.localConnection = localConnection;
+
+        if (localConnection != null) {
+            this.properties = localConnection.getProperties();
+        } else {
+            this.properties = chainInfo.getProperties();
+        }
     }
 
     public void start() {
-        if (!running.get()) {
-            running.set(true);
-
-            blockSyncThread =
-                    new Thread(
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    mainLoop();
-                                }
-                            });
-            blockSyncThread.start();
-            logger.trace("Block header sync thread started");
-
-            mainLoopTimer.schedule(
-                    new TimerTask() {
-                        @Override
-                        public void run() {
-                            noteMainLoop();
-                        }
-                    },
-                    mainLoopInterval,
-                    mainLoopInterval);
-        }
+        blockHeaderManager.start();
     }
 
     public void stop() {
-        if (running.get()) {
-            running.set(false);
-            try {
-                logger.trace("Stoping block header sync thread...");
-                blockSyncThread.interrupt();
-                blockSyncThread.join();
-                logger.trace("Block header sync thread stopped");
-            } catch (Exception e) {
-                logger.error("Thread interrupt", e);
-            }
-        }
+        blockHeaderManager.stop();
     }
 
-    public void mainLoop() {
-        try {
-            loadLocalBlockHeader();
-            while (running.get()) {
-                try {
-                    fetchBlockHeader();
-                } catch (Exception e) {
-                    logger.warn("Get block header exception", e);
-                }
-                synchronized (mainLoopLock) {
-                    mainLoopLock.wait();
-                }
-            }
-        } catch (Exception e) {
-            logger.info("Chain mainLoop interrupted");
-        }
-    }
+    public ChainInfo getChainInfo() {
+        ChainInfo chainInfo = new ChainInfo();
+        chainInfo.setName(name);
+        chainInfo.setStubType(stubType);
+        chainInfo.setProperties(properties);
+        chainInfo.setChecksum(checksum);
 
-    public void noteMainLoop() {
-        synchronized (mainLoopLock) {
-            mainLoopLock.notifyAll();
-        }
-    }
-
-    public void noteBlockHeaderChange() {
-        noteMainLoop();
-    }
-
-    public void fetchBlockHeader() {
-        Connection connection = chooseConnection();
-
-        logger.trace("Fetch block header: {}", connection);
-        if (connection != null) {
-
-            long remoteBlockNumber = driver.getBlockNumber(connection);
-
-            long localBlockNumber = localBlockHeader.getNumber();
-
-            if (remoteBlockNumber < 0) {
-                logger.warn(
-                        "Remote blockNumber({}), remote router access failed.",
-                        localBlockNumber,
-                        remoteBlockNumber);
-                return;
-            } else if (remoteBlockNumber < localBlockNumber) {
-                logger.error(
-                        "Local blockNumber({}) is bigger than remote blockNumber({}), please remove ./db carefully and try again.",
-                        localBlockNumber,
-                        remoteBlockNumber);
-                return;
-            } else if (remoteBlockNumber == localBlockNumber) {
-                logger.trace(
-                        "Chain({}) blockNumber({}) is up to date", this.name, remoteBlockNumber);
-            } else {
-                fetchBlockHeaderByNumber(remoteBlockNumber);
-            }
-        }
-    }
-
-    public void fetchBlockHeaderByNumber(long number) {
-        long localBlockNumber = localBlockHeader.getNumber();
-        if (number <= localBlockNumber) {
-            return;
-        }
-        synchronized (this) {
-            localBlockNumber = localBlockHeader.getNumber();
-            if (number <= localBlockNumber) {
-                return;
-            }
-
-            String localBlockHash = localBlockHeader.getHash();
-            Connection connection = chooseConnection();
-
-            for (long blockNumber = localBlockNumber + 1; blockNumber <= number; ++blockNumber) {
-                byte[] blockBytes = driver.getBlockHeader(blockNumber, connection);
-                if (blockBytes == null) {
-                    logger.error(
-                            "Could not get block header, please start the router which has chain({})",
-                            name);
-                    break;
-                }
-
-                BlockHeader blockHeader = driver.decodeBlockHeader(blockBytes);
-                if (localBlockNumber >= 0) {
-                    if (blockHeader.getNumber() != localBlockHeader.getNumber() + 1
-                            || !blockHeader.getPrevHash().equals(localBlockHeader.getHash())) {
-                        logger.error(
-                                "Fetched block couldn't be the next block, localBlockNumber: {} localBlockHash: {} fetchedBlockNumber: {} fetchedBlockPrevHash: {}, please check the router which has chain({}) is the same chain?",
-                                localBlockNumber,
-                                localBlockHash,
-                                blockHeader.getNumber(),
-                                blockHeader.getPrevHash(),
-                                name);
-                        break;
-                    }
-                }
-
-                blockHeaderStorage.writeBlockHeader(blockNumber, blockBytes);
-                localBlockHeader = blockHeader; // Must update header after write in db
-
-                logger.debug("Commit blockHeader: {}", localBlockHeader.toString());
-            }
-        }
-    }
-
-    public long getBlockNumber() {
-        return blockHeaderStorage.readBlockNumber();
-    }
-
-    public BlockHeader getBlockHeader(int blockNumber) {
-        return driver.decodeBlockHeader(blockHeaderStorage.readBlockHeader(blockNumber));
-    }
-
-    public void putBlockHeader(int blockNumber, byte[] blockHeader) {
-        blockHeaderStorage.writeBlockHeader(blockNumber, blockHeader);
-    }
-
-    public void addConnection(Peer peer, Connection connection) {
-        if (!hasLocalConnection) {
-            if (peer == null) {
-                connections.clear();
-                hasLocalConnection = true;
-            }
-            connections.put(peer, connection);
-        }
-    }
-
-    public void removeConnection(Peer peer) {
-        if (!hasLocalConnection) {
-            connections.remove(peer);
-        }
-    }
-
-    public Connection chooseConnection() {
-        if (connections.isEmpty()) {
-            logger.warn("Empty connections");
-            return null;
-        }
-
-        if (connections.size() == 1) {
-            return (Connection) connections.values().toArray()[0];
-        } else {
-            int index = random.nextInt(connections.size());
-            return (Connection) connections.values().toArray()[index];
-        }
-    }
-
-    public Map<String, Resource> getResources() {
-        return resources;
+        List<ResourceInfo> resourceInfos = getAllResourcesInfo(true);
+        chainInfo.setResources(resourceInfos);
+        return chainInfo;
     }
 
     public Logger getLogger() {
@@ -237,6 +85,14 @@ public class Chain {
         this.resources = resources;
     }
 
+    public String getStubType() {
+        return stubType;
+    }
+
+    public void setStubType(String stubType) {
+        this.stubType = stubType;
+    }
+
     public Driver getDriver() {
         return driver;
     }
@@ -245,24 +101,283 @@ public class Chain {
         this.driver = driver;
     }
 
-    public BlockHeaderStorage getBlockHeaderStorage() {
-        return blockHeaderStorage;
+    public BlockHeaderManager getBlockHeaderManager() {
+        return blockHeaderManager;
     }
 
-    public void setBlockHeaderStorage(BlockHeaderStorage blockHeaderStorage) {
-        this.blockHeaderStorage = blockHeaderStorage;
+    public void setBlockHeaderManager(BlockHeaderManager blockHeaderManager) {
+        this.blockHeaderManager = blockHeaderManager;
     }
 
-    private void loadLocalBlockHeader() {
-        long localBlockNumber = blockHeaderStorage.readBlockNumber();
-        if (localBlockNumber < 0) {
-            BlockHeader beforeGenesisBlockHeader = new BlockHeader();
-            beforeGenesisBlockHeader.setNumber(-1);
-            beforeGenesisBlockHeader.setHash("");
-            localBlockHeader = beforeGenesisBlockHeader;
-        } else {
-            byte[] blockHeaderBytes = blockHeaderStorage.readBlockHeader(localBlockNumber);
-            localBlockHeader = driver.decodeBlockHeader(blockHeaderBytes);
+    public long getBlockNumber() {
+        long blockNumber = 0;
+        try {
+            CompletableFuture<Long> future = new CompletableFuture<>();
+            this.blockHeaderManager.asyncGetBlockNumber(
+                    new BlockHeaderManager.GetBlockNumberCallback() {
+                        @Override
+                        public void onResponse(Exception e, long blockNumber) {
+                            if (e != null) {
+                                logger.warn("getBlockNumber exception: " + e);
+                                future.complete(Long.valueOf(0));
+                            } else {
+                                future.complete(blockNumber);
+                            }
+                        }
+                    });
+            blockNumber = future.get(10, TimeUnit.SECONDS).longValue();
+        } catch (Exception e) {
+            logger.warn("getBlockNumber exception: " + e);
+            blockNumber = 0;
         }
+        return blockNumber;
+    }
+
+    public Map<Peer, Connection> getConnections() {
+        lock.readLock().lock();
+        try {
+            Map<Peer, Connection> connections = new HashMap<>();
+            if (localConnection != null) {
+                connections.put(null, localConnection); // null means local connection in Resource
+            }
+
+            for (Resource resource : resources.values()) {
+                for (Map.Entry<Peer, Connection> entry : resource.getConnections().entrySet())
+                    if (!connections.containsKey(entry.getKey())) {
+                        connections.put(entry.getKey(), entry.getValue());
+                    }
+            }
+
+            if (connections.size() == 0) {
+                logger.warn("getConnections: Chain {} has no connection", name);
+            }
+
+            return connections;
+        } catch (Exception e) {
+            logger.debug("Exception: " + e);
+            return null;
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public Set<Peer> getPeers() {
+        return peers;
+    }
+
+    public Connection chooseConnection() {
+        Map<Peer, Connection> connections = getConnections();
+        if (connections == null) {
+            logger.warn("Chain {} connection is null", name);
+            return null;
+        }
+
+        Connection connection = connections.get(null);
+        if (connection != null) {
+            return connection;
+        }
+
+        if (connections.size() == 0) {
+            return null;
+        } else {
+            int index = random.nextInt(connections.size());
+            return (Connection) connections.values().toArray()[index];
+        }
+    }
+
+    public void addResource(Path path, Resource resource, boolean replaceIfExist) {
+        addResource(path.getResource(), resource, replaceIfExist);
+    }
+
+    public void addResource(String name, Resource resource, boolean replaceIfExist) {
+        Resource oldResource = getResource(name);
+        lock.writeLock().lock();
+        try {
+
+            if (oldResource != null && replaceIfExist || oldResource == null) {
+                resources.put(name, resource);
+            }
+        } catch (Exception e) {
+            logger.debug("Exception: " + e);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public void removeResource(Path path, boolean ignoreRemote) {
+        removeResource(path.getResource(), ignoreRemote);
+    }
+
+    public void removeResource(String name, boolean ignoreRemote) {
+        Resource resource = getResource(name);
+        if (resource != null && !resource.hasLocalConnection() && ignoreRemote) {
+            return; // ignore remote resource
+        }
+
+        lock.writeLock().lock();
+        try {
+            if (resources.containsKey(name)) {
+
+                resources.remove(name);
+            }
+        } catch (Exception e) {
+            logger.debug("Exception: " + e);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public Resource getResource(String name) {
+        lock.readLock().lock();
+        try {
+            return resources.get(name);
+        } catch (Exception e) {
+            logger.debug("Exception: " + e);
+            return null;
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public Resource getResource(Path path) {
+        return getResource(path.getResource());
+    }
+
+    public Map<String, Resource> getResources() {
+        lock.readLock().lock();
+        try {
+            return resources;
+        } catch (Exception e) {
+            logger.debug("Exception: " + e);
+            return null;
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public List<ResourceInfo> getAllResourcesInfo(boolean ignoreRemote) {
+        List<ResourceInfo> resourceInfos = new LinkedList<>();
+        for (Resource resource : resources.values()) {
+            if (ignoreRemote && !resource.hasLocalConnection()) {
+                continue;
+            }
+            resourceInfos.add(resource.getResourceInfo());
+        }
+        return resourceInfos;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
+
+    public void updateLocalResources(List<ResourceInfo> resourceInfos) {
+        lock.writeLock().lock();
+        try {
+            // Remove old local resources
+            List<String> oldResourceNames = new LinkedList<>();
+            for (Resource resource : resources.values()) {
+                if (resource.isOnlyLocal()) {
+                    oldResourceNames.add(resource.getResourceInfo().getName());
+                }
+            }
+            for (String oldResource : oldResourceNames) {
+                resources.remove(oldResource);
+            }
+
+            // Add new local resources
+            for (ResourceInfo newResourceInfo : resourceInfos) {
+                String newResourceName = newResourceInfo.getName();
+                Resource resource = resources.get(newResourceName);
+
+                if (resource == null) {
+                    resource = new Resource();
+                    resources.put(newResourceName, resource);
+                }
+
+                Path path = new Path();
+                path.setZone(zoneName);
+                path.setChain(name);
+                path.setResource(newResourceName);
+                resource.setPath(path);
+                resource.setStubType(stubType);
+                resource.setTemporary(false);
+                resource.setResourceInfo(newResourceInfo);
+                resource.setBlockHeaderManager(blockHeaderManager);
+                resource.setDriver(driver);
+                resource.addConnection(null, localConnection);
+
+                logger.info(
+                        "Chain {} add/update local resource {}", name, resource.getResourceInfo());
+            }
+
+        } catch (Exception e) {
+            logger.debug("Exception: " + e);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public void addRemoteResource(
+            Peer peer, ResourceInfo resourceInfo, RemoteConnection remoteConnection) {
+        lock.writeLock().lock();
+        try {
+
+            if (!peers.contains(peer)) {
+                peers.add(peer);
+            }
+
+            // Add or append resource's remote connection
+            String newName = resourceInfo.getName();
+            Resource resource = resources.get(newName);
+
+            if (resource == null) {
+                resource = new Resource();
+                resources.put(newName, resource);
+            }
+
+            Path path = new Path();
+            path.setZone(zoneName);
+            path.setChain(name);
+            path.setResource(newName);
+            resource.setPath(path);
+            resource.setStubType(stubType);
+            resource.setTemporary(false);
+            resource.setResourceInfo(resourceInfo);
+            resource.setBlockHeaderManager(blockHeaderManager);
+            resource.setDriver(driver);
+            resource.addConnection(peer, remoteConnection);
+
+            logger.info(
+                    "Chain {} add/update remote resource {}, peer: {}",
+                    name,
+                    resource.getResourceInfo(),
+                    peer.toString());
+
+        } catch (Exception e) {
+            logger.debug("Exception: " + e);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public void removePeers(Peer peer) {
+        lock.writeLock().lock();
+        try {
+            if (peers.contains(peer)) {
+                peers.remove(peer);
+            }
+        } catch (Exception e) {
+            logger.debug("Exception: " + e);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public boolean hasLocalConnection() {
+        return localConnection != null;
+    }
+
+    public Connection getLocalConnection() {
+        return localConnection;
     }
 }

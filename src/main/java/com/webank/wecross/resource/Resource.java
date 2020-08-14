@@ -1,8 +1,11 @@
 package com.webank.wecross.resource;
 
 import com.webank.wecross.peer.Peer;
+import com.webank.wecross.stub.Account;
+import com.webank.wecross.stub.BlockHeaderManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
@@ -22,13 +25,25 @@ import org.slf4j.LoggerFactory;
 
 public class Resource {
     private Logger logger = LoggerFactory.getLogger(Response.class);
-    private String type;
+    private String stubType;
     private Driver driver;
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
+    private Path path;
     private ResourceInfo resourceInfo;
-    private ResourceBlockHeaderManager resourceBlockHeaderManager;
+    private BlockHeaderManager blockHeaderManager;
     boolean hasLocalConnection = false;
+    boolean isTemporary = false;
     private Random random = new SecureRandom();
+
+    public static final String RAW_TRANSACTION = "RAW_TRANSACTION";
+
+    public Map<Peer, Connection> getConnections() {
+        return connections;
+    }
+
+    public void setConnection(Map<Peer, Connection> connections) {
+        this.connections = connections;
+    }
 
     public void addConnection(Peer peer, Connection connection) {
         if (!hasLocalConnection) {
@@ -52,63 +67,147 @@ public class Resource {
     }
 
     public Connection chooseConnection() {
-        if (connections.size() == 1) {
-            return (Connection) connections.values().toArray()[0];
+        if (connections == null || connections.size() == 0) {
+            return null;
         } else {
             int index = random.nextInt(connections.size());
             return (Connection) connections.values().toArray()[index];
         }
     }
 
-    public abstract static class Callback {
-        public abstract void onTransactionResponse(
+    public void setPath(Path path) {
+        this.path = path;
+    }
+
+    public Path getPath() {
+        return path;
+    }
+
+    public interface Callback {
+        public void onTransactionResponse(
                 TransactionException transactionException, TransactionResponse transactionResponse);
     }
 
-    public TransactionResponse call(TransactionContext<TransactionRequest> request)
+    @Deprecated
+    public TransactionResponse call(TransactionRequest request, Account account)
             throws TransactionException {
-        return driver.call(request, chooseConnection());
+        TransactionContext<TransactionRequest> context =
+                new TransactionContext<>(
+                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
+        return driver.call(context, chooseConnection());
     }
 
-    public void asyncCall(
-            TransactionContext<TransactionRequest> request, Resource.Callback callback) {
-        driver.asyncCall(
-                request,
-                chooseConnection(),
-                new Driver.Callback() {
-                    @Override
-                    public void onTransactionResponse(
-                            TransactionException transactionException,
-                            TransactionResponse transactionResponse) {
-                        callback.onTransactionResponse(transactionException, transactionResponse);
-                    }
-                });
+    public void asyncCall(TransactionRequest request, Account account, Resource.Callback callback) {
+        TransactionContext<TransactionRequest> context =
+                new TransactionContext<>(
+                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
+        boolean isRawTransaction =
+                (boolean) request.getOptions().getOrDefault(RAW_TRANSACTION, false);
+        if (isRawTransaction) {
+            driver.asyncCall(
+                    context,
+                    chooseConnection(),
+                    new Driver.Callback() {
+                        @Override
+                        public void onTransactionResponse(
+                                TransactionException transactionException,
+                                TransactionResponse transactionResponse) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug(
+                                        "asyncCall response: {}, exception: ",
+                                        transactionResponse,
+                                        transactionException);
+                            }
+                            callback.onTransactionResponse(
+                                    transactionException, transactionResponse);
+                        }
+                    });
+        } else {
+            driver.asyncCallByProxy(
+                    context,
+                    chooseConnection(),
+                    new Driver.Callback() {
+                        @Override
+                        public void onTransactionResponse(
+                                TransactionException transactionException,
+                                TransactionResponse transactionResponse) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug(
+                                        "asyncCall response: {}, exception: ",
+                                        transactionResponse,
+                                        transactionException);
+                            }
+                            callback.onTransactionResponse(
+                                    transactionException, transactionResponse);
+                        }
+                    });
+        }
     }
 
-    public TransactionResponse sendTransaction(TransactionContext<TransactionRequest> request)
+    @Deprecated
+    public TransactionResponse sendTransaction(TransactionRequest request, Account account)
             throws TransactionException {
-        return driver.sendTransaction(request, chooseConnection());
+        TransactionContext<TransactionRequest> context =
+                new TransactionContext<>(
+                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
+        return driver.sendTransaction(context, chooseConnection());
     }
 
     public void asyncSendTransaction(
-            TransactionContext<TransactionRequest> request, Resource.Callback callback) {
-        driver.asyncSendTransaction(
-                request,
-                chooseConnection(),
-                new Driver.Callback() {
-                    @Override
-                    public void onTransactionResponse(
-                            TransactionException transactionException,
-                            TransactionResponse transactionResponse) {
-                        callback.onTransactionResponse(transactionException, transactionResponse);
-                    }
-                });
+            TransactionRequest request, Account account, Resource.Callback callback) {
+        TransactionContext<TransactionRequest> context =
+                new TransactionContext<>(
+                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
+        boolean isRawTransaction =
+                (boolean) request.getOptions().getOrDefault(RAW_TRANSACTION, false);
+        if (isRawTransaction) {
+            driver.asyncSendTransaction(
+                    context,
+                    chooseConnection(),
+                    new Driver.Callback() {
+                        @Override
+                        public void onTransactionResponse(
+                                TransactionException transactionException,
+                                TransactionResponse transactionResponse) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug(
+                                        "asyncCall response: {}, exception: ",
+                                        transactionResponse,
+                                        transactionException);
+                            }
+                            callback.onTransactionResponse(
+                                    transactionException, transactionResponse);
+                        }
+                    });
+        } else {
+            driver.asyncSendTransactionByProxy(
+                    context,
+                    chooseConnection(),
+                    new Driver.Callback() {
+                        @Override
+                        public void onTransactionResponse(
+                                TransactionException transactionException,
+                                TransactionResponse transactionResponse) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug(
+                                        "asyncCall response: {}, exception: ",
+                                        transactionResponse,
+                                        transactionException);
+                            }
+                            callback.onTransactionResponse(
+                                    transactionException, transactionResponse);
+                        }
+                    });
+        }
     }
 
     public void onRemoteTransaction(Request request, Connection.Callback callback) {
         if (driver.isTransaction(request)) {
+
+            /*
             TransactionContext<TransactionRequest> transactionRequest =
                     driver.decodeTransactionRequest(request.getData());
+                    */
 
             // TODO: check request
 
@@ -144,12 +243,12 @@ public class Resource {
 
     public void registerEventHandler(EventCallback callback) {}
 
-    public String getType() {
-        return type;
+    public String getStubType() {
+        return stubType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setStubType(String type) {
+        this.stubType = type;
     }
 
     public String getChecksum() {
@@ -172,16 +271,30 @@ public class Resource {
         this.resourceInfo = resourceInfo;
     }
 
-    public ResourceBlockHeaderManager getResourceBlockHeaderManager() {
-        return resourceBlockHeaderManager;
+    public BlockHeaderManager getBlockHeaderManager() {
+        return blockHeaderManager;
     }
 
-    public void setResourceBlockHeaderManager(
-            ResourceBlockHeaderManager resourceBlockHeaderManager) {
-        this.resourceBlockHeaderManager = resourceBlockHeaderManager;
+    public void setBlockHeaderManager(BlockHeaderManager resourceBlockHeaderManager) {
+        this.blockHeaderManager = resourceBlockHeaderManager;
     }
 
-    public boolean isHasLocalConnection() {
+    public boolean hasLocalConnection() {
         return hasLocalConnection;
+    }
+
+    public boolean isTemporary() {
+        return isTemporary;
+    }
+
+    public void setTemporary(boolean isTemporary) {
+        this.isTemporary = isTemporary;
+        if (isTemporary) {
+            resourceInfo.getProperties().put("isTemporary", "true");
+        }
+    }
+
+    public boolean isOnlyLocal() {
+        return hasLocalConnection && connections.size() == 1;
     }
 }

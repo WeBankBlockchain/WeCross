@@ -2,7 +2,7 @@ package com.webank.wecross.config;
 
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.StubFactory;
-import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.stubmanager.StubManager;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ public class StubManagerConfig {
 
             MetadataReaderFactory metadataReaderFabtFactory = new SimpleMetadataReaderFactory();
             for (Resource resource : resources) {
-                logger.debug("Scan stub plugin: {}", resource.getURI().toString());
+                logger.trace("Scan stub plugin: {}", resource.getURI().toString());
                 MetadataReader metadataReader =
                         metadataReaderFabtFactory.getMetadataReader(resource);
                 if (metadataReader.getAnnotationMetadata().hasAnnotation(Stub.class.getName())) {
@@ -47,7 +47,7 @@ public class StubManagerConfig {
                                     .getAnnotationAttributes(Stub.class.getName());
                     String name = (String) attributes.get("value");
 
-                    if (stubManager.hasDriver(name)) {
+                    if (stubManager.hasFactory(name)) {
                         throw new Exception(
                                 "Duplicate stub plugin["
                                         + name

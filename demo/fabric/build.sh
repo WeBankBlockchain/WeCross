@@ -46,6 +46,16 @@ check_docker_service()
     set -e
 }
 
+remove_mycc()
+{
+    LOG_INFO "Remove default mycc chaincode"
+    docker exec -it peer0.org1.example.com rm /var/hyperledger/production/chaincodes/mycc.1.0
+    docker exec -it peer0.org2.example.com rm /var/hyperledger/production/chaincodes/mycc.1.0
+    docker exec -it peer1.org2.example.com rm /var/hyperledger/production/chaincodes/mycc.1.0
+    docker stop $(docker ps |grep mycc |awk '{print $1}')
+    docker rm $(docker ps -a |grep mycc |awk '{print $1}')
+}
+
 check_docker_service
 
 # Download
@@ -95,8 +105,10 @@ certs_dir=certs
 fabric_stub_dir=${certs_dir}/chains/fabric
 fabric_admin_dir=${certs_dir}/accounts/fabric_admin
 fabric_user_dir=${certs_dir}/accounts/fabric_user1
+fabric_admin_org1_dir=${certs_dir}/accounts/fabric_admin_org1
+fabric_admin_org2_dir=${certs_dir}/accounts/fabric_admin_org2
 
-mkdir -p ${certs_dir} ${fabric_admin_dir} ${fabric_user_dir} ${fabric_stub_dir}
+mkdir -p ${certs_dir} ${fabric_admin_dir} ${fabric_user_dir} ${fabric_stub_dir} ${fabric_admin_org1_dir} ${fabric_admin_org2_dir}
 
 crypto_dir=fabric-samples-1.4.4/first-network/crypto-config/
 cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/*_sk ${fabric_admin_dir}/account.key
@@ -108,3 +120,13 @@ cp ${crypto_dir}/peerOrganizations/org1.example.com/users/User1@org1.example.com
 cp ${crypto_dir}/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem ${fabric_stub_dir}/orderer-tlsca.crt
 cp ${crypto_dir}/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt ${fabric_stub_dir}/org1-tlsca.crt
 cp ${crypto_dir}/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt ${fabric_stub_dir}/org2-tlsca.crt
+
+cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/*_sk ${fabric_admin_org1_dir}/account.key
+cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem ${fabric_admin_org1_dir}/account.crt
+
+cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/*_sk ${fabric_admin_org2_dir}/account.key
+cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem ${fabric_admin_org2_dir}/account.crt
+
+remove_mycc
+
+LOG_INFO "SUCCESS: Build Fabric demo finish."

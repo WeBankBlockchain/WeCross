@@ -13,7 +13,7 @@ public class ResourceDetail {
 
     public ResourceDetail initResourceDetail(Resource resource, String path) {
         ResourceDetail detail = new ResourceDetail();
-        int distance = resource.isHasLocalConnection() ? 0 : 1;
+        int distance = resource.hasLocalConnection() ? 0 : 1;
         ResourceInfo resourceInfo = resource.getResourceInfo();
         detail.setPath(path);
         detail.setDistance(distance);

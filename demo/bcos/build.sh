@@ -30,24 +30,27 @@ build_bcos_chain()
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/raw/master/tools/build_chain.sh
     chmod u+x build_chain.sh
 
-    LOG_INFO "Download HelloWeCross.sol ..."
-    Download https://github.com/WeBankFinTech/WeCross/releases/download/resources/HelloWeCross.sol
-
     # Build chain
     LOG_INFO "Build chain ..."
-    echo "127.0.0.1:4 agency1 1" >ipconf
+    if [ ! -e ipconf ];then
+        echo "127.0.0.1:4 agency1 1" >ipconf
+    fi
 
     # build chain
     if [ "$(uname)" == "Darwin" ]; then
         # Mac
-        if [ -e fisco-bcos-mac ];then
-            ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos-mac
+        if [ -e fisco-bcos-macOS.tar.gz ];then
+            rm -f ./fisco-bcos
+            tar -zxvf fisco-bcos-macOS.tar.gz
+            ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos
         else
             ./build_chain.sh -f ipconf -p 30300,20200,8545
         fi
     else
         # Other
-        if [ -e fisco-bcos ];then
+        if [ -e fisco-bcos.tar.gz ];then
+            rm -f ./fisco-bcos
+            tar -zxvf fisco-bcos.tar.gz
             ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos
         else
             ./build_chain.sh -f ipconf -p 30300,20200,8545
@@ -61,8 +64,16 @@ build_bcos_chain()
 build_console()
 {
     # Download console
+    LOG_INFO "Download HelloWeCross.sol ..."
+    Download https://github.com/WeBankFinTech/WeCross/releases/download/resources/HelloWeCross.sol
+
     LOG_INFO "Download console ..."
-    bash ./nodes/127.0.0.1/download_console.sh -v 1.0.9
+    if [ -e console.tar.gz ]; then
+        rm -rf console
+        tar -zxvf console.tar.gz
+    else
+        bash ./nodes/127.0.0.1/download_console.sh -v 1.0.10
+    fi
 
     # Copy demo HelloWeCross
     cp HelloWeCross.sol console/contracts/solidity/
@@ -77,7 +88,7 @@ deploy_contract()
 {
     cd console
     bash start.sh <<EOF
-    deploy HelloWeCross
+    deployByCNS HelloWeCross 1.0
 EOF
     hello_address=$(grep 'HelloWeCross' deploylog.txt | awk '{print $5}')
     cd -
@@ -86,8 +97,7 @@ EOF
 main()
 {
     build_bcos_chain
-    build_console
-    deploy_contract
+    LOG_INFO "SUCCESS: Build FISCO BCOS demo finish."
 }
 
 main

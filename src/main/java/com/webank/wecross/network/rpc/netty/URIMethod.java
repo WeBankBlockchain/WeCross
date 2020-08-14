@@ -1,7 +1,6 @@
 package com.webank.wecross.network.rpc.netty;
 
 import java.util.Objects;
-import org.apache.logging.log4j.util.Strings;
 
 public class URIMethod {
     private String uri;
@@ -29,12 +28,14 @@ public class URIMethod {
     }
 
     public boolean isResourceURI() {
-        if (Strings.isEmpty(uri)) {
+        if (uri == null || uri.length() == 0) {
             return false;
         }
 
         // /network/stub/resource/method
-        return uri.startsWith("/") && uri.substring(1).split("/").length == 4;
+        // /network/stub/method
+        int count = uri.substring(1).split("/").length;
+        return uri.startsWith("/") && (count == 4 || count == 3);
     }
 
     @Override
