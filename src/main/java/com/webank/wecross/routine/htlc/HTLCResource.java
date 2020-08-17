@@ -38,14 +38,8 @@ public class HTLCResource extends Resource {
             new HashSet<String>() {
                 {
                     // TODO: optimize this, this method is not belongs to HTLC
-                    // */
-                    // for performance test, remove before releasing
-                    add("newProposal");
-                    add("setNewProposalTxInfo");
-                    add("setSecret");
-                    // */
-
                     add("selectByName");
+                    // 
                     add("lock");
                     add("unlock");
                     add("balanceOf");
