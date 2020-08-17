@@ -5,7 +5,7 @@ set -e
 LANG=en_US.utf8
 ROOT=$(cd "$(dirname "$0")";pwd)
 WECROSS_ROOT=${ROOT}/../
-BCOS_VERSION=v2.5.0
+BCOS_VERSION=v2.6.0
 BCOS_CONSOLE_VERSION=v1.0.10
 
 LOG_INFO()
@@ -42,8 +42,8 @@ prepare_bcos()
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos-macOS.tar.gz
 
     LOG_INFO "Download tassl requirements"
-    Download https://github.com/FISCO-BCOS/LargeFiles/raw/master/tools/tassl.tar.gz
-    Download https://github.com/FISCO-BCOS/LargeFiles/raw/master/tools/tassl_mac.tar.gz
+    Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl.tar.gz
+    Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl_mac.tar.gz
 
     # LOG_INFO "Download HelloWeCross.sol ..."
     # cp ${WECROSS_ROOT}/src/main/resources/chains-sample/bcos/HelloWeCross.sol ./
