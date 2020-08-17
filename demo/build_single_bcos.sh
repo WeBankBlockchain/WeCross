@@ -251,9 +251,6 @@ EOF
     # config routers
     config_router_8250 ${ROOT}/routers-payment/127.0.0.1-8250-25500/ ${ROOT}/fabric ${ROOT}/bcos
 
-    # print running env
-    netstat -napl|grep 20200
-
     # Start up routers
     cd ${ROOT}/routers-payment/127.0.0.1-8250-25500/
     bash start.sh
