@@ -37,6 +37,7 @@ public interface Driver {
      * @param connection the connection of a chain
      * @return the transaction response
      */
+    @Deprecated
     public TransactionResponse call(
             TransactionContext<TransactionRequest> request, Connection connection)
             throws TransactionException;
@@ -50,20 +51,15 @@ public interface Driver {
      * @param callback the callback class for async call
      * @return the transaction response
      */
-    default void asyncCall(
+    void asyncCall(
             TransactionContext<TransactionRequest> request,
             Connection connection,
-            Driver.Callback callback) {
-        try {
-            callback.onTransactionResponse(
-                    TransactionException.Builder.newSuccessException(), call(request, connection));
-        } catch (TransactionException e) {
-            callback.onTransactionResponse(e, null);
-        } catch (Exception e) {
-            callback.onTransactionResponse(
-                    TransactionException.Builder.newInternalException(e.getMessage()), null);
-        }
-    }
+            Driver.Callback callback);
+
+    void asyncCallByProxy(
+            TransactionContext<TransactionRequest> request,
+            Connection connection,
+            Driver.Callback callback);
 
     /**
      * Send transaction to the interface of contract or chaincode
@@ -71,6 +67,7 @@ public interface Driver {
      * @param request the transaction request
      * @return the transaction response
      */
+    @Deprecated
     public TransactionResponse sendTransaction(
             TransactionContext<TransactionRequest> request, Connection connection)
             throws TransactionException;
@@ -84,28 +81,26 @@ public interface Driver {
      * @param callback the callback class for async sendTransaction
      * @return the transaction response
      */
-    default void asyncSendTransaction(
+    void asyncSendTransaction(
             TransactionContext<TransactionRequest> request,
             Connection connection,
-            Driver.Callback callback) {
-        try {
-            callback.onTransactionResponse(
-                    TransactionException.Builder.newSuccessException(),
-                    sendTransaction(request, connection));
-        } catch (TransactionException e) {
-            callback.onTransactionResponse(e, null);
-        } catch (Exception e) {
-            callback.onTransactionResponse(
-                    TransactionException.Builder.newInternalException(e.getMessage()), null);
-        }
-    }
+            Driver.Callback callback);
+
+    void asyncSendTransactionByProxy(
+            TransactionContext<TransactionRequest> request,
+            Connection connection,
+            Driver.Callback callback);
 
     /**
      * Get block number
      *
      * @return block number
      */
-    public long getBlockNumber(Connection connection);
+    public interface GetBlockNumberCallback {
+        public void onResponse(Exception e, long blockNumber);
+    }
+
+    public void asyncGetBlockNumber(Connection connection, GetBlockNumberCallback callback);
 
     /**
      * Get block header
@@ -113,20 +108,55 @@ public interface Driver {
      * @param blockNumber
      * @return BlockHeader
      */
-    public byte[] getBlockHeader(long blockNumber, Connection connection);
+    public void asyncGetBlockHeader(
+            long blockNumber, Connection connection, GetBlockHeaderCallback callback);
+
+    public interface GetBlockHeaderCallback {
+        public void onResponse(Exception e, byte[] blockHeader);
+    }
 
     /**
      * Get verified transaction info of the Chain
      *
+     * @param expectPath
      * @param transactionHash
      * @param blockNumber
      * @param blockHeaderManager
      * @param connection
      * @return null if the transaction has not been verified
      */
-    public VerifiedTransaction getVerifiedTransaction(
+    public void asyncGetVerifiedTransaction(
+            Path expectPath,
             String transactionHash,
             long blockNumber,
             BlockHeaderManager blockHeaderManager,
-            Connection connection);
+            Connection connection,
+            GetVerifiedTransactionCallback callback);
+
+    interface CustomCommandCallback {
+        void onResponse(Exception error, Object response);
+    }
+
+    public interface GetVerifiedTransactionCallback {
+        public void onResponse(Exception e, VerifiedTransaction verifiedTransaction);
+    }
+
+    /**
+     * Custom command
+     *
+     * @param path
+     * @param args
+     * @param account
+     * @param blockHeaderManager
+     * @param connection
+     * @param callback
+     */
+    public void asyncCustomCommand(
+            String command,
+            Path path,
+            Object[] args,
+            Account account,
+            BlockHeaderManager blockHeaderManager,
+            Connection connection,
+            CustomCommandCallback callback);
 }

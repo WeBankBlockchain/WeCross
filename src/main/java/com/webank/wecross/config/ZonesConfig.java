@@ -3,20 +3,22 @@ package com.webank.wecross.config;
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
-import com.webank.wecross.resource.ResourceBlockHeaderManager;
-import com.webank.wecross.resource.ResourceBlockHeaderManagerFactory;
-import com.webank.wecross.storage.BlockHeaderStorageFactory;
 import com.webank.wecross.stub.Connection;
+import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.StubFactory;
-import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.stubmanager.MemoryBlockHeaderManagerFactory;
+import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.utils.ConfigUtils;
 import com.webank.wecross.zone.Chain;
+import com.webank.wecross.zone.ChainInfo;
 import com.webank.wecross.zone.Zone;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +33,7 @@ public class ZonesConfig {
 
     @Resource StubManager stubManager;
 
-    @Resource BlockHeaderStorageFactory blockHeaderStorageFactory;
-
-    @Resource ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory;
+    @Resource MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory;
 
     @Bean
     public Map<String, Zone> newZoneMap() {
@@ -115,37 +115,58 @@ public class ZonesConfig {
                 throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
             }
 
+            String configureChainName = stubToml.getString("common.name");
+            if (Objects.isNull(configureChainName) || !chainName.equals(configureChainName)) {
+                String errorMessage =
+                        "name = '"
+                                + configureChainName
+                                + "' in [common] item is not the same as the dir name: "
+                                + chainName;
+                throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
+            }
+
             StubFactory stubFactory = stubManager.getStubFactory(type);
             if (stubFactory == null) {
                 logger.error("Can not find stub type: {}", type);
 
                 throw new WeCrossException(-1, "Cannot find stub type: " + type);
             }
-            Connection connection = stubFactory.newConnection(stubPath);
+            Connection localConnection = stubFactory.newConnection(stubPath);
 
-            if (connection == null) {
-                logger.error("Init connection: {}-{} failed", stubPath, type);
+            if (localConnection == null) {
+                logger.error("Init localConnection: {}-{} failed", stubPath, type);
 
-                throw new WeCrossException(-1, "Init connection failed");
+                throw new WeCrossException(-1, "Init localConnection failed");
             }
 
-            List<ResourceInfo> resources = connection.getResources();
+            Driver driver = stubFactory.newDriver();
+            List<ResourceInfo> resources = localConnection.getResources();
+            String checksum = ChainInfo.buildChecksum(driver, localConnection);
 
-            String blockPath = zone + "." + chainName;
-            Chain chain = new Chain(chainName);
+            ChainInfo chainInfo = new ChainInfo();
+            chainInfo.setName(chainName);
+            chainInfo.setProperties(localConnection.getProperties());
+            chainInfo.setStubType(type);
+            chainInfo.setResources(resources);
+            chainInfo.setChecksum(checksum);
+
+            Chain chain = new Chain(zone, chainInfo, driver, localConnection);
             chain.setDriver(stubFactory.newDriver());
-            chain.setBlockHeaderStorage(blockHeaderStorageFactory.newBlockHeaderStorage(blockPath));
+            chain.setBlockHeaderManager(resourceBlockHeaderManagerFactory.build(chain));
             for (ResourceInfo resourceInfo : resources) {
                 com.webank.wecross.resource.Resource resource =
                         new com.webank.wecross.resource.Resource();
+                Path path = new Path();
+                path.setZone(zone);
+                path.setChain(chainInfo.getName());
+                path.setResource(resourceInfo.getName());
+                resource.setPath(path);
                 resource.setDriver(chain.getDriver());
-                resource.addConnection(null, connection);
-                resource.setType(type);
+                resource.addConnection(null, localConnection);
+                resource.setStubType(type);
                 resource.setResourceInfo(resourceInfo);
 
-                ResourceBlockHeaderManager resourceBlockHeaderManager =
-                        resourceBlockHeaderManagerFactory.build(chain);
-                resource.setResourceBlockHeaderManager(resourceBlockHeaderManager);
+                resource.setBlockHeaderManager(chain.getBlockHeaderManager());
 
                 chain.getResources().put(resourceInfo.getName(), resource);
                 logger.info(
@@ -155,11 +176,8 @@ public class ZonesConfig {
                         resource.getResourceInfo().getName(),
                         resource.getResourceInfo());
             }
-            chain.addConnection(null, connection);
-
-            chain.start();
-            logger.info("Start block header sync: {}", zone + "." + chainName);
             stubMap.put(chainName, chain);
+            chain.start();
         }
 
         return stubMap;

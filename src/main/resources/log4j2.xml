@@ -19,6 +19,19 @@
             <DefaultRolloverStrategy max="24"/>
         </RollingFile>
 
+        <RollingFile name="traceLog" fileName="${logPath}trace.log"
+                     filePattern="${logPath}trace.log.%d{yyyy-MM-dd}.%i.log.gz">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="200 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="24"/>
+            <Filters>
+                <ThresholdFilter level="trace" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </RollingFile>
+
         <RollingFile name="debugLog" fileName="${logPath}debug.log"
             filePattern="${logPath}debug.log.%d{yyyy-MM-dd}.%i.log.gz">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n"/>
@@ -79,6 +92,10 @@
             <AppenderRef ref="fileAppender"/>
         </Async>
 
+        <Async name="asyncTRACE" bufferSize="512">
+            <AppenderRef ref="traceLog"/>
+        </Async>
+
         <Async name="asyncDEBUG" bufferSize="512">
             <AppenderRef ref="debugLog"/>
         </Async>
@@ -98,6 +115,7 @@
 
     <Loggers>
         <Root level="DEBUG">
+            <AppenderRef ref="asyncTRACE"/>
             <AppenderRef ref="asyncDEBUG"/>
             <AppenderRef ref="asyncINFO"/>
             <AppenderRef ref="asyncWARN"/>

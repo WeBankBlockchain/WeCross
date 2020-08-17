@@ -50,7 +50,7 @@ done
 download_demo()
 {
     local github_url=https://github.com/WeBankFinTech/WeCross/releases/download/
-    local cdn_url=https://www.fisco.com.cn/cdn/wecross/releases/download/
+    local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/Demo/
     #local compatibility_version=
     local release_pkg=demo.tar.gz
     local release_pkg_checksum_file=demo.tar.gz.md5

@@ -67,7 +67,7 @@ done
 download_wecross_console_pkg()
 {
     local github_url=https://github.com/WeBankFinTech/WeCross-Console/releases/download/
-    local cdn_url=https://www.fisco.com.cn/cdn/wecross-console/releases/download/
+    local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross-Console/
     local release_pkg=WeCross-Console.tar.gz
     local release_pkg_checksum_file=WeCross-Console.tar.gz.md5
 

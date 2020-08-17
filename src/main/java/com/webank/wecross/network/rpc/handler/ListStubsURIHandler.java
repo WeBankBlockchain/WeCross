@@ -5,8 +5,7 @@ import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.response.StubResponse;
-import com.webank.wecross.stub.StubManager;
-import com.webank.wecross.utils.ObjectMapperFactory;
+import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.zone.ZoneManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,7 @@ public class ListStubsURIHandler implements URIHandler {
     private static final Logger logger = LoggerFactory.getLogger(ListStubsURIHandler.class);
 
     private WeCrossHost host;
-    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     public ListStubsURIHandler(WeCrossHost host) {
         this.host = host;

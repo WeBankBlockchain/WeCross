@@ -3,18 +3,20 @@ package com.webank.wecross.zone;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.peer.Peer;
+import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.remote.RemoteConnection;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.resource.ResourceBlockHeaderManager;
-import com.webank.wecross.resource.ResourceBlockHeaderManagerFactory;
-import com.webank.wecross.storage.BlockHeaderStorageFactory;
+import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
-import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.stubmanager.MemoryBlockHeaderManager;
+import com.webank.wecross.stubmanager.MemoryBlockHeaderManagerFactory;
+import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.utils.core.PathUtils;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -22,29 +24,95 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ZoneManager {
+    private Logger logger = LoggerFactory.getLogger(ZoneManager.class);
     private Map<String, Zone> zones = new HashMap<>();
     private AtomicInteger seq = new AtomicInteger(1);
-    private Logger logger = LoggerFactory.getLogger(ZoneManager.class);
     private P2PService p2PService;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
     private StubManager stubManager;
-    BlockHeaderStorageFactory blockHeaderStorageFactory;
-    private ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory;
+    private MemoryBlockHeaderManagerFactory memoryBlockHeaderManagerFactory;
+    private PeerManager peerManager;
 
-    public Resource getResource(Path path) {
+    public Chain getChain(Path path) {
         lock.readLock().lock();
         try {
             Zone zone = getZone(path);
 
             if (zone != null) {
-                Chain stub = zone.getChain(path);
+                Chain chain = zone.getChain(path);
 
-                if (stub != null) {
-                    Resource resource = stub.getResources().get(path.getResource());
+                return chain;
+            }
+        } catch (Exception e) {
+            logger.debug("Exception: " + e);
+        } finally {
+            lock.readLock().unlock();
+        }
 
-                    return resource;
+        return null;
+    }
+
+    public Resource fetchResource(Path path) {
+        return getResource(path, true);
+    }
+
+    public Resource getResource(Path path) {
+        return getResource(path, false);
+    }
+
+    public Resource getResource(Path path, boolean create) {
+        lock.readLock().lock();
+        try {
+            Zone zone = getZone(path);
+
+            if (zone != null) {
+                Chain chain = zone.getChain(path);
+
+                if (chain != null) {
+                    Resource resource = chain.getResource(path);
+
+                    if (resource != null) {
+                        return resource;
+                    } else {
+                        if (create) {
+                            ResourceInfo resourceInfo = new ResourceInfo();
+                            resourceInfo.setName(path.getResource());
+
+                            // not found, build default resource
+                            resource = new Resource();
+                            resource.setPath(path);
+                            resource.setBlockHeaderManager(chain.getBlockHeaderManager());
+                            resource.setDriver(chain.getDriver());
+                            resource.setStubType(chain.getStubType());
+                            resource.setResourceInfo(resourceInfo);
+
+                            Connection localConnection = chain.getLocalConnection();
+                            if (localConnection != null) {
+                                resource.addConnection(null, localConnection);
+                            } else {
+
+                                Set<Peer> peers = chain.getPeers();
+                                for (Peer peer : peers) {
+                                    RemoteConnection remoteConnection = new RemoteConnection();
+                                    remoteConnection.setP2PService(p2PService);
+                                    remoteConnection.setPeer(peer);
+                                    remoteConnection.setPath(path.toURI());
+                                    remoteConnection.setProperties(
+                                            chain.getChainInfo().getProperties());
+                                    resource.addConnection(peer, remoteConnection);
+                                }
+                            }
+
+                            resource.setTemporary(true);
+
+                            return resource;
+                        } else {
+                            return null;
+                        }
+                    }
                 }
             }
+
             return null;
         } catch (Exception e) {
             logger.debug("Exception: " + e);
@@ -57,7 +125,7 @@ public class ZoneManager {
     public Zone getZone(Path path) {
         lock.readLock().lock();
         try {
-            return getZone(path.getNetwork());
+            return getZone(path.getZone());
         } finally {
             lock.readLock().unlock();
         }
@@ -86,85 +154,66 @@ public class ZoneManager {
         return seq.intValue();
     }
 
-    public void addRemoteResources(Peer peer, Map<String, ResourceInfo> resources)
-            throws Exception {
+    public boolean addRemoteChains(Peer peer, Map<String, ChainInfo> chainInfos) throws Exception {
         lock.writeLock().lock();
+        boolean changed = false;
         try {
-            for (Map.Entry<String, ResourceInfo> entry : resources.entrySet()) {
-                Path path;
-                ResourceInfo resourceInfo = entry.getValue();
+            for (Map.Entry<String, ChainInfo> entry : chainInfos.entrySet()) {
+                Path chainPath;
+                ChainInfo chainInfo = entry.getValue();
                 try {
-                    path = Path.decode(entry.getKey());
+                    chainPath = Path.decode(entry.getKey());
                 } catch (Exception e) {
                     logger.error("Parse path error: {} {}", entry.getKey(), e);
                     continue;
                 }
 
-                // Verify Checksum
-                if (getResource(path) != null) {
-                    String originChecksum = getResource(path).getResourceInfo().getChecksum();
-                    String receiveChecksum = resourceInfo.getChecksum();
-                    if (!originChecksum.equals(receiveChecksum)) {
+                Zone zone = zones.get(chainPath.getZone());
+                if (zone == null) {
+                    zone = new Zone();
+                    zones.put(chainPath.getZone(), zone);
+                }
+
+                Chain chain = zone.getChains().get(chainPath.getChain());
+
+                if (chain == null) {
+                    Driver driver = stubManager.getStubFactory(chainInfo.getStubType()).newDriver();
+
+                    chain = new Chain(chainPath.getZone(), chainInfo, driver, null);
+                    MemoryBlockHeaderManager resourceBlockHeaderManager =
+                            memoryBlockHeaderManagerFactory.build(chain);
+
+                    chain.setBlockHeaderManager(resourceBlockHeaderManager);
+
+                    zone.getChains().put(chainPath.getChain(), chain);
+                } else {
+                    // verify checksum
+                    ChainInfo oldChainInfo = chain.getChainInfo();
+                    if (!oldChainInfo.getChecksum().equals(chainInfo.getChecksum())) {
                         logger.error(
-                                "Receive resource with different checksum, ipath: {} peer: {} receiveChecksum: {} originChecksum: {}",
-                                path.toString(),
-                                peer.getNode().toString(),
-                                receiveChecksum,
-                                originChecksum);
+                                "addRemoteChains: Chain checksum is not the same: old:{}, receive:{}",
+                                oldChainInfo.toString(),
+                                chainInfo.toString());
                         continue;
                     }
                 }
 
-                Zone zone = zones.get(path.getNetwork());
-                if (zone == null) {
-                    zone = new Zone();
-                    zones.put(path.getNetwork(), zone);
+                for (ResourceInfo resourceInfo : chainInfo.getResources()) {
+                    Path resourcePath = new Path();
+                    resourcePath.setZone(chainPath.getZone());
+                    resourcePath.setChain(chainPath.getChain());
+                    resourcePath.setResource(resourceInfo.getName());
+
+                    RemoteConnection remoteConnection = new RemoteConnection();
+                    remoteConnection.setP2PService(p2PService);
+                    remoteConnection.setPeer(peer);
+                    remoteConnection.setPath(resourcePath.toURI());
+                    remoteConnection.setProperties(chainInfo.getProperties());
+
+                    chain.addRemoteResource(peer, resourceInfo, remoteConnection);
                 }
-
-                Driver driver = stubManager.getStubFactory(resourceInfo.getStubType()).newDriver();
-                RemoteConnection remoteConnection = new RemoteConnection();
-                remoteConnection.setP2PService(p2PService);
-                remoteConnection.setPeer(peer);
-                remoteConnection.setPath(path.toURI());
-
-                Chain chain = zone.getChains().get(path.getChain());
-                if (chain == null) {
-                    chain = new Chain(path.getChain());
-                    chain.setDriver(driver);
-
-                    String blockPath = path.getNetwork() + "." + path.getChain();
-                    chain.setBlockHeaderStorage(
-                            blockHeaderStorageFactory.newBlockHeaderStorage(blockPath));
-                    chain.addConnection(peer, remoteConnection);
-                    chain.start();
-
-                    logger.info("Start block header sync: {}", blockPath);
-
-                    zone.getChains().put(path.getChain(), chain);
-                } else {
-                    chain.addConnection(peer, remoteConnection);
-                }
-
-                Resource resource = chain.getResources().get(path.getResource());
-                if (resource == null) {
-                    resource = new Resource();
-                    resource.setDriver(driver);
-
-                    ResourceBlockHeaderManager resourceBlockHeaderManager =
-                            resourceBlockHeaderManagerFactory.build(chain);
-
-                    resource.setResourceBlockHeaderManager(resourceBlockHeaderManager);
-                    resource.setResourceInfo(resourceInfo);
-
-                    chain.getResources().put(path.getResource(), resource);
-                }
-
-                resource.addConnection(peer, remoteConnection);
-                logger.info(
-                        "Add remote resource({}) connection, peer: {}, resource: {}",
-                        path.toString(),
-                        peer.toString(),
-                        resource.getResourceInfo());
+                chain.start();
+                changed = true;
             }
         } catch (WeCrossException e) {
             logger.error("Add remote resource error", e);
@@ -172,67 +221,82 @@ public class ZoneManager {
         } finally {
             lock.writeLock().unlock();
         }
+        return changed;
     }
 
-    public void removeRemoteResources(Peer peer, Map<String, ResourceInfo> resources) {
+    public boolean removeRemoteChains(
+            Peer peer, Map<String, ChainInfo> chains, boolean removeChainPeer) {
         lock.writeLock().lock();
+        boolean changed = false; // return
         try {
-            for (Map.Entry<String, ResourceInfo> entry : resources.entrySet()) {
-                Path path;
+            for (Map.Entry<String, ChainInfo> entry : chains.entrySet()) {
+                Path chainPath;
+                ChainInfo chainInfo = entry.getValue();
                 try {
-                    path = Path.decode(entry.getKey());
+                    chainPath = Path.decode(entry.getKey());
                 } catch (Exception e) {
                     logger.error("Parse path error: {} {}", entry.getKey(), e);
                     continue;
                 }
 
-                Zone zone = zones.get(path.getNetwork());
+                Zone zone = zones.get(chainPath.getZone());
                 if (zone == null) {
                     // zone not exists, bug?
-                    logger.error("Zone not exists! Peer: {} Path: {}", peer, path);
+                    logger.error("Zone not exists! Peer: {} Path: {}", peer, chainPath);
                     continue;
                 }
 
-                Chain chain = zone.getChain(path.getChain());
+                Chain chain = zone.getChain(chainPath.getChain());
                 if (chain == null) {
                     // stub not exists, bug?
-                    logger.error("Stub not exists! Peer: {} Path: {}", peer, path);
+                    logger.error("Stub not exists! Peer: {} Path: {}", peer, chainPath);
                     continue;
                 }
 
-                Resource resource = chain.getResources().get(path.getResource());
-
-                if (resource == null) {
-                    // resource not exists, bug?
-                    logger.error("Resource not exists! Peer: {} Path: {}", peer, path);
+                ChainInfo oldChainInfo = chain.getChainInfo();
+                if (!oldChainInfo.getChecksum().equals(chainInfo.getChecksum())) {
+                    logger.error(
+                            "removeRemoteChains: Chain checksum is not the same: old:{}, receive:{}",
+                            oldChainInfo.toString(),
+                            chainInfo.toString());
                     continue;
                 }
 
-                resource.removeConnection(peer);
+                if (chainInfo.getResources() != null) {
+                    for (ResourceInfo resourceInfo : chainInfo.getResources()) {
+                        Resource resource = chain.getResource(resourceInfo.getName());
 
-                if (resource.isConnectionEmpty()) {
-                    chain.getResources().remove(path.getResource());
-                }
+                        if (resource == null) {
+                            // resource not exists, bug?
+                            logger.error("Resource not exists! Peer: {} Path: {}", peer, chainPath);
+                            continue;
+                        }
 
-                if (chain.getResources().isEmpty()) {
-                    chain.stop();
-                    if (chain.getBlockHeaderStorage() != null) {
-                        chain.getBlockHeaderStorage().close();
+                        if (!resource.isTemporary()) {
+                            resource.removeConnection(peer);
+
+                            if (resource.isConnectionEmpty()) {
+                                chain.removeResource(resourceInfo.getName(), false);
+                            }
+                        }
                     }
-                    logger.info(
-                            "Stop block header sync: {}",
-                            path.getNetwork() + "." + path.getChain());
-
-                    zone.getChains().remove(path.getChain());
                 }
 
-                if (zone.getChains().isEmpty()) {
-                    zones.remove(path.getNetwork());
+                if (removeChainPeer) {
+                    chain.removePeers(peer);
                 }
+
+                if (chain.getPeers().isEmpty() && !chain.hasLocalConnection()) {
+                    chain.stop();
+                    zone.getChains().remove(chainPath.getChain());
+                }
+
+                changed = true;
             }
         } finally {
             lock.writeLock().unlock();
         }
+        return changed;
     }
 
     public Map<String, Resource> getAllResources(boolean ignoreRemote) {
@@ -249,7 +313,7 @@ public class ZoneManager {
 
                     for (Map.Entry<String, Resource> resourceEntry :
                             stubEntry.getValue().getResources().entrySet()) {
-                        if (resourceEntry.getValue().isHasLocalConnection() || !ignoreRemote) {
+                        if (resourceEntry.getValue().hasLocalConnection() || !ignoreRemote) {
                             String resourceName = PathUtils.toPureName(resourceEntry.getKey());
                             resources.put(
                                     zoneName + "." + stubName + "." + resourceName,
@@ -265,35 +329,32 @@ public class ZoneManager {
         return resources;
     }
 
-    public Map<String, ResourceInfo> getAllResourcesInfo(boolean ignoreRemote) {
-        Map<String, ResourceInfo> resources = new HashMap<String, ResourceInfo>();
+    public Map<String, ChainInfo> getAllChainsInfo(boolean ignoreRemote) {
+        Map<String, ChainInfo> chains = new HashMap<String, ChainInfo>();
 
         lock.readLock().lock();
         try {
             for (Map.Entry<String, Zone> zoneEntry : zones.entrySet()) {
-                String zoneName = PathUtils.toPureName(zoneEntry.getKey());
-
-                for (Map.Entry<String, Chain> stubEntry :
+                for (Map.Entry<String, Chain> chainEntry :
                         zoneEntry.getValue().getChains().entrySet()) {
-                    String stubName = PathUtils.toPureName(stubEntry.getKey());
-
-                    for (Map.Entry<String, Resource> resourceEntry :
-                            stubEntry.getValue().getResources().entrySet()) {
-                        if (ignoreRemote && !resourceEntry.getValue().isHasLocalConnection()) {
-                        } else {
-                            String resourceName = PathUtils.toPureName(resourceEntry.getKey());
-                            resources.put(
-                                    zoneName + "." + stubName + "." + resourceName,
-                                    resourceEntry.getValue().getResourceInfo());
-                        }
+                    if (ignoreRemote && !chainEntry.getValue().hasLocalConnection()) {
+                        continue;
                     }
+
+                    String chainName = PathUtils.toPureName(chainEntry.getKey());
+
+                    Path path = new Path();
+                    path.setZone(zoneEntry.getKey());
+                    path.setChain(chainName);
+
+                    chains.put(path.toString(), chainEntry.getValue().getChainInfo());
                 }
             }
         } finally {
             lock.readLock().unlock();
         }
 
-        return resources;
+        return chains;
     }
 
     public P2PService getP2PService() {
@@ -312,20 +373,20 @@ public class ZoneManager {
         this.stubManager = stubManager;
     }
 
-    public BlockHeaderStorageFactory getBlockHeaderStorageFactory() {
-        return blockHeaderStorageFactory;
-    }
-
-    public void setBlockHeaderStorageFactory(BlockHeaderStorageFactory blockHeaderStorageFactory) {
-        this.blockHeaderStorageFactory = blockHeaderStorageFactory;
-    }
-
-    public ResourceBlockHeaderManagerFactory getResourceBlockHeaderManagerFactory() {
-        return resourceBlockHeaderManagerFactory;
+    public MemoryBlockHeaderManagerFactory getResourceBlockHeaderManagerFactory() {
+        return memoryBlockHeaderManagerFactory;
     }
 
     public void setResourceBlockHeaderManagerFactory(
-            ResourceBlockHeaderManagerFactory resourceBlockHeaderManagerFactory) {
-        this.resourceBlockHeaderManagerFactory = resourceBlockHeaderManagerFactory;
+            MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory) {
+        this.memoryBlockHeaderManagerFactory = resourceBlockHeaderManagerFactory;
+    }
+
+    public void setPeerManager(PeerManager peerManager) {
+        this.peerManager = peerManager;
+    }
+
+    public void newSeq() {
+        this.seq.addAndGet(1);
     }
 }

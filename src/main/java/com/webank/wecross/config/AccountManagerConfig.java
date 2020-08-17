@@ -6,7 +6,7 @@ import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.p2p.netty.factory.P2PConfig;
 import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.StubManager;
+import com.webank.wecross.stubmanager.StubManager;
 import java.io.IOException;
 import java.util.Objects;
 import javax.annotation.Resource;
@@ -69,12 +69,16 @@ public class AccountManagerConfig {
                     if (type == null) {
                         logger.error(
                                 "Could not load account type. path: {}", accountConfig.getURI());
-                        continue;
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.INVALID_ACCOUNT,
+                                "Could not load account type. path: " + accountConfig.getURI());
                     }
 
-                    if (!stubManager.hasDriver(type)) {
+                    if (!stubManager.hasFactory(type)) {
                         logger.error("Stub plugin[" + type + "] not found!");
-                        continue;
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.INVALID_ACCOUNT,
+                                "Stub plugin[" + type + "] not found!");
                     }
 
                     Account account =
@@ -89,7 +93,9 @@ public class AccountManagerConfig {
                                 accountConfig.getURI(),
                                 resource.getFile().getName(),
                                 type);
-                        continue;
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.INVALID_ACCOUNT,
+                                "Invalid account configure: " + accountConfig.getURI());
                     }
                     accountManager.addAccount(resource.getFile().getName(), account);
                 }

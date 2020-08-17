@@ -8,6 +8,7 @@ import com.webank.wecross.network.rpc.handler.ResourceURIHandler;
 import com.webank.wecross.network.rpc.handler.StateURIHandler;
 import com.webank.wecross.network.rpc.handler.TestURIHandler;
 import com.webank.wecross.network.rpc.handler.URIHandler;
+import com.webank.wecross.network.rpc.handler.XATransactionHandler;
 import com.webank.wecross.network.rpc.netty.URIMethod;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +59,15 @@ public class URIHandlerDispatcher {
         ListAccountsURIHandler listAccountsURIHandler = new ListAccountsURIHandler(host);
         registerURIHandler(new URIMethod("GET", "/listAccounts"), listAccountsURIHandler);
         registerURIHandler(new URIMethod("POST", "/listAccounts"), listAccountsURIHandler);
+
+        XATransactionHandler xaTransactionHandler = new XATransactionHandler();
+        xaTransactionHandler.setXaTransactionManager(host.getXaTransactionManager());
+        xaTransactionHandler.setAccountManager(host.getAccountManager());
+        registerURIHandler(new URIMethod("POST", "/startTransaction"), xaTransactionHandler);
+        registerURIHandler(new URIMethod("POST", "/commitTransaction"), xaTransactionHandler);
+        registerURIHandler(new URIMethod("POST", "/rollbackTransaction"), xaTransactionHandler);
+        registerURIHandler(new URIMethod("POST", "/getTransactionInfo"), xaTransactionHandler);
+        registerURIHandler(new URIMethod("POST", "/getTransactionIDs"), xaTransactionHandler);
 
         ResourceURIHandler resourceURIHandler = new ResourceURIHandler(host);
         registerURIHandler(RESOURCE_URIMETHOD, resourceURIHandler);

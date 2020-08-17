@@ -20,9 +20,8 @@ import com.webank.wecross.routine.htlc.HTLCManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Request;
-import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
-import com.webank.wecross.utils.ObjectMapperFactory;
+import com.webank.wecross.zone.ChainInfo;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -35,7 +34,7 @@ public class P2PProcessor implements NetworkProcessor {
     private ZoneManager zoneManager;
     private P2PService p2PService;
     private RoutineManager routineManager;
-    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     public PeerManager getPeerManager() {
         return peerManager;
@@ -91,11 +90,11 @@ public class P2PProcessor implements NetworkProcessor {
 
                         p2pRequest.checkP2PMessage(method);
 
-                        Map<String, ResourceInfo> resources = zoneManager.getAllResourcesInfo(true);
+                        Map<String, ChainInfo> chains = zoneManager.getAllChainsInfo(true);
 
                         PeerInfoMessageData data = new PeerInfoMessageData();
                         data.setSeq(zoneManager.getSeq());
-                        data.setResources(resources);
+                        data.setChainInfos(chains);
 
                         response.setErrorCode(NetworkQueryStatus.SUCCESS);
                         response.setMessage("request " + method + " success");
@@ -146,23 +145,31 @@ public class P2PProcessor implements NetworkProcessor {
                                                         int newSeq = data.getSeq();
                                                         if (peerManager.hasPeerChanged(
                                                                 peerInfo.getNode(), newSeq)) {
+
                                                             // compare and update
-                                                            Map<String, ResourceInfo> newResources =
-                                                                    data.getResources();
-                                                            logger.debug(
-                                                                    "Update peerInfo from {}, seq:{}, resource:{}",
-                                                                    peerInfo,
-                                                                    newSeq,
-                                                                    newResources);
+                                                            Map<String, ChainInfo> newChains =
+                                                                    data.getChainInfos();
 
                                                             // update zonemanager
-                                                            zoneManager.removeRemoteResources(
-                                                                    peerInfo,
-                                                                    peerInfo.getResourceInfos());
-                                                            zoneManager.addRemoteResources(
-                                                                    peerInfo, newResources);
-                                                            peerInfo.setResources(
-                                                                    newSeq, newResources);
+                                                            boolean changed = false;
+                                                            changed |=
+                                                                    zoneManager.removeRemoteChains(
+                                                                            peerInfo,
+                                                                            peerInfo
+                                                                                    .getChainInfos(),
+                                                                            false);
+                                                            changed |=
+                                                                    zoneManager.addRemoteChains(
+                                                                            peerInfo, newChains);
+                                                            if (changed) {
+                                                                logger.debug(
+                                                                        "Update peerInfo from {}, seq:{}, resource:{}",
+                                                                        peerInfo,
+                                                                        newSeq,
+                                                                        newChains);
+                                                                peerInfo.setChainInfos(
+                                                                        newSeq, newChains);
+                                                            }
                                                         } else {
                                                             logger.debug(
                                                                     "Peer info not changed, seq:{}",
@@ -236,7 +243,7 @@ public class P2PProcessor implements NetworkProcessor {
             String p2pRequestString,
             NetworkProcessor.Callback callback) {
         Path path = new Path();
-        path.setNetwork(network);
+        path.setZone(network);
         path.setChain(chain);
         path.setResource(resource);
 
@@ -248,7 +255,8 @@ public class P2PProcessor implements NetworkProcessor {
         logger.debug("request string: {}", p2pRequestString);
 
         try {
-            Resource resourceObj = zoneManager.getResource(path);
+            // Resource resourceObj = zoneManager.getResource(path);
+            Resource resourceObj = zoneManager.fetchResource(path);
             if (resourceObj == null) {
                 logger.warn("Unable to find resource: {}.{}.{}", network, chain, resource);
                 throw new Exception("Resource not found");

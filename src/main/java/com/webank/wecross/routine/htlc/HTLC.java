@@ -3,68 +3,143 @@ package com.webank.wecross.routine.htlc;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.TransactionResponse;
-import java.math.BigInteger;
 
 public interface HTLC {
-    TransactionResponse lock(HTLCResource htlcResource, String h) throws WeCrossException;
+    interface Callback {
+        void onReturn(WeCrossException exception, String result);
+    }
 
-    void lockWithVerify(HTLCResource htlcResource, String address, String h)
-            throws WeCrossException;
+    interface VerifyCallback {
+        void onReturn(WeCrossException exception, boolean result);
+    }
 
-    TransactionResponse unlock(
-            HTLCResource htlcResource, String txHash, long blockNumber, String h, String s)
-            throws WeCrossException;
+    /**
+     * lock self asset
+     *
+     * @param htlcResource self htlc resource
+     * @param hash hash of secret, also the proposal id
+     * @param callback a callback interface
+     */
+    void lockSelf(HTLCResource htlcResource, String hash, Callback callback);
 
-    void unlockWithVerify(
-            HTLCResource htlcResource,
-            String txHash,
-            long blockNumber,
-            String address,
-            String h,
-            String s)
-            throws WeCrossException;
+    /**
+     * lock counterpart asset with transaction verification
+     *
+     * @param htlcResource counterpart htlc resource
+     * @param hash hash of secret, also the proposal id
+     * @param callback a callback interface
+     */
+    void lockCounterparty(HTLCResource htlcResource, String hash, Callback callback);
 
-    String rollback(HTLCResource htlcResource, String h) throws WeCrossException;
+    /**
+     * unlock counterpart asset with transaction verification
+     *
+     * @param htlcResource counterpart htlc resource
+     * @param hash hash of secret, also the proposal id
+     * @param secret secret
+     * @param callback a callback interface
+     */
+    void unlockCounterparty(
+            HTLCResource htlcResource, String hash, String secret, Callback callback);
 
-    boolean verify(Resource counterpartyResource, VerifyData verifyData);
+    /**
+     * rollback self asset
+     *
+     * @param htlcResource self htlc resource
+     * @param hash hash of secret, also the proposal id
+     * @param callback a callback interface
+     */
+    void rollback(HTLCResource htlcResource, String hash, Callback callback);
 
-    String getCounterpartyHtlc(Resource resource, Account account) throws WeCrossException;
+    /**
+     * verify transaction
+     *
+     * @param counterpartyResource counterparty resource
+     * @param verifyData expected transaction data
+     */
+    void verifyHtlcTransaction(
+            Resource counterpartyResource, VerifyData verifyData, VerifyCallback callback);
 
-    String getTask(HTLCResource htlcResource) throws WeCrossException;
+    /**
+     * get counterparty htlc contract address
+     *
+     * @param resource self htlc resource
+     * @param account account to sign
+     * @param callback a callback interface
+     */
+    void getCounterpartyHtlcAddress(Resource resource, Account account, Callback callback);
 
-    String deleteTask(HTLCResource htlcResource, String h) throws WeCrossException;
+    /**
+     * get all proposal ids
+     *
+     * @param htlcResource self htlc resource
+     * @param callback a callback interface
+     */
+    void getProposalIDs(HTLCResource htlcResource, Callback callback);
 
-    String getSecret(HTLCResource htlcResource, String h) throws WeCrossException;
+    /**
+     * get proposal info by id
+     *
+     * @param resource self htlc resource
+     * @param account account to sign
+     * @param hash hash of secret, also the proposal id
+     * @param callback a callback interface
+     */
+    void getProposalInfo(Resource resource, Account account, String hash, Callback callback);
 
-    String[] getNewContractTxInfo(HTLCResource htlcResource, String h) throws WeCrossException;
+    /**
+     * decode proposal with string array inputs
+     *
+     * @param info fields of proposal
+     * @return proposal
+     * @throws WeCrossException decode failed
+     */
+    HTLCProposal decodeProposal(String[] info) throws WeCrossException;
 
-    String[] getLockTxInfo(HTLCResource htlcResource, String h) throws WeCrossException;
+    /**
+     * delete proposal
+     *
+     * @param htlcResource self htlc resource
+     * @param hash hash of secret, also the proposal id
+     * @param callback a callback interface
+     */
+    void deleteProposalID(HTLCResource htlcResource, String hash, Callback callback);
 
-    void setLockTxInfo(HTLCResource htlcResource, String h, String txHash, long blockNumber)
-            throws WeCrossException;
+    /**
+     * get transaction info of new proposal
+     *
+     * @param htlcResource self htlc resource
+     * @param hash hash of secret, also the proposal id
+     * @param callback a callback interface
+     */
+    void getNewProposalTxInfo(HTLCResource htlcResource, String hash, Callback callback);
 
-    BigInteger getSelfTimelock(HTLCResource htlcResource, String h) throws WeCrossException;
+    /**
+     * set lock state of counterparty
+     *
+     * @param htlcResource self htlc resource
+     * @param hash hash of secret, also the proposal id
+     * @param callback a callback interface
+     */
+    void setCounterpartyLockState(HTLCResource htlcResource, String hash, Callback callback);
 
-    BigInteger getCounterpartyTimelock(HTLCResource htlcResource, String h) throws WeCrossException;
+    /**
+     * set unlock state of counterparty
+     *
+     * @param resource self htlc resource
+     * @param account account to sign
+     * @param hash hash of secret, also the proposal id
+     * @param callback a callback interface
+     */
+    void setCounterpartyUnlockState(
+            Resource resource, Account account, String hash, Callback callback);
 
-    boolean getSelfLockStatus(HTLCResource htlcResource, String h) throws WeCrossException;
-
-    boolean getCounterpartyLockStatus(HTLCResource htlcResource, String h) throws WeCrossException;
-
-    boolean getSelfUnlockStatus(HTLCResource htlcResource, String h) throws WeCrossException;
-
-    boolean getCounterpartyUnlockStatus(HTLCResource htlcResource, String h)
-            throws WeCrossException;
-
-    boolean getSelfRollbackStatus(HTLCResource htlcResource, String h) throws WeCrossException;
-
-    boolean getCounterpartyRollbackStatus(HTLCResource htlcResource, String h)
-            throws WeCrossException;
-
-    void setCounterpartyLockStatus(HTLCResource htlcResource, String h) throws WeCrossException;
-
-    void setCounterpartyUnlockStatus(HTLCResource htlcResource, String h) throws WeCrossException;
-
-    void setCounterpartyRollbackStatus(HTLCResource htlcResource, String h) throws WeCrossException;
+    /**
+     * set rollback state of counterparty
+     *
+     * @param htlcResource self htlc resource
+     * @param hash hash of secret, also the proposal id
+     * @param callback a callback interface
+     */
+    void setCounterpartyRollbackState(HTLCResource htlcResource, String hash, Callback callback);
 }

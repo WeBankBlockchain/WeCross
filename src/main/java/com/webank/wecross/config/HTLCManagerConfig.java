@@ -3,11 +3,8 @@ package com.webank.wecross.config;
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.common.WeCrossDefault;
-import com.webank.wecross.exception.WeCrossException;
-import com.webank.wecross.routine.htlc.HTLC;
-import com.webank.wecross.routine.htlc.HTLCManager;
-import com.webank.wecross.routine.htlc.HTLCTaskInfo;
-import com.webank.wecross.routine.htlc.WeCrossHTLC;
+import com.webank.wecross.routine.RoutineDefault;
+import com.webank.wecross.routine.htlc.*;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.ZoneManager;
@@ -15,6 +12,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,69 +39,92 @@ public class HTLCManagerConfig {
         if (infoList == null) {
             return htlcManager;
         }
-        Map<String, HTLCTaskInfo> htlcTaskInfos = new HashMap<>();
+        Map<String, HTLCTaskData> htlcTaskDataMap = new HashMap<>();
 
         try {
             for (Map<String, String> infoMap : infoList) {
-                HTLCTaskInfo htlcTaskInfo = new HTLCTaskInfo();
+                HTLCTaskData htlcTaskData = new HTLCTaskData();
 
                 String selfPath = getSelfPath(infoMap);
-                checkHtlcResources(selfPath);
+                checkHTLCResources(selfPath);
 
                 String counterpartyPath = getCounterpartyPath(infoMap);
-                String selfAccount = getAccount1(infoMap);
-                String counterpartyAccount = getAccount2(infoMap);
+                String account1 = getAccount1(infoMap);
+                String account2 = getAccount2(infoMap);
 
-                htlcTaskInfo.setSelfPath(selfPath);
-                htlcTaskInfo.setSelfAccount(selfAccount);
+                htlcTaskData.setSelfPath(Path.decode(selfPath));
+                htlcTaskData.setAccount1(accountManager.getAccount(account1));
+                htlcTaskData.setCounterpartyPath(Path.decode(counterpartyPath));
+                htlcTaskData.setAccount2(accountManager.getAccount(account2));
+                htlcTaskData.setCounterpartyAddress(getCounterpartyHtlcAddress(selfPath, account1));
 
-                htlcTaskInfo.setCounterpartyPath(counterpartyPath);
-                htlcTaskInfo.setCounterpartyAccount(counterpartyAccount);
-                htlcTaskInfo.setCounterpartyAddress(getCounterpartyHtlc(selfPath, selfAccount));
-
-                htlcTaskInfos.put(selfPath, htlcTaskInfo);
+                htlcTaskDataMap.put(selfPath, htlcTaskData);
             }
         } catch (Exception e) {
-            logger.error("failed to new HTLCManager: {}", e);
-            System.exit(-1);
+            logger.error("Failed to new HTLCManager.", e);
+            System.exit(1);
         }
 
-        htlcManager.setHtlcTaskInfos(htlcTaskInfos);
-        logger.info("HTLC resources: {}", Arrays.toString(htlcTaskInfos.keySet().toArray()));
+        htlcManager.setHtlcTaskDataMap(htlcTaskDataMap);
+        logger.info("HTLC resources: {}", Arrays.toString(htlcTaskDataMap.keySet().toArray()));
+
+        htlcManager.initHTLCResourcePairs(zoneManager);
         return htlcManager;
     }
 
-    public void checkHtlcResources(String path) throws Exception {
+    public void checkHTLCResources(String path) throws Exception {
         com.webank.wecross.resource.Resource selfResource =
-                zoneManager.getResource(Path.decode(path));
+                zoneManager.fetchResource(Path.decode(path));
         if (selfResource == null) {
-            throw new Exception("htlc resource: " + path + " not found");
+            throw new Exception("HTLC resource: " + path + " not found");
         }
     }
 
-    private String getCounterpartyHtlc(String iPath, String accountName) {
-        Path path = null;
+    private String getCounterpartyHtlcAddress(String iPath, String accountName) throws Exception {
+        com.webank.wecross.resource.Resource resource =
+                zoneManager.fetchResource(Path.decode(iPath));
+        Account account = accountManager.getAccount(accountName);
+        return getCounterpartyHtlcAddress(resource, account);
+    }
+
+    private String getCounterpartyHtlcAddress(
+            com.webank.wecross.resource.Resource resource, Account account) throws Exception {
+        HTLC htlc = new AssetHTLC();
+
+        CompletableFuture<String> future = new CompletableFuture<>();
+        htlc.getCounterpartyHtlcAddress(
+                resource,
+                account,
+                (exception, address) -> {
+                    if (exception != null) {
+                        logger.error(
+                                "Failed to get counterparty htlc address, errorMessage: {}, internalMessage: {}",
+                                exception.getLocalizedMessage(),
+                                exception.getInternalMessage());
+                        future.complete(null);
+                    } else {
+                        if (address == null || RoutineDefault.NULL_FLAG.equals(address)) {
+                            logger.error("Counterparty htlc address has not set.");
+                            address = null;
+                        }
+                        if (!future.isCancelled()) {
+                            future.complete(address);
+                        }
+                    }
+                });
+
+        String result;
         try {
-            path = Path.decode(iPath);
+            result = future.get(RoutineDefault.CALLBACK_TIMEOUT, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            logger.error(e.getMessage());
-            System.exit(1);
+            future.cancel(true);
+            result = null;
         }
 
-        com.webank.wecross.resource.Resource resource = zoneManager.getResource(path);
-        HTLC htlc = new WeCrossHTLC();
-        Account account = accountManager.getAccount(accountName);
-        String counterpartyaddress = null;
-        try {
-            counterpartyaddress = htlc.getCounterpartyHtlc(resource, account);
-        } catch (WeCrossException e) {
-            logger.error(
-                    "failed to get counterparty htlc address, path: {}, error: {}",
-                    iPath,
-                    e.getInternalMessage());
-            System.exit(1);
+        if (result == null) {
+            throw (new Exception("GET_COUNTERPARTY_HTLC_ADDRESS_ERROR"));
         }
-        return counterpartyaddress;
+        return result;
     }
 
     private String getSelfPath(Map<String, String> infoMap) {

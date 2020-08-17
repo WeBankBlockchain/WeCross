@@ -6,7 +6,6 @@ import com.webank.wecross.network.NetworkResponse;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.StubQueryStatus;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,13 +34,13 @@ class RemoteConnectionSemaphoreCallback extends NetworkCallback {
 
     public Response getResponseData() {
         try {
-            semaphore.tryAcquire(1, 10, TimeUnit.SECONDS);
-
+            semaphore.acquire(1);
         } catch (Exception e) {
+            Thread.interrupted();
             logger.warn("send error", e);
             Response response = new Response();
             response.setErrorCode(StubQueryStatus.REMOTE_QUERY_FAILED);
-            response.setErrorMessage("Send error: " + e.getMessage());
+            response.setErrorMessage("acquire exception: " + e.getMessage());
             return response;
         }
         semaphore.release();
