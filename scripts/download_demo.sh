@@ -96,7 +96,7 @@ download_release_pkg()
     fi
 
     # download
-    if [ -f "${release_pkg}" ] && md5sum -c ${release_pkg_checksum_file};then
+    if [ -f "${release_pkg}" ] && md5sum -c ${release_pkg_checksum_file}; then
         LOG_INFO "Latest release ${release_pkg} exists."
     else
         LOG_INFO "Try to download from: ${cdn_url}/${compatibility_version}/${release_pkg}"
@@ -106,7 +106,7 @@ download_release_pkg()
             curl -C - -LO ${github_url}/${compatibility_version}/${release_pkg}
         fi
 
-        if [ "$(md5sum -c ${release_pkg_checksum_file}|echo $?)" -ne "0" ]; then
+        if ! md5sum -c ${release_pkg_checksum_file}; then
             LOG_ERROR "Download package error"
             rm -f ${release_pkg}
             exit 1
