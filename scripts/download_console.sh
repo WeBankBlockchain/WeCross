@@ -112,7 +112,7 @@ download_release_pkg()
     fi
 
     # download 
-    if [ -f "${release_pkg}" ] && [ "$(md5sum -c ${release_pkg_checksum_file}|echo $?)" -eq "0" ];then
+    if [ -f "${release_pkg}" ] && md5sum -c ${release_pkg_checksum_file};then
         LOG_INFO "Latest release ${release_pkg} exists."
     else
         LOG_INFO "Try to download from: ${cdn_url}/${compatibility_version}/${release_pkg}"
