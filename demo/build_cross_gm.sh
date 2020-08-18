@@ -60,7 +60,7 @@ check_port_avaliable()
 {
     port=$1
     name=$2
-    if [ "$(netstat -npl 2>/dev/null |grep $port | wc -l)" -ne "0" ]; then
+    if [ "$(netstat -na 2>/dev/null |grep $port | wc -l)" -ne "0" ]; then
         LOG_ERROR "${name} port ${port} is not avaliable. Are there any other blockchain is running?"
         exit 1
     fi
@@ -341,9 +341,6 @@ EOF
     # config routers
     config_router_8250 ${ROOT}/routers-payment/127.0.0.1-8250-25500/
     config_router_8251 ${ROOT}/routers-payment/127.0.0.1-8251-25501/
-
-    # print running env
-    netstat -napl|grep 20200
 
     # Start up routers
     cd ${ROOT}/routers-payment/127.0.0.1-8250-25500/
