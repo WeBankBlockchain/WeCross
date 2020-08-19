@@ -3,11 +3,8 @@ package com.webank.wecross.routine.htlc;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.routine.RoutineDefault;
-import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.VerifiedTransaction;
 import java.math.BigInteger;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,11 +55,13 @@ public class HTLCScheduler {
                         return;
                     }
 
-                    logger.trace(
-                            "get proposal info successfully, path: {}, hash: {}, info: {}",
-                            selfResource.getSelfPath(),
-                            hash,
-                            proposal);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(
+                                "get proposal info successfully, path: {}, hash: {}, info: {}",
+                                selfResource.getSelfPath(),
+                                hash,
+                                proposal);
+                    }
 
                     // check if the transfer is succeeded
                     if (proposal.isSelfUnlocked() && proposal.isCounterpartyUnlocked()) {
@@ -116,6 +115,10 @@ public class HTLCScheduler {
     }
 
     public void checkSelfRollback(HTLCResource htlcResource, String hash, Callback callback) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("checkSelfRollback, path: {}, hash: {}", htlcResource.getSelfPath(), hash);
+        }
+
         if (proposal.isSelfRolledback()) {
             callback.onReturn(null, true);
             return;
@@ -142,11 +145,13 @@ public class HTLCScheduler {
                             return;
                         }
 
-                        logger.trace(
-                                "no need to rollback, reason: {}, hash: {}, path: {}",
-                                hash,
-                                result,
-                                htlcResource.getSelfPath());
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(
+                                    "no need to rollback, reason: {}, hash: {}, path: {}",
+                                    hash,
+                                    result,
+                                    htlcResource.getSelfPath());
+                        }
                         callback.onReturn(null, true);
                     });
         } else {
@@ -156,6 +161,12 @@ public class HTLCScheduler {
 
     public void checkCounterpartyRollback(
             HTLCResource htlcResource, String hash, Callback callback) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "checkCounterpartyRollback, path: {}, hash: {}",
+                    htlcResource.getSelfPath(),
+                    hash);
+        }
         if (proposal.isCounterpartyRolledback()) {
             callback.onReturn(null, true);
             return;
@@ -181,6 +192,13 @@ public class HTLCScheduler {
     private void execProposal(HTLCResourcePair htlcResourcePair, String hash, Callback callback) {
         HTLCResource selfResource = htlcResourcePair.getSelfHTLCResource();
         HTLCResource counterpartyResource = htlcResourcePair.getCounterpartyHTLCResource();
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "execProposal, selfPath: {},  counterpartyPath: {}, hash: {}",
+                    selfResource.getSelfPath(),
+                    counterpartyResource.getSelfPath(),
+                    hash);
+        }
 
         if (counterpartyResource.getSelfResource() == null) {
             callback.onReturn(
@@ -245,14 +263,14 @@ public class HTLCScheduler {
             HTLCResource counterpartyResource,
             String hash,
             Callback callback) {
-        callback.onReturn(null, true);
-    }
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "checkProposalConsistency, selfPath: {},  counterpartyPath: {}, hash: {}",
+                    selfResource.getSelfPath(),
+                    counterpartyResource.getSelfPath(),
+                    hash);
+        }
 
-    private void origincheckProposalConsistency(
-            HTLCResource selfResource,
-            HTLCResource counterpartyResource,
-            String hash,
-            Callback callback) {
         htlc.getNewProposalTxInfo(
                 selfResource,
                 hash,
@@ -274,82 +292,14 @@ public class HTLCScheduler {
                     }
 
                     String[] info0 = selfTxInfo.split(RoutineDefault.SPLIT_REGEX);
-                    VerifiedTransaction verifiedTransaction0 =
-                            getVerifiedTransaction(
-                                    selfResource, info0[0], Long.parseLong(info0[1]));
-
-                    if (verifiedTransaction0 == null) {
-                        logger.error(
-                                "self verified transaction not found, hash: {}, path: {}",
-                                hash,
-                                selfResource.getSelfPath());
-                        callback.onReturn(
-                                new WeCrossException(
-                                        ErrorCode.HTLC_ERROR,
-                                        "GET_NEW_PROPOSAL_TX_INFO_ERROR",
-                                        HTLCErrorCode.GET_PROPOSAL_TX_INFO_ERROR,
-                                        "self verified transaction not found"),
-                                false);
-                        return;
-                    }
-
-                    logger.trace(
-                            "verifiedTransaction for self transfer contract: {}",
-                            verifiedTransaction0);
-
-                    // construct new args, args: [hash] , [role] ...
-                    String[] args = verifiedTransaction0.getTransactionRequest().getArgs();
-                    if (RoutineDefault.TRUE_FLAG.equals(args[1])) {
-                        args[1] = RoutineDefault.FALSE_FLAG;
-                    } else {
-                        args[1] = RoutineDefault.TRUE_FLAG;
-                    }
-
-                    // construct new outputs
-                    String[] output = verifiedTransaction0.getTransactionResponse().getResult();
-
-                    htlc.getNewProposalTxInfo(
-                            counterpartyResource,
-                            hash,
-                            (exception1, counterpartyTxInfo) -> {
-                                if (exception1 != null) {
-                                    callback.onReturn(exception1, false);
-                                    return;
-                                }
-
-                                if (counterpartyTxInfo == null
-                                        || RoutineDefault.NULL_FLAG.equals(counterpartyTxInfo)) {
-                                    callback.onReturn(
-                                            new WeCrossException(
-                                                    ErrorCode.HTLC_ERROR,
-                                                    "GET_NEW_PROPOSAL_TX_INFO_ERROR",
-                                                    HTLCErrorCode.GET_PROPOSAL_TX_INFO_ERROR,
-                                                    "counterparty tx-info of proposal not found"),
-                                            false);
-                                    return;
-                                }
-
-                                String[] info1 =
-                                        counterpartyTxInfo.split(RoutineDefault.SPLIT_REGEX);
-
-                                VerifyData verifyData =
-                                        new VerifyData(
-                                                Long.parseLong(info1[1]),
-                                                info1[0],
-                                                selfResource.getCounterpartyAddress(),
-                                                "newContract",
-                                                args,
-                                                output);
-
-                                VerifiedTransaction verifiedTransaction1 =
-                                        getVerifiedTransaction(
-                                                counterpartyResource,
-                                                info1[0],
-                                                Long.parseLong(info1[1]));
-
-                                if (verifiedTransaction1 == null) {
+                    getVerifiedTransaction(
+                            selfResource,
+                            info0[0],
+                            Long.parseLong(info0[1]),
+                            (exception0, verifiedTransaction0) -> {
+                                if (exception0 != null || verifiedTransaction0 == null) {
                                     logger.error(
-                                            "counterparty verified transaction not found, hash: {}, path: {}",
+                                            "self verified transaction not found, hash: {}, path: {}",
                                             hash,
                                             selfResource.getSelfPath());
                                     callback.onReturn(
@@ -357,54 +307,145 @@ public class HTLCScheduler {
                                                     ErrorCode.HTLC_ERROR,
                                                     "GET_NEW_PROPOSAL_TX_INFO_ERROR",
                                                     HTLCErrorCode.GET_PROPOSAL_TX_INFO_ERROR,
-                                                    "counterparty verified transaction not found"),
+                                                    "self verified transaction not found"),
                                             false);
                                     return;
                                 }
 
-                                logger.trace(
-                                        "verifiedTransaction for counterparty transfer contract: {}",
-                                        verifiedTransaction1);
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug(
+                                            "verifiedTransaction for self transfer contract: {}, hash: {}",
+                                            verifiedTransaction0,
+                                            hash);
+                                }
 
-                                callback.onReturn(null, verifyData.verify(verifiedTransaction1));
+                                // construct new args, args: [hash] , [role] ...
+                                String[] args =
+                                        verifiedTransaction0.getTransactionRequest().getArgs();
+                                if (RoutineDefault.TRUE_FLAG.equals(args[1])) {
+                                    args[1] = RoutineDefault.FALSE_FLAG;
+                                } else {
+                                    args[1] = RoutineDefault.TRUE_FLAG;
+                                }
+
+                                // construct new outputs
+                                String[] output =
+                                        verifiedTransaction0.getTransactionResponse().getResult();
+
+                                htlc.getNewProposalTxInfo(
+                                        counterpartyResource,
+                                        hash,
+                                        (infoException, counterpartyTxInfo) -> {
+                                            if (infoException != null) {
+                                                callback.onReturn(infoException, false);
+                                                return;
+                                            }
+
+                                            if (logger.isDebugEnabled()) {
+                                                logger.debug(
+                                                        "counterpartyTxInfo: {}, hash: {}",
+                                                        counterpartyTxInfo,
+                                                        hash);
+                                            }
+
+                                            if (counterpartyTxInfo == null
+                                                    || RoutineDefault.NULL_FLAG.equals(
+                                                            counterpartyTxInfo)) {
+                                                callback.onReturn(
+                                                        new WeCrossException(
+                                                                ErrorCode.HTLC_ERROR,
+                                                                "GET_NEW_PROPOSAL_TX_INFO_ERROR",
+                                                                HTLCErrorCode
+                                                                        .GET_PROPOSAL_TX_INFO_ERROR,
+                                                                "counterparty tx-info of proposal not found"),
+                                                        false);
+                                                return;
+                                            }
+
+                                            String[] info1 =
+                                                    counterpartyTxInfo.split(
+                                                            RoutineDefault.SPLIT_REGEX);
+
+                                            VerifyData verifyData =
+                                                    new VerifyData(
+                                                            Long.parseLong(info1[1]),
+                                                            info1[0],
+                                                            "newProposal",
+                                                            args,
+                                                            output);
+
+                                            getVerifiedTransaction(
+                                                    counterpartyResource,
+                                                    info1[0],
+                                                    Long.parseLong(info1[1]),
+                                                    (exception1, verifiedTransaction1) -> {
+                                                        if (exception1 != null
+                                                                || verifiedTransaction1 == null) {
+                                                            logger.error(
+                                                                    "counterparty verified transaction not found, hash: {}, path: {}",
+                                                                    hash,
+                                                                    selfResource.getSelfPath());
+                                                            callback.onReturn(
+                                                                    new WeCrossException(
+                                                                            ErrorCode.HTLC_ERROR,
+                                                                            "GET_NEW_PROPOSAL_TX_INFO_ERROR",
+                                                                            HTLCErrorCode
+                                                                                    .GET_PROPOSAL_TX_INFO_ERROR,
+                                                                            "counterparty verified transaction not found"),
+                                                                    false);
+                                                            return;
+                                                        }
+
+                                                        if (logger.isDebugEnabled()) {
+                                                            logger.debug(
+                                                                    "verifiedTransaction for counterparty transfer contract: {}, hash: {}",
+                                                                    verifiedTransaction1,
+                                                                    hash);
+                                                        }
+
+                                                        callback.onReturn(
+                                                                null,
+                                                                verifyData.verify(
+                                                                        verifiedTransaction1));
+                                                    });
+                                        });
                             });
                 });
     }
 
-    private VerifiedTransaction getVerifiedTransaction(
-            HTLCResource htlcResource, String txHash, long blockNum) {
-        CompletableFuture<VerifiedTransaction> verifiedTransactionFuture =
-                new CompletableFuture<>();
+    private interface GetVerifiedTransactionCallback {
+        void onReturn(WeCrossException exception, VerifiedTransaction result);
+    }
+
+    private void getVerifiedTransaction(
+            HTLCResource htlcResource,
+            String txHash,
+            long blockNum,
+            GetVerifiedTransactionCallback callback) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("getVerifiedTransaction, path: {}", htlcResource.getSelfPath());
+        }
 
         htlcResource
                 .getDriver()
                 .asyncGetVerifiedTransaction(
+                        htlcResource.getSelfPath(),
                         txHash,
                         blockNum,
                         htlcResource.getBlockHeaderManager(),
                         htlcResource.chooseConnection(),
-                        new Driver.GetVerifiedTransactionCallback() {
-                            @Override
-                            public void onResponse(
-                                    Exception e, VerifiedTransaction verifiedTransaction) {
-                                if (e != null) {
-                                    logger.error("get verifiedTransaction0Future exception: " + e);
-                                    verifiedTransactionFuture.complete(null);
-                                } else {
-
-                                    verifiedTransactionFuture.complete(verifiedTransaction);
-                                }
+                        (exception, verifiedTransaction) -> {
+                            if (exception != null) {
+                                logger.error("get verifiedTransaction exception, ", exception);
+                                callback.onReturn(
+                                        new WeCrossException(
+                                                ErrorCode.HTLC_ERROR,
+                                                "GET_VERIFIED_TRANSACTION_ERROR"),
+                                        null);
+                            } else {
+                                callback.onReturn(null, verifiedTransaction);
                             }
                         });
-
-        VerifiedTransaction verifiedTransaction = null;
-        try {
-            verifiedTransaction = verifiedTransactionFuture.get(30, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            logger.error("get verifiedTransaction0Future timeout: " + e);
-        }
-
-        return verifiedTransaction;
     }
 
     private void execInitiatorProcess(
@@ -412,6 +453,13 @@ public class HTLCScheduler {
             HTLCResource counterpartyResource,
             String hash,
             Callback callback) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "execInitiatorProcess, selfPath: {},  counterpartyPath: {}, hash: {}",
+                    selfResource.getSelfPath(),
+                    counterpartyResource.getSelfPath(),
+                    hash);
+        }
         if (!proposal.isSelfUnlocked()) {
             // lock self
             handleSelfLock(
@@ -446,6 +494,10 @@ public class HTLCScheduler {
     }
 
     private void handleSelfLock(HTLCResource htlcResource, String hash, Callback callback) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("handleSelfLock, path: {}, hash: {}", htlcResource.getSelfPath(), hash);
+        }
+
         if (!proposal.isSelfLocked()) {
             htlc.lockSelf(
                     htlcResource,
@@ -454,10 +506,12 @@ public class HTLCScheduler {
                         if (exception != null) {
                             callback.onReturn(exception, false);
                         } else {
-                            logger.trace(
-                                    "lock self successfully: {}, path: {}",
-                                    hash,
-                                    htlcResource.getSelfPath());
+                            if (logger.isDebugEnabled()) {
+                                logger.debug(
+                                        "lock self successfully: {}, path: {}",
+                                        hash,
+                                        htlcResource.getSelfPath());
+                            }
                             callback.onReturn(null, true);
                         }
                     });
@@ -471,10 +525,17 @@ public class HTLCScheduler {
             HTLCResource counterpartyResource,
             String hash,
             Callback callback) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "handleCounterpartyLock, selfPath: {},  counterpartyPath: {}, hash: {}",
+                    selfResource.getSelfPath(),
+                    counterpartyResource.getSelfPath(),
+                    hash);
+        }
+
         if (!proposal.isCounterpartyLocked()) {
             htlc.lockCounterparty(
                     counterpartyResource,
-                    selfResource.getCounterpartyAddress(),
                     hash,
                     (exception, result) -> {
                         if (exception != null) {
@@ -489,10 +550,12 @@ public class HTLCScheduler {
                                     if (exception1 != null) {
                                         callback.onReturn(exception1, false);
                                     } else {
-                                        logger.trace(
-                                                "lock counterparty successfully: {}, path: {}",
-                                                hash,
-                                                selfResource.getSelfPath());
+                                        if (logger.isDebugEnabled()) {
+                                            logger.trace(
+                                                    "lock counterparty successfully: {}, path: {}",
+                                                    hash,
+                                                    selfResource.getSelfPath());
+                                        }
                                         callback.onReturn(null, true);
                                     }
                                 });
@@ -507,6 +570,14 @@ public class HTLCScheduler {
             HTLCResource counterpartyResource,
             String hash,
             Callback callback) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "handleCounterpartyUnlock, selfPath: {},  counterpartyPath: {}, hash: {}",
+                    selfResource.getSelfPath(),
+                    counterpartyResource.getSelfPath(),
+                    hash);
+        }
+
         htlc.getCounterpartyHtlcAddress(
                 counterpartyResource.getSelfResource(),
                 counterpartyResource.getAccount1(),
@@ -531,7 +602,6 @@ public class HTLCScheduler {
 
                     htlc.unlockCounterparty(
                             counterpartyResource,
-                            selfResource.getCounterpartyAddress(),
                             hash,
                             proposal.getSecret(),
                             (exception1, result1) -> {
@@ -548,10 +618,12 @@ public class HTLCScheduler {
                                             if (exception2 != null) {
                                                 callback.onReturn(exception2, false);
                                             } else {
-                                                logger.trace(
-                                                        "unlock counterparty successfully: {}, path: {}",
-                                                        hash,
-                                                        selfResource.getSelfPath());
+                                                if (logger.isDebugEnabled()) {
+                                                    logger.trace(
+                                                            "unlock counterparty successfully: {}, path: {}",
+                                                            hash,
+                                                            selfResource.getSelfPath());
+                                                }
                                                 callback.onReturn(null, true);
                                             }
                                         });
@@ -561,6 +633,10 @@ public class HTLCScheduler {
 
     private void deleteProposal(
             HTLCResource htlcResource, String hash, boolean state, Callback callback) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("deleteProposal, path: {}, hash: {}", htlcResource.getSelfPath(), hash);
+        }
+
         htlc.deleteProposalID(
                 htlcResource,
                 hash,
@@ -572,12 +648,12 @@ public class HTLCScheduler {
 
                     if (state) {
                         logger.info(
-                                "current proposal succeeded: {}, path: {}",
+                                "Current proposal succeeded: {}, path: {}",
                                 hash,
                                 htlcResource.getSelfPath());
                     } else {
                         logger.info(
-                                "current proposal failed: {}, path: {}",
+                                "Current proposal failed: {}, path: {}",
                                 hash,
                                 htlcResource.getSelfPath());
                     }

@@ -38,8 +38,14 @@ public class HTLCResource extends Resource {
             new HashSet<String>() {
                 {
                     // TODO: optimize this, this method is not belongs to HTLC
-                    add("selectByName");
+                    // */
+                    // for performance test, remove before releasing
+                    add("newProposal");
+                    add("setNewProposalTxInfo");
+                    add("setSecret");
+                    // */
 
+                    add("selectByName");
                     add("lock");
                     add("unlock");
                     add("balanceOf");
@@ -139,7 +145,12 @@ public class HTLCResource extends Resource {
                                         return;
                                     }
 
-                                    logger.trace("Participant unlocks initiator successfully!");
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(
+                                                "Participant unlocks initiator successfully, request: {}",
+                                                request);
+                                    }
+
                                     htlc.setCounterpartyUnlockState(
                                             getSelfResource(),
                                             account1,
@@ -153,70 +164,86 @@ public class HTLCResource extends Resource {
     }
 
     private void unlockCounterparty(TransactionRequest request, Callback callback) {
-        logger.trace("Participant receives a unlock request, and unlocks initiator firstly!");
-
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "Participant receives a unlock request, and unlocks initiator firstly, request: {}",
+                    request);
+        }
         getCounterpartyResource()
                 .asyncSendTransaction(
                         request,
                         account2,
-                        new Resource.Callback() {
-                            @Override
-                            public void onTransactionResponse(
-                                    TransactionException transactionException,
-                                    TransactionResponse transactionResponse) {
-                                if (transactionException != null
-                                        && !transactionException.isSuccess()) {
-                                    callback.onReturn(
-                                            new WeCrossException(
-                                                    HTLCErrorCode.UNLOCK_ERROR,
-                                                    "participant failed to unlock initiator"));
-                                    logger.error(
-                                            "UNLOCK_INITIATOR_ERROR: {}, {}",
-                                            transactionException.getErrorCode(),
-                                            transactionException.getMessage());
-                                    return;
-                                }
-
-                                if (transactionResponse.getErrorCode() != 0) {
-                                    callback.onReturn(
-                                            new WeCrossException(
-                                                    HTLCErrorCode.UNLOCK_ERROR,
-                                                    "participant failed to unlock initiator"));
-                                    logger.error(
-                                            "UNLOCK_INITIATOR_ERROR: {}, {}",
-                                            transactionResponse.getErrorCode(),
-                                            transactionResponse.getErrorMessage());
-                                    return;
-                                }
-
-                                try {
-                                    verifyUnlock(transactionResponse, request.getArgs());
-                                } catch (WeCrossException e) {
-                                    callback.onReturn(e);
-                                    return;
-                                }
-
-                                callback.onReturn(null);
+                        (transactionException, transactionResponse) -> {
+                            if (transactionException != null && !transactionException.isSuccess()) {
+                                callback.onReturn(
+                                        new WeCrossException(
+                                                HTLCErrorCode.UNLOCK_ERROR,
+                                                "participant failed to unlock initiator"));
+                                logger.error(
+                                        "UNLOCK_INITIATOR_ERROR: {}, {}",
+                                        transactionException.getErrorCode(),
+                                        transactionException.getMessage());
+                                return;
                             }
+
+                            if (transactionResponse.getErrorCode() != 0) {
+                                callback.onReturn(
+                                        new WeCrossException(
+                                                HTLCErrorCode.UNLOCK_ERROR,
+                                                "participant failed to unlock initiator"));
+                                logger.error(
+                                        "UNLOCK_INITIATOR_ERROR: {}, {}",
+                                        transactionResponse.getErrorCode(),
+                                        transactionResponse.getErrorMessage());
+                                return;
+                            }
+
+                            verifyUnlock(
+                                    transactionResponse,
+                                    request.getArgs(),
+                                    (exception, result) -> {
+                                        if (exception != null || !result) {
+                                            callback.onReturn(
+                                                    new WeCrossException(
+                                                            ErrorCode.HTLC_ERROR,
+                                                            "participant failed to verify unlock"));
+                                        } else {
+                                            callback.onReturn(null);
+                                        }
+                                    });
                         });
     }
 
-    private void verifyUnlock(TransactionResponse transactionResponse, String[] args)
-            throws WeCrossException {
+    interface VerifyUnlockCallback {
+        void onReturn(WeCrossException exception, boolean result);
+    }
+
+    private void verifyUnlock(
+            TransactionResponse transactionResponse, String[] args, VerifyUnlockCallback callback) {
         HTLC htlc = new AssetHTLC();
 
         VerifyData verifyData =
                 new VerifyData(
                         transactionResponse.getBlockNumber(),
                         transactionResponse.getHash(),
-                        counterpartyAddress,
                         RoutineDefault.UNLOCK_METHOD,
                         args,
                         new String[] {RoutineDefault.SUCCESS_FLAG});
 
-        if (!htlc.verifyHtlcTransaction(getCounterpartyResource(), verifyData)) {
-            throw new WeCrossException(ErrorCode.HTLC_ERROR, "participant failed to verify unlock");
-        }
+        htlc.verifyHtlcTransaction(
+                getCounterpartyResource(),
+                verifyData,
+                (exception, result) -> {
+                    if (exception != null) {
+                        logger.error("failed to verify unlock,", exception);
+                        callback.onReturn(
+                                new WeCrossException(
+                                        ErrorCode.HTLC_ERROR, exception.getInternalMessage()),
+                                false);
+                    } else {
+                        callback.onReturn(null, result);
+                    }
+                });
     }
 
     @Override
@@ -236,7 +263,9 @@ public class HTLCResource extends Resource {
         Response response = new Response();
         Driver driver = getDriver();
         if (driver.isTransaction(request)) {
-            logger.trace("onRemoteTransaction, request: {}", request);
+            if (logger.isDebugEnabled()) {
+                logger.debug("onRemoteTransaction, request: {}", request);
+            }
 
             TransactionContext<TransactionRequest> context =
                     driver.decodeTransactionRequest(request.getData());
@@ -244,13 +273,18 @@ public class HTLCResource extends Resource {
             if (context == null) {
                 response.setErrorCode(ErrorCode.DECODE_TRANSACTION_REQUEST_ERROR);
                 response.setErrorMessage("decode transaction request failed");
-                logger.trace("onRemoteTransaction, response: {}", response);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("onRemoteTransaction, response: {}", response);
+                }
+
                 callback.onResponse(response);
                 return;
             }
 
             TransactionRequest transactionRequest = context.getData();
-            logger.trace("onRemoteTransaction, transactionRequest: {}", transactionRequest);
+            if (logger.isDebugEnabled()) {
+                logger.debug("onRemoteTransaction, transactionRequest: {}", transactionRequest);
+            }
 
             String method = transactionRequest.getMethod();
             if (RoutineDefault.UNLOCK_METHOD.equals(method)) {
@@ -259,18 +293,22 @@ public class HTLCResource extends Resource {
                         exception -> {
                             if (exception != null) {
                                 Response response1 = new Response();
-                                response1.setErrorCode(exception.getErrorCode());
+                                response1.setErrorCode(ErrorCode.HTLC_ERROR);
                                 response1.setErrorMessage(exception.getMessage());
-                                logger.trace("onRemoteTransaction, response: {}", response1);
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug("onRemoteTransaction, response: {}", response1);
+                                }
                                 callback.onResponse(response1);
                             } else {
                                 getSelfResource()
                                         .onRemoteTransaction(
                                                 request,
                                                 response1 -> {
-                                                    logger.trace(
-                                                            "onRemoteTransaction, response: {}",
-                                                            response1);
+                                                    if (logger.isDebugEnabled()) {
+                                                        logger.debug(
+                                                                "onRemoteTransaction, response: {}",
+                                                                response1);
+                                                    }
                                                     callback.onResponse(response1);
                                                 });
                             }
@@ -280,9 +318,12 @@ public class HTLCResource extends Resource {
 
             if (!P2P_ACCESS_WHITE_LIST.contains(method)) {
                 response = new Response();
-                response.setErrorCode(HTLCErrorCode.NO_PERMISSION);
+                response.setErrorCode(ErrorCode.HTLC_ERROR);
                 response.setErrorMessage("HTLCResource doesn't allow peers to call " + method);
-                logger.trace("onRemoteTransaction, response: {}", response);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("onRemoteTransaction, response: {}", response);
+                }
+
                 callback.onResponse(response);
                 return;
             }
@@ -292,17 +333,20 @@ public class HTLCResource extends Resource {
                 .onRemoteTransaction(
                         request,
                         response2 -> {
-                            logger.trace("onRemoteTransaction, response: {}", response2);
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("onRemoteTransaction, response: {}", response2);
+                            }
+
                             callback.onResponse(response2);
                         });
     }
 
     public Resource getSelfResource() {
-        return zoneManager.getResource(selfPath);
+        return zoneManager.fetchResource(selfPath);
     }
 
     public Resource getCounterpartyResource() {
-        return zoneManager.getResource(counterpartyPath);
+        return zoneManager.fetchResource(counterpartyPath);
     }
 
     public ZoneManager getZoneManager() {
@@ -354,6 +398,11 @@ public class HTLCResource extends Resource {
     }
 
     @Override
+    public Path getPath() {
+        return selfPath;
+    }
+
+    @Override
     public void addConnection(Peer peer, Connection connection) {
         getSelfResource().addConnection(peer, connection);
     }
@@ -379,13 +428,13 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public String getType() {
-        return getSelfResource().getType();
+    public String getStubType() {
+        return getSelfResource().getStubType();
     }
 
     @Override
-    public void setType(String type) {
-        getSelfResource().setType(type);
+    public void setStubType(String type) {
+        getSelfResource().setStubType(type);
     }
 
     @Override

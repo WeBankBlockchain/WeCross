@@ -12,6 +12,8 @@ public class WeCrossException extends java.lang.Exception {
         public static final int ILLEGAL_SYMBOL = 103;
         public static final int DIR_NOT_EXISTS = 104;
         public static final int REPEATED_KEY = 105;
+        public static final int INVALID_ACCOUNT = 106;
+        public static final int GET_CHAIN_CHECKSUM_ERROR = 107;
 
         // exception in http
         public static final int VERSION_ERROR = 201;
@@ -19,7 +21,7 @@ public class WeCrossException extends java.lang.Exception {
         public static final int RESOURCE_ERROR = 203;
         public static final int METHOD_ERROR = 204;
         public static final int DECODE_TRANSACTION_REQUEST_ERROR = 205;
-        public static final int UNSUPPORTED_TYPE = 206;
+        public static final int ACCOUNT_ERROR = 206;
 
         // other
         public static final int HTLC_ERROR = 301;

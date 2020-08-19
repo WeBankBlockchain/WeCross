@@ -3,7 +3,7 @@ set -e
 
 LANG=en_US.utf8
 
-default_compatibility_version=v1.0.0-rc3 # update this every release
+default_compatibility_version=v1.0.0-rc4 # update this every release
 
 compatibility_version=
 enable_build_from_resource=0
@@ -67,7 +67,7 @@ done
 download_wecross_console_pkg()
 {
     local github_url=https://github.com/WeBankFinTech/WeCross-Console/releases/download/
-    local cdn_url=https://www.fisco.com.cn/cdn/wecross-console/releases/download/
+    local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross-Console/
     local release_pkg=WeCross-Console.tar.gz
     local release_pkg_checksum_file=WeCross-Console.tar.gz.md5
 
@@ -112,7 +112,7 @@ download_release_pkg()
     fi
 
     # download 
-    if [ -f "${release_pkg}" ] && [ "$(md5sum -c ${release_pkg_checksum_file}|echo $?)" -eq "0" ];then
+    if [ -f "${release_pkg}" ] && md5sum -c ${release_pkg_checksum_file}; then
         LOG_INFO "Latest release ${release_pkg} exists."
     else
         LOG_INFO "Try to download from: ${cdn_url}/${compatibility_version}/${release_pkg}"
@@ -122,7 +122,7 @@ download_release_pkg()
             curl -C - -LO ${github_url}/${compatibility_version}/${release_pkg}
         fi
 
-        if [ "$(md5sum -c ${release_pkg_checksum_file}|echo $?)" -ne "0" ]; then
+        if ! md5sum -c ${release_pkg_checksum_file}; then
             LOG_ERROR "Download package error"
             rm -f ${release_pkg}
             exit 1

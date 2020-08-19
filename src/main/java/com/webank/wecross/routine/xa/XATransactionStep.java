@@ -4,7 +4,7 @@ public class XATransactionStep {
     private int seq;
     private String contract;
     private String path;
-    private int timestamp;
+    private String timestamp;
     private String func;
     private String args;
 
@@ -32,11 +32,11 @@ public class XATransactionStep {
         this.path = path;
     }
 
-    public int getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(int timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -54,5 +54,28 @@ public class XATransactionStep {
 
     public void setArgs(String args) {
         this.args = args;
+    }
+
+    @Override
+    public String toString() {
+        return "XATransactionStep{"
+                + "seq="
+                + seq
+                + ", contract='"
+                + contract
+                + '\''
+                + ", path='"
+                + path
+                + '\''
+                + ", timestamp='"
+                + timestamp
+                + '\''
+                + ", func='"
+                + func
+                + '\''
+                + ", args='"
+                + args
+                + '\''
+                + '}';
     }
 }

@@ -69,12 +69,16 @@ public class AccountManagerConfig {
                     if (type == null) {
                         logger.error(
                                 "Could not load account type. path: {}", accountConfig.getURI());
-                        continue;
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.INVALID_ACCOUNT,
+                                "Could not load account type. path: " + accountConfig.getURI());
                     }
 
                     if (!stubManager.hasFactory(type)) {
                         logger.error("Stub plugin[" + type + "] not found!");
-                        continue;
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.INVALID_ACCOUNT,
+                                "Stub plugin[" + type + "] not found!");
                     }
 
                     Account account =
@@ -89,7 +93,9 @@ public class AccountManagerConfig {
                                 accountConfig.getURI(),
                                 resource.getFile().getName(),
                                 type);
-                        continue;
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.INVALID_ACCOUNT,
+                                "Invalid account configure: " + accountConfig.getURI());
                     }
                     accountManager.addAccount(resource.getFile().getName(), account);
                 }

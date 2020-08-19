@@ -1,15 +1,14 @@
 package com.webank.wecross.routine.xa;
 
-import com.webank.wecross.stub.Path;
 import java.util.List;
 
 public class XATransactionInfo {
     private String transactionID;
     private int status;
-    private int startTimestamp;
-    private int commitTimestamp;
-    private int rollbackTimestamp;
-    private List<Path> paths;
+    private String startTimestamp;
+    private String commitTimestamp;
+    private String rollbackTimestamp;
+    private List<String> allPaths;
     private List<XATransactionStep> transactionSteps;
 
     public String getTransactionID() {
@@ -28,36 +27,36 @@ public class XATransactionInfo {
         this.status = status;
     }
 
-    public int getStartTimestamp() {
+    public String getStartTimestamp() {
         return startTimestamp;
     }
 
-    public void setStartTimestamp(int startTimestamp) {
+    public void setStartTimestamp(String startTimestamp) {
         this.startTimestamp = startTimestamp;
     }
 
-    public int getCommitTimestamp() {
+    public String getCommitTimestamp() {
         return commitTimestamp;
     }
 
-    public void setCommitTimestamp(int commitTimestamp) {
+    public void setCommitTimestamp(String commitTimestamp) {
         this.commitTimestamp = commitTimestamp;
     }
 
-    public int getRollbackTimestamp() {
+    public String getRollbackTimestamp() {
         return rollbackTimestamp;
     }
 
-    public void setRollbackTimestamp(int rollbackTimestamp) {
+    public void setRollbackTimestamp(String rollbackTimestamp) {
         this.rollbackTimestamp = rollbackTimestamp;
     }
 
-    public List<Path> getPaths() {
-        return paths;
+    public List<String> getAllPaths() {
+        return allPaths;
     }
 
-    public void setPaths(List<Path> paths) {
-        this.paths = paths;
+    public void setAllPaths(List<String> allPaths) {
+        this.allPaths = allPaths;
     }
 
     public List<XATransactionStep> getTransactionSteps() {
@@ -66,5 +65,26 @@ public class XATransactionInfo {
 
     public void setTransactionSteps(List<XATransactionStep> transactionSteps) {
         this.transactionSteps = transactionSteps;
+    }
+
+    @Override
+    public String toString() {
+        return "XATransactionInfo{"
+                + "transactionID='"
+                + transactionID
+                + '\''
+                + ", status="
+                + status
+                + ", startTimestamp="
+                + startTimestamp
+                + ", commitTimestamp="
+                + commitTimestamp
+                + ", rollbackTimestamp="
+                + rollbackTimestamp
+                + ", paths="
+                + allPaths
+                + ", transactionSteps="
+                + transactionSteps
+                + '}';
     }
 }

@@ -7,6 +7,7 @@ import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.network.rpc.CustomCommandRequest;
+import com.webank.wecross.network.rpc.RequestUtils;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceDetail;
 import com.webank.wecross.restserver.RestRequest;
@@ -18,6 +19,9 @@ import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.Chain;
+import com.webank.wecross.zone.Zone;
+import com.webank.wecross.zone.ZoneManager;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,12 +115,6 @@ public class ResourceURIHandler implements URIHandler {
                     }
                 case "sendtransaction":
                     {
-                        Resource resourceObj = getResource(path);
-                        if (resourceObj == null) {
-                            throw new WeCrossException(
-                                    WeCrossException.ErrorCode.RESOURCE_ERROR,
-                                    "Resource not found");
-                        }
                         RestRequest<TransactionRequest> restRequest =
                                 objectMapper.readValue(
                                         content,
@@ -127,6 +125,9 @@ public class ResourceURIHandler implements URIHandler {
                         TransactionRequest transactionRequest = restRequest.getData();
                         String accountName = restRequest.getAccount();
                         Account account = accountManager.getAccount(accountName);
+                        Resource resourceObj = getResource(path);
+                        RequestUtils.checkAccountAndResource(account, resourceObj);
+
                         logger.trace(
                                 "sendTransaction request: {}, account: {}",
                                 transactionRequest,
@@ -166,13 +167,6 @@ public class ResourceURIHandler implements URIHandler {
                     }
                 case "call":
                     {
-                        Resource resourceObj = getResource(path);
-                        if (resourceObj == null) {
-                            throw new WeCrossException(
-                                    WeCrossException.ErrorCode.RESOURCE_ERROR,
-                                    "Resource not found");
-                        }
-
                         RestRequest<TransactionRequest> restRequest =
                                 objectMapper.readValue(
                                         content,
@@ -184,6 +178,9 @@ public class ResourceURIHandler implements URIHandler {
 
                         String accountName = restRequest.getAccount();
                         Account account = accountManager.getAccount(accountName);
+                        Resource resourceObj = getResource(path);
+                        RequestUtils.checkAccountAndResource(account, resourceObj);
+
                         logger.trace(
                                 "call request: {}, account: {}", transactionRequest, accountName);
 
@@ -222,10 +219,34 @@ public class ResourceURIHandler implements URIHandler {
                     }
                 case "customcommand":
                     {
-                        Chain chain =
-                                host.getZoneManager()
-                                        .getZone(path.getZone())
-                                        .getChain(path.getChain());
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("zone: {}, chain: {}", path.getZone(), path.getChain());
+                        }
+
+                        ZoneManager zoneManager = host.getZoneManager();
+                        Zone zone = zoneManager.getZone(path.getZone());
+                        if (Objects.isNull(zone)) {
+                            throw new WeCrossException(
+                                    WeCrossException.ErrorCode.INTERNAL_ERROR,
+                                    " zone not exist, zone: " + path.getZone());
+                        }
+
+                        Chain chain = zone.getChain(path.getChain());
+                        if (Objects.isNull(chain)) {
+                            throw new WeCrossException(
+                                    WeCrossException.ErrorCode.INTERNAL_ERROR,
+                                    " chain not exist, chain: " + path.getChain());
+                        }
+
+                        if (chain == null) {
+                            throw new WeCrossException(
+                                    -1,
+                                    "Chain: "
+                                            + path.getZone()
+                                            + "."
+                                            + path.getChain()
+                                            + " not found!");
+                        }
 
                         RestRequest<CustomCommandRequest> restRequest =
                                 objectMapper.readValue(
@@ -234,6 +255,20 @@ public class ResourceURIHandler implements URIHandler {
 
                         String accountName = restRequest.getAccount();
                         Account account = accountManager.getAccount(accountName);
+                        if (Objects.isNull(account)) {
+                            throw new WeCrossException(
+                                    WeCrossException.ErrorCode.ACCOUNT_ERROR, "Account not found");
+                        }
+
+                        if (!account.getType().equals(chain.getStubType())) {
+                            throw new WeCrossException(
+                                    WeCrossException.ErrorCode.ACCOUNT_ERROR,
+                                    "Account type '"
+                                            + account.getType()
+                                            + "' does not match the stub type '"
+                                            + chain.getStubType()
+                                            + "'");
+                        }
 
                         chain.getDriver()
                                 .asyncCustomCommand(
@@ -244,7 +279,13 @@ public class ResourceURIHandler implements URIHandler {
                                         chain.getBlockHeaderManager(),
                                         chain.chooseConnection(),
                                         (e, response) -> {
-                                            restResponse.setData(response);
+                                            if (Objects.nonNull(e)) {
+                                                restResponse.setErrorCode(
+                                                        NetworkQueryStatus.INTERNAL_ERROR);
+                                                restResponse.setMessage(e.getMessage());
+                                            } else {
+                                                restResponse.setData(response);
+                                            }
 
                                             callback.onResponse(restResponse);
                                         });

@@ -145,24 +145,31 @@ public class P2PProcessor implements NetworkProcessor {
                                                         int newSeq = data.getSeq();
                                                         if (peerManager.hasPeerChanged(
                                                                 peerInfo.getNode(), newSeq)) {
+
                                                             // compare and update
                                                             Map<String, ChainInfo> newChains =
                                                                     data.getChainInfos();
-                                                            logger.debug(
-                                                                    "Update peerInfo from {}, seq:{}, resource:{}",
-                                                                    peerInfo,
-                                                                    newSeq,
-                                                                    newChains);
 
                                                             // update zonemanager
-                                                            zoneManager.removeRemoteChains(
-                                                                    peerInfo,
-                                                                    peerInfo.getChainInfos(),
-                                                                    false);
-                                                            zoneManager.addRemoteChains(
-                                                                    peerInfo, newChains);
-                                                            peerInfo.setChainInfos(
-                                                                    newSeq, newChains);
+                                                            boolean changed = false;
+                                                            changed |=
+                                                                    zoneManager.removeRemoteChains(
+                                                                            peerInfo,
+                                                                            peerInfo
+                                                                                    .getChainInfos(),
+                                                                            false);
+                                                            changed |=
+                                                                    zoneManager.addRemoteChains(
+                                                                            peerInfo, newChains);
+                                                            if (changed) {
+                                                                logger.debug(
+                                                                        "Update peerInfo from {}, seq:{}, resource:{}",
+                                                                        peerInfo,
+                                                                        newSeq,
+                                                                        newChains);
+                                                                peerInfo.setChainInfos(
+                                                                        newSeq, newChains);
+                                                            }
                                                         } else {
                                                             logger.debug(
                                                                     "Peer info not changed, seq:{}",

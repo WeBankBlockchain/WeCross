@@ -58,11 +58,6 @@ public class Peer {
     }
 
     @Override
-    public String toString() {
-        return this.node.toString();
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Peer)) return false;
@@ -73,5 +68,10 @@ public class Peer {
     @Override
     public int hashCode() {
         return Objects.hash(getNode());
+    }
+
+    @Override
+    public String toString() {
+        return "Peer{" + "node=" + node + ", seq=" + seq + '}';
     }
 }

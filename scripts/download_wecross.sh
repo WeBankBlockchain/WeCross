@@ -6,7 +6,7 @@ LANG=en_US.utf8
 enable_build_from_resource=0
 compatibility_version=
 
-default_compatibility_version=v1.0.0-rc3 # update this every release
+default_compatibility_version=v1.0.0-rc4 # update this every release
 deps_dir=$(pwd)'/WeCross/plugin/'
 src_dir=$(pwd)'/src/'
 
@@ -75,29 +75,10 @@ done
 
 }
 
-parallel_download()
-{
-    #parallel_download WeCross.tar.bz2.md5 https://github.com/WeBankFinTech/WeCross/releases/download/${compatibility_version}
-    md5_file_list=${1}
-    prefix=${2}
-    # shellcheck disable=SC2162
-    
-    while read line;do
-        local part=$(echo ${line}|awk '{print $2}')
-        curl -s -C - -LO ${prefix}/${part} &
-    done < "${md5_file_list}"   
-    wait
-    
-    if [ ! -z "$(md5sum -c ${md5_file_list}|grep FAILED)" ];then
-        LOG_ERROR "Download WeCross package failed! URL: ${prefix}"
-        exit 1
-    fi
-}
-
 download_wecross_pkg()
 {
     local github_url=https://github.com/WeBankFinTech/WeCross/releases/download/
-    local cdn_url=https://www.fisco.com.cn/cdn/wecross/releases/download/
+    local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross/
     local release_pkg=WeCross.tar.gz
     local release_pkg_checksum_file=WeCross.tar.gz.md5
 
@@ -142,7 +123,7 @@ download_release_pkg()
     fi
 
     # download 
-    if [ -f "${release_pkg}" ] && [ "$(md5sum -c ${release_pkg_checksum_file}|echo $?)" -eq "0" ];then
+    if [ -f "${release_pkg}" ] && md5sum -c ${release_pkg_checksum_file}; then
         LOG_INFO "Latest release ${release_pkg} exists."
     else
         LOG_INFO "Try to download from: ${cdn_url}/${compatibility_version}/${release_pkg}"
@@ -152,7 +133,7 @@ download_release_pkg()
             curl -C - -LO ${github_url}/${compatibility_version}/${release_pkg}
         fi
 
-        if [ "$(md5sum -c ${release_pkg_checksum_file}|echo $?)" -ne "0" ]; then
+        if ! md5sum -c ${release_pkg_checksum_file}; then
             LOG_ERROR "Download package error"
             rm -f ${release_pkg}
             exit 1

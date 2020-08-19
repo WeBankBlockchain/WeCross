@@ -18,7 +18,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
@@ -32,31 +31,29 @@ public class Chain {
     private String name;
     private String stubType;
     private Map<String, String> properties;
+    private String checksum;
 
     private Connection localConnection;
     private Set<Peer> peers = new HashSet<>();
     private Map<String, Resource> resources = new HashMap<String, Resource>();
     private Driver driver;
     private BlockHeaderManager blockHeaderManager;
-    private AtomicBoolean running = new AtomicBoolean(false);
     private Random random = new SecureRandom();
     private ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    public Chain(
-            String zoneName,
-            String name,
-            String stubType,
-            Driver driver,
-            Connection localConnection) {
+    public Chain(String zoneName, ChainInfo chainInfo, Driver driver, Connection localConnection) {
 
         this.zoneName = zoneName;
-        this.name = name;
-        this.stubType = stubType;
+        this.name = chainInfo.getName();
+        this.stubType = chainInfo.getStubType();
+        this.checksum = chainInfo.getChecksum();
         this.driver = driver;
         this.localConnection = localConnection;
 
         if (localConnection != null) {
             this.properties = localConnection.getProperties();
+        } else {
+            this.properties = chainInfo.getProperties();
         }
     }
 
@@ -73,6 +70,7 @@ public class Chain {
         chainInfo.setName(name);
         chainInfo.setStubType(stubType);
         chainInfo.setProperties(properties);
+        chainInfo.setChecksum(checksum);
 
         List<ResourceInfo> resourceInfos = getAllResourcesInfo(true);
         chainInfo.setResources(resourceInfos);
@@ -85,6 +83,14 @@ public class Chain {
 
     public void setResources(Map<String, Resource> resources) {
         this.resources = resources;
+    }
+
+    public String getStubType() {
+        return stubType;
+    }
+
+    public void setStubType(String stubType) {
+        this.stubType = stubType;
     }
 
     public Driver getDriver() {
@@ -113,7 +119,7 @@ public class Chain {
                         public void onResponse(Exception e, long blockNumber) {
                             if (e != null) {
                                 logger.warn("getBlockNumber exception: " + e);
-                                future.complete(new Long(0));
+                                future.complete(Long.valueOf(0));
                             } else {
                                 future.complete(blockNumber);
                             }
@@ -293,7 +299,7 @@ public class Chain {
                 path.setChain(name);
                 path.setResource(newResourceName);
                 resource.setPath(path);
-                resource.setType(stubType);
+                resource.setStubType(stubType);
                 resource.setTemporary(false);
                 resource.setResourceInfo(newResourceInfo);
                 resource.setBlockHeaderManager(blockHeaderManager);
@@ -334,7 +340,7 @@ public class Chain {
             path.setChain(name);
             path.setResource(newName);
             resource.setPath(path);
-            resource.setType(stubType);
+            resource.setStubType(stubType);
             resource.setTemporary(false);
             resource.setResourceInfo(resourceInfo);
             resource.setBlockHeaderManager(blockHeaderManager);

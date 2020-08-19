@@ -1,15 +1,28 @@
 package com.webank.wecross.zone;
 
+import static com.webank.wecross.exception.WeCrossException.ErrorCode.GET_CHAIN_CHECKSUM_ERROR;
+
+import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.stub.Connection;
+import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.ResourceInfo;
+import com.webank.wecross.utils.Sha256Utils;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ChainInfo {
+    private static Logger logger = LoggerFactory.getLogger(ChainInfo.class);
     private String name;
     private String stubType;
     private List<ResourceInfo> resources = new LinkedList<>();
     private Map<String, String> properties;
+    private String checksum;
 
     public String getName() {
         return name;
@@ -41,5 +54,68 @@ public class ChainInfo {
 
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
+    }
+
+    public String getChecksum() {
+        return checksum;
+    }
+
+    public void setChecksum(String checksum) {
+        this.checksum = checksum;
+    }
+
+    public static String buildChecksum(Driver driver, Connection connection)
+            throws WeCrossException {
+        CompletableFuture<byte[]> gnensisblockHeaderFuture = new CompletableFuture<>();
+        driver.asyncGetBlockHeader(
+                0,
+                connection,
+                new Driver.GetBlockHeaderCallback() {
+                    @Override
+                    public void onResponse(Exception e, byte[] blockHeader) {
+                        if (!Objects.isNull(e)) {
+                            logger.error(
+                                    "Could not get genesisBlock from connection: {}",
+                                    connection.getProperties());
+                            gnensisblockHeaderFuture.complete(null);
+                        } else {
+                            gnensisblockHeaderFuture.complete(blockHeader);
+                        }
+                    }
+                });
+
+        byte[] genesisBlockHeader;
+        try {
+            genesisBlockHeader = gnensisblockHeaderFuture.get(20, TimeUnit.SECONDS);
+            if (genesisBlockHeader == null) {
+                String errorMessage =
+                        "Could not get genesisBlock from connection: " + connection.getProperties();
+                logger.error(errorMessage);
+                throw new Exception(errorMessage);
+            }
+        } catch (Exception e) {
+            throw new WeCrossException(GET_CHAIN_CHECKSUM_ERROR, e.getMessage(), e.getCause());
+        }
+        String checksum = Sha256Utils.sha256String(genesisBlockHeader);
+        return checksum;
+    }
+
+    @Override
+    public String toString() {
+        return "ChainInfo{"
+                + "name='"
+                + name
+                + '\''
+                + ", stubType='"
+                + stubType
+                + '\''
+                + ", resources="
+                + resources
+                + ", properties="
+                + properties
+                + ", checksum='"
+                + checksum
+                + '\''
+                + '}';
     }
 }

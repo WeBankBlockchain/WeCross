@@ -5,7 +5,7 @@ set -e
 LANG=en_US.utf8
 ROOT=$(cd "$(dirname "$0")";pwd)
 WECROSS_ROOT=${ROOT}/../
-BCOS_VERSION=v2.5.0
+BCOS_VERSION=v2.6.0
 BCOS_CONSOLE_VERSION=v1.0.10
 
 LOG_INFO()
@@ -41,16 +41,20 @@ prepare_bcos()
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos.tar.gz
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos-macOS.tar.gz
 
-    LOG_INFO "Download HelloWeCross.sol ..."
-    cp ${WECROSS_ROOT}/src/main/resources/chains-sample/bcos/HelloWeCross.sol ./
+    LOG_INFO "Download tassl requirements"
+    Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl.tar.gz
+    Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl_mac.tar.gz
 
-    LOG_INFO "Download FISCO-BCOS console"
-    Download https://github.com/FISCO-BCOS/console/releases/download/${BCOS_CONSOLE_VERSION}/console.tar.gz
+    # LOG_INFO "Download HelloWeCross.sol ..."
+    # cp ${WECROSS_ROOT}/src/main/resources/chains-sample/bcos/HelloWeCross.sol ./
 
-    LOG_INFO "Download ledger-tool ..."
-    git clone --depth 1 https://github.com/Shareong/ledger-tool.git
-    tar -zcf ledger-tool.tar.gz ledger-tool
-    rm -rf ledger-tool
+    # LOG_INFO "Download FISCO-BCOS console"
+    # Download https://github.com/FISCO-BCOS/console/releases/download/${BCOS_CONSOLE_VERSION}/console.tar.gz
+
+    # LOG_INFO "Download ledger-tool ..."
+    # git clone --depth 1 https://github.com/Shareong/ledger-tool.git
+    # tar -zcf ledger-tool.tar.gz ledger-tool
+    # rm -rf ledger-tool
 
     cd -
 }
@@ -79,10 +83,14 @@ prepare_wecross()
 
 main()
 {
+    if [ -n "$1" ]; then
+        WECROSS_ROOT=$1/
+    fi
+
     prepare_bcos
     prepare_fabric
     prepare_wecross
 }
 
-main
+main $@
 

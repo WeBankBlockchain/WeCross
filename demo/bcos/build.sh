@@ -30,9 +30,6 @@ build_bcos_chain()
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/raw/master/tools/build_chain.sh
     chmod u+x build_chain.sh
 
-    LOG_INFO "Download HelloWeCross.sol ..."
-    Download https://github.com/WeBankFinTech/WeCross/releases/download/resources/HelloWeCross.sol
-
     # Build chain
     LOG_INFO "Build chain ..."
     if [ ! -e ipconf ];then
@@ -67,6 +64,9 @@ build_bcos_chain()
 build_console()
 {
     # Download console
+    LOG_INFO "Download HelloWeCross.sol ..."
+    Download https://github.com/WeBankFinTech/WeCross/releases/download/resources/HelloWeCross.sol
+
     LOG_INFO "Download console ..."
     if [ -e console.tar.gz ]; then
         rm -rf console
@@ -97,8 +97,7 @@ EOF
 main()
 {
     build_bcos_chain
-    build_console
-    deploy_contract
+    LOG_INFO "SUCCESS: Build FISCO BCOS demo finish."
 }
 
 main
