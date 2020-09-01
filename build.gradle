@@ -24,7 +24,7 @@ repositories {
 }
 
 sourceCompatibility = '1.8'
-version = '1.0.0-rc4'
+version = '1.0.0-rc5-09010-SNAPSHOT'
 
 task stubSourceJar(type: Jar) {
     into 'com/webank/wecross/stub', { from 'src/main/java/com/webank/wecross/stub' }
@@ -41,6 +41,17 @@ task javadocJar(type: Jar) {
     // from javadoc
     classifier = 'javadoc'
 }
+
+ext {
+    if (!project.hasProperty("NEXUS_USERNAME")) {
+        NEXUS_USERNAME="xxx"
+    }
+
+    if (!project.hasProperty("NEXUS_PASSWORD")) {
+        NEXUS_PASSWORD="xxx"
+    }
+}
+
 
 publishing {
     publications {
@@ -81,22 +92,17 @@ publishing {
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-            
-            //*
-            def NEXUS_USERNAME = ''
-            def NEXUS_PASSWORD = ''
-            //*/
+
             credentials {
                 username = NEXUS_USERNAME
                 password = NEXUS_PASSWORD
             }
-
         }
     }
-}
 
-signing {
-    sign publishing.publications.mavenJava
+    signing {
+        sign publishing.publications.mavenJava
+    }
 }
 
 
