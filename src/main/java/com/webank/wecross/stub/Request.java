@@ -1,5 +1,6 @@
 package com.webank.wecross.stub;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 public class Request {
@@ -53,5 +54,30 @@ public class Request {
                 + ", resourceInfo="
                 + resourceInfo
                 + '}';
+    }
+
+    /**
+     * construct Request object
+     *
+     * @param type
+     * @param content
+     * @return
+     */
+    public static Request newRequest(int type, String content) {
+        return newRequest(type, content.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * construct Request object
+     *
+     * @param type
+     * @param content
+     * @return
+     */
+    public static Request newRequest(int type, byte[] content) {
+        Request request = new Request();
+        request.setType(type);
+        request.setData(content);
+        return request;
     }
 }

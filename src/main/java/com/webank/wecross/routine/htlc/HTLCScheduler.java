@@ -3,7 +3,7 @@ package com.webank.wecross.routine.htlc;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.routine.RoutineDefault;
-import com.webank.wecross.stub.VerifiedTransaction;
+import com.webank.wecross.stub.Transaction;
 import java.math.BigInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -414,7 +414,7 @@ public class HTLCScheduler {
     }
 
     private interface GetVerifiedTransactionCallback {
-        void onReturn(WeCrossException exception, VerifiedTransaction result);
+        void onReturn(WeCrossException exception, Transaction result);
     }
 
     private void getVerifiedTransaction(
@@ -428,8 +428,8 @@ public class HTLCScheduler {
 
         htlcResource
                 .getDriver()
-                .asyncGetVerifiedTransaction(
-                        htlcResource.getSelfPath(),
+                .asyncGetTransaction(
+                        // htlcResource.getSelfPath(),
                         txHash,
                         blockNum,
                         htlcResource.getBlockHeaderManager(),

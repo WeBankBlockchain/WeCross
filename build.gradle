@@ -18,12 +18,11 @@ repositories {
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url 'https://dl.bintray.com/ethereum/maven/' }
+    maven { url "https://maven.aliyun.com/nexus/content/groups/public/" }
 }
 
 sourceCompatibility = '1.8'
 version = '1.0.0-rc4'
-
 
 task stubSourceJar(type: Jar) {
     into 'com/webank/wecross/stub', { from 'src/main/java/com/webank/wecross/stub' }
@@ -120,6 +119,7 @@ configurations.all {
 dependencies {
     compile 'org.quartz-scheduler:quartz:2.3.2'
     compile 'com.moandjiezana.toml:toml4j:0.7.2'
+    compile 'org.apache.commons:commons-lang3:3.11'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.11.0' // must not lower than 2.11.0 to support abi translate
     compile 'org.springframework.boot:spring-boot-starter-log4j2:2.1.13.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-actuator:2.1.13.RELEASE'

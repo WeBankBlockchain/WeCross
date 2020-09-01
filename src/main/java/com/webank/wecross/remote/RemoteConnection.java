@@ -9,10 +9,8 @@ import com.webank.wecross.peer.Peer;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Request;
-import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.stub.StubQueryStatus;
-import java.util.List;
 import java.util.Map;
 
 public class RemoteConnection implements Connection {
@@ -21,32 +19,6 @@ public class RemoteConnection implements Connection {
     private P2PService p2PService;
     private Map<String, String> properties;
     private ConnectionEventHandler eventHandler;
-
-    @Override
-    public Response send(Request request) {
-        try {
-            NetworkMessage<Request> networkMessage = new NetworkMessage<Request>();
-            networkMessage.setVersion(Versions.currentVersion);
-            networkMessage.setMethod(path.replace(".", "/") + "/transaction");
-            networkMessage.newSeq();
-
-            request.setResourceInfo(null); // will be set in dest router, left null here
-            networkMessage.setData(request);
-
-            RemoteConnectionSemaphoreCallback callback = new RemoteConnectionSemaphoreCallback();
-
-            p2PService.asyncSendMessage(peer, networkMessage, callback);
-
-            return callback.getResponseData();
-
-        } catch (Exception e) {
-            Response response = new Response();
-            response.setErrorCode(StubQueryStatus.REMOTE_QUERY_FAILED);
-            response.setErrorMessage(
-                    "Send remote connection exception: " + e.getLocalizedMessage());
-            return response;
-        }
-    }
 
     @Override
     public void asyncSend(Request request, Connection.Callback callback) {
@@ -97,16 +69,6 @@ public class RemoteConnection implements Connection {
                     "Async send remote connection exception: " + e.getLocalizedMessage());
             callback.onResponse(response);
         }
-    }
-
-    @Override
-    public List<ResourceInfo> getResources() {
-        return null;
-    }
-
-    @Override
-    public Map<String, String> getProperties() {
-        return properties;
     }
 
     @Override

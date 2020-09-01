@@ -147,13 +147,13 @@ public class AssetHTLC implements HTLC {
         BlockHeaderManager blockHeaderManager = resource.getBlockHeaderManager();
         Connection connection = resource.chooseConnection();
         Driver driver = resource.getDriver();
-        driver.asyncGetVerifiedTransaction(
-                resource.getPath(),
+        driver.asyncGetTransaction(
+                // resource.getPath(),
                 txHash,
                 blockNumber,
                 blockHeaderManager,
                 connection,
-                (exception, verifiedTransaction) -> {
+                (exception, transaction) -> {
                     if (exception != null) {
                         logger.error("asyncGetVerifiedTransaction exception, ", exception);
                         callback.onReturn(
@@ -161,7 +161,7 @@ public class AssetHTLC implements HTLC {
                                         ErrorCode.HTLC_ERROR, "GET_VERIFIED_TRANSACTION_ERROR"),
                                 false);
                     } else {
-                        callback.onReturn(null, verifyData.verify(verifiedTransaction));
+                        callback.onReturn(null, verifyData.verify(transaction));
                     }
                 });
     }

@@ -1,31 +1,20 @@
 package com.webank.wecross.stub;
 
-public class TransactionContext<T> {
-    private T data;
+public class TransactionContext {
     private Account account;
     private Path path;
     private ResourceInfo resourceInfo;
     private BlockHeaderManager blockHeaderManager;
 
     public TransactionContext(
-            T data,
             Account account,
             Path path,
             ResourceInfo resourceInfo,
             BlockHeaderManager blockHeaderManager) {
-        this.data = data;
         this.account = account;
         this.path = path;
         this.resourceInfo = resourceInfo;
         this.blockHeaderManager = blockHeaderManager;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
     }
 
     public Account getAccount() {
@@ -55,9 +44,7 @@ public class TransactionContext<T> {
     @Override
     public String toString() {
         return "TransactionContext{"
-                + "data="
-                + data.toString()
-                + ", account="
+                + "account="
                 + account
                 + ", resourceInfo="
                 + resourceInfo.toString()

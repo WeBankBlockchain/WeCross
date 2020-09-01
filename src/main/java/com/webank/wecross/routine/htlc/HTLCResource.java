@@ -14,13 +14,13 @@ import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
-import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -247,30 +247,19 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public TransactionResponse call(TransactionRequest request, Account account)
-            throws TransactionException {
-        return getSelfResource().call(request, account);
-    }
-
-    @Override
-    public TransactionResponse sendTransaction(TransactionRequest request, Account account)
-            throws TransactionException {
-        return getSelfResource().sendTransaction(request, account);
-    }
-
-    @Override
     public void onRemoteTransaction(Request request, Connection.Callback callback) {
         Response response = new Response();
         Driver driver = getDriver();
-        if (driver.isTransaction(request)) {
+
+        ImmutablePair<Boolean, TransactionRequest> booleanTransactionRequestPair =
+                driver.decodeTransactionRequest(request);
+        if (booleanTransactionRequestPair.getKey()) {
             if (logger.isDebugEnabled()) {
                 logger.debug("onRemoteTransaction, request: {}", request);
             }
 
-            TransactionContext<TransactionRequest> context =
-                    driver.decodeTransactionRequest(request.getData());
-
-            if (context == null) {
+            TransactionRequest transactionRequest = booleanTransactionRequestPair.getValue();
+            if (transactionRequest == null) {
                 response.setErrorCode(ErrorCode.DECODE_TRANSACTION_REQUEST_ERROR);
                 response.setErrorMessage("decode transaction request failed");
                 if (logger.isDebugEnabled()) {
@@ -281,7 +270,6 @@ public class HTLCResource extends Resource {
                 return;
             }
 
-            TransactionRequest transactionRequest = context.getData();
             if (logger.isDebugEnabled()) {
                 logger.debug("onRemoteTransaction, transactionRequest: {}", transactionRequest);
             }
