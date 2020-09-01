@@ -3,6 +3,7 @@ package com.webank.wecross.zone;
 import static com.webank.wecross.exception.WeCrossException.ErrorCode.GET_CHAIN_CHECKSUM_ERROR;
 
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.stub.Block;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.ResourceInfo;
@@ -66,30 +67,32 @@ public class ChainInfo {
 
     public static String buildChecksum(Driver driver, Connection connection)
             throws WeCrossException {
-        CompletableFuture<byte[]> gnensisblockHeaderFuture = new CompletableFuture<>();
-        driver.asyncGetBlockHeader(
+        CompletableFuture<byte[]> genensisBlockHeaderFuture = new CompletableFuture<>();
+        driver.asyncGetBlock(
                 0,
+                true,
                 connection,
-                new Driver.GetBlockHeaderCallback() {
+                new Driver.GetBlockCallback() {
                     @Override
-                    public void onResponse(Exception e, byte[] blockHeader) {
+                    public void onResponse(Exception e, Block block) {
                         if (!Objects.isNull(e)) {
                             logger.error(
                                     "Could not get genesisBlock from connection: {}",
-                                    connection.getProperties());
-                            gnensisblockHeaderFuture.complete(null);
+                                    driver.getProperties(connection));
+                            genensisBlockHeaderFuture.complete(null);
                         } else {
-                            gnensisblockHeaderFuture.complete(blockHeader);
+                            genensisBlockHeaderFuture.complete(block.getRawBytes());
                         }
                     }
                 });
 
         byte[] genesisBlockHeader;
         try {
-            genesisBlockHeader = gnensisblockHeaderFuture.get(20, TimeUnit.SECONDS);
+            genesisBlockHeader = genensisBlockHeaderFuture.get(20, TimeUnit.SECONDS);
             if (genesisBlockHeader == null) {
                 String errorMessage =
-                        "Could not get genesisBlock from connection: " + connection.getProperties();
+                        "Could not get genesisBlock from connection: "
+                                + driver.getProperties(connection);
                 logger.error(errorMessage);
                 throw new Exception(errorMessage);
             }

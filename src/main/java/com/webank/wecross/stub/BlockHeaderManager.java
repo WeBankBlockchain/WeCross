@@ -12,7 +12,7 @@ public interface BlockHeaderManager {
     public void asyncGetBlockNumber(GetBlockNumberCallback callback);
 
     public interface GetBlockHeaderCallback {
-        void onResponse(Exception e, byte[] blockHeader);
+        void onResponse(Exception e, BlockHeader blockHeader);
     }
 
     void asyncGetBlockHeader(long blockNumber, BlockHeaderManager.GetBlockHeaderCallback callback);

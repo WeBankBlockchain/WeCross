@@ -1,5 +1,9 @@
 package com.webank.wecross.stub;
 
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 public interface Driver {
     interface Callback {
         void onTransactionResponse(
@@ -9,68 +13,42 @@ public interface Driver {
     /**
      * Decode an encoded transaction request binary data.
      *
-     * @param data the encoded transaction request binary data
+     * @param request the encoded transaction request binary data
      * @return TransactionRequest
      */
-    public TransactionContext<TransactionRequest> decodeTransactionRequest(byte[] data);
+    public ImmutablePair<Boolean, TransactionRequest> decodeTransactionRequest(Request request);
 
     /**
-     * Check if the request is transaction
+     * get resources name
      *
-     * @param request
-     * @return true if transaction
+     * @return resources
      */
-    public boolean isTransaction(Request request);
+    List<ResourceInfo> getResources(Connection connection);
 
     /**
-     * Decode an encoded block header binary data.
+     * get properties
      *
-     * @param data the encoded block header
-     * @return BlockHeader
+     * @return Map<String , String>
      */
-    public BlockHeader decodeBlockHeader(byte[] data);
-
-    /**
-     * Call the interface of contract or chaincode
-     *
-     * @param request the transaction request
-     * @param connection the connection of a chain
-     * @return the transaction response
-     */
-    @Deprecated
-    public TransactionResponse call(
-            TransactionContext<TransactionRequest> request, Connection connection)
-            throws TransactionException;
+    Map<String, String> getProperties(Connection connection);
 
     /**
      * Async Call the interface of contract or chaincode Just fake async for compatibility, you need
      * to override this function
      *
+     * @param context
      * @param request the transaction request
+     * @param byProxy
      * @param connection the connection of a chain
      * @param callback the callback class for async call
      * @return the transaction response
      */
     void asyncCall(
-            TransactionContext<TransactionRequest> request,
+            TransactionContext context,
+            TransactionRequest request,
+            boolean byProxy,
             Connection connection,
             Driver.Callback callback);
-
-    void asyncCallByProxy(
-            TransactionContext<TransactionRequest> request,
-            Connection connection,
-            Driver.Callback callback);
-
-    /**
-     * Send transaction to the interface of contract or chaincode
-     *
-     * @param request the transaction request
-     * @return the transaction response
-     */
-    @Deprecated
-    public TransactionResponse sendTransaction(
-            TransactionContext<TransactionRequest> request, Connection connection)
-            throws TransactionException;
 
     /**
      * Async transaction the interface of contract or chaincode Just fake async for compatibility,
@@ -82,12 +60,9 @@ public interface Driver {
      * @return the transaction response
      */
     void asyncSendTransaction(
-            TransactionContext<TransactionRequest> request,
-            Connection connection,
-            Driver.Callback callback);
-
-    void asyncSendTransactionByProxy(
-            TransactionContext<TransactionRequest> request,
+            TransactionContext context,
+            TransactionRequest request,
+            boolean byProxy,
             Connection connection,
             Driver.Callback callback);
 
@@ -103,42 +78,39 @@ public interface Driver {
     public void asyncGetBlockNumber(Connection connection, GetBlockNumberCallback callback);
 
     /**
-     * Get block header
+     * Get block
      *
-     * @param blockNumber
-     * @return BlockHeader
+     * @return Block
      */
-    public void asyncGetBlockHeader(
-            long blockNumber, Connection connection, GetBlockHeaderCallback callback);
+    public interface GetBlockCallback {
+        public void onResponse(Exception e, Block block);
+    }
 
-    public interface GetBlockHeaderCallback {
-        public void onResponse(Exception e, byte[] blockHeader);
+    public void asyncGetBlock(
+            long blockNumber, boolean onlyHeader, Connection connection, GetBlockCallback callback);
+
+    public interface GetTransactionCallback {
+        public void onResponse(Exception e, Transaction transaction);
     }
 
     /**
      * Get verified transaction info of the Chain
      *
-     * @param expectPath
      * @param transactionHash
      * @param blockNumber
      * @param blockHeaderManager
      * @param connection
      * @return null if the transaction has not been verified
      */
-    public void asyncGetVerifiedTransaction(
-            Path expectPath,
+    public void asyncGetTransaction(
             String transactionHash,
             long blockNumber,
             BlockHeaderManager blockHeaderManager,
             Connection connection,
-            GetVerifiedTransactionCallback callback);
+            GetTransactionCallback callback);
 
     interface CustomCommandCallback {
         void onResponse(Exception error, Object response);
-    }
-
-    public interface GetVerifiedTransactionCallback {
-        public void onResponse(Exception e, VerifiedTransaction verifiedTransaction);
     }
 
     /**

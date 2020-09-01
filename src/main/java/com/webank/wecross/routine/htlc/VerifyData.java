@@ -1,8 +1,8 @@
 package com.webank.wecross.routine.htlc;
 
+import com.webank.wecross.stub.Transaction;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
-import com.webank.wecross.stub.VerifiedTransaction;
 import java.util.Arrays;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ public class VerifyData {
         this.result = result;
     }
 
-    public boolean verify(VerifiedTransaction transaction) {
+    public boolean verify(Transaction transaction) {
         if (transaction == null) {
             logger.error("verify transaction failed, transaction: null, verifyData: {}", this);
             return false;
