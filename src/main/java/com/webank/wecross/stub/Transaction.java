@@ -7,7 +7,7 @@ public class Transaction {
 
     private String transactionID;
     private String seq;
-    private Path path;
+    private String resource;
 
     private long blockNumber;
     private String transactionHash;
@@ -43,12 +43,12 @@ public class Transaction {
         this.transactionHash = transactionHash;
     }
 
-    public Path getPath() {
-        return path;
+    public String getResource() {
+        return resource;
     }
 
-    public void setPath(Path path) {
-        this.path = path;
+    public void setResource(String resource) {
+        this.resource = resource;
     }
 
     public TransactionRequest getTransactionRequest() {
@@ -115,8 +115,8 @@ public class Transaction {
                 + '\''
                 + ", seq="
                 + seq
-                + ", path="
-                + path
+                + ", resource="
+                + resource
                 + ", blockNumber="
                 + blockNumber
                 + ", transactionHash='"

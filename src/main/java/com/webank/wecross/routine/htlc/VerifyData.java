@@ -1,5 +1,6 @@
 package com.webank.wecross.routine.htlc;
 
+import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Transaction;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
@@ -16,6 +17,7 @@ public class VerifyData {
     private String method;
     private String[] args;
     private String[] result;
+    private Path path;
 
     public VerifyData(
             long blockNumber,
@@ -28,6 +30,14 @@ public class VerifyData {
         this.method = method;
         this.args = args;
         this.result = result;
+    }
+
+    public Path getPath() {
+        return path;
+    }
+
+    public void setPath(Path path) {
+        this.path = path;
     }
 
     public boolean verify(Transaction transaction) {
@@ -49,7 +59,8 @@ public class VerifyData {
         }
 
         boolean isEqual =
-                getBlockNumber() == transaction.getBlockNumber()
+                path.getResource().equals(transaction.getResource())
+                        && getBlockNumber() == transaction.getBlockNumber()
                         && getTransactionHash().equals(transaction.getTransactionHash())
                         && getMethod().equals(request.getMethod())
                         && Arrays.equals(getArgs(), request.getArgs())
@@ -67,6 +78,8 @@ public class VerifyData {
                 + blockNumber
                 + ", transactionHash='"
                 + transactionHash
+                + ", path='"
+                + path
                 + '\''
                 + ", method='"
                 + method

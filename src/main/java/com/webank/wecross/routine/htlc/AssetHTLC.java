@@ -112,7 +112,7 @@ public class AssetHTLC implements HTLC {
                                     method,
                                     args,
                                     new String[] {RoutineDefault.SUCCESS_FLAG});
-
+                    verifyData.setPath(htlcResource.getPath());
                     String finalRes = res;
                     verifyHtlcTransaction(
                             htlcResource,
@@ -148,7 +148,6 @@ public class AssetHTLC implements HTLC {
         Connection connection = resource.chooseConnection();
         Driver driver = resource.getDriver();
         driver.asyncGetTransaction(
-                // resource.getPath(),
                 txHash,
                 blockNumber,
                 blockHeaderManager,

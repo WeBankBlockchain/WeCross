@@ -229,7 +229,7 @@ public class HTLCResource extends Resource {
                         RoutineDefault.UNLOCK_METHOD,
                         args,
                         new String[] {RoutineDefault.SUCCESS_FLAG});
-
+        verifyData.setPath(getCounterpartyPath());
         htlc.verifyHtlcTransaction(
                 getCounterpartyResource(),
                 verifyData,
