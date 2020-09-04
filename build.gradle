@@ -16,6 +16,8 @@ apply plugin: 'jacoco'
 repositories {
     // Use jcenter for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
+    maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+    maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
     jcenter()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { url 'https://dl.bintray.com/ethereum/maven/' }
