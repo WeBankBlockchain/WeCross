@@ -2,6 +2,7 @@ package com.webank.wecross.stubmanager;
 
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.BlockHeader;
+import com.webank.wecross.stub.BlockHeaderData;
 import com.webank.wecross.stub.BlockHeaderManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
@@ -26,7 +27,7 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     private ThreadPoolTaskExecutor threadPool;
     private Map<Long, List<GetBlockHeaderCallback>> getBlockHeaderCallbacks =
             new HashMap<Long, List<GetBlockHeaderCallback>>();
-    private LinkedList<BlockHeaderData> blockHeaderCache = new LinkedList<BlockHeaderData>();
+    private LinkedList<BlockHeaderData> blockHeaderDataCache = new LinkedList<BlockHeaderData>();
     private Chain chain;
     private AtomicBoolean running = new AtomicBoolean(false);
     private Timer timer;
@@ -35,38 +36,12 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     private long getBlockNumberDelay = 1000;
     private int maxCacheSize = 20;
 
-    public class BlockHeaderData {
-        private BlockHeader blockHeader;
-        private byte[] data;
-
-        public BlockHeaderData(BlockHeader blockHeader, byte[] data) {
-            this.blockHeader = blockHeader;
-            this.data = data;
-        }
-
-        public byte[] getData() {
-            return data;
-        }
-
-        public void setData(byte[] data) {
-            this.data = data;
-        }
-
-        public BlockHeader getBlockHeader() {
-            return blockHeader;
-        }
-
-        public void setBlockHeader(BlockHeader blockHeader) {
-            this.blockHeader = blockHeader;
-        }
-    }
-
     public void onGetBlockNumber(Exception e, long blockNumber) {
         lock.readLock().lock();
         long current = 0;
         try {
-            if (!blockHeaderCache.isEmpty()) {
-                current = blockHeaderCache.peekLast().getBlockHeader().getNumber();
+            if (!blockHeaderDataCache.isEmpty()) {
+                current = blockHeaderDataCache.peekLast().getBlockHeader().getNumber();
             }
         } finally {
             lock.readLock().unlock();
@@ -88,8 +63,8 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
                             (error, data) -> {
                                 onSyncBlockHeader(
                                         error,
-                                        data.getBlockHeader(),
-                                        data.getRawBytes(),
+                                        new BlockHeaderData(
+                                                data.getBlockHeader(), data.getRawBytes()),
                                         blockNumber);
                             });
 
@@ -98,18 +73,20 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
         }
     }
 
-    public void onSyncBlockHeader(Exception e, BlockHeader blockHeader, byte[] data, long target) {
+    public void onSyncBlockHeader(Exception e, BlockHeaderData blockHeaderData, long target) {
         if (Objects.nonNull(e)) {
             logger.warn("On block header exception: ", e);
             waitAndSyncBlock(getGetBlockNumberDelay());
             return;
         }
 
+        BlockHeader blockHeader = blockHeaderData.getBlockHeader();
+        byte[] data = blockHeaderData.getData();
         lock.writeLock().lock();
 
         try {
 
-            blockHeaderCache.add(new BlockHeaderData(blockHeader, data));
+            blockHeaderDataCache.add(blockHeaderData);
             List<GetBlockHeaderCallback> callbacks =
                     getBlockHeaderCallbacks.get(blockHeader.getNumber());
             if (callbacks != null) {
@@ -118,15 +95,15 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
                             new Runnable() {
                                 @Override
                                 public void run() {
-                                    callback.onResponse(null, blockHeader);
+                                    callback.onResponse(null, blockHeaderData);
                                 }
                             });
                 }
             }
             getBlockHeaderCallbacks.remove(blockHeader.getNumber());
 
-            if (blockHeaderCache.size() > maxCacheSize) {
-                blockHeaderCache.pop();
+            if (blockHeaderDataCache.size() > maxCacheSize) {
+                blockHeaderDataCache.pop();
             }
 
         } finally {
@@ -142,8 +119,9 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
                             (error, blockData) -> {
                                 onSyncBlockHeader(
                                         error,
-                                        blockData.getBlockHeader(),
-                                        blockData.getRawBytes(),
+                                        new BlockHeaderData(
+                                                blockData.getBlockHeader(),
+                                                blockData.getRawBytes()),
                                         target);
                             });
         } else {
@@ -207,7 +185,7 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
                 }
             }
 
-            blockHeaderCache.clear();
+            blockHeaderDataCache.clear();
             getBlockHeaderCallbacks.clear();
             if (timeout != null) {
                 timeout.cancel();
@@ -219,7 +197,7 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
     public void asyncGetBlockNumber(GetBlockNumberCallback callback) {
         lock.readLock().lock();
         try {
-            if (blockHeaderCache.isEmpty()) {
+            if (blockHeaderDataCache.isEmpty()) {
                 threadPool.execute(
                         () -> {
                             callback.onResponse(null, 0);
@@ -228,7 +206,8 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
                 threadPool.execute(
                         () -> {
                             callback.onResponse(
-                                    null, blockHeaderCache.peekLast().getBlockHeader().getNumber());
+                                    null,
+                                    blockHeaderDataCache.peekLast().getBlockHeader().getNumber());
                         });
             }
         } finally {
@@ -241,17 +220,21 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
         lock.writeLock().lock();
 
         try {
-            if (blockHeaderCache.isEmpty()
-                    || blockNumber < blockHeaderCache.peekFirst().getBlockHeader().getNumber()) {
+            if (blockHeaderDataCache.isEmpty()
+                    || blockNumber
+                            < blockHeaderDataCache.peekFirst().getBlockHeader().getNumber()) {
                 chain.getDriver()
                         .asyncGetBlock(
                                 blockNumber,
                                 true,
                                 chain.chooseConnection(),
                                 (error, data) -> {
-                                    callback.onResponse(error, data.getBlockHeader());
+                                    callback.onResponse(
+                                            error,
+                                            new BlockHeaderData(
+                                                    data.getBlockHeader(), data.getRawBytes()));
                                 });
-            } else if (blockNumber > blockHeaderCache.peekLast().getBlockHeader().getNumber()) {
+            } else if (blockNumber > blockHeaderDataCache.peekLast().getBlockHeader().getNumber()) {
                 if (!getBlockHeaderCallbacks.containsKey(blockNumber)) {
                     getBlockHeaderCallbacks.put(
                             blockNumber, new LinkedList<GetBlockHeaderCallback>());
@@ -272,13 +255,13 @@ public class MemoryBlockHeaderManager implements BlockHeaderManager {
                     }
                 }
             } else {
-                for (BlockHeaderData blockHeader : blockHeaderCache) {
-                    if (blockHeader.getBlockHeader().getNumber() == blockNumber) {
+                for (BlockHeaderData blockHeaderData : blockHeaderDataCache) {
+                    if (blockHeaderData.getBlockHeader().getNumber() == blockNumber) {
                         threadPool.execute(
                                 new Runnable() {
                                     @Override
                                     public void run() {
-                                        callback.onResponse(null, blockHeader.getBlockHeader());
+                                        callback.onResponse(null, blockHeaderData);
                                     }
                                 });
 

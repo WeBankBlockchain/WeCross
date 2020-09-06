@@ -59,7 +59,7 @@ public class ResourceTest {
         Mockito.doAnswer(
                         (Answer<Void>)
                                 invocation -> {
-                                    Driver.Callback callback = invocation.getArgument(2);
+                                    Driver.Callback callback = invocation.getArgument(4);
                                     callback.onTransactionResponse(
                                             TransactionException.Builder.newSuccessException(),
                                             response);
@@ -69,14 +69,14 @@ public class ResourceTest {
                 .asyncCall(
                         Mockito.any(),
                         Mockito.any(),
-                        false,
+                        Mockito.anyBoolean(),
                         Mockito.any(Connection.class),
                         Mockito.any(Driver.Callback.class));
 
         Mockito.doAnswer(
                         (Answer<Void>)
                                 invocation -> {
-                                    Driver.Callback callback = invocation.getArgument(2);
+                                    Driver.Callback callback = invocation.getArgument(4);
                                     callback.onTransactionResponse(
                                             TransactionException.Builder.newSuccessException(),
                                             response);
@@ -86,7 +86,7 @@ public class ResourceTest {
                 .asyncSendTransaction(
                         Mockito.any(),
                         Mockito.any(),
-                        false,
+                        Mockito.anyBoolean(),
                         Mockito.any(Connection.class),
                         Mockito.any(Driver.Callback.class));
         resource.setDriver(driver);
