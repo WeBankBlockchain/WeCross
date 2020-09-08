@@ -5,7 +5,7 @@ import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.BlockHeaderManager;
+import com.webank.wecross.stub.BlockManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.TransactionException;
@@ -144,13 +144,13 @@ public class AssetHTLC implements HTLC {
             Resource resource, VerifyData verifyData, VerifyCallback callback) {
         String txHash = verifyData.getTransactionHash();
         long blockNumber = verifyData.getBlockNumber();
-        BlockHeaderManager blockHeaderManager = resource.getBlockHeaderManager();
+        BlockManager blockManager = resource.getBlockManager();
         Connection connection = resource.chooseConnection();
         Driver driver = resource.getDriver();
         driver.asyncGetTransaction(
                 txHash,
                 blockNumber,
-                blockHeaderManager,
+                blockManager,
                 connection,
                 (exception, transaction) -> {
                     if (exception != null) {

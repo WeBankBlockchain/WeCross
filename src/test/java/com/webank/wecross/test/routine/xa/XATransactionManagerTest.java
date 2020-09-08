@@ -5,7 +5,7 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.xa.XATransactionManager;
 import com.webank.wecross.routine.xa.XATransactionManager.ReduceCallback;
 import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.BlockHeaderManager;
+import com.webank.wecross.stub.BlockManager;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.TransactionException;
@@ -27,10 +27,10 @@ import org.mockito.stubbing.Answer;
 public class XATransactionManagerTest {
     @Test
     public void testPrepare() throws Exception {
-        BlockHeaderManager blockHeaderManager = Mockito.mock(BlockHeaderManager.class);
+        BlockManager blockManager = Mockito.mock(BlockManager.class);
 
         Chain chain = Mockito.mock(Chain.class);
-        Mockito.when(chain.getBlockHeaderManager()).thenReturn(blockHeaderManager);
+        Mockito.when(chain.getBlockManager()).thenReturn(blockManager);
 
         Zone zone = Mockito.mock(Zone.class);
         Mockito.when(zone.getChain(Mockito.any(Path.class))).thenReturn(chain);
@@ -143,10 +143,10 @@ public class XATransactionManagerTest {
 
     @Test
     public void testCommit() throws Exception {
-        BlockHeaderManager blockHeaderManager = Mockito.mock(BlockHeaderManager.class);
+        BlockManager blockManager = Mockito.mock(BlockManager.class);
 
         Chain chain = Mockito.mock(Chain.class);
-        Mockito.when(chain.getBlockHeaderManager()).thenReturn(blockHeaderManager);
+        Mockito.when(chain.getBlockManager()).thenReturn(blockManager);
 
         Zone zone = Mockito.mock(Zone.class);
         Mockito.when(zone.getChain(Mockito.any(Path.class))).thenReturn(chain);
@@ -246,10 +246,10 @@ public class XATransactionManagerTest {
 
     @Test
     public void testRollback() throws Exception {
-        BlockHeaderManager blockHeaderManager = Mockito.mock(BlockHeaderManager.class);
+        BlockManager blockManager = Mockito.mock(BlockManager.class);
 
         Chain chain = Mockito.mock(Chain.class);
-        Mockito.when(chain.getBlockHeaderManager()).thenReturn(blockHeaderManager);
+        Mockito.when(chain.getBlockManager()).thenReturn(blockManager);
 
         Zone zone = Mockito.mock(Zone.class);
         Mockito.when(zone.getChain(Mockito.any(Path.class))).thenReturn(chain);
@@ -385,10 +385,10 @@ public class XATransactionManagerTest {
 
     @Test
     public void testGetTransactionInfo() throws Exception {
-        BlockHeaderManager blockHeaderManager = Mockito.mock(BlockHeaderManager.class);
+        BlockManager blockManager = Mockito.mock(BlockManager.class);
 
         Chain chain = Mockito.mock(Chain.class);
-        Mockito.when(chain.getBlockHeaderManager()).thenReturn(blockHeaderManager);
+        Mockito.when(chain.getBlockManager()).thenReturn(blockManager);
 
         Zone zone = Mockito.mock(Zone.class);
         Mockito.when(zone.getChain(Mockito.any(Path.class))).thenReturn(chain);

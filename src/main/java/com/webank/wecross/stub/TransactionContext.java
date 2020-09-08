@@ -4,17 +4,14 @@ public class TransactionContext {
     private Account account;
     private Path path;
     private ResourceInfo resourceInfo;
-    private BlockHeaderManager blockHeaderManager;
+    private BlockManager blockManager;
 
     public TransactionContext(
-            Account account,
-            Path path,
-            ResourceInfo resourceInfo,
-            BlockHeaderManager blockHeaderManager) {
+            Account account, Path path, ResourceInfo resourceInfo, BlockManager blockManager) {
         this.account = account;
         this.path = path;
         this.resourceInfo = resourceInfo;
-        this.blockHeaderManager = blockHeaderManager;
+        this.blockManager = blockManager;
     }
 
     public Account getAccount() {
@@ -33,12 +30,12 @@ public class TransactionContext {
         this.resourceInfo = resourceInfo;
     }
 
-    public BlockHeaderManager getBlockHeaderManager() {
-        return blockHeaderManager;
+    public BlockManager getBlockManager() {
+        return blockManager;
     }
 
-    public void setBlockHeaderManager(BlockHeaderManager blockHeaderManager) {
-        this.blockHeaderManager = blockHeaderManager;
+    public void setBlockManager(BlockManager blockManager) {
+        this.blockManager = blockManager;
     }
 
     @Override
@@ -48,8 +45,8 @@ public class TransactionContext {
                 + account
                 + ", resourceInfo="
                 + resourceInfo.toString()
-                + ", blockHeaderManager="
-                + blockHeaderManager
+                + ", blockManager="
+                + blockManager
                 + '}';
     }
 

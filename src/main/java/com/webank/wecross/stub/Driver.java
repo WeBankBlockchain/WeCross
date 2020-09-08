@@ -98,14 +98,14 @@ public interface Driver {
      *
      * @param transactionHash
      * @param blockNumber
-     * @param blockHeaderManager
+     * @param blockManager
      * @param connection
      * @return null if the transaction has not been verified
      */
     public void asyncGetTransaction(
             String transactionHash,
             long blockNumber,
-            BlockHeaderManager blockHeaderManager,
+            BlockManager blockManager,
             Connection connection,
             GetTransactionCallback callback);
 
@@ -119,7 +119,7 @@ public interface Driver {
      * @param path
      * @param args
      * @param account
-     * @param blockHeaderManager
+     * @param blockManager
      * @param connection
      * @param callback
      */
@@ -128,7 +128,7 @@ public interface Driver {
             Path path,
             Object[] args,
             Account account,
-            BlockHeaderManager blockHeaderManager,
+            BlockManager blockManager,
             Connection connection,
             CustomCommandCallback callback);
 }

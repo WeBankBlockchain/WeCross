@@ -2,7 +2,7 @@ package com.webank.wecross.config;
 
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.ResourceInfo;
-import com.webank.wecross.stubmanager.MemoryBlockHeaderManagerFactory;
+import com.webank.wecross.stubmanager.MemoryBlockManagerFactory;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
@@ -20,7 +20,7 @@ public class ZoneManagerConfig {
 
     @Resource private StubManager stubManager;
 
-    @Resource private MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory;
+    @Resource private MemoryBlockManagerFactory resourceBlockManagerFactory;
 
     @Bean
     public ZoneManager newZoneManager() {
@@ -29,7 +29,7 @@ public class ZoneManagerConfig {
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setZones(zones);
         zoneManager.setStubManager(stubManager);
-        zoneManager.setResourceBlockHeaderManagerFactory(resourceBlockHeaderManagerFactory);
+        zoneManager.setMemoryBlockManagerFactory(resourceBlockManagerFactory);
         addChangeEvent(zoneManager);
 
         return zoneManager;

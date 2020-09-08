@@ -8,12 +8,11 @@ import static org.junit.Assert.assertNull;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.stub.Block;
 import com.webank.wecross.stub.BlockHeader;
-import com.webank.wecross.stub.BlockHeaderData;
-import com.webank.wecross.stub.BlockHeaderManager;
+import com.webank.wecross.stub.BlockManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Request;
-import com.webank.wecross.stubmanager.MemoryBlockHeaderManager;
+import com.webank.wecross.stubmanager.MemoryBlockManager;
 import com.webank.wecross.zone.Chain;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
@@ -26,7 +25,7 @@ import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-public class MemoryBlockHeaderManagerTest {
+public class MemoryBlockManagerTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     public BlockHeader buildBlockHeader(long number) {
@@ -46,7 +45,7 @@ public class MemoryBlockHeaderManagerTest {
 
     @Test
     public void testSyncBlock() throws InterruptedException {
-        MemoryBlockHeaderManager memoryBlockHeaderManager = new MemoryBlockHeaderManager();
+        MemoryBlockManager memoryBlockManager = new MemoryBlockManager();
 
         ThreadPoolTaskExecutor threadPool = new ThreadPoolTaskExecutor();
         threadPool.setCorePoolSize(10);
@@ -103,23 +102,23 @@ public class MemoryBlockHeaderManagerTest {
 
         Timer timer = new HashedWheelTimer();
 
-        memoryBlockHeaderManager.setThreadPool(threadPool);
+        memoryBlockManager.setThreadPool(threadPool);
 
-        memoryBlockHeaderManager.asyncGetBlockNumber(
+        memoryBlockManager.asyncGetBlockNumber(
                 (e, number) -> {
                     assertEquals(0, number);
                 });
 
-        memoryBlockHeaderManager.setChain(chain);
-        memoryBlockHeaderManager.setMaxCacheSize(20);
-        memoryBlockHeaderManager.setTimer(timer);
-        memoryBlockHeaderManager.setGetBlockNumberDelay(100);
+        memoryBlockManager.setChain(chain);
+        memoryBlockManager.setMaxCacheSize(20);
+        memoryBlockManager.setTimer(timer);
+        memoryBlockManager.setGetBlockNumberDelay(100);
 
-        memoryBlockHeaderManager.start();
+        memoryBlockManager.start();
 
         Thread.sleep(3000);
 
-        memoryBlockHeaderManager.asyncGetBlockNumber(
+        memoryBlockManager.asyncGetBlockNumber(
                 (e, number) -> {
                     assertNull(e);
                     assertEquals(30, number);
@@ -144,7 +143,7 @@ public class MemoryBlockHeaderManagerTest {
 
         // Test sync block
 
-        memoryBlockHeaderManager.asyncGetBlockNumber(
+        memoryBlockManager.asyncGetBlockNumber(
                 (e, number) -> {
                     assertNull(e);
                     assertEquals(100, number);
@@ -154,18 +153,14 @@ public class MemoryBlockHeaderManagerTest {
                         (Answer<Void>)
                                 invocation -> {
                                     long blockNumber = invocation.getArgument(0);
-                                    BlockHeaderManager.GetBlockHeaderCallback callback =
+                                    BlockManager.GetBlockCallback callback =
                                             invocation.getArgument(2);
 
                                     assertTrue(blockNumber <= 80);
 
                                     threadPool.execute(
                                             () -> {
-                                                callback.onResponse(
-                                                        null,
-                                                        new BlockHeaderData(
-                                                                buildBlockHeader(blockNumber),
-                                                                null));
+                                                callback.onResponse(null, buildBlock(blockNumber));
                                             });
 
                                     return null;
@@ -214,7 +209,7 @@ public class MemoryBlockHeaderManagerTest {
 
         // assertFalse(flags.isEmpty());
 
-        memoryBlockHeaderManager.asyncGetBlockHeader(
+        memoryBlockManager.asyncGetBlock(
                 500,
                 (error, blockHeader) -> {
                     assertNotNull(error);
@@ -222,7 +217,7 @@ public class MemoryBlockHeaderManagerTest {
                 });
 
         waitingForAllDone(threadPool, "last");
-        memoryBlockHeaderManager.stop();
+        memoryBlockManager.stop();
     }
 
     private void waitingForAllDone(ThreadPoolTaskExecutor threadPool, String prefix)
