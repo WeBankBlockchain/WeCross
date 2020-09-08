@@ -432,7 +432,7 @@ public class HTLCScheduler {
                         // htlcResource.getSelfPath(),
                         txHash,
                         blockNum,
-                        htlcResource.getBlockHeaderManager(),
+                        htlcResource.getBlockManager(),
                         htlcResource.chooseConnection(),
                         (exception, verifiedTransaction) -> {
                             if (exception != null) {

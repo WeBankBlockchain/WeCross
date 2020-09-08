@@ -2,8 +2,8 @@ package com.webank.wecross.stub;
 
 public class Transaction {
 
-    private byte[] txBytes; // 交易信息
-    private byte[] receiptBytes; // 交易回执信息
+    private byte[] txBytes; // raw transaction info
+    private byte[] receiptBytes; // raw transaction receipt info
 
     private String transactionID;
     private String seq;

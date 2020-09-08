@@ -7,7 +7,7 @@ import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.BlockHeaderManager;
+import com.webank.wecross.stub.BlockManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
@@ -451,13 +451,13 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public BlockHeaderManager getBlockHeaderManager() {
-        return getSelfResource().getBlockHeaderManager();
+    public BlockManager getBlockManager() {
+        return getSelfResource().getBlockManager();
     }
 
     @Override
-    public void setBlockHeaderManager(BlockHeaderManager resourceBlockHeaderManager) {
-        getSelfResource().setBlockHeaderManager(resourceBlockHeaderManager);
+    public void setBlockManager(BlockManager blockManager) {
+        getSelfResource().setBlockManager(blockManager);
     }
 
     @Override

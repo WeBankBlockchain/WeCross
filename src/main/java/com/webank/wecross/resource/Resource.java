@@ -2,7 +2,7 @@ package com.webank.wecross.resource;
 
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.BlockHeaderManager;
+import com.webank.wecross.stub.BlockManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
@@ -30,7 +30,7 @@ public class Resource {
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
     private Path path;
     private ResourceInfo resourceInfo;
-    private BlockHeaderManager blockHeaderManager;
+    private BlockManager blockManager;
     boolean hasLocalConnection = false;
     boolean isTemporary = false;
     private Random random = new SecureRandom();
@@ -90,8 +90,7 @@ public class Resource {
 
     public void asyncCall(TransactionRequest request, Account account, Resource.Callback callback) {
         TransactionContext context =
-                new TransactionContext(
-                        account, this.path, this.resourceInfo, this.blockHeaderManager);
+                new TransactionContext(account, this.path, this.resourceInfo, this.blockManager);
         boolean isRawTransaction =
                 (boolean) request.getOptions().getOrDefault(RAW_TRANSACTION, false);
         if (isRawTransaction) {
@@ -142,8 +141,7 @@ public class Resource {
     public void asyncSendTransaction(
             TransactionRequest request, Account account, Resource.Callback callback) {
         TransactionContext context =
-                new TransactionContext(
-                        account, this.path, this.resourceInfo, this.blockHeaderManager);
+                new TransactionContext(account, this.path, this.resourceInfo, this.blockManager);
         boolean isRawTransaction =
                 (boolean) request.getOptions().getOrDefault(RAW_TRANSACTION, false);
         if (isRawTransaction) {
@@ -261,12 +259,12 @@ public class Resource {
         this.resourceInfo = resourceInfo;
     }
 
-    public BlockHeaderManager getBlockHeaderManager() {
-        return blockHeaderManager;
+    public BlockManager getBlockManager() {
+        return blockManager;
     }
 
-    public void setBlockHeaderManager(BlockHeaderManager resourceBlockHeaderManager) {
-        this.blockHeaderManager = resourceBlockHeaderManager;
+    public void setBlockManager(BlockManager blockManager) {
+        this.blockManager = blockManager;
     }
 
     public boolean hasLocalConnection() {

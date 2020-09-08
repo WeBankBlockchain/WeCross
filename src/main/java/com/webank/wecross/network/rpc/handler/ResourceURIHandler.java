@@ -276,7 +276,7 @@ public class ResourceURIHandler implements URIHandler {
                                         path,
                                         restRequest.getData().getArgs().toArray(),
                                         account,
-                                        chain.getBlockHeaderManager(),
+                                        chain.getBlockManager(),
                                         chain.chooseConnection(),
                                         (e, response) -> {
                                             if (Objects.nonNull(e)) {
