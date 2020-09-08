@@ -7,15 +7,14 @@ import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.p2p.netty.factory.P2PConfig;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stubmanager.StubManager;
+import java.io.IOException;
+import java.util.Objects;
+import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-
-import javax.annotation.Resource;
-import java.io.IOException;
-import java.util.Objects;
 
 @Configuration
 public class AccountManagerConfig {
