@@ -11,10 +11,9 @@ import com.webank.wecross.network.p2p.netty.response.Response;
 import com.webank.wecross.network.p2p.netty.response.ResponseCallBack;
 import com.webank.wecross.network.p2p.netty.response.StatusCode;
 import com.webank.wecross.peer.Peer;
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class P2PService implements NetworkService {
     private Logger logger = LoggerFactory.getLogger(P2PService.class);

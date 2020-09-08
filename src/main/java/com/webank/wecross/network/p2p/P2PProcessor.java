@@ -23,10 +23,9 @@ import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.Response;
 import com.webank.wecross.zone.ChainInfo;
 import com.webank.wecross.zone.ZoneManager;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 public class P2PProcessor implements NetworkProcessor {
     private Logger logger = LoggerFactory.getLogger(P2PProcessor.class);

@@ -17,10 +17,9 @@ import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 public class WeCrossHost {
     private Logger logger = LoggerFactory.getLogger(WeCrossHost.class);

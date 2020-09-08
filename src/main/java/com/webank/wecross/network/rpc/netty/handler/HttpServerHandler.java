@@ -15,12 +15,11 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslCloseCompletionEvent;
 import io.netty.handler.ssl.SslHandshakeCompletionEvent;
 import io.netty.handler.timeout.IdleStateEvent;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 
 /** */
 public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> {
