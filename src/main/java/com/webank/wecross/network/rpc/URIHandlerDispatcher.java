@@ -101,7 +101,9 @@ public class URIHandlerDispatcher {
             logger.warn(
                     " Not found, method: {}, uri: {} ", uriMethod.getMethod(), uriMethod.getUri());
         } else {
-            logger.trace(" path: {}, handler: {}", uriMethod, uriHandler.getClass().getName());
+            if (logger.isTraceEnabled()) {
+                logger.trace(" path: {}, handler: {}", uriMethod, uriHandler.getClass().getName());
+            }
         }
 
         return uriHandler;

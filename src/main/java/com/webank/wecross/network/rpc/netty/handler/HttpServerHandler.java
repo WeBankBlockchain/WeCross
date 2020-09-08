@@ -11,24 +11,16 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaderValues;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpUtil;
-import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslCloseCompletionEvent;
 import io.netty.handler.ssl.SslHandshakeCompletionEvent;
 import io.netty.handler.timeout.IdleStateEvent;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 /** */
 public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> {
@@ -164,7 +156,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
                     ((SocketChannel) ctx.channel()).remoteAddress().getAddress().getHostAddress();
             Integer port = ((SocketChannel) ctx.channel()).remoteAddress().getPort();
             int hashCode = System.identityHashCode(ctx);
-            logger.debug(" channelActive, {}:{}, ctx: {}", host, port, hashCode);
+            if (logger.isDebugEnabled()) {
+                logger.debug(" channelActive, {}:{}, ctx: {}", host, port, hashCode);
+            }
         }
     }
 
@@ -177,7 +171,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
                     ((SocketChannel) ctx.channel()).remoteAddress().getAddress().getHostAddress();
             Integer port = ((SocketChannel) ctx.channel()).remoteAddress().getPort();
             int hashCode = System.identityHashCode(ctx);
-            logger.debug(" channelInactive, {}:{}, ctx: {}", host, port, hashCode);
+            if (logger.isDebugEnabled()) {
+                logger.debug(" channelInactive, {}:{}, ctx: {}", host, port, hashCode);
+            }
         }
     }
 

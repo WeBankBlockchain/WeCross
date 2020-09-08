@@ -13,17 +13,14 @@ import com.webank.wecross.resource.ResourceDetail;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.routine.htlc.HTLCManager;
-import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.TransactionException;
-import com.webank.wecross.stub.TransactionRequest;
-import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.stub.*;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
 
 /** GET/POST /network/stub/resource/method */
 public class ResourceURIHandler implements URIHandler {
@@ -128,10 +125,12 @@ public class ResourceURIHandler implements URIHandler {
                         Resource resourceObj = getResource(path);
                         RequestUtils.checkAccountAndResource(account, resourceObj);
 
-                        logger.trace(
-                                "sendTransaction request: {}, account: {}",
-                                transactionRequest,
-                                accountName);
+                        if (logger.isTraceEnabled()) {
+                            logger.trace(
+                                    "sendTransaction request: {}, account: {}",
+                                    transactionRequest,
+                                    accountName);
+                        }
 
                         resourceObj.asyncSendTransaction(
                                 transactionRequest,
@@ -181,8 +180,12 @@ public class ResourceURIHandler implements URIHandler {
                         Resource resourceObj = getResource(path);
                         RequestUtils.checkAccountAndResource(account, resourceObj);
 
-                        logger.trace(
-                                "call request: {}, account: {}", transactionRequest, accountName);
+                        if (logger.isTraceEnabled()) {
+                            logger.trace(
+                                    "call request: {}, account: {}",
+                                    transactionRequest,
+                                    accountName);
+                        }
 
                         // TODO: byProxy
                         resourceObj.asyncCall(

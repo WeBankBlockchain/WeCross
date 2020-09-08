@@ -3,13 +3,14 @@ package com.webank.wecross.utils;
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+
 import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 public class ConfigUtils {
 
@@ -52,7 +53,9 @@ public class ConfigUtils {
             dir = resolver.getResource(stubsPath).getFile();
             // dir = new File(ConfigUtils.class.getClassLoader().getResource(stubsPath).getFile());
         } catch (Exception e) {
-            logger.debug("Local stubs: " + stubsPath + " is empty");
+            if (logger.isDebugEnabled()) {
+                logger.debug("Local stubs: " + stubsPath + " is empty");
+            }
             // throw new WeCrossException(ResourceQueryStatus.DIR_NOT_EXISTS, errorMessage);
             return result;
         }

@@ -3,7 +3,6 @@ package com.webank.wecross.config;
 import com.webank.wecross.stub.Stub;
 import com.webank.wecross.stub.StubFactory;
 import com.webank.wecross.stubmanager.StubManager;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +14,8 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.ClassUtils;
+
+import java.util.Map;
 
 @Configuration
 public class StubManagerConfig {
@@ -33,11 +34,15 @@ public class StubManagerConfig {
                             ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
                                     + ClassUtils.convertClassNameToResourcePath("com.webank")
                                     + "/**/*.class");
-            logger.debug("Total {} resources", resources.length);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Total {} resources", resources.length);
+            }
 
             MetadataReaderFactory metadataReaderFabtFactory = new SimpleMetadataReaderFactory();
             for (Resource resource : resources) {
-                logger.trace("Scan stub plugin: {}", resource.getURI().toString());
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Scan stub plugin: {}", resource.getURI().toString());
+                }
                 MetadataReader metadataReader =
                         metadataReaderFabtFactory.getMetadataReader(resource);
                 if (metadataReader.getAnnotationMetadata().hasAnnotation(Stub.class.getName())) {

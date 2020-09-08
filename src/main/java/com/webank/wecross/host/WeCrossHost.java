@@ -17,9 +17,10 @@ import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 public class WeCrossHost {
     private Logger logger = LoggerFactory.getLogger(WeCrossHost.class);
@@ -114,7 +115,9 @@ public class WeCrossHost {
         msg.setMethod("seq");
 
         for (Peer peer : peerManager.getPeerInfos().values()) {
-            logger.debug("Send peer seq, to peer:{}, seq:{}", peer, seq);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Send peer seq, to peer:{}, seq:{}", peer, seq);
+            }
             zoneManager.getP2PService().asyncSendMessage(peer, msg, null);
         }
     }
@@ -170,7 +173,9 @@ public class WeCrossHost {
             // dump to info every 10 seconds
             logger.info(dumpStr);
         } else {
-            logger.debug(dumpStr);
+            if (logger.isDebugEnabled()) {
+                logger.debug(dumpStr);
+            }
         }
     }
 

@@ -2,11 +2,7 @@ package com.webank.wecross.network.p2p;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.common.NetworkQueryStatus;
-import com.webank.wecross.network.NetworkCallback;
-import com.webank.wecross.network.NetworkMessage;
-import com.webank.wecross.network.NetworkProcessor;
-import com.webank.wecross.network.NetworkResponse;
-import com.webank.wecross.network.NetworkService;
+import com.webank.wecross.network.*;
 import com.webank.wecross.network.p2p.netty.MessageType;
 import com.webank.wecross.network.p2p.netty.NettyService;
 import com.webank.wecross.network.p2p.netty.RequestProcessor;
@@ -15,9 +11,10 @@ import com.webank.wecross.network.p2p.netty.response.Response;
 import com.webank.wecross.network.p2p.netty.response.ResponseCallBack;
 import com.webank.wecross.network.p2p.netty.response.StatusCode;
 import com.webank.wecross.peer.Peer;
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class P2PService implements NetworkService {
     private Logger logger = LoggerFactory.getLogger(P2PService.class);
@@ -60,8 +57,9 @@ public class P2PService implements NetworkService {
                 new ResponseCallBack() {
                     @Override
                     public void onResponse(Response response) {
-                        logger.trace(" receive response: {}", response);
-
+                        if (logger.isTraceEnabled()) {
+                            logger.trace(" receive response: {}", response);
+                        }
                         if (callback != null) {
                             String content = response.getContent();
                             try {

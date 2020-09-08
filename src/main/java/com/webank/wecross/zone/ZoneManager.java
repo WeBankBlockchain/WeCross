@@ -44,7 +44,9 @@ public class ZoneManager {
                 return chain;
             }
         } catch (Exception e) {
-            logger.debug("Exception: " + e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Exception: " + e);
+            }
         } finally {
             lock.readLock().unlock();
         }
@@ -115,7 +117,9 @@ public class ZoneManager {
 
             return null;
         } catch (Exception e) {
-            logger.debug("Exception: " + e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Exception: " + e);
+            }
         } finally {
             lock.readLock().unlock();
         }
@@ -134,7 +138,9 @@ public class ZoneManager {
     public Zone getZone(String name) {
         lock.readLock().lock();
         try {
-            logger.trace("get zone: {}", name);
+            if (logger.isTraceEnabled()) {
+                logger.trace("get zone: {}", name);
+            }
             Zone zone = zones.get(name);
             return zone;
         } finally {

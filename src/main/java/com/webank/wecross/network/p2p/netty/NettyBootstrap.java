@@ -9,12 +9,7 @@ import com.webank.wecross.network.p2p.netty.message.serialize.MessageSerializer;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -22,11 +17,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.ssl.ClientAuth;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.SslHandler;
-import io.netty.handler.ssl.SslProvider;
+import io.netty.handler.ssl.*;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AttributeKey;
 import java.io.IOException;
@@ -294,7 +285,9 @@ public class NettyBootstrap {
 
                     Node node = (Node) ctx.channel().attr(AttributeKey.valueOf("node")).get();
 
-                    logger.trace(" send heartbeat message to {} ", node);
+                    if (logger.isTraceEnabled()) {
+                        logger.trace(" send heartbeat message to {} ", node);
+                    }
                 });
     }
 
@@ -311,7 +304,9 @@ public class NettyBootstrap {
                                         @Override
                                         public void operationComplete(ChannelFuture future) {
                                             if (future.isSuccess()) {
-                                                logger.debug(" connect to {} success", host);
+                                                if (logger.isDebugEnabled()) {
+                                                    logger.debug(" connect to {} success", host);
+                                                }
                                             } else {
                                                 logger.warn(
                                                         " connect to {} failed, error: {}",
@@ -320,7 +315,9 @@ public class NettyBootstrap {
                                             }
                                         }
                                     });
-                            logger.debug(" try to connect {}", host);
+                            if (logger.isDebugEnabled()) {
+                                logger.debug(" try to connect {}", host);
+                            }
                         });
     }
 }

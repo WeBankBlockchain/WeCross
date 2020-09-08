@@ -4,9 +4,10 @@ import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.VerifiedTransaction;
-import java.math.BigInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.math.BigInteger;
 
 public class HTLCScheduler {
     private Logger logger = LoggerFactory.getLogger(HTLCScheduler.class);
@@ -551,10 +552,12 @@ public class HTLCScheduler {
                                         callback.onReturn(exception1, false);
                                     } else {
                                         if (logger.isDebugEnabled()) {
-                                            logger.trace(
-                                                    "lock counterparty successfully: {}, path: {}",
-                                                    hash,
-                                                    selfResource.getSelfPath());
+                                            if (logger.isTraceEnabled()) {
+                                                logger.trace(
+                                                        "lock counterparty successfully: {}, path: {}",
+                                                        hash,
+                                                        selfResource.getSelfPath());
+                                            }
                                         }
                                         callback.onReturn(null, true);
                                     }
@@ -619,10 +622,12 @@ public class HTLCScheduler {
                                                 callback.onReturn(exception2, false);
                                             } else {
                                                 if (logger.isDebugEnabled()) {
-                                                    logger.trace(
-                                                            "unlock counterparty successfully: {}, path: {}",
-                                                            hash,
-                                                            selfResource.getSelfPath());
+                                                    if (logger.isTraceEnabled()) {
+                                                        logger.trace(
+                                                                "unlock counterparty successfully: {}, path: {}",
+                                                                hash,
+                                                                selfResource.getSelfPath());
+                                                    }
                                                 }
                                                 callback.onReturn(null, true);
                                             }

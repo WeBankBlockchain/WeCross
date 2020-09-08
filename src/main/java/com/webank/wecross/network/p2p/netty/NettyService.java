@@ -14,13 +14,14 @@ import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /** P2P service */
 public class NettyService {
@@ -105,7 +106,9 @@ public class NettyService {
             @Override
             public void onResponse(Response response) {
                 this.response = response;
-                logger.debug(" callback: request response {}", response);
+                if (logger.isDebugEnabled()) {
+                    logger.debug(" callback: request response {}", response);
+                }
                 semaphore.release();
             }
 
@@ -139,14 +142,15 @@ public class NettyService {
         callback.setSeqMapper(getSeqMapper());
 
         String nodeID = node.getNodeID();
-
-        logger.trace(
-                " request content, node: {}, seq: {}, type: {}, timeout: {}, content: {}",
-                nodeID,
-                message.getSeq(),
-                message.getType(),
-                request.getTimeout(),
-                request.getContent());
+        if (logger.isTraceEnabled()) {
+            logger.trace(
+                    " request content, node: {}, seq: {}, type: {}, timeout: {}, content: {}",
+                    nodeID,
+                    message.getSeq(),
+                    message.getType(),
+                    request.getTimeout(),
+                    request.getContent());
+        }
 
         // select random nodes to send
         ChannelHandlerContext ctx = getConnections().getChannelHandler(nodeID);
@@ -188,8 +192,9 @@ public class NettyService {
             ByteBuf byteBuf = ctx.alloc().buffer();
             serializer.serialize(message, byteBuf);
             ctx.writeAndFlush(byteBuf);
-
-            logger.trace(" send request, host: {}, seq: {}", node, message.getSeq());
+            if (logger.isTraceEnabled()) {
+                logger.trace(" send request, host: {}, seq: {}", node, message.getSeq());
+            }
         } else {
             callback.sendFailed(StatusCode.UNREACHABLE, "node unreachable");
         }
