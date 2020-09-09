@@ -19,6 +19,8 @@ public class HeartBeatProcessor implements Processor {
     @Override
     public void process(ChannelHandlerContext ctx, Node node, Message message) {
         // log with do nothing
-        logger.trace(" receive heartbeat, host: {}, seq: {}", node, message.getSeq());
+        if (logger.isTraceEnabled()) {
+            logger.trace(" receive heartbeat, host: {}, seq: {}", node, message.getSeq());
+        }
     }
 }

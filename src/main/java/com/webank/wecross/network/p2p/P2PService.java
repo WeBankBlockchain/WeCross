@@ -2,11 +2,7 @@ package com.webank.wecross.network.p2p;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.common.NetworkQueryStatus;
-import com.webank.wecross.network.NetworkCallback;
-import com.webank.wecross.network.NetworkMessage;
-import com.webank.wecross.network.NetworkProcessor;
-import com.webank.wecross.network.NetworkResponse;
-import com.webank.wecross.network.NetworkService;
+import com.webank.wecross.network.*;
 import com.webank.wecross.network.p2p.netty.MessageType;
 import com.webank.wecross.network.p2p.netty.NettyService;
 import com.webank.wecross.network.p2p.netty.RequestProcessor;
@@ -60,8 +56,9 @@ public class P2PService implements NetworkService {
                 new ResponseCallBack() {
                     @Override
                     public void onResponse(Response response) {
-                        logger.trace(" receive response: {}", response);
-
+                        if (logger.isTraceEnabled()) {
+                            logger.trace(" receive response: {}", response);
+                        }
                         if (callback != null) {
                             String content = response.getContent();
                             try {

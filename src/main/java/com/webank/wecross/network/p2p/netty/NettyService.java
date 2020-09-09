@@ -105,7 +105,9 @@ public class NettyService {
             @Override
             public void onResponse(Response response) {
                 this.response = response;
-                logger.debug(" callback: request response {}", response);
+                if (logger.isDebugEnabled()) {
+                    logger.debug(" callback: request response {}", response);
+                }
                 semaphore.release();
             }
 
@@ -139,14 +141,15 @@ public class NettyService {
         callback.setSeqMapper(getSeqMapper());
 
         String nodeID = node.getNodeID();
-
-        logger.trace(
-                " request content, node: {}, seq: {}, type: {}, timeout: {}, content: {}",
-                nodeID,
-                message.getSeq(),
-                message.getType(),
-                request.getTimeout(),
-                request.getContent());
+        if (logger.isTraceEnabled()) {
+            logger.trace(
+                    " request content, node: {}, seq: {}, type: {}, timeout: {}, content: {}",
+                    nodeID,
+                    message.getSeq(),
+                    message.getType(),
+                    request.getTimeout(),
+                    request.getContent());
+        }
 
         // select random nodes to send
         ChannelHandlerContext ctx = getConnections().getChannelHandler(nodeID);
@@ -188,8 +191,9 @@ public class NettyService {
             ByteBuf byteBuf = ctx.alloc().buffer();
             serializer.serialize(message, byteBuf);
             ctx.writeAndFlush(byteBuf);
-
-            logger.trace(" send request, host: {}, seq: {}", node, message.getSeq());
+            if (logger.isTraceEnabled()) {
+                logger.trace(" send request, host: {}, seq: {}", node, message.getSeq());
+            }
         } else {
             callback.sendFailed(StatusCode.UNREACHABLE, "node unreachable");
         }

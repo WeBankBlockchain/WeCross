@@ -36,27 +36,32 @@ public class ResourceThreadPoolConfig {
         Long corePoolSize = toml.getLong("advanced.resourceThreadPool.corePoolSize");
         if (corePoolSize == null) {
             corePoolSize = (long) 8;
-            logger.debug(
-                    "[advanced.resourceThreadPool.corePoolSize] not set, use default: "
-                            + corePoolSize);
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                        "[advanced.resourceThreadPool.corePoolSize] not set, use default: "
+                                + corePoolSize);
+            }
         }
 
         Long maxPoolSize = toml.getLong("advanced.resourceThreadPool.maxPoolSize");
         if (maxPoolSize == null) {
             maxPoolSize = new Long(8);
-            logger.debug(
-                    "[advanced.resourceThreadPool.maxPoolSize] not set, use default: "
-                            + maxPoolSize);
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                        "[advanced.resourceThreadPool.maxPoolSize] not set, use default: "
+                                + maxPoolSize);
+            }
         }
 
         Long queueCapacity = toml.getLong("advanced.resourceThreadPool.threadQueueCapacity");
         if (queueCapacity == null) {
             queueCapacity = new Long(10000);
-            logger.debug(
-                    "[advanced.resourceThreadPool.threadQueueCapacity] not set, use default: "
-                            + queueCapacity);
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                        "[advanced.resourceThreadPool.threadQueueCapacity] not set, use default: "
+                                + queueCapacity);
+            }
         }
-
         return new ResourceThreadPool(
                 corePoolSize.intValue(), maxPoolSize.intValue(), queueCapacity.intValue());
     }

@@ -3,19 +3,9 @@ package com.webank.wecross.zone;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.remote.RemoteConnection;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.stub.BlockHeaderManager;
-import com.webank.wecross.stub.Connection;
-import com.webank.wecross.stub.Driver;
-import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.ResourceInfo;
+import com.webank.wecross.stub.*;
 import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -154,7 +144,9 @@ public class Chain {
 
             return connections;
         } catch (Exception e) {
-            logger.debug("Exception: " + e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Exception: " + e);
+            }
             return null;
         } finally {
             lock.readLock().unlock();
@@ -198,7 +190,9 @@ public class Chain {
                 resources.put(name, resource);
             }
         } catch (Exception e) {
-            logger.debug("Exception: " + e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Exception: " + e);
+            }
         } finally {
             lock.writeLock().unlock();
         }
@@ -221,7 +215,9 @@ public class Chain {
                 resources.remove(name);
             }
         } catch (Exception e) {
-            logger.debug("Exception: " + e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Exception: " + e);
+            }
         } finally {
             lock.writeLock().unlock();
         }
@@ -232,7 +228,9 @@ public class Chain {
         try {
             return resources.get(name);
         } catch (Exception e) {
-            logger.debug("Exception: " + e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Exception: " + e);
+            }
             return null;
         } finally {
             lock.readLock().unlock();
@@ -248,7 +246,9 @@ public class Chain {
         try {
             return resources;
         } catch (Exception e) {
-            logger.debug("Exception: " + e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Exception: " + e);
+            }
             return null;
         } finally {
             lock.readLock().unlock();
@@ -311,7 +311,9 @@ public class Chain {
             }
 
         } catch (Exception e) {
-            logger.debug("Exception: " + e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Exception: " + e);
+            }
         } finally {
             lock.writeLock().unlock();
         }
@@ -354,7 +356,9 @@ public class Chain {
                     peer.toString());
 
         } catch (Exception e) {
-            logger.debug("Exception: " + e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Exception: " + e);
+            }
         } finally {
             lock.writeLock().unlock();
         }
@@ -367,7 +371,9 @@ public class Chain {
                 peers.remove(peer);
             }
         } catch (Exception e) {
-            logger.debug("Exception: " + e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Exception: " + e);
+            }
         } finally {
             lock.writeLock().unlock();
         }

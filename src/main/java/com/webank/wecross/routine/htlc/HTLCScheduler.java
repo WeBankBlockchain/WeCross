@@ -551,10 +551,12 @@ public class HTLCScheduler {
                                         callback.onReturn(exception1, false);
                                     } else {
                                         if (logger.isDebugEnabled()) {
-                                            logger.trace(
-                                                    "lock counterparty successfully: {}, path: {}",
-                                                    hash,
-                                                    selfResource.getSelfPath());
+                                            if (logger.isTraceEnabled()) {
+                                                logger.trace(
+                                                        "lock counterparty successfully: {}, path: {}",
+                                                        hash,
+                                                        selfResource.getSelfPath());
+                                            }
                                         }
                                         callback.onReturn(null, true);
                                     }
@@ -619,10 +621,12 @@ public class HTLCScheduler {
                                                 callback.onReturn(exception2, false);
                                             } else {
                                                 if (logger.isDebugEnabled()) {
-                                                    logger.trace(
-                                                            "unlock counterparty successfully: {}, path: {}",
-                                                            hash,
-                                                            selfResource.getSelfPath());
+                                                    if (logger.isTraceEnabled()) {
+                                                        logger.trace(
+                                                                "unlock counterparty successfully: {}, path: {}",
+                                                                hash,
+                                                                selfResource.getSelfPath());
+                                                    }
                                                 }
                                                 callback.onReturn(null, true);
                                             }

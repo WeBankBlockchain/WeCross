@@ -52,7 +52,9 @@ public class ConfigUtils {
             dir = resolver.getResource(stubsPath).getFile();
             // dir = new File(ConfigUtils.class.getClassLoader().getResource(stubsPath).getFile());
         } catch (Exception e) {
-            logger.debug("Local stubs: " + stubsPath + " is empty");
+            if (logger.isDebugEnabled()) {
+                logger.debug("Local stubs: " + stubsPath + " is empty");
+            }
             // throw new WeCrossException(ResourceQueryStatus.DIR_NOT_EXISTS, errorMessage);
             return result;
         }

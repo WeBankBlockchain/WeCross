@@ -59,13 +59,13 @@ public class AccountManagerConfig {
                     toml.read(accountConfig.getInputStream());
 
                     String type = toml.getString("account.type");
-
-                    logger.debug(
-                            "Loading account, path: {}, name: {}, type: {}",
-                            accountConfig.getURI(),
-                            resource.getFile().getName(),
-                            type);
-
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(
+                                "Loading account, path: {}, name: {}, type: {}",
+                                accountConfig.getURI(),
+                                resource.getFile().getName(),
+                                type);
+                    }
                     if (type == null) {
                         logger.error(
                                 "Could not load account type. path: {}", accountConfig.getURI());

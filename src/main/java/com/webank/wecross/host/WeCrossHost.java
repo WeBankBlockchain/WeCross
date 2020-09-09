@@ -114,7 +114,9 @@ public class WeCrossHost {
         msg.setMethod("seq");
 
         for (Peer peer : peerManager.getPeerInfos().values()) {
-            logger.debug("Send peer seq, to peer:{}, seq:{}", peer, seq);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Send peer seq, to peer:{}, seq:{}", peer, seq);
+            }
             zoneManager.getP2PService().asyncSendMessage(peer, msg, null);
         }
     }
@@ -170,7 +172,9 @@ public class WeCrossHost {
             // dump to info every 10 seconds
             logger.info(dumpStr);
         } else {
-            logger.debug(dumpStr);
+            if (logger.isDebugEnabled()) {
+                logger.debug(dumpStr);
+            }
         }
     }
 
