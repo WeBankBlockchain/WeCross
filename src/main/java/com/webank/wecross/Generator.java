@@ -9,22 +9,22 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 public class Generator {
-    private static final Logger logger  = LoggerFactory.getLogger(Generator.class);
     private static final int ARGS_LENGTH = 3;
     private static ApplicationContext context;
+
     public static void main(String[] args) {
 
         context = new AnnotationConfigApplicationContext(StubManagerConfig.class);
 
         if (args.length < ARGS_LENGTH) {
-            logger.debug("Usage: connection/account <type> <path> <args>");
+            System.out.println("Usage: connection/account <type> <path> <args>");
             return;
         }
 
         String op = args[0];
         String type = args[1];
         String path = args[2];
-        logger.debug("operator:{} type:{} path:{}", op, type, path);
+        System.out.println(String.format("operator:%1 type:%2 path:%3", op, type, path));
 
         StubManager stubManager = context.getBean(StubManager.class);
         try {
@@ -35,10 +35,10 @@ public class Generator {
             } else if (op.equals("account")) {
                 stubFactory.generateAccount(path, new String[] {});
             } else {
-                logger.error("Unknown operation: " + op);
+                System.err.println("Unknown operation: " + op);
             }
         } catch (Exception e) {
-            logger.error("Error" + e.toString());
+            System.err.println("Error" + e.toString());
             return;
         }
     }
