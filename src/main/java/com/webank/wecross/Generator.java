@@ -3,8 +3,6 @@ package com.webank.wecross;
 import com.webank.wecross.config.StubManagerConfig;
 import com.webank.wecross.stub.StubFactory;
 import com.webank.wecross.stubmanager.StubManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
