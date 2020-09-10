@@ -11,7 +11,6 @@ public class Generator {
     private static ApplicationContext context;
 
     public static void main(String[] args) {
-
         context = new AnnotationConfigApplicationContext(StubManagerConfig.class);
 
         if (args.length < ARGS_LENGTH) {
@@ -22,7 +21,7 @@ public class Generator {
         String op = args[0];
         String type = args[1];
         String path = args[2];
-        System.out.println(String.format("operator:%1 type:%2 path:%3", op, type, path));
+        System.out.println(String.format("operator: " + op + " type: " + type + " path: " + path));
 
         StubManager stubManager = context.getBean(StubManager.class);
         try {
