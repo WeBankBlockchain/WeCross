@@ -24,16 +24,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Resource {
-    private Logger logger = LoggerFactory.getLogger(Response.class);
+    private final Logger logger = LoggerFactory.getLogger(Response.class);
     private String stubType;
     private Driver driver;
-    private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
+    private Map<Peer, Connection> connections = new HashMap<>();
     private Path path;
     private ResourceInfo resourceInfo;
     private BlockHeaderManager blockHeaderManager;
     boolean hasLocalConnection = false;
     boolean isTemporary = false;
-    private Random random = new SecureRandom();
+    private final Random random = new SecureRandom();
 
     public static final String RAW_TRANSACTION = "RAW_TRANSACTION";
 
@@ -84,7 +84,7 @@ public class Resource {
     }
 
     public interface Callback {
-        public void onTransactionResponse(
+        void onTransactionResponse(
                 TransactionException transactionException, TransactionResponse transactionResponse);
     }
 
@@ -107,39 +107,27 @@ public class Resource {
             driver.asyncCall(
                     context,
                     chooseConnection(),
-                    new Driver.Callback() {
-                        @Override
-                        public void onTransactionResponse(
-                                TransactionException transactionException,
-                                TransactionResponse transactionResponse) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug(
-                                        "asyncCall response: {}, exception: ",
-                                        transactionResponse,
-                                        transactionException);
-                            }
-                            callback.onTransactionResponse(
-                                    transactionException, transactionResponse);
+                    (transactionException, transactionResponse) -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(
+                                    "asyncCall response: {}, exception: ",
+                                    transactionResponse,
+                                    transactionException);
                         }
+                        callback.onTransactionResponse(transactionException, transactionResponse);
                     });
         } else {
             driver.asyncCallByProxy(
                     context,
                     chooseConnection(),
-                    new Driver.Callback() {
-                        @Override
-                        public void onTransactionResponse(
-                                TransactionException transactionException,
-                                TransactionResponse transactionResponse) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug(
-                                        "asyncCall response: {}, exception: ",
-                                        transactionResponse,
-                                        transactionException);
-                            }
-                            callback.onTransactionResponse(
-                                    transactionException, transactionResponse);
+                    (transactionException, transactionResponse) -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(
+                                    "asyncCall response: {}, exception: ",
+                                    transactionResponse,
+                                    transactionException);
                         }
+                        callback.onTransactionResponse(transactionException, transactionResponse);
                     });
         }
     }
@@ -164,39 +152,27 @@ public class Resource {
             driver.asyncSendTransaction(
                     context,
                     chooseConnection(),
-                    new Driver.Callback() {
-                        @Override
-                        public void onTransactionResponse(
-                                TransactionException transactionException,
-                                TransactionResponse transactionResponse) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug(
-                                        "asyncCall response: {}, exception: ",
-                                        transactionResponse,
-                                        transactionException);
-                            }
-                            callback.onTransactionResponse(
-                                    transactionException, transactionResponse);
+                    (transactionException, transactionResponse) -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(
+                                    "asyncCall response: {}, exception: ",
+                                    transactionResponse,
+                                    transactionException);
                         }
+                        callback.onTransactionResponse(transactionException, transactionResponse);
                     });
         } else {
             driver.asyncSendTransactionByProxy(
                     context,
                     chooseConnection(),
-                    new Driver.Callback() {
-                        @Override
-                        public void onTransactionResponse(
-                                TransactionException transactionException,
-                                TransactionResponse transactionResponse) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug(
-                                        "asyncCall response: {}, exception: ",
-                                        transactionResponse,
-                                        transactionException);
-                            }
-                            callback.onTransactionResponse(
-                                    transactionException, transactionResponse);
+                    (transactionException, transactionResponse) -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(
+                                    "asyncCall response: {}, exception: ",
+                                    transactionResponse,
+                                    transactionException);
                         }
+                        callback.onTransactionResponse(transactionException, transactionResponse);
                     });
         }
     }
@@ -221,14 +197,7 @@ public class Resource {
     public Response onRemoteTransaction(Request request) {
         CompletableFuture<Response> completableFuture = new CompletableFuture<>();
 
-        onRemoteTransaction(
-                request,
-                new Connection.Callback() {
-                    @Override
-                    public void onResponse(Response response) {
-                        completableFuture.complete(response);
-                    }
-                });
+        onRemoteTransaction(request, completableFuture::complete);
 
         try {
             return completableFuture.get(10, TimeUnit.SECONDS);
