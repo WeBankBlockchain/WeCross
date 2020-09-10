@@ -59,8 +59,8 @@ public class VerifyData {
         }
 
         boolean isEqual =
-                path.getResource().equals(transaction.getResource())
-                        && getBlockNumber() == transaction.getBlockNumber()
+                // path.getResource().equals(transaction.getResource()) &&
+                getBlockNumber() == transaction.getBlockNumber()
                         && getTransactionHash().equals(transaction.getTransactionHash())
                         && getMethod().equals(request.getMethod())
                         && Arrays.equals(getArgs(), request.getArgs())

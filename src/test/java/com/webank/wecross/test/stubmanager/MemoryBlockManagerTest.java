@@ -18,6 +18,7 @@ import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.junit.Assert;
 import org.junit.Test;
@@ -98,6 +99,11 @@ public class MemoryBlockManagerTest {
                             @Override
                             public void setConnectionEventHandler(
                                     ConnectionEventHandler eventHandler) {}
+
+                            @Override
+                            public Map<String, String> getProperties() {
+                                return null;
+                            }
                         });
 
         Timer timer = new HashedWheelTimer();

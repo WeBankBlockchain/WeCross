@@ -141,7 +141,7 @@ public class ZonesConfig {
 
             Driver driver = stubFactory.newDriver();
             List<ResourceInfo> resources = driver.getResources(localConnection);
-            Map<String, String> properties = driver.getProperties(localConnection);
+            Map<String, String> properties = localConnection.getProperties();
             String checksum = ChainInfo.buildChecksum(driver, localConnection);
 
             ChainInfo chainInfo = new ChainInfo();

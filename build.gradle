@@ -196,7 +196,10 @@ task makeStubJAR(type: org.gradle.api.tasks.bundling.Jar) {
 }
 
 test {
-    testLogging.showStandardStreams = true
+    testLogging {
+                showStandardStreams = false
+                events "passed","skipped","failed"
+            }
 }
 
 jacocoTestReport {

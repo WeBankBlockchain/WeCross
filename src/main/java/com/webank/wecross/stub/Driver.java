@@ -1,7 +1,6 @@
 package com.webank.wecross.stub;
 
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public interface Driver {
@@ -24,13 +23,6 @@ public interface Driver {
      * @return resources
      */
     List<ResourceInfo> getResources(Connection connection);
-
-    /**
-     * get properties
-     *
-     * @return Map<String , String>
-     */
-    Map<String, String> getProperties(Connection connection);
 
     /**
      * Async Call the interface of contract or chaincode Just fake async for compatibility, you need

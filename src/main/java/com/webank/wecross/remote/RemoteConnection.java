@@ -76,6 +76,11 @@ public class RemoteConnection implements Connection {
         this.eventHandler = eventHandler;
     }
 
+    @Override
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }

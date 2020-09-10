@@ -51,7 +51,7 @@ public class Chain {
         this.localConnection = localConnection;
 
         if (localConnection != null) {
-            this.properties = driver.getProperties(localConnection);
+            this.properties = localConnection.getProperties();
         } else {
             this.properties = chainInfo.getProperties();
         }

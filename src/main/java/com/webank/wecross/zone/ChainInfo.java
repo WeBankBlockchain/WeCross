@@ -78,7 +78,7 @@ public class ChainInfo {
                         if (!Objects.isNull(e)) {
                             logger.error(
                                     "Could not get genesisBlock from connection: {}",
-                                    driver.getProperties(connection));
+                                    connection.getProperties());
                             genensisBlockHeaderFuture.complete(null);
                         } else {
                             genensisBlockHeaderFuture.complete(block.getRawBytes());
@@ -91,8 +91,7 @@ public class ChainInfo {
             genesisBlockHeader = genensisBlockHeaderFuture.get(20, TimeUnit.SECONDS);
             if (genesisBlockHeader == null) {
                 String errorMessage =
-                        "Could not get genesisBlock from connection: "
-                                + driver.getProperties(connection);
+                        "Could not get genesisBlock from connection: " + connection.getProperties();
                 logger.error(errorMessage);
                 throw new Exception(errorMessage);
             }

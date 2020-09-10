@@ -307,7 +307,8 @@ public class HTLCResource extends Resource {
             if (!P2P_ACCESS_WHITE_LIST.contains(method)) {
                 response = new Response();
                 response.setErrorCode(ErrorCode.HTLC_ERROR);
-                response.setErrorMessage("HTLCResource doesn't allow peers to call " + method);
+                response.setErrorMessage(
+                        "HTLCResource doesn't allow peers to call,request: " + transactionRequest);
                 if (logger.isDebugEnabled()) {
                     logger.debug("onRemoteTransaction, response: {}", response);
                 }
