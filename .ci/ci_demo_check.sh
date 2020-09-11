@@ -115,7 +115,7 @@ quit
 EOF
     cd ..
 
-    sleep 20
+    sleep 25
 
     cd WeCross-Console/
     bash start.sh <<EOF
