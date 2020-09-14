@@ -2,11 +2,17 @@ package com.webank.wecross.config;
 
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.LocalAccountManager;
+import com.webank.wecross.account.RemoteAccountManager;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.network.client.ClientConnection;
+import com.webank.wecross.network.client.NettyAsyncHttpClientEngine;
 import com.webank.wecross.network.p2p.netty.factory.P2PConfig;
+import com.webank.wecross.restserver.RPCContext;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stubmanager.StubManager;
+import com.webank.wecross.utils.ConfigUtils;
 import java.io.IOException;
 import java.util.Objects;
 import javax.annotation.Resource;
@@ -24,10 +30,21 @@ public class AccountManagerConfig {
 
     @Resource P2PConfig weCrossConfig;
 
+    @Resource RPCContext rpcContext;
+
     private Logger logger = LoggerFactory.getLogger(AccountManagerConfig.class);
 
     @Bean
     public AccountManager newAccountManager() throws IOException, WeCrossException {
+        boolean enableRemote = ConfigUtils.parseBoolean(toml, "account-manager.enable", false);
+        if (!enableRemote) {
+            return newLocalAccountManager();
+        } else {
+            return newRemoteAccountManager();
+        }
+    }
+
+    public AccountManager newLocalAccountManager() throws IOException, WeCrossException {
         String accountsPath = toml.getString("accounts.path", "classpath:accounts/");
 
         System.out.println("Initializing AccountManager with config(" + accountsPath + ") ...");
@@ -46,7 +63,7 @@ public class AccountManagerConfig {
             org.springframework.core.io.Resource[] resources =
                     resolver.getResources(accountsPath + "/*");
 
-            AccountManager accountManager = new AccountManager();
+            AccountManager accountManager = new LocalAccountManager();
             for (org.springframework.core.io.Resource resource : resources) {
                 if (resource.getFile().isDirectory()
                         && !Objects.requireNonNull(resource.getFilename()).startsWith(".")) {
@@ -105,5 +122,32 @@ public class AccountManagerConfig {
         } catch (IOException e) {
             throw e;
         }
+    }
+
+    public AccountManager newRemoteAccountManager() throws IOException, WeCrossException {
+        ClientConnection clientConnection = new ClientConnection();
+
+        clientConnection.setServer(ConfigUtils.parseString(toml, "account-manager.server"));
+        clientConnection.setSSLKey(ConfigUtils.parseString(toml, "account-manager.sslKey"));
+        clientConnection.setSSLCert(ConfigUtils.parseString(toml, "account-manager.sslCert"));
+        clientConnection.setCaCert(ConfigUtils.parseString(toml, "account-manager.caCert"));
+        clientConnection.setMaxTotal(ConfigUtils.parseInt(toml, "account-manager.maxTotal", 200));
+        clientConnection.setMaxPerRoute(
+                ConfigUtils.parseInt(toml, "account-manager.maxPerRoute", 8));
+
+        NettyAsyncHttpClientEngine engine = new NettyAsyncHttpClientEngine();
+        engine.setClientConnection(clientConnection);
+        engine.init();
+
+        RemoteAccountManager remoteAccountManager = new RemoteAccountManager();
+        remoteAccountManager.setEngine(engine);
+        remoteAccountManager.setRpcContext(rpcContext);
+
+        AccountManager localAccountManager = newLocalAccountManager();
+        rpcContext.setToken(WeCrossDefault.LOCAL_ACCOUNT_TOKEN);
+        remoteAccountManager.setAccounts(
+                localAccountManager.getAccounts()); // set according with rpcContext
+
+        return remoteAccountManager;
     }
 }

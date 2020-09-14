@@ -3,6 +3,7 @@ package com.webank.wecross.network.rpc.netty;
 import com.webank.wecross.network.p2p.netty.factory.ThreadPoolTaskExecutorFactory;
 import com.webank.wecross.network.rpc.URIHandlerDispatcher;
 import com.webank.wecross.network.rpc.netty.handler.HttpServerHandler;
+import com.webank.wecross.restserver.RPCContext;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -41,6 +42,12 @@ public class RPCBootstrap {
     private ServerBootstrap serverBootstrap = new ServerBootstrap();
     private RPCConfig config;
     private URIHandlerDispatcher uriHandlerDispatcher;
+
+    public void setRPCContext(com.webank.wecross.restserver.RPCContext RPCContext) {
+        this.rpcContext = RPCContext;
+    }
+
+    private RPCContext rpcContext;
 
     public RPCConfig getConfig() {
         return config;
@@ -151,7 +158,8 @@ public class RPCBootstrap {
                                                 new HttpObjectAggregator(Integer.MAX_VALUE),
                                                 new HttpServerHandler(
                                                         getUriHandlerDispatcher(),
-                                                        threadPoolTaskExecutor));
+                                                        threadPoolTaskExecutor,
+                                                        rpcContext));
                             }
                         });
 

@@ -25,6 +25,15 @@
     threadNum = 16
     threadQueueCapacity = 100000
 
+[account-manager]
+    enable = true
+    server =  '127.0.0.1:8250'
+    sslKey = 'classpath:ssl.key'
+    sslCert = 'classpath:ssl.crt'
+    caCert = 'classpath:ca.crt'
+    maxTotal = 200
+    maxPerRoute = 8
+
 
 #[[htlc]]
 #    selfPath = 'payment.bcos.htlc'

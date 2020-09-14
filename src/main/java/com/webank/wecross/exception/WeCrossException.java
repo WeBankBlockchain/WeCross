@@ -25,6 +25,13 @@ public class WeCrossException extends java.lang.Exception {
 
         // other
         public static final int HTLC_ERROR = 301;
+
+        // client engine
+        public static final int QUERY_TIMEOUT = 401;
+        public static final int QUERY_PARAMS_ERROR = 402;
+        public static final int QUERY_CLIENT_ERROR = 403;
+        public static final int QUERY_SERVER_ERROR = 404;
+        public static final int QUERY_CLIENT_INIT_ERROR = 405;
     }
 
     public static final int UNKNOWN_INTERNAL_ERROR = -6535;

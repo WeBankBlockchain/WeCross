@@ -133,7 +133,9 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-actuator:2.1.16.RELEASE'
     compile 'org.springframework.boot:spring-boot-configuration-processor:2.1.16.RELEASE'
     compile 'io.netty:netty-all:4.1.51.Final'
+    compile 'org.asynchttpclient:async-http-client:2.12.0'
     compile 'org.bouncycastle:bcprov-jdk15on:1.60'
+    compile 'com.auth0:java-jwt:3.10.3'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
