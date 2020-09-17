@@ -1,8 +1,9 @@
 package com.webank.wecross.routine.htlc;
 
+import com.webank.wecross.stub.Path;
+import com.webank.wecross.stub.Transaction;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
-import com.webank.wecross.stub.VerifiedTransaction;
 import java.util.Arrays;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ public class VerifyData {
     private String method;
     private String[] args;
     private String[] result;
+    private Path path;
 
     public VerifyData(
             long blockNumber,
@@ -30,7 +32,15 @@ public class VerifyData {
         this.result = result;
     }
 
-    public boolean verify(VerifiedTransaction transaction) {
+    public Path getPath() {
+        return path;
+    }
+
+    public void setPath(Path path) {
+        this.path = path;
+    }
+
+    public boolean verify(Transaction transaction) {
         if (transaction == null) {
             logger.error("verify transaction failed, transaction: null, verifyData: {}", this);
             return false;
@@ -49,6 +59,7 @@ public class VerifyData {
         }
 
         boolean isEqual =
+                // path.getResource().equals(transaction.getResource()) &&
                 getBlockNumber() == transaction.getBlockNumber()
                         && getTransactionHash().equals(transaction.getTransactionHash())
                         && getMethod().equals(request.getMethod())
@@ -67,6 +78,8 @@ public class VerifyData {
                 + blockNumber
                 + ", transactionHash='"
                 + transactionHash
+                + ", path='"
+                + path
                 + '\''
                 + ", method='"
                 + method

@@ -1,6 +1,6 @@
 package com.webank.wecross.stub;
 
-public interface BlockHeaderManager {
+public interface BlockManager {
     public void start();
 
     public void stop();
@@ -11,9 +11,9 @@ public interface BlockHeaderManager {
 
     public void asyncGetBlockNumber(GetBlockNumberCallback callback);
 
-    public interface GetBlockHeaderCallback {
-        void onResponse(Exception e, byte[] blockHeader);
+    public interface GetBlockCallback {
+        void onResponse(Exception e, Block block);
     }
 
-    void asyncGetBlockHeader(long blockNumber, BlockHeaderManager.GetBlockHeaderCallback callback);
+    void asyncGetBlock(long blockNumber, GetBlockCallback callback);
 }

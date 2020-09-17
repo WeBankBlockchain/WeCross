@@ -5,7 +5,7 @@ import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.BlockHeaderManager;
+import com.webank.wecross.stub.BlockManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.TransactionException;
@@ -112,7 +112,7 @@ public class AssetHTLC implements HTLC {
                                     method,
                                     args,
                                     new String[] {RoutineDefault.SUCCESS_FLAG});
-
+                    verifyData.setPath(htlcResource.getPath());
                     String finalRes = res;
                     verifyHtlcTransaction(
                             htlcResource,
@@ -144,16 +144,15 @@ public class AssetHTLC implements HTLC {
             Resource resource, VerifyData verifyData, VerifyCallback callback) {
         String txHash = verifyData.getTransactionHash();
         long blockNumber = verifyData.getBlockNumber();
-        BlockHeaderManager blockHeaderManager = resource.getBlockHeaderManager();
+        BlockManager blockManager = resource.getBlockManager();
         Connection connection = resource.chooseConnection();
         Driver driver = resource.getDriver();
-        driver.asyncGetVerifiedTransaction(
-                resource.getPath(),
+        driver.asyncGetTransaction(
                 txHash,
                 blockNumber,
-                blockHeaderManager,
+                blockManager,
                 connection,
-                (exception, verifiedTransaction) -> {
+                (exception, transaction) -> {
                     if (exception != null) {
                         logger.error("asyncGetVerifiedTransaction exception, ", exception);
                         callback.onReturn(
@@ -161,7 +160,7 @@ public class AssetHTLC implements HTLC {
                                         ErrorCode.HTLC_ERROR, "GET_VERIFIED_TRANSACTION_ERROR"),
                                 false);
                     } else {
-                        callback.onReturn(null, verifyData.verify(verifiedTransaction));
+                        callback.onReturn(null, verifyData.verify(transaction));
                     }
                 });
     }

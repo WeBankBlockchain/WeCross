@@ -2,9 +2,9 @@ package com.webank.wecross.test.routine;
 
 import com.webank.wecross.routine.htlc.VerifyData;
 import com.webank.wecross.stub.Path;
+import com.webank.wecross.stub.Transaction;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
-import com.webank.wecross.stub.VerifiedTransaction;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -18,18 +18,21 @@ public class VerifyDataTest {
                         "test",
                         new String[] {"hello", "world"},
                         new String[] {"hello", "world"});
+
+        verifyData.setPath(Path.decode("a.b.c"));
         TransactionRequest request =
                 new TransactionRequest("test", new String[] {"hello", "world"});
         TransactionResponse response = new TransactionResponse();
         response.setResult(new String[] {"hello", "world"});
-        VerifiedTransaction verifiedTransaction =
-                new VerifiedTransaction(
-                        100, "0x", Path.decode("test.test.test"), "0x", request, response);
-        Assert.assertEquals(true, verifyData.verify(verifiedTransaction));
+        Transaction transaction = new Transaction(100, "0x", request, response);
 
-        VerifiedTransaction unVerifiedTransaction =
-                new VerifiedTransaction(
-                        1000, null, Path.decode("test.test.test"), "0xx", request, response);
-        Assert.assertEquals(false, verifyData.verify(unVerifiedTransaction));
+        transaction.setSeq("0");
+        transaction.setTransactionID("0");
+        transaction.setResource("c");
+
+        Assert.assertEquals(true, verifyData.verify(transaction));
+
+        Transaction transaction1 = new Transaction(1000, "0xx", request, response);
+        Assert.assertEquals(false, verifyData.verify(transaction1));
     }
 }

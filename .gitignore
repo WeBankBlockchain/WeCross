@@ -12,6 +12,7 @@
 .gradle
 build
 gradle.properties
+secring.gpg
 
 ### output
 dist*

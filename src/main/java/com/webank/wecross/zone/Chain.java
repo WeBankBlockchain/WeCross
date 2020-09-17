@@ -3,7 +3,7 @@ package com.webank.wecross.zone;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.remote.RemoteConnection;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.stub.BlockHeaderManager;
+import com.webank.wecross.stub.BlockManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
@@ -37,7 +37,7 @@ public class Chain {
     private Set<Peer> peers = new HashSet<>();
     private Map<String, Resource> resources = new HashMap<String, Resource>();
     private Driver driver;
-    private BlockHeaderManager blockHeaderManager;
+    private BlockManager blockManager;
     private Random random = new SecureRandom();
     private ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -58,11 +58,11 @@ public class Chain {
     }
 
     public void start() {
-        blockHeaderManager.start();
+        blockManager.start();
     }
 
     public void stop() {
-        blockHeaderManager.stop();
+        blockManager.stop();
     }
 
     public ChainInfo getChainInfo() {
@@ -101,20 +101,20 @@ public class Chain {
         this.driver = driver;
     }
 
-    public BlockHeaderManager getBlockHeaderManager() {
-        return blockHeaderManager;
+    public BlockManager getBlockManager() {
+        return blockManager;
     }
 
-    public void setBlockHeaderManager(BlockHeaderManager blockHeaderManager) {
-        this.blockHeaderManager = blockHeaderManager;
+    public void setBlockManager(BlockManager blockManager) {
+        this.blockManager = blockManager;
     }
 
     public long getBlockNumber() {
         long blockNumber = 0;
         try {
             CompletableFuture<Long> future = new CompletableFuture<>();
-            this.blockHeaderManager.asyncGetBlockNumber(
-                    new BlockHeaderManager.GetBlockNumberCallback() {
+            this.blockManager.asyncGetBlockNumber(
+                    new BlockManager.GetBlockNumberCallback() {
                         @Override
                         public void onResponse(Exception e, long blockNumber) {
                             if (e != null) {
@@ -302,7 +302,7 @@ public class Chain {
                 resource.setStubType(stubType);
                 resource.setTemporary(false);
                 resource.setResourceInfo(newResourceInfo);
-                resource.setBlockHeaderManager(blockHeaderManager);
+                resource.setBlockManager(blockManager);
                 resource.setDriver(driver);
                 resource.addConnection(null, localConnection);
 
@@ -343,7 +343,7 @@ public class Chain {
             resource.setStubType(stubType);
             resource.setTemporary(false);
             resource.setResourceInfo(resourceInfo);
-            resource.setBlockHeaderManager(blockHeaderManager);
+            resource.setBlockManager(blockManager);
             resource.setDriver(driver);
             resource.addConnection(peer, remoteConnection);
 

@@ -8,7 +8,7 @@ import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.StubFactory;
-import com.webank.wecross.stubmanager.MemoryBlockHeaderManagerFactory;
+import com.webank.wecross.stubmanager.MemoryBlockManagerFactory;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.utils.ConfigUtils;
 import com.webank.wecross.zone.Chain;
@@ -33,7 +33,7 @@ public class ZonesConfig {
 
     @Resource StubManager stubManager;
 
-    @Resource MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory;
+    @Resource MemoryBlockManagerFactory resourceBlockManagerFactory;
 
     @Bean
     public Map<String, Zone> newZoneMap() {
@@ -140,19 +140,20 @@ public class ZonesConfig {
             }
 
             Driver driver = stubFactory.newDriver();
-            List<ResourceInfo> resources = localConnection.getResources();
+            List<ResourceInfo> resources = driver.getResources(localConnection);
+            Map<String, String> properties = localConnection.getProperties();
             String checksum = ChainInfo.buildChecksum(driver, localConnection);
 
             ChainInfo chainInfo = new ChainInfo();
             chainInfo.setName(chainName);
-            chainInfo.setProperties(localConnection.getProperties());
+            chainInfo.setProperties(properties);
             chainInfo.setStubType(type);
             chainInfo.setResources(resources);
             chainInfo.setChecksum(checksum);
 
             Chain chain = new Chain(zone, chainInfo, driver, localConnection);
             chain.setDriver(stubFactory.newDriver());
-            chain.setBlockHeaderManager(resourceBlockHeaderManagerFactory.build(chain));
+            chain.setBlockManager(resourceBlockManagerFactory.build(chain));
             for (ResourceInfo resourceInfo : resources) {
                 com.webank.wecross.resource.Resource resource =
                         new com.webank.wecross.resource.Resource();
@@ -166,7 +167,7 @@ public class ZonesConfig {
                 resource.setStubType(type);
                 resource.setResourceInfo(resourceInfo);
 
-                resource.setBlockHeaderManager(chain.getBlockHeaderManager());
+                resource.setBlockManager(chain.getBlockManager());
 
                 chain.getResources().put(resourceInfo.getName(), resource);
                 logger.info(

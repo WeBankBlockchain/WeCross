@@ -20,12 +20,11 @@ repositories {
     maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
     jcenter()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url 'https://dl.bintray.com/ethereum/maven/' }
+    maven { url "https://maven.aliyun.com/nexus/content/groups/public/" }
 }
 
 sourceCompatibility = '1.8'
-version = '1.0.0-rc4'
-
+version = '1.0.0-rc5-09061-SNAPSHOT'
 
 task stubSourceJar(type: Jar) {
     into 'com/webank/wecross/stub', { from 'src/main/java/com/webank/wecross/stub' }
@@ -42,6 +41,17 @@ task javadocJar(type: Jar) {
     // from javadoc
     classifier = 'javadoc'
 }
+
+ext {
+    if (!project.hasProperty("NEXUS_USERNAME")) {
+        NEXUS_USERNAME="xxx"
+    }
+
+    if (!project.hasProperty("NEXUS_PASSWORD")) {
+        NEXUS_PASSWORD="xxx"
+    }
+}
+
 
 publishing {
     publications {
@@ -82,22 +92,17 @@ publishing {
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-            
-            //*
-            def NEXUS_USERNAME = ''
-            def NEXUS_PASSWORD = ''
-            //*/
+
             credentials {
                 username = NEXUS_USERNAME
                 password = NEXUS_PASSWORD
             }
-
         }
     }
-}
 
-signing {
-    sign publishing.publications.mavenJava
+    signing {
+        sign publishing.publications.mavenJava
+    }
 }
 
 
@@ -122,6 +127,7 @@ configurations.all {
 dependencies {
     compile 'org.quartz-scheduler:quartz:2.3.2'
     compile 'com.moandjiezana.toml:toml4j:0.7.2'
+    compile 'org.apache.commons:commons-lang3:3.11'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.11.2' // must not lower than 2.11.0 to support abi translate
     compile 'org.springframework.boot:spring-boot-starter-log4j2:2.1.16.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-actuator:2.1.16.RELEASE'
@@ -190,7 +196,10 @@ task makeStubJAR(type: org.gradle.api.tasks.bundling.Jar) {
 }
 
 test {
-    testLogging.showStandardStreams = true
+    testLogging {
+                showStandardStreams = false
+                events "passed","skipped","failed"
+            }
 }
 
 jacocoTestReport {

@@ -2,7 +2,7 @@ package com.webank.wecross.resource;
 
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.BlockHeaderManager;
+import com.webank.wecross.stub.BlockManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
@@ -30,7 +30,7 @@ public class Resource {
     private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
     private Path path;
     private ResourceInfo resourceInfo;
-    private BlockHeaderManager blockHeaderManager;
+    private BlockManager blockManager;
     boolean hasLocalConnection = false;
     boolean isTemporary = false;
     private Random random = new SecureRandom();
@@ -88,24 +88,16 @@ public class Resource {
                 TransactionException transactionException, TransactionResponse transactionResponse);
     }
 
-    @Deprecated
-    public TransactionResponse call(TransactionRequest request, Account account)
-            throws TransactionException {
-        TransactionContext<TransactionRequest> context =
-                new TransactionContext<>(
-                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
-        return driver.call(context, chooseConnection());
-    }
-
     public void asyncCall(TransactionRequest request, Account account, Resource.Callback callback) {
-        TransactionContext<TransactionRequest> context =
-                new TransactionContext<>(
-                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
+        TransactionContext context =
+                new TransactionContext(account, this.path, this.resourceInfo, this.blockManager);
         boolean isRawTransaction =
                 (boolean) request.getOptions().getOrDefault(RAW_TRANSACTION, false);
         if (isRawTransaction) {
             driver.asyncCall(
                     context,
+                    request,
+                    false,
                     chooseConnection(),
                     new Driver.Callback() {
                         @Override
@@ -123,8 +115,10 @@ public class Resource {
                         }
                     });
         } else {
-            driver.asyncCallByProxy(
+            driver.asyncCall(
                     context,
+                    request,
+                    true,
                     chooseConnection(),
                     new Driver.Callback() {
                         @Override
@@ -144,25 +138,17 @@ public class Resource {
         }
     }
 
-    @Deprecated
-    public TransactionResponse sendTransaction(TransactionRequest request, Account account)
-            throws TransactionException {
-        TransactionContext<TransactionRequest> context =
-                new TransactionContext<>(
-                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
-        return driver.sendTransaction(context, chooseConnection());
-    }
-
     public void asyncSendTransaction(
             TransactionRequest request, Account account, Resource.Callback callback) {
-        TransactionContext<TransactionRequest> context =
-                new TransactionContext<>(
-                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
+        TransactionContext context =
+                new TransactionContext(account, this.path, this.resourceInfo, this.blockManager);
         boolean isRawTransaction =
                 (boolean) request.getOptions().getOrDefault(RAW_TRANSACTION, false);
         if (isRawTransaction) {
             driver.asyncSendTransaction(
                     context,
+                    request,
+                    false,
                     chooseConnection(),
                     new Driver.Callback() {
                         @Override
@@ -180,8 +166,10 @@ public class Resource {
                         }
                     });
         } else {
-            driver.asyncSendTransactionByProxy(
+            driver.asyncSendTransaction(
                     context,
+                    request,
+                    true,
                     chooseConnection(),
                     new Driver.Callback() {
                         @Override
@@ -202,17 +190,17 @@ public class Resource {
     }
 
     public void onRemoteTransaction(Request request, Connection.Callback callback) {
-        if (driver.isTransaction(request)) {
+        /*
+        ImmutablePair<Boolean, TransactionRequest> booleanTransactionRequestPair =
+                driver.decodeTransactionRequest(request);
+        if (booleanTransactionRequestPair.getLeft()) {
 
-            /*
-            TransactionContext<TransactionRequest> transactionRequest =
-                    driver.decodeTransactionRequest(request.getData());
-                    */
-
+            TransactionRequest transactionRequest = booleanTransactionRequestPair.getValue();
             // TODO: check request
 
             // fail or return
         }
+        */
 
         request.setResourceInfo(resourceInfo);
         chooseConnection().asyncSend(request, callback);
@@ -271,12 +259,12 @@ public class Resource {
         this.resourceInfo = resourceInfo;
     }
 
-    public BlockHeaderManager getBlockHeaderManager() {
-        return blockHeaderManager;
+    public BlockManager getBlockManager() {
+        return blockManager;
     }
 
-    public void setBlockHeaderManager(BlockHeaderManager resourceBlockHeaderManager) {
-        this.blockHeaderManager = resourceBlockHeaderManager;
+    public void setBlockManager(BlockManager blockManager) {
+        this.blockManager = blockManager;
     }
 
     public boolean hasLocalConnection() {

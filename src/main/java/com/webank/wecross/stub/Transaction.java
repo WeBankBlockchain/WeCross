@@ -1,24 +1,28 @@
 package com.webank.wecross.stub;
 
-public class VerifiedTransaction {
+public class Transaction {
+
+    private byte[] txBytes; // raw transaction info
+    private byte[] receiptBytes; // raw transaction receipt info
+
+    private String transactionID;
+    private String seq;
+    private String resource;
+
     private long blockNumber;
     private String transactionHash;
-    private Path path;
-    private String realAddress;
     private TransactionRequest transactionRequest;
     private TransactionResponse transactionResponse;
 
-    public VerifiedTransaction(
+    private boolean transactionByProxy = false;
+
+    public Transaction(
             long blockNumber,
             String transactionHash,
-            Path path,
-            String realAddress,
             TransactionRequest transactionRequest,
             TransactionResponse transactionResponse) {
         this.blockNumber = blockNumber;
         this.transactionHash = transactionHash;
-        this.path = path;
-        this.realAddress = realAddress;
         this.transactionRequest = transactionRequest;
         this.transactionResponse = transactionResponse;
     }
@@ -39,20 +43,12 @@ public class VerifiedTransaction {
         this.transactionHash = transactionHash;
     }
 
-    public Path getPath() {
-        return path;
+    public String getResource() {
+        return resource;
     }
 
-    public void setPath(Path path) {
-        this.path = path;
-    }
-
-    public String getRealAddress() {
-        return realAddress;
-    }
-
-    public void setRealAddress(String realAddress) {
-        this.realAddress = realAddress;
+    public void setResource(String resource) {
+        this.resource = resource;
     }
 
     public TransactionRequest getTransactionRequest() {
@@ -71,19 +67,63 @@ public class VerifiedTransaction {
         this.transactionResponse = transactionResponse;
     }
 
+    public byte[] getTxBytes() {
+        return txBytes;
+    }
+
+    public void setTxBytes(byte[] txBytes) {
+        this.txBytes = txBytes;
+    }
+
+    public byte[] getReceiptBytes() {
+        return receiptBytes;
+    }
+
+    public void setReceiptBytes(byte[] receiptBytes) {
+        this.receiptBytes = receiptBytes;
+    }
+
+    public String getTransactionID() {
+        return transactionID;
+    }
+
+    public void setTransactionID(String transactionID) {
+        this.transactionID = transactionID;
+    }
+
+    public boolean isTransactionByProxy() {
+        return transactionByProxy;
+    }
+
+    public void setTransactionByProxy(boolean transactionByProxy) {
+        this.transactionByProxy = transactionByProxy;
+    }
+
+    public String getSeq() {
+        return seq;
+    }
+
+    public void setSeq(String seq) {
+        this.seq = seq;
+    }
+
     @Override
     public String toString() {
-        return "VerifiedTransaction{"
-                + "blockNumber="
+        return "Transaction{"
+                + "transactionID='"
+                + transactionID
+                + '\''
+                + ", seq="
+                + seq
+                + ", resource="
+                + resource
+                + ", blockNumber="
                 + blockNumber
                 + ", transactionHash='"
                 + transactionHash
                 + '\''
-                + ", path="
-                + path
-                + ", realAddress='"
-                + realAddress
-                + '\''
+                + ", transactionByProxy="
+                + transactionByProxy
                 + ", transactionRequest="
                 + transactionRequest
                 + ", transactionResponse="

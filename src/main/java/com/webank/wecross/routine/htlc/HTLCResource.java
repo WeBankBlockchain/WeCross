@@ -7,20 +7,20 @@ import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.BlockHeaderManager;
+import com.webank.wecross.stub.BlockManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Request;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.Response;
-import com.webank.wecross.stub.TransactionContext;
 import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -229,7 +229,7 @@ public class HTLCResource extends Resource {
                         RoutineDefault.UNLOCK_METHOD,
                         args,
                         new String[] {RoutineDefault.SUCCESS_FLAG});
-
+        verifyData.setPath(getCounterpartyPath());
         htlc.verifyHtlcTransaction(
                 getCounterpartyResource(),
                 verifyData,
@@ -247,30 +247,19 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public TransactionResponse call(TransactionRequest request, Account account)
-            throws TransactionException {
-        return getSelfResource().call(request, account);
-    }
-
-    @Override
-    public TransactionResponse sendTransaction(TransactionRequest request, Account account)
-            throws TransactionException {
-        return getSelfResource().sendTransaction(request, account);
-    }
-
-    @Override
     public void onRemoteTransaction(Request request, Connection.Callback callback) {
         Response response = new Response();
         Driver driver = getDriver();
-        if (driver.isTransaction(request)) {
+
+        ImmutablePair<Boolean, TransactionRequest> booleanTransactionRequestPair =
+                driver.decodeTransactionRequest(request);
+        if (booleanTransactionRequestPair.getKey()) {
             if (logger.isDebugEnabled()) {
                 logger.debug("onRemoteTransaction, request: {}", request);
             }
 
-            TransactionContext<TransactionRequest> context =
-                    driver.decodeTransactionRequest(request.getData());
-
-            if (context == null) {
+            TransactionRequest transactionRequest = booleanTransactionRequestPair.getValue();
+            if (transactionRequest == null) {
                 response.setErrorCode(ErrorCode.DECODE_TRANSACTION_REQUEST_ERROR);
                 response.setErrorMessage("decode transaction request failed");
                 if (logger.isDebugEnabled()) {
@@ -281,7 +270,6 @@ public class HTLCResource extends Resource {
                 return;
             }
 
-            TransactionRequest transactionRequest = context.getData();
             if (logger.isDebugEnabled()) {
                 logger.debug("onRemoteTransaction, transactionRequest: {}", transactionRequest);
             }
@@ -319,7 +307,8 @@ public class HTLCResource extends Resource {
             if (!P2P_ACCESS_WHITE_LIST.contains(method)) {
                 response = new Response();
                 response.setErrorCode(ErrorCode.HTLC_ERROR);
-                response.setErrorMessage("HTLCResource doesn't allow peers to call " + method);
+                response.setErrorMessage(
+                        "HTLCResource doesn't allow peers to call,request: " + transactionRequest);
                 if (logger.isDebugEnabled()) {
                     logger.debug("onRemoteTransaction, response: {}", response);
                 }
@@ -463,13 +452,13 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public BlockHeaderManager getBlockHeaderManager() {
-        return getSelfResource().getBlockHeaderManager();
+    public BlockManager getBlockManager() {
+        return getSelfResource().getBlockManager();
     }
 
     @Override
-    public void setBlockHeaderManager(BlockHeaderManager resourceBlockHeaderManager) {
-        getSelfResource().setBlockHeaderManager(resourceBlockHeaderManager);
+    public void setBlockManager(BlockManager blockManager) {
+        getSelfResource().setBlockManager(blockManager);
     }
 
     @Override
