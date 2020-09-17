@@ -3,6 +3,7 @@ package com.webank.wecross.network.rpc.handler;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
@@ -23,6 +24,7 @@ public class ListAccountsURIHandler implements URIHandler {
 
     private WeCrossHost host;
     private ObjectMapper objectMapper = new ObjectMapper();
+    private UserContext userContext;
 
     public ListAccountsURIHandler(WeCrossHost host) {
         this.host = host;
@@ -48,10 +50,10 @@ public class ListAccountsURIHandler implements URIHandler {
             AccountManager accountManager = host.getAccountManager();
             RestRequest restRequest =
                     objectMapper.readValue(content, new TypeReference<RestRequest>() {});
-            restRequest.checkRestRequest("", "listAccounts");
-            Map<String, Account> accounts = accountManager.getAccounts();
+            restRequest.checkRestRequest("", "auth/listAccounts");
+            List<Account> accounts = accountManager.getAccounts(userContext);
             List<Map<String, String>> accountInfos = new ArrayList<>();
-            for (Account account : accounts.values()) {
+            for (Account account : accounts) {
                 Map<String, String> accountInfo = new HashMap<>();
                 accountInfo.put("name", account.getName());
                 accountInfo.put("type", account.getType());
@@ -73,5 +75,9 @@ public class ListAccountsURIHandler implements URIHandler {
         }
 
         callback.onResponse(restResponse);
+    }
+
+    public void setUserContext(UserContext userContext) {
+        this.userContext = userContext;
     }
 }

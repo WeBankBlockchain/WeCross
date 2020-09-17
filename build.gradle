@@ -125,6 +125,9 @@ configurations.all {
 }
 
 dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.8'
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+
     compile 'org.quartz-scheduler:quartz:2.3.2'
     compile 'com.moandjiezana.toml:toml4j:0.7.2'
     compile 'org.apache.commons:commons-lang3:3.11'

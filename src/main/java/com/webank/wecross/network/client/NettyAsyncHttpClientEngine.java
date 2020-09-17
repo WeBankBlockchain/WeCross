@@ -3,6 +3,7 @@ package com.webank.wecross.network.client;
 import static org.asynchttpclient.Dsl.asyncHttpClient;
 import static org.asynchttpclient.Dsl.config;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.exception.WeCrossException;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -13,11 +14,14 @@ import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import java.awt.*;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.asynchttpclient.AsyncCompletionHandler;
 import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.BoundRequestBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -49,11 +53,8 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
     }
 
     @Override
-    public <T extends Response> T send(Request request) throws WeCrossException {
-        String url = clientConnection.getServer() + "/" + request.getMethod();
-        if (logger.isDebugEnabled()) {
-            logger.debug("request: {}; url: {}", request.toString(), url);
-        }
+    public <T extends Response> T send(Request request, TypeReference typeReference)
+            throws WeCrossException {
 
         checkRequest(request);
         CompletableFuture<T> responseFuture = new CompletableFuture<>();
@@ -61,6 +62,7 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
 
         asyncSend(
                 request,
+                typeReference,
                 new Callback<T>() {
                     @Override
                     public void onSuccess(T response) {
@@ -101,9 +103,10 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
     }
 
     @Override
-    public <T extends Response> void asyncSend(Request<?> request, Callback<T> callback) {
+    public <T extends Response> void asyncSend(
+            Request<?> request, TypeReference typeReference, Callback<T> callback) {
         try {
-            String url = clientConnection.getServer() + "/" + request.getMethod();
+            String url = "https://" + clientConnection.getServer() + request.getMethod();
             if (logger.isDebugEnabled()) {
                 logger.debug("request: {}; url: {}", request.toString(), url);
             }
@@ -113,9 +116,7 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
                     .preparePost(url)
                     .setHeader(HttpHeaders.Names.ACCEPT, HttpHeaders.Values.APPLICATION_JSON)
                     .setHeader(HttpHeaders.Names.CONTENT_TYPE, HttpHeaders.Values.APPLICATION_JSON)
-                    .setHeader(
-                            HttpHeaders.Names.AUTHORIZATION,
-                            request.getProperty(HttpHeaders.Names.AUTHORIZATION))
+                    .setHeader(HttpHeaders.Names.AUTHORIZATION, request.getAuth())
                     .setBody(objectMapper.writeValueAsString(request))
                     .execute(
                             new AsyncCompletionHandler<Object>() {
@@ -139,8 +140,7 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
                                             T response =
                                                     (T)
                                                             objectMapper.readValue(
-                                                                    content,
-                                                                    callback.getResponseType());
+                                                                    content, typeReference);
                                             callback.callOnSuccess(response);
                                             return response;
                                         }
@@ -171,6 +171,36 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
                             WeCrossException.ErrorCode.QUERY_CLIENT_ERROR,
                             "Encode json error when async sending: " + e));
         }
+    }
+
+    @Override
+    public void asyncSendInternal(
+            String method,
+            String uri,
+            Iterable<Map.Entry<String, String>> headers,
+            String body,
+            Handler handler) {
+        String url = "https://" + clientConnection.getServer() + uri;
+        BoundRequestBuilder requestBuilder = httpClient.prepare(method, url).setBody(body);
+
+        for (Map.Entry<String, String> header : headers) {
+            requestBuilder.setHeader(header.getKey(), header.getValue());
+        }
+
+        requestBuilder.execute(
+                new AsyncCompletionHandler<Object>() {
+                    @Override
+                    public Object onCompleted(org.asynchttpclient.Response response)
+                            throws Exception {
+                        int statusCode = response.getStatusCode();
+                        String statusText = response.getStatusText();
+                        Iterable<Map.Entry<String, String>> responseHeaders = response.getHeaders();
+                        String responseBody = response.getResponseBody(StandardCharsets.UTF_8);
+
+                        handler.onResponse(statusCode, statusText, responseHeaders, responseBody);
+                        return response;
+                    }
+                });
     }
 
     private SslContext getSslContext(ClientConnection clientConnection) throws IOException {

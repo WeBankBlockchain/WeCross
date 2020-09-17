@@ -3,6 +3,7 @@ package com.webank.wecross.network.rpc.handler;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
@@ -32,6 +33,7 @@ public class ResourceURIHandler implements URIHandler {
 
     private WeCrossHost host;
     private ObjectMapper objectMapper = new ObjectMapper();
+    private UserContext userContext;
 
     public ResourceURIHandler(WeCrossHost host) {
         this.host = host;
@@ -311,5 +313,9 @@ public class ResourceURIHandler implements URIHandler {
         }
 
         callback.onResponse(restResponse);
+    }
+
+    public void setUserContext(UserContext userContext) {
+        this.userContext = userContext;
     }
 }

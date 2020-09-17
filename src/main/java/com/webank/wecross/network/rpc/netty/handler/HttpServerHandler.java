@@ -2,11 +2,12 @@ package com.webank.wecross.network.rpc.netty.handler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.wecross.common.WeCrossDefault;
+import com.webank.wecross.account.JwtToken;
+import com.webank.wecross.account.UserContext;
 import com.webank.wecross.network.rpc.URIHandlerDispatcher;
+import com.webank.wecross.network.rpc.authentication.AuthFilter;
 import com.webank.wecross.network.rpc.handler.URIHandler;
 import com.webank.wecross.network.rpc.netty.URIMethod;
-import com.webank.wecross.restserver.RPCContext;
 import com.webank.wecross.restserver.RestResponse;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -40,14 +41,17 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
 
     private URIHandlerDispatcher uriHandlerDispatcher;
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
-    private RPCContext rpcContext;
+    private UserContext userContext;
+    private AuthFilter authFilter;
     private ObjectMapper objectMapper = new ObjectMapper();
 
     public HttpServerHandler(
             URIHandlerDispatcher uriHandlerDispatcher,
             ThreadPoolTaskExecutor threadPoolTaskExecutor,
-            RPCContext rpcContext) {
-        this.rpcContext = rpcContext;
+            UserContext userContext,
+            AuthFilter authFilter) {
+        this.userContext = userContext;
+        this.authFilter = authFilter;
         this.setUriHandlerDispatcher(uriHandlerDispatcher);
         this.setThreadPoolTaskExecutor(threadPoolTaskExecutor);
     }
@@ -62,6 +66,20 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpRequest httpRequest)
+            throws Exception {
+        authFilter.doAuth(
+                ctx,
+                httpRequest,
+                new AuthFilter.Handler() {
+                    @Override
+                    public void onAuth(ChannelHandlerContext ctx, HttpRequest httpRequest)
+                            throws Exception {
+                        doRouterRead(ctx, httpRequest);
+                    }
+                });
+    }
+
+    protected void doRouterRead(ChannelHandlerContext ctx, HttpRequest httpRequest)
             throws Exception {
         final FullHttpRequest fullHttpRequest = (FullHttpRequest) httpRequest;
 
@@ -102,7 +120,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
 
         threadPoolTaskExecutor.execute(
                 () -> {
-                    rpcContext.setToken(getTokenFromHeader(httpRequest));
+                    userContext.setToken(getTokenFromHeader(httpRequest));
                     uriHandler.handle(
                             uri,
                             method.toString(),
@@ -267,12 +285,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
         this.threadPoolTaskExecutor = threadPoolTaskExecutor;
     }
 
-    private String getTokenFromHeader(HttpRequest httpRequest) {
-        String token = httpRequest.headers().get(HttpHeaders.Names.AUTHORIZATION);
-        if (token == null) {
-            token = WeCrossDefault.LOCAL_ACCOUNT_TOKEN;
+    private JwtToken getTokenFromHeader(HttpRequest httpRequest) {
+        String tokenStr = httpRequest.headers().get(HttpHeaders.Names.AUTHORIZATION);
+        if (tokenStr == null || tokenStr.length() == 0) {
+            return null;
+        } else {
+            return new JwtToken(tokenStr);
         }
-
-        return token;
     }
 }

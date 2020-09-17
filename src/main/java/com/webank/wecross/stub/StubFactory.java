@@ -1,5 +1,7 @@
 package com.webank.wecross.stub;
 
+import java.util.Map;
+
 public interface StubFactory {
     public String version = "1.0.0";
 
@@ -26,6 +28,14 @@ public interface StubFactory {
 
     /** load account */
     public Account newAccount(String name, String path);
+
+    /**
+     * use sec and cert to new account
+     *
+     * @param properties
+     * @return
+     */
+    public Account newAccount(Map<String, Object> properties);
 
     /**
      * generate account

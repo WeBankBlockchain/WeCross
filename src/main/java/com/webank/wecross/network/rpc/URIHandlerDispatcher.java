@@ -1,7 +1,7 @@
 package com.webank.wecross.network.rpc;
 
+import com.webank.wecross.account.UserContext;
 import com.webank.wecross.host.WeCrossHost;
-import com.webank.wecross.network.rpc.handler.ListAccountsURIHandler;
 import com.webank.wecross.network.rpc.handler.ListResourcesURIHandler;
 import com.webank.wecross.network.rpc.handler.ListStubsURIHandler;
 import com.webank.wecross.network.rpc.handler.ResourceURIHandler;
@@ -24,6 +24,8 @@ public class URIHandlerDispatcher {
             new URIMethod("POST", "/network/stub/resource/method");
 
     private Map<URIMethod, URIHandler> requestURIMapper = new HashMap<>();
+
+    private UserContext userContext;
 
     public Map<URIMethod, URIHandler> getRequestURIMapper() {
         return requestURIMapper;
@@ -56,11 +58,14 @@ public class URIHandlerDispatcher {
         registerURIHandler(new URIMethod("GET", "/listResources"), listResourcesURIHandler);
         registerURIHandler(new URIMethod("POST", "/listResources"), listResourcesURIHandler);
 
-        ListAccountsURIHandler listAccountsURIHandler = new ListAccountsURIHandler(host);
-        registerURIHandler(new URIMethod("GET", "/listAccounts"), listAccountsURIHandler);
-        registerURIHandler(new URIMethod("POST", "/listAccounts"), listAccountsURIHandler);
-
+        /*
+                ListAccountsURIHandler listAccountsURIHandler = new ListAccountsURIHandler(host);
+                listAccountsURIHandler.setUserContext(userContext);
+                registerURIHandler(new URIMethod("GET", "/listAccounts"), listAccountsURIHandler);
+                registerURIHandler(new URIMethod("POST", "/listAccounts"), listAccountsURIHandler);
+        */
         XATransactionHandler xaTransactionHandler = new XATransactionHandler();
+        xaTransactionHandler.setUserContext(userContext);
         xaTransactionHandler.setXaTransactionManager(host.getXaTransactionManager());
         xaTransactionHandler.setAccountManager(host.getAccountManager());
         registerURIHandler(new URIMethod("POST", "/startTransaction"), xaTransactionHandler);
@@ -70,6 +75,7 @@ public class URIHandlerDispatcher {
         registerURIHandler(new URIMethod("POST", "/getTransactionIDs"), xaTransactionHandler);
 
         ResourceURIHandler resourceURIHandler = new ResourceURIHandler(host);
+        resourceURIHandler.setUserContext(userContext);
         registerURIHandler(RESOURCE_URIMETHOD, resourceURIHandler);
 
         logger.info(" initialize size: {}", requestURIMapper.size());
@@ -105,5 +111,9 @@ public class URIHandlerDispatcher {
         }
 
         return uriHandler;
+    }
+
+    public void setUserContext(UserContext userContext) {
+        this.userContext = userContext;
     }
 }

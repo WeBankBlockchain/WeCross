@@ -1,6 +1,5 @@
 package com.webank.wecross.network.client;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.wecross.exception.WeCrossException;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
@@ -51,9 +50,5 @@ public abstract class Callback<T> {
             timeoutWorker.cancel();
             onFailed(e);
         }
-    }
-
-    public TypeReference<T> getResponseType() {
-        return new TypeReference<T>() {};
     }
 }

@@ -3,6 +3,7 @@ package com.webank.wecross.network.rpc.handler;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.rpc.RequestUtils;
@@ -22,6 +23,7 @@ public class XATransactionHandler implements URIHandler {
     private ObjectMapper objectMapper = new ObjectMapper();
     private AccountManager accountManager;
     private XATransactionManager xaTransactionManager;
+    private UserContext userContext;
 
     public static class XAStartTransactionRequest {
         private String transactionID;
@@ -419,5 +421,9 @@ public class XATransactionHandler implements URIHandler {
 
     public void setXaTransactionManager(XATransactionManager xaTransactionManager) {
         this.xaTransactionManager = xaTransactionManager;
+    }
+
+    public void setUserContext(UserContext userContext) {
+        this.userContext = userContext;
     }
 }

@@ -1,12 +1,9 @@
 package com.webank.wecross.network.client;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class Request<T> {
     private String version = "1.0";
     private String method;
-    private Map<String, String> properties = new HashMap<>();
+    private String auth = "";
     private T data;
 
     public Request() {}
@@ -40,19 +37,11 @@ public class Request<T> {
         this.data = data;
     }
 
-    public Map<String, String> getProperties() {
-        return properties;
+    public String getAuth() {
+        return auth;
     }
 
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
-    }
-
-    public String getProperty(String key) {
-        return properties.get(key);
-    }
-
-    public void setProperty(String key, String value) {
-        properties.putIfAbsent(key, value);
+    public void setAuth(String auth) {
+        this.auth = auth;
     }
 }
