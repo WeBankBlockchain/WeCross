@@ -299,6 +299,7 @@ download_wecross_console()
     fi
 }
 
+
 deploy_bcos_sample_resource()
 {
     # deploy from 8250

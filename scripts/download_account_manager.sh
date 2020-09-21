@@ -10,8 +10,8 @@ enable_build_from_resource=0
 
 src_dir=$(pwd)'/src/'
 
-wecross_console_url=https://github.com/WeBankFinTech/WeCross-Console.git
-wecross_console_branch=${default_compatibility_version}
+wecross_account_manager_url=https://github.com/WeBankFinTech/WeCross-Account-Manager.git
+wecross_account_manager_branch=${default_compatibility_version}
 
 LOG_INFO()
 {
@@ -30,7 +30,7 @@ help()
     echo "$1"
     cat << EOF
 Usage:
-    -s                              [Optional] Get wecross console by: gradle build from github Source Code.
+    -s                              [Optional] Get wecross account manager by: gradle build from github Source Code.
     -b                              [Optional] Download from certain branch
     -t                              [Optional] Download from certain tag (same as -b)
     -h  call for help
@@ -51,11 +51,11 @@ while getopts "b:t:sh" option;do
         enable_build_from_resource=1
     ;;
     b)
-        wecross_console_branch=$OPTARG
+        wecross_account_manager_branch=$OPTARG
         compatibility_version=$OPTARG
     ;;
     t)
-        wecross_console_branch=$OPTARG
+        wecross_account_manager_branch=$OPTARG
         compatibility_version=$OPTARG
     ;;
     h)  help;;
@@ -64,21 +64,21 @@ done
 
 }
 
-download_wecross_console_pkg()
+download_wecross_account_manager_pkg()
 {
-    local github_url=https://github.com/WeBankFinTech/WeCross-Console/releases/download/
-    local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross-Console/
-    local release_pkg=WeCross-Console.tar.gz
-    local release_pkg_checksum_file=WeCross-Console.tar.gz.md5
+    local github_url=https://github.com/WeBankFinTech/WeCross-Account-Manager/releases/download/
+    local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross-Account-Manager/
+    local release_pkg=WeCross-Account-Manager.tar.gz
+    local release_pkg_checksum_file=WeCross-Account-Manager.tar.gz.md5
 
-    if [ -d WeCross-Console/apps ];then
-        LOG_INFO "./WeCross-Console/ exists"
+    if [ -d WeCross-Account-Manager/apps ];then
+        LOG_INFO "./WeCross-Account-Manager/ exists"
         exit 0
     fi
 
     LOG_INFO "Checking latest release"
     if [ -z "${compatibility_version}" ];then
-        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross-Console/releases/latest | grep "tag_name"|awk -F '\"' '{print $4}')
+        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross-Account-Manager/releases/latest | grep "tag_name"|awk -F '\"' '{print $4}')
     fi
 
     if [ -z "${compatibility_version}" ];then
@@ -150,30 +150,30 @@ download_latest_code()
 
 build_from_source()
 {
-    LOG_INFO "Build WeCross Console from source"
+    LOG_INFO "Build WeCross Account Manager from source"
 
-    local url=${wecross_console_url}
-    local branch=${wecross_console_branch}
+    local url=${wecross_account_manager_url}
+    local branch=${wecross_account_manager_branch}
     local output_dir=$(pwd)
 
-    if [ -d WeCross-Console ];then
-        LOG_INFO "./WeCross-Console/ exists"
+    if [ -d WeCross-Account-Manager ];then
+        LOG_INFO "./WeCross-Account-Manager/ exists"
         return
     fi
 
     mkdir -p ${src_dir}/
     cd ${src_dir}/
 
-    download_latest_code WeCross-Console ${url} ${branch}
+    download_latest_code WeCross-Account-Manager ${url} ${branch}
 
-    cd WeCross-Console
+    cd WeCross-Account-Manager
     rm -rf dist
     bash ./gradlew assemble 2>&1 | tee output.log
     chmod +x dist/apps/*
     # shellcheck disable=SC2046
     # shellcheck disable=SC2006
     if [ `grep -c "BUILD SUCCESSFUL" output.log` -eq '0' ]; then
-        LOG_ERROR "Build Wecross Console project failed"
+        LOG_ERROR "Build Wecross Account Manager project failed"
         LOG_INFO "See output.log for details"
         mv output.log ../output.log
         exit 1
@@ -181,12 +181,12 @@ build_from_source()
     echo "================================================================"
     cd ..
 
-    mv WeCross-Console/dist ${output_dir}/WeCross-Console
-    chmod +x ${output_dir}/WeCross-Console/*.sh
+    mv WeCross-Account-Manager/dist ${output_dir}/WeCross-Account-Manager
+    chmod +x ${output_dir}/WeCross-Account-Manager/*.sh
 
     cd ${output_dir}
 
-    LOG_INFO "Build WeCross Console successfully"
+    LOG_INFO "Build WeCross Account Manager successfully"
 }
 
 main()
@@ -194,14 +194,14 @@ main()
     if [ 1 -eq ${enable_build_from_resource} ];then
         build_from_source
     else
-        download_wecross_console_pkg
+        download_wecross_account_manager_pkg
     fi
 }
 
 print_result()
 {
-LOG_INFO "Download completed. WeCross Console is in: ./WeCross-Console/"
-LOG_INFO "Please configure \"./WeCross-Console/conf/application.toml\" according with \"application-sample.toml\" and \"bash start.sh\" to start."
+LOG_INFO "Download completed. WeCross Account Manager is in: ./WeCross-Account-Manager/"
+LOG_INFO "Please configure \"./WeCross-Account-Manager/conf/application.toml\" according with \"application-sample.toml\" and \"bash start.sh\" to start."
 }
 
 parse_command $@

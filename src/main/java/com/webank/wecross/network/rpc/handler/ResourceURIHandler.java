@@ -19,6 +19,7 @@ import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.stub.UniversalAccount;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
@@ -125,9 +126,11 @@ public class ResourceURIHandler implements URIHandler {
                         restRequest.checkRestRequest(path.toString(), method);
 
                         TransactionRequest transactionRequest = restRequest.getData();
-                        String accountName = restRequest.getAccount();
-                        Account account = accountManager.getAccount(accountName);
                         Resource resourceObj = getResource(path);
+                        UniversalAccount ua = accountManager.getUniversalAccount(userContext);
+                        Account account = ua.getAccount(resourceObj.getStubType());
+                        String accountName = account.getName();
+
                         RequestUtils.checkAccountAndResource(account, resourceObj);
 
                         logger.trace(
@@ -178,9 +181,10 @@ public class ResourceURIHandler implements URIHandler {
 
                         TransactionRequest transactionRequest = restRequest.getData();
 
-                        String accountName = restRequest.getAccount();
-                        Account account = accountManager.getAccount(accountName);
                         Resource resourceObj = getResource(path);
+                        UniversalAccount ua = accountManager.getUniversalAccount(userContext);
+                        Account account = ua.getAccount(resourceObj.getStubType());
+                        String accountName = account.getName();
                         RequestUtils.checkAccountAndResource(account, resourceObj);
 
                         logger.trace(
@@ -255,8 +259,9 @@ public class ResourceURIHandler implements URIHandler {
                                         content,
                                         new TypeReference<RestRequest<CustomCommandRequest>>() {});
 
-                        String accountName = restRequest.getAccount();
-                        Account account = accountManager.getAccount(accountName);
+                        UniversalAccount ua = accountManager.getUniversalAccount(userContext);
+                        Account account = ua.getAccount(chain.getStubType());
+
                         if (Objects.isNull(account)) {
                             throw new WeCrossException(
                                     WeCrossException.ErrorCode.ACCOUNT_ERROR, "Account not found");

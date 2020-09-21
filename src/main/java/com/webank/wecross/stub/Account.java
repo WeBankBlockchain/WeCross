@@ -10,4 +10,8 @@ public interface Account {
      * @return
      */
     String getIdentity();
+
+    int getKeyID();
+
+    boolean isDefault();
 }

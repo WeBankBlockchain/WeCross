@@ -23,7 +23,7 @@ public class UniversalAccountFactory {
 
         // foreach details, set default account into ua
         for (Map<Integer, UniversalAccount.ChainAccountDetails> chainAccountDetailsMap :
-                uaDetails.getType2ChainAccounts().values()) {
+                uaDetails.getType2ChainAccountDetails().values()) {
             for (UniversalAccount.ChainAccountDetails details : chainAccountDetailsMap.values()) {
 
                 String type = details.getType();
@@ -43,7 +43,7 @@ public class UniversalAccountFactory {
 
                 ua.addAccount(type, details.getKeyID(), account, details);
 
-                if (details.isDefault()) {
+                if (details.getIsDefault().booleanValue()) {
                     ua.setDefaultAccount(type, account);
                 }
             }

@@ -1,8 +1,8 @@
 package com.webank.wecross.account;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.stub.Account;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -16,28 +16,35 @@ import org.slf4j.LoggerFactory;
 
 @Data
 @Builder
-public class UniversalAccount {
+public class UniversalAccount implements com.webank.wecross.stub.UniversalAccount {
     private static Logger logger = LoggerFactory.getLogger(UniversalAccount.class);
+    private static ObjectMapper objectMapper = new ObjectMapper();
+
     private String username;
     private String uaID;
     private String pubKey;
     private boolean isAdmin;
 
+    @Builder.Default
     private Map<String, Map<Integer, Account>> type2ChainAccounts = new HashMap<>();
 
-    private Map<String, Account> type2DefaultAccount;
+    @Builder.Default private Map<String, Account> type2DefaultAccount = new HashMap<>();
 
+    @Override
     public Account getAccount(String type) {
         return type2DefaultAccount.get(type);
     }
 
     public void setDefaultAccount(String type, Account account) {
         type2DefaultAccount.put(type, account);
+        logger.info("setDefaultAccount {} {}", type, account);
     }
 
     public void addAccount(String type, int keyID, Account account, ChainAccountDetails details) {
         type2ChainAccounts.putIfAbsent(type, new HashMap<>());
         type2ChainAccounts.get(type).put(new Integer(keyID), account);
+
+        logger.info("addAccount {} {} {} {}", type, keyID, account, details);
     }
 
     @JsonGetter("chainAccounts")
@@ -51,21 +58,44 @@ public class UniversalAccount {
         return accounts;
     }
 
+    @Override
+    public String getUAID() {
+        return uaID;
+    }
+
+    @Override
+    public String getPub() {
+        return pubKey;
+    }
+
+    @Override
+    public byte[] sign(byte[] message) {
+        // xxx
+        return new byte[0];
+    }
+
+    @Override
+    public boolean verify(byte[] signData) {
+        // xxx
+        return false;
+    }
+
     @Data
-    public class ChainAccountDetails {
+    public static class ChainAccountDetails {
         private String username; // ua
         private Integer keyID;
+        private String identity;
         private String type;
 
         @JsonProperty("isDefault")
-        private boolean isDefault;
+        private Boolean isDefault;
 
         private String pubKey;
-        @JsonIgnore private String secKey;
-        @JsonIgnore private String ext0;
-        @JsonIgnore private String ext1;
-        @JsonIgnore private String ext2;
-        @JsonIgnore private String ext3;
+        private String secKey;
+        private String ext0;
+        private String ext1;
+        private String ext2;
+        private String ext3;
 
         public Map<String, Object> toProperties() {
             Map<String, Object> properties = new HashMap<>();
@@ -97,14 +127,17 @@ public class UniversalAccount {
     }
 
     @Data
-    public class UADetails {
+    public static class UADetails {
         private String username;
         private String uaID;
         private String pubKey;
         private String password;
         private String secKey;
         private String role;
+
+        @JsonProperty("isAdmin")
         private boolean isAdmin;
-        private Map<String, Map<Integer, ChainAccountDetails>> type2ChainAccounts;
+
+        private Map<String, Map<Integer, ChainAccountDetails>> type2ChainAccountDetails;
     }
 }

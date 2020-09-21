@@ -6,6 +6,7 @@ import com.webank.wecross.network.client.ClientMessageEngine;
 import com.webank.wecross.network.client.Request;
 import com.webank.wecross.network.client.Response;
 import com.webank.wecross.stub.Account;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class AccountManager {
 
     private AdminContext adminContext;
 
-    private Map<JwtToken, UniversalAccount> token2UA;
+    private Map<JwtToken, UniversalAccount> token2UA = new HashMap<>();
 
     public Account getAccount(String name) {
         String message =
@@ -110,7 +111,7 @@ public class AccountManager {
     private UniversalAccount fetchUA(JwtToken token) {
 
         Request<Object> request = new Request();
-        request.setData(new Object());
+        request.setData(null);
         request.setMethod("/auth/getUniversalAccount");
         request.setAuth(token.getTokenStrWithPrefix());
 
@@ -130,7 +131,7 @@ public class AccountManager {
             return ua;
 
         } catch (Exception e) {
-            logger.error("FetchUA failed: " + e.getMessage());
+            logger.error("FetchUA failed: " + e + " stack: " + e.getStackTrace().toString());
             return null;
         }
     }

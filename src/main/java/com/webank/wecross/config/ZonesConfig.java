@@ -154,6 +154,7 @@ public class ZonesConfig {
             Chain chain = new Chain(zone, chainInfo, driver, localConnection);
             chain.setDriver(stubFactory.newDriver());
             chain.setBlockManager(resourceBlockManagerFactory.build(chain));
+            chain.setStubType(type);
             for (ResourceInfo resourceInfo : resources) {
                 com.webank.wecross.resource.Resource resource =
                         new com.webank.wecross.resource.Resource();
