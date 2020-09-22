@@ -109,11 +109,19 @@ prepare_wecross_console()
     cd -
 }
 
+prepare_account_manager()
+{
+    cd ${ROOT}/
+    LOG_INFO "Download wecross account manager from branch: ${PLUGIN_BRANCH}"
+    bash WeCross/download_account_manager.sh -s -t ${PLUGIN_BRANCH}
+    cd -
+}
 
 main()
 {
     prepare_wecross
     prepare_wecross_console
+    prepare_account_manager
     prepare_demo
     cross_group_demo_test
 }

@@ -13,15 +13,15 @@ deploy:
 matrix:
     fast_finish: true
     include:
-        -   language: python
-            python: 3.6
-            dist: xenial
-            before_cache:
-            cache:
-            before_install:
-            name: "security scan"
-            script: |
-                bash .ci/ci_check_commit.sh
+#        -   language: python
+#            python: 3.6
+#            dist: xenial
+#            before_cache:
+#            cache:
+#            before_install:
+#            name: "security scan"
+#            script: |
+#                bash .ci/ci_check_commit.sh
 
         -   language: java
             jdk: openjdk8

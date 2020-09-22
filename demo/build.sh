@@ -131,6 +131,7 @@ check_env()
     check_command docker-compose
     check_command mysql
     check_docker_service
+    check_db_service
     check_fabric_avaliable
     check_bcos_avaliable
     check_wecross_avaliable

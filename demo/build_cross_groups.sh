@@ -108,6 +108,7 @@ check_env()
     LOG_INFO "Check environments"
     check_command java
     check_command mysql
+    check_db_service
     check_bcos_avaliable
     check_wecross_avaliable
     check_account_manager_avaliable
