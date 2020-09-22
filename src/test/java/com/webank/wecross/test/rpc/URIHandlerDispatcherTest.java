@@ -49,15 +49,6 @@ public class URIHandlerDispatcherTest {
         Assert.assertTrue(
                 Objects.nonNull(
                         uriHandlerDispatcher.matchURIHandler(
-                                new URIMethod("GET", "/listAccounts"))));
-        Assert.assertTrue(
-                Objects.nonNull(
-                        uriHandlerDispatcher.matchURIHandler(
-                                new URIMethod("POST", "/listAccounts"))));
-
-        Assert.assertTrue(
-                Objects.nonNull(
-                        uriHandlerDispatcher.matchURIHandler(
                                 new URIMethod("GET", "/listResources"))));
         Assert.assertTrue(
                 Objects.nonNull(

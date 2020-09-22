@@ -120,7 +120,7 @@ EOF
 
 console_ask()
 {
-    read -p "Start WeCross Console to try? [Y/n]" ans
+    read -r -p "Start WeCross Console to try? [Y/n]" ans
     case "$ans" in
     y | Y | "")
     cd ${ROOT}/WeCross-Console && ./start.sh

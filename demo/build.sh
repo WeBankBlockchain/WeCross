@@ -51,8 +51,7 @@ check_command()
 check_docker_service()
 {
     set +e
-    docker ps > /dev/null
-    if [ "$?" -ne "0" ]; then
+    if docker ps > /dev/null; then
         LOG_INFO "Please install docker and add your user by:"
         echo -e "\033[32m        sudo gpasswd -a ${USER} docker && su ${USER}\033[0m"
         exit 1
@@ -69,8 +68,7 @@ check_db_service()
 {
     LOG_INFO "Checking database configuration"
     set +e
-    query_db -e "status;" > /dev/null
-        if [ "$?" -ne "0" ]; then
+    if query_db -e "status;" > /dev/null; then
         LOG_ERROR "Database configuration error."
         LOG_INFO "Please config database, username and password. And use this command to check:"
         echo -e "\033[32m        mysql -u ${DB_USERNAME} --password=\"<your password>\" -h ${DB_IP} -P ${DB_PORT} -e \"status;\" \033[0m"
@@ -217,7 +215,7 @@ clear_ask()
 
     # Clear history
     if [ -e ${ROOT}/routers-payment ];then
-        read -p "Old demo network exist. Clear all and re-build? [Y/n]" ans
+        read -r -p "Old demo network exist. Clear all and re-build? [Y/n]" ans
         case "$ans" in
         y | Y | "")
             LOG_INFO "Clear old network ..."
@@ -233,7 +231,7 @@ clear_ask()
 
 console_ask()
 {
-    read -p "Start WeCross Console? [Y/n]" ans
+    read -r -p "Start WeCross Console? [Y/n]" ans
     case "$ans" in
     y | Y | "")
     cd ${ROOT}/WeCross-Console && ./start.sh
@@ -248,10 +246,10 @@ db_config_ask()
 {
     check_command mysql
     LOG_INFO "Database connection:"
-    read -p "[1/4]> ip: " DB_IP
-    read -p "[2/4]> port: " DB_PORT
-    read -p "[3/4]> username: " DB_USERNAME
-    read -p "[4/4]> password: " -s DB_PASSWORD
+    read -r -p "[1/4]> ip: " DB_IP
+    read -r -p "[2/4]> port: " DB_PORT
+    read -r -p "[3/4]> username: " DB_USERNAME
+    read -r -p "[4/4]> password: " -s DB_PASSWORD
     echo "" # \n
     LOG_INFO "Database connetion with: ${DB_IP}:${DB_PORT} ${DB_USERNAME} "
     check_db_service
@@ -479,7 +477,7 @@ add_bcos_account()
 
     # get address
     cd ${ROOT}/WeCross-Console/conf/accounts/${name}/
-    local address=$(ls *.public.pem |awk -F "." '{print $1}')
+    local address=$(ls 0x*.public.pem |awk -F "." '{print $1}')
     cd -
 
     # addChainAccount
@@ -499,7 +497,7 @@ add_bcos_gm_account()
 
     # get address
     cd ${ROOT}/WeCross-Console/conf/accounts/${name}/
-    local address=$(ls *.public.pem |awk -F "." '{print $1}')
+    local address=$(ls 0x*.public.pem |awk -F "." '{print $1}')
     cd -
 
     # addChainAccount
