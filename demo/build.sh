@@ -2,6 +2,10 @@
 set -e
 LANG=en_US.utf8
 ROOT=$(pwd)
+DB_URL=localhost
+DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=
 
 
 LOG_INFO()
@@ -56,6 +60,26 @@ check_docker_service()
     set -e
 }
 
+query_db()
+{
+    mysql -u ${DB_USERNAME} --password="${DB_PASSWORD}" -h ${DB_IP} -P ${DB_PORT} $@  2>/dev/null
+}
+
+check_db_service()
+{
+    LOG_INFO "Checking database configuration"
+    set +e
+    query_db -e "status;" > /dev/null
+        if [ "$?" -ne "0" ]; then
+        LOG_ERROR "Database configuration error."
+        LOG_INFO "Please config database, username and password. And use this command to check:"
+        echo -e "\033[32m        mysql -u ${DB_USERNAME} --password=\"<your password>\" -h ${DB_IP} -P ${DB_PORT} -e \"status;\" \033[0m"
+        exit 1
+    fi
+    set -e
+    LOG_INFO "Database configuration OK!"
+}
+
 check_port_avaliable()
 {
     port=$1
@@ -64,6 +88,11 @@ check_port_avaliable()
         LOG_ERROR "${name} port ${port} is not avaliable. Are there any other blockchain is running?"
         exit 1
     fi
+}
+
+check_account_manager_avaliable()
+{
+    check_port_avaliable 8340 WeCross-Account-Manager
 }
 
 check_fabric_avaliable()
@@ -102,10 +131,12 @@ check_env()
     check_command java
     check_command docker
     check_command docker-compose
+    check_command mysql
     check_docker_service
     check_fabric_avaliable
     check_bcos_avaliable
     check_wecross_avaliable
+    check_account_manager_avaliable
 }
 
 build_bcos()
@@ -113,6 +144,16 @@ build_bcos()
     LOG_INFO "Build BCOS ..."
     cd ${ROOT}/bcos
     bash build.sh
+
+    # generate accounts
+    mkdir -p accounts
+    cd accounts
+
+    bash ../get_account.sh # normal
+    mv accounts bcos_user1
+
+    bash ../get_gm_account.sh # gm
+    mv accounts_gm bcos_gm_user1
 
     cd ${ROOT}
 }
@@ -203,6 +244,20 @@ console_ask()
     esac
 }
 
+db_config_ask()
+{
+    check_command mysql
+    LOG_INFO "Database connection:"
+    read -p "[1/4]> ip: " DB_IP
+    read -p "[2/4]> port: " DB_PORT
+    read -p "[3/4]> username: " DB_USERNAME
+    read -p "[4/4]> password: " -s DB_PASSWORD
+    echo "" # \n
+    LOG_INFO "Database connetion with: ${DB_IP}:${DB_PORT} ${DB_USERNAME} "
+    check_db_service
+}
+
+
 config_router_8250()
 {
     router_dir=${1}
@@ -266,7 +321,7 @@ config_router_8251()
     cd -
 }
 
-download_wecross()
+build_wecross()
 {
     # Download
     LOG_INFO "Download WeCross ..."
@@ -281,9 +336,17 @@ download_wecross()
             bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0-rc4
         fi
     fi
+
+        # Build Routers
+    LOG_INFO "Build Routers ..."
+    cat << EOF > ipfile
+127.0.0.1:8250:25500
+127.0.0.1:8251:25501
+EOF
+    bash ./WeCross/build_wecross.sh -n payment -o routers-payment -f ipfile
 }
 
-download_wecross_console()
+build_wecross_console()
 {
     LOG_INFO "Download WeCross Console ..."
 
@@ -297,6 +360,58 @@ download_wecross_console()
             bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_console.sh) -t v1.0.0-rc4
         fi
     fi
+
+    # Build WeCross Console
+    LOG_INFO "Build WeCross Console ..."
+    cp routers-payment/cert/sdk/* ${ROOT}/WeCross-Console/conf/
+    cp ${ROOT}/WeCross-Console/conf/application-sample.toml ${ROOT}/WeCross-Console/conf/application.toml
+
+    # config universal account
+    cat << EOF >> ${ROOT}/WeCross-Console/conf/application.toml
+[login]
+    username = 'org1-admin'
+    password = '123456'
+EOF
+
+    cd ${ROOT}/WeCross-Console/
+    bash start.sh <<EOF
+quit
+EOF
+    cd -
+}
+
+build_account_manager()
+{
+    LOG_INFO "Download WeCross Account Manager ..."
+
+    local name=./WeCross-Account-Manager
+    if [ -d ${name}  ]; then
+        LOG_INFO "${name} exists."
+    else
+        if [ -e download_account_manager.sh ];then
+            bash download_account_manager.sh -t v1.0.0-rc4
+        else
+            bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_account_manager.sh) -t v1.0.0-rc4
+        fi
+    fi
+
+
+    # Build Account Manager
+    LOG_INFO "Build WeCross Account Manager ..."
+    cp routers-payment/cert/sdk/* ${ROOT}/WeCross-Account-Manager/conf/
+    cp ${ROOT}/WeCross-Account-Manager/conf/application-sample.toml ${ROOT}/WeCross-Account-Manager/conf/application.toml
+    sed_i "/jdbc/s/localhost/${DB_IP}/g" ${ROOT}/WeCross-Account-Manager/conf/application.toml
+    sed_i "/jdbc/s/3306/${DB_PORT}/g" ${ROOT}/WeCross-Account-Manager/conf/application.toml
+    sed_i "/username/s/root/${DB_USERNAME}/g" ${ROOT}/WeCross-Account-Manager/conf/application.toml
+    sed_i "/password/s/''/'${DB_PASSWORD}'/g" ${ROOT}/WeCross-Account-Manager/conf/application.toml
+
+    sed_i 's/update/create/g' ${ROOT}/WeCross-Account-Manager/conf/application.properties
+
+    LOG_INFO "Setup database"
+    cd ${ROOT}/WeCross-Account-Manager/
+    query_db < conf/db_setup.sql
+
+    bash start.sh
 }
 
 
@@ -308,8 +423,9 @@ deploy_bcos_sample_resource()
     sed_i  's/8251/8250/g'  conf/application.toml
 
     bash start.sh <<EOF
-bcosDeploy payment.bcos.HelloWorld bcos_user1 conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
-quit
+    login
+    bcosDeploy payment.bcos.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
+    quit
 EOF
     cd -
 }
@@ -322,9 +438,17 @@ deploy_fabric_sample_resource()
     sed_i  's/8250/8251/g'  conf/application.toml
 
     bash start.sh <<EOF
-    fabricInstall payment.fabric.sacc fabric_admin_org1 Org1 contracts/chaincode/sacc 1.0 GO_LANG
-    fabricInstall payment.fabric.sacc fabric_admin_org2 Org2 contracts/chaincode/sacc 1.0 GO_LANG
-    fabricInstantiate payment.fabric.sacc fabric_admin ["Org1","Org2"] contracts/chaincode/sacc 1.0 GO_LANG policy.yaml ["a","10"]
+    login
+
+    setDefaultAccount Fabric1.4 2
+    login
+    fabricInstall payment.fabric.sacc Org2 contracts/chaincode/sacc 1.0 GO_LANG
+
+    setDefaultAccount Fabric1.4 1
+    login
+    fabricInstall payment.fabric.sacc Org1 contracts/chaincode/sacc 1.0 GO_LANG
+
+    fabricInstantiate payment.fabric.sacc ["Org1","Org2"] contracts/chaincode/sacc 1.0 GO_LANG policy.yaml ["a","10"]
 quit
 EOF
     # wait the chaincode instantiate
@@ -347,6 +471,76 @@ EOF
     cd -
 }
 
+
+
+add_bcos_account()
+{
+    local name=${1}
+
+    # get address
+    cd ${ROOT}/WeCross-Console/conf/accounts/${name}/
+    local address=$(ls *.public.pem |awk -F "." '{print $1}')
+    cd -
+
+    # addChainAccount
+    cd ${ROOT}/WeCross-Console/
+    bash start.sh << EOF
+    login
+    addChainAccount BCOS2.0 conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true
+    quit
+EOF
+    cd -
+
+}
+
+add_bcos_gm_account()
+{
+    local name=${1}
+
+    # get address
+    cd ${ROOT}/WeCross-Console/conf/accounts/${name}/
+    local address=$(ls *.public.pem |awk -F "." '{print $1}')
+    cd -
+
+    # addChainAccount
+    cd ${ROOT}/WeCross-Console/
+    bash start.sh << EOF
+    login
+    addChainAccount GM_BCOS2.0 conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true
+    quit
+EOF
+    cd -
+
+}
+
+add_fabric_account()
+{
+    local name=${1}
+    local mspid=${2}
+
+        # addChainAccount
+    cd ${ROOT}/WeCross-Console/
+    bash start.sh << EOF
+    login
+    addChainAccount Fabric1.4 conf/accounts/${name}/account.crt conf/accounts/${name}/account.key ${mspid} true
+    quit
+EOF
+    cd -
+}
+
+deploy_chain_account()
+{
+    mkdir -p ${ROOT}/WeCross-Console/conf/accounts/
+    cp -r ${ROOT}/bcos/accounts/* ${ROOT}/WeCross-Console/conf/accounts/
+    cp -r ${ROOT}/fabric/certs/accounts/* ${ROOT}/WeCross-Console/conf/accounts/
+
+    add_bcos_account bcos_user1 # 0
+    add_fabric_account fabric_admin_org1 Org1MSP # 1
+    add_fabric_account fabric_admin_org2 Org2MSP # 2
+    add_fabric_account fabric_user1 Org1MSP # 3
+    add_bcos_gm_account bcos_gm_user1 # 4
+}
+
 deploy_sample_resource()
 {
     deploy_fabric_sample_resource
@@ -359,27 +553,13 @@ main()
 
     check_env
 
-    download_wecross
-    download_wecross_console
+    if [ ! -n "$1" ] ;then
+        db_config_ask
+    fi
 
-    # Build Routers
-    LOG_INFO "Build Routers ..."
-    cat << EOF > ipfile
-127.0.0.1:8250:25500
-127.0.0.1:8251:25501
-EOF
-    bash ./WeCross/build_wecross.sh -n payment -o routers-payment -f ipfile
-
-    # Build WeCross Console
-    LOG_INFO "Build WeCross Console ..."
-    cp routers-payment/cert/sdk/* ${ROOT}/WeCross-Console/conf/
-    cp ${ROOT}/WeCross-Console/conf/application-sample.toml ${ROOT}/WeCross-Console/conf/application.toml
-
-    cd ${ROOT}/WeCross-Console/
-    bash start.sh <<EOF
-quit
-EOF
-    cd ${ROOT}/
+    build_wecross
+    build_wecross_console
+    build_account_manager
 
     # Build BCOS
     build_bcos
@@ -402,6 +582,8 @@ EOF
 
     check_wecross_network
 
+    deploy_chain_account
+
     deploy_sample_resource
 
     LOG_INFO "Success! WeCross demo network is running. Framework:"
@@ -419,6 +601,7 @@ EOF
 "
 
 }
+
 
 main
 if [ ! -n "$1" ] ;then

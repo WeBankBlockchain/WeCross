@@ -72,13 +72,14 @@ demo_test()
     cd WeCross-Console/
     bash start.sh <<EOF
 listResources
-listAccounts
-call payment.bcos.HelloWorld bcos_user1 get
-sendTransaction payment.bcos.HelloWorld bcos_user1 set Tom
-call payment.bcos.HelloWorld bcos_user1 get
-call payment.fabric.sacc fabric_user1 query a
-sendTransaction payment.fabric.sacc fabric_user1 set a 666
-call payment.fabric.sacc fabric_user1 query a
+login
+listAccount
+call payment.bcos.HelloWorld get
+sendTransaction payment.bcos.HelloWorld set Tom
+call payment.bcos.HelloWorld get
+call payment.fabric.sacc query a
+sendTransaction payment.fabric.sacc set a 666
+call payment.fabric.sacc query a
 quit
 EOF
     cd ..
@@ -197,6 +198,14 @@ prepare_wecross_console()
     cd -
 }
 
+prepare_account_manager()
+{
+    cd ${ROOT}/
+    LOG_INFO "Download wecross account manager from branch: ${PLUGIN_BRANCH}"
+    bash WeCross/download_account_manager.sh -s -t ${PLUGIN_BRANCH}
+    cd -
+}
+
 prepare_bcos()
 {
     cd ${ROOT}/bcos/
@@ -208,11 +217,12 @@ main()
 {
     prepare_wecross
     prepare_wecross_console
+    prepare_account_manager
     prepare_bcos
     prepare_demo
     demo_test
-    htlc_test
-    2pc_test
+    # htlc_test
+    # 2pc_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then

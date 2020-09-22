@@ -72,13 +72,14 @@ cross_group_demo_test()
     cd WeCross-Console/
     bash start.sh <<EOF
 listResources
-listAccounts
-call payment.group1.HelloWorldGroup1 bcos_user1 get
-sendTransaction payment.group1.HelloWorldGroup1 bcos_user1 set Tom
-call payment.group1.HelloWorldGroup1 bcos_user1 get
-call payment.group2.HelloWorldGroup2 bcos_user1 get
-sendTransaction payment.group2.HelloWorldGroup2 bcos_user1 set Jerry
-call payment.group2.HelloWorldGroup2 bcos_user1 get
+login
+listAccount
+call payment.group1.HelloWorldGroup1 get
+sendTransaction payment.group1.HelloWorldGroup1 set Tom
+call payment.group1.HelloWorldGroup1 get
+call payment.group2.HelloWorldGroup2 get
+sendTransaction payment.group2.HelloWorldGroup2 set Jerry
+call payment.group2.HelloWorldGroup2 get
 quit
 EOF
     cd ..

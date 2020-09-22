@@ -65,13 +65,14 @@ cross_normal_guomi_demo_test()
     cd WeCross-Console/
     bash start.sh <<EOF
 listResources
-listAccounts
-call payment.bcos.HelloWorld bcos_user1 get
-sendTransaction payment.bcos.HelloWorld bcos_user1 set Tom
-call payment.bcos.HelloWorld bcos_user1 get
-call payment.bcos_gm.HelloWorld bcos_gm_user1 get
-sendTransaction payment.bcos_gm.HelloWorld bcos_gm_user1 set Jerry
-call payment.bcos_gm.HelloWorld bcos_gm_user1 get
+login
+listAccount
+call payment.bcos.HelloWorld get
+sendTransaction payment.bcos.HelloWorld set Tom
+call payment.bcos.HelloWorld get
+call payment.bcos_gm.HelloWorld get
+sendTransaction payment.bcos_gm.HelloWorld set Jerry
+call payment.bcos_gm.HelloWorld get
 quit
 EOF
     cd ..

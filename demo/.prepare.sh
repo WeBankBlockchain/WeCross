@@ -37,6 +37,14 @@ prepare_bcos()
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/build_chain.sh
     chmod u+x build_chain.sh
 
+    LOG_INFO "Download get_account.sh ..."
+    Download https://raw.githubusercontent.com/FISCO-BCOS/console/master/tools/get_account.sh
+    chmod u+x get_account.sh
+
+    LOG_INFO "Download get_gm_account.sh ..."
+    Download https://raw.githubusercontent.com/FISCO-BCOS/console/master/tools/get_gm_account.sh
+    chmod u+x get_gm_account.sh
+
     LOG_INFO "Download fisco-bcos binary"
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos.tar.gz
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos-macOS.tar.gz
@@ -79,6 +87,7 @@ prepare_wecross()
     LOG_INFO "Copy WeCross scripts"
     cp ${WECROSS_ROOT}/scripts/download_wecross.sh ./
     cp ${WECROSS_ROOT}/scripts/download_console.sh ./
+    cp ${WECROSS_ROOT}/scripts/download_account_manager.sh ./
 }
 
 main()
