@@ -489,7 +489,7 @@ main()
 }
 
 
-main
+main $@
 if [ ! -n "$1" ] ;then
     console_ask
 fi

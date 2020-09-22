@@ -99,7 +99,7 @@ public class AccountManager {
             return ua;
 
         } catch (Exception e) {
-            logger.error("get universal account by account failed: " + e.getMessage());
+            logger.error("get ua by identity failed: " + e.getMessage());
             return null;
         }
     }
