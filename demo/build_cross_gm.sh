@@ -57,7 +57,7 @@ check_db_service()
 {
     LOG_INFO "Checking database configuration"
     set +e
-    if query_db -e "status;" > /dev/null; then
+    if !query_db -e "status;" > /dev/null; then
         LOG_ERROR "Database configuration error."
         LOG_INFO "Please config database, username and password. And use this command to check:"
         echo -e "\033[32m        mysql -u ${DB_USERNAME} --password=\"<your password>\" -h ${DB_IP} -P ${DB_PORT} -e \"status;\" \033[0m"
