@@ -4,8 +4,8 @@ branches:
         - /.*/
 
 services:
-    - docker
     - mysql
+    - docker
 
 deploy:
     github_token: $GITHUB_TOKEN

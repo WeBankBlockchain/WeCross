@@ -48,17 +48,6 @@ check_command()
     fi
 }
 
-check_docker_service()
-{
-    set +e
-    if docker ps > /dev/null; then
-        LOG_INFO "Please install docker and add your user by:"
-        echo -e "\033[32m        sudo gpasswd -a ${USER} docker && su ${USER}\033[0m"
-        exit 1
-    fi
-    set -e
-}
-
 query_db()
 {
     mysql -u ${DB_USERNAME} --password="${DB_PASSWORD}" -h ${DB_IP} -P ${DB_PORT} $@  2>/dev/null
@@ -118,10 +107,7 @@ check_env()
 {
     LOG_INFO "Check environments"
     check_command java
-    check_command docker
-    check_command docker-compose
     check_command mysql
-    check_docker_service
     check_bcos_avaliable
     check_wecross_avaliable
     check_account_manager_avaliable
@@ -157,15 +143,6 @@ check_process()
     local process_name=${1}
     if [ -z "$(ps -ef |grep ${process_name} |grep -v grep)" ];then
         LOG_ERROR "Build demo failed: ${process_name} does not exist."
-        exit 1
-    fi
-}
-
-check_container()
-{
-    local container_name=${1}
-    if [ -z "$(docker ps |grep ${container_name} |grep -v grep)" ];then
-        LOG_ERROR "Build demo failed: ${container_name} does not exist."
         exit 1
     fi
 }
