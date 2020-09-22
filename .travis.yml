@@ -28,7 +28,7 @@ matrix:
             os: linux
             dist: xenial
             sudo: required
-            name: "2 groups"
+            name: "unitest"
             script: |
                 cat ~travis/.my.cnf && bash .ci/ci_check.sh
 

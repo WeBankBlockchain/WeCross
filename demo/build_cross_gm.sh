@@ -50,7 +50,11 @@ check_command()
 
 query_db()
 {
-    mysql -u ${DB_USERNAME} --password="${DB_PASSWORD}" -h ${DB_IP} -P ${DB_PORT} $@  2>/dev/null
+    if [ ${DB_PASSWORD} ]; then
+        mysql -u ${DB_USERNAME} --password="${DB_PASSWORD}" -h ${DB_IP} -P ${DB_PORT} $@  2>/dev/null
+    else
+        mysql -u ${DB_USERNAME} -h ${DB_IP} -P ${DB_PORT} $@  2>/dev/null
+    fi
 }
 
 check_db_service()
