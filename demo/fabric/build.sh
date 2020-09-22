@@ -37,7 +37,7 @@ Download_IMG()
 check_docker_service()
 {
     set +e
-    if !docker ps > /dev/null; then
+    if ! docker ps > /dev/null; then
         LOG_INFO "Please install docker and add your user by:"
         LOG_INFO "        sudo gpasswd -a ${USER} docker && su ${USER}"
         exit 1
