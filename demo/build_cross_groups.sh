@@ -2,7 +2,7 @@
 set -e
 LANG=en_US.utf8
 ROOT=$(pwd)
-DB_URL=localhost
+DB_IP=localhost
 DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=
@@ -51,9 +51,9 @@ check_command()
 query_db()
 {
     if [ ${DB_PASSWORD} ]; then
-        mysql -u ${DB_USERNAME} --password="${DB_PASSWORD}" -h ${DB_IP} -P ${DB_PORT} $@  #2>/dev/null
+        mysql -u ${DB_USERNAME} --password="${DB_PASSWORD}" -h ${DB_IP} -P ${DB_PORT} $@  2>/dev/null
     else
-        mysql -u ${DB_USERNAME} -h ${DB_IP} -P ${DB_PORT} $@  #2>/dev/null
+        mysql -u ${DB_USERNAME} -h ${DB_IP} -P ${DB_PORT} $@  2>/dev/null
     fi
 }
 

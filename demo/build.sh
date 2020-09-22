@@ -2,7 +2,7 @@
 set -e
 LANG=en_US.utf8
 ROOT=$(pwd)
-DB_URL=localhost
+DB_IP=localhost
 DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=
