@@ -2,7 +2,10 @@ package com.webank.wecross.network.rpc.netty.handler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.account.JwtToken;
+import com.webank.wecross.account.UserContext;
 import com.webank.wecross.network.rpc.URIHandlerDispatcher;
+import com.webank.wecross.network.rpc.authentication.AuthFilter;
 import com.webank.wecross.network.rpc.handler.URIHandler;
 import com.webank.wecross.network.rpc.netty.URIMethod;
 import com.webank.wecross.restserver.RestResponse;
@@ -16,6 +19,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -37,11 +41,17 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
 
     private URIHandlerDispatcher uriHandlerDispatcher;
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+    private UserContext userContext;
+    private AuthFilter authFilter;
     private ObjectMapper objectMapper = new ObjectMapper();
 
     public HttpServerHandler(
             URIHandlerDispatcher uriHandlerDispatcher,
-            ThreadPoolTaskExecutor threadPoolTaskExecutor) {
+            ThreadPoolTaskExecutor threadPoolTaskExecutor,
+            UserContext userContext,
+            AuthFilter authFilter) {
+        this.userContext = userContext;
+        this.authFilter = authFilter;
         this.setUriHandlerDispatcher(uriHandlerDispatcher);
         this.setThreadPoolTaskExecutor(threadPoolTaskExecutor);
     }
@@ -56,6 +66,20 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpRequest httpRequest)
+            throws Exception {
+        authFilter.doAuth(
+                ctx,
+                httpRequest,
+                new AuthFilter.Handler() {
+                    @Override
+                    public void onAuth(ChannelHandlerContext ctx, HttpRequest httpRequest)
+                            throws Exception {
+                        doRouterRead(ctx, httpRequest);
+                    }
+                });
+    }
+
+    protected void doRouterRead(ChannelHandlerContext ctx, HttpRequest httpRequest)
             throws Exception {
         final FullHttpRequest fullHttpRequest = (FullHttpRequest) httpRequest;
 
@@ -95,64 +119,64 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
         }
 
         threadPoolTaskExecutor.execute(
-                () ->
-                        uriHandler.handle(
-                                uri,
-                                method.toString(),
-                                content,
-                                new URIHandler.Callback() {
-                                    @Override
-                                    public void onResponse(RestResponse restResponse) {
+                () -> {
+                    userContext.setToken(getTokenFromHeader(httpRequest));
+                    uriHandler.handle(
+                            uri,
+                            method.toString(),
+                            content,
+                            new URIHandler.Callback() {
+                                @Override
+                                public void onResponse(RestResponse restResponse) {
 
-                                        // check if connection active
-                                        if (!ctx.channel().isActive()) {
-                                            long currentTimeMillis1 = System.currentTimeMillis();
-                                            logger.warn(
-                                                    " ctx: {} not active, cost: {} ",
-                                                    System.identityHashCode(ctx),
-                                                    (currentTimeMillis1 - currentTimeMillis));
-                                            return;
-                                        }
-
-                                        String content = "";
-                                        try {
-                                            content = objectMapper.writeValueAsString(restResponse);
-                                        } catch (JsonProcessingException e) {
-                                            logger.warn(" e: {}", e);
-                                            return;
-                                        }
-
-                                        if (logger.isDebugEnabled()) {
-                                            logger.debug(" ===>>> content: {}", content);
-                                        }
-
-                                        FullHttpResponse response =
-                                                new DefaultFullHttpResponse(
-                                                        HttpVersion.HTTP_1_1,
-                                                        HttpResponseStatus.OK,
-                                                        Unpooled.wrappedBuffer(content.getBytes()));
-
-                                        response.headers()
-                                                .set(
-                                                        HttpHeaderNames.CONTENT_TYPE,
-                                                        "application/json");
-                                        response.headers()
-                                                .set(
-                                                        HttpHeaderNames.CONTENT_LENGTH,
-                                                        response.content().readableBytes());
-
-                                        if (keepAlive) {
-                                            response.headers()
-                                                    .set(
-                                                            HttpHeaderNames.CONNECTION,
-                                                            HttpHeaderValues.KEEP_ALIVE);
-                                            ctx.writeAndFlush(response);
-                                        } else {
-                                            ctx.writeAndFlush(response)
-                                                    .addListener(ChannelFutureListener.CLOSE);
-                                        }
+                                    // check if connection active
+                                    if (!ctx.channel().isActive()) {
+                                        long currentTimeMillis1 = System.currentTimeMillis();
+                                        logger.warn(
+                                                " ctx: {} not active, cost: {} ",
+                                                System.identityHashCode(ctx),
+                                                (currentTimeMillis1 - currentTimeMillis));
+                                        return;
                                     }
-                                }));
+
+                                    String content = "";
+                                    try {
+                                        content = objectMapper.writeValueAsString(restResponse);
+                                    } catch (JsonProcessingException e) {
+                                        logger.warn(" e: {}", e);
+                                        return;
+                                    }
+
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(" ===>>> content: {}", content);
+                                    }
+
+                                    FullHttpResponse response =
+                                            new DefaultFullHttpResponse(
+                                                    HttpVersion.HTTP_1_1,
+                                                    HttpResponseStatus.OK,
+                                                    Unpooled.wrappedBuffer(content.getBytes()));
+
+                                    response.headers()
+                                            .set(HttpHeaderNames.CONTENT_TYPE, "application/json");
+                                    response.headers()
+                                            .set(
+                                                    HttpHeaderNames.CONTENT_LENGTH,
+                                                    response.content().readableBytes());
+
+                                    if (keepAlive) {
+                                        response.headers()
+                                                .set(
+                                                        HttpHeaderNames.CONNECTION,
+                                                        HttpHeaderValues.KEEP_ALIVE);
+                                        ctx.writeAndFlush(response);
+                                    } else {
+                                        ctx.writeAndFlush(response)
+                                                .addListener(ChannelFutureListener.CLOSE);
+                                    }
+                                }
+                            });
+                });
     }
 
     @Override
@@ -259,5 +283,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
 
     public void setThreadPoolTaskExecutor(ThreadPoolTaskExecutor threadPoolTaskExecutor) {
         this.threadPoolTaskExecutor = threadPoolTaskExecutor;
+    }
+
+    private JwtToken getTokenFromHeader(HttpRequest httpRequest) {
+        String tokenStr = httpRequest.headers().get(HttpHeaders.Names.AUTHORIZATION);
+        if (tokenStr == null || tokenStr.length() == 0) {
+            return null;
+        } else {
+            return new JwtToken(tokenStr);
+        }
     }
 }

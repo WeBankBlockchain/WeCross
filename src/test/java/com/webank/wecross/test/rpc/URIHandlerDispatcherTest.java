@@ -21,7 +21,7 @@ public class URIHandlerDispatcherTest {
 
         URIHandlerDispatcher uriHandlerDispatcher = new URIHandlerDispatcher();
         uriHandlerDispatcher.initializeRequestMapper(host);
-        Assert.assertTrue(uriHandlerDispatcher.getRequestURIMapper().size() == 16);
+        Assert.assertTrue(uriHandlerDispatcher.getRequestURIMapper().size() == 14);
 
         Assert.assertTrue(
                 Objects.nonNull(
@@ -45,15 +45,6 @@ public class URIHandlerDispatcherTest {
                 Objects.nonNull(
                         uriHandlerDispatcher.matchURIHandler(
                                 new URIMethod("POST", "/supportedStubs"))));
-
-        Assert.assertTrue(
-                Objects.nonNull(
-                        uriHandlerDispatcher.matchURIHandler(
-                                new URIMethod("GET", "/listAccounts"))));
-        Assert.assertTrue(
-                Objects.nonNull(
-                        uriHandlerDispatcher.matchURIHandler(
-                                new URIMethod("POST", "/listAccounts"))));
 
         Assert.assertTrue(
                 Objects.nonNull(

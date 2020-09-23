@@ -1,7 +1,9 @@
 package com.webank.wecross.network.rpc.netty;
 
+import com.webank.wecross.account.UserContext;
 import com.webank.wecross.network.p2p.netty.factory.ThreadPoolTaskExecutorFactory;
 import com.webank.wecross.network.rpc.URIHandlerDispatcher;
+import com.webank.wecross.network.rpc.authentication.AuthFilter;
 import com.webank.wecross.network.rpc.netty.handler.HttpServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -41,6 +43,13 @@ public class RPCBootstrap {
     private ServerBootstrap serverBootstrap = new ServerBootstrap();
     private RPCConfig config;
     private URIHandlerDispatcher uriHandlerDispatcher;
+
+    private UserContext userContext;
+    private AuthFilter authFilter;
+
+    public void setUserContext(UserContext UserContext) {
+        this.userContext = UserContext;
+    }
 
     public RPCConfig getConfig() {
         return config;
@@ -151,7 +160,9 @@ public class RPCBootstrap {
                                                 new HttpObjectAggregator(Integer.MAX_VALUE),
                                                 new HttpServerHandler(
                                                         getUriHandlerDispatcher(),
-                                                        threadPoolTaskExecutor));
+                                                        threadPoolTaskExecutor,
+                                                        userContext,
+                                                        authFilter));
                             }
                         });
 
@@ -162,5 +173,9 @@ public class RPCBootstrap {
                 " start rpc http server, listen ip: {}, port: {}",
                 config.getListenIP(),
                 config.getListenPort());
+    }
+
+    public void setAuthFilter(AuthFilter authFilter) {
+        this.authFilter = authFilter;
     }
 }

@@ -183,6 +183,7 @@ public class ZoneManager {
                     MemoryBlockManager resourceBlockHeaderManager =
                             memoryBlockManagerFactory.build(chain);
 
+                    chain.setStubType(chainInfo.getStubType());
                     chain.setBlockManager(resourceBlockHeaderManager);
 
                     zone.getChains().put(chainPath.getChain(), chain);

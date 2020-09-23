@@ -221,6 +221,14 @@ gen_conf()
     sslKey = 'classpath:ssl.key'
     peers = [${5}]
 
+[account-manager]
+    server =  '127.0.0.1:8340'
+    admin = 'org1-admin'
+    password = '123456'
+    sslKey = 'classpath:ssl.key'
+    sslCert = 'classpath:ssl.crt'
+    caCert = 'classpath:ca.crt'
+
 #[[htlc]]
 #    selfPath = 'payment.bcos.htlc'
 #    account1 = 'bcos_default_account'

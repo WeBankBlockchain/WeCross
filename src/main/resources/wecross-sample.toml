@@ -8,12 +8,12 @@
 [rpc] # rpc ip & port
     address = '127.0.0.1'
     port = 8250
-    sslOn = true
     caCert = 'classpath:ca.crt'
     sslCert = 'classpath:ssl.crt'
     sslKey = 'classpath:ssl.key'
     threadNum = 16
     threadQueueCapacity = 10000
+    #sslSwitch = 1  # SSL_OFF(2), SSL_ON(1), SSL_ON_CLIENT_AUTH(0);
 
 [p2p]
     listenIP = '0.0.0.0'
@@ -24,6 +24,16 @@
     peers = ['127.0.0.1:25501']
     threadNum = 16
     threadQueueCapacity = 100000
+
+[account-manager]
+    server =  '127.0.0.1:8250'
+    admin = 'org1-admin'
+    password = '123456'
+    sslKey = 'classpath:ssl.key'
+    sslCert = 'classpath:ssl.crt'
+    caCert = 'classpath:ca.crt'
+    maxTotal = 200
+    maxPerRoute = 8
 
 
 #[[htlc]]

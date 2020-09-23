@@ -60,7 +60,7 @@ cross_group_demo_test()
     cd WeCross-Console/
     bash start.sh <<EOF
 listResources
-listAccounts
+listAccount
 call payment.bcos.HelloWeCross bcos_user1 get
 sendTransaction payment.bcos.HelloWeCross bcos_user1 set ["Tom"]
 call payment.bcos.HelloWeCross bcos_user1 get

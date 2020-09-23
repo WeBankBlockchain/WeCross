@@ -122,7 +122,7 @@ clear_ask()
 
     # Clear history
     if [ -e ${ROOT}/routers-payment ];then
-        read -p "Old demo network exist. Clear all and re-build? [Y/n]" ans
+        read -r -p "Old demo network exist. Clear all and re-build? [Y/n]" ans
         case "$ans" in
         y | Y | "")
             LOG_INFO "Clear old network ..."
