@@ -1,22 +1,11 @@
 package com.webank.wecross.resource;
 
 import com.webank.wecross.peer.Peer;
-import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.BlockManager;
-import com.webank.wecross.stub.Connection;
-import com.webank.wecross.stub.Driver;
-import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.Request;
-import com.webank.wecross.stub.ResourceInfo;
-import com.webank.wecross.stub.Response;
-import com.webank.wecross.stub.StubQueryStatus;
-import com.webank.wecross.stub.TransactionContext;
-import com.webank.wecross.stub.TransactionException;
-import com.webank.wecross.stub.TransactionRequest;
-import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.stub.*;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -84,11 +73,22 @@ public class Resource {
     }
 
     public interface Callback {
-        public void onTransactionResponse(
+        void onTransactionResponse(
                 TransactionException transactionException, TransactionResponse transactionResponse);
     }
 
-    public void asyncCall(TransactionRequest request, Account account, Resource.Callback callback) {
+    public void asyncCall(
+            TransactionRequest request, UniversalAccount ua, Resource.Callback callback) {
+        Account account = ua.getAccount(stubType);
+        if (Objects.isNull(account)) {
+            callback.onTransactionResponse(
+                    new TransactionException(
+                            0,
+                            "Account with type '" + stubType + "' not found for " + ua.getName()),
+                    null);
+            return;
+        }
+
         TransactionContext context =
                 new TransactionContext(account, this.path, this.resourceInfo, this.blockManager);
         boolean isRawTransaction =
@@ -99,20 +99,14 @@ public class Resource {
                     request,
                     false,
                     chooseConnection(),
-                    new Driver.Callback() {
-                        @Override
-                        public void onTransactionResponse(
-                                TransactionException transactionException,
-                                TransactionResponse transactionResponse) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug(
-                                        "asyncCall response: {}, exception: ",
-                                        transactionResponse,
-                                        transactionException);
-                            }
-                            callback.onTransactionResponse(
-                                    transactionException, transactionResponse);
+                    (transactionException, transactionResponse) -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(
+                                    "asyncCall response: {}, exception: ",
+                                    transactionResponse,
+                                    transactionException);
                         }
+                        callback.onTransactionResponse(transactionException, transactionResponse);
                     });
         } else {
             driver.asyncCall(
@@ -120,26 +114,30 @@ public class Resource {
                     request,
                     true,
                     chooseConnection(),
-                    new Driver.Callback() {
-                        @Override
-                        public void onTransactionResponse(
-                                TransactionException transactionException,
-                                TransactionResponse transactionResponse) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug(
-                                        "asyncCall response: {}, exception: ",
-                                        transactionResponse,
-                                        transactionException);
-                            }
-                            callback.onTransactionResponse(
-                                    transactionException, transactionResponse);
+                    (transactionException, transactionResponse) -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(
+                                    "asyncCall response: {}, exception: ",
+                                    transactionResponse,
+                                    transactionException);
                         }
+                        callback.onTransactionResponse(transactionException, transactionResponse);
                     });
         }
     }
 
     public void asyncSendTransaction(
-            TransactionRequest request, Account account, Resource.Callback callback) {
+            TransactionRequest request, UniversalAccount ua, Resource.Callback callback) {
+        Account account = ua.getAccount(stubType);
+        if (Objects.isNull(account)) {
+            callback.onTransactionResponse(
+                    new TransactionException(
+                            0,
+                            "Account with type '" + stubType + "' not found for " + ua.getName()),
+                    null);
+            return;
+        }
+
         TransactionContext context =
                 new TransactionContext(account, this.path, this.resourceInfo, this.blockManager);
         boolean isRawTransaction =
@@ -150,20 +148,14 @@ public class Resource {
                     request,
                     false,
                     chooseConnection(),
-                    new Driver.Callback() {
-                        @Override
-                        public void onTransactionResponse(
-                                TransactionException transactionException,
-                                TransactionResponse transactionResponse) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug(
-                                        "asyncCall response: {}, exception: ",
-                                        transactionResponse,
-                                        transactionException);
-                            }
-                            callback.onTransactionResponse(
-                                    transactionException, transactionResponse);
+                    (transactionException, transactionResponse) -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(
+                                    "asyncCall response: {}, exception: ",
+                                    transactionResponse,
+                                    transactionException);
                         }
+                        callback.onTransactionResponse(transactionException, transactionResponse);
                     });
         } else {
             driver.asyncSendTransaction(
@@ -171,37 +163,19 @@ public class Resource {
                     request,
                     true,
                     chooseConnection(),
-                    new Driver.Callback() {
-                        @Override
-                        public void onTransactionResponse(
-                                TransactionException transactionException,
-                                TransactionResponse transactionResponse) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug(
-                                        "asyncCall response: {}, exception: ",
-                                        transactionResponse,
-                                        transactionException);
-                            }
-                            callback.onTransactionResponse(
-                                    transactionException, transactionResponse);
+                    (transactionException, transactionResponse) -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(
+                                    "asyncCall response: {}, exception: ",
+                                    transactionResponse,
+                                    transactionException);
                         }
+                        callback.onTransactionResponse(transactionException, transactionResponse);
                     });
         }
     }
 
     public void onRemoteTransaction(Request request, Connection.Callback callback) {
-        /*
-        ImmutablePair<Boolean, TransactionRequest> booleanTransactionRequestPair =
-                driver.decodeTransactionRequest(request);
-        if (booleanTransactionRequestPair.getLeft()) {
-
-            TransactionRequest transactionRequest = booleanTransactionRequestPair.getValue();
-            // TODO: check request
-
-            // fail or return
-        }
-        */
-
         request.setResourceInfo(resourceInfo);
         chooseConnection().asyncSend(request, callback);
     }
@@ -209,14 +183,7 @@ public class Resource {
     public Response onRemoteTransaction(Request request) {
         CompletableFuture<Response> completableFuture = new CompletableFuture<>();
 
-        onRemoteTransaction(
-                request,
-                new Connection.Callback() {
-                    @Override
-                    public void onResponse(Response response) {
-                        completableFuture.complete(response);
-                    }
-                });
+        onRemoteTransaction(request, response -> completableFuture.complete(response));
 
         try {
             return completableFuture.get(10, TimeUnit.SECONDS);
@@ -224,7 +191,7 @@ public class Resource {
             Response response = new Response();
             response.setErrorCode(StubQueryStatus.TIMEOUT);
             response.setErrorMessage("onRemoteTransaction completableFuture exception: " + e);
-            logger.error("onRemoteTransaction timeout, resource: " + getResourceInfo());
+            logger.error("onRemoteTransaction timeout, resource: {}", getResourceInfo());
             return response;
         }
     }

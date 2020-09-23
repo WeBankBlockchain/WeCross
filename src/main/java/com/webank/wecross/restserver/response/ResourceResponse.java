@@ -1,9 +1,9 @@
 package com.webank.wecross.restserver.response;
 
-import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceDetail;
 import com.webank.wecross.stub.Path;
+import com.webank.wecross.stub.StubConstant;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.LinkedList;
 import java.util.Map;
@@ -27,9 +27,7 @@ public class ResourceResponse {
 
             try {
                 if (ignoreProxy
-                        && Path.decode(path)
-                                .getResource()
-                                .equals(WeCrossDefault.WECROSS_PROXY_NAME)) {
+                        && Path.decode(path).getResource().equals(StubConstant.PROXY_NAME)) {
                     continue;
                 }
             } catch (Exception e) {

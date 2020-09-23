@@ -55,7 +55,7 @@ EOF
 
   bash start.sh <<EOF
 sendTransaction payment.bcos.ledger bcos_sender approve ${BCOS_HTLC} 1000000
-sendTransaction payment.bcos.htlc bcos_sender init ${BCOS_LEDGER} ${FABRIC_HTLC}
+sendTransaction payment.bcos.htlc bcos_sender init ${BCOS_LEDGER}
 quit
 EOF
     cd -
@@ -82,7 +82,7 @@ install_fabric_chaincode()
 
     # install htlc
     docker exec -it cli peer chaincode install -n ${FABRIC_HTLC} -v ${version} -p github.com/chaincode/htlc/
-    docker exec -it cli peer chaincode instantiate -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n ${FABRIC_HTLC} -l golang -v ${version} -c '{"Args":["init",'"\"${FABRIC_LEDGER}\"","\"mychannel\"","\"${BCOS_HTLC}\""']}'
+    docker exec -it cli peer chaincode instantiate -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n ${FABRIC_HTLC} -l golang -v ${version} -c '{"Args":["init",'"\"${FABRIC_LEDGER}\""',"mychannel"]}'
 
     # approve
     docker exec -it cli peer chaincode invoke -C mychannel -n ${FABRIC_LEDGER} -c '{"Args":["createEscrowAccount","1000000"]}' -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem

@@ -7,15 +7,7 @@ import static org.junit.Assert.assertTrue;
 import com.webank.wecross.network.p2p.netty.common.Node;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.stub.Connection;
-import com.webank.wecross.stub.Driver;
-import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.Request;
-import com.webank.wecross.stub.ResourceInfo;
-import com.webank.wecross.stub.Response;
-import com.webank.wecross.stub.TransactionException;
-import com.webank.wecross.stub.TransactionRequest;
-import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.stub.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Assert;
 import org.junit.Test;
@@ -91,9 +83,13 @@ public class ResourceTest {
                         Mockito.any(Driver.Callback.class));
         resource.setDriver(driver);
 
+        UniversalAccount ua = Mockito.mock(UniversalAccount.class);
+        Account account = Mockito.mock(Account.class);
+        Mockito.when(ua.getAccount(Mockito.any())).thenReturn(account);
+
         resource.asyncCall(
                 request,
-                null,
+                ua,
                 new Resource.Callback() {
                     @Override
                     public void onTransactionResponse(
@@ -104,7 +100,7 @@ public class ResourceTest {
 
                         resource.asyncSendTransaction(
                                 request,
-                                null,
+                                ua,
                                 new Resource.Callback() {
                                     @Override
                                     public void onTransactionResponse(

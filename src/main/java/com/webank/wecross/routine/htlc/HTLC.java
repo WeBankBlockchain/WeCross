@@ -2,7 +2,8 @@ package com.webank.wecross.routine.htlc;
 
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.stub.Account;
+import com.webank.wecross.routine.TransactionValidator;
+import com.webank.wecross.stub.UniversalAccount;
 
 public interface HTLC {
     interface Callback {
@@ -55,19 +56,12 @@ public interface HTLC {
      * verify transaction
      *
      * @param counterpartyResource counterparty resource
-     * @param verifyData expected transaction data
+     * @param transactionValidator expected transaction data
      */
     void verifyHtlcTransaction(
-            Resource counterpartyResource, VerifyData verifyData, VerifyCallback callback);
-
-    /**
-     * get counterparty htlc contract address
-     *
-     * @param resource self htlc resource
-     * @param account account to sign
-     * @param callback a callback interface
-     */
-    void getCounterpartyHtlcAddress(Resource resource, Account account, Callback callback);
+            Resource counterpartyResource,
+            TransactionValidator transactionValidator,
+            VerifyCallback callback);
 
     /**
      * get all proposal ids
@@ -81,11 +75,11 @@ public interface HTLC {
      * get proposal info by id
      *
      * @param resource self htlc resource
-     * @param account account to sign
+     * @param ua account to sign
      * @param hash hash of secret, also the proposal id
      * @param callback a callback interface
      */
-    void getProposalInfo(Resource resource, Account account, String hash, Callback callback);
+    void getProposalInfo(Resource resource, UniversalAccount ua, String hash, Callback callback);
 
     /**
      * decode proposal with string array inputs
@@ -127,12 +121,12 @@ public interface HTLC {
      * set unlock state of counterparty
      *
      * @param resource self htlc resource
-     * @param account account to sign
+     * @param ua account to sign
      * @param hash hash of secret, also the proposal id
      * @param callback a callback interface
      */
     void setCounterpartyUnlockState(
-            Resource resource, Account account, String hash, Callback callback);
+            Resource resource, UniversalAccount ua, String hash, Callback callback);
 
     /**
      * set rollback state of counterparty

@@ -4,19 +4,14 @@ import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.RoutineDefault;
-import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.BlockManager;
-import com.webank.wecross.stub.Connection;
-import com.webank.wecross.stub.Driver;
-import com.webank.wecross.stub.TransactionException;
-import com.webank.wecross.stub.TransactionRequest;
-import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.routine.TransactionValidator;
+import com.webank.wecross.stub.*;
 import java.math.BigInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AssetHTLC implements HTLC {
-    private Logger logger = LoggerFactory.getLogger(AssetHTLC.class);
+public class HTLCImpl implements HTLC {
+    private Logger logger = LoggerFactory.getLogger(HTLCImpl.class);
 
     @Override
     public void lockSelf(HTLCResource htlcResource, String hash, Callback callback) {
@@ -54,13 +49,13 @@ public class AssetHTLC implements HTLC {
                 htlcResource, RoutineDefault.UNLOCK_METHOD, new String[] {hash, secret}, callback);
     }
 
-    // lock or unlock with validation
+    /* lock or unlock with validation */
     private void transferWithValidation(
             HTLCResource htlcResource, String method, String[] args, Callback callback) {
         TransactionRequest request = new TransactionRequest(method, args);
         htlcResource.asyncSendTransaction(
                 request,
-                htlcResource.getAccount1(),
+                htlcResource.getAdminUa(),
                 (transactionException, transactionResponse) -> {
                     if (transactionException != null && !transactionException.isSuccess()) {
                         callback.onReturn(
@@ -105,18 +100,18 @@ public class AssetHTLC implements HTLC {
                         return;
                     }
 
-                    VerifyData verifyData =
-                            new VerifyData(
+                    TransactionValidator transactionValidator =
+                            new TransactionValidator(
                                     transactionResponse.getBlockNumber(),
                                     transactionResponse.getHash(),
                                     method,
                                     args,
                                     new String[] {RoutineDefault.SUCCESS_FLAG});
-                    verifyData.setPath(htlcResource.getPath());
+                    transactionValidator.setPath(htlcResource.getPath());
                     String finalRes = res;
                     verifyHtlcTransaction(
                             htlcResource,
-                            verifyData,
+                            transactionValidator,
                             (exception, result1) -> {
                                 if (exception != null || !result1) {
                                     callback.onReturn(
@@ -141,9 +136,9 @@ public class AssetHTLC implements HTLC {
 
     @Override
     public void verifyHtlcTransaction(
-            Resource resource, VerifyData verifyData, VerifyCallback callback) {
-        String txHash = verifyData.getTransactionHash();
-        long blockNumber = verifyData.getBlockNumber();
+            Resource resource, TransactionValidator transactionValidator, VerifyCallback callback) {
+        String txHash = transactionValidator.getTransactionHash();
+        long blockNumber = transactionValidator.getBlockNumber();
         BlockManager blockManager = resource.getBlockManager();
         Connection connection = resource.chooseConnection();
         Driver driver = resource.getDriver();
@@ -160,15 +155,15 @@ public class AssetHTLC implements HTLC {
                                         ErrorCode.HTLC_ERROR, "GET_VERIFIED_TRANSACTION_ERROR"),
                                 false);
                     } else {
-                        callback.onReturn(null, verifyData.verify(transaction));
+                        callback.onReturn(null, transactionValidator.verify(transaction));
                     }
                 });
     }
 
     @Override
     public void getProposalInfo(
-            Resource resource, Account account, String hash, Callback callback) {
-        call(resource, account, "getProposalInfo", new String[] {hash}, callback);
+            Resource resource, UniversalAccount ua, String hash, Callback callback) {
+        call(resource, ua, "getProposalInfo", new String[] {hash}, callback);
     }
 
     @Override
@@ -197,11 +192,6 @@ public class AssetHTLC implements HTLC {
     }
 
     @Override
-    public void getCounterpartyHtlcAddress(Resource resource, Account account, Callback callback) {
-        call(resource, account, "getCounterpartyHtlcAddress", null, callback);
-    }
-
-    @Override
     public void getProposalIDs(HTLCResource htlcResource, Callback callback) {
         call(htlcResource, "getProposalIDs", null, callback);
     }
@@ -224,9 +214,8 @@ public class AssetHTLC implements HTLC {
 
     @Override
     public void setCounterpartyUnlockState(
-            Resource resource, Account account, String hash, Callback callback) {
-        sendTransaction(
-                resource, account, "setCounterpartyUnlockState", new String[] {hash}, callback);
+            Resource resource, UniversalAccount ua, String hash, Callback callback) {
+        sendTransaction(resource, ua, "setCounterpartyUnlockState", new String[] {hash}, callback);
     }
 
     @Override
@@ -237,13 +226,15 @@ public class AssetHTLC implements HTLC {
     }
 
     private void call(
-            Resource resource, Account account, String method, String[] args, Callback callback) {
+            Resource resource,
+            UniversalAccount ua,
+            String method,
+            String[] args,
+            Callback callback) {
         TransactionRequest request = new TransactionRequest(method, args);
 
         resource.asyncCall(
-                request,
-                account,
-                newTransactionCallback(RoutineDefault.CALL_TYPE, method, callback));
+                request, ua, newTransactionCallback(RoutineDefault.CALL_TYPE, method, callback));
     }
 
     private void call(HTLCResource htlcResource, String method, String[] args, Callback callback) {
@@ -251,17 +242,21 @@ public class AssetHTLC implements HTLC {
 
         htlcResource.asyncCall(
                 request,
-                htlcResource.getAccount1(),
+                htlcResource.getAdminUa(),
                 newTransactionCallback(RoutineDefault.CALL_TYPE, method, callback));
     }
 
     private void sendTransaction(
-            Resource resource, Account account, String method, String[] args, Callback callback) {
+            Resource resource,
+            UniversalAccount ua,
+            String method,
+            String[] args,
+            Callback callback) {
         TransactionRequest request = new TransactionRequest(method, args);
 
         resource.asyncSendTransaction(
                 request,
-                account,
+                ua,
                 newTransactionCallback(RoutineDefault.SEND_TRANSACTION_TYPE, method, callback));
     }
 
@@ -270,39 +265,33 @@ public class AssetHTLC implements HTLC {
         TransactionRequest request = new TransactionRequest(method, args);
         htlcResource.asyncSendTransaction(
                 request,
-                htlcResource.getAccount1(),
+                htlcResource.getAdminUa(),
                 newTransactionCallback(RoutineDefault.SEND_TRANSACTION_TYPE, method, callback));
     }
 
     private Resource.Callback newTransactionCallback(
             String type, String method, Callback callback) {
-        return new Resource.Callback() {
-            @Override
-            public void onTransactionResponse(
-                    TransactionException transactionException,
-                    TransactionResponse transactionResponse) {
-                if (transactionException != null && !transactionException.isSuccess()) {
-                    logger.error(
-                            "{}, method: {}, errorCode: {}, errorMsg: {}",
-                            type,
-                            method,
-                            transactionException.getErrorCode(),
-                            transactionException.getMessage());
-                    callback.onReturn(
-                            new WeCrossException(
-                                    ErrorCode.HTLC_ERROR,
-                                    method.toUpperCase() + "_ERROR",
-                                    HTLCErrorCode.TRANSACTION_ERROR,
-                                    transactionException.getMessage()),
-                            null);
-                } else {
-                    try {
-                        String result =
-                                handleTransactionResponse(type, method, transactionResponse);
-                        callback.onReturn(null, result);
-                    } catch (WeCrossException e) {
-                        callback.onReturn(e, null);
-                    }
+        return (transactionException, transactionResponse) -> {
+            if (transactionException != null && !transactionException.isSuccess()) {
+                logger.error(
+                        "{}, method: {}, errorCode: {}, errorMsg: {}",
+                        type,
+                        method,
+                        transactionException.getErrorCode(),
+                        transactionException.getMessage());
+                callback.onReturn(
+                        new WeCrossException(
+                                ErrorCode.HTLC_ERROR,
+                                method.toUpperCase() + "_ERROR",
+                                HTLCErrorCode.TRANSACTION_ERROR,
+                                transactionException.getMessage()),
+                        null);
+            } else {
+                try {
+                    String result = handleTransactionResponse(type, method, transactionResponse);
+                    callback.onReturn(null, result);
+                } catch (WeCrossException e) {
+                    callback.onReturn(e, null);
                 }
             }
         };

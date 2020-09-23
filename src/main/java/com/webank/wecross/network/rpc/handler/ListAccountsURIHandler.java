@@ -11,6 +11,7 @@ import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.response.AccountResponse;
 import com.webank.wecross.stub.Account;
+import com.webank.wecross.stub.UniversalAccount;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +40,8 @@ public class ListAccountsURIHandler implements URIHandler {
     }
 
     @Override
-    public void handle(String uri, String method, String content, Callback callback) {
+    public void handle(
+            UniversalAccount ua, String uri, String method, String content, Callback callback) {
 
         RestResponse<AccountResponse> restResponse = new RestResponse<>();
         if (logger.isDebugEnabled()) {

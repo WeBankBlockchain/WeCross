@@ -1,9 +1,6 @@
-package com.webank.wecross.routine.task;
+package com.webank.wecross.polling;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.StdSchedulerFactory;
@@ -16,26 +13,43 @@ public class TaskManager {
 
     private Scheduler scheduler;
     private List<Task> tasks = new ArrayList<>();
-    private static final int DEFAULT_THREAD_COUNT = 16;
+    private static final int DEFAULT_THREAD_COUNT = 32;
 
-    public void init() throws SchedulerException {
+    public void start() throws SchedulerException {
+        /* init scheduler */
         int threadCount =
                 tasks.isEmpty() ? DEFAULT_THREAD_COUNT : tasks.size() % DEFAULT_THREAD_COUNT;
-        StdSchedulerFactory stdSchedulerFactory = new StdSchedulerFactory();
         Properties props = new Properties();
         props.put(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, "org.quartz.simpl.SimpleThreadPool");
         props.put("org.quartz.threadPool.threadCount", String.valueOf(threadCount));
+        StdSchedulerFactory stdSchedulerFactory = new StdSchedulerFactory();
         stdSchedulerFactory.initialize(props);
         scheduler = stdSchedulerFactory.getScheduler();
-    }
 
-    public void start() throws SchedulerException {
-        logger.info("Scheduler starts working");
+        /* schedule current registered tasks*/
+        scheduleTasks();
+
+        logger.info("Polling scheduler starts working");
         scheduler.start();
     }
 
-    public void addTasks(Task[] tasks) throws SchedulerException {
+    public void registerTasks(Task[] tasks) {
         this.tasks.addAll(Arrays.asList(tasks));
+    }
+
+    /** only used when scheduler has started */
+    public void appendTasks(Task[] tasks) throws SchedulerException {
+        if (Objects.isNull(scheduler)) {
+            throw new SchedulerException("Scheduler hasn't been initialized yet");
+        }
+
+        this.tasks.addAll(Arrays.asList(tasks));
+        for (Task task : tasks) {
+            scheduler.scheduleJob(task.getJobDetail(), task.getTrigger());
+        }
+    }
+
+    private void scheduleTasks() throws SchedulerException {
         for (Task task : tasks) {
             scheduler.scheduleJob(task.getJobDetail(), task.getTrigger());
         }

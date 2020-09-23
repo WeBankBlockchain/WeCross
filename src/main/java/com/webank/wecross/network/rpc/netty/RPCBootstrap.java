@@ -1,5 +1,6 @@
 package com.webank.wecross.network.rpc.netty;
 
+import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.account.UserContext;
 import com.webank.wecross.network.p2p.netty.factory.ThreadPoolTaskExecutorFactory;
 import com.webank.wecross.network.rpc.URIHandlerDispatcher;
@@ -44,8 +45,17 @@ public class RPCBootstrap {
     private RPCConfig config;
     private URIHandlerDispatcher uriHandlerDispatcher;
 
+    private AccountManager accountManager;
     private UserContext userContext;
     private AuthFilter authFilter;
+
+    public AccountManager getAccountManager() {
+        return accountManager;
+    }
+
+    public void setAccountManager(AccountManager accountManager) {
+        this.accountManager = accountManager;
+    }
 
     public void setUserContext(UserContext UserContext) {
         this.userContext = UserContext;
@@ -161,6 +171,7 @@ public class RPCBootstrap {
                                                 new HttpServerHandler(
                                                         getUriHandlerDispatcher(),
                                                         threadPoolTaskExecutor,
+                                                        accountManager,
                                                         userContext,
                                                         authFilter));
                             }

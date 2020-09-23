@@ -7,12 +7,12 @@ import com.webank.wecross.network.rpc.RPCService;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.peer.PeerSeqMessageData;
+import com.webank.wecross.polling.PollingManager;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.restserver.request.StateRequest;
 import com.webank.wecross.restserver.response.StateResponse;
 import com.webank.wecross.routine.RoutineManager;
-import com.webank.wecross.routine.xa.XATransactionManager;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
@@ -30,7 +30,7 @@ public class WeCrossHost {
     private RoutineManager routineManager;
     private P2PService p2PService;
     private RPCService rpcService;
-    private XATransactionManager xaTransactionManager;
+    private PollingManager pollingManager;
 
     Thread mainLoopThread;
 
@@ -228,11 +228,11 @@ public class WeCrossHost {
         this.rpcService = rpcService;
     }
 
-    public XATransactionManager getXaTransactionManager() {
-        return xaTransactionManager;
+    public PollingManager getPollingManager() {
+        return pollingManager;
     }
 
-    public void setXaTransactionManager(XATransactionManager xaTransactionManager) {
-        this.xaTransactionManager = xaTransactionManager;
+    public void setPollingManager(PollingManager pollingManager) {
+        this.pollingManager = pollingManager;
     }
 }

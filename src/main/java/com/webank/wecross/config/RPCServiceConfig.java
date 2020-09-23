@@ -1,5 +1,6 @@
 package com.webank.wecross.config;
 
+import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.account.UserContext;
 import com.webank.wecross.network.rpc.RPCService;
 import com.webank.wecross.network.rpc.URIHandlerDispatcher;
@@ -19,15 +20,17 @@ public class RPCServiceConfig {
 
     @Resource AuthFilter authFilter;
 
+    @Resource AccountManager accountManager;
+
     @Bean
     public RPCService newRPCService() {
         RPCBootstrap rpcBootstrap = new RPCBootstrap();
         rpcBootstrap.setConfig(rpcConfig);
+        rpcBootstrap.setAccountManager(accountManager);
         rpcBootstrap.setUserContext(userContext);
         rpcBootstrap.setAuthFilter(authFilter);
 
         URIHandlerDispatcher uriHandlerDispatcher = new URIHandlerDispatcher();
-        uriHandlerDispatcher.setUserContext(userContext);
         rpcBootstrap.setUriHandlerDispatcher(uriHandlerDispatcher);
 
         RPCService rpcService = new RPCService();

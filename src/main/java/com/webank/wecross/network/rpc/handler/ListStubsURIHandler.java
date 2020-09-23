@@ -1,10 +1,10 @@
 package com.webank.wecross.network.rpc.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.response.StubResponse;
+import com.webank.wecross.stub.UniversalAccount;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.zone.ZoneManager;
 import org.slf4j.Logger;
@@ -15,7 +15,6 @@ public class ListStubsURIHandler implements URIHandler {
     private static final Logger logger = LoggerFactory.getLogger(ListStubsURIHandler.class);
 
     private WeCrossHost host;
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     public ListStubsURIHandler(WeCrossHost host) {
         this.host = host;
@@ -30,19 +29,10 @@ public class ListStubsURIHandler implements URIHandler {
     }
 
     @Override
-    public void handle(String uri, String method, String content, Callback callback) {
+    public void handle(
+            UniversalAccount ua, String uri, String method, String content, Callback callback) {
         RestResponse<StubResponse> restResponse = new RestResponse<>();
-        //         String content = httpRequest.content().toString(StandardCharsets.UTF_8);
-
-        //        if (logger.isDebugEnabled()) {
-        //            logger.debug(" request string: {}", content);
-        //        }
-
         try {
-            //            RestRequest restRequest =
-            //                    objectMapper.readValue(content, new TypeReference<RestRequest>()
-            // {});
-            //            restRequest.checkRestRequest("", "supportedStubs");
             StubResponse stubResponse = new StubResponse();
             ZoneManager zoneManager = host.getZoneManager();
             StubManager stubManager = zoneManager.getStubManager();

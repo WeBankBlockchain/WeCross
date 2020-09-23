@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 
 @Data
 @Builder
-public class UniversalAccount implements com.webank.wecross.stub.UniversalAccount {
-    private static Logger logger = LoggerFactory.getLogger(UniversalAccount.class);
+public class UniversalAccountImpl implements com.webank.wecross.stub.UniversalAccount {
+    private static Logger logger = LoggerFactory.getLogger(UniversalAccountImpl.class);
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     private String username;
@@ -56,6 +56,11 @@ public class UniversalAccount implements com.webank.wecross.stub.UniversalAccoun
             }
         }
         return accounts;
+    }
+
+    @Override
+    public String getName() {
+        return username;
     }
 
     @Override
