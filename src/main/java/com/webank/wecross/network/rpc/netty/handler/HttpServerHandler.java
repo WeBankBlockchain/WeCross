@@ -43,7 +43,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
     private URIHandlerDispatcher uriHandlerDispatcher;
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
     private AccountManager accountManager;
-    private UserContext userContext;
+
     private AuthFilter authFilter;
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -51,10 +51,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
             URIHandlerDispatcher uriHandlerDispatcher,
             ThreadPoolTaskExecutor threadPoolTaskExecutor,
             AccountManager accountManager,
-            UserContext userContext,
             AuthFilter authFilter) {
         this.accountManager = accountManager;
-        this.userContext = userContext;
         this.authFilter = authFilter;
         this.setUriHandlerDispatcher(uriHandlerDispatcher);
         this.setThreadPoolTaskExecutor(threadPoolTaskExecutor);
@@ -124,9 +122,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
 
         threadPoolTaskExecutor.execute(
                 () -> {
+                    UserContext userContext = new UserContext();
                     userContext.setToken(getTokenFromHeader(httpRequest));
+
                     uriHandler.handle(
-                            accountManager.getUniversalAccount(userContext),
+                            userContext,
                             uri,
                             method.toString(),
                             content,

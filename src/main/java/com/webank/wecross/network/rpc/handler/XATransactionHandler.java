@@ -2,8 +2,10 @@ package com.webank.wecross.network.rpc.handler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
@@ -20,6 +22,8 @@ public class XATransactionHandler implements URIHandler {
     private Logger logger = LoggerFactory.getLogger(XATransactionHandler.class);
     private ObjectMapper objectMapper = new ObjectMapper();
     private XATransactionManager xaTransactionManager;
+
+    private WeCrossHost host;
 
     public static class XAStartTransactionRequest {
         private String transactionID;
@@ -128,10 +132,15 @@ public class XATransactionHandler implements URIHandler {
 
     @Override
     public void handle(
-            UniversalAccount ua, String uri, String httpMethod, String content, Callback callback) {
+            UserContext userContext,
+            String uri,
+            String httpMethod,
+            String content,
+            Callback callback) {
         RestResponse<Object> restResponse = new RestResponse<Object>();
 
         try {
+            UniversalAccount ua = host.getAccountManager().getUniversalAccount(userContext);
             String method = uri.substring(1);
 
             switch (method) {
@@ -329,5 +338,9 @@ public class XATransactionHandler implements URIHandler {
 
     public void setXaTransactionManager(XATransactionManager xaTransactionManager) {
         this.xaTransactionManager = xaTransactionManager;
+    }
+
+    public void setHost(WeCrossHost host) {
+        this.host = host;
     }
 }

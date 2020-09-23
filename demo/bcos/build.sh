@@ -84,6 +84,17 @@ build_console()
     cp nodes/127.0.0.1/sdk/* console/conf/
 }
 
+build_accounts()
+{
+    # generate accounts
+    mkdir -p accounts
+    cd accounts
+
+    bash ../get_account.sh # normal
+    mv accounts bcos_user1
+    cd -
+}
+
 deploy_contract()
 {
     cd console
@@ -94,9 +105,11 @@ EOF
     cd -
 }
 
+
 main()
 {
     build_bcos_chain
+    build_accounts
     LOG_INFO "SUCCESS: Build FISCO BCOS demo finish."
 }
 

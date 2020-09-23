@@ -1,7 +1,6 @@
 package com.webank.wecross.config;
 
 import com.webank.wecross.account.AccountManager;
-import com.webank.wecross.account.UserContext;
 import com.webank.wecross.network.rpc.RPCService;
 import com.webank.wecross.network.rpc.URIHandlerDispatcher;
 import com.webank.wecross.network.rpc.authentication.AuthFilter;
@@ -15,9 +14,6 @@ import org.springframework.context.annotation.Configuration;
 public class RPCServiceConfig {
     @Resource RPCConfig rpcConfig;
 
-    @Resource(name = "newUserContext")
-    UserContext userContext;
-
     @Resource AuthFilter authFilter;
 
     @Resource AccountManager accountManager;
@@ -27,7 +23,6 @@ public class RPCServiceConfig {
         RPCBootstrap rpcBootstrap = new RPCBootstrap();
         rpcBootstrap.setConfig(rpcConfig);
         rpcBootstrap.setAccountManager(accountManager);
-        rpcBootstrap.setUserContext(userContext);
         rpcBootstrap.setAuthFilter(authFilter);
 
         URIHandlerDispatcher uriHandlerDispatcher = new URIHandlerDispatcher();

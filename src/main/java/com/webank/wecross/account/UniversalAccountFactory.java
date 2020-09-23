@@ -20,6 +20,7 @@ public class UniversalAccountFactory {
                         .uaID(uaDetails.getUaID())
                         .pubKey(uaDetails.getPubKey())
                         .isAdmin(uaDetails.isAdmin())
+                        .lastActiveTimestamp(System.currentTimeMillis())
                         .build();
 
         // foreach details, set default account into ua
@@ -32,6 +33,7 @@ public class UniversalAccountFactory {
                 StubFactory stubFactory = stubManager.getStubFactory(type);
                 if (stubFactory == null) {
                     logger.error("Stub type not found: " + type);
+                    continue;
                 }
 
                 Account account = stubFactory.newAccount(details.toProperties());

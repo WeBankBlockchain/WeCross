@@ -3,7 +3,6 @@ package com.webank.wecross.config;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.account.AdminContext;
 import com.webank.wecross.account.UniversalAccountFactory;
-import com.webank.wecross.account.UserContext;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.client.ClientMessageEngine;
 import java.io.IOException;
@@ -15,8 +14,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AccountManagerConfig {
-    @Resource(name = "newUserContext")
-    UserContext userContext;
 
     @Resource AdminContext adminContext;
 
@@ -42,10 +39,5 @@ public class AccountManagerConfig {
                     localAccountManager.getAccounts()); // set according with rpcContext
         */
         return accountManager;
-    }
-
-    @Bean
-    public UserContext newUserContext() throws WeCrossException {
-        return new UserContext();
     }
 }

@@ -60,6 +60,16 @@ build_bcos_chain()
     ./nodes_gm/127.0.0.1/start_all.sh
 }
 
+build_accounts()
+{
+    # generate accounts
+    mkdir -p accounts
+    cd accounts
+
+    bash ../get_gm_account.sh # gm
+    mv accounts_gm bcos_gm_user1
+    cd -
+}
 
 check_and_install_tassl(){
     local TASSL_HOME="${HOME}"/.fisco
@@ -82,6 +92,7 @@ main()
 {
     check_and_install_tassl
     build_bcos_chain
+    build_accounts
     LOG_INFO "SUCCESS: Build FISCO BCOS Guomi demo finish."
 }
 
