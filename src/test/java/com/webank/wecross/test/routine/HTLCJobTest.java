@@ -1,7 +1,8 @@
 package com.webank.wecross.test.routine;
 
+import com.webank.wecross.polling.Task;
+import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.routine.htlc.*;
-import com.webank.wecross.routine.task.Task;
 import com.webank.wecross.stub.Path;
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,7 +19,9 @@ public class HTLCJobTest {
             HTLCTaskFactory htlcTaskFactory = new HTLCTaskFactory();
             HTLCResourcePair[] htlcResourcePairs = new HTLCResourcePair[1];
             htlcResourcePairs[0] = getHTLCResourcePair();
-            Task[] tasks = htlcTaskFactory.load(htlcResourcePairs);
+            Task[] tasks =
+                    htlcTaskFactory.load(
+                            htlcResourcePairs, RoutineDefault.HTLC_JOB_DATA_KEY, HTLCJob.class);
             JobDetail jobDetail = tasks[0].getJobDetail();
             Mockito.when(jobExecutionContext.getJobDetail()).thenReturn(jobDetail);
             htlcJob.execute(jobExecutionContext);
@@ -32,7 +35,7 @@ public class HTLCJobTest {
         HTLCResource htlcResource2 = new HTLCResource();
         htlcResource1.setSelfPath(new Path());
         htlcResource2.setSelfPath(new Path());
-        AssetHTLC assetHTLC = new AssetHTLC();
-        return new HTLCResourcePair(assetHTLC, htlcResource1, htlcResource2);
+        HTLCImpl htlcImpl = new HTLCImpl();
+        return new HTLCResourcePair(htlcImpl, htlcResource1, htlcResource2);
     }
 }

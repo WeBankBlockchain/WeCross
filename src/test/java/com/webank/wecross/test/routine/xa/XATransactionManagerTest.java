@@ -4,19 +4,11 @@ import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.xa.XATransactionManager;
 import com.webank.wecross.routine.xa.XATransactionManager.ReduceCallback;
-import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.BlockManager;
-import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.ResourceInfo;
-import com.webank.wecross.stub.TransactionException;
-import com.webank.wecross.stub.TransactionRequest;
-import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.stub.*;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,9 +27,7 @@ public class XATransactionManagerTest {
         Zone zone = Mockito.mock(Zone.class);
         Mockito.when(zone.getChain(Mockito.any(Path.class))).thenReturn(chain);
 
-        Account account = Mockito.mock(Account.class);
-        Map<String, Account> accounts = new HashMap<String, Account>();
-        accounts.put("test", account);
+        UniversalAccount ua = Mockito.mock(UniversalAccount.class);
 
         Resource proxyResource = Mockito.mock(Resource.class);
         proxyResource.setResourceInfo(new ResourceInfo());
@@ -46,10 +36,10 @@ public class XATransactionManagerTest {
                             @Override
                             public Object answer(InvocationOnMock invocation) throws Throwable {
                                 TransactionRequest request = invocation.getArgument(0);
-                                Account account1 = invocation.getArgument(1);
+                                UniversalAccount ua1 = invocation.getArgument(1);
                                 Resource.Callback callback = invocation.getArgument(2);
 
-                                Assert.assertEquals(account1, account);
+                                Assert.assertEquals(ua1, ua);
 
                                 Assert.assertEquals("startTransaction", request.getMethod());
                                 Assert.assertEquals("0001", request.getArgs()[0]);
@@ -101,7 +91,7 @@ public class XATransactionManagerTest {
 
         xaTransactionManager.asyncStartTransaction(
                 transactionID,
-                accounts,
+                ua,
                 resources,
                 new ReduceCallback() {
                     @Override
@@ -115,8 +105,6 @@ public class XATransactionManagerTest {
                         new Answer<Object>() {
                             @Override
                             public Object answer(InvocationOnMock invocation) throws Throwable {
-                                TransactionRequest context = invocation.getArgument(0);
-                                Account account1 = invocation.getArgument(1);
                                 Resource.Callback callback = invocation.getArgument(2);
 
                                 callback.onTransactionResponse(
@@ -130,7 +118,7 @@ public class XATransactionManagerTest {
 
         xaTransactionManager.asyncStartTransaction(
                 transactionID,
-                accounts,
+                ua,
                 resources,
                 new ReduceCallback() {
                     @Override
@@ -151,9 +139,7 @@ public class XATransactionManagerTest {
         Zone zone = Mockito.mock(Zone.class);
         Mockito.when(zone.getChain(Mockito.any(Path.class))).thenReturn(chain);
 
-        Account account = Mockito.mock(Account.class);
-        Map<String, Account> accounts = new HashMap<String, Account>();
-        accounts.put("test", account);
+        UniversalAccount ua = Mockito.mock(UniversalAccount.class);
 
         Resource proxyResource = Mockito.mock(Resource.class);
         proxyResource.setResourceInfo(new ResourceInfo());
@@ -162,10 +148,10 @@ public class XATransactionManagerTest {
                             @Override
                             public Object answer(InvocationOnMock invocation) throws Throwable {
                                 TransactionRequest request = invocation.getArgument(0);
-                                Account account1 = invocation.getArgument(1);
+                                UniversalAccount ua1 = invocation.getArgument(1);
                                 Resource.Callback callback = invocation.getArgument(2);
 
-                                Assert.assertEquals(account1, account);
+                                Assert.assertEquals(ua1, ua);
 
                                 Assert.assertEquals("commitTransaction", request.getMethod());
                                 Assert.assertEquals("0001", request.getArgs()[0]);
@@ -204,7 +190,7 @@ public class XATransactionManagerTest {
 
         xaTransactionManager.asyncCommitTransaction(
                 transactionID,
-                accounts,
+                ua,
                 resources,
                 new ReduceCallback() {
                     @Override
@@ -218,8 +204,6 @@ public class XATransactionManagerTest {
                         new Answer<Object>() {
                             @Override
                             public Object answer(InvocationOnMock invocation) throws Throwable {
-                                TransactionRequest context = invocation.getArgument(0);
-                                Account account1 = invocation.getArgument(1);
                                 Resource.Callback callback = invocation.getArgument(2);
 
                                 callback.onTransactionResponse(
@@ -233,7 +217,7 @@ public class XATransactionManagerTest {
 
         xaTransactionManager.asyncCommitTransaction(
                 transactionID,
-                accounts,
+                ua,
                 resources,
                 new ReduceCallback() {
                     @Override
@@ -254,9 +238,7 @@ public class XATransactionManagerTest {
         Zone zone = Mockito.mock(Zone.class);
         Mockito.when(zone.getChain(Mockito.any(Path.class))).thenReturn(chain);
 
-        Account account = Mockito.mock(Account.class);
-        Map<String, Account> accounts = new HashMap<String, Account>();
-        accounts.put("test", account);
+        UniversalAccount ua = Mockito.mock(UniversalAccount.class);
 
         Resource proxyResource = Mockito.mock(Resource.class);
         proxyResource.setResourceInfo(new ResourceInfo());
@@ -265,10 +247,10 @@ public class XATransactionManagerTest {
                             @Override
                             public Object answer(InvocationOnMock invocation) throws Throwable {
                                 TransactionRequest request = invocation.getArgument(0);
-                                Account account1 = invocation.getArgument(1);
+                                UniversalAccount ua1 = invocation.getArgument(1);
                                 Resource.Callback callback = invocation.getArgument(2);
 
-                                Assert.assertEquals(account1, account);
+                                Assert.assertEquals(ua1, ua);
 
                                 Assert.assertEquals("rollbackTransaction", request.getMethod());
                                 Assert.assertEquals("0001", request.getArgs()[0]);
@@ -307,7 +289,7 @@ public class XATransactionManagerTest {
 
         xaTransactionManager.asyncRollback(
                 transactionID,
-                accounts,
+                ua,
                 resources,
                 new ReduceCallback() {
                     @Override
@@ -321,8 +303,6 @@ public class XATransactionManagerTest {
                         new Answer<Object>() {
                             @Override
                             public Object answer(InvocationOnMock invocation) throws Throwable {
-                                TransactionRequest context = invocation.getArgument(0);
-                                Account account1 = invocation.getArgument(1);
                                 Resource.Callback callback = invocation.getArgument(2);
 
                                 callback.onTransactionResponse(
@@ -336,7 +316,7 @@ public class XATransactionManagerTest {
 
         xaTransactionManager.asyncRollback(
                 transactionID,
-                accounts,
+                ua,
                 resources,
                 new ReduceCallback() {
                     @Override
@@ -345,42 +325,6 @@ public class XATransactionManagerTest {
                         Assert.assertEquals(-1, result);
                     }
                 });
-
-        /*
-               Mockito.doAnswer(
-                               new Answer<Object>() {
-                                   @Override
-                                   public Object answer(InvocationOnMock invocation) throws Throwable {
-                                       TransactionContext<TransactionRequest> context =
-                                               invocation.getArgument(0);
-                                       Resource.Callback callback = invocation.getArgument(1);
-
-                                       TransactionResponse transactionResponse = new
-        TransactionResponse();
-                                       transactionResponse.setErrorCode(0);
-                                       transactionResponse.setErrorMessage("");
-                                       transactionResponse.setResult(new String[] {"100"});
-
-                                       callback.onTransactionResponse(null, transactionResponse);
-
-                                       return null;
-                                   }
-                               })
-                       .when(proxyResource)
-                       .asyncSendTransaction(Mockito.any(), Mockito.any());
-
-               xaTransactionManager.asyncRollback(
-                       transactionID,
-                       accounts,
-                       resources,
-                       new Callback() {
-                           @Override
-                           public void onResponse(Exception e, int result) {
-                               Assert.assertNull(e);
-                               Assert.assertEquals(100, result);
-                           }
-                       });
-                       */
     }
 
     @Test
@@ -393,9 +337,7 @@ public class XATransactionManagerTest {
         Zone zone = Mockito.mock(Zone.class);
         Mockito.when(zone.getChain(Mockito.any(Path.class))).thenReturn(chain);
 
-        Account account = Mockito.mock(Account.class);
-        Map<String, Account> accounts = new HashMap<String, Account>();
-        accounts.put("test", account);
+        UniversalAccount ua = Mockito.mock(UniversalAccount.class);
 
         Resource proxyResource = Mockito.mock(Resource.class);
         proxyResource.setResourceInfo(new ResourceInfo());
@@ -404,10 +346,10 @@ public class XATransactionManagerTest {
                             @Override
                             public Object answer(InvocationOnMock invocation) throws Throwable {
                                 TransactionRequest request = invocation.getArgument(0);
-                                Account account1 = invocation.getArgument(1);
+                                UniversalAccount ua1 = invocation.getArgument(1);
                                 Resource.Callback callback = invocation.getArgument(2);
 
-                                Assert.assertEquals(account1, account);
+                                Assert.assertEquals(ua1, ua);
 
                                 Assert.assertEquals("getTransactionInfo", request.getMethod());
                                 Assert.assertEquals("0001", request.getArgs()[0]);
@@ -471,7 +413,7 @@ public class XATransactionManagerTest {
 
         xaTransactionManager.asyncGetTransactionInfo(
                 transactionID,
-                accounts,
+                ua,
                 resources,
                 (e, transactionInfo) -> {
                     Assert.assertNull(e);
@@ -485,8 +427,6 @@ public class XATransactionManagerTest {
                         new Answer<Object>() {
                             @Override
                             public Object answer(InvocationOnMock invocation) throws Throwable {
-                                TransactionRequest TransactionRequest = invocation.getArgument(0);
-                                Account account1 = invocation.getArgument(1);
                                 Resource.Callback callback = invocation.getArgument(2);
 
                                 callback.onTransactionResponse(
@@ -500,7 +440,7 @@ public class XATransactionManagerTest {
 
         xaTransactionManager.asyncGetTransactionInfo(
                 transactionID,
-                accounts,
+                ua,
                 resources,
                 (e, transactionInfo) -> {
                     Assert.assertNotNull(e);
@@ -510,8 +450,6 @@ public class XATransactionManagerTest {
                         new Answer<Object>() {
                             @Override
                             public Object answer(InvocationOnMock invocation) throws Throwable {
-                                TransactionRequest context = invocation.getArgument(0);
-                                Account account1 = invocation.getArgument(1);
                                 Resource.Callback callback = invocation.getArgument(2);
 
                                 TransactionResponse transactionResponse = new TransactionResponse();
@@ -529,7 +467,7 @@ public class XATransactionManagerTest {
 
         xaTransactionManager.asyncGetTransactionInfo(
                 transactionID,
-                accounts,
+                ua,
                 resources,
                 (e, transactionInfo) -> {
                     Assert.assertNotNull(e);

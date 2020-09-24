@@ -6,17 +6,8 @@ import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.RoutineDefault;
-import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.BlockManager;
-import com.webank.wecross.stub.Connection;
-import com.webank.wecross.stub.Driver;
-import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.Request;
-import com.webank.wecross.stub.ResourceInfo;
-import com.webank.wecross.stub.Response;
-import com.webank.wecross.stub.TransactionException;
-import com.webank.wecross.stub.TransactionRequest;
-import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.routine.TransactionValidator;
+import com.webank.wecross.stub.*;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,11 +20,10 @@ public class HTLCResource extends Resource {
     private Logger logger = LoggerFactory.getLogger(HTLCResource.class);
 
     private ZoneManager zoneManager;
+    private UniversalAccount adminUa;
     private Path selfPath;
-    private Account account1;
     private Path counterpartyPath;
-    private Account account2;
-    private String counterpartyAddress;
+
     private static final Set<String> P2P_ACCESS_WHITE_LIST =
             new HashSet<String>() {
                 {
@@ -67,13 +57,14 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public void asyncCall(TransactionRequest request, Account account, Resource.Callback callback) {
-        getSelfResource().asyncCall(request, account, callback);
+    public void asyncCall(
+            TransactionRequest request, UniversalAccount ua, Resource.Callback callback) {
+        getSelfResource().asyncCall(request, ua, callback);
     }
 
     @Override
     public void asyncSendTransaction(
-            TransactionRequest request, Account account, Resource.Callback callback) {
+            TransactionRequest request, UniversalAccount ua, Resource.Callback callback) {
         if (getSelfResource().hasLocalConnection()) {
             TransactionRequest transactionRequest = request;
             if (RoutineDefault.UNLOCK_METHOD.equals(transactionRequest.getMethod())) {
@@ -87,14 +78,14 @@ public class HTLCResource extends Resource {
                                 callback.onTransactionResponse(
                                         new TransactionException(0, null), transactionResponse);
                             } else {
-                                getSelfResource().asyncSendTransaction(request, account, callback);
+                                getSelfResource().asyncSendTransaction(request, ua, callback);
                             }
                         });
             } else {
-                getSelfResource().asyncSendTransaction(request, account, callback);
+                getSelfResource().asyncSendTransaction(request, ua, callback);
             }
         } else {
-            getSelfResource().asyncSendTransaction(request, account, callback);
+            getSelfResource().asyncSendTransaction(request, ua, callback);
         }
     }
 
@@ -106,10 +97,10 @@ public class HTLCResource extends Resource {
         }
 
         String hash = args[0];
-        HTLC htlc = new AssetHTLC();
+        HTLC htlc = new HTLCImpl();
         htlc.getProposalInfo(
                 getSelfResource(),
-                account1,
+                adminUa,
                 hash,
                 (exception, result) -> {
                     if (exception != null) {
@@ -153,7 +144,7 @@ public class HTLCResource extends Resource {
 
                                     htlc.setCounterpartyUnlockState(
                                             getSelfResource(),
-                                            account1,
+                                            adminUa,
                                             hash,
                                             (exception2, result2) -> callback.onReturn(exception2));
                                 });
@@ -172,7 +163,7 @@ public class HTLCResource extends Resource {
         getCounterpartyResource()
                 .asyncSendTransaction(
                         request,
-                        account2,
+                        adminUa,
                         (transactionException, transactionResponse) -> {
                             if (transactionException != null && !transactionException.isSuccess()) {
                                 callback.onReturn(
@@ -220,19 +211,19 @@ public class HTLCResource extends Resource {
 
     private void verifyUnlock(
             TransactionResponse transactionResponse, String[] args, VerifyUnlockCallback callback) {
-        HTLC htlc = new AssetHTLC();
+        HTLC htlc = new HTLCImpl();
 
-        VerifyData verifyData =
-                new VerifyData(
+        TransactionValidator transactionValidator =
+                new TransactionValidator(
                         transactionResponse.getBlockNumber(),
                         transactionResponse.getHash(),
                         RoutineDefault.UNLOCK_METHOD,
                         args,
                         new String[] {RoutineDefault.SUCCESS_FLAG});
-        verifyData.setPath(getCounterpartyPath());
+        transactionValidator.setPath(getCounterpartyPath());
         htlc.verifyHtlcTransaction(
                 getCounterpartyResource(),
-                verifyData,
+                transactionValidator,
                 (exception, result) -> {
                     if (exception != null) {
                         logger.error("failed to verify unlock,", exception);
@@ -280,13 +271,13 @@ public class HTLCResource extends Resource {
                         transactionRequest,
                         exception -> {
                             if (exception != null) {
-                                Response response1 = new Response();
-                                response1.setErrorCode(ErrorCode.HTLC_ERROR);
-                                response1.setErrorMessage(exception.getMessage());
+                                Response newResponse = new Response();
+                                newResponse.setErrorCode(ErrorCode.HTLC_ERROR);
+                                newResponse.setErrorMessage(exception.getMessage());
                                 if (logger.isDebugEnabled()) {
-                                    logger.debug("onRemoteTransaction, response: {}", response1);
+                                    logger.debug("onRemoteTransaction, response: {}", newResponse);
                                 }
-                                callback.onResponse(response1);
+                                callback.onResponse(newResponse);
                             } else {
                                 getSelfResource()
                                         .onRemoteTransaction(
@@ -346,6 +337,14 @@ public class HTLCResource extends Resource {
         this.zoneManager = zoneManager;
     }
 
+    public UniversalAccount getAdminUa() {
+        return adminUa;
+    }
+
+    public void setAdminUa(UniversalAccount adminUa) {
+        this.adminUa = adminUa;
+    }
+
     public Path getSelfPath() {
         return selfPath;
     }
@@ -354,36 +353,12 @@ public class HTLCResource extends Resource {
         this.selfPath = selfPath;
     }
 
-    public Account getAccount1() {
-        return account1;
-    }
-
-    public void setAccount1(Account account1) {
-        this.account1 = account1;
-    }
-
     public Path getCounterpartyPath() {
         return counterpartyPath;
     }
 
     public void setCounterpartyPath(Path counterpartyPath) {
         this.counterpartyPath = counterpartyPath;
-    }
-
-    public Account getAccount2() {
-        return account2;
-    }
-
-    public void setAccount2(Account account2) {
-        this.account2 = account2;
-    }
-
-    public String getCounterpartyAddress() {
-        return counterpartyAddress;
-    }
-
-    public void setCounterpartyAddress(String counterpartyAddress) {
-        this.counterpartyAddress = counterpartyAddress;
     }
 
     @Override
@@ -471,17 +446,12 @@ public class HTLCResource extends Resource {
         return "HTLCResource{"
                 + "zoneManager="
                 + zoneManager
+                + ", adminUa="
+                + adminUa
                 + ", selfPath="
                 + selfPath
-                + ", account1="
-                + account1
                 + ", counterpartyPath="
                 + counterpartyPath
-                + ", account2="
-                + account2
-                + ", counterpartyAddress='"
-                + counterpartyAddress
-                + '\''
                 + '}';
     }
 }

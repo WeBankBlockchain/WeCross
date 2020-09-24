@@ -1,4 +1,4 @@
-package com.webank.wecross.routine.htlc;
+package com.webank.wecross.routine;
 
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Transaction;
@@ -9,8 +9,9 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VerifyData {
-    private Logger logger = LoggerFactory.getLogger(VerifyData.class);
+/** verify transaction including request and response */
+public class TransactionValidator {
+    private Logger logger = LoggerFactory.getLogger(TransactionValidator.class);
 
     private long blockNumber;
     private String transactionHash;
@@ -19,7 +20,7 @@ public class VerifyData {
     private String[] result;
     private Path path;
 
-    public VerifyData(
+    public TransactionValidator(
             long blockNumber,
             String transactionHash,
             String method,

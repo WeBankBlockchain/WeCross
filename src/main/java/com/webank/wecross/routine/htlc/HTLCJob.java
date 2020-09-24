@@ -1,5 +1,6 @@
 package com.webank.wecross.routine.htlc;
 
+import com.webank.wecross.interchain.InterchainDefault;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.Path;
 import java.util.concurrent.CompletableFuture;
@@ -39,12 +40,8 @@ public class HTLCJob implements Job {
             Thread.currentThread().interrupt();
         }
 
-        boolean printTimeCost = false;
-        long startTime = System.currentTimeMillis();
-
         for (String proposalId : proposalIds) {
             if (!RoutineDefault.NULL_FLAG.equals(proposalId)) {
-                printTimeCost = true;
                 Path path = htlcResourcePair.getSelfHTLCResource().getSelfPath();
                 if (logger.isDebugEnabled()) {
                     logger.debug("Start handling htlc proposal: {}, path: {}", proposalId, path);
@@ -95,12 +92,6 @@ public class HTLCJob implements Job {
         try {
             // wait until job is finished
             semaphore.acquire(proposalIds.length);
-            if (printTimeCost) {
-                long endTime = System.currentTimeMillis();
-                if (logger.isDebugEnabled()) {
-                    logger.debug("current round of htlc: {} ms", endTime - startTime);
-                }
-            }
         } catch (InterruptedException e) {
             logger.warn("Interrupted,", e);
             Thread.currentThread().interrupt();
@@ -121,7 +112,9 @@ public class HTLCJob implements Job {
                                 htlcResource.getSelfPath(),
                                 exception.getLocalizedMessage(),
                                 exception.getInternalMessage());
-                        future.complete(RoutineDefault.NULL_FLAG);
+                        if (!future.isCancelled()) {
+                            future.complete(InterchainDefault.NULL_FLAG);
+                        }
                     } else {
                         if (!future.isCancelled()) {
                             future.complete(result);

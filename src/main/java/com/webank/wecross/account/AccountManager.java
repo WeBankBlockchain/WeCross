@@ -6,6 +6,7 @@ import com.webank.wecross.network.client.ClientMessageEngine;
 import com.webank.wecross.network.client.Request;
 import com.webank.wecross.network.client.Response;
 import com.webank.wecross.stub.Account;
+import com.webank.wecross.stub.UniversalAccount;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +25,9 @@ public class AccountManager {
 
     private AdminContext adminContext;
 
-    private Map<JwtToken, UniversalAccount> token2UA = new HashMap<>();
+    private UniversalAccount adminUA;
+
+    private Map<JwtToken, UniversalAccountImpl> token2UA = new HashMap<>();
 
     public Account getAccount(String name) {
         String message =
@@ -40,11 +43,11 @@ public class AccountManager {
             return new LinkedList<>();
         }
 
-        UniversalAccount ua = getUniversalAccount(userContext);
+        UniversalAccountImpl ua = getUniversalAccount(userContext);
         return ua.getAccounts();
     }
 
-    public UniversalAccount getUniversalAccount(UserContext userContext) {
+    public UniversalAccountImpl getUniversalAccount(UserContext userContext) {
 
         JwtToken token = userContext.getToken();
         if (token == null) {
@@ -52,7 +55,7 @@ public class AccountManager {
         }
 
         if (token.hasExpired() || !token2UA.containsKey(token)) {
-            UniversalAccount newUA = fetchUA(token); // from WeCross-Account-Manager
+            UniversalAccountImpl newUA = fetchUA(token); // from WeCross-Account-Manager
             if (newUA != null) {
                 token2UA.put(token, newUA);
             }
@@ -71,7 +74,7 @@ public class AccountManager {
         private String identity;
     }
 
-    public UniversalAccount getUniversalAccountByAccount(String accountIdentity) {
+    public UniversalAccount getUniversalAccountByIdentity(String accountIdentity) {
         JwtToken token = adminContext.getToken(); // only admin can query
 
         Request<Object> request = new Request();
@@ -84,9 +87,10 @@ public class AccountManager {
 
         try {
             // TODO: cache the response
-            Response<UniversalAccount.UADetails> response =
+            Response<UniversalAccountImpl.UADetails> response =
                     engine.send(
-                            request, new TypeReference<Response<UniversalAccount.UADetails>>() {});
+                            request,
+                            new TypeReference<Response<UniversalAccountImpl.UADetails>>() {});
 
             if (response.getErrorCode() != 0) {
                 throw new WeCrossException(
@@ -94,9 +98,7 @@ public class AccountManager {
                         response.getMessage());
             }
 
-            UniversalAccount ua = universalAccountFactory.buildUA(response.getData());
-
-            return ua;
+            return universalAccountFactory.buildUA(response.getData());
 
         } catch (Exception e) {
             logger.error("get ua by identity failed: " + e.getMessage());
@@ -108,7 +110,7 @@ public class AccountManager {
         this.adminContext = adminContext;
     }
 
-    private UniversalAccount fetchUA(JwtToken token) {
+    private UniversalAccountImpl fetchUA(JwtToken token) {
 
         Request<Object> request = new Request();
         request.setData(null);
@@ -117,16 +119,17 @@ public class AccountManager {
 
         try {
 
-            Response<UniversalAccount.UADetails> response =
+            Response<UniversalAccountImpl.UADetails> response =
                     engine.send(
-                            request, new TypeReference<Response<UniversalAccount.UADetails>>() {});
+                            request,
+                            new TypeReference<Response<UniversalAccountImpl.UADetails>>() {});
 
             if (response.getErrorCode() != 0) {
                 throw new WeCrossException(
                         WeCrossException.ErrorCode.FETCH_UA_FAILED, response.getMessage());
             }
 
-            UniversalAccount ua = universalAccountFactory.buildUA(response.getData());
+            UniversalAccountImpl ua = universalAccountFactory.buildUA(response.getData());
 
             return ua;
 
@@ -134,6 +137,14 @@ public class AccountManager {
             logger.error("FetchUA failed: " + e + " stack: " + e.getStackTrace().toString());
             return null;
         }
+    }
+
+    public UniversalAccount getAdminUA() {
+        return adminUA;
+    }
+
+    public void setAdminUA(UniversalAccount adminUA) {
+        this.adminUA = adminUA;
     }
 
     public void setEngine(ClientMessageEngine engine) {

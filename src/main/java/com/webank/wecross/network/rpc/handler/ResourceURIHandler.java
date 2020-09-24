@@ -3,12 +3,10 @@ package com.webank.wecross.network.rpc.handler;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
-import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.network.rpc.CustomCommandRequest;
-import com.webank.wecross.network.rpc.RequestUtils;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceDetail;
 import com.webank.wecross.restserver.RestRequest;
@@ -16,9 +14,7 @@ import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.routine.htlc.HTLCManager;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
-import com.webank.wecross.stub.TransactionResponse;
 import com.webank.wecross.stub.UniversalAccount;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
@@ -34,7 +30,6 @@ public class ResourceURIHandler implements URIHandler {
 
     private WeCrossHost host;
     private ObjectMapper objectMapper = new ObjectMapper();
-    private UserContext userContext;
 
     public ResourceURIHandler(WeCrossHost host) {
         this.host = host;
@@ -67,7 +62,8 @@ public class ResourceURIHandler implements URIHandler {
     }
 
     @Override
-    public void handle(String uri, String httpMethod, String content, Callback callback) {
+    public void handle(
+            UniversalAccount ua, String uri, String httpMethod, String content, Callback callback) {
         RestResponse<Object> restResponse = new RestResponse<>();
         try {
             String[] splits = uri.substring(1).split("/");
@@ -127,45 +123,40 @@ public class ResourceURIHandler implements URIHandler {
 
                         TransactionRequest transactionRequest = restRequest.getData();
                         Resource resourceObj = getResource(path);
-                        UniversalAccount ua = accountManager.getUniversalAccount(userContext);
-                        Account account = ua.getAccount(resourceObj.getStubType());
-                        String accountName = account.getName();
+                        if (Objects.isNull(resourceObj)) {
+                            throw new WeCrossException(
+                                    WeCrossException.ErrorCode.RESOURCE_ERROR,
+                                    "Resource not found");
+                        }
 
-                        RequestUtils.checkAccountAndResource(account, resourceObj);
-
+                        String accountName = ua.getName();
                         logger.trace(
-                                "sendTransaction request: {}, account: {}",
+                                "sendTransaction request: {}, universal account: {}",
                                 transactionRequest,
                                 accountName);
 
                         resourceObj.asyncSendTransaction(
                                 transactionRequest,
-                                account,
-                                new Resource.Callback() {
-                                    @Override
-                                    public void onTransactionResponse(
-                                            TransactionException transactionException,
-                                            TransactionResponse transactionResponse) {
-                                        if (logger.isDebugEnabled()) {
-                                            logger.debug(
-                                                    " TransactionResponse: {}, TransactionException: {}",
-                                                    transactionResponse,
-                                                    transactionException);
-                                        }
-
-                                        if (transactionException != null
-                                                && !transactionException.isSuccess()) {
-                                            restResponse.setErrorCode(
-                                                    NetworkQueryStatus.TRANSACTION_ERROR
-                                                            + transactionException.getErrorCode());
-                                            restResponse.setMessage(
-                                                    transactionException.getMessage());
-                                        } else {
-                                            restResponse.setData(transactionResponse);
-                                        }
-
-                                        callback.onResponse(restResponse);
+                                ua,
+                                (transactionException, transactionResponse) -> {
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(
+                                                " TransactionResponse: {}, TransactionException, ",
+                                                transactionResponse,
+                                                transactionException);
                                     }
+
+                                    if (transactionException != null
+                                            && !transactionException.isSuccess()) {
+                                        restResponse.setErrorCode(
+                                                NetworkQueryStatus.TRANSACTION_ERROR
+                                                        + transactionException.getErrorCode());
+                                        restResponse.setMessage(transactionException.getMessage());
+                                    } else {
+                                        restResponse.setData(transactionResponse);
+                                    }
+
+                                    callback.onResponse(restResponse);
                                 });
                         // Response Will be returned in the callback
                         return;
@@ -180,45 +171,42 @@ public class ResourceURIHandler implements URIHandler {
                         restRequest.checkRestRequest(path.toString(), method);
 
                         TransactionRequest transactionRequest = restRequest.getData();
-
                         Resource resourceObj = getResource(path);
-                        UniversalAccount ua = accountManager.getUniversalAccount(userContext);
-                        Account account = ua.getAccount(resourceObj.getStubType());
-                        String accountName = account.getName();
-                        RequestUtils.checkAccountAndResource(account, resourceObj);
+                        if (Objects.isNull(resourceObj)) {
+                            throw new WeCrossException(
+                                    WeCrossException.ErrorCode.RESOURCE_ERROR,
+                                    "Resource not found");
+                        }
 
+                        String accountName = ua.getName();
                         logger.trace(
-                                "call request: {}, account: {}", transactionRequest, accountName);
+                                "sendTransaction request: {}, universal account: {}",
+                                transactionRequest,
+                                accountName);
 
                         // TODO: byProxy
                         resourceObj.asyncCall(
                                 transactionRequest,
-                                account,
-                                new Resource.Callback() {
-                                    @Override
-                                    public void onTransactionResponse(
-                                            TransactionException transactionException,
-                                            TransactionResponse transactionResponse) {
-                                        if (logger.isDebugEnabled()) {
-                                            logger.debug(
-                                                    " TransactionResponse: {}, TransactionException: {}",
-                                                    transactionResponse,
-                                                    transactionException);
-                                        }
-
-                                        if (transactionException != null
-                                                && !transactionException.isSuccess()) {
-                                            restResponse.setErrorCode(
-                                                    NetworkQueryStatus.TRANSACTION_ERROR
-                                                            + transactionException.getErrorCode());
-                                            restResponse.setMessage(
-                                                    transactionException.getMessage());
-                                        } else {
-                                            restResponse.setData(transactionResponse);
-                                        }
-
-                                        callback.onResponse(restResponse);
+                                ua,
+                                (transactionException, transactionResponse) -> {
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(
+                                                " TransactionResponse: {}, TransactionException, ",
+                                                transactionResponse,
+                                                transactionException);
                                     }
+
+                                    if (transactionException != null
+                                            && !transactionException.isSuccess()) {
+                                        restResponse.setErrorCode(
+                                                NetworkQueryStatus.TRANSACTION_ERROR
+                                                        + transactionException.getErrorCode());
+                                        restResponse.setMessage(transactionException.getMessage());
+                                    } else {
+                                        restResponse.setData(transactionResponse);
+                                    }
+
+                                    callback.onResponse(restResponse);
                                 });
                         // Response Will be returned in the callback
                         return;
@@ -259,22 +247,14 @@ public class ResourceURIHandler implements URIHandler {
                                         content,
                                         new TypeReference<RestRequest<CustomCommandRequest>>() {});
 
-                        UniversalAccount ua = accountManager.getUniversalAccount(userContext);
                         Account account = ua.getAccount(chain.getStubType());
-
                         if (Objects.isNull(account)) {
                             throw new WeCrossException(
-                                    WeCrossException.ErrorCode.ACCOUNT_ERROR, "Account not found");
-                        }
-
-                        if (!account.getType().equals(chain.getStubType())) {
-                            throw new WeCrossException(
                                     WeCrossException.ErrorCode.ACCOUNT_ERROR,
-                                    "Account type '"
-                                            + account.getType()
-                                            + "' does not match the stub type '"
+                                    "Account with type '"
                                             + chain.getStubType()
-                                            + "'");
+                                            + "' not found for "
+                                            + ua.getName());
                         }
 
                         chain.getDriver()
@@ -318,9 +298,5 @@ public class ResourceURIHandler implements URIHandler {
         }
 
         callback.onResponse(restResponse);
-    }
-
-    public void setUserContext(UserContext userContext) {
-        this.userContext = userContext;
     }
 }

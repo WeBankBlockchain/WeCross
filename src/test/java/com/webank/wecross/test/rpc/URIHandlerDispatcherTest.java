@@ -7,6 +7,7 @@ import com.webank.wecross.network.rpc.handler.URIHandler;
 import com.webank.wecross.network.rpc.netty.URIMethod;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.Versions;
+import com.webank.wecross.routine.RoutineManager;
 import java.util.Objects;
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,7 +18,9 @@ public class URIHandlerDispatcherTest {
     public void URIHandlerDispatcherTest() throws Exception {
         WeCrossHost host = Mockito.mock(WeCrossHost.class);
         Mockito.when(host.getAccountManager()).thenReturn(null);
-        Mockito.when(host.getXaTransactionManager()).thenReturn(null);
+        RoutineManager routineManager = Mockito.mock(RoutineManager.class);
+        Mockito.when(host.getRoutineManager()).thenReturn(routineManager);
+        Mockito.when(routineManager.getXaTransactionManager()).thenReturn(null);
 
         URIHandlerDispatcher uriHandlerDispatcher = new URIHandlerDispatcher();
         uriHandlerDispatcher.initializeRequestMapper(host);
@@ -83,7 +86,9 @@ public class URIHandlerDispatcherTest {
     public void TestURIHandlerTest() throws Exception {
         WeCrossHost host = Mockito.mock(WeCrossHost.class);
         Mockito.when(host.getAccountManager()).thenReturn(null);
-        Mockito.when(host.getXaTransactionManager()).thenReturn(null);
+        RoutineManager routineManager = Mockito.mock(RoutineManager.class);
+        Mockito.when(host.getRoutineManager()).thenReturn(routineManager);
+        Mockito.when(routineManager.getXaTransactionManager()).thenReturn(null);
 
         URIHandlerDispatcher uriHandlerDispatcher = new URIHandlerDispatcher();
         uriHandlerDispatcher.initializeRequestMapper(host);
@@ -92,6 +97,7 @@ public class URIHandlerDispatcherTest {
 
         final RestResponse[] restResp = {null};
         uriHandler.handle(
+                null,
                 null,
                 null,
                 null,

@@ -1,28 +1,24 @@
 package com.webank.wecross.routine;
 
+import com.webank.wecross.polling.TaskManager;
 import com.webank.wecross.routine.htlc.HTLCManager;
-import com.webank.wecross.routine.task.TaskManager;
-import org.quartz.SchedulerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.webank.wecross.routine.xa.XATransactionManager;
+import java.util.Objects;
 
 public class RoutineManager {
-    private Logger logger = LoggerFactory.getLogger(RoutineManager.class);
 
     private HTLCManager htlcManager;
-    private TaskManager taskManager;
+    private XATransactionManager xaTransactionManager;
 
-    public void start() {
+    public void registerTask(TaskManager taskManager) {
         /* register htlc task */
-        if (htlcManager != null) {
+        if (Objects.nonNull(htlcManager)) {
             htlcManager.registerTask(taskManager);
         }
 
-        /* start all routine tasks */
-        try {
-            taskManager.start();
-        } catch (SchedulerException e) {
-            logger.error("Failed to start TaskManager: {}", e.getMessage(), e);
+        /* register xa task */
+        if (Objects.nonNull(xaTransactionManager)) {
+            xaTransactionManager.registerTask(taskManager);
         }
     }
 
@@ -34,11 +30,11 @@ public class RoutineManager {
         this.htlcManager = htlcManager;
     }
 
-    public TaskManager getTaskManager() {
-        return taskManager;
+    public XATransactionManager getXaTransactionManager() {
+        return xaTransactionManager;
     }
 
-    public void setTaskManager(TaskManager taskManager) {
-        this.taskManager = taskManager;
+    public void setXaTransactionManager(XATransactionManager xaTransactionManager) {
+        this.xaTransactionManager = xaTransactionManager;
     }
 }

@@ -3,10 +3,9 @@ package com.webank.wecross.routine.xa;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.polling.TaskManager;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.TransactionRequest;
+import com.webank.wecross.stub.*;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,8 +42,7 @@ public class XATransactionManager {
 
     private ReduceCallback getReduceCallback(int size, ReduceCallback callback) {
         AtomicInteger finished = new AtomicInteger();
-        List<WeCrossException> fatals =
-                Collections.synchronizedList(new LinkedList<WeCrossException>());
+        List<WeCrossException> fatals = Collections.synchronizedList(new LinkedList<>());
 
         ReduceCallback reduceCallback =
                 (exception, result) -> {
@@ -77,7 +75,7 @@ public class XATransactionManager {
 
     public void asyncStartTransaction(
             String transactionID,
-            Map<String, Account> accounts,
+            UniversalAccount ua,
             Set<Path> resources,
             ReduceCallback callback) {
         try {
@@ -112,23 +110,12 @@ public class XATransactionManager {
                 transactionRequest.getOptions().put(Resource.RAW_TRANSACTION, true);
 
                 Path proxyPath = new Path(chainPath);
-                proxyPath.setResource("WeCrossProxy");
+                proxyPath.setResource(StubConstant.PROXY_NAME);
                 Resource resource = zoneManager.fetchResource(proxyPath);
-
-                Account account = accounts.get(resource.getStubType());
-                if (Objects.isNull(account)) {
-                    String errorMsg =
-                            "Account with type '" + resource.getStubType() + "' not found";
-                    logger.error(errorMsg);
-                    reduceCallback.onResponse(
-                            new WeCrossException(XAErrorCode.START_TRANSACTION_ERROR, errorMsg),
-                            -1);
-                    continue;
-                }
 
                 resource.asyncSendTransaction(
                         transactionRequest,
-                        account,
+                        ua,
                         (exception, response) -> {
                             if (exception != null && !exception.isSuccess()) {
                                 logger.error("StartTransaction failed, ", exception);
@@ -171,10 +158,7 @@ public class XATransactionManager {
     }
 
     public void asyncCommitTransaction(
-            String transactionID,
-            Map<String, Account> accounts,
-            Set<Path> chains,
-            ReduceCallback callback) {
+            String transactionID, UniversalAccount ua, Set<Path> chains, ReduceCallback callback) {
         try {
             logger.info("CommitTransaction, chains: {}", chains);
 
@@ -189,23 +173,12 @@ public class XATransactionManager {
                 transactionRequest.getOptions().put(Resource.RAW_TRANSACTION, true);
 
                 Path proxyPath = new Path(chainPath);
-                proxyPath.setResource("WeCrossProxy");
+                proxyPath.setResource(StubConstant.PROXY_NAME);
                 Resource resource = zoneManager.fetchResource(proxyPath);
-
-                Account account = accounts.get(resource.getStubType());
-                if (Objects.isNull(account)) {
-                    String errorMsg =
-                            "Account with type '" + resource.getStubType() + "' not found";
-                    logger.error(errorMsg);
-                    reduceCallback.onResponse(
-                            new WeCrossException(XAErrorCode.COMMIT_TRANSACTION_ERROR, errorMsg),
-                            -1);
-                    continue;
-                }
 
                 resource.asyncSendTransaction(
                         transactionRequest,
-                        account,
+                        ua,
                         (exception, response) -> {
                             if (exception != null && !exception.isSuccess()) {
                                 logger.error("CommitTransaction failed, ", exception);
@@ -248,10 +221,7 @@ public class XATransactionManager {
     };
 
     public void asyncRollback(
-            String transactionID,
-            Map<String, Account> accounts,
-            Set<Path> chains,
-            ReduceCallback callback) {
+            String transactionID, UniversalAccount ua, Set<Path> chains, ReduceCallback callback) {
         try {
             ReduceCallback reduceCallback = getReduceCallback(chains.size(), callback);
 
@@ -264,23 +234,12 @@ public class XATransactionManager {
                 transactionRequest.getOptions().put(Resource.RAW_TRANSACTION, true);
 
                 Path proxyPath = new Path(chainPath);
-                proxyPath.setResource("WeCrossProxy");
+                proxyPath.setResource(StubConstant.PROXY_NAME);
                 Resource resource = zoneManager.fetchResource(proxyPath);
-
-                Account account = accounts.get(resource.getStubType());
-                if (Objects.isNull(account)) {
-                    String errorMsg =
-                            "Account with type '" + resource.getStubType() + "' not found";
-                    logger.error(errorMsg);
-                    reduceCallback.onResponse(
-                            new WeCrossException(XAErrorCode.ROLLBACK_TRANSACTION_ERROR, errorMsg),
-                            -1);
-                    continue;
-                }
 
                 resource.asyncSendTransaction(
                         transactionRequest,
-                        account,
+                        ua,
                         (exception, response) -> {
                             if (exception != null && !exception.isSuccess()) {
                                 logger.error("RollbackTransaction failed, ", exception);
@@ -329,10 +288,8 @@ public class XATransactionManager {
     private GetTransactionInfoCallback getTransactionInfoReduceCallback(
             int size, GetTransactionInfoCallback callback) {
         AtomicInteger finished = new AtomicInteger();
-        List<WeCrossException> fatals =
-                Collections.synchronizedList(new LinkedList<WeCrossException>());
-        List<XATransactionInfo> infos =
-                Collections.synchronizedList(new LinkedList<XATransactionInfo>());
+        List<WeCrossException> fatals = Collections.synchronizedList(new LinkedList<>());
+        List<XATransactionInfo> infos = Collections.synchronizedList(new LinkedList<>());
 
         GetTransactionInfoCallback reduceCallback =
                 (exception, info) -> {
@@ -381,7 +338,7 @@ public class XATransactionManager {
 
     public void asyncGetTransactionInfo(
             String transactionID,
-            Map<String, Account> accounts,
+            UniversalAccount ua,
             Set<Path> chains,
             GetTransactionInfoCallback callback) {
         try {
@@ -396,23 +353,12 @@ public class XATransactionManager {
                 transactionRequest.getOptions().put(Resource.RAW_TRANSACTION, true);
 
                 Path proxyPath = new Path(path);
-                proxyPath.setResource("WeCrossProxy");
+                proxyPath.setResource(StubConstant.PROXY_NAME);
                 Resource resource = zoneManager.fetchResource(proxyPath);
-
-                Account account = accounts.get(resource.getStubType());
-                if (Objects.isNull(account)) {
-                    String errorMsg =
-                            "Account with type '" + resource.getStubType() + "' not found";
-                    logger.error(errorMsg);
-                    reduceCallback.onResponse(
-                            new WeCrossException(XAErrorCode.GET_TRANSACTION_INFO_ERROR, errorMsg),
-                            null);
-                    continue;
-                }
 
                 resource.asyncCall(
                         transactionRequest,
-                        account,
+                        ua,
                         (exception, response) -> {
                             if (exception != null && !exception.isSuccess()) {
                                 logger.error("GetTransactionInfo error", exception);
@@ -485,7 +431,7 @@ public class XATransactionManager {
 
     public void asyncGetTransactionIDs(
             Resource proxyResource,
-            Account account,
+            UniversalAccount ua,
             int option,
             GetTransactionIDsCallback callback) {
         TransactionRequest transactionRequest = new TransactionRequest();
@@ -501,7 +447,7 @@ public class XATransactionManager {
 
                 proxyResource.asyncCall(
                         transactionRequest,
-                        account,
+                        ua,
                         (exception, response) -> {
                             if (exception != null && !exception.isSuccess()) {
                                 callback.onResponse(
@@ -523,7 +469,7 @@ public class XATransactionManager {
                             callback.onResponse(null, response.getResult()[0].trim().split(" "));
                         });
             } else if (option == GET_UNFINISHED) {
-                asyncGetUnfinishedTransactionIDs(proxyResource, account, callback);
+                asyncGetUnfinishedTransactionIDs(proxyResource, ua, callback);
             } else {
                 logger.error("GetTransactionIDs error, undefined option: {}", option);
                 callback.onResponse(
@@ -540,14 +486,14 @@ public class XATransactionManager {
     }
 
     public void asyncGetUnfinishedTransactionIDs(
-            Resource proxyResource, Account account, GetTransactionIDsCallback callback) {
+            Resource proxyResource, UniversalAccount ua, GetTransactionIDsCallback callback) {
         TransactionRequest transactionRequest = new TransactionRequest();
         transactionRequest.getOptions().put(Resource.RAW_TRANSACTION, true);
         // get all ids
         transactionRequest.setMethod("getAllTransactionIDs");
         proxyResource.asyncCall(
                 transactionRequest,
-                account,
+                ua,
                 (exception, response) -> {
                     if (exception != null && !exception.isSuccess()) {
                         callback.onResponse(
@@ -571,7 +517,7 @@ public class XATransactionManager {
                     transactionRequest.setMethod("getFinishedTransactionIDs");
                     proxyResource.asyncCall(
                             transactionRequest,
-                            account,
+                            ua,
                             (exception1, response1) -> {
                                 if (exception1 != null && !exception1.isSuccess()) {
                                     callback.onResponse(
@@ -608,6 +554,8 @@ public class XATransactionManager {
                             });
                 });
     }
+
+    public void registerTask(TaskManager taskManager) {}
 
     public ZoneManager getZoneManager() {
         return zoneManager;

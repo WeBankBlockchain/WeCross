@@ -1,6 +1,6 @@
 package com.webank.wecross.test.routine;
 
-import com.webank.wecross.routine.htlc.VerifyData;
+import com.webank.wecross.routine.TransactionValidator;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.Transaction;
 import com.webank.wecross.stub.TransactionRequest;
@@ -8,18 +8,18 @@ import com.webank.wecross.stub.TransactionResponse;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class VerifyDataTest {
+public class TransactionValidatorTest {
     @Test
     public void equalsTest() throws Exception {
-        VerifyData verifyData =
-                new VerifyData(
+        TransactionValidator transactionValidator =
+                new TransactionValidator(
                         100,
                         "0x",
                         "test",
                         new String[] {"hello", "world"},
                         new String[] {"hello", "world"});
 
-        verifyData.setPath(Path.decode("a.b.c"));
+        transactionValidator.setPath(Path.decode("a.b.c"));
         TransactionRequest request =
                 new TransactionRequest("test", new String[] {"hello", "world"});
         TransactionResponse response = new TransactionResponse();
@@ -30,9 +30,9 @@ public class VerifyDataTest {
         transaction.setTransactionID("0");
         transaction.setResource("c");
 
-        Assert.assertEquals(true, verifyData.verify(transaction));
+        Assert.assertEquals(true, transactionValidator.verify(transaction));
 
         Transaction transaction1 = new Transaction(1000, "0xx", request, response);
-        Assert.assertEquals(false, verifyData.verify(transaction1));
+        Assert.assertEquals(false, transactionValidator.verify(transaction1));
     }
 }

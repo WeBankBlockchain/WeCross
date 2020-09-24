@@ -1,6 +1,9 @@
 package com.webank.wecross.stub;
 
 public interface UniversalAccount {
+
+    String getName();
+
     String getUAID();
 
     String getPub();

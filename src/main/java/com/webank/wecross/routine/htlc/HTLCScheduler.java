@@ -3,6 +3,7 @@ package com.webank.wecross.routine.htlc;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.routine.RoutineDefault;
+import com.webank.wecross.routine.TransactionValidator;
 import com.webank.wecross.stub.Transaction;
 import java.math.BigInteger;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ public class HTLCScheduler {
         // get proposal info
         htlc.getProposalInfo(
                 selfResource,
-                selfResource.getAccount1(),
+                selfResource.getAdminUa(),
                 hash,
                 (exception, info) -> {
                     if (exception != null) {
@@ -366,8 +367,8 @@ public class HTLCScheduler {
                                                     counterpartyTxInfo.split(
                                                             RoutineDefault.SPLIT_REGEX);
 
-                                            VerifyData verifyData =
-                                                    new VerifyData(
+                                            TransactionValidator transactionValidator =
+                                                    new TransactionValidator(
                                                             Long.parseLong(info1[1]),
                                                             info1[0],
                                                             "newProposal",
@@ -405,7 +406,7 @@ public class HTLCScheduler {
 
                                                         callback.onReturn(
                                                                 null,
-                                                                verifyData.verify(
+                                                                transactionValidator.verify(
                                                                         verifiedTransaction1));
                                                     });
                                         });
@@ -578,55 +579,32 @@ public class HTLCScheduler {
                     hash);
         }
 
-        htlc.getCounterpartyHtlcAddress(
-                counterpartyResource.getSelfResource(),
-                counterpartyResource.getAccount1(),
-                (exception, address) -> {
-                    if (exception != null) {
-                        callback.onReturn(exception, false);
+        htlc.unlockCounterparty(
+                counterpartyResource,
+                hash,
+                proposal.getSecret(),
+                (exception1, result1) -> {
+                    if (exception1 != null) {
+                        callback.onReturn(exception1, false);
                         return;
                     }
 
-                    if (address == null || RoutineDefault.NULL_FLAG.equals(address)) {
-                        callback.onReturn(
-                                new WeCrossException(
-                                        ErrorCode.HTLC_ERROR,
-                                        "GET_COUNTERPARTY_HTLC_ADDRESS_ERROR",
-                                        HTLCErrorCode.NONE_RETURN,
-                                        "counterparty htlc address has not set"),
-                                false);
-                        return;
-                    }
-
-                    counterpartyResource.setCounterpartyAddress(address);
-
-                    htlc.unlockCounterparty(
-                            counterpartyResource,
+                    htlc.setCounterpartyUnlockState(
+                            selfResource,
+                            selfResource.getAdminUa(),
                             hash,
-                            proposal.getSecret(),
-                            (exception1, result1) -> {
-                                if (exception1 != null) {
-                                    callback.onReturn(exception1, false);
-                                    return;
+                            (exception2, result2) -> {
+                                if (exception2 != null) {
+                                    callback.onReturn(exception2, false);
+                                } else {
+                                    if (logger.isDebugEnabled()) {
+                                        logger.trace(
+                                                "unlock counterparty successfully: {}, path: {}",
+                                                hash,
+                                                selfResource.getSelfPath());
+                                    }
+                                    callback.onReturn(null, true);
                                 }
-
-                                htlc.setCounterpartyUnlockState(
-                                        selfResource,
-                                        selfResource.getAccount1(),
-                                        hash,
-                                        (exception2, result2) -> {
-                                            if (exception2 != null) {
-                                                callback.onReturn(exception2, false);
-                                            } else {
-                                                if (logger.isDebugEnabled()) {
-                                                    logger.trace(
-                                                            "unlock counterparty successfully: {}, path: {}",
-                                                            hash,
-                                                            selfResource.getSelfPath());
-                                                }
-                                                callback.onReturn(null, true);
-                                            }
-                                        });
                             });
                 });
     }

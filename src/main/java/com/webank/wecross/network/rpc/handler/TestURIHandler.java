@@ -1,12 +1,14 @@
 package com.webank.wecross.network.rpc.handler;
 
 import com.webank.wecross.restserver.RestResponse;
+import com.webank.wecross.stub.UniversalAccount;
 
 /** GET/POST /test */
 public class TestURIHandler implements URIHandler {
 
     @Override
-    public void handle(String uri, String method, String content, Callback callback) {
+    public void handle(
+            UniversalAccount ua, String uri, String method, String content, Callback callback) {
         RestResponse<String> restResponse = new RestResponse<>();
         restResponse.setData("OK!");
 
