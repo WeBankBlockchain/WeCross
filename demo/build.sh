@@ -287,9 +287,14 @@ config_router_8251()
     bash add_chain.sh -t Fabric1.4 -n fabric -d conf/chains
     cp ${fabric_demo_dir}/certs/chains/fabric/* conf/chains/fabric/
 
-    # fabric stub internal account
+    # fabric stub internal accounts
     bash add_account.sh -t Fabric1.4 -n fabric_admin -d conf/accounts
     cp ${fabric_demo_dir}/certs/accounts/fabric_admin/* conf/accounts/fabric_admin/
+    bash add_account.sh -t Fabric1.4 -n fabric_admin_org1 -d conf/accounts
+    cp ${fabric_demo_dir}/certs/accounts/fabric_admin_org1/* conf/accounts/fabric_admin_org1/
+    bash add_account.sh -t Fabric1.4 -n fabric_admin_org2 -d conf/accounts
+    cp ${fabric_demo_dir}/certs/accounts/fabric_admin_org2/* conf/accounts/fabric_admin_org2/
+    sed_i  's/Org1MSP/Org2MSP/g'  conf/accounts/fabric_admin_org2/account.toml
 
     # deploy proxy
     java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy chains/fabric
