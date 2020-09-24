@@ -212,16 +212,17 @@ config_router_8250()
     LOG_INFO "Configure router ${router_dir}"
 
     cd ${router_dir}
-    # account
-    bash add_account.sh -t BCOS2.0 -n bcos_user1 -d conf/accounts
 
     # stubs
     bash add_chain.sh -t BCOS2.0 -n group1 -d conf/chains
     # copy cert
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/group1/
 
+    # bcos stub internal account
+    bash add_account.sh -t BCOS2.0 -n bcos_admin1 -d conf/accounts
+
     # deploy proxy
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/group1 bcos_user1
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/group1 bcos_admin1
 
     cd -
 }
@@ -233,9 +234,6 @@ config_router_8251()
     LOG_INFO "Configure router ${router_dir}"
 
     cd ${router_dir}
-    # account
-    bash add_account.sh -t BCOS2.0 -n bcos_user2 -d conf/accounts
-
     # stubs
     bash add_chain.sh -t BCOS2.0 -n group2 -d conf/chains
     # copy cert
@@ -249,8 +247,11 @@ config_router_8251()
         sed -i 's/groupId = 1/groupId = 2/g' conf/chains/group2/stub.toml
     fi
 
+    # bcos stub internal account
+    bash add_account.sh -t BCOS2.0 -n bcos_admin2 -d conf/accounts
+
     # deploy proxy
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/group2 bcos_user2
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/group2 bcos_admin2
 
     cd -
 }

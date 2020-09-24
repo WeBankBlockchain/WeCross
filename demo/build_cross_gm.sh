@@ -222,17 +222,17 @@ config_router_8250()
     LOG_INFO "Configure router ${router_dir}"
 
     cd ${router_dir}
-    # account
-    bash add_account.sh -t BCOS2.0 -n bcos_user1 -d conf/accounts
-    bash add_account.sh -t GM_BCOS2.0 -n bcos_gm_user1 -d conf/accounts
 
     # stubs
     bash add_chain.sh -t BCOS2.0 -n bcos -d conf/chains
     # copy cert
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/bcos/
 
+    # bcos stub internal account
+    bash add_account.sh -t BCOS2.0 -n bcos_admin -d conf/accounts #
+
     # deploy proxy
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/bcos bcos_user1
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/bcos bcos_admin
 
     cd -
 }
@@ -244,9 +244,6 @@ config_router_8251()
     LOG_INFO "Configure router ${router_dir}"
 
     cd ${router_dir}
-    # account
-    bash add_account.sh -t BCOS2.0 -n bcos_user2 -d conf/accounts
-    bash add_account.sh -t GM_BCOS2.0 -n bcos_gm_user2 -d conf/accounts
 
     # stubs
     bash add_chain.sh -t GM_BCOS2.0 -n bcos_gm -d conf/chains
@@ -261,8 +258,11 @@ config_router_8251()
         sed -i 's/20200/20210/g' conf/chains/bcos_gm/stub.toml
     fi
 
+    # bcos gm stub internal account
+    bash add_account.sh -t GM_BCOS2.0 -n bcos_gm_admin -d conf/accounts
+
     # deploy proxy
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.proxy.ProxyContractDeployment deploy chains/bcos_gm bcos_gm_user2
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.proxy.ProxyContractDeployment deploy chains/bcos_gm bcos_gm_admin
 
     cd -
 }

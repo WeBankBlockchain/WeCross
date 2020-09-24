@@ -3,17 +3,21 @@ package com.webank.wecross.zone;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.remote.RemoteConnection;
 import com.webank.wecross.resource.Resource;
+import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.BlockManager;
 import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
+import com.webank.wecross.stub.TransactionException;
+import com.webank.wecross.stub.UniversalAccount;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -379,5 +383,31 @@ public class Chain {
 
     public Connection getLocalConnection() {
         return localConnection;
+    }
+
+    public void asyncCustomCommand(
+            String command,
+            Path path,
+            Object[] args,
+            UniversalAccount ua,
+            Driver.CustomCommandCallback callback) {
+        Account account = ua.getAccount(getStubType());
+        if (Objects.isNull(account)) {
+            callback.onResponse(
+                    new TransactionException(
+                            0,
+                            "Account with type '" + stubType + "' not found for " + ua.getName()),
+                    null);
+            return;
+        }
+        getDriver()
+                .asyncCustomCommand(
+                        command,
+                        path,
+                        args,
+                        account,
+                        getBlockManager(),
+                        chooseConnection(),
+                        callback);
     }
 }

@@ -260,22 +260,17 @@ config_router_8250()
     LOG_INFO "Configure router ${router_dir}"
 
     cd ${router_dir}
-    # account
-    bash add_account.sh -t BCOS2.0 -n bcos_default_account -d conf/accounts
-    bash add_account.sh -t BCOS2.0 -n bcos_user1 -d conf/accounts
-
-    bash add_account.sh -t Fabric1.4 -n fabric_default_account -d conf/accounts
-    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_default_account/
-    bash add_account.sh -t Fabric1.4 -n fabric_user1 -d conf/accounts
-    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_user1/
 
     # stubs
     bash add_chain.sh -t BCOS2.0 -n bcos -d conf/chains
     # copy cert
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/bcos/
 
+    # bcos stub internal account
+    bash add_account.sh -t BCOS2.0 -n bcos_admin -d conf/accounts
+
     # deploy proxy
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/bcos bcos_user1
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/bcos bcos_admin
 
     cd -
 }
@@ -288,25 +283,13 @@ config_router_8251()
     LOG_INFO "Configure router ${router_dir}"
 
     cd ${router_dir}
-    # account
-    bash add_account.sh -t BCOS2.0 -n bcos_default_account -d conf/accounts
-    bash add_account.sh -t BCOS2.0 -n bcos_user2 -d conf/accounts
-
-    bash add_account.sh -t Fabric1.4 -n fabric_admin -d conf/accounts
-    cp ${fabric_demo_dir}/certs/accounts/fabric_admin/* conf/accounts/fabric_admin/
-    bash add_account.sh -t Fabric1.4 -n fabric_admin_org1 -d conf/accounts
-    cp ${fabric_demo_dir}/certs/accounts/fabric_admin_org1/* conf/accounts/fabric_admin_org1/
-    bash add_account.sh -t Fabric1.4 -n fabric_admin_org2 -d conf/accounts
-    cp ${fabric_demo_dir}/certs/accounts/fabric_admin_org2/* conf/accounts/fabric_admin_org2/
-    sed_i  's/Org1MSP/Org2MSP/g'  conf/accounts/fabric_admin_org2/account.toml
-    bash add_account.sh -t Fabric1.4 -n fabric_default_account -d conf/accounts
-    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_default_account/
-    bash add_account.sh -t Fabric1.4 -n fabric_user1 -d conf/accounts
-    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_user1/
-
     # stubs
     bash add_chain.sh -t Fabric1.4 -n fabric -d conf/chains
     cp ${fabric_demo_dir}/certs/chains/fabric/* conf/chains/fabric/
+
+    # fabric stub internal account
+    bash add_account.sh -t Fabric1.4 -n fabric_admin -d conf/accounts
+    cp ${fabric_demo_dir}/certs/accounts/fabric_admin/* conf/accounts/fabric_admin/
 
     # deploy proxy
     java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy chains/fabric
