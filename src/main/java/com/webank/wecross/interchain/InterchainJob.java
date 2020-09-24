@@ -31,8 +31,13 @@ public class InterchainJob implements Job {
 
     private void handleInterchainRequests(SystemResource systemResource) {
 
-        UniversalAccount adminUA = systemResource.getAccountManager().getAdminUA();
-
+        UniversalAccount adminUA;
+        try {
+            adminUA = systemResource.getAccountManager().getAdminUA();
+        } catch (WeCrossException e) {
+            logger.error("getAdminUA failed: ", e);
+            return;
+        }
         String[] requests = getInterchainRequests(systemResource, adminUA);
         if (Objects.nonNull(requests)) {
 

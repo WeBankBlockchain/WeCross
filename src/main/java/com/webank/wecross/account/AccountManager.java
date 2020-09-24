@@ -27,9 +27,7 @@ public class AccountManager {
 
     private AdminContext adminContext;
 
-    private UniversalAccount adminUA;
-
-    private Map<JwtToken, UniversalAccount> token2UA = new HashMap<>();
+    private Map<String, UniversalAccount> token2UA = new HashMap<>();
 
     public Account getAccount(String name) {
         String message =
@@ -40,7 +38,7 @@ public class AccountManager {
     }
 
     public List<Account> getAccounts(UserContext userContext) throws WeCrossException {
-        JwtToken token = userContext.getToken();
+        String token = userContext.getToken();
         if (token == null) {
             return new LinkedList<>();
         }
@@ -51,7 +49,7 @@ public class AccountManager {
 
     public UniversalAccount getUniversalAccount(UserContext userContext) throws WeCrossException {
 
-        JwtToken token = userContext.getToken();
+        String token = userContext.getToken();
         if (token == null) {
             return null;
         }
@@ -93,7 +91,7 @@ public class AccountManager {
     }
 
     public UniversalAccount getUniversalAccountByIdentity(String accountIdentity) {
-        JwtToken token = adminContext.getToken(); // only admin can query
+        String token = adminContext.getToken(); // only admin can query
 
         Request<Object> request = new Request();
         request.setData(
@@ -101,7 +99,7 @@ public class AccountManager {
                         .identity(accountIdentity)
                         .build());
         request.setMethod("/auth/getUniversalAccountByChainAccountIdentity");
-        request.setAuth(token.getTokenStrWithPrefix());
+        request.setAuth(token);
 
         try {
             // TODO: cache the response
@@ -127,11 +125,11 @@ public class AccountManager {
         this.adminContext = adminContext;
     }
 
-    private boolean fetchHasLoginStatus(JwtToken token) {
+    private boolean fetchHasLoginStatus(String token) {
         Request<Object> request = new Request();
         request.setData(null);
         request.setMethod("/auth/hasLogin");
-        request.setAuth(token.getTokenStrWithPrefix());
+        request.setAuth(token);
 
         try {
             Response<?> response = engine.send(request, new TypeReference<Response<?>>() {});
@@ -147,12 +145,12 @@ public class AccountManager {
         }
     }
 
-    private UniversalAccount fetchUA(JwtToken token) {
+    private UniversalAccount fetchUA(String token) {
 
         Request<Object> request = new Request();
         request.setData(null);
         request.setMethod("/auth/getUniversalAccount");
-        request.setAuth(token.getTokenStrWithPrefix());
+        request.setAuth(token);
 
         try {
 
@@ -175,12 +173,16 @@ public class AccountManager {
         }
     }
 
-    public UniversalAccount getAdminUA() {
-        return adminUA;
-    }
-
-    public void setAdminUA(UniversalAccount adminUA) {
-        this.adminUA = adminUA;
+    public UniversalAccount getAdminUA() throws WeCrossException {
+        UniversalAccount ua = null;
+        try {
+            ua = getUniversalAccount(adminContext);
+        } catch (WeCrossException e) {
+            logger.debug("admin login expired, try relogin");
+            adminContext.reLogin();
+            ua = getUniversalAccount(adminContext);
+        }
+        return ua;
     }
 
     public void setEngine(ClientMessageEngine engine) {
