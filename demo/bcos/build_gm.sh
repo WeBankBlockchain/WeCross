@@ -79,10 +79,14 @@ check_and_install_tassl(){
         LOG_INFO "Downloading tassl binary ..."
         mkdir -p ${TASSL_HOME}
         if [[ -n "${macOS}" ]];then
-            Download https://github.com/FISCO-BCOS/LargeFiles/raw/master/tools/tassl_mac.tar.gz
+            if [ ! -f tassl_mac.tar.gz ]; then
+                Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl_mac.tar.gz
+            fi
             tar -zxvf tassl_mac.tar.gz -C ${TASSL_HOME}
         else
-            Download https://github.com/FISCO-BCOS/LargeFiles/raw/master/tools/tassl.tar.gz
+            if [ ! -f tassl.tar.gz ]; then
+                Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl.tar.gz
+            fi
             tar -zxvf tassl.tar.gz -C ${TASSL_HOME}
         fi
     fi
