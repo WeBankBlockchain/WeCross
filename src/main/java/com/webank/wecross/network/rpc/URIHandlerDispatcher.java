@@ -64,6 +64,7 @@ public class URIHandlerDispatcher {
         XATransactionHandler xaTransactionHandler = new XATransactionHandler();
         xaTransactionHandler.setXaTransactionManager(
                 host.getRoutineManager().getXaTransactionManager());
+        xaTransactionHandler.setHost(host);
         registerURIHandler(new URIMethod("POST", "/startTransaction"), xaTransactionHandler);
         registerURIHandler(new URIMethod("POST", "/commitTransaction"), xaTransactionHandler);
         registerURIHandler(new URIMethod("POST", "/rollbackTransaction"), xaTransactionHandler);

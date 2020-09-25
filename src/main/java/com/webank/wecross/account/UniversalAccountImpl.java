@@ -24,6 +24,9 @@ public class UniversalAccountImpl implements com.webank.wecross.stub.UniversalAc
     private String uaID;
     private String pubKey;
     private boolean isAdmin;
+    private long lastActiveTimestamp;
+
+    private final long QUERY_ACTIVE_EXPIRES = 1000; // 1s
 
     @Builder.Default
     private Map<String, Map<Integer, Account>> type2ChainAccounts = new HashMap<>();
@@ -80,7 +83,7 @@ public class UniversalAccountImpl implements com.webank.wecross.stub.UniversalAc
     }
 
     @Override
-    public boolean verify(byte[] signData) {
+    public boolean verify(byte[] signData, byte[] originData) {
         // xxx
         return false;
     }
@@ -144,5 +147,13 @@ public class UniversalAccountImpl implements com.webank.wecross.stub.UniversalAc
         private boolean isAdmin;
 
         private Map<String, Map<Integer, ChainAccountDetails>> type2ChainAccountDetails;
+    }
+
+    public boolean isActive() {
+        return System.currentTimeMillis() - lastActiveTimestamp < QUERY_ACTIVE_EXPIRES;
+    }
+
+    public void activate() {
+        lastActiveTimestamp = System.currentTimeMillis();
     }
 }

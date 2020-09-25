@@ -7,6 +7,7 @@ DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=
 
+need_db_config_ask=true
 
 LOG_INFO()
 {
@@ -135,7 +136,6 @@ check_env()
     check_command docker-compose
     check_command mysql
     check_docker_service
-    check_db_service
     check_fabric_avaliable
     check_bcos_avaliable
     check_wecross_avaliable
@@ -147,16 +147,6 @@ build_bcos()
     LOG_INFO "Build BCOS ..."
     cd ${ROOT}/bcos
     bash build.sh
-
-    # generate accounts
-    mkdir -p accounts
-    cd accounts
-
-    bash ../get_account.sh # normal
-    mv accounts bcos_user1
-
-    bash ../get_gm_account.sh # gm
-    mv accounts_gm bcos_gm_user1
 
     cd ${ROOT}
 }
@@ -270,22 +260,17 @@ config_router_8250()
     LOG_INFO "Configure router ${router_dir}"
 
     cd ${router_dir}
-    # account
-    bash add_account.sh -t BCOS2.0 -n bcos_default_account -d conf/accounts
-    bash add_account.sh -t BCOS2.0 -n bcos_user1 -d conf/accounts
-
-    bash add_account.sh -t Fabric1.4 -n fabric_default_account -d conf/accounts
-    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_default_account/
-    bash add_account.sh -t Fabric1.4 -n fabric_user1 -d conf/accounts
-    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_user1/
 
     # stubs
     bash add_chain.sh -t BCOS2.0 -n bcos -d conf/chains
     # copy cert
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/bcos/
 
+    # bcos stub internal account
+    bash add_account.sh -t BCOS2.0 -n bcos_admin -d conf/accounts
+
     # deploy proxy
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/bcos bcos_user1
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/bcos bcos_admin
 
     cd -
 }
@@ -298,10 +283,11 @@ config_router_8251()
     LOG_INFO "Configure router ${router_dir}"
 
     cd ${router_dir}
-    # account
-    bash add_account.sh -t BCOS2.0 -n bcos_default_account -d conf/accounts
-    bash add_account.sh -t BCOS2.0 -n bcos_user2 -d conf/accounts
+    # stubs
+    bash add_chain.sh -t Fabric1.4 -n fabric -d conf/chains
+    cp ${fabric_demo_dir}/certs/chains/fabric/* conf/chains/fabric/
 
+    # fabric stub internal accounts
     bash add_account.sh -t Fabric1.4 -n fabric_admin -d conf/accounts
     cp ${fabric_demo_dir}/certs/accounts/fabric_admin/* conf/accounts/fabric_admin/
     bash add_account.sh -t Fabric1.4 -n fabric_admin_org1 -d conf/accounts
@@ -309,19 +295,20 @@ config_router_8251()
     bash add_account.sh -t Fabric1.4 -n fabric_admin_org2 -d conf/accounts
     cp ${fabric_demo_dir}/certs/accounts/fabric_admin_org2/* conf/accounts/fabric_admin_org2/
     sed_i  's/Org1MSP/Org2MSP/g'  conf/accounts/fabric_admin_org2/account.toml
-    bash add_account.sh -t Fabric1.4 -n fabric_default_account -d conf/accounts
-    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_default_account/
-    bash add_account.sh -t Fabric1.4 -n fabric_user1 -d conf/accounts
-    cp ${fabric_demo_dir}/certs/accounts/fabric_user1/* conf/accounts/fabric_user1/
-
-    # stubs
-    bash add_chain.sh -t Fabric1.4 -n fabric -d conf/chains
-    cp ${fabric_demo_dir}/certs/chains/fabric/* conf/chains/fabric/
 
     # deploy proxy
     java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy chains/fabric
 
     cd -
+}
+
+config_database()
+{
+    if ${need_db_config_ask} ;then
+        db_config_ask
+    else
+        check_db_service
+    fi
 }
 
 build_wecross()
@@ -408,7 +395,7 @@ build_account_manager()
     sed_i "/username/s/root/${DB_USERNAME}/g" ${ROOT}/WeCross-Account-Manager/conf/application.toml
     sed_i "/password/s/''/'${DB_PASSWORD}'/g" ${ROOT}/WeCross-Account-Manager/conf/application.toml
 
-    sed_i 's/update/create/g' ${ROOT}/WeCross-Account-Manager/conf/application.properties
+    #sed_i 's/update/create/g' ${ROOT}/WeCross-Account-Manager/conf/application.properties
 
     LOG_INFO "Setup database"
     cd ${ROOT}/WeCross-Account-Manager/
@@ -541,7 +528,7 @@ deploy_chain_account()
     add_fabric_account fabric_admin_org1 Org1MSP # 1
     add_fabric_account fabric_admin_org2 Org2MSP # 2
     add_fabric_account fabric_user1 Org1MSP # 3
-    add_bcos_gm_account bcos_gm_user1 # 4
+    # add_bcos_gm_account bcos_gm_user1 # 4
 }
 
 deploy_sample_resource()
@@ -556,9 +543,7 @@ main()
 
     check_env
 
-    if [ ! -n "$1" ] ;then
-        db_config_ask
-    fi
+    config_database
 
     build_wecross
     build_wecross_console
@@ -605,8 +590,12 @@ main()
 
 }
 
+if [ -n "$1" ] ;then
+    need_db_config_ask=false
+fi
 
 main $@
+
 if [ ! -n "$1" ] ;then
     console_ask
 fi

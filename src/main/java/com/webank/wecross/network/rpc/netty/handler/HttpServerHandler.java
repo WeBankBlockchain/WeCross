@@ -3,7 +3,6 @@ package com.webank.wecross.network.rpc.netty.handler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
-import com.webank.wecross.account.JwtToken;
 import com.webank.wecross.account.UserContext;
 import com.webank.wecross.network.rpc.URIHandlerDispatcher;
 import com.webank.wecross.network.rpc.authentication.AuthFilter;
@@ -43,7 +42,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
     private URIHandlerDispatcher uriHandlerDispatcher;
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
     private AccountManager accountManager;
-    private UserContext userContext;
+
     private AuthFilter authFilter;
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -51,10 +50,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
             URIHandlerDispatcher uriHandlerDispatcher,
             ThreadPoolTaskExecutor threadPoolTaskExecutor,
             AccountManager accountManager,
-            UserContext userContext,
             AuthFilter authFilter) {
         this.accountManager = accountManager;
-        this.userContext = userContext;
         this.authFilter = authFilter;
         this.setUriHandlerDispatcher(uriHandlerDispatcher);
         this.setThreadPoolTaskExecutor(threadPoolTaskExecutor);
@@ -124,9 +121,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
 
         threadPoolTaskExecutor.execute(
                 () -> {
+                    UserContext userContext = new UserContext();
                     userContext.setToken(getTokenFromHeader(httpRequest));
+
                     uriHandler.handle(
-                            accountManager.getUniversalAccount(userContext),
+                            userContext,
                             uri,
                             method.toString(),
                             content,
@@ -290,12 +289,12 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
         this.threadPoolTaskExecutor = threadPoolTaskExecutor;
     }
 
-    private JwtToken getTokenFromHeader(HttpRequest httpRequest) {
+    private String getTokenFromHeader(HttpRequest httpRequest) {
         String tokenStr = httpRequest.headers().get(HttpHeaders.Names.AUTHORIZATION);
         if (tokenStr == null || tokenStr.length() == 0) {
             return null;
         } else {
-            return new JwtToken(tokenStr);
+            return tokenStr;
         }
     }
 }

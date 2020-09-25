@@ -7,6 +7,8 @@ DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=
 
+need_db_config_ask=true
+
 
 LOG_INFO()
 {
@@ -112,7 +114,6 @@ check_env()
     LOG_INFO "Check environments"
     check_command java
     check_command mysql
-    check_db_service
     check_bcos_avaliable
     check_wecross_avaliable
     check_account_manager_avaliable
@@ -123,16 +124,6 @@ build_bcos()
     LOG_INFO "Build BCOS ..."
     cd ${ROOT}/bcos
     bash build.sh
-
-    # generate accounts
-    mkdir -p accounts
-    cd accounts
-
-    bash ../get_account.sh # normal
-    mv accounts bcos_user1
-
-    bash ../get_gm_account.sh # gm
-    mv accounts_gm bcos_gm_user1
 
     cd ${ROOT}
 }
@@ -231,17 +222,17 @@ config_router_8250()
     LOG_INFO "Configure router ${router_dir}"
 
     cd ${router_dir}
-    # account
-    bash add_account.sh -t BCOS2.0 -n bcos_user1 -d conf/accounts
-    bash add_account.sh -t GM_BCOS2.0 -n bcos_gm_user1 -d conf/accounts
 
     # stubs
     bash add_chain.sh -t BCOS2.0 -n bcos -d conf/chains
     # copy cert
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/bcos/
 
+    # bcos stub internal account
+    bash add_account.sh -t BCOS2.0 -n bcos_admin -d conf/accounts #
+
     # deploy proxy
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/bcos bcos_user1
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.proxy.ProxyContractDeployment deploy chains/bcos bcos_admin
 
     cd -
 }
@@ -253,9 +244,6 @@ config_router_8251()
     LOG_INFO "Configure router ${router_dir}"
 
     cd ${router_dir}
-    # account
-    bash add_account.sh -t BCOS2.0 -n bcos_user2 -d conf/accounts
-    bash add_account.sh -t GM_BCOS2.0 -n bcos_gm_user2 -d conf/accounts
 
     # stubs
     bash add_chain.sh -t GM_BCOS2.0 -n bcos_gm -d conf/chains
@@ -270,10 +258,22 @@ config_router_8251()
         sed -i 's/20200/20210/g' conf/chains/bcos_gm/stub.toml
     fi
 
+    # bcos gm stub internal account
+    bash add_account.sh -t GM_BCOS2.0 -n bcos_gm_admin -d conf/accounts
+
     # deploy proxy
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.proxy.ProxyContractDeployment deploy chains/bcos_gm bcos_gm_user2
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.proxy.ProxyContractDeployment deploy chains/bcos_gm bcos_gm_admin
 
     cd -
+}
+
+config_database()
+{
+    if ${need_db_config_ask} ;then
+        db_config_ask
+    else
+        check_db_service
+    fi
 }
 
 build_wecross()
@@ -360,7 +360,7 @@ build_account_manager()
     sed_i "/username/s/root/${DB_USERNAME}/g" ${ROOT}/WeCross-Account-Manager/conf/application.toml
     sed_i "/password/s/''/'${DB_PASSWORD}'/g" ${ROOT}/WeCross-Account-Manager/conf/application.toml
 
-    sed_i 's/update/create/g' ${ROOT}/WeCross-Account-Manager/conf/application.properties
+    # sed_i 's/update/create/g' ${ROOT}/WeCross-Account-Manager/conf/application.properties
 
     LOG_INFO "Setup database"
     cd ${ROOT}/WeCross-Account-Manager/
@@ -446,9 +446,7 @@ main()
 
     check_env
 
-    if [ ! -n "$1" ] ;then
-        db_config_ask
-    fi
+    config_database
 
     build_wecross
     build_wecross_console
@@ -493,8 +491,12 @@ main()
 
 }
 
+if [ -n "$1" ] ;then
+    need_db_config_ask=false
+fi
 
 main $@
+
 if [ ! -n "$1" ] ;then
     console_ask
 fi

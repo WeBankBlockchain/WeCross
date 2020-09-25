@@ -24,7 +24,7 @@ repositories {
 }
 
 sourceCompatibility = '1.8'
-version = '1.0.0-rc5-09172-SNAPSHOT'
+version = '1.0.0-rc5-09232-SNAPSHOT'
 
 task stubSourceJar(type: Jar) {
     into 'com/webank/wecross/stub', { from 'src/main/java/com/webank/wecross/stub' }
@@ -137,8 +137,6 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-configuration-processor:2.1.16.RELEASE'
     compile 'io.netty:netty-all:4.1.51.Final'
     compile 'org.asynchttpclient:async-http-client:2.12.0'
-    compile 'org.bouncycastle:bcprov-jdk15on:1.60'
-    compile 'com.auth0:java-jwt:3.10.3'
     compile 'org.bouncycastle:bcprov-jdk15on:1.60'
     compile 'commons-codec:commons-codec:1.14'
 

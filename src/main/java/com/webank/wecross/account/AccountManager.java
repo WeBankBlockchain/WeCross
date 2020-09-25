@@ -1,5 +1,7 @@
 package com.webank.wecross.account;
 
+import static com.webank.wecross.exception.WeCrossException.ErrorCode.GET_UA_FAILED;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.client.ClientMessageEngine;
@@ -25,9 +27,7 @@ public class AccountManager {
 
     private AdminContext adminContext;
 
-    private UniversalAccount adminUA;
-
-    private Map<JwtToken, UniversalAccountImpl> token2UA = new HashMap<>();
+    private Map<String, UniversalAccount> token2UA = new HashMap<>();
 
     public Account getAccount(String name) {
         String message =
@@ -37,31 +37,47 @@ public class AccountManager {
         return null;
     }
 
-    public List<Account> getAccounts(UserContext userContext) {
-        JwtToken token = userContext.getToken();
+    public List<Account> getAccounts(UserContext userContext) throws WeCrossException {
+        String token = userContext.getToken();
         if (token == null) {
             return new LinkedList<>();
         }
 
-        UniversalAccountImpl ua = getUniversalAccount(userContext);
+        UniversalAccount ua = getUniversalAccount(userContext);
         return ua.getAccounts();
     }
 
-    public UniversalAccountImpl getUniversalAccount(UserContext userContext) {
+    public UniversalAccount getUniversalAccount(UserContext userContext) throws WeCrossException {
 
-        JwtToken token = userContext.getToken();
+        String token = userContext.getToken();
         if (token == null) {
             return null;
         }
 
-        if (token.hasExpired() || !token2UA.containsKey(token)) {
-            UniversalAccountImpl newUA = fetchUA(token); // from WeCross-Account-Manager
+        if (!token2UA.containsKey(token)) {
+            UniversalAccount newUA = fetchUA(token); // from WeCross-Account-Manager
+
             if (newUA != null) {
                 token2UA.put(token, newUA);
+            } else {
+                throw new WeCrossException(GET_UA_FAILED, "UA is not exist or login expired");
             }
         }
 
-        return token2UA.get(token);
+        UniversalAccount ua = token2UA.get(token);
+
+        // query login state every x seconds
+        if (!((UniversalAccountImpl) ua).isActive()) {
+            if (!fetchHasLoginStatus(token)) {
+                token2UA.remove(token);
+                ua = null;
+                throw new WeCrossException(GET_UA_FAILED, "login expired");
+            } else {
+                ((UniversalAccountImpl) ua).activate();
+            }
+        }
+
+        return ua;
     }
 
     public void setUniversalAccountFactory(UniversalAccountFactory universalAccountFactory) {
@@ -75,7 +91,7 @@ public class AccountManager {
     }
 
     public UniversalAccount getUniversalAccountByIdentity(String accountIdentity) {
-        JwtToken token = adminContext.getToken(); // only admin can query
+        String token = adminContext.getToken(); // only admin can query
 
         Request<Object> request = new Request();
         request.setData(
@@ -83,7 +99,7 @@ public class AccountManager {
                         .identity(accountIdentity)
                         .build());
         request.setMethod("/auth/getUniversalAccountByChainAccountIdentity");
-        request.setAuth(token.getTokenStrWithPrefix());
+        request.setAuth(token);
 
         try {
             // TODO: cache the response
@@ -94,8 +110,7 @@ public class AccountManager {
 
             if (response.getErrorCode() != 0) {
                 throw new WeCrossException(
-                        WeCrossException.ErrorCode.FETCH_UA_BY_ACCOUNT_FAILED,
-                        response.getMessage());
+                        WeCrossException.ErrorCode.GET_UA_BY_ACCOUNT_FAILED, response.getMessage());
             }
 
             return universalAccountFactory.buildUA(response.getData());
@@ -110,12 +125,32 @@ public class AccountManager {
         this.adminContext = adminContext;
     }
 
-    private UniversalAccountImpl fetchUA(JwtToken token) {
+    private boolean fetchHasLoginStatus(String token) {
+        Request<Object> request = new Request();
+        request.setData(null);
+        request.setMethod("/auth/hasLogin");
+        request.setAuth(token);
+
+        try {
+            Response<?> response = engine.send(request, new TypeReference<Response<?>>() {});
+
+            if (response.getErrorCode() != 0) {
+                return false;
+            }
+
+            return true;
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private UniversalAccount fetchUA(String token) {
 
         Request<Object> request = new Request();
         request.setData(null);
         request.setMethod("/auth/getUniversalAccount");
-        request.setAuth(token.getTokenStrWithPrefix());
+        request.setAuth(token);
 
         try {
 
@@ -125,11 +160,10 @@ public class AccountManager {
                             new TypeReference<Response<UniversalAccountImpl.UADetails>>() {});
 
             if (response.getErrorCode() != 0) {
-                throw new WeCrossException(
-                        WeCrossException.ErrorCode.FETCH_UA_FAILED, response.getMessage());
+                throw new WeCrossException(GET_UA_FAILED, response.getMessage());
             }
 
-            UniversalAccountImpl ua = universalAccountFactory.buildUA(response.getData());
+            UniversalAccount ua = universalAccountFactory.buildUA(response.getData());
 
             return ua;
 
@@ -139,12 +173,16 @@ public class AccountManager {
         }
     }
 
-    public UniversalAccount getAdminUA() {
-        return adminUA;
-    }
-
-    public void setAdminUA(UniversalAccount adminUA) {
-        this.adminUA = adminUA;
+    public UniversalAccount getAdminUA() throws WeCrossException {
+        UniversalAccount ua = null;
+        try {
+            ua = getUniversalAccount(adminContext);
+        } catch (WeCrossException e) {
+            logger.debug("admin login expired, try relogin");
+            adminContext.reLogin();
+            ua = getUniversalAccount(adminContext);
+        }
+        return ua;
     }
 
     public void setEngine(ClientMessageEngine engine) {

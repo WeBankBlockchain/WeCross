@@ -13,31 +13,12 @@ public class AdminContext extends UserContext {
 
     private String username;
     private String password;
-    private JwtToken token;
 
     public void setAccountManagerEngine(ClientMessageEngine accountManagerEngine) {
         this.accountManagerEngine = accountManagerEngine;
     }
 
     private ClientMessageEngine accountManagerEngine;
-
-    @Override
-    public JwtToken getToken() {
-        if (hasExpired()) {
-            reLogin();
-        }
-
-        return token;
-    }
-
-    @Override
-    public void setToken(JwtToken token) {
-        this.token = token;
-    }
-
-    private boolean hasExpired() {
-        return token.hasExpired();
-    }
 
     static class LoginRequest {
         public String username;
@@ -93,9 +74,9 @@ public class AdminContext extends UserContext {
                         "login error: " + username + " is not admin in account manager");
             }
 
-            token = new JwtToken(response.getData().credential);
+            super.setToken(response.getData().credential);
 
-            logger.info("Admin login success with token: " + token.getTokenStr());
+            logger.info("Admin login success with token: " + getToken());
         } catch (Exception e) {
             logger.error("Admin login failed for: " + e.getMessage());
             throw new WeCrossException(

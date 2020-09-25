@@ -3,6 +3,7 @@ package com.webank.wecross.network.rpc.handler;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
@@ -12,7 +13,6 @@ import com.webank.wecross.resource.ResourceDetail;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.routine.htlc.HTLCManager;
-import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.stub.UniversalAccount;
@@ -63,9 +63,15 @@ public class ResourceURIHandler implements URIHandler {
 
     @Override
     public void handle(
-            UniversalAccount ua, String uri, String httpMethod, String content, Callback callback) {
+            UserContext userContext,
+            String uri,
+            String httpMethod,
+            String content,
+            Callback callback) {
         RestResponse<Object> restResponse = new RestResponse<>();
         try {
+            UniversalAccount ua = host.getAccountManager().getUniversalAccount(userContext);
+
             String[] splits = uri.substring(1).split("/");
 
             Path path = new Path();
@@ -247,35 +253,22 @@ public class ResourceURIHandler implements URIHandler {
                                         content,
                                         new TypeReference<RestRequest<CustomCommandRequest>>() {});
 
-                        Account account = ua.getAccount(chain.getStubType());
-                        if (Objects.isNull(account)) {
-                            throw new WeCrossException(
-                                    WeCrossException.ErrorCode.ACCOUNT_ERROR,
-                                    "Account with type '"
-                                            + chain.getStubType()
-                                            + "' not found for "
-                                            + ua.getName());
-                        }
+                        chain.asyncCustomCommand(
+                                restRequest.getData().getCommand(),
+                                path,
+                                restRequest.getData().getArgs().toArray(),
+                                ua,
+                                (e, response) -> {
+                                    if (Objects.nonNull(e)) {
+                                        restResponse.setErrorCode(
+                                                NetworkQueryStatus.INTERNAL_ERROR);
+                                        restResponse.setMessage(e.getMessage());
+                                    } else {
+                                        restResponse.setData(response);
+                                    }
 
-                        chain.getDriver()
-                                .asyncCustomCommand(
-                                        restRequest.getData().getCommand(),
-                                        path,
-                                        restRequest.getData().getArgs().toArray(),
-                                        account,
-                                        chain.getBlockManager(),
-                                        chain.chooseConnection(),
-                                        (e, response) -> {
-                                            if (Objects.nonNull(e)) {
-                                                restResponse.setErrorCode(
-                                                        NetworkQueryStatus.INTERNAL_ERROR);
-                                                restResponse.setMessage(e.getMessage());
-                                            } else {
-                                                restResponse.setData(response);
-                                            }
-
-                                            callback.onResponse(restResponse);
-                                        });
+                                    callback.onResponse(restResponse);
+                                });
 
                         return;
                     }

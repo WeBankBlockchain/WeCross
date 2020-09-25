@@ -1,10 +1,10 @@
 package com.webank.wecross.network.rpc.handler;
 
+import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.response.StubResponse;
-import com.webank.wecross.stub.UniversalAccount;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.zone.ZoneManager;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ public class ListStubsURIHandler implements URIHandler {
 
     @Override
     public void handle(
-            UniversalAccount ua, String uri, String method, String content, Callback callback) {
+            UserContext userContext, String uri, String method, String content, Callback callback) {
         RestResponse<StubResponse> restResponse = new RestResponse<>();
         try {
             StubResponse stubResponse = new StubResponse();

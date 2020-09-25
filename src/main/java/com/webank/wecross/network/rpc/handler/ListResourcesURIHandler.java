@@ -2,6 +2,7 @@ package com.webank.wecross.network.rpc.handler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
@@ -9,7 +10,6 @@ import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.request.ResourceRequest;
 import com.webank.wecross.restserver.response.ResourceResponse;
-import com.webank.wecross.stub.UniversalAccount;
 import com.webank.wecross.zone.ZoneManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ public class ListResourcesURIHandler implements URIHandler {
 
     @Override
     public void handle(
-            UniversalAccount ua, String uri, String method, String content, Callback callback) {
+            UserContext userContext, String uri, String method, String content, Callback callback) {
         RestResponse<ResourceResponse> restResponse = new RestResponse<>();
 
         if (logger.isDebugEnabled()) {

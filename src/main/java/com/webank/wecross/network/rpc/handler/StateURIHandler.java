@@ -1,10 +1,10 @@
 package com.webank.wecross.network.rpc.handler;
 
+import com.webank.wecross.account.UserContext;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.request.StateRequest;
 import com.webank.wecross.restserver.response.StateResponse;
-import com.webank.wecross.stub.UniversalAccount;
 
 /** GET/POST /state */
 public class StateURIHandler implements URIHandler {
@@ -27,7 +27,7 @@ public class StateURIHandler implements URIHandler {
 
     @Override
     public void handle(
-            UniversalAccount ua, String uri, String method, String content, Callback callback) {
+            UserContext userContext, String uri, String method, String content, Callback callback) {
 
         StateResponse stateResponse = host.getState(new StateRequest());
         RestResponse<StateResponse> restResponse = new RestResponse<>();

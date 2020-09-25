@@ -1,13 +1,13 @@
 package com.webank.wecross.account;
 
 public class UserContext {
-    private ThreadLocal<JwtToken> token = new ThreadLocal<>();
+    private String token;
 
-    public JwtToken getToken() {
-        return token.get();
+    public String getToken() {
+        return token;
     }
 
-    public void setToken(JwtToken token) {
-        this.token.set(token);
+    public void setToken(String token) {
+        this.token = token; // token.replaceAll(JwtToken.TOKEN_PREFIX, "").replaceAll(" ", "");
     }
 }
