@@ -26,6 +26,7 @@ public class AccountManager {
     private UniversalAccountFactory universalAccountFactory;
 
     private AdminContext adminContext;
+    private AccountSyncManager accountSyncManager;
 
     private Map<String, UniversalAccount> token2UA = new HashMap<>();
 
@@ -82,6 +83,10 @@ public class AccountManager {
 
     public void setUniversalAccountFactory(UniversalAccountFactory universalAccountFactory) {
         this.universalAccountFactory = universalAccountFactory;
+    }
+
+    public void setAccountSyncManager(AccountSyncManager accountSyncManager) {
+        this.accountSyncManager = accountSyncManager;
     }
 
     @Data
@@ -165,10 +170,11 @@ public class AccountManager {
 
             UniversalAccount ua = universalAccountFactory.buildUA(response.getData());
 
+            accountSyncManager.onNewUA(ua);
             return ua;
 
         } catch (Exception e) {
-            logger.error("FetchUA failed: " + e + " stack: " + e.getStackTrace().toString());
+            logger.error("FetchUA failed: ", e);
             return null;
         }
     }

@@ -1,6 +1,7 @@
 package com.webank.wecross.config;
 
 import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.AccountSyncManager;
 import com.webank.wecross.common.BCManager;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.network.p2p.P2PProcessor;
@@ -29,6 +30,8 @@ public class WeCrossHostConfig {
 
     @Resource private AccountManager accountManager;
 
+    @Resource private AccountSyncManager accountSyncManager;
+
     @Resource private BCManager bcManager;
 
     @Resource private PollingManager pollingManager;
@@ -45,6 +48,7 @@ public class WeCrossHostConfig {
         host.setZoneManager(zoneManager);
         host.setPeerManager(peerManager);
         host.setAccountManager(accountManager);
+        host.setAccountSyncManager(accountSyncManager);
         host.setRoutineManager(routineManager);
         host.setP2PService(p2PService);
         host.setRpcService(rpcService);

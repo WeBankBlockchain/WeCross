@@ -1,5 +1,6 @@
 package com.webank.wecross.config;
 
+import com.webank.wecross.account.AccountSyncManager;
 import com.webank.wecross.network.p2p.P2PProcessor;
 import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.peer.PeerManager;
@@ -16,6 +17,8 @@ public class P2PProcessorConfig {
 
     @Resource PeerManager peerManager;
 
+    @Resource AccountSyncManager accountSyncManager;
+
     @Resource ZoneManager zoneManager;
 
     @Resource RoutineManager routineManager;
@@ -25,6 +28,7 @@ public class P2PProcessorConfig {
         P2PProcessor p2PProcessor = new P2PProcessor();
         p2PProcessor.setP2PService(p2PService);
         p2PProcessor.setPeerManager(peerManager);
+        p2PProcessor.setAccountSyncManager(accountSyncManager);
         p2PProcessor.setZoneManager(zoneManager);
         p2PProcessor.setRoutineManager(routineManager);
         return p2PProcessor;

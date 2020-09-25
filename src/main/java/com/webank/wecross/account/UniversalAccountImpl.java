@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.stub.Account;
+import com.webank.wecross.utils.SM2;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class UniversalAccountImpl implements com.webank.wecross.stub.UniversalAc
     private String username;
     private String uaID;
     private String pubKey;
+    private String secKey;
     private boolean isAdmin;
     private long lastActiveTimestamp;
 
@@ -78,14 +80,23 @@ public class UniversalAccountImpl implements com.webank.wecross.stub.UniversalAc
 
     @Override
     public byte[] sign(byte[] message) {
-        // xxx
-        return new byte[0];
+        try {
+            return SM2.sign(secKey, message);
+        } catch (Exception e) {
+            logger.error("sign exception: ", e);
+            return null;
+        }
     }
 
     @Override
     public boolean verify(byte[] signData, byte[] originData) {
-        // xxx
-        return false;
+        try {
+            // Notice: Just verify signData, not verify signData belongs to this UA
+            return SM2.verify(signData, originData);
+        } catch (Exception e) {
+            logger.error("sign exception: ", e);
+            return false;
+        }
     }
 
     @Data

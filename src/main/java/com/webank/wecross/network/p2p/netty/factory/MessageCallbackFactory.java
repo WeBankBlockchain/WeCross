@@ -1,5 +1,6 @@
 package com.webank.wecross.network.p2p.netty.factory;
 
+import com.webank.wecross.account.AccountSyncManager;
 import com.webank.wecross.network.p2p.netty.ConnectProcessor;
 import com.webank.wecross.network.p2p.netty.DisconnectProcessor;
 import com.webank.wecross.network.p2p.netty.HeartBeatProcessor;
@@ -35,16 +36,22 @@ public class MessageCallbackFactory {
     }
 
     private static DisconnectProcessor newDisconnectProcessor(
-            PeerManager peerManager, ZoneManager zoneManager) {
+            PeerManager peerManager,
+            ZoneManager zoneManager,
+            AccountSyncManager accountSyncManager) {
         DisconnectProcessor disconnectProcessor = new DisconnectProcessor();
         disconnectProcessor.setPeerManager(peerManager);
         disconnectProcessor.setZoneManager(zoneManager);
+        disconnectProcessor.setAccountSyncManager(accountSyncManager);
 
         return disconnectProcessor;
     }
 
     public static MessageCallBack build(
-            SeqMapper seqMapper, PeerManager peerManager, ZoneManager zoneManager) {
+            SeqMapper seqMapper,
+            PeerManager peerManager,
+            ZoneManager zoneManager,
+            AccountSyncManager accountSyncManager) {
         System.out.println("Initializing MessageCallBack ...");
 
         MessageCallBack callback = new MessageCallBack();
@@ -55,7 +62,8 @@ public class MessageCallbackFactory {
         callback.setProcessor(MessageType.RESOURCE_RESPONSE, newResponseProcessor(seqMapper));
         callback.setProcessor(MessageCallBack.ON_CONNECT, newConnectProcessor(peerManager));
         callback.setProcessor(
-                MessageCallBack.ON_DISCONNECT, newDisconnectProcessor(peerManager, zoneManager));
+                MessageCallBack.ON_DISCONNECT,
+                newDisconnectProcessor(peerManager, zoneManager, accountSyncManager));
 
         return callback;
     }

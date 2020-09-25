@@ -123,4 +123,19 @@ public interface Driver {
             BlockManager blockManager,
             Connection connection,
             CustomCommandCallback callback);
+
+    /**
+     * @param account
+     * @param message
+     * @return signBytes
+     */
+    // byte[] accountSign(Account account, byte[] message);
+
+    /**
+     * @param identity: Chain account identity
+     * @param signBytes
+     * @param message
+     * @return success or failed
+     */
+    // boolean accountVerify(String identity, byte[] signBytes, byte[] message);
 }

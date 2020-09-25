@@ -19,6 +19,7 @@ public class UniversalAccountFactory {
                         .username(uaDetails.getUsername())
                         .uaID(uaDetails.getUaID())
                         .pubKey(uaDetails.getPubKey())
+                        .secKey(uaDetails.getSecKey())
                         .isAdmin(uaDetails.isAdmin())
                         .lastActiveTimestamp(System.currentTimeMillis())
                         .build();

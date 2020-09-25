@@ -1,6 +1,7 @@
 package com.webank.wecross.host;
 
 import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.AccountSyncManager;
 import com.webank.wecross.network.NetworkMessage;
 import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.network.rpc.RPCService;
@@ -27,6 +28,7 @@ public class WeCrossHost {
     private ZoneManager zoneManager;
     private PeerManager peerManager;
     private AccountManager accountManager;
+    private AccountSyncManager accountSyncManager;
     private RoutineManager routineManager;
     private P2PService p2PService;
     private RPCService rpcService;
@@ -77,7 +79,7 @@ public class WeCrossHost {
                 flag = false;
             }
 
-            broadcastResourceSeq();
+            broadcastStatus();
             dumpStatus();
         }
         System.exit(0);
@@ -101,11 +103,13 @@ public class WeCrossHost {
         }
     }
 
-    private void broadcastResourceSeq() {
+    private void broadcastStatus() {
         int seq = zoneManager.getSeq();
+        int accountSeq = accountSyncManager.getSeq();
 
         PeerSeqMessageData peerSeqMessageData = new PeerSeqMessageData();
         peerSeqMessageData.setSeq(seq);
+        peerSeqMessageData.setAccountSeq(accountSeq);
 
         NetworkMessage<Object> msg = new NetworkMessage<>();
         msg.newSeq();
@@ -122,6 +126,16 @@ public class WeCrossHost {
     private void dumpStatus() {
         dumpChainsStatus();
         dumpActiveResources();
+        dumpAccountStatus();
+    }
+
+    private void dumpAccountStatus() {
+        String dumpStr = "Current account info: ";
+
+        dumpStr += " seq: " + accountSyncManager.getSeq();
+        dumpStr += " table: " + accountSyncManager.dumpCAID2UAID();
+
+        dumpByTime(dumpStr);
     }
 
     private void dumpChainsStatus() {
@@ -234,5 +248,9 @@ public class WeCrossHost {
 
     public void setPollingManager(PollingManager pollingManager) {
         this.pollingManager = pollingManager;
+    }
+
+    public void setAccountSyncManager(AccountSyncManager accountSyncManager) {
+        this.accountSyncManager = accountSyncManager;
     }
 }

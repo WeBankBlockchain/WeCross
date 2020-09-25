@@ -1,6 +1,7 @@
 package com.webank.wecross.config;
 
 import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.AccountSyncManager;
 import com.webank.wecross.account.AdminContext;
 import com.webank.wecross.account.UniversalAccountFactory;
 import com.webank.wecross.exception.WeCrossException;
@@ -22,6 +23,8 @@ public class AccountManagerConfig {
 
     @Resource UniversalAccountFactory universalAccountFactory;
 
+    @Resource AccountSyncManager accountSyncManager;
+
     private Logger logger = LoggerFactory.getLogger(AccountManagerConfig.class);
 
     @Bean
@@ -31,6 +34,7 @@ public class AccountManagerConfig {
         accountManager.setEngine(accountManagerEngine);
         accountManager.setAdminContext(adminContext);
         accountManager.setUniversalAccountFactory(universalAccountFactory);
+        accountManager.setAccountSyncManager(accountSyncManager);
 
         /*
             AccountManager localAccountManager = newLocalAccountManager();
