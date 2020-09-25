@@ -15,13 +15,14 @@ import com.webank.wecross.network.p2p.netty.response.Response;
 import com.webank.wecross.network.p2p.netty.response.ResponseCallBack;
 import com.webank.wecross.network.p2p.netty.response.StatusCode;
 import com.webank.wecross.peer.Peer;
+import com.webank.wecross.stub.ObjectMapperFactory;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class P2PService implements NetworkService {
     private Logger logger = LoggerFactory.getLogger(P2PService.class);
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     private NettyService nettyService;
 

@@ -53,10 +53,6 @@ public class HTLCResource extends Resource {
         this.counterpartyPath = counterpartyPath;
     }
 
-    interface Callback {
-        void onReturn(WeCrossException exception);
-    }
-
     @Override
     public void asyncCall(
             TransactionRequest request, UniversalAccount ua, Resource.Callback callback) {
@@ -90,7 +86,12 @@ public class HTLCResource extends Resource {
         }
     }
 
-    private void handleUnlockRequest(TransactionRequest request, Callback callback) {
+    public interface HandleUnlockRequestCallback {
+        void onReturn(WeCrossException exception);
+    }
+
+    public void handleUnlockRequest(
+            TransactionRequest request, HandleUnlockRequestCallback callback) {
         String[] args = request.getArgs();
         if (args == null || args.length != 2) {
             callback.onReturn(new WeCrossException(HTLCErrorCode.UNLOCK_ERROR, "incomplete args"));
@@ -155,7 +156,12 @@ public class HTLCResource extends Resource {
                 });
     }
 
-    private void unlockCounterparty(TransactionRequest request, Callback callback) {
+    public interface UnlockCounterpartyCallback {
+        void onReturn(WeCrossException exception);
+    }
+
+    public void unlockCounterparty(
+            TransactionRequest request, UnlockCounterpartyCallback callback) {
         if (logger.isDebugEnabled()) {
             logger.debug(
                     "Participant receives a unlock request, and unlocks initiator firstly, request: {}",
@@ -206,11 +212,11 @@ public class HTLCResource extends Resource {
                         });
     }
 
-    interface VerifyUnlockCallback {
+    public interface VerifyUnlockCallback {
         void onReturn(WeCrossException exception, boolean result);
     }
 
-    private void verifyUnlock(
+    public void verifyUnlock(
             TransactionResponse transactionResponse, String[] args, VerifyUnlockCallback callback) {
         HTLC htlc = new HTLCImpl();
 

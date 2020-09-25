@@ -5,11 +5,13 @@ import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.RoutineDefault;
+import com.webank.wecross.stub.ObjectMapperFactory;
 import com.webank.wecross.stub.TransactionRequest;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +19,7 @@ import org.slf4j.LoggerFactory;
 @DisallowConcurrentExecution
 public class InterchainJob implements Job {
     private Logger logger = LoggerFactory.getLogger(InterchainJob.class);
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -25,11 +27,10 @@ public class InterchainJob implements Job {
         SystemResource systemResource =
                 (SystemResource) dataMap.get(InterchainDefault.INTER_CHAIN_JOB_DATA_KEY);
 
-        // todo open job
-        // handleInterchainRequests(systemResource);
+        handleInterchainRequests(systemResource);
     }
 
-    private void handleInterchainRequests(SystemResource systemResource) {
+    public void handleInterchainRequests(SystemResource systemResource) {
 
         UniversalAccount adminUA;
         try {
@@ -49,7 +50,7 @@ public class InterchainJob implements Job {
                 Thread.currentThread().interrupt();
             }
 
-            int count = 0;
+            AtomicInteger count = new AtomicInteger(0);
             String currentIndex = "0";
 
             String hubPath = systemResource.getHubResource().getPath().toString();
@@ -57,7 +58,7 @@ public class InterchainJob implements Job {
                 try {
                     InterchainRequest interchainRequest = new InterchainRequest();
                     interchainRequest.build(request);
-                    if (count++ == requests.length) {
+                    if (count.getAndIncrement() == requests.length - 1) {
                         currentIndex = interchainRequest.getUid();
                     }
 
@@ -112,7 +113,7 @@ public class InterchainJob implements Job {
         }
     }
 
-    private String[] getInterchainRequests(SystemResource systemResource, UniversalAccount ua) {
+    public String[] getInterchainRequests(SystemResource systemResource, UniversalAccount ua) {
         Resource hubResource = systemResource.getHubResource();
         TransactionRequest transactionRequest = new TransactionRequest();
         transactionRequest.setArgs(new String[] {InterchainDefault.MAX_NUMBER_PER_POLLING});
@@ -157,26 +158,44 @@ public class InterchainJob implements Job {
                     }
                 });
 
+        String result = null;
         try {
-            String result = future.get(RoutineDefault.CALLBACK_TIMEOUT, TimeUnit.MILLISECONDS);
+            result = future.get(RoutineDefault.CALLBACK_TIMEOUT, TimeUnit.MILLISECONDS);
             if (Objects.isNull(result) || RoutineDefault.NULL_FLAG.equals(result)) {
                 return new String[] {};
             }
 
-            return objectMapper.readValue(result, String[].class);
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                        "Interchain json requests: {}, path: {}", result, hubResource.getPath());
+            }
+
+            return objectMapper.readValue(
+                    result.replace(new String(Character.toChars(0)), ""), String[].class);
         } catch (Exception e) {
-            logger.error("Failed to get interchain requests, path: {}", hubResource.getPath(), e);
+            logger.error(
+                    "Failed to get interchain requests, result: {} path: {}",
+                    result,
+                    hubResource.getPath(),
+                    e);
             future.cancel(true);
             return new String[] {};
         }
     }
 
-    private void updateCurrentRequestIndex(
+    public void updateCurrentRequestIndex(
             SystemResource systemResource, String index, UniversalAccount ua) {
         Resource hubResource = systemResource.getHubResource();
         TransactionRequest transactionRequest = new TransactionRequest();
         transactionRequest.setArgs(new String[] {index});
         transactionRequest.setMethod(InterchainDefault.UPDATE_CURRENT_REQUEST_INDEX_METHOD);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "update current request index: {}, path: {}",
+                    index,
+                    systemResource.getHubResource().getPath());
+        }
 
         Semaphore semaphore = new Semaphore(1, true);
         try {

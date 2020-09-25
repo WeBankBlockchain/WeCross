@@ -1,7 +1,6 @@
 package com.webank.wecross.account;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.utils.SM2;
 import java.util.HashMap;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 public class UniversalAccount {
     private static Logger logger = LoggerFactory.getLogger(UniversalAccount.class);
-    private static ObjectMapper objectMapper = new ObjectMapper();
 
     private String username;
     private String uaID;

@@ -80,16 +80,14 @@ public class Resource {
 
     public void asyncCall(
             TransactionRequest request, UniversalAccount ua, Resource.Callback callback) {
-        Account account = ua.getAccount(stubType);
-        if (Objects.isNull(account)) {
-            callback.onTransactionResponse(
-                    new TransactionException(
-                            0,
-                            "Account with type '" + stubType + "' not found for " + ua.getName()),
-                    null);
+        try {
+            checkAccount(ua);
+        } catch (TransactionException e) {
+            callback.onTransactionResponse(e, null);
             return;
         }
 
+        Account account = ua.getAccount(stubType);
         TransactionContext context =
                 new TransactionContext(account, this.path, this.resourceInfo, this.blockManager);
         boolean isRawTransaction =
@@ -129,16 +127,14 @@ public class Resource {
 
     public void asyncSendTransaction(
             TransactionRequest request, UniversalAccount ua, Resource.Callback callback) {
-        Account account = ua.getAccount(stubType);
-        if (Objects.isNull(account)) {
-            callback.onTransactionResponse(
-                    new TransactionException(
-                            0,
-                            "Account with type '" + stubType + "' not found for " + ua.getName()),
-                    null);
+        try {
+            checkAccount(ua);
+        } catch (TransactionException e) {
+            callback.onTransactionResponse(e, null);
             return;
         }
 
+        Account account = ua.getAccount(stubType);
         TransactionContext context =
                 new TransactionContext(account, this.path, this.resourceInfo, this.blockManager);
         boolean isRawTransaction =
@@ -152,7 +148,7 @@ public class Resource {
                     (transactionException, transactionResponse) -> {
                         if (logger.isDebugEnabled()) {
                             logger.debug(
-                                    "asyncCall response: {}, exception: ",
+                                    "asyncSendTransaction response: {}, exception: ",
                                     transactionResponse,
                                     transactionException);
                         }
@@ -167,7 +163,7 @@ public class Resource {
                     (transactionException, transactionResponse) -> {
                         if (logger.isDebugEnabled()) {
                             logger.debug(
-                                    "asyncCall response: {}, exception: ",
+                                    "asyncSendTransaction response: {}, exception: ",
                                     transactionResponse,
                                     transactionException);
                         }
@@ -194,6 +190,19 @@ public class Resource {
             response.setErrorMessage("onRemoteTransaction completableFuture exception: " + e);
             logger.error("onRemoteTransaction timeout, resource: {}", getResourceInfo());
             return response;
+        }
+    }
+
+    private void checkAccount(UniversalAccount ua) throws TransactionException {
+        if (Objects.isNull(ua)) {
+            throw new TransactionException(
+                    TransactionException.ErrorCode.ACCOUNT_ERRPR, "UniversalAccount is null");
+        }
+
+        if (Objects.isNull(ua.getAccount(stubType))) {
+            throw new TransactionException(
+                    TransactionException.ErrorCode.ACCOUNT_ERRPR,
+                    "Account with type '" + stubType + "' not found for " + ua.getName());
         }
     }
 

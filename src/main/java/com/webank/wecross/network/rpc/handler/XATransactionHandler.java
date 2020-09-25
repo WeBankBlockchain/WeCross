@@ -13,6 +13,7 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.routine.xa.XATransactionManager;
+import com.webank.wecross.stub.ObjectMapperFactory;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.StubConstant;
 import java.util.*;
@@ -22,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 public class XATransactionHandler implements URIHandler {
     private Logger logger = LoggerFactory.getLogger(XATransactionHandler.class);
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
     private XATransactionManager xaTransactionManager;
 
     private WeCrossHost host;

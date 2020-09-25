@@ -1,6 +1,5 @@
 package com.webank.wecross.routine.xa;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.exception.WeCrossException;
@@ -15,8 +14,7 @@ import org.slf4j.LoggerFactory;
 
 public class XATransactionManager {
     private Logger logger = LoggerFactory.getLogger(XATransactionManager.class);
-    ObjectMapper objectMapper =
-            new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     private ZoneManager zoneManager;
     private static final int GET_ALL = 0;

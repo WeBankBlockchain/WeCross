@@ -40,19 +40,28 @@ public class HTLCImpl implements HTLC {
     @Override
     public void lockCounterparty(HTLCResource htlcResource, String hash, Callback callback) {
         transferWithValidation(
-                htlcResource, RoutineDefault.LOCK_METHOD, new String[] {hash}, callback);
+                htlcResource, RoutineDefault.LOCK_METHOD, new String[] {hash}, callback::onReturn);
     }
 
     @Override
     public void unlockCounterparty(
             HTLCResource htlcResource, String hash, String secret, Callback callback) {
         transferWithValidation(
-                htlcResource, RoutineDefault.UNLOCK_METHOD, new String[] {hash, secret}, callback);
+                htlcResource,
+                RoutineDefault.UNLOCK_METHOD,
+                new String[] {hash, secret},
+                callback::onReturn);
     }
 
+    public interface TransferWithValidationCallback {
+        void onReturn(WeCrossException exception, String result);
+    }
     /* lock or unlock with validation */
-    private void transferWithValidation(
-            HTLCResource htlcResource, String method, String[] args, Callback callback) {
+    public void transferWithValidation(
+            HTLCResource htlcResource,
+            String method,
+            String[] args,
+            TransferWithValidationCallback callback) {
         TransactionRequest request = new TransactionRequest(method, args);
         htlcResource.asyncSendTransaction(
                 request,
@@ -226,7 +235,7 @@ public class HTLCImpl implements HTLC {
                 htlcResource, "setCounterpartyRollbackState", new String[] {hash}, callback);
     }
 
-    private void call(
+    public void call(
             Resource resource,
             UniversalAccount ua,
             String method,
@@ -238,7 +247,7 @@ public class HTLCImpl implements HTLC {
                 request, ua, newTransactionCallback(RoutineDefault.CALL_TYPE, method, callback));
     }
 
-    private void call(HTLCResource htlcResource, String method, String[] args, Callback callback) {
+    public void call(HTLCResource htlcResource, String method, String[] args, Callback callback) {
         TransactionRequest request = new TransactionRequest(method, args);
 
         htlcResource.asyncCall(
@@ -247,7 +256,7 @@ public class HTLCImpl implements HTLC {
                 newTransactionCallback(RoutineDefault.CALL_TYPE, method, callback));
     }
 
-    private void sendTransaction(
+    public void sendTransaction(
             Resource resource,
             UniversalAccount ua,
             String method,
@@ -261,7 +270,7 @@ public class HTLCImpl implements HTLC {
                 newTransactionCallback(RoutineDefault.SEND_TRANSACTION_TYPE, method, callback));
     }
 
-    private void sendTransaction(
+    public void sendTransaction(
             HTLCResource htlcResource, String method, String[] args, Callback callback) {
         TransactionRequest request = new TransactionRequest(method, args);
         htlcResource.asyncSendTransaction(
@@ -270,8 +279,7 @@ public class HTLCImpl implements HTLC {
                 newTransactionCallback(RoutineDefault.SEND_TRANSACTION_TYPE, method, callback));
     }
 
-    private Resource.Callback newTransactionCallback(
-            String type, String method, Callback callback) {
+    public Resource.Callback newTransactionCallback(String type, String method, Callback callback) {
         return (transactionException, transactionResponse) -> {
             if (transactionException != null && !transactionException.isSuccess()) {
                 logger.error(
@@ -298,7 +306,7 @@ public class HTLCImpl implements HTLC {
         };
     }
 
-    private String handleTransactionResponse(
+    public String handleTransactionResponse(
             String type, String method, TransactionResponse response) throws WeCrossException {
         if (response.getErrorCode() != 0) {
             logger.error(

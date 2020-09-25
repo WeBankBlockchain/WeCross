@@ -6,6 +6,7 @@ import static org.asynchttpclient.Dsl.config;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.stub.ObjectMapperFactory;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.SslContext;
@@ -32,7 +33,7 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
 
     private String server;
     private AsyncHttpClient httpClient;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
     private ClientConnection clientConnection;
 
     private static int httpClientTimeOut = 100000; // ms
