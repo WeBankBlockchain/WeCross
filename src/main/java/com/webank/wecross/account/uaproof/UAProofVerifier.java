@@ -18,12 +18,12 @@ public class UAProofVerifier {
         String type = uaProof.getType();
         try {
 
-            if (!verifyUA(uaProof.getUa2ca())) {
+            if (!verifyUa2Ca(uaProof.getUa2ca())) {
                 logger.warn("Verify ua2ca failed: " + uaProof);
                 return false;
             }
 
-            if (!verifyCA(type, uaProof.getCa2ua())) {
+            if (!verifyCa2Ua(type, uaProof.getCa2ua())) {
                 logger.warn("Verify ua2ca failed: " + uaProof);
                 return false;
             }
@@ -46,17 +46,17 @@ public class UAProofVerifier {
         }
     }
 
-    private boolean verifyUA(UAProofSign ua2ca) throws WeCrossException {
+    private boolean verifyUa2Ca(UAProofSign ua2ca) throws WeCrossException {
         try {
             if (!SM2.verify(ua2ca.getSignBytes(), ua2ca.getMessage())) {
-                logger.warn("verifyUA failed: " + ua2ca);
+                logger.warn("verifyUa2Ca failed: " + ua2ca);
                 return false;
             }
 
             String uaPubInSign = SM2.SignatureData.parseFrom(ua2ca.getSignBytes()).getHexPub();
 
             if (!ua2ca.getSigner().equals(uaPubInSign)) {
-                logger.warn("verifyUA signer failed: " + ua2ca);
+                logger.warn("verifyUa2Ca signer failed: " + ua2ca);
                 return false;
             }
 
@@ -67,7 +67,7 @@ public class UAProofVerifier {
         }
     }
 
-    private boolean verifyCA(String type, UAProofSign ca2ua) throws WeCrossException {
+    private boolean verifyCa2Ua(String type, UAProofSign ca2ua) throws WeCrossException {
         Driver driver = stubManager.getStubFactory(type).newDriver();
         return driver.accountVerify(ca2ua.getSigner(), ca2ua.getSignBytes(), ca2ua.getMessage());
     }

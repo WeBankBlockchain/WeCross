@@ -133,7 +133,7 @@ public class WeCrossHost {
         String dumpStr = "Current account info: ";
 
         dumpStr += " seq: " + accountSyncManager.getSeq();
-        dumpStr += " table: " + accountSyncManager.dumpCAID2UAID();
+        dumpStr += " table: " + accountSyncManager.dumpCaID2UaID();
 
         dumpByTime(dumpStr);
     }

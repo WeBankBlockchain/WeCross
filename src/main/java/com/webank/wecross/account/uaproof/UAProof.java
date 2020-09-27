@@ -15,11 +15,11 @@ public class UAProof {
     private UAProofSign ua2ca; // universal account to chain account
     private UAProofSign ca2ua; // chain account to universal account
 
-    public String getUAID() {
+    public String getUaID() {
         return ca2ua.getSignee();
     }
 
-    public String getCAID() {
+    public String getCaID() {
         return ua2ca.getSignee();
     }
 

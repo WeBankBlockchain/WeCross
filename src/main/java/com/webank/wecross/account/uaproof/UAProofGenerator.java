@@ -1,9 +1,9 @@
 package com.webank.wecross.account.uaproof;
 
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.Driver;
-import com.webank.wecross.stub.UniversalAccount;
 import com.webank.wecross.stubmanager.StubManager;
 
 public class UAProofGenerator {
@@ -16,8 +16,8 @@ public class UAProofGenerator {
     public UAProof generate(UniversalAccount ua, Account ca) throws WeCrossException {
         String timestamp = String.valueOf(System.currentTimeMillis());
 
-        UAProofSign ua2ca = generateUA2CA(ua, ca, timestamp);
-        UAProofSign ca2ua = generateCA2UA(ua, ca, timestamp);
+        UAProofSign ua2ca = generateUa2Ca(ua, ca, timestamp);
+        UAProofSign ca2ua = generateCa2Ua(ua, ca, timestamp);
 
         UAProof uaProof = new UAProof();
         uaProof.setType(ca.getType());
@@ -26,7 +26,7 @@ public class UAProofGenerator {
         return uaProof;
     }
 
-    private UAProofSign generateUA2CA(UniversalAccount ua, Account ca, String timestamp)
+    private UAProofSign generateUa2Ca(UniversalAccount ua, Account ca, String timestamp)
             throws WeCrossException {
         UAProofSign ua2ca = new UAProofSign();
         ua2ca.setTimestamp(timestamp);
@@ -38,7 +38,7 @@ public class UAProofGenerator {
         return ua2ca;
     }
 
-    private UAProofSign generateCA2UA(UniversalAccount ua, Account ca, String timestamp)
+    private UAProofSign generateCa2Ua(UniversalAccount ua, Account ca, String timestamp)
             throws WeCrossException {
         UAProofSign ca2ua = new UAProofSign();
         ca2ua.setTimestamp(timestamp);

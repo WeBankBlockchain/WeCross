@@ -8,7 +8,6 @@ import com.webank.wecross.network.client.ClientMessageEngine;
 import com.webank.wecross.network.client.Request;
 import com.webank.wecross.network.client.Response;
 import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.UniversalAccount;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -68,13 +67,13 @@ public class AccountManager {
         UniversalAccount ua = token2UA.get(token);
 
         // query login state every x seconds
-        if (!((UniversalAccountImpl) ua).isActive()) {
+        if (!((UniversalAccount) ua).isActive()) {
             if (!fetchHasLoginStatus(token)) {
                 token2UA.remove(token);
                 ua = null;
                 throw new WeCrossException(GET_UA_FAILED, "login expired");
             } else {
-                ((UniversalAccountImpl) ua).activate();
+                ((UniversalAccount) ua).activate();
             }
         }
 
@@ -108,10 +107,9 @@ public class AccountManager {
 
         try {
             // TODO: cache the response
-            Response<UniversalAccountImpl.UADetails> response =
+            Response<UniversalAccount.UADetails> response =
                     engine.send(
-                            request,
-                            new TypeReference<Response<UniversalAccountImpl.UADetails>>() {});
+                            request, new TypeReference<Response<UniversalAccount.UADetails>>() {});
 
             if (response.getErrorCode() != 0) {
                 throw new WeCrossException(
@@ -159,10 +157,9 @@ public class AccountManager {
 
         try {
 
-            Response<UniversalAccountImpl.UADetails> response =
+            Response<UniversalAccount.UADetails> response =
                     engine.send(
-                            request,
-                            new TypeReference<Response<UniversalAccountImpl.UADetails>>() {});
+                            request, new TypeReference<Response<UniversalAccount.UADetails>>() {});
 
             if (response.getErrorCode() != 0) {
                 throw new WeCrossException(GET_UA_FAILED, response.getMessage());

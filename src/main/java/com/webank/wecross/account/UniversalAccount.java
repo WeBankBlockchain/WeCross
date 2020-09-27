@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 
 @Data
 @Builder
-public class UniversalAccountImpl implements com.webank.wecross.stub.UniversalAccount {
-    private static Logger logger = LoggerFactory.getLogger(UniversalAccountImpl.class);
+public class UniversalAccount {
+    private static Logger logger = LoggerFactory.getLogger(UniversalAccount.class);
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     private String username;
@@ -35,7 +35,6 @@ public class UniversalAccountImpl implements com.webank.wecross.stub.UniversalAc
 
     @Builder.Default private Map<String, Account> type2DefaultAccount = new HashMap<>();
 
-    @Override
     public Account getAccount(String type) {
         return type2DefaultAccount.get(type);
     }
@@ -63,39 +62,24 @@ public class UniversalAccountImpl implements com.webank.wecross.stub.UniversalAc
         return accounts;
     }
 
-    @Override
     public String getName() {
         return username;
     }
 
-    @Override
     public String getUAID() {
         return uaID;
     }
 
-    @Override
     public String getPub() {
         return pubKey;
     }
 
-    @Override
     public byte[] sign(byte[] message) {
         try {
             return SM2.sign(secKey, message);
         } catch (Exception e) {
             logger.error("sign exception: ", e);
             return null;
-        }
-    }
-
-    @Override
-    public boolean verify(byte[] signData, byte[] originData) {
-        try {
-            // Notice: Just verify signData, not verify signData belongs to this UA
-            return SM2.verify(signData, originData);
-        } catch (Exception e) {
-            logger.error("sign exception: ", e);
-            return false;
         }
     }
 

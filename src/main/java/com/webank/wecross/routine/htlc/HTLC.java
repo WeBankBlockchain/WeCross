@@ -1,9 +1,9 @@
 package com.webank.wecross.routine.htlc;
 
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.TransactionValidator;
-import com.webank.wecross.stub.UniversalAccount;
 
 public interface HTLC {
     interface Callback {

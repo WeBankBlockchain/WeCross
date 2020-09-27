@@ -1,5 +1,6 @@
 package com.webank.wecross.resource;
 
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.stub.*;
 import java.security.SecureRandom;

@@ -9,7 +9,6 @@ import com.webank.wecross.account.uaproof.UAProofVerifier;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.p2p.netty.common.Node;
 import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.UniversalAccount;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +26,7 @@ public class AccountSyncManager {
 
     private Map<String, UAProofInfo> myUAProofs = new HashMap<>(); // caID 2 UAPRoof
 
-    private Map<String, String> cAID2UAID = new HashMap<>(); // chain account id 2 uaid
+    private Map<String, String> caID2UaID = new HashMap<>(); // chain account id 2 uaid
 
     public void addMyUAProof(String chainAccountID, String uaID, String type, String uaProof) {
         myUAProofs.put(
@@ -40,8 +39,8 @@ public class AccountSyncManager {
                         .build());
     }
 
-    public void addCAID2UAID(String chainAccountID, String uaID) throws WeCrossException {
-        String currentUAID = cAID2UAID.get(chainAccountID);
+    public void addCaID2UaID(String chainAccountID, String uaID) throws WeCrossException {
+        String currentUAID = caID2UaID.get(chainAccountID);
 
         if (currentUAID != null && !currentUAID.equals(uaID)) {
             throw new WeCrossException(
@@ -54,7 +53,7 @@ public class AccountSyncManager {
                             + uaID);
         }
 
-        cAID2UAID.putIfAbsent(chainAccountID, uaID);
+        caID2UaID.putIfAbsent(chainAccountID, uaID);
     }
 
     public Integer getSeq() {
@@ -77,7 +76,7 @@ public class AccountSyncManager {
     }
 
     public String getUAIDByChainAccountIdentity(String identity) {
-        return cAID2UAID.get(identity);
+        return caID2UaID.get(identity);
     }
 
     public Collection<UAProofInfo> getUAProofs() {
@@ -91,13 +90,13 @@ public class AccountSyncManager {
             String caID = info.getChainAccountID();
 
             if (verifyUAProof(info)) {
-                String oldUAID = cAID2UAID.get(caID);
+                String oldUAID = caID2UaID.get(caID);
 
                 if (oldUAID != null && !oldUAID.equals(uaID)) {
                     logger.warn("Overwrite account {} uaID from {} to {}", caID, oldUAID, uaID);
                 }
 
-                cAID2UAID.put(caID, uaID);
+                caID2UaID.put(caID, uaID);
             } else {
                 logger.warn("Receive invalid UAProof: " + uaProofInfos);
             }
@@ -119,8 +118,8 @@ public class AccountSyncManager {
                 return false;
             }
 
-            if (!uaProofInfo.getChainAccountID().equals(uaProof.getCAID())
-                    || !uaProofInfo.getUaID().equals(uaProof.getUAID())) {
+            if (!uaProofInfo.getChainAccountID().equals(uaProof.getCaID())
+                    || !uaProofInfo.getUaID().equals(uaProof.getUaID())) {
                 logger.warn(
                         "Identities are not belong to the UAProof identity:{} UAProof:{}",
                         uaProofInfo,
@@ -157,7 +156,7 @@ public class AccountSyncManager {
 
                 myUAProofs.put(caID, info);
 
-                addCAID2UAID(caID, uaID);
+                addCaID2UaID(caID, uaID);
             } catch (WeCrossException e) {
                 logger.warn("onNewUA: ", e);
             } catch (Exception e) {
@@ -166,10 +165,10 @@ public class AccountSyncManager {
         }
     }
 
-    public String dumpCAID2UAID() {
+    public String dumpCaID2UaID() {
         String dumpStr = "";
 
-        for (Map.Entry<String, String> entry : cAID2UAID.entrySet()) {
+        for (Map.Entry<String, String> entry : caID2UaID.entrySet()) {
             dumpStr +=
                     "("
                             + entry.getKey().substring(0, 32).replaceAll("\n", "")

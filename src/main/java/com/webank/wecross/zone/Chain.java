@@ -1,5 +1,6 @@
 package com.webank.wecross.zone;
 
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.remote.RemoteConnection;
 import com.webank.wecross.resource.Resource;
@@ -10,7 +11,6 @@ import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.TransactionException;
-import com.webank.wecross.stub.UniversalAccount;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.HashSet;

@@ -1,5 +1,6 @@
 package com.webank.wecross.routine.htlc;
 
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.peer.Peer;

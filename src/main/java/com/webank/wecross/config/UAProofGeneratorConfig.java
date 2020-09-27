@@ -4,7 +4,9 @@ import com.webank.wecross.account.uaproof.UAProofGenerator;
 import com.webank.wecross.stubmanager.StubManager;
 import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
+@Configuration
 public class UAProofGeneratorConfig {
     @Resource StubManager stubManager;
 
