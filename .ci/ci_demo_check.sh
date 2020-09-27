@@ -153,7 +153,7 @@ call payment.fabric.evidence queryEvidence evidence0
 startTransaction 100 payment.bcos.evidence payment.fabric.evidence
 execTransaction payment.bcos.evidence 100 1 newEvidence evidence0 "I'm Tom"
 execTransaction payment.fabric.evidence 100 1 newEvidence evidence0 "I'm Jerry"
-commitTransaction
+commitTransaction 100 payment.bcos.evidence payment.fabric.evidence
 
 call payment.bcos.evidence queryEvidence evidence0
 call payment.fabric.evidence queryEvidence evidence0
@@ -164,7 +164,7 @@ execTransaction payment.fabric.evidence 101 1 newEvidence evidence1 "I'm JerryMM
 callTransaction payment.bcos.evidence 101 queryEvidence evidence1
 callTransaction payment.fabric.evidence 101 queryEvidence evidence1
 callTransaction payment.bcos.evidence 101 queryEvidence evidence1
-rollbackTransaction
+rollbackTransaction 101 bcos_user1 payment.bcos.evidence payment.fabric.evidence
 
 call payment.bcos.evidence queryEvidence evidence1
 call payment.fabric.evidence queryEvidence evidence1
