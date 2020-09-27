@@ -1,5 +1,6 @@
 package com.webank.wecross.account;
 
+import com.webank.wecross.account.uaproof.UAProofInfo;
 import java.util.Collection;
 import java.util.HashSet;
 import lombok.Data;

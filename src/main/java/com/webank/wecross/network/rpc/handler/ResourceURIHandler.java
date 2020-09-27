@@ -1,5 +1,7 @@
 package com.webank.wecross.network.rpc.handler;
 
+import static com.webank.wecross.exception.WeCrossException.ErrorCode.GET_UA_FAILED;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
@@ -71,6 +73,9 @@ public class ResourceURIHandler implements URIHandler {
         RestResponse<Object> restResponse = new RestResponse<>();
         try {
             UniversalAccount ua = host.getAccountManager().getUniversalAccount(userContext);
+            if (ua == null) {
+                throw new WeCrossException(GET_UA_FAILED, "");
+            }
 
             String[] splits = uri.substring(1).split("/");
 

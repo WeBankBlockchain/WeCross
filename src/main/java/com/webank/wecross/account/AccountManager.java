@@ -9,10 +9,10 @@ import com.webank.wecross.network.client.Request;
 import com.webank.wecross.network.client.Response;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.UniversalAccount;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.Builder;
 import lombok.Data;
 import org.slf4j.Logger;
@@ -28,7 +28,7 @@ public class AccountManager {
     private AdminContext adminContext;
     private AccountSyncManager accountSyncManager;
 
-    private Map<String, UniversalAccount> token2UA = new HashMap<>();
+    private Map<String, UniversalAccount> token2UA = new ConcurrentHashMap<>();
 
     public Account getAccount(String name) {
         String message =
@@ -184,7 +184,7 @@ public class AccountManager {
         try {
             ua = getUniversalAccount(adminContext);
         } catch (WeCrossException e) {
-            logger.debug("admin login expired, try relogin");
+            logger.debug("admin login expired, try re-login");
             adminContext.reLogin();
             ua = getUniversalAccount(adminContext);
         }

@@ -2,11 +2,14 @@ package com.webank.wecross.account;
 
 import static com.webank.wecross.exception.WeCrossException.ErrorCode;
 
+import com.webank.wecross.account.uaproof.UAProof;
+import com.webank.wecross.account.uaproof.UAProofGenerator;
+import com.webank.wecross.account.uaproof.UAProofInfo;
+import com.webank.wecross.account.uaproof.UAProofVerifier;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.p2p.netty.common.Node;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.stub.UniversalAccount;
-import com.webank.wecross.stubmanager.StubManager;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +19,9 @@ import org.slf4j.LoggerFactory;
 public class AccountSyncManager {
     private static Logger logger = LoggerFactory.getLogger(AccountSyncManager.class);
 
-    private StubManager stubManager;
+    private UAProofVerifier uaProofVerifier;
+
+    private UAProofGenerator uaProofGenerator;
 
     private Map<Node, Integer> nodeSeq = new HashMap<>();
 
@@ -79,10 +84,6 @@ public class AccountSyncManager {
         return myUAProofs.values();
     }
 
-    public void setStubManager(StubManager stubManager) {
-        this.stubManager = stubManager;
-    }
-
     public void updateByUAProofs(Collection<UAProofInfo> uaProofInfos) {
         Map<String, String> tmpCAID2UAID = new HashMap<>();
         for (UAProofInfo info : uaProofInfos) {
@@ -104,8 +105,34 @@ public class AccountSyncManager {
     }
 
     private boolean verifyUAProof(UAProofInfo uaProofInfo) {
-        // TODO: verify uaproof
-        return true;
+        try {
+            String uaProofStr = uaProofInfo.getUaProof();
+            if (uaProofStr == null || uaProofStr.length() == 0) {
+                logger.warn("Empty UAProof: " + uaProofInfo);
+                return false;
+            }
+
+            UAProof uaProof = UAProof.perseFrom(uaProofStr);
+
+            if (!uaProofVerifier.verify(uaProof)) {
+                logger.warn("UAProof verify failed: " + uaProof);
+                return false;
+            }
+
+            if (!uaProofInfo.getChainAccountID().equals(uaProof.getCAID())
+                    || !uaProofInfo.getUaID().equals(uaProof.getUAID())) {
+                logger.warn(
+                        "Identities are not belong to the UAProof identity:{} UAProof:{}",
+                        uaProofInfo,
+                        uaProof);
+                return false;
+            }
+
+            return true;
+        } catch (Exception e) {
+            logger.error("verifyUAProof excpetion: ", e);
+            return false;
+        }
     }
 
     public void onNewUA(UniversalAccount ua) {
@@ -118,20 +145,23 @@ public class AccountSyncManager {
                 continue;
             }
 
-            String uaProof = "uaProof!!"; // TODO: generate it
-            UAProofInfo info =
-                    UAProofInfo.builder()
-                            .chainAccountID(caID)
-                            .uaID(uaID)
-                            .type(account.getType())
-                            .uaProof(uaProof)
-                            .build();
-
-            myUAProofs.put(caID, info);
             try {
+                String uaProof = uaProofGenerator.generate(ua, account).toJsonString();
+                UAProofInfo info =
+                        UAProofInfo.builder()
+                                .chainAccountID(caID)
+                                .uaID(uaID)
+                                .type(account.getType())
+                                .uaProof(uaProof)
+                                .build();
+
+                myUAProofs.put(caID, info);
+
                 addCAID2UAID(caID, uaID);
             } catch (WeCrossException e) {
-                logger.warn("onNewUA: " + e.getMessage());
+                logger.warn("onNewUA: ", e);
+            } catch (Exception e) {
+                logger.warn("onNewUA: ", e);
             }
         }
     }
@@ -142,11 +172,19 @@ public class AccountSyncManager {
         for (Map.Entry<String, String> entry : cAID2UAID.entrySet()) {
             dumpStr +=
                     "("
-                            + entry.getKey().substring(0, 8)
+                            + entry.getKey().substring(0, 32).replaceAll("\n", "")
                             + "->"
-                            + entry.getValue().substring(0, 8)
+                            + entry.getValue().substring(0, 32).replaceAll("\n", "")
                             + ") ";
         }
         return dumpStr;
+    }
+
+    public void setUaProofVerifier(UAProofVerifier uaProofVerifier) {
+        this.uaProofVerifier = uaProofVerifier;
+    }
+
+    public void setUaProofGenerator(UAProofGenerator uaProofGenerator) {
+        this.uaProofGenerator = uaProofGenerator;
     }
 }

@@ -1,4 +1,4 @@
-package com.webank.wecross.account;
+package com.webank.wecross.account.uaproof;
 
 import lombok.Builder;
 import lombok.Data;

@@ -80,9 +80,10 @@ deploy_fabric_2pc_evidence_chiancode()
     sed_i  's/8250/8251/g'  conf/application.toml
 
     bash start.sh <<EOF
-    fabricInstall payment.fabric.evidence fabric_admin_org1 Org1 contracts/chaincode/EvidenceSample2PC 1.0 GO_LANG
-    fabricInstantiate payment.fabric.evidence fabric_admin ["Org1"] contracts/chaincode/EvidenceSample2PC 1.0 GO_LANG default []
-quit
+    login
+    fabricInstall payment.fabric.evidence Org1 contracts/chaincode/EvidenceSample2PC 1.0 GO_LANG
+    fabricInstantiate payment.fabric.evidence ["Org1"] contracts/chaincode/EvidenceSample2PC 1.0 GO_LANG default []
+    quit
 EOF
     # wait the chaincode instantiate
     try_times=80
@@ -112,8 +113,9 @@ deploy_bcos_2pc_evidence_contract()
     sed_i  's/8251/8250/g'  conf/application.toml
 
     bash start.sh <<EOF
-bcosDeploy payment.bcos.evidence bcos_user1 conf/contracts/solidity/EvidenceSample2PC.sol Evidence 1.0
-quit
+    login
+    bcosDeploy payment.bcos.evidence conf/contracts/solidity/EvidenceSample2PC.sol Evidence 1.0
+    quit
 EOF
     cd -
 }

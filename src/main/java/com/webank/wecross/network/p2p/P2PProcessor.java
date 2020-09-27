@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountSyncManager;
 import com.webank.wecross.account.AccountSyncMessageData;
-import com.webank.wecross.account.UAProofInfo;
+import com.webank.wecross.account.uaproof.UAProofInfo;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.NetworkCallback;

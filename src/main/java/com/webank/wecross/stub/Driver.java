@@ -129,7 +129,7 @@ public interface Driver {
      * @param message
      * @return signBytes
      */
-    // byte[] accountSign(Account account, byte[] message);
+    byte[] accountSign(Account account, byte[] message);
 
     /**
      * @param identity: Chain account identity
@@ -137,5 +137,5 @@ public interface Driver {
      * @param message
      * @return success or failed
      */
-    // boolean accountVerify(String identity, byte[] signBytes, byte[] message);
+    boolean accountVerify(String identity, byte[] signBytes, byte[] message);
 }
