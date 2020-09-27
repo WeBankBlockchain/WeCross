@@ -164,7 +164,7 @@ execTransaction payment.fabric.evidence 101 1 newEvidence evidence1 "I'm JerryMM
 callTransaction payment.bcos.evidence 101 queryEvidence evidence1
 callTransaction payment.fabric.evidence 101 queryEvidence evidence1
 callTransaction payment.bcos.evidence 101 queryEvidence evidence1
-rollbackTransaction 101 bcos_user1 payment.bcos.evidence payment.fabric.evidence
+rollbackTransaction 101 payment.bcos.evidence payment.fabric.evidence
 
 call payment.bcos.evidence queryEvidence evidence1
 call payment.fabric.evidence queryEvidence evidence1
