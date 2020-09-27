@@ -146,24 +146,25 @@ EOF
 
     cd WeCross-Console/
     bash start.sh <<EOF
-call payment.bcos.evidence bcos_user1 queryEvidence evidence0
-call payment.fabric.evidence fabric_user1 queryEvidence evidence0
+login
+call payment.bcos.evidence queryEvidence evidence0
+call payment.fabric.evidence queryEvidence evidence0
 
-startTransaction 100 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
-execTransaction payment.bcos.evidence bcos_user1 100 1 newEvidence evidence0 "I'm Tom"
-execTransaction payment.fabric.evidence fabric_user1 100 1 newEvidence evidence0 "I'm Jerry"
-commitTransaction 100 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
+startTransaction 100 payment.bcos.evidence payment.fabric.evidence
+execTransaction payment.bcos.evidence 100 1 newEvidence evidence0 "I'm Tom"
+execTransaction payment.fabric.evidence 100 1 newEvidence evidence0 "I'm Jerry"
+commitTransaction 100 payment.bcos.evidence payment.fabric.evidence
 
-call payment.bcos.evidence bcos_user1 queryEvidence evidence0
-call payment.fabric.evidence fabric_user1 queryEvidence evidence0
+call payment.bcos.evidence queryEvidence evidence0
+call payment.fabric.evidence queryEvidence evidence0
 
-startTransaction 101 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
-execTransaction payment.bcos.evidence bcos_user1 101 1 newEvidence evidence1 "I'm TomGG"
-execTransaction payment.fabric.evidence fabric_user1 101 1 newEvidence evidence1 "I'm JerryMM"
-callTransaction payment.bcos.evidence bcos_user1 101 queryEvidence evidence1
-callTransaction payment.fabric.evidence fabric_user1 101 queryEvidence evidence1
-callTransaction payment.bcos.evidence bcos_user1 101 queryEvidence evidence1
-rollbackTransaction 101 bcos_user1 fabric_user1 payment.bcos.evidence payment.fabric.evidence
+startTransaction 101 payment.bcos.evidence payment.fabric.evidence
+execTransaction payment.bcos.evidence 101 1 newEvidence evidence1 "I'm TomGG"
+execTransaction payment.fabric.evidence 101 1 newEvidence evidence1 "I'm JerryMM"
+callTransaction payment.bcos.evidence 101 queryEvidence evidence1
+callTransaction payment.fabric.evidence 101 queryEvidence evidence1
+callTransaction payment.bcos.evidence 101 queryEvidence evidence1
+rollbackTransaction 101 bcos_user1 payment.bcos.evidence payment.fabric.evidence
 
 call payment.bcos.evidence bcos_user1 queryEvidence evidence1
 call payment.fabric.evidence fabric_user1 queryEvidence evidence1
@@ -222,7 +223,7 @@ main()
     prepare_demo
     demo_test
     # htlc_test
-    # 2pc_test
+    2pc_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then
