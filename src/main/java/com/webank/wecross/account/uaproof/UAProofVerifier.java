@@ -38,6 +38,8 @@ public class UAProofVerifier {
                 return false;
             }
 
+            logger.debug("Verify UAProof Success: {}", uaProof);
+
             return true; // ok
 
         } catch (WeCrossException e) {

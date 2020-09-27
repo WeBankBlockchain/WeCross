@@ -12,7 +12,7 @@ public class UniversalAccountFactory {
     private static Logger logger = LoggerFactory.getLogger(UniversalAccountFactory.class);
     private StubManager stubManager;
 
-    public UniversalAccount buildUA(UniversalAccount.UADetails uaDetails) throws WeCrossException {
+    public UniversalAccount buildUA(UADetails uaDetails) throws WeCrossException {
         UniversalAccount ua =
                 UniversalAccount.builder()
                         .username(uaDetails.getUsername())
@@ -24,9 +24,9 @@ public class UniversalAccountFactory {
                         .build();
 
         // foreach details, set default account into ua
-        for (Map<Integer, UniversalAccount.ChainAccountDetails> chainAccountDetailsMap :
+        for (Map<Integer, ChainAccountDetails> chainAccountDetailsMap :
                 uaDetails.getType2ChainAccountDetails().values()) {
-            for (UniversalAccount.ChainAccountDetails details : chainAccountDetailsMap.values()) {
+            for (ChainAccountDetails details : chainAccountDetailsMap.values()) {
 
                 String type = details.getType();
                 StubFactory stubFactory = stubManager.getStubFactory(type);

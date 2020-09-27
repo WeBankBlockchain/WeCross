@@ -84,7 +84,6 @@ public class AccountSyncManager {
     }
 
     public void updateByUAProofs(Collection<UAProofInfo> uaProofInfos) {
-        Map<String, String> tmpCAID2UAID = new HashMap<>();
         for (UAProofInfo info : uaProofInfos) {
             String uaID = info.getUaID();
             String caID = info.getChainAccountID();
@@ -105,6 +104,8 @@ public class AccountSyncManager {
 
     private boolean verifyUAProof(UAProofInfo uaProofInfo) {
         try {
+            logger.debug("Try to verifyUAProof: {}", uaProofInfo);
+
             String uaProofStr = uaProofInfo.getUaProof();
             if (uaProofStr == null || uaProofStr.length() == 0) {
                 logger.warn("Empty UAProof: " + uaProofInfo);

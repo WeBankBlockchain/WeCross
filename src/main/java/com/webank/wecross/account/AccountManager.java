@@ -12,8 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import lombok.Builder;
-import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -88,28 +86,26 @@ public class AccountManager {
         this.accountSyncManager = accountSyncManager;
     }
 
-    @Data
-    @Builder
     public static class GetUniversalAccountByChainAccountIdentityRequest {
-        private String identity;
+        public String identity;
     }
 
     public UniversalAccount getUniversalAccountByIdentity(String accountIdentity) {
         String token = adminContext.getToken(); // only admin can query
 
         Request<Object> request = new Request();
-        request.setData(
-                GetUniversalAccountByChainAccountIdentityRequest.builder()
-                        .identity(accountIdentity)
-                        .build());
+        GetUniversalAccountByChainAccountIdentityRequest
+                getUniversalAccountByChainAccountIdentityRequest =
+                        new GetUniversalAccountByChainAccountIdentityRequest();
+        getUniversalAccountByChainAccountIdentityRequest.identity = accountIdentity;
+        request.setData(getUniversalAccountByChainAccountIdentityRequest);
         request.setMethod("/auth/getUniversalAccountByChainAccountIdentity");
         request.setAuth(token);
 
         try {
             // TODO: cache the response
-            Response<UniversalAccount.UADetails> response =
-                    engine.send(
-                            request, new TypeReference<Response<UniversalAccount.UADetails>>() {});
+            Response<UADetails> response =
+                    engine.send(request, new TypeReference<Response<UADetails>>() {});
 
             if (response.getErrorCode() != 0) {
                 throw new WeCrossException(
@@ -157,9 +153,8 @@ public class AccountManager {
 
         try {
 
-            Response<UniversalAccount.UADetails> response =
-                    engine.send(
-                            request, new TypeReference<Response<UniversalAccount.UADetails>>() {});
+            Response<UADetails> response =
+                    engine.send(request, new TypeReference<Response<UADetails>>() {});
 
             if (response.getErrorCode() != 0) {
                 throw new WeCrossException(GET_UA_FAILED, response.getMessage());
