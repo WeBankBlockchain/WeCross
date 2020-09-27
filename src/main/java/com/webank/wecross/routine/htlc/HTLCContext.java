@@ -1,7 +1,7 @@
 package com.webank.wecross.routine.htlc;
 
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.UniversalAccount;
 
 public class HTLCContext {
     private Path selfPath;

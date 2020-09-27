@@ -21,8 +21,10 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import java.util.Collections;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.params.ECDomainParameters;
@@ -83,6 +85,16 @@ public class SM2 {
 
         public String getHexPub() {
             return Hex.encodeHexString(pub);
+        }
+
+        public byte[] toBytes() {
+            return ArrayUtils.addAll(pub, sign);
+        }
+
+        public static SignatureData parseFrom(byte[] signBytes) {
+            byte[] pub = Arrays.copyOf(signBytes, 91);
+            byte[] sign = Arrays.copyOfRange(signBytes, 91, signBytes.length);
+            return new SignatureData(sign, pub);
         }
     }
 
@@ -227,6 +239,14 @@ public class SM2 {
         return new SignatureData(signer.generateSignature(), bcecPublicKey.getEncoded());
     }
 
+    public static byte[] sign(String secKeyContent, byte[] data)
+            throws CryptoException, IOException, NoSuchProviderException, NoSuchAlgorithmException,
+                    InvalidKeySpecException {
+        KeyPair keyPair = loadKeyPair(secKeyContent);
+        SignatureData signatureData = sign(keyPair, data);
+        return signatureData.toBytes();
+    }
+
     /**
      * @param signatureData
      * @param srcData
@@ -255,5 +275,11 @@ public class SM2 {
         signer.update(srcData, 0, srcData.length);
 
         return signer.verifySignature(signatureData.getSign());
+    }
+
+    public static boolean verify(byte[] signBytes, byte[] srcData)
+            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException {
+        SignatureData signatureData = SignatureData.parseFrom(signBytes);
+        return verify(signatureData, srcData);
     }
 }

@@ -360,13 +360,14 @@ build_account_manager()
     sed_i "/username/s/root/${DB_USERNAME}/g" ${ROOT}/WeCross-Account-Manager/conf/application.toml
     sed_i "/password/s/''/'${DB_PASSWORD}'/g" ${ROOT}/WeCross-Account-Manager/conf/application.toml
 
-    # sed_i 's/update/create/g' ${ROOT}/WeCross-Account-Manager/conf/application.properties
+    sed_i 's/update/create/g' ${ROOT}/WeCross-Account-Manager/conf/application.properties
 
     LOG_INFO "Setup database"
     cd ${ROOT}/WeCross-Account-Manager/
     query_db < conf/db_setup.sql
 
     bash start.sh
+    sed_i 's/create/update/g' ${ROOT}/WeCross-Account-Manager/conf/application.properties
 }
 
 

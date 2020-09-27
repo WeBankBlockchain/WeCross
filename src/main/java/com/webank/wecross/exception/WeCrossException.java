@@ -38,6 +38,8 @@ public class WeCrossException extends java.lang.Exception {
         public static final int ADMIN_LOGIN_FAILED = 501;
         public static final int GET_UA_FAILED = 502;
         public static final int GET_UA_BY_ACCOUNT_FAILED = 503;
+        public static final int DIFFRENT_CHAIN_ACCOUNT_ID_TO_UA_ID = 504;
+        public static final int UAPROOF_VERIFYIER_EXCEPTION = 505;
     }
 
     public static final int UNKNOWN_INTERNAL_ERROR = -6535;

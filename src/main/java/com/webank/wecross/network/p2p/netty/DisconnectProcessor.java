@@ -1,5 +1,6 @@
 package com.webank.wecross.network.p2p.netty;
 
+import com.webank.wecross.account.AccountSyncManager;
 import com.webank.wecross.network.p2p.netty.common.Node;
 import com.webank.wecross.network.p2p.netty.message.processor.Processor;
 import com.webank.wecross.network.p2p.netty.message.proto.Message;
@@ -11,6 +12,7 @@ import io.netty.channel.ChannelHandlerContext;
 public class DisconnectProcessor implements Processor {
     private PeerManager peerManager;
     private ZoneManager zoneManager;
+    private AccountSyncManager accountSyncManager;
 
     @Override
     public String name() {
@@ -23,6 +25,7 @@ public class DisconnectProcessor implements Processor {
         if (peer != null) {
             zoneManager.removeRemoteChains(peer, peer.getChainInfos(), true);
             peerManager.removePeerInfo(node);
+            accountSyncManager.removeNodeSeq(node);
         }
     }
 
@@ -40,5 +43,9 @@ public class DisconnectProcessor implements Processor {
 
     public void setZoneManager(ZoneManager zoneManager) {
         this.zoneManager = zoneManager;
+    }
+
+    public void setAccountSyncManager(AccountSyncManager accountSyncManager) {
+        this.accountSyncManager = accountSyncManager;
     }
 }

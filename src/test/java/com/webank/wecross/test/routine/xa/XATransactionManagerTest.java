@@ -1,5 +1,6 @@
 package com.webank.wecross.test.routine.xa;
 
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.xa.XATransactionManager;

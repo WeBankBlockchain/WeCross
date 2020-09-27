@@ -1,11 +1,11 @@
 package com.webank.wecross.interchain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.TransactionRequest;
-import com.webank.wecross.stub.UniversalAccount;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Semaphore;

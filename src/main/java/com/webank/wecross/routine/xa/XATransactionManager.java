@@ -2,6 +2,7 @@ package com.webank.wecross.routine.xa;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.polling.TaskManager;
 import com.webank.wecross.resource.Resource;

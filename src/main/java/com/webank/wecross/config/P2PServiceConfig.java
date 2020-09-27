@@ -1,5 +1,6 @@
 package com.webank.wecross.config;
 
+import com.webank.wecross.account.AccountSyncManager;
 import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.network.p2p.netty.NettyBootstrap;
 import com.webank.wecross.network.p2p.netty.NettyService;
@@ -27,6 +28,8 @@ public class P2PServiceConfig {
 
     @Resource ZoneManager zoneManager;
 
+    @Resource AccountSyncManager accountSyncManager;
+
     @Bean
     public P2PService newP2PService() {
         ThreadPoolTaskExecutor threadPool =
@@ -36,7 +39,8 @@ public class P2PServiceConfig {
                         "p2p-callback");
         SeqMapper seqMapper = SeqMapperFactory.build();
         MessageCallBack messageCallback =
-                MessageCallbackFactory.build(seqMapper, peerManager, zoneManager);
+                MessageCallbackFactory.build(
+                        seqMapper, peerManager, zoneManager, accountSyncManager);
         NettyBootstrap nettyBootstrap =
                 NettyBootstrapFactory.build(p2pConfig, threadPool, messageCallback);
         NettyService nettyService =

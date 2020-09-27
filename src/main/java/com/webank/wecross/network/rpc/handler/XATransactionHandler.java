@@ -1,7 +1,10 @@
 package com.webank.wecross.network.rpc.handler;
 
+import static com.webank.wecross.exception.WeCrossException.ErrorCode.GET_UA_FAILED;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
@@ -12,7 +15,6 @@ import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.routine.xa.XATransactionManager;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.StubConstant;
-import com.webank.wecross.stub.UniversalAccount;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -141,6 +143,10 @@ public class XATransactionHandler implements URIHandler {
 
         try {
             UniversalAccount ua = host.getAccountManager().getUniversalAccount(userContext);
+            if (ua == null) {
+                throw new WeCrossException(GET_UA_FAILED, "");
+            }
+
             String method = uri.substring(1);
 
             switch (method) {
