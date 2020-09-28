@@ -6,6 +6,7 @@ import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.ObjectMapperFactory;
+import com.webank.wecross.stub.TransactionException;
 import com.webank.wecross.stub.TransactionRequest;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -126,10 +127,20 @@ public class InterchainJob implements Job {
                 (transactionException, transactionResponse) -> {
                     if (Objects.nonNull(transactionException)
                             && !transactionException.isSuccess()) {
-                        logger.error(
-                                "Failed to get interchain requests, path: {}, errorMessage: {}",
-                                hubResource.getPath(),
-                                transactionException.getMessage());
+                        if (transactionException.getErrorCode()
+                                == TransactionException.ErrorCode.ACCOUNT_ERRPR) {
+                            /* if has not config chain account for router */
+                            logger.warn(
+                                    "Failed to get interchain requests, path: {}, errorMessage: {}",
+                                    hubResource.getPath(),
+                                    transactionException.getMessage());
+                        } else {
+                            logger.error(
+                                    "Failed to get interchain requests, path: {}, errorMessage: {}",
+                                    hubResource.getPath(),
+                                    transactionException.getMessage());
+                        }
+
                         if (!future.isCancelled()) {
                             future.complete(InterchainDefault.NULL_FLAG);
                         }
