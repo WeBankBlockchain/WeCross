@@ -78,7 +78,7 @@ check_db_service() {
 check_port_avaliable() {
     port=$1
     name=$2
-    if [ "$(netstat -na 2>/dev/null | grep $port | wc -l)" -ne "0" ]; then
+    if [ "$(lsof -i:$port | wc -l)" -ne "0" ]; then
         LOG_ERROR "${name} port ${port} is not avaliable. Are there any other blockchain is running?"
         exit 1
     fi
@@ -324,10 +324,14 @@ build_wecross_console() {
     # Build WeCross Console
     LOG_INFO "Build WeCross Console ..."
     cp routers-payment/cert/sdk/* ${ROOT}/WeCross-Console/conf/
-    cp ${ROOT}/WeCross-Console/conf/application-sample.toml ${ROOT}/WeCross-Console/conf/application.toml
 
     # config universal account
-    cat <<EOF >>${ROOT}/WeCross-Console/conf/application.toml
+    cat <<EOF >${ROOT}/WeCross-Console/conf/application.toml
+[connection]
+    server =  '127.0.0.1:8250'
+    sslKey = 'classpath:ssl.key'
+    sslCert = 'classpath:ssl.crt'
+    caCert = 'classpath:ca.crt'
 [login]
     username = 'org1-admin'
     password = '123456'
@@ -380,9 +384,9 @@ deploy_bcos_sample_resource() {
     sed_i 's/8251/8250/g' conf/application.toml
 
     bash start.sh <<EOF
-    login
-    bcosDeploy payment.bcos.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
-    quit
+login
+bcosDeploy payment.bcos.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
+quit
 EOF
     cd -
 }
@@ -394,18 +398,18 @@ deploy_fabric_sample_resource() {
     sed_i 's/8250/8251/g' conf/application.toml
 
     bash start.sh <<EOF
-    login
-    setDefaultAccount Fabric1.4 2
-    fabricInstall payment.fabric.sacc Org2 contracts/chaincode/sacc 1.0 GO_LANG
-
-    setDefaultAccount Fabric1.4 1
-    fabricInstall payment.fabric.sacc Org1 contracts/chaincode/sacc 1.0 GO_LANG
-
-    fabricInstantiate payment.fabric.sacc ["Org1","Org2"] contracts/chaincode/sacc 1.0 GO_LANG policy.yaml ["a","10"]
+login
+setDefaultAccount Fabric1.4 2
+login
+fabricInstall payment.fabric.sacc Org2 contracts/chaincode/sacc 1.0 GO_LANG
+setDefaultAccount Fabric1.4 1
+login
+fabricInstall payment.fabric.sacc Org1 contracts/chaincode/sacc 1.0 GO_LANG
+fabricInstantiate payment.fabric.sacc ["Org1","Org2"] contracts/chaincode/sacc 1.0 GO_LANG policy.yaml ["a","10"]
 quit
 EOF
     # wait the chaincode instantiate
-    try_times=80
+    try_times=120
     i=0
     echo -e "\033[32msacc chaincode is instantiating ...\033[0m\c"
     while [ ! -n "$(docker ps | grep sacc | awk '{print $1}')" ]; do
@@ -415,7 +419,7 @@ EOF
         if [ $i -lt ${try_times} ]; then
             echo -e "\033[32m.\033[0m\c"
         else
-            LOG_ERROR "Instantiate sacc timeout!"
+            # LOG_ERROR "Instantiate sacc timeout!"
             exit 1
         fi
     done
@@ -434,9 +438,9 @@ add_bcos_account() {
     # addChainAccount
     cd ${ROOT}/WeCross-Console/
     bash start.sh <<EOF
-    login
-    addChainAccount BCOS2.0 conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true
-    quit
+login
+addChainAccount BCOS2.0 conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true
+quit
 EOF
     cd -
 
@@ -453,9 +457,9 @@ add_bcos_gm_account() {
     # addChainAccount
     cd ${ROOT}/WeCross-Console/
     bash start.sh <<EOF
-    login
-    addChainAccount GM_BCOS2.0 conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true
-    quit
+login
+addChainAccount GM_BCOS2.0 conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true
+quit
 EOF
     cd -
 
@@ -468,9 +472,9 @@ add_fabric_account() {
     # addChainAccount
     cd ${ROOT}/WeCross-Console/
     bash start.sh <<EOF
-    login
-    addChainAccount Fabric1.4 conf/accounts/${name}/account.crt conf/accounts/${name}/account.key ${mspid} true
-    quit
+login
+addChainAccount Fabric1.4 conf/accounts/${name}/account.crt conf/accounts/${name}/account.key ${mspid} true
+quit
 EOF
     cd -
 }

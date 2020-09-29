@@ -19,23 +19,19 @@ bcos_stub_branch=${default_compatibility_version}
 fabric_stub_url=https://github.com/WeBankFinTech/WeCross-Fabric1-Stub.git
 fabric_stub_branch=${default_compatibility_version}
 
-
-LOG_INFO()
-{
+LOG_INFO() {
     local content=${1}
     echo -e "\033[32m[INFO] ${content}\033[0m"
 }
 
-LOG_ERROR()
-{
+LOG_ERROR() {
     local content=${1}
     echo -e "\033[31m[ERROR] ${content}\033[0m"
 }
 
-help()
-{
+help() {
     echo "$1"
-    cat << EOF
+    cat <<EOF
 Usage:
     -s                              [Optional] Get wecross by: gradle build from github Source Code.
     -b                              [Optional] Download from certain branch
@@ -45,54 +41,51 @@ e.g
     bash $0 
     bash $0 -s 
 EOF
-exit 0
+    exit 0
 }
 
-
-parse_command()
-{
-while getopts "b:t:sh" option;do
-    # shellcheck disable=SC2220
-    case ${option} in
-    s)
-        enable_build_from_resource=1
-    ;;
-    b)
-        wecross_branch=$OPTARG
-        bcos_stub_branch=$OPTARG
-        fabric_stub_branch=$OPTARG
-        compatibility_version=$OPTARG
-    ;;
-    t)
-        wecross_branch=$OPTARG
-        bcos_stub_branch=$OPTARG
-        fabric_stub_branch=$OPTARG
-        compatibility_version=$OPTARG
-    ;;
-    h)  help;;
-    esac
-done
+parse_command() {
+    while getopts "b:t:sh" option; do
+        # shellcheck disable=SC2220
+        case ${option} in
+        s)
+            enable_build_from_resource=1
+            ;;
+        b)
+            wecross_branch=$OPTARG
+            bcos_stub_branch=$OPTARG
+            fabric_stub_branch=$OPTARG
+            compatibility_version=$OPTARG
+            ;;
+        t)
+            wecross_branch=$OPTARG
+            bcos_stub_branch=$OPTARG
+            fabric_stub_branch=$OPTARG
+            compatibility_version=$OPTARG
+            ;;
+        h) help ;;
+        esac
+    done
 
 }
 
-download_wecross_pkg()
-{
+download_wecross_pkg() {
     local github_url=https://github.com/WeBankFinTech/WeCross/releases/download/
     local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross/
     local release_pkg=WeCross.tar.gz
     local release_pkg_checksum_file=WeCross.tar.gz.md5
 
-    if [ -d WeCross/apps ];then
+    if [ -d WeCross/apps ]; then
         LOG_INFO "./WeCross/ exists"
         exit 0
     fi
 
     LOG_INFO "Checking latest release"
-    if [ -z "${compatibility_version}" ];then
-        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross/releases/latest | grep "tag_name"|awk -F '\"' '{print $4}')
+    if [ -z "${compatibility_version}" ]; then
+        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
     fi
 
-    if [ -z "${compatibility_version}" ];then
+    if [ -z "${compatibility_version}" ]; then
         # could not get version from github
         compatibility_version=${default_compatibility_version}
     fi
@@ -102,8 +95,7 @@ download_wecross_pkg()
     download_release_pkg ${github_url} ${cdn_url} ${compatibility_version} ${release_pkg} ${release_pkg_checksum_file}
 }
 
-download_release_pkg()
-{
+download_release_pkg() {
     local github_url=${1}
     local cdn_url=${2}
     local compatibility_version=${3}
@@ -117,12 +109,12 @@ download_release_pkg()
         curl -LO ${github_url}/${compatibility_version}/${release_pkg_checksum_file}
     fi
 
-    if  [ ! -e ${release_pkg_checksum_file} ] || [ -z "$(grep ${release_pkg} ${release_pkg_checksum_file})" ]; then
+    if [ ! -e ${release_pkg_checksum_file} ] || [ -z "$(grep ${release_pkg} ${release_pkg_checksum_file})" ]; then
         LOG_ERROR "Download checksum file error"
         exit 1
     fi
 
-    # download 
+    # download
     if [ -f "${release_pkg}" ] && md5sum -c ${release_pkg_checksum_file}; then
         LOG_INFO "Latest release ${release_pkg} exists."
     else
@@ -143,13 +135,12 @@ download_release_pkg()
     tar -zxf ${release_pkg}
 }
 
-download_latest_code()
-{
+download_latest_code() {
     local name=${1}
     local url=${2}
     local branch=${3}
 
-    if [ -d ${name} ];then
+    if [ -d ${name} ]; then
         cd ${name}
         git checkout ${branch}
         git pull
@@ -159,15 +150,14 @@ download_latest_code()
     fi
 }
 
-build_from_source()
-{
+build_from_source() {
     LOG_INFO "Build WeCross from source"
 
     local url=${wecross_url}
     local branch=${wecross_branch}
     local output_dir=$(pwd)
 
-    if [ -d WeCross ];then
+    if [ -d WeCross ]; then
         LOG_INFO "./WeCross/ exists"
         return
     fi
@@ -183,7 +173,7 @@ build_from_source()
     chmod +x dist/apps/*
     # shellcheck disable=SC2046
     # shellcheck disable=SC2006
-    if [ `grep -c "BUILD SUCCESSFUL" output.log` -eq '0' ]; then
+    if [ $(grep -c "BUILD SUCCESSFUL" output.log) -eq '0' ]; then
         LOG_ERROR "Build Wecross project failed"
         LOG_INFO "See output.log for details"
         mv output.log ../output.log
@@ -199,8 +189,7 @@ build_from_source()
     cd ${output_dir}
 }
 
-build_plugin_from_source()
-{
+build_plugin_from_source() {
     local name=${1}
     local url=${2}
     local branch=${3}
@@ -208,7 +197,7 @@ build_plugin_from_source()
 
     LOG_INFO "Build ${name} from source"
 
-    if [ -d ${name} ];then
+    if [ -d ${name} ]; then
         LOG_INFO "./${name}/ exists"
         return
     fi
@@ -230,9 +219,8 @@ build_plugin_from_source()
     cd ${origin_dir}
 }
 
-main()
-{
-    if [ 1 -eq ${enable_build_from_resource} ];then
+main() {
+    if [ 1 -eq ${enable_build_from_resource} ]; then
         build_from_source
         build_plugin_from_source WeCross-BCOS2-Stub ${bcos_stub_url} ${bcos_stub_branch}
         build_plugin_from_source WeCross-Fabric1-Stub ${fabric_stub_url} ${fabric_stub_branch}
@@ -241,9 +229,8 @@ main()
     fi
 }
 
-print_result()
-{
-LOG_INFO "Download completed. WeCross is in: ./WeCross/"
+print_result() {
+    LOG_INFO "Download completed. WeCross is in: ./WeCross/"
 }
 
 parse_command $@

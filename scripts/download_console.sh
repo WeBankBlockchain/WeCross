@@ -13,22 +13,19 @@ src_dir=$(pwd)'/src/'
 wecross_console_url=https://github.com/WeBankFinTech/WeCross-Console.git
 wecross_console_branch=${default_compatibility_version}
 
-LOG_INFO()
-{
+LOG_INFO() {
     local content=${1}
     echo -e "\033[32m[INFO] ${content}\033[0m"
 }
 
-LOG_ERROR()
-{
+LOG_ERROR() {
     local content=${1}
     echo -e "\033[31m[ERROR] ${content}\033[0m"
 }
 
-help()
-{
+help() {
     echo "$1"
-    cat << EOF
+    cat <<EOF
 Usage:
     -s                              [Optional] Get wecross console by: gradle build from github Source Code.
     -b                              [Optional] Download from certain branch
@@ -38,50 +35,47 @@ e.g
     bash $0 
     bash $0 -s 
 EOF
-exit 0
+    exit 0
 }
 
-
-parse_command()
-{
-while getopts "b:t:sh" option;do
-    # shellcheck disable=SC2220
-    case ${option} in
-    s)
-        enable_build_from_resource=1
-    ;;
-    b)
-        wecross_console_branch=$OPTARG
-        compatibility_version=$OPTARG
-    ;;
-    t)
-        wecross_console_branch=$OPTARG
-        compatibility_version=$OPTARG
-    ;;
-    h)  help;;
-    esac
-done
+parse_command() {
+    while getopts "b:t:sh" option; do
+        # shellcheck disable=SC2220
+        case ${option} in
+        s)
+            enable_build_from_resource=1
+            ;;
+        b)
+            wecross_console_branch=$OPTARG
+            compatibility_version=$OPTARG
+            ;;
+        t)
+            wecross_console_branch=$OPTARG
+            compatibility_version=$OPTARG
+            ;;
+        h) help ;;
+        esac
+    done
 
 }
 
-download_wecross_console_pkg()
-{
+download_wecross_console_pkg() {
     local github_url=https://github.com/WeBankFinTech/WeCross-Console/releases/download/
     local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross-Console/
     local release_pkg=WeCross-Console.tar.gz
     local release_pkg_checksum_file=WeCross-Console.tar.gz.md5
 
-    if [ -d WeCross-Console/apps ];then
+    if [ -d WeCross-Console/apps ]; then
         LOG_INFO "./WeCross-Console/ exists"
         exit 0
     fi
 
     LOG_INFO "Checking latest release"
-    if [ -z "${compatibility_version}" ];then
-        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross-Console/releases/latest | grep "tag_name"|awk -F '\"' '{print $4}')
+    if [ -z "${compatibility_version}" ]; then
+        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross-Console/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
     fi
 
-    if [ -z "${compatibility_version}" ];then
+    if [ -z "${compatibility_version}" ]; then
         # could not get version from github
         compatibility_version=${default_compatibility_version}
     fi
@@ -91,8 +85,7 @@ download_wecross_console_pkg()
     download_release_pkg ${github_url} ${cdn_url} ${compatibility_version} ${release_pkg} ${release_pkg_checksum_file}
 }
 
-download_release_pkg()
-{
+download_release_pkg() {
     local github_url=${1}
     local cdn_url=${2}
     local compatibility_version=${3}
@@ -106,12 +99,12 @@ download_release_pkg()
         curl -LO ${github_url}/${compatibility_version}/${release_pkg_checksum_file}
     fi
 
-    if  [ ! -e ${release_pkg_checksum_file} ] || [ -z "$(grep ${release_pkg} ${release_pkg_checksum_file})" ]; then
+    if [ ! -e ${release_pkg_checksum_file} ] || [ -z "$(grep ${release_pkg} ${release_pkg_checksum_file})" ]; then
         LOG_ERROR "Download checksum file error"
         exit 1
     fi
 
-    # download 
+    # download
     if [ -f "${release_pkg}" ] && md5sum -c ${release_pkg_checksum_file}; then
         LOG_INFO "Latest release ${release_pkg} exists."
     else
@@ -132,13 +125,12 @@ download_release_pkg()
     tar -zxf ${release_pkg}
 }
 
-download_latest_code()
-{
+download_latest_code() {
     local name=${1}
     local url=${2}
     local branch=${3}
 
-    if [ -d ${name} ];then
+    if [ -d ${name} ]; then
         cd ${name}
         git checkout ${branch}
         git pull
@@ -148,15 +140,14 @@ download_latest_code()
     fi
 }
 
-build_from_source()
-{
+build_from_source() {
     LOG_INFO "Build WeCross Console from source"
 
     local url=${wecross_console_url}
     local branch=${wecross_console_branch}
     local output_dir=$(pwd)
 
-    if [ -d WeCross-Console ];then
+    if [ -d WeCross-Console ]; then
         LOG_INFO "./WeCross-Console/ exists"
         return
     fi
@@ -172,7 +163,7 @@ build_from_source()
     chmod +x dist/apps/*
     # shellcheck disable=SC2046
     # shellcheck disable=SC2006
-    if [ `grep -c "BUILD SUCCESSFUL" output.log` -eq '0' ]; then
+    if [ $(grep -c "BUILD SUCCESSFUL" output.log) -eq '0' ]; then
         LOG_ERROR "Build Wecross Console project failed"
         LOG_INFO "See output.log for details"
         mv output.log ../output.log
@@ -189,19 +180,17 @@ build_from_source()
     LOG_INFO "Build WeCross Console successfully"
 }
 
-main()
-{
-    if [ 1 -eq ${enable_build_from_resource} ];then
+main() {
+    if [ 1 -eq ${enable_build_from_resource} ]; then
         build_from_source
     else
         download_wecross_console_pkg
     fi
 }
 
-print_result()
-{
-LOG_INFO "Download completed. WeCross Console is in: ./WeCross-Console/"
-LOG_INFO "Please configure \"./WeCross-Console/conf/application.toml\" according with \"application-sample.toml\" and \"bash start.sh\" to start."
+print_result() {
+    LOG_INFO "Download completed. WeCross Console is in: ./WeCross-Console/"
+    LOG_INFO "Please configure \"./WeCross-Console/conf/application.toml\" according with \"application-sample.toml\" and \"bash start.sh\" to start."
 }
 
 parse_command $@

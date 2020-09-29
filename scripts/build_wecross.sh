@@ -19,24 +19,20 @@ make_tar=0
 router_output=$(pwd)/routers
 wecross_dir=$(dirname $(pwd)/${0})/
 
-
-LOG_INFO()
-{
+LOG_INFO() {
     local content=${1}
     echo -e "\033[32m[INFO] ${content}\033[0m"
 }
 
-LOG_ERROR()
-{
+LOG_ERROR() {
     local content=${1}
     echo -e "\033[31m[ERROR] ${content}\033[0m"
 }
 
 # shellcheck disable=SC2120
-help()
-{
+help() {
     echo "$1"
-    cat << EOF
+    cat <<EOF
 Usage:
     -n  <zone id>                   [Required]   set zone ID
     -l  <ip:rpc-port:p2p-port>      [Optional]   "ip:rpc-port:p2p-port" e.g:"127.0.0.1:8250:25500"
@@ -51,11 +47,10 @@ e.g
     bash $0 -n payment -f ipfile
     bash $0 -n payment -f ipfile -c ./ca/
 EOF
-exit 0
+    exit 0
 }
 
-check_env()
-{
+check_env() {
     # shellcheck disable=SC2143
     # shellcheck disable=SC2236
     [ ! -z "$(openssl version | grep 1.0.2)" ] || [ ! -z "$(openssl version | grep 1.1)" ] || [ ! -z "$(openssl version | grep reSSL)" ] || {
@@ -65,62 +60,60 @@ check_env()
         exit 1
     }
 
-    if [ ! -z "$(openssl version | grep reSSL)" ];then
+    if [ ! -z "$(openssl version | grep reSSL)" ]; then
         export PATH="/usr/local/opt/openssl/bin:$PATH"
     fi
 
-    if [ "$(uname)" == "Darwin" ];then
+    if [ "$(uname)" == "Darwin" ]; then
         macOS="macOS"
     fi
-    
-    if [ "$(uname -m)" != "x86_64" ];then
+
+    if [ "$(uname -m)" != "x86_64" ]; then
         x86_64_arch="false"
     fi
 }
 
-parse_command()
-{
-while getopts "o:n:l:f:c:zTh" option;do
-    # shellcheck disable=SC2220
-    case ${option} in
-    o)
-        router_output=$OPTARG
-    ;;
-    n)
-        zone=$OPTARG
-    ;;
-    l)
-        use_file=0
-        ip_param=$OPTARG
-    ;;
-    f)
-        use_file=1
-        ip_file=$OPTARG
-    ;;
-    c)
-        ca=1
-        ca_dir=$OPTARG
-    ;;
-    z)
-        make_tar=1
-    ;;
-    T)
-        enable_test_resource="true"
-    ;;
-    h)  help;;
-    esac
-done
+parse_command() {
+    while getopts "o:n:l:f:c:zTh" option; do
+        # shellcheck disable=SC2220
+        case ${option} in
+        o)
+            router_output=$OPTARG
+            ;;
+        n)
+            zone=$OPTARG
+            ;;
+        l)
+            use_file=0
+            ip_param=$OPTARG
+            ;;
+        f)
+            use_file=1
+            ip_file=$OPTARG
+            ;;
+        c)
+            ca=1
+            ca_dir=$OPTARG
+            ;;
+        z)
+            make_tar=1
+            ;;
+        T)
+            enable_test_resource="true"
+            ;;
+        h) help ;;
+        esac
+    done
 }
 
-check_params()
-{
-    if [ -z "${zone}" ];then
+check_params() {
+    if [ -z "${zone}" ]; then
         LOG_ERROR "Please set [zone id]"
         help
         exit 1
     fi
 
-    if [ -z "${use_file}" ];then
+    if [ -z "${use_file}" ]; then
         LOG_ERROR "Please set [ip:rpc-port:p2p-Port]"
         help
         exit 1
@@ -137,14 +130,13 @@ check_params()
     fi
 }
 
-gen_crt()
-{
+gen_crt() {
     scripts_dir=${1}/
     output=${2}/
     num=${3}
 
     # generate ca.crt
-    if [ ${ca} -eq 0 ];then
+    if [ ${ca} -eq 0 ]; then
         bash "${scripts_dir}"/create_cert.sh -c -d "${output}" 2>/dev/null
         ca_dir=${output}
     fi
@@ -160,8 +152,7 @@ gen_crt()
 }
 
 #index ip rpc_port p2p_port peers
-gen_one_wecross()
-{
+gen_one_wecross() {
     #default execute dir: ../WeCross
     cert_dir=${1}
     output=${router_output}/${2}-${3}-${4}
@@ -180,14 +171,14 @@ gen_one_wecross()
     cp -r ${wecross_dir}/lib "${output}/"
 
     # Configure plugin
-    cp ${wecross_dir}/plugin/*  ${output}/plugin/
+    cp ${wecross_dir}/plugin/* ${output}/plugin/
 
     cp -r "${wecross_dir}/conf" "${output}/"
     cp -r "${cert_dir}"/* "${output}"/conf/
     gen_conf "${output}"/conf/wecross.toml "${2}" "${3}" "${4}" "${5}"
     LOG_INFO "Create ${output} successfully"
 
-    if [ ${make_tar} -eq 1 ];then
+    if [ ${make_tar} -eq 1 ]; then
         cd "${router_output}"
         tar -czf "${target}".tar.gz "${target}"
         # cp "${target}".tar.gz ../
@@ -196,9 +187,8 @@ gen_one_wecross()
     fi
 }
 
-gen_conf()
-{
-    cat << EOF > "${1}"
+gen_conf() {
+    cat <<EOF >"${1}"
 [common]
     zone = '${zone}'
     visible = true
@@ -238,33 +228,29 @@ gen_conf()
 EOF
 }
 
-parse_ip_file()
-{
+parse_ip_file() {
     # shellcheck disable=SC2162
-    while read line;do
+    while read line; do
         ip_array[counter]=$(echo "${line}" | awk -F ':' '{print $1}')
         rpc_port_array[counter]=$(echo "${line}" | awk -F ':' '{print $2}')
         p2p_port_array[counter]=$(echo "${line}" | awk -F ':' '{print $3}')
-        if [ -z "${ip_array[counter]}" ] && [ -z "${rpc_port_array[counter]}" ] && [ -z "${p2p_port_array[counter]}" ];then
+        if [ -z "${ip_array[counter]}" ] && [ -z "${rpc_port_array[counter]}" ] && [ -z "${p2p_port_array[counter]}" ]; then
             ((--counter))
-        elif [ -z "${ip_array[counter]}" ] || [  -z "${rpc_port_array[counter]}" ] || [ -z "${p2p_port_array[counter]}" ];then
+        elif [ -z "${ip_array[counter]}" ] || [ -z "${rpc_port_array[counter]}" ] || [ -z "${p2p_port_array[counter]}" ]; then
             LOG_ERROR "Please check ${1} format! e.g:\n127.0.0.1:8250:25500\n127.0.0.1:8251:25501\n127.0.0.2:8252:25502"
             exit 1
         fi
         ((++counter))
-    done < "${1}"
+    done <"${1}"
 }
 
 # shellcheck disable=SC2120
-gen_wecross_tars()
-{
+gen_wecross_tars() {
     certs_dir_prefix=${1}
-    for ((i=0;i<counter;i++))
-    do
-        for((j=0;j<counter;j++))
-        do
+    for ((i = 0; i < counter; i++)); do
+        for ((j = 0; j < counter; j++)); do
             # shellcheck disable=SC2057
-            if [ ${i} -ne ${j} ];then
+            if [ ${i} -ne ${j} ]; then
                 peers_array[i]=${peers_array[i]}"'"${ip_array[j]}:${p2p_port_array[j]}"'",
             fi
         done
@@ -274,15 +260,14 @@ gen_wecross_tars()
     done
 }
 
-main()
-{
+main() {
     check_params
 
-    if [ ${use_file} -eq 0 ];then
+    if [ ${use_file} -eq 0 ]; then
         ip_rpc_p2p=(${ip_param//:/ })
         gen_crt ${wecross_dir} "$router_output"/cert/ 1
         gen_one_wecross "$router_output"/cert/node0 "${ip_rpc_p2p[0]}" "${ip_rpc_p2p[1]}" "${ip_rpc_p2p[2]}"
-    elif [ ${use_file} -eq 1 ];then
+    elif [ ${use_file} -eq 1 ]; then
         parse_ip_file "${ip_file}"
         gen_crt ${wecross_dir} "$router_output"/cert/ ${counter}
         gen_wecross_tars "$router_output"/cert/node
@@ -291,9 +276,8 @@ main()
     fi
 }
 
-print_result()
-{
-LOG_INFO "All completed. WeCross routers are generated in: ${router_output}/"
+print_result() {
+    LOG_INFO "All completed. WeCross routers are generated in: ${router_output}/"
 }
 
 # shellcheck disable=SC2068

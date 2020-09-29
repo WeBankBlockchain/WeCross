@@ -58,7 +58,7 @@ prepare_demo() {
 demo_test() {
     cd ${ROOT}
 
-    bash build.sh n
+    bash -x build.sh n
 
     ensure_bcos_nodes_running
 
@@ -94,7 +94,8 @@ htlc_test() {
 
     cd WeCross-Console-8251/
     bash start.sh <<EOF
-    setDefaultAccount Fabric1.4 1
+login
+setDefaultAccount Fabric1.4 1
 call payment.fabric.htlc balanceOf User1@org1.example.com
 newHTLCProposal payment.fabric.htlc bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 null false 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
 quit
@@ -103,6 +104,7 @@ EOF
 
     cd WeCross-Console/
     bash start.sh <<EOF
+login
 call payment.bcos.htlc balanceOf 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf
 newHTLCProposal payment.bcos.htlc bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 9dda9a5e175a919ee98ff0198927b0a765ef96cf917144b589bb8e510e04843c true 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
 quit
@@ -113,6 +115,7 @@ EOF
 
     cd WeCross-Console/
     bash start.sh <<EOF
+login
 call payment.bcos.htlc balanceOf 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf
 quit
 EOF
@@ -120,6 +123,7 @@ EOF
 
     cd WeCross-Console-8251/
     bash start.sh <<EOF
+login
 call payment.fabric.htlc balanceOf User1@org1.example.com
 quit
 EOF
@@ -134,7 +138,7 @@ EOF
 2pc_test() {
     cd ${ROOT}
 
-    bash 2pc_config.sh n
+    bash -x 2pc_config.sh n
 
     cd WeCross-Console/
     bash start.sh <<EOF

@@ -1,20 +1,17 @@
 #!/bin/bash
 set -e
 LANG=en_US.utf8
-LOG_INFO()
-{
+LOG_INFO() {
     local content=${1}
     echo -e "\033[32m[INFO][Fabric] ${content}\033[0m"
 }
 
-LOG_ERROR()
-{
+LOG_ERROR() {
     local content=${1}
     echo -e "\033[31m[ERROR][Fabric] ${content}\033[0m"
 }
 
-Download()
-{
+Download() {
     local url=${1}
     local file=$(basename ${url})
     if [ ! -e ${file} ]; then
@@ -22,22 +19,19 @@ Download()
     fi
 }
 
-Download_IMG()
-{
+Download_IMG() {
     local name=${1}
     local tag=${2}
 
-    if [ -z "$(docker images |grep ${name} |grep ${tag})" ];then
+    if [ -z "$(docker images | grep ${name} | grep ${tag})" ]; then
         docker pull ${name}:${tag}
         docker tag ${name}:${tag} ${name}:latest
     fi
 }
 
-
-check_docker_service()
-{
+check_docker_service() {
     set +e
-    if ! docker ps > /dev/null; then
+    if ! docker ps >/dev/null; then
         LOG_INFO "Please install docker and add your user by:"
         LOG_INFO "        sudo gpasswd -a ${USER} docker && su ${USER}"
         exit 1
@@ -45,14 +39,13 @@ check_docker_service()
     set -e
 }
 
-remove_mycc()
-{
+remove_mycc() {
     LOG_INFO "Remove default mycc chaincode"
     docker exec -it peer0.org1.example.com rm /var/hyperledger/production/chaincodes/mycc.1.0
     docker exec -it peer0.org2.example.com rm /var/hyperledger/production/chaincodes/mycc.1.0
     docker exec -it peer1.org2.example.com rm /var/hyperledger/production/chaincodes/mycc.1.0
-    docker stop $(docker ps |grep mycc |awk '{print $1}')
-    docker rm $(docker ps -a |grep mycc |awk '{print $1}')
+    docker stop $(docker ps | grep mycc | awk '{print $1}')
+    docker rm $(docker ps -a | grep mycc | awk '{print $1}')
 }
 
 check_docker_service
@@ -88,7 +81,6 @@ else
 fi
 mv -f bin fabric-samples-1.4.4/
 rm -rf config
-
 
 # Startup
 LOG_INFO "Startup first-network"
