@@ -110,7 +110,7 @@ public class MemoryBlockManager implements BlockManager {
                             true,
                             chain.chooseConnection(),
                             (error, blockData) -> {
-                                onSyncBlock(error, block, target);
+                                onSyncBlock(error, blockData, target);
                             });
         } else {
             waitAndSyncBlock(0);

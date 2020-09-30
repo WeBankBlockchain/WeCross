@@ -9,6 +9,8 @@ public class TransactionException extends java.lang.Exception {
 
         public static final int TIMEOUT = StubQueryStatus.TIMEOUT; // 200
 
+        public static final int ACCOUNT_ERRPR = 300; // 300
+
         public static final int INTERNAL_ERROR = 1001;
 
         // BCOS: 2000 - 2999

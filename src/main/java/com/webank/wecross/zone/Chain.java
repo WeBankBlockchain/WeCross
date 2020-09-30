@@ -118,15 +118,12 @@ public class Chain {
         try {
             CompletableFuture<Long> future = new CompletableFuture<>();
             this.blockManager.asyncGetBlockNumber(
-                    new BlockManager.GetBlockNumberCallback() {
-                        @Override
-                        public void onResponse(Exception e, long blockNumber) {
-                            if (e != null) {
-                                logger.warn("getBlockNumber exception: " + e);
-                                future.complete(Long.valueOf(0));
-                            } else {
-                                future.complete(blockNumber);
-                            }
+                    (e, blockNumber1) -> {
+                        if (e != null) {
+                            logger.warn("getBlockNumber exception: " + e);
+                            future.complete(Long.valueOf(0));
+                        } else {
+                            future.complete(blockNumber1);
                         }
                     });
             blockNumber = future.get(10, TimeUnit.SECONDS).longValue();
@@ -146,10 +143,11 @@ public class Chain {
             }
 
             for (Resource resource : resources.values()) {
-                for (Map.Entry<Peer, Connection> entry : resource.getConnections().entrySet())
+                for (Map.Entry<Peer, Connection> entry : resource.getConnections().entrySet()) {
                     if (!connections.containsKey(entry.getKey())) {
                         connections.put(entry.getKey(), entry.getValue());
                     }
+                }
             }
 
             if (connections.size() == 0) {
@@ -391,15 +389,25 @@ public class Chain {
             Object[] args,
             UniversalAccount ua,
             Driver.CustomCommandCallback callback) {
+        if (Objects.isNull(ua)) {
+            callback.onResponse(
+                    new TransactionException(
+                            TransactionException.ErrorCode.ACCOUNT_ERRPR,
+                            "UniversalAccount is null"),
+                    null);
+            return;
+        }
+
         Account account = ua.getAccount(getStubType());
         if (Objects.isNull(account)) {
             callback.onResponse(
                     new TransactionException(
-                            0,
+                            TransactionException.ErrorCode.ACCOUNT_ERRPR,
                             "Account with type '" + stubType + "' not found for " + ua.getName()),
                     null);
             return;
         }
+
         getDriver()
                 .asyncCustomCommand(
                         command,

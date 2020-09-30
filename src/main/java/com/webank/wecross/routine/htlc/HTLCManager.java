@@ -7,13 +7,22 @@ import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HTLCManager {
+    private Logger logger = LoggerFactory.getLogger(HTLCManager.class);
 
-    Map<String, HTLCContext> htlcTaskDataMap = new HashMap<>();
-    HTLCResourcePair[] htlcResourcePairs;
+    private ZoneManager zoneManager;
+    private Map<String, HTLCContext> htlcContextMap = new HashMap<>();
 
     public void registerTask(TaskManager taskManager) {
+        if (Objects.isNull(zoneManager)) {
+            logger.error("HTLCManager has not been initialized");
+            return;
+        }
+
+        HTLCResourcePair[] htlcResourcePairs = initHTLCResourcePairs();
         if (Objects.nonNull(htlcResourcePairs) && htlcResourcePairs.length > 0) {
             HTLCTaskFactory htlcTaskFactory = new HTLCTaskFactory();
             Task[] tasks =
@@ -24,8 +33,8 @@ public class HTLCManager {
     }
 
     public Resource filterHTLCResource(ZoneManager zoneManager, Path path, Resource resource) {
-        if (htlcTaskDataMap.containsKey(path.toString())) {
-            HTLCContext htlcContext = htlcTaskDataMap.get(path.toString());
+        if (htlcContextMap.containsKey(path.toString())) {
+            HTLCContext htlcContext = htlcContextMap.get(path.toString());
 
             HTLCResource htlcResource =
                     new HTLCResource(zoneManager, path, htlcContext.getCounterpartyPath());
@@ -37,10 +46,10 @@ public class HTLCManager {
         return resource;
     }
 
-    public void initHTLCResourcePairs(ZoneManager zoneManager) {
-        htlcResourcePairs = new HTLCResourcePair[htlcTaskDataMap.size()];
+    public HTLCResourcePair[] initHTLCResourcePairs() {
+        HTLCResourcePair[] htlcResourcePairs = new HTLCResourcePair[htlcContextMap.size()];
         int num = 0;
-        for (HTLCContext htlcContext : htlcTaskDataMap.values()) {
+        for (HTLCContext htlcContext : htlcContextMap.values()) {
             Path selfPath = htlcContext.getSelfPath();
             Path counterpartyPath = htlcContext.getCounterpartyPath();
 
@@ -57,21 +66,22 @@ public class HTLCManager {
             htlcResourcePairs[num++] =
                     new HTLCResourcePair(weCrossHTLC, selfHTLCResource, counterpartyHTLCResource);
         }
-    }
-
-    public Map<String, HTLCContext> getHtlcTaskDataMap() {
-        return htlcTaskDataMap;
-    }
-
-    public void setHtlcTaskDataMap(Map<String, HTLCContext> htlcTaskDataMap) {
-        this.htlcTaskDataMap = htlcTaskDataMap;
-    }
-
-    public HTLCResourcePair[] getHtlcResourcePairs() {
         return htlcResourcePairs;
     }
 
-    public void setHtlcResourcePairs(HTLCResourcePair[] htlcResourcePairs) {
-        this.htlcResourcePairs = htlcResourcePairs;
+    public ZoneManager getZoneManager() {
+        return zoneManager;
+    }
+
+    public void setZoneManager(ZoneManager zoneManager) {
+        this.zoneManager = zoneManager;
+    }
+
+    public Map<String, HTLCContext> getHtlcContextMap() {
+        return htlcContextMap;
+    }
+
+    public void setHtlcContextMap(Map<String, HTLCContext> htlcContextMap) {
+        this.htlcContextMap = htlcContextMap;
     }
 }

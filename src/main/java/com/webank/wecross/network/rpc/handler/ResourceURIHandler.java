@@ -16,6 +16,7 @@ import com.webank.wecross.resource.ResourceDetail;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.routine.htlc.HTLCManager;
+import com.webank.wecross.stub.ObjectMapperFactory;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.TransactionRequest;
 import com.webank.wecross.zone.Chain;
@@ -31,7 +32,7 @@ public class ResourceURIHandler implements URIHandler {
     private static final Logger logger = LoggerFactory.getLogger(ResourceURIHandler.class);
 
     private WeCrossHost host;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     public ResourceURIHandler(WeCrossHost host) {
         this.host = host;
@@ -243,16 +244,6 @@ public class ResourceURIHandler implements URIHandler {
                                     " chain not exist, chain: " + path.getChain());
                         }
 
-                        if (chain == null) {
-                            throw new WeCrossException(
-                                    -1,
-                                    "Chain: "
-                                            + path.getZone()
-                                            + "."
-                                            + path.getChain()
-                                            + " not found!");
-                        }
-
                         RestRequest<CustomCommandRequest> restRequest =
                                 objectMapper.readValue(
                                         content,
@@ -274,7 +265,6 @@ public class ResourceURIHandler implements URIHandler {
 
                                     callback.onResponse(restResponse);
                                 });
-
                         return;
                     }
                 default:

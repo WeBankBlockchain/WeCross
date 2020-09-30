@@ -20,10 +20,7 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.routine.RoutineManager;
 import com.webank.wecross.routine.htlc.HTLCManager;
-import com.webank.wecross.stub.Connection;
-import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.Request;
-import com.webank.wecross.stub.Response;
+import com.webank.wecross.stub.*;
 import com.webank.wecross.zone.ChainInfo;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.Collection;
@@ -39,7 +36,7 @@ public class P2PProcessor implements NetworkProcessor {
     private ZoneManager zoneManager;
     private P2PService p2PService;
     private RoutineManager routineManager;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     public PeerManager getPeerManager() {
         return peerManager;

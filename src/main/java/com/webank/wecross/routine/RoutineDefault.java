@@ -16,6 +16,6 @@ public class RoutineDefault {
     public static final String HTLC_JOB_DATA_KEY = "htlc_job";
 
     // milli seconds
-    public static final int POLLING_INTERVAL = 1000;
+    public static final int POLLING_CYCLE = 1000;
     public static final long CALLBACK_TIMEOUT = 10000;
 }

@@ -2,20 +2,17 @@
 set -e
 LANG=en_US.utf8
 
-LOG_INFO()
-{
+LOG_INFO() {
     local content=${1}
     echo -e "\033[32m[INFO][FISCO BCOS] ${content}\033[0m"
 }
 
-LOG_ERROR()
-{
+LOG_ERROR() {
     local content=${1}
     echo -e "\033[31m[ERROR][FISCO BCOS] ${content}\033[0m"
 }
 
-Download()
-{
+Download() {
     local url=${1}
     local file=$(basename ${url})
     if [ ! -e ${file} ]; then
@@ -23,8 +20,7 @@ Download()
     fi
 }
 
-build_bcos_chain()
-{
+build_bcos_chain() {
     # Download
     LOG_INFO "Download build_chain.sh ..."
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/raw/master/tools/build_chain.sh
@@ -32,14 +28,14 @@ build_bcos_chain()
 
     # Build chain
     LOG_INFO "Build chain ..."
-    if [ ! -e ipconf ];then
+    if [ ! -e ipconf ]; then
         echo "127.0.0.1:4 agency1 1" >ipconf
     fi
 
     # build chain
     if [ "$(uname)" == "Darwin" ]; then
         # Mac
-        if [ -e fisco-bcos-macOS.tar.gz ];then
+        if [ -e fisco-bcos-macOS.tar.gz ]; then
             rm -f ./fisco-bcos
             tar -zxvf fisco-bcos-macOS.tar.gz
             ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos
@@ -48,7 +44,7 @@ build_bcos_chain()
         fi
     else
         # Other
-        if [ -e fisco-bcos.tar.gz ];then
+        if [ -e fisco-bcos.tar.gz ]; then
             rm -f ./fisco-bcos
             tar -zxvf fisco-bcos.tar.gz
             ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos
@@ -60,9 +56,7 @@ build_bcos_chain()
     ./nodes/127.0.0.1/start_all.sh
 }
 
-
-build_console()
-{
+build_console() {
     # Download console
     LOG_INFO "Download HelloWeCross.sol ..."
     Download https://github.com/WeBankFinTech/WeCross/releases/download/resources/HelloWeCross.sol
@@ -84,8 +78,7 @@ build_console()
     cp nodes/127.0.0.1/sdk/* console/conf/
 }
 
-build_accounts()
-{
+build_accounts() {
     # generate accounts
     mkdir -p accounts
     cd accounts
@@ -95,8 +88,7 @@ build_accounts()
     cd -
 }
 
-deploy_contract()
-{
+deploy_contract() {
     cd console
     bash start.sh <<EOF
     deployByCNS HelloWeCross 1.0
@@ -105,9 +97,7 @@ EOF
     cd -
 }
 
-
-main()
-{
+main() {
     build_bcos_chain
     build_accounts
     LOG_INFO "SUCCESS: Build FISCO BCOS demo finish."

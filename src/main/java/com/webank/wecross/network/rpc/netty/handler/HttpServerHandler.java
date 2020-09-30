@@ -9,6 +9,7 @@ import com.webank.wecross.network.rpc.authentication.AuthFilter;
 import com.webank.wecross.network.rpc.handler.URIHandler;
 import com.webank.wecross.network.rpc.netty.URIMethod;
 import com.webank.wecross.restserver.RestResponse;
+import com.webank.wecross.stub.ObjectMapperFactory;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -44,7 +45,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
     private AccountManager accountManager;
 
     private AuthFilter authFilter;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     public HttpServerHandler(
             URIHandlerDispatcher uriHandlerDispatcher,

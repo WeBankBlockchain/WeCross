@@ -8,7 +8,7 @@ name=''
 
 help() {
     echo $1
-    cat << EOF
+    cat <<EOF
 Usage: 
     -t <type>                           [Required] type of account, BCOS2.0 or GM_BCOS2.0 or Fabric1.4
     -n <name>                           [Required] name of account
@@ -20,15 +20,15 @@ e.g
     bash $0 -t Fabric1.4 -n my_fabric_account
 EOF
 
-exit 0
+    exit 0
 }
 
-while getopts "t:n:d:h" option;do
+while getopts "t:n:d:h" option; do
     case $option in
     t) type=$OPTARG ;;
     n) name=$OPTARG ;;
     d) target_dir=$OPTARG ;;
-    *) help;;
+    *) help ;;
     esac
 done
 

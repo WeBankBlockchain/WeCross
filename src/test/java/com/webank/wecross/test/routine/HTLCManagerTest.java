@@ -29,7 +29,7 @@ public class HTLCManagerTest {
         htlcContext.setSelfPath(Path.decode("a.b.c"));
         Map<String, HTLCContext> htlcTaskDataMap = new HashMap<>();
         htlcTaskDataMap.put("a.b.c", htlcContext);
-        htlcManager.setHtlcTaskDataMap(htlcTaskDataMap);
+        htlcManager.setHtlcContextMap(htlcTaskDataMap);
         Mockito.when(mockZoneManager.fetchResource(Mockito.any(Path.class)))
                 .thenReturn(mockResource);
         Assert.assertEquals(
@@ -44,8 +44,7 @@ public class HTLCManagerTest {
         Map<String, HTLCContext> htlcTaskDataMap = new HashMap<>();
         htlcTaskDataMap.put("a.b.c", htlcContext);
         HTLCManager htlcManager = new HTLCManager();
-        htlcManager.setHtlcTaskDataMap(htlcTaskDataMap);
-        htlcManager.initHTLCResourcePairs(null);
-        Assert.assertEquals(1, htlcManager.getHtlcResourcePairs().length);
+        htlcManager.setHtlcContextMap(htlcTaskDataMap);
+        htlcManager.initHTLCResourcePairs();
     }
 }

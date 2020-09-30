@@ -46,4 +46,22 @@ public class NetworkResponse<T> {
     public void setData(T data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        return "NetworkResponse{"
+                + "version='"
+                + version
+                + '\''
+                + ", seq="
+                + seq
+                + ", errorCode="
+                + errorCode
+                + ", message='"
+                + message
+                + '\''
+                + ", data="
+                + data
+                + '}';
+    }
 }

@@ -3,6 +3,7 @@ package com.webank.wecross.routine.htlc;
 import com.webank.wecross.interchain.InterchainDefault;
 import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.Path;
+import com.webank.wecross.stub.TransactionException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -107,11 +108,23 @@ public class HTLCJob implements Job {
                 htlcResource,
                 (exception, result) -> {
                     if (exception != null) {
-                        logger.error(
-                                "Failed to get proposalIDs, path: {}, errorMessage: {}, internalMessage: {}",
-                                htlcResource.getSelfPath(),
-                                exception.getLocalizedMessage(),
-                                exception.getInternalMessage());
+
+                        if (exception.getErrorCode()
+                                == TransactionException.ErrorCode.ACCOUNT_ERRPR) {
+                            /* if has not config chain account for router */
+                            logger.warn(
+                                    "Failed to get proposalIDs, path: {}, errorMessage: {}, internalMessage: {}",
+                                    htlcResource.getSelfPath(),
+                                    exception.getLocalizedMessage(),
+                                    exception.getInternalMessage());
+                        } else {
+                            logger.error(
+                                    "Failed to get proposalIDs, path: {}, errorMessage: {}, internalMessage: {}",
+                                    htlcResource.getSelfPath(),
+                                    exception.getLocalizedMessage(),
+                                    exception.getInternalMessage());
+                        }
+
                         if (!future.isCancelled()) {
                             future.complete(InterchainDefault.NULL_FLAG);
                         }

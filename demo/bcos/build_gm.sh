@@ -2,20 +2,17 @@
 set -e
 LANG=en_US.utf8
 
-LOG_INFO()
-{
+LOG_INFO() {
     local content=${1}
     echo -e "\033[32m[INFO][FISCO BCOS] ${content}\033[0m"
 }
 
-LOG_ERROR()
-{
+LOG_ERROR() {
     local content=${1}
     echo -e "\033[31m[ERROR][FISCO BCOS] ${content}\033[0m"
 }
 
-Download()
-{
+Download() {
     local url=${1}
     local file=$(basename ${url})
     if [ ! -e ${file} ]; then
@@ -23,8 +20,7 @@ Download()
     fi
 }
 
-build_bcos_chain()
-{
+build_bcos_chain() {
     # Download
     LOG_INFO "Download build_chain.sh ..."
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/raw/master/tools/build_chain.sh
@@ -32,14 +28,14 @@ build_bcos_chain()
 
     # Build chain
     LOG_INFO "Build chain ..."
-    if [ ! -e ipconf ];then
+    if [ ! -e ipconf ]; then
         echo "127.0.0.1:4 agency1 1" >ipconf
     fi
 
     # build chain
     if [ "$(uname)" == "Darwin" ]; then
         # Mac
-        if [ -e fisco-bcos-macOS.tar.gz ];then
+        if [ -e fisco-bcos-macOS.tar.gz ]; then
             rm -f ./fisco-bcos
             tar -zxvf fisco-bcos-macOS.tar.gz
             ./build_chain.sh -f ipconf -p 30310,20210,8555 -e ./fisco-bcos -g -o nodes_gm
@@ -48,7 +44,7 @@ build_bcos_chain()
         fi
     else
         # Other
-        if [ -e fisco-bcos.tar.gz ];then
+        if [ -e fisco-bcos.tar.gz ]; then
             rm -f ./fisco-bcos
             tar -zxvf fisco-bcos.tar.gz
             ./build_chain.sh -f ipconf -p 30310,20210,8555 -e ./fisco-bcos -g -o nodes_gm
@@ -60,8 +56,7 @@ build_bcos_chain()
     ./nodes_gm/127.0.0.1/start_all.sh
 }
 
-build_accounts()
-{
+build_accounts() {
     # generate accounts
     mkdir -p accounts
     cd accounts
@@ -71,14 +66,14 @@ build_accounts()
     cd -
 }
 
-check_and_install_tassl(){
+check_and_install_tassl() {
     local TASSL_HOME="${HOME}"/.fisco
     local TASSL_CMD=${TASSL_HOME}/tassl
 
-    if [ ! -f "${TASSL_CMD}" ];then
+    if [ ! -f "${TASSL_CMD}" ]; then
         LOG_INFO "Downloading tassl binary ..."
         mkdir -p ${TASSL_HOME}
-        if [[ -n "${macOS}" ]];then
+        if [[ -n "${macOS}" ]]; then
             if [ ! -f tassl_mac.tar.gz ]; then
                 Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl_mac.tar.gz
             fi
@@ -92,8 +87,7 @@ check_and_install_tassl(){
     fi
 }
 
-main()
-{
+main() {
     check_and_install_tassl
     build_bcos_chain
     build_accounts

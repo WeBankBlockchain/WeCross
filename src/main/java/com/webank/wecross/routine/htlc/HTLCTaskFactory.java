@@ -25,7 +25,7 @@ public class HTLCTaskFactory implements TaskFactory {
                             .withSchedule(
                                     SimpleScheduleBuilder.simpleSchedule()
                                             .withIntervalInMilliseconds(
-                                                    RoutineDefault.POLLING_INTERVAL)
+                                                    RoutineDefault.POLLING_CYCLE)
                                             .repeatForever())
                             .build();
             tasks[num++] = new Task(trigger, jobDetail);

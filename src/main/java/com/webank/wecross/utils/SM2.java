@@ -2,6 +2,7 @@ package com.webank.wecross.utils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.stub.ObjectMapperFactory;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -57,7 +58,8 @@ public class SM2 {
     }
 
     public static class SignatureData {
-        @JsonIgnore private static ObjectMapper objectMapper = new ObjectMapper();
+        @JsonIgnore
+        private static ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
         public SignatureData(byte[] sign, byte[] pub) {
             this.sign = sign;

@@ -3,11 +3,12 @@ package com.webank.wecross.interchain;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.exception.WeCrossException.ErrorCode;
+import com.webank.wecross.stub.ObjectMapperFactory;
 import java.util.Arrays;
 import java.util.Objects;
 
 public class InterchainRequest {
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     private String uid;
     private int callType;

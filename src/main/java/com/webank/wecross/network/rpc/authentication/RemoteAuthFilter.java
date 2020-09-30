@@ -3,6 +3,7 @@ package com.webank.wecross.network.rpc.authentication;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.network.client.BaseClientEngine;
 import com.webank.wecross.network.client.ClientMessageEngine;
+import com.webank.wecross.stub.ObjectMapperFactory;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -21,7 +22,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class RemoteAuthFilter implements AuthFilter {
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
     private ClientMessageEngine remoteEngine;
     private Collection<String> uriNeedAuth = new HashSet<>();
 

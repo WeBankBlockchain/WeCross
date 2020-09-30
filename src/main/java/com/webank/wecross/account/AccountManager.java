@@ -48,7 +48,13 @@ public class AccountManager {
     public UniversalAccount getUniversalAccount(UserContext userContext) throws WeCrossException {
 
         String token = userContext.getToken();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("token: {}", token);
+        }
+
         if (token == null) {
+
             return null;
         }
 

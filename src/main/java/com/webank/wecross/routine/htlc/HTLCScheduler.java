@@ -66,7 +66,7 @@ public class HTLCScheduler {
 
                     // check if the transfer is succeeded
                     if (proposal.isSelfUnlocked() && proposal.isCounterpartyUnlocked()) {
-                        deleteProposal(selfResource, hash, true, callback);
+                        deleteProposal(selfResource, hash, true, callback::onReturn);
                         return;
                     }
 
@@ -92,10 +92,16 @@ public class HTLCScheduler {
                                                 if (counterpartyRolledback) {
                                                     // both parties are rolledback
                                                     deleteProposal(
-                                                            selfResource, hash, false, callback);
+                                                            selfResource,
+                                                            hash,
+                                                            false,
+                                                            callback::onReturn);
                                                 } else {
                                                     // continue
-                                                    execProposal(htlcResourcePair, hash, callback);
+                                                    execProposal(
+                                                            htlcResourcePair,
+                                                            hash,
+                                                            callback::onReturn);
                                                 }
                                             });
                                 } else {
@@ -107,7 +113,10 @@ public class HTLCScheduler {
                                                     callback.onReturn(exception2, false);
                                                 } else {
                                                     // continue
-                                                    execProposal(htlcResourcePair, hash, callback);
+                                                    execProposal(
+                                                            htlcResourcePair,
+                                                            hash,
+                                                            callback::onReturn);
                                                 }
                                             });
                                 }
@@ -115,7 +124,12 @@ public class HTLCScheduler {
                 });
     }
 
-    public void checkSelfRollback(HTLCResource htlcResource, String hash, Callback callback) {
+    public interface CheckSelfRollbackCallback {
+        void onReturn(WeCrossException exception, boolean state);
+    }
+
+    public void checkSelfRollback(
+            HTLCResource htlcResource, String hash, CheckSelfRollbackCallback callback) {
         if (logger.isDebugEnabled()) {
             logger.debug("checkSelfRollback, path: {}, hash: {}", htlcResource.getSelfPath(), hash);
         }
@@ -160,8 +174,12 @@ public class HTLCScheduler {
         }
     }
 
+    public interface CheckCounterpartyRollbackCallback {
+        void onReturn(WeCrossException exception, boolean state);
+    }
+
     public void checkCounterpartyRollback(
-            HTLCResource htlcResource, String hash, Callback callback) {
+            HTLCResource htlcResource, String hash, CheckCounterpartyRollbackCallback callback) {
         if (logger.isDebugEnabled()) {
             logger.debug(
                     "checkCounterpartyRollback, path: {}, hash: {}",
@@ -190,7 +208,12 @@ public class HTLCScheduler {
         }
     }
 
-    private void execProposal(HTLCResourcePair htlcResourcePair, String hash, Callback callback) {
+    public interface ExecProposalCallback {
+        void onReturn(WeCrossException exception, boolean state);
+    }
+
+    public void execProposal(
+            HTLCResourcePair htlcResourcePair, String hash, ExecProposalCallback callback) {
         HTLCResource selfResource = htlcResourcePair.getSelfHTLCResource();
         HTLCResource counterpartyResource = htlcResourcePair.getCounterpartyHTLCResource();
         if (logger.isDebugEnabled()) {
@@ -230,7 +253,7 @@ public class HTLCScheduler {
                                 "proposal data is inconsistent, delete current proposal: {}, path: {}",
                                 hash,
                                 selfResource.getSelfPath());
-                        deleteProposal(selfResource, hash, false, callback);
+                        deleteProposal(selfResource, hash, false, callback::onReturn);
                         return;
                     }
 
@@ -247,7 +270,8 @@ public class HTLCScheduler {
 
                                     if (succeeded) {
                                         // finished
-                                        deleteProposal(selfResource, hash, true, callback);
+                                        deleteProposal(
+                                                selfResource, hash, true, callback::onReturn);
                                     } else {
                                         callback.onReturn(null, false);
                                     }
@@ -259,11 +283,15 @@ public class HTLCScheduler {
                 });
     }
 
-    private void checkProposalConsistency(
+    public interface checkProposalConsistencyCallback {
+        void onReturn(WeCrossException exception, boolean state);
+    }
+
+    public void checkProposalConsistency(
             HTLCResource selfResource,
             HTLCResource counterpartyResource,
             String hash,
-            Callback callback) {
+            checkProposalConsistencyCallback callback) {
         if (logger.isDebugEnabled()) {
             logger.debug(
                     "checkProposalConsistency, selfPath: {},  counterpartyPath: {}, hash: {}",
@@ -414,11 +442,11 @@ public class HTLCScheduler {
                 });
     }
 
-    private interface GetVerifiedTransactionCallback {
+    public interface GetVerifiedTransactionCallback {
         void onReturn(WeCrossException exception, Transaction result);
     }
 
-    private void getVerifiedTransaction(
+    public void getVerifiedTransaction(
             HTLCResource htlcResource,
             String txHash,
             long blockNum,
@@ -449,11 +477,15 @@ public class HTLCScheduler {
                         });
     }
 
-    private void execInitiatorProcess(
+    public interface ExecInitiatorProcessCallback {
+        void onReturn(WeCrossException exception, boolean state);
+    }
+
+    public void execInitiatorProcess(
             HTLCResource selfResource,
             HTLCResource counterpartyResource,
             String hash,
-            Callback callback) {
+            ExecInitiatorProcessCallback callback) {
         if (logger.isDebugEnabled()) {
             logger.debug(
                     "execInitiatorProcess, selfPath: {},  counterpartyPath: {}, hash: {}",
@@ -483,14 +515,17 @@ public class HTLCScheduler {
                                     } else {
                                         // unlock counterparty
                                         handleCounterpartyUnlock(
-                                                selfResource, counterpartyResource, hash, callback);
+                                                selfResource,
+                                                counterpartyResource,
+                                                hash,
+                                                callback::onReturn);
                                     }
                                 });
                     });
 
         } else {
             // unlock counterparty
-            handleCounterpartyUnlock(selfResource, counterpartyResource, hash, callback);
+            handleCounterpartyUnlock(selfResource, counterpartyResource, hash, callback::onReturn);
         }
     }
 
@@ -521,11 +556,15 @@ public class HTLCScheduler {
         }
     }
 
-    private void handleCounterpartyLock(
+    public interface HandleCounterpartyLockCallback {
+        void onReturn(WeCrossException exception, boolean state);
+    }
+
+    public void handleCounterpartyLock(
             HTLCResource selfResource,
             HTLCResource counterpartyResource,
             String hash,
-            Callback callback) {
+            HandleCounterpartyLockCallback callback) {
         if (logger.isDebugEnabled()) {
             logger.debug(
                     "handleCounterpartyLock, selfPath: {},  counterpartyPath: {}, hash: {}",
@@ -566,11 +605,15 @@ public class HTLCScheduler {
         }
     }
 
-    private void handleCounterpartyUnlock(
+    public interface HandleCounterpartyUnlockCallback {
+        void onReturn(WeCrossException exception, boolean state);
+    }
+
+    public void handleCounterpartyUnlock(
             HTLCResource selfResource,
             HTLCResource counterpartyResource,
             String hash,
-            Callback callback) {
+            HandleCounterpartyUnlockCallback callback) {
         if (logger.isDebugEnabled()) {
             logger.debug(
                     "handleCounterpartyUnlock, selfPath: {},  counterpartyPath: {}, hash: {}",
@@ -609,8 +652,15 @@ public class HTLCScheduler {
                 });
     }
 
-    private void deleteProposal(
-            HTLCResource htlcResource, String hash, boolean state, Callback callback) {
+    public interface DeleteProposalCallback {
+        void onReturn(WeCrossException exception, boolean state);
+    }
+
+    public void deleteProposal(
+            HTLCResource htlcResource,
+            String hash,
+            boolean state,
+            DeleteProposalCallback callback) {
         if (logger.isDebugEnabled()) {
             logger.debug("deleteProposal, path: {}, hash: {}", htlcResource.getSelfPath(), hash);
         }

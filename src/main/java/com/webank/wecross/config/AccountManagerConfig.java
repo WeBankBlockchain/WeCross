@@ -8,8 +8,6 @@ import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.client.ClientMessageEngine;
 import java.io.IOException;
 import javax.annotation.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,8 +22,6 @@ public class AccountManagerConfig {
     @Resource UniversalAccountFactory universalAccountFactory;
 
     @Resource AccountSyncManager accountSyncManager;
-
-    private Logger logger = LoggerFactory.getLogger(AccountManagerConfig.class);
 
     @Bean
     public AccountManager newAccountManager() throws IOException, WeCrossException {

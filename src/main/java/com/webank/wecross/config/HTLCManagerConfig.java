@@ -31,12 +31,14 @@ public class HTLCManagerConfig {
         System.out.println("Initializing HTLCManager ...");
 
         HTLCManager htlcManager = new HTLCManager();
+        htlcManager.setZoneManager(zoneManager);
+
         List<Map<String, String>> infoList = toml.getList("htlc");
         if (infoList == null) {
             return htlcManager;
         }
-        Map<String, HTLCContext> htlcTaskDataMap = new HashMap<>();
 
+        Map<String, HTLCContext> htlcTaskDataMap = new HashMap<>();
         try {
             for (Map<String, String> infoMap : infoList) {
                 HTLCContext htlcContext = new HTLCContext();
@@ -55,11 +57,9 @@ public class HTLCManagerConfig {
             logger.error("Failed to new HTLCManager.", e);
             System.exit(1);
         }
-
-        htlcManager.setHtlcTaskDataMap(htlcTaskDataMap);
+        htlcManager.setHtlcContextMap(htlcTaskDataMap);
         logger.info("HTLC resources: {}", Arrays.toString(htlcTaskDataMap.keySet().toArray()));
 
-        htlcManager.initHTLCResourcePairs(zoneManager);
         return htlcManager;
     }
 
