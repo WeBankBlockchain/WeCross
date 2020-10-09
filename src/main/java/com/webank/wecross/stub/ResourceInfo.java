@@ -2,6 +2,7 @@ package com.webank.wecross.stub;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ResourceInfo {
     private String name;
@@ -47,7 +48,8 @@ public class ResourceInfo {
 
             ResourceInfo info = (ResourceInfo) obj;
             // no need to check distance
-            return info.name.equals(this.name) && info.checksum.equals(this.checksum);
+            return info.name.equals(this.name)
+                    && Objects.equals(info.checksum, this.checksum);
 
         } catch (Exception e) {
             return false;
