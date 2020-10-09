@@ -62,7 +62,7 @@ build_accounts() {
     cd accounts
 
     bash ../get_gm_account.sh # gm
-    mv accounts_gm bcos_gm_user1
+    mv accounts bcos_gm_user1
     cd -
 }
 
