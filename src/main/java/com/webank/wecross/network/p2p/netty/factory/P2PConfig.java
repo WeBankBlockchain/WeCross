@@ -89,7 +89,7 @@ public class P2PConfig {
      * @return invalid host format return null otherwise return Host object
      * @throws InvalidParameterException
      */
-    public Node toHost(String host) throws InvalidParameterException {
+    public static Node toHost(String host) throws InvalidParameterException {
 
         try {
             // "127.0.0.1:1111"

@@ -1,6 +1,7 @@
 package com.webank.wecross.network.rpc;
 
 import com.webank.wecross.host.WeCrossHost;
+import com.webank.wecross.network.rpc.handler.ConnectionURIHandler;
 import com.webank.wecross.network.rpc.handler.ListResourcesURIHandler;
 import com.webank.wecross.network.rpc.handler.ListStubsURIHandler;
 import com.webank.wecross.network.rpc.handler.ResourceURIHandler;
@@ -61,6 +62,18 @@ public class URIHandlerDispatcher {
                 registerURIHandler(new URIMethod("GET", "/listAccounts"), listAccountsURIHandler);
                 registerURIHandler(new URIMethod("POST", "/listAccounts"), listAccountsURIHandler);
         */
+        ConnectionURIHandler connectionURIHandler = new ConnectionURIHandler();
+        connectionURIHandler.setP2PService(host.getP2PService());
+        connectionURIHandler.setPeerManager(host.getPeerManager());
+        connectionURIHandler.setZoneManager(host.getZoneManager());
+        registerURIHandler(new URIMethod("GET", "/conn/listChains"), connectionURIHandler);
+        registerURIHandler(new URIMethod("POST", "/conn/addChain"), connectionURIHandler);
+        registerURIHandler(new URIMethod("POST", "/conn/updateChain"), connectionURIHandler);
+        registerURIHandler(new URIMethod("POST", "/conn/removeChain"), connectionURIHandler);
+        registerURIHandler(new URIMethod("GET", "/conn/listPeers"), connectionURIHandler);
+        registerURIHandler(new URIMethod("POST", "/conn/addPeer"), connectionURIHandler);
+        registerURIHandler(new URIMethod("POST", "/conn/removePeer"), connectionURIHandler);
+
         XATransactionHandler xaTransactionHandler = new XATransactionHandler();
         xaTransactionHandler.setXaTransactionManager(
                 host.getRoutineManager().getXaTransactionManager());

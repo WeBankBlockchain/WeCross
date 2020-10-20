@@ -9,6 +9,8 @@ public class Transaction {
     private String seq;
     private String resource;
 
+    private String sender; // identity of transaction sender
+
     private long blockNumber;
     private String transactionHash;
     private TransactionRequest transactionRequest;
