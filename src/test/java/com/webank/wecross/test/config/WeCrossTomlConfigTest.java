@@ -20,7 +20,7 @@ public class WeCrossTomlConfigTest {
                         + "    path = 'classpath:stubs'\n"
                         + "\n"
                         + "[rpc] # rpc ip & port\n"
-                        + "    host = '0.0.0.0'\n"
+                        + "    address = '0.0.0.0'\n"
                         + "    port = 8250\n"
                         + "    caCert = 'classpath:ca.crt'\n"
                         + "    sslCert = 'classpath:ssl.crt'\n"
@@ -50,7 +50,7 @@ public class WeCrossTomlConfigTest {
 
         Assert.assertTrue(stubs.containsKey("path"));
 
-        Assert.assertTrue(rpc.containsKey("host"));
+        Assert.assertTrue(rpc.containsKey("address"));
         Assert.assertTrue(rpc.containsKey("port"));
         Assert.assertTrue(rpc.containsKey("caCert"));
         Assert.assertTrue(rpc.containsKey("sslCert"));
