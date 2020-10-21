@@ -163,6 +163,7 @@ gen_one_wecross() {
     mkdir -p ${output}/conf/accounts
     mkdir -p ${output}/conf/chains
     mkdir -p ${output}/plugin
+    mkdir -p ${output}/pages
 
     # copy files
     chmod u+x ${wecross_dir}./*.sh

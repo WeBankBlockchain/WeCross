@@ -136,6 +136,7 @@ dependencies {
     compile 'org.asynchttpclient:async-http-client:2.12.0'
     compile 'org.bouncycastle:bcprov-jdk15on:1.60'
     compile 'commons-codec:commons-codec:1.14'
+    compile 'javax.activation:activation:1.1.1'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'

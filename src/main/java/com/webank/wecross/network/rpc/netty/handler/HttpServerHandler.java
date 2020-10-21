@@ -29,8 +29,11 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.ssl.SslCloseCompletionEvent;
 import io.netty.handler.ssl.SslHandshakeCompletionEvent;
 import io.netty.handler.timeout.IdleStateEvent;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Objects;
+import javax.activation.MimetypesFileTypeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -131,8 +134,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
                             method.toString(),
                             content,
                             new URIHandler.Callback() {
-                                @Override
-                                public void onResponse(RestResponse restResponse) {
+
+                                private void write(FullHttpResponse response) {
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(
+                                                " ===>>> content: {}",
+                                                response.content().toString());
+                                    }
 
                                     // check if connection active
                                     if (!ctx.channel().isActive()) {
@@ -144,26 +152,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
                                         return;
                                     }
 
-                                    String content = "";
-                                    try {
-                                        content = objectMapper.writeValueAsString(restResponse);
-                                    } catch (JsonProcessingException e) {
-                                        logger.warn(" e: {}", e);
-                                        return;
-                                    }
-
-                                    if (logger.isDebugEnabled()) {
-                                        logger.debug(" ===>>> content: {}", content);
-                                    }
-
-                                    FullHttpResponse response =
-                                            new DefaultFullHttpResponse(
-                                                    HttpVersion.HTTP_1_1,
-                                                    HttpResponseStatus.OK,
-                                                    Unpooled.wrappedBuffer(content.getBytes()));
-
-                                    response.headers()
-                                            .set(HttpHeaderNames.CONTENT_TYPE, "application/json");
                                     response.headers()
                                             .set(
                                                     HttpHeaderNames.CONTENT_LENGTH,
@@ -179,6 +167,71 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
                                         ctx.writeAndFlush(response)
                                                 .addListener(ChannelFutureListener.CLOSE);
                                     }
+                                }
+
+                                @Override
+                                public void onResponse(RestResponse restResponse) {
+                                    String restResponseStr = "";
+                                    try {
+                                        restResponseStr =
+                                                objectMapper.writeValueAsString(restResponse);
+                                    } catch (JsonProcessingException e) {
+                                        logger.warn("writeValueAsString e: {}", e);
+                                        return;
+                                    }
+
+                                    FullHttpResponse response =
+                                            new DefaultFullHttpResponse(
+                                                    HttpVersion.HTTP_1_1,
+                                                    HttpResponseStatus.OK,
+                                                    Unpooled.wrappedBuffer(
+                                                            restResponseStr.getBytes()));
+
+                                    response.headers()
+                                            .set(HttpHeaderNames.CONTENT_TYPE, "application/json");
+                                    write(response);
+                                }
+
+                                @Override
+                                public void onResponse(String restResponse) {
+                                    FullHttpResponse response =
+                                            new DefaultFullHttpResponse(
+                                                    HttpVersion.HTTP_1_1,
+                                                    HttpResponseStatus.OK,
+                                                    Unpooled.wrappedBuffer(
+                                                            restResponse.getBytes()));
+
+                                    response.headers()
+                                            .set(HttpHeaderNames.CONTENT_TYPE, "text/html");
+
+                                    write(response);
+                                }
+
+                                @Override
+                                public void onResponse(File restResponse) {
+                                    byte[] content;
+
+                                    try {
+                                        content = Files.readAllBytes(restResponse.toPath());
+                                    } catch (Exception e) {
+                                        logger.warn("readAllBytes e: {}", e);
+                                        return;
+                                    }
+
+                                    FullHttpResponse response =
+                                            new DefaultFullHttpResponse(
+                                                    HttpVersion.HTTP_1_1,
+                                                    HttpResponseStatus.OK,
+                                                    Unpooled.wrappedBuffer(content));
+
+                                    MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
+
+                                    response.headers()
+                                            .set(
+                                                    HttpHeaderNames.CONTENT_TYPE,
+                                                    mimeTypesMap.getContentType(restResponse));
+
+                                    write(response);
                                 }
                             });
                 });

@@ -81,10 +81,13 @@ public class ResourceInfo {
         this.properties = properties;
     }
 
+    @Deprecated
     public void setChecksum(String checksum) {
         this.checksum = checksum;
     }
 
+    @Deprecated
+    @JsonIgnore
     public String getChecksum() {
         return checksum;
     }

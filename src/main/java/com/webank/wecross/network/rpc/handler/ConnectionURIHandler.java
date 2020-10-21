@@ -7,8 +7,10 @@ import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.peer.PeerManager;
+import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
+import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
@@ -86,6 +88,7 @@ public class ConnectionURIHandler implements URIHandler {
         public String zone;
         public String chain;
         public String type;
+        public Collection<ResourceInfo> resources;
         public Map<String, String> properties;
     }
 
@@ -100,12 +103,18 @@ public class ConnectionURIHandler implements URIHandler {
                 String chain = chainEntry.getKey();
                 String type = chainEntry.getValue().getStubType();
                 Map<String, String> properties = chainEntry.getValue().getProperties();
+                Collection<ResourceInfo> resources = new HashSet<>();
+
+                for (Resource resource : chainEntry.getValue().getResources().values()) {
+                    resources.add(resource.getResourceInfo());
+                }
 
                 ChainDetails chainDetails = new ChainDetails();
                 chainDetails.zone = zone;
                 chainDetails.chain = chain;
                 chainDetails.type = type;
                 chainDetails.properties = properties;
+                chainDetails.resources = resources;
 
                 chains.add(chainDetails);
             }
