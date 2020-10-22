@@ -30,6 +30,7 @@ import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AttributeKey;
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -299,7 +300,8 @@ public class NettyBootstrap {
     }
 
     /** reconnect all configured nodes */
-    public void reconnect() {
+    public synchronized void reconnect() {
+
         getConnections()
                 .shouldConnectNodes()
                 .forEach(
@@ -322,5 +324,44 @@ public class NettyBootstrap {
                                     });
                             logger.debug(" try to connect {}", host);
                         });
+    }
+
+    public synchronized void removeConnect(String ipPort) {
+
+        String nodeID = getConnections().getHost2NodeID().get(ipPort);
+        if (nodeID == null) {
+            return;
+        }
+
+        ChannelHandlerContext ctx = getConnections().getChannelHandler(nodeID);
+        if (ctx != null) {
+            logger.debug("Try to disconnect {}", nodeID);
+            getChannelHandlerCallBack().onDisconnect(ctx);
+            ctx.disconnect();
+            ctx.close();
+            logger.debug("Disconnected: {}", nodeID);
+        }
+    }
+
+    public void addConfiguredPeer(String ipPort) throws InvalidParameterException {
+        addConfiguredPeer(P2PConfig.toHost(ipPort));
+    }
+
+    public void addConfiguredPeer(Node node) {
+        getConnections().addConfiguredPeer(node);
+        reconnect();
+        logger.info(
+                "Add configured peer {}, configuredPeers: {}",
+                node,
+                getConnections().getConfiguredPeers());
+    }
+
+    public void removeConfiguredPeer(String ipPort) {
+        getConnections().removeConfiguredPeer(ipPort);
+        removeConnect(ipPort);
+        logger.info(
+                "Remove configured peer {}, configuredPeers: {}",
+                ipPort,
+                getConnections().getConfiguredPeers());
     }
 }

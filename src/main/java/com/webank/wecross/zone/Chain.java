@@ -418,4 +418,8 @@ public class Chain {
                         chooseConnection(),
                         callback);
     }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
 }

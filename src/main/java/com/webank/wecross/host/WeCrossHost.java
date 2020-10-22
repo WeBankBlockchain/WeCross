@@ -253,4 +253,12 @@ public class WeCrossHost {
     public void setAccountSyncManager(AccountSyncManager accountSyncManager) {
         this.accountSyncManager = accountSyncManager;
     }
+
+    public AccountSyncManager getAccountSyncManager() {
+        return accountSyncManager;
+    }
+
+    public P2PService getP2PService() {
+        return p2PService;
+    }
 }

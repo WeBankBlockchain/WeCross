@@ -163,6 +163,7 @@ gen_one_wecross() {
     mkdir -p ${output}/conf/accounts
     mkdir -p ${output}/conf/chains
     mkdir -p ${output}/plugin
+    mkdir -p ${output}/pages
 
     # copy files
     chmod u+x ${wecross_dir}./*.sh
@@ -171,7 +172,7 @@ gen_one_wecross() {
     cp -r ${wecross_dir}/lib "${output}/"
 
     # Configure plugin
-    cp ${wecross_dir}/plugin/* ${output}/plugin/
+    cp -r ${wecross_dir}/plugin ${output}/
 
     cp -r "${wecross_dir}/conf" "${output}/"
     cp -r "${cert_dir}"/* "${output}"/conf/

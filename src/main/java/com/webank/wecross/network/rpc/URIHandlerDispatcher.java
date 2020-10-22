@@ -1,6 +1,7 @@
 package com.webank.wecross.network.rpc;
 
 import com.webank.wecross.host.WeCrossHost;
+import com.webank.wecross.network.rpc.handler.ConnectionURIHandler;
 import com.webank.wecross.network.rpc.handler.ListResourcesURIHandler;
 import com.webank.wecross.network.rpc.handler.ListStubsURIHandler;
 import com.webank.wecross.network.rpc.handler.ResourceURIHandler;
@@ -9,6 +10,7 @@ import com.webank.wecross.network.rpc.handler.TestURIHandler;
 import com.webank.wecross.network.rpc.handler.URIHandler;
 import com.webank.wecross.network.rpc.handler.XATransactionHandler;
 import com.webank.wecross.network.rpc.netty.URIMethod;
+import com.webank.wecross.network.rpc.web.WebService;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -23,6 +25,8 @@ public class URIHandlerDispatcher {
             new URIMethod("POST", "/network/stub/resource/method");
 
     private Map<URIMethod, URIHandler> requestURIMapper = new HashMap<>();
+
+    private WebService webService;
 
     public Map<URIMethod, URIHandler> getRequestURIMapper() {
         return requestURIMapper;
@@ -39,6 +43,7 @@ public class URIHandlerDispatcher {
      */
     public void initializeRequestMapper(WeCrossHost host) {
 
+        // Others
         TestURIHandler testURIHandler = new TestURIHandler();
         registerURIHandler(new URIMethod("GET", "/test"), testURIHandler);
         registerURIHandler(new URIMethod("POST", "/test"), testURIHandler);
@@ -61,6 +66,18 @@ public class URIHandlerDispatcher {
                 registerURIHandler(new URIMethod("GET", "/listAccounts"), listAccountsURIHandler);
                 registerURIHandler(new URIMethod("POST", "/listAccounts"), listAccountsURIHandler);
         */
+        ConnectionURIHandler connectionURIHandler = new ConnectionURIHandler();
+        connectionURIHandler.setP2PService(host.getP2PService());
+        connectionURIHandler.setPeerManager(host.getPeerManager());
+        connectionURIHandler.setZoneManager(host.getZoneManager());
+        registerURIHandler(new URIMethod("GET", "/conn/listChains"), connectionURIHandler);
+        registerURIHandler(new URIMethod("POST", "/conn/addChain"), connectionURIHandler);
+        registerURIHandler(new URIMethod("POST", "/conn/updateChain"), connectionURIHandler);
+        registerURIHandler(new URIMethod("POST", "/conn/removeChain"), connectionURIHandler);
+        registerURIHandler(new URIMethod("GET", "/conn/listPeers"), connectionURIHandler);
+        registerURIHandler(new URIMethod("POST", "/conn/addPeer"), connectionURIHandler);
+        registerURIHandler(new URIMethod("POST", "/conn/removePeer"), connectionURIHandler);
+
         XATransactionHandler xaTransactionHandler = new XATransactionHandler();
         xaTransactionHandler.setXaTransactionManager(
                 host.getRoutineManager().getXaTransactionManager());
@@ -94,7 +111,13 @@ public class URIHandlerDispatcher {
      * @return
      */
     public URIHandler matchURIHandler(URIMethod uriMethod) {
-        URIHandler uriHandler = requestURIMapper.get(uriMethod);
+        URIHandler uriHandler = matchWebURIHandler(uriMethod);
+        if (!Objects.isNull(uriHandler)) {
+            return uriHandler;
+        }
+
+        uriHandler = requestURIMapper.get(uriMethod);
+
         if (Objects.isNull(uriHandler) && uriMethod.isResourceURI()) {
             uriHandler = requestURIMapper.get(RESOURCE_URIMETHOD);
         }
@@ -107,5 +130,17 @@ public class URIHandlerDispatcher {
         }
 
         return uriHandler;
+    }
+
+    public URIHandler matchWebURIHandler(URIMethod uriMethod) {
+        if (uriMethod.getUri().startsWith("/s/")) {
+            // /s/index.html
+            return webService.getHandler();
+        }
+        return null;
+    }
+
+    public void setWebService(WebService webService) {
+        this.webService = webService;
     }
 }

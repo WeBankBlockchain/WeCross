@@ -79,7 +79,7 @@ check_port_avaliable() {
     port=$1
     name=$2
     if [ "$(lsof -i:$port | wc -l)" -ne "0" ]; then
-        LOG_ERROR "${name} port ${port} is not avaliable. Are there any other blockchain is running?"
+        LOG_ERROR "${name} port ${port} is not avaliable. Are there any other blockchain or application is running?"
         exit 1
     fi
 }
