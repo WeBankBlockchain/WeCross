@@ -2,7 +2,6 @@ package com.webank.wecross.zone;
 
 import static com.webank.wecross.exception.WeCrossException.ErrorCode.GET_CHAIN_CHECKSUM_ERROR;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.Block;
 import com.webank.wecross.stub.Connection;
@@ -50,7 +49,6 @@ public class ChainInfo {
         this.resources = resources;
     }
 
-    @JsonIgnore
     public Map<String, String> getProperties() {
         return properties;
     }
