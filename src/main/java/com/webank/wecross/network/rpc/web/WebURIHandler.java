@@ -68,7 +68,7 @@ public class WebURIHandler implements URIHandler {
 
     private String toLocalPath(String uri) {
 
-        return uri.replace("/s/", WEB_ROOT).replace("/", File.separator);
+        return uri.replaceFirst("/s/", WEB_ROOT).replace("/", File.separator);
     }
 
     private static String getWebRoot(String rootPath) {
