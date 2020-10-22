@@ -85,10 +85,15 @@ public class ConnectionURIHandler implements URIHandler {
     }
 
     public static class ChainDetails {
+        public static class ResourceInfoDetails {
+            public String name;
+            public String stubType;
+        }
+
         public String zone;
         public String chain;
         public String type;
-        public Collection<ResourceInfo> resources;
+        public Collection<ResourceInfoDetails> resources;
         public Map<String, String> properties;
     }
 
@@ -103,10 +108,17 @@ public class ConnectionURIHandler implements URIHandler {
                 String chain = chainEntry.getKey();
                 String type = chainEntry.getValue().getStubType();
                 Map<String, String> properties = chainEntry.getValue().getProperties();
-                Collection<ResourceInfo> resources = new HashSet<>();
+                Collection<ChainDetails.ResourceInfoDetails> resources = new HashSet<>();
 
                 for (Resource resource : chainEntry.getValue().getResources().values()) {
-                    resources.add(resource.getResourceInfo());
+                    ResourceInfo resourceInfo = resource.getResourceInfo();
+
+                    ChainDetails.ResourceInfoDetails resourceInfoDetails =
+                            new ChainDetails.ResourceInfoDetails();
+                    resourceInfoDetails.name = resourceInfo.getName();
+                    resourceInfoDetails.stubType = resourceInfo.getStubType();
+
+                    resources.add(resourceInfoDetails);
                 }
 
                 ChainDetails chainDetails = new ChainDetails();

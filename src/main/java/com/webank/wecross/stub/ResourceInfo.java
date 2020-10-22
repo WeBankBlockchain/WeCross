@@ -1,6 +1,5 @@
 package com.webank.wecross.stub;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -72,7 +71,6 @@ public class ResourceInfo {
         this.stubType = driverType;
     }
 
-    @JsonIgnore
     public Map<Object, Object> getProperties() {
         return properties;
     }
@@ -87,7 +85,6 @@ public class ResourceInfo {
     }
 
     @Deprecated
-    @JsonIgnore
     public String getChecksum() {
         return checksum;
     }
