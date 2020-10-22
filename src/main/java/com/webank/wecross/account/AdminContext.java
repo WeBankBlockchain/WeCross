@@ -51,7 +51,8 @@ public class AdminContext extends UserContext {
         try {
             Response<LoginResponse> response =
                     accountManagerEngine.send(
-                            request, new TypeReference<Response<LoginResponse>>() {});
+                            request, new TypeReference<Response<LoginResponse>>() {
+                            });
 
             if (response.getErrorCode() != 0) {
                 throw new Exception(
@@ -77,6 +78,11 @@ public class AdminContext extends UserContext {
             super.setToken(response.getData().credential);
 
             logger.info("Admin login success with token: " + getToken());
+        } catch (WeCrossException e) {
+            logger.error("Admin login failed for {}, (Please check WeCross-Account-Manager service is available)", e.getMessage());
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.ADMIN_LOGIN_FAILED,
+                    "Admin login failed for: " + e.getMessage());
         } catch (Exception e) {
             logger.error("Admin login failed for: " + e.getMessage());
             throw new WeCrossException(
