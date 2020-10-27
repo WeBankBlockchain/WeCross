@@ -114,17 +114,22 @@ public class PeerManager {
         this.p2PService = p2PService;
     }
 
-    public class PeerDetail {
+    public class ChainInfoDetails {
+        public String name;
+        public String stubType;
+    }
+
+    public class PeerDetails {
         public String nodeID;
         public String address;
         public int seq;
-        public Collection<ChainInfo> chainInfos;
+        public Collection<ChainInfoDetails> chainInfos;
     }
 
-    public Collection<PeerDetail> getPeerDetails() {
-        Collection<PeerDetail> peerDetails = new HashSet<>();
+    public Collection<PeerDetails> getPeerDetails() {
+        Collection<PeerDetails> peerDetails = new HashSet<>();
         for (Peer peer : peerInfos.values()) {
-            PeerDetail detail = new PeerDetail();
+            PeerDetails detail = new PeerDetails();
             detail.nodeID = peer.node.getNodeID();
             detail.address =
                     p2PService
@@ -132,7 +137,15 @@ public class PeerManager {
                             .getConnections()
                             .getIPPortIDByNodeID(detail.nodeID);
             detail.seq = peer.getSeq();
-            detail.chainInfos = peer.getChainInfos().values();
+
+            detail.chainInfos = new HashSet<>();
+
+            for (ChainInfo chainInfo : peer.getChainInfos().values()) {
+                ChainInfoDetails chainInfoDetails = new ChainInfoDetails();
+                chainInfoDetails.name = chainInfo.getName();
+                chainInfoDetails.stubType = chainInfo.getStubType();
+                detail.chainInfos.add(chainInfoDetails);
+            }
 
             peerDetails.add(detail);
         }
