@@ -7,7 +7,6 @@ import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
-import com.webank.wecross.stub.StubFactory;
 import com.webank.wecross.stubmanager.MemoryBlockManagerFactory;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.utils.ConfigUtils;
@@ -125,21 +124,14 @@ public class ZonesConfig {
                 throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
             }
 
-            StubFactory stubFactory = stubManager.getStubFactory(type);
-            if (stubFactory == null) {
-                logger.error("Can not find stub type: {}", type);
-
-                throw new WeCrossException(-1, "Cannot find stub type: " + type);
-            }
-            Connection localConnection = stubFactory.newConnection(stubPath);
-
+            Connection localConnection = stubManager.newStubConnection(type, stubPath);
             if (localConnection == null) {
                 logger.error("Init localConnection: {}-{} failed", stubPath, type);
 
                 throw new WeCrossException(-1, "Init localConnection failed");
             }
 
-            Driver driver = stubFactory.newDriver();
+            Driver driver = stubManager.getStubDriver(type);
             List<ResourceInfo> resources = driver.getResources(localConnection);
             Map<String, String> properties = localConnection.getProperties();
             String checksum = ChainInfo.buildChecksum(driver, localConnection);
@@ -152,7 +144,7 @@ public class ZonesConfig {
             chainInfo.setChecksum(checksum);
 
             Chain chain = new Chain(zone, chainInfo, driver, localConnection);
-            chain.setDriver(stubFactory.newDriver());
+            chain.setDriver(driver);
             chain.setBlockManager(resourceBlockManagerFactory.build(chain));
             chain.setStubType(type);
             for (ResourceInfo resourceInfo : resources) {

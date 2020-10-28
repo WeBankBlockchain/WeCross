@@ -70,7 +70,7 @@ public class UAProofVerifier {
     }
 
     private boolean verifyCa2Ua(String type, UAProofSign ca2ua) throws WeCrossException {
-        Driver driver = stubManager.getStubFactory(type).newDriver();
+        Driver driver = stubManager.getStubDriver(type);
         return driver.accountVerify(ca2ua.getSigner(), ca2ua.getSignBytes(), ca2ua.getMessage());
     }
 
