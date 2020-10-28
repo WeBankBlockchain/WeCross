@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.Assert;
 
 public class AccountManager {
     private Logger logger = LoggerFactory.getLogger(AccountManager.class);
@@ -26,14 +25,6 @@ public class AccountManager {
     private AccountSyncManager accountSyncManager;
 
     private Map<String, UniversalAccount> token2UA = new ConcurrentHashMap<>();
-
-    public Account getAccount(String name) {
-        String message =
-                "Please delete this function and use getUniversalAccount(context).getAccount(type)";
-        logger.error(message);
-        Assert.isTrue(false, message);
-        return null;
-    }
 
     public List<Account> getAccounts(UserContext userContext) throws WeCrossException {
         String token = userContext.getToken();
@@ -54,8 +45,7 @@ public class AccountManager {
         }
 
         if (token == null) {
-
-            return null;
+            throw new WeCrossException(GET_UA_FAILED, "token is null");
         }
 
         if (!token2UA.containsKey(token)) {
