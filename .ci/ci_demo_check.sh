@@ -146,21 +146,21 @@ login
 call payment.bcos.evidence queryEvidence evidence0
 call payment.fabric.evidence queryEvidence evidence0
 
-startTransaction 100 payment.bcos.evidence payment.fabric.evidence
-execTransaction payment.bcos.evidence 100 1 newEvidence evidence0 "I'm Tom"
-execTransaction payment.fabric.evidence 100 1 newEvidence evidence0 "I'm Jerry"
-commitTransaction 100 payment.bcos.evidence payment.fabric.evidence
+startTransaction payment.bcos.evidence payment.fabric.evidence
+execTransaction payment.bcos.evidence newEvidence evidence0 "I'm Tom"
+execTransaction payment.fabric.evidence newEvidence evidence0 "I'm Jerry"
+commitTransaction payment.bcos.evidence payment.fabric.evidence
 
 call payment.bcos.evidence queryEvidence evidence0
 call payment.fabric.evidence queryEvidence evidence0
 
-startTransaction 101 payment.bcos.evidence payment.fabric.evidence
-execTransaction payment.bcos.evidence 101 1 newEvidence evidence1 "I'm TomGG"
-execTransaction payment.fabric.evidence 101 1 newEvidence evidence1 "I'm JerryMM"
-callTransaction payment.bcos.evidence 101 queryEvidence evidence1
-callTransaction payment.fabric.evidence 101 queryEvidence evidence1
-callTransaction payment.bcos.evidence 101 queryEvidence evidence1
-rollbackTransaction 101 payment.bcos.evidence payment.fabric.evidence
+startTransaction payment.bcos.evidence payment.fabric.evidence
+execTransaction payment.bcos.evidence newEvidence evidence1 "I'm TomGG"
+execTransaction payment.fabric.evidence newEvidence evidence1 "I'm JerryMM"
+callTransaction payment.bcos.evidence queryEvidence evidence1
+callTransaction payment.fabric.evidence queryEvidence evidence1
+callTransaction payment.bcos.evidence queryEvidence evidence1
+rollbackTransaction payment.bcos.evidence payment.fabric.evidence
 
 call payment.bcos.evidence queryEvidence evidence1
 call payment.fabric.evidence queryEvidence evidence1
