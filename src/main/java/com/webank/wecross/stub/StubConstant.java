@@ -6,6 +6,6 @@ public interface StubConstant {
     String HUB_NAME = "WeCrossHub";
 
     String TRANSACTION_UNIQUE_ID = "TRANSACTION_UNIQUE_ID";
-    String TRANSACTION_ID = "TRANSACTION_ID";
-    String TRANSACTION_SEQ = "TRANSACTION_SEQ";
+    String XA_TRANSACTION_ID = "XA_TRANSACTION_ID";
+    String XA_TRANSACTION_SEQ = "XA_TRANSACTION_SEQ";
 }

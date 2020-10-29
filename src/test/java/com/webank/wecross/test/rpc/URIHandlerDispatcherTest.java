@@ -29,42 +29,31 @@ public class URIHandlerDispatcherTest {
 
         Assert.assertTrue(
                 Objects.nonNull(
-                        uriHandlerDispatcher.matchURIHandler(new URIMethod("GET", "/test"))));
+                        uriHandlerDispatcher.matchURIHandler(new URIMethod("GET", "/sys/test"))));
         Assert.assertTrue(
                 Objects.nonNull(
-                        uriHandlerDispatcher.matchURIHandler(new URIMethod("POST", "/test"))));
+                        uriHandlerDispatcher.matchURIHandler(new URIMethod("POST", "/sys/test"))));
 
         Assert.assertTrue(
                 Objects.nonNull(
-                        uriHandlerDispatcher.matchURIHandler(new URIMethod("GET", "/state"))));
+                        uriHandlerDispatcher.matchURIHandler(new URIMethod("GET", "/sys/state"))));
         Assert.assertTrue(
                 Objects.nonNull(
-                        uriHandlerDispatcher.matchURIHandler(new URIMethod("POST", "/state"))));
+                        uriHandlerDispatcher.matchURIHandler(
+                                new URIMethod("GET", "/sys/supportedStubs"))));
+        Assert.assertTrue(
+                Objects.nonNull(
+                        uriHandlerDispatcher.matchURIHandler(
+                                new URIMethod("GET", "/sys/listResources"))));
+        Assert.assertTrue(
+                Objects.nonNull(
+                        uriHandlerDispatcher.matchURIHandler(
+                                new URIMethod("POST", "/sys/listResources"))));
 
         Assert.assertTrue(
                 Objects.nonNull(
                         uriHandlerDispatcher.matchURIHandler(
-                                new URIMethod("GET", "/supportedStubs"))));
-        Assert.assertTrue(
-                Objects.nonNull(
-                        uriHandlerDispatcher.matchURIHandler(
-                                new URIMethod("POST", "/supportedStubs"))));
-
-        Assert.assertTrue(
-                Objects.nonNull(
-                        uriHandlerDispatcher.matchURIHandler(
-                                new URIMethod("GET", "/listResources"))));
-        Assert.assertTrue(
-                Objects.nonNull(
-                        uriHandlerDispatcher.matchURIHandler(
-                                new URIMethod("POST", "/listResources"))));
-
-        Assert.assertTrue(
-                Objects.nonNull(
-                        uriHandlerDispatcher.matchURIHandler(new URIMethod("GET", "/a/b/c/d"))));
-        Assert.assertTrue(
-                Objects.nonNull(
-                        uriHandlerDispatcher.matchURIHandler(new URIMethod("POST", "/a/b/c/d"))));
+                                new URIMethod("POST", "/resource/b/c/d/e"))));
 
         Assert.assertTrue(
                 Objects.nonNull(
@@ -73,7 +62,8 @@ public class URIHandlerDispatcherTest {
 
         Assert.assertTrue(
                 Objects.nonNull(
-                        uriHandlerDispatcher.matchURIHandler(new URIMethod("POST", "/a/b/c/d"))));
+                        uriHandlerDispatcher.matchURIHandler(
+                                new URIMethod("POST", "/resource/b/c/d/e"))));
 
         Assert.assertTrue(
                 Objects.isNull(
@@ -94,7 +84,8 @@ public class URIHandlerDispatcherTest {
         URIHandlerDispatcher uriHandlerDispatcher = new URIHandlerDispatcher();
         uriHandlerDispatcher.initializeRequestMapper(host);
 
-        URIHandler uriHandler = uriHandlerDispatcher.matchURIHandler(new URIMethod("GET", "/test"));
+        URIHandler uriHandler =
+                uriHandlerDispatcher.matchURIHandler(new URIMethod("GET", "/sys/test"));
 
         final RestResponse[] restResp = {null};
         uriHandler.handle(

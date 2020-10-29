@@ -152,7 +152,7 @@ public class P2PProcessor implements NetworkProcessor {
                                 objectMapper.readValue(
                                         p2pRequestString,
                                         new TypeReference<NetworkMessage<Object>>() {});
-                        response.setErrorCode(NetworkQueryStatus.METHOD_ERROR);
+                        response.setErrorCode(NetworkQueryStatus.URI_PATH_ERROR);
                         response.setSeq(p2pRequest.getSeq());
                         response.setMessage("Unsupported method: " + method);
                         break;
@@ -161,7 +161,7 @@ public class P2PProcessor implements NetworkProcessor {
 
         } catch (WeCrossException e) {
             logger.warn("Process request error: {}", e.getMessage());
-            response.setErrorCode(NetworkQueryStatus.EXCEPTION_FLAG + e.getErrorCode());
+            response.setErrorCode(NetworkQueryStatus.NETWORK_PACKAGE_ERROR + e.getErrorCode());
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error:", e);
@@ -331,16 +331,23 @@ public class P2PProcessor implements NetworkProcessor {
 
         logger.debug("request string: {}", p2pRequestString);
 
-        try {
-            // Resource resourceObj = zoneManager.getResource(path);
-            Resource resourceObj = zoneManager.fetchResource(path);
-            if (resourceObj == null) {
-                logger.warn("Unable to find resource: {}.{}.{}", network, chain, resource);
-                throw new Exception("Resource not found");
-            } else {
-                HTLCManager htlcManager = routineManager.getHtlcManager();
-                resourceObj = htlcManager.filterHTLCResource(zoneManager, path, resourceObj);
+        Resource resourceObj = zoneManager.fetchResource(path);
+        if (resourceObj == null) {
+            logger.warn("Unable to find resource: {}.{}.{}", network, chain, resource);
+
+            networkResponse.setErrorCode(NetworkQueryStatus.URI_PATH_ERROR);
+            networkResponse.setMessage("Resource not found");
+            try {
+                callback.onResponse(objectMapper.writeValueAsString(networkResponse));
+            } catch (Exception e1) {
+                logger.error("Can't serialize error response: " + resource.toString());
             }
+            return;
+        }
+
+        try {
+            HTLCManager htlcManager = routineManager.getHtlcManager();
+            resourceObj = htlcManager.filterHTLCResource(zoneManager, path, resourceObj);
 
             switch (method) {
                 case "transaction":
@@ -395,7 +402,7 @@ public class P2PProcessor implements NetworkProcessor {
                                         p2pRequestString,
                                         new TypeReference<NetworkMessage<Object>>() {});
                         logger.warn("Unsupported method: {}", method);
-                        networkResponse.setErrorCode(NetworkQueryStatus.METHOD_ERROR);
+                        networkResponse.setErrorCode(NetworkQueryStatus.URI_PATH_ERROR);
                         networkResponse.setMessage("Unsupported method: " + method);
                         networkResponse.setSeq(p2pRequest.getSeq());
                         break;
@@ -403,11 +410,11 @@ public class P2PProcessor implements NetworkProcessor {
             }
         } catch (WeCrossException e) {
             logger.warn("Process request error: {}", e.getMessage());
-            networkResponse.setErrorCode(NetworkQueryStatus.EXCEPTION_FLAG + e.getErrorCode());
+            networkResponse.setErrorCode(
+                    NetworkQueryStatus.NETWORK_PACKAGE_ERROR + e.getErrorCode());
             networkResponse.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error:", e);
-
             networkResponse.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
             networkResponse.setMessage(e.getLocalizedMessage());
         }

@@ -37,14 +37,14 @@ public class HTLCManagerTest {
                 htlcManager.filterHTLCResource(mockZoneManager, mockPath, mockResource).getClass());
     }
 
-    @Test
-    public void initHTLCResourcePairsTest() throws Exception {
-        HTLCContext htlcContext = new HTLCContext();
-        htlcContext.setSelfPath(Path.decode("a.b.c"));
-        Map<String, HTLCContext> htlcTaskDataMap = new HashMap<>();
-        htlcTaskDataMap.put("a.b.c", htlcContext);
-        HTLCManager htlcManager = new HTLCManager();
-        htlcManager.setHtlcContextMap(htlcTaskDataMap);
-        htlcManager.initHTLCResourcePairs();
-    }
+    //    @Test
+    //    public void initHTLCResourcePairsTest() throws Exception {
+    //        HTLCContext htlcContext = new HTLCContext();
+    //        htlcContext.setSelfPath(Path.decode("a.b.c"));
+    //        Map<String, HTLCContext> htlcTaskDataMap = new HashMap<>();
+    //        htlcTaskDataMap.put("a.b.c", htlcContext);
+    //        HTLCManager htlcManager = new HTLCManager();
+    //        htlcManager.setHtlcContextMap(htlcTaskDataMap);
+    //        htlcManager.initHTLCResourcePairs();
+    //    }
 }

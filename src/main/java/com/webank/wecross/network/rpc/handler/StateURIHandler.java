@@ -6,7 +6,7 @@ import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.request.StateRequest;
 import com.webank.wecross.restserver.response.StateResponse;
 
-/** GET/POST /state */
+/** GET /sys/state */
 public class StateURIHandler implements URIHandler {
 
     private WeCrossHost host;

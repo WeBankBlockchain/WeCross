@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
-import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.resource.Resource;
@@ -67,7 +66,13 @@ public class ConnectionURIHandler implements URIHandler {
                     data = handleRemovePeer(userContext, uri, method, content);
                     break;
                 default:
-                    data = handleDefault(userContext, uri, method, content);
+                    {
+                        logger.warn("Unsupported method: {}", method);
+                        restResponse.setErrorCode(NetworkQueryStatus.URI_PATH_ERROR);
+                        restResponse.setMessage("Unsupported method: " + method);
+                        callback.onResponse(restResponse);
+                        return;
+                    }
             }
         } catch (Exception e) {
             String message = "Handle rpc connection request exception: " + e.getMessage();
@@ -198,12 +203,6 @@ public class ConnectionURIHandler implements URIHandler {
         }
 
         return StatusResponse.buildSuccessResponse();
-    }
-
-    private Object handleDefault(UserContext userContext, String uri, String method, String content)
-            throws WeCrossException {
-        throw new WeCrossException(
-                WeCrossException.ErrorCode.METHOD_ERROR, "Unsupported method: " + method);
     }
 
     public void setP2PService(P2PService p2PService) {

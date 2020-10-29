@@ -46,7 +46,7 @@ public class HTLCManager {
         return resource;
     }
 
-    public HTLCResourcePair[] initHTLCResourcePairs() {
+    private HTLCResourcePair[] initHTLCResourcePairs() {
         HTLCResourcePair[] htlcResourcePairs = new HTLCResourcePair[htlcContextMap.size()];
         int num = 0;
         for (HTLCContext htlcContext : htlcContextMap.values()) {

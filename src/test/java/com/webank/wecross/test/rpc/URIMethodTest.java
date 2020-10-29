@@ -17,9 +17,9 @@ public class URIMethodTest {
         Assert.assertEquals(uriMethod0.getUri(), "/test");
         Assert.assertTrue(!uriMethod.isResourceURI());
 
-        URIMethod uriMethod1 = new URIMethod("POST", "/a/b/c/d");
+        URIMethod uriMethod1 = new URIMethod("POST", "/resource/a/b/c/d");
         Assert.assertEquals(uriMethod1.getMethod(), "POST");
-        Assert.assertEquals(uriMethod1.getUri(), "/a/b/c/d");
+        Assert.assertEquals(uriMethod1.getUri(), "/resource/a/b/c/d");
         Assert.assertTrue(uriMethod1.isResourceURI());
     }
 }

@@ -1,11 +1,12 @@
 package com.webank.wecross.stub;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class Block {
     public byte[] rawBytes;
     public BlockHeader blockHeader;
-    public List<String> transactionsHashes;
+    public List<String> transactionsHashes = new LinkedList<>();
 
     public BlockHeader getBlockHeader() {
         return blockHeader;

@@ -15,7 +15,7 @@ public interface Driver {
      * @param request the encoded transaction request binary data
      * @return TransactionRequest
      */
-    public ImmutablePair<Boolean, TransactionRequest> decodeTransactionRequest(Request request);
+    ImmutablePair<Boolean, TransactionRequest> decodeTransactionRequest(Request request);
 
     /**
      * get resources name
@@ -63,26 +63,26 @@ public interface Driver {
      *
      * @return block number
      */
-    public interface GetBlockNumberCallback {
-        public void onResponse(Exception e, long blockNumber);
+    interface GetBlockNumberCallback {
+        void onResponse(Exception e, long blockNumber);
     }
 
-    public void asyncGetBlockNumber(Connection connection, GetBlockNumberCallback callback);
+    void asyncGetBlockNumber(Connection connection, GetBlockNumberCallback callback);
 
     /**
      * Get block
      *
      * @return Block
      */
-    public interface GetBlockCallback {
-        public void onResponse(Exception e, Block block);
+    interface GetBlockCallback {
+        void onResponse(Exception e, Block block);
     }
 
-    public void asyncGetBlock(
+    void asyncGetBlock(
             long blockNumber, boolean onlyHeader, Connection connection, GetBlockCallback callback);
 
-    public interface GetTransactionCallback {
-        public void onResponse(Exception e, Transaction transaction);
+    interface GetTransactionCallback {
+        void onResponse(Exception e, Transaction transaction);
     }
 
     /**
@@ -91,13 +91,15 @@ public interface Driver {
      * @param transactionHash
      * @param blockNumber
      * @param blockManager
+     * @param isVerified whether it needs to be verified
      * @param connection
      * @return null if the transaction has not been verified
      */
-    public void asyncGetTransaction(
+    void asyncGetTransaction(
             String transactionHash,
             long blockNumber,
             BlockManager blockManager,
+            boolean isVerified,
             Connection connection,
             GetTransactionCallback callback);
 
@@ -115,7 +117,7 @@ public interface Driver {
      * @param connection
      * @param callback
      */
-    public void asyncCustomCommand(
+    void asyncCustomCommand(
             String command,
             Path path,
             Object[] args,

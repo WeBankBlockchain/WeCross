@@ -1,27 +1,39 @@
 package com.webank.wecross.routine.xa;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class XATransactionStep {
-    private int seq;
-    private String contract;
+    private long xaTransactionSeq;
+    private String accountIdentity;
+    private String username;
     private String path;
-    private String timestamp;
-    private String func;
+    private long timestamp;
+    private String method;
     private String args;
 
-    public int getSeq() {
-        return seq;
+    public long getXaTransactionSeq() {
+        return xaTransactionSeq;
     }
 
-    public void setSeq(int seq) {
-        this.seq = seq;
+    public void setXaTransactionSeq(long xaTransactionSeq) {
+        this.xaTransactionSeq = xaTransactionSeq;
     }
 
-    public String getContract() {
-        return contract;
+    public String getAccountIdentity() {
+        return accountIdentity;
     }
 
-    public void setContract(String contract) {
-        this.contract = contract;
+    public void setAccountIdentity(String accountIdentity) {
+        this.accountIdentity = accountIdentity;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPath() {
@@ -32,20 +44,20 @@ public class XATransactionStep {
         this.path = path;
     }
 
-    public String getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
-    public String getFunc() {
-        return func;
+    public String getMethod() {
+        return method;
     }
 
-    public void setFunc(String func) {
-        this.func = func;
+    public void setMethod(String method) {
+        this.method = method;
     }
 
     public String getArgs() {
@@ -59,19 +71,21 @@ public class XATransactionStep {
     @Override
     public String toString() {
         return "XATransactionStep{"
-                + "seq="
-                + seq
-                + ", contract='"
-                + contract
+                + "xaTransactionSeq="
+                + xaTransactionSeq
+                + ", accountIdentity='"
+                + accountIdentity
+                + '\''
+                + ", username='"
+                + username
                 + '\''
                 + ", path='"
                 + path
                 + '\''
-                + ", timestamp='"
+                + ", timestamp="
                 + timestamp
-                + '\''
-                + ", func='"
-                + func
+                + ", method='"
+                + method
                 + '\''
                 + ", args='"
                 + args
