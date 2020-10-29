@@ -6,10 +6,8 @@ import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.peer.PeerManager;
-import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
-import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
@@ -98,7 +96,7 @@ public class ConnectionURIHandler implements URIHandler {
         public String zone;
         public String chain;
         public String type;
-        public Collection<ResourceInfoDetails> resources;
+        // public Collection<ResourceInfoDetails> resources;
         public Map<String, String> properties;
     }
 
@@ -113,8 +111,8 @@ public class ConnectionURIHandler implements URIHandler {
                 String chain = chainEntry.getKey();
                 String type = chainEntry.getValue().getStubType();
                 Map<String, String> properties = chainEntry.getValue().getProperties();
-                Collection<ChainDetails.ResourceInfoDetails> resources = new HashSet<>();
-
+                // Collection<ChainDetails.ResourceInfoDetails> resources = new HashSet<>();
+                /*
                 for (Resource resource : chainEntry.getValue().getResources().values()) {
                     ResourceInfo resourceInfo = resource.getResourceInfo();
 
@@ -125,13 +123,14 @@ public class ConnectionURIHandler implements URIHandler {
 
                     resources.add(resourceInfoDetails);
                 }
+                */
 
                 ChainDetails chainDetails = new ChainDetails();
                 chainDetails.zone = zone;
                 chainDetails.chain = chain;
                 chainDetails.type = type;
                 chainDetails.properties = properties;
-                chainDetails.resources = resources;
+                // chainDetails.resources = resources;
 
                 chains.add(chainDetails);
             }
