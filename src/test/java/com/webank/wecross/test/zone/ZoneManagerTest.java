@@ -9,7 +9,6 @@ import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
-import com.webank.wecross.stub.StubFactory;
 import com.webank.wecross.stubmanager.MemoryBlockManagerFactory;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.zone.Chain;
@@ -46,12 +45,10 @@ public class ZoneManagerTest {
 
     @Test
     public void addRemoteResourcesTest() throws Exception {
-        StubFactory stubFactory = Mockito.spy(StubFactory.class);
-        Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
-        Mockito.when(stubFactory.newDriver()).thenReturn(null);
-
         StubManager stubManager = Mockito.mock(StubManager.class);
-        Mockito.when(stubManager.getStubFactory(Mockito.anyString())).thenReturn(stubFactory);
+        Mockito.when(stubManager.newStubConnection(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(null);
+        Mockito.when(stubManager.getStubDriver(Mockito.anyString())).thenReturn(null);
 
         ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
                 new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
@@ -116,12 +113,10 @@ public class ZoneManagerTest {
 
     @Test
     public void removeRemoteResourcesTest() throws Exception {
-        StubFactory stubFactory = Mockito.spy(StubFactory.class);
-        Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
-        Mockito.when(stubFactory.newDriver()).thenReturn(null);
-
         StubManager stubManager = Mockito.mock(StubManager.class);
-        Mockito.when(stubManager.getStubFactory("test")).thenReturn(stubFactory);
+        Mockito.when(stubManager.newStubConnection(Mockito.contains("test"), Mockito.anyString()))
+                .thenReturn(null);
+        Mockito.when(stubManager.getStubDriver("test")).thenReturn(null);
 
         ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
                 new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
@@ -212,12 +207,10 @@ public class ZoneManagerTest {
 
     @Test
     public void testGetResource() throws Exception {
-        StubFactory stubFactory = Mockito.spy(StubFactory.class);
-        Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
-        Mockito.when(stubFactory.newDriver()).thenReturn(null);
-
         StubManager stubManager = Mockito.mock(StubManager.class);
-        Mockito.when(stubManager.getStubFactory("test")).thenReturn(stubFactory);
+        Mockito.when(stubManager.newStubConnection(Mockito.contains("test"), Mockito.anyString()))
+                .thenReturn(null);
+        Mockito.when(stubManager.getStubDriver("test")).thenReturn(null);
 
         ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
                 new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
@@ -278,12 +271,10 @@ public class ZoneManagerTest {
 
     @Test
     public void checksumTest() throws Exception {
-        StubFactory stubFactory = Mockito.spy(StubFactory.class);
-        Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
-        Mockito.when(stubFactory.newDriver()).thenReturn(null);
-
         StubManager stubManager = Mockito.mock(StubManager.class);
-        Mockito.when(stubManager.getStubFactory("test")).thenReturn(stubFactory);
+        Mockito.when(stubManager.newStubConnection(Mockito.contains("test"), Mockito.anyString()))
+                .thenReturn(null);
+        Mockito.when(stubManager.getStubDriver("test")).thenReturn(null);
 
         ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
                 new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);

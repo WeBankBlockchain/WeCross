@@ -2,7 +2,6 @@ package com.webank.wecross.account;
 
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.StubFactory;
 import com.webank.wecross.stubmanager.StubManager;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -29,13 +28,8 @@ public class UniversalAccountFactory {
             for (ChainAccountDetails details : chainAccountDetailsMap.values()) {
 
                 String type = details.getType();
-                StubFactory stubFactory = stubManager.getStubFactory(type);
-                if (stubFactory == null) {
-                    logger.error("Stub type not found: " + type);
-                    continue;
-                }
 
-                Account account = stubFactory.newAccount(details.toProperties());
+                Account account = stubManager.newStubAccount(type, details.toProperties());
 
                 if (account == null) {
                     logger.error(

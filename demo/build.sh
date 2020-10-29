@@ -481,7 +481,7 @@ EOF
 
 deploy_chain_account() {
     mkdir -p ${ROOT}/WeCross-Console/conf/accounts/
-    rm -rf ${ROOT}/WeCross-Console/conf/accounts/*
+    rm -rf $(ls ${ROOT}/WeCross-Console/conf/accounts/ | grep -v .sh)
     cp -r ${ROOT}/bcos/accounts/* ${ROOT}/WeCross-Console/conf/accounts/
     cp -r ${ROOT}/fabric/certs/accounts/* ${ROOT}/WeCross-Console/conf/accounts/
 
