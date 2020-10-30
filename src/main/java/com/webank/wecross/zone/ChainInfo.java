@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 public class ChainInfo {
     private static Logger logger = LoggerFactory.getLogger(ChainInfo.class);
+    private String zone;
     private String name;
     private String stubType;
     private List<ResourceInfo> resources = new LinkedList<>();
@@ -119,5 +120,13 @@ public class ChainInfo {
                 + checksum
                 + '\''
                 + '}';
+    }
+
+    public String getZone() {
+        return zone;
+    }
+
+    public void setZone(String zone) {
+        this.zone = zone;
     }
 }
