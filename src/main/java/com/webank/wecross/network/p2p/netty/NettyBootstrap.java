@@ -39,6 +39,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
 /** init P2P service */
 public class NettyBootstrap {
@@ -87,7 +88,8 @@ public class NettyBootstrap {
     private final Bootstrap bootstrap = new Bootstrap();
     private final ServerBootstrap serverBootstrap = new ServerBootstrap();
 
-    private ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1);
+    private ScheduledExecutorService scheduledExecutorService =
+            new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("p2pbootstrap-"));
 
     /**
      * init SslContext for p2p connection
