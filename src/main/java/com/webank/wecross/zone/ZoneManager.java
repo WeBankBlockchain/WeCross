@@ -175,7 +175,7 @@ public class ZoneManager {
                 Chain chain = zone.getChains().get(chainPath.getChain());
 
                 if (chain == null) {
-                    Driver driver = stubManager.getStubFactory(chainInfo.getStubType()).newDriver();
+                    Driver driver = stubManager.getStubDriver(chainInfo.getStubType());
 
                     chain = new Chain(chainPath.getZone(), chainInfo, driver, null);
                     MemoryBlockManager resourceBlockHeaderManager =

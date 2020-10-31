@@ -396,6 +396,7 @@ EOF
 
 deploy_chain_account() {
     mkdir -p ${ROOT}/WeCross-Console/conf/accounts/
+    rm -rf $(ls ${ROOT}/WeCross-Console/conf/accounts/ | grep -v .sh)
     cp -r ${ROOT}/bcos/accounts/* ${ROOT}/WeCross-Console/conf/accounts/
 
     add_bcos_account bcos_user1       # 0

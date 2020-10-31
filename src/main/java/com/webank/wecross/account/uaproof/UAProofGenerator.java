@@ -47,7 +47,7 @@ public class UAProofGenerator {
 
         String type = ca.getType();
 
-        Driver driver = stubManager.getStubFactory(type).newDriver();
+        Driver driver = stubManager.getStubDriver(type);
 
         byte[] signBytes = driver.accountSign(ca, ca2ua.getMessage());
         ca2ua.setSignBytes(signBytes);
