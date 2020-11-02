@@ -68,7 +68,7 @@ check_db_service() {
 check_port_avaliable() {
     port=$1
     name=$2
-    if [ "$(netstat -na 2>/dev/null | grep $port | wc -l)" -ne "0" ]; then
+    if [ "$(lsof -i:$port | wc -l)" -ne "0" ]; then
         LOG_ERROR "${name} port ${port} is not avaliable. Are there any other blockchain is running?"
         exit 1
     fi
@@ -396,7 +396,7 @@ EOF
 
 deploy_chain_account() {
     mkdir -p ${ROOT}/WeCross-Console/conf/accounts/
-    rm -rf $(ls ${ROOT}/WeCross-Console/conf/accounts/ | grep -v .sh)
+    cd ${ROOT}/WeCross-Console/conf/accounts/ && rm -rf $(ls | grep -v .sh) && cd -
     cp -r ${ROOT}/bcos/accounts/* ${ROOT}/WeCross-Console/conf/accounts/
 
     add_bcos_account bcos_user1       # 0
