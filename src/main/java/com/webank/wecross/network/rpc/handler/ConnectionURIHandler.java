@@ -89,7 +89,7 @@ public class ConnectionURIHandler implements URIHandler {
 
     public static class ChainDetails {
         public static class ResourceInfoDetails {
-            public String name;
+            public String path;
             public String stubType;
         }
 

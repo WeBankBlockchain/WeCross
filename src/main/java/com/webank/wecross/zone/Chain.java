@@ -64,6 +64,7 @@ public class Chain {
 
     public ChainInfo getChainInfo() {
         ChainInfo chainInfo = new ChainInfo();
+        chainInfo.setZone(zoneName);
         chainInfo.setName(name);
         chainInfo.setStubType(stubType);
         chainInfo.setProperties(properties);
