@@ -7,40 +7,43 @@ import java.util.*;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class XATransactionListResponse {
-    private List<XATransactionInfo> infoList = new ArrayList<>();
-    private List<Integer> offsets = new ArrayList<>();
+    private List<XA> xaList = new ArrayList<>();
+    private Map<String, Integer> nextOffsets = Collections.synchronizedMap(new HashMap<>());
     private boolean finished = false;
 
-    public void addXATransactionInfo(XATransactionInfo info) {
-        infoList.add(info);
+    public void addXATransactionInfo(XA info) {
+        xaList.add(info);
+    }
+
+    public void addOffset(String chain, Integer offset) {
+        nextOffsets.put(chain, offset);
     }
 
     public void recoverUsername(AccountManager accountManager) {
-        for (XATransactionInfo xaTransactionInfo : infoList) {
+        for (XA xa : xaList) {
             UniversalAccount ua =
-                    accountManager.getUniversalAccountByIdentity(
-                            xaTransactionInfo.getAccountIdentity());
+                    accountManager.getUniversalAccountByIdentity(xa.getAccountIdentity());
             String username = Objects.nonNull(ua) ? ua.getUsername() : "unknown";
 
-            xaTransactionInfo.setUsername(username);
-            xaTransactionInfo.setAccountIdentity(null);
+            xa.setUsername(username);
+            xa.setAccountIdentity(null);
         }
     }
 
-    public List<XATransactionInfo> getInfoList() {
-        return infoList;
+    public List<XA> getXaList() {
+        return xaList;
     }
 
-    public void setInfoList(List<XATransactionInfo> infoList) {
-        this.infoList = infoList;
+    public void setXaList(List<XA> xaList) {
+        this.xaList = xaList;
     }
 
-    public List<Integer> getOffsets() {
-        return offsets;
+    public Map<String, Integer> getNextOffsets() {
+        return nextOffsets;
     }
 
-    public void setOffsets(List<Integer> offsets) {
-        this.offsets = offsets;
+    public void setNextOffsets(Map<String, Integer> nextOffsets) {
+        this.nextOffsets = nextOffsets;
     }
 
     public boolean isFinished() {
@@ -54,16 +57,16 @@ public class XATransactionListResponse {
     @Override
     public String toString() {
         return "XATransactionListResponse{"
-                + "infoList="
-                + infoList
-                + ", offsets="
-                + offsets
+                + "xaList="
+                + xaList
+                + ", nextOffsets="
+                + nextOffsets
                 + ", finished="
                 + finished
                 + '}';
     }
 
-    public static class XATransactionInfo {
+    public static class XA {
         private String xaTransactionID;
         private String accountIdentity;
         private String username;

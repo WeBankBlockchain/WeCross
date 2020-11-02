@@ -30,20 +30,22 @@ public class XAResponse {
     }
 
     public static class ChainErrorMessage {
-        private String chain;
+        private String path;
         private String message;
 
-        public ChainErrorMessage(String chain, String message) {
-            this.chain = chain;
+        public ChainErrorMessage() {}
+
+        public ChainErrorMessage(String path, String message) {
+            this.path = path;
             this.message = message;
         }
 
-        public String getChain() {
-            return chain;
+        public String getPath() {
+            return path;
         }
 
-        public void setChain(String chain) {
-            this.chain = chain;
+        public void setPath(String path) {
+            this.path = path;
         }
 
         public String getMessage() {
@@ -58,7 +60,7 @@ public class XAResponse {
         public String toString() {
             return "ChainErrorMessage{"
                     + "chain='"
-                    + chain
+                    + path
                     + '\''
                     + ", message='"
                     + message

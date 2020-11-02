@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
+import com.webank.wecross.network.UriDecoder;
 import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.restserver.RestRequest;
@@ -33,14 +34,8 @@ public class ConnectionURIHandler implements URIHandler {
         RestResponse<Object> restResponse = new RestResponse();
         Object data;
         try {
-            String[] splits = uri.substring(1).split("/");
-
-            if (splits.length != 2) {
-                throw new Exception("Unsupported uri: " + uri);
-            }
-
-            String operation = splits[1];
-
+            UriDecoder uriDecoder = new UriDecoder(uri);
+            String operation = uriDecoder.getMethod();
             switch (operation) {
                 case "listChains":
                     data = handleListChains(userContext, uri, method, content);

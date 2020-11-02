@@ -9,6 +9,7 @@ import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
+import com.webank.wecross.network.UriDecoder;
 import com.webank.wecross.network.rpc.CustomCommandRequest;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceDetail;
@@ -92,17 +93,15 @@ public class ResourceURIHandler implements URIHandler {
             Path path = new Path();
             path.setZone(splits[1]);
             path.setChain(splits[2]);
-
-            String method = "";
             if (splits.length > 4) {
                 path.setResource(splits[3]);
-                method = splits[4];
-            } else {
-                method = splits[3];
             }
 
+            UriDecoder uriDecoder = new UriDecoder(uri);
+            String method = uriDecoder.getMethod();
             if (logger.isDebugEnabled()) {
-                logger.debug("request path: {}, method: {}, string: {}", path, method, content);
+                logger.debug(
+                        "resource request path: {}, method: {}, string: {}", path, method, content);
             }
 
             switch (method.toLowerCase()) {
@@ -148,12 +147,6 @@ public class ResourceURIHandler implements URIHandler {
                             return;
                         }
 
-                        String accountName = ua.getName();
-                        logger.trace(
-                                "sendTransaction request: {}, universal account: {}",
-                                transactionRequest,
-                                accountName);
-
                         resourceObj.asyncSendTransaction(
                                 transactionRequest,
                                 ua,
@@ -197,12 +190,6 @@ public class ResourceURIHandler implements URIHandler {
                             callback.onResponse(restResponse);
                             return;
                         }
-
-                        String accountName = ua.getName();
-                        logger.trace(
-                                "sendTransaction request: {}, universal account: {}",
-                                transactionRequest,
-                                accountName);
 
                         resourceObj.asyncCall(
                                 transactionRequest,

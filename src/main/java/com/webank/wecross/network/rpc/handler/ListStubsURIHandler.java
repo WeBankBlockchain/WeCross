@@ -6,12 +6,9 @@ import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.response.StubResponse;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.zone.ZoneManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** GET /sys/supportedStubs */
 public class ListStubsURIHandler implements URIHandler {
-    private static final Logger logger = LoggerFactory.getLogger(ListStubsURIHandler.class);
 
     private WeCrossHost host;
 

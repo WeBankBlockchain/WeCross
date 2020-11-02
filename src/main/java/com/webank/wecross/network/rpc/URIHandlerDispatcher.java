@@ -4,6 +4,8 @@ import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.network.rpc.handler.*;
 import com.webank.wecross.network.rpc.netty.URIMethod;
 import com.webank.wecross.network.rpc.web.WebService;
+import com.webank.wecross.restserver.fetcher.ResourceFetcher;
+import com.webank.wecross.restserver.fetcher.TransactionFetcher;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -47,20 +49,18 @@ public class URIHandlerDispatcher {
         ListStubsURIHandler listStubsURIHandler = new ListStubsURIHandler(host);
         registerURIHandler(new URIMethod("GET", "/sys/supportedStubs"), listStubsURIHandler);
 
-        ListResourcesURIHandler listResourcesURIHandler = new ListResourcesURIHandler(host);
+        ResourceFetcher resourceFetcher = new ResourceFetcher(host.getZoneManager());
+        ListResourcesURIHandler listResourcesURIHandler =
+                new ListResourcesURIHandler(resourceFetcher);
         registerURIHandler(new URIMethod("GET", "/sys/listResources"), listResourcesURIHandler);
         registerURIHandler(new URIMethod("POST", "/sys/listResources"), listResourcesURIHandler);
 
-        TransactionURIHandler transactionURIHandler = new TransactionURIHandler(host);
+        TransactionFetcher transactionFetcher =
+                new TransactionFetcher(host.getZoneManager(), host.getAccountManager());
+        TransactionURIHandler transactionURIHandler = new TransactionURIHandler(transactionFetcher);
         registerURIHandler(new URIMethod("GET", "/trans/getTransaction"), transactionURIHandler);
         registerURIHandler(new URIMethod("GET", "/trans/listTransactions"), transactionURIHandler);
 
-        /*
-                ListAccountsURIHandler listAccountsURIHandler = new ListAccountsURIHandler(host);
-                listAccountsURIHandler.setUserContext(userContext);
-                registerURIHandler(new URIMethod("GET", "/listAccounts"), listAccountsURIHandler);
-                registerURIHandler(new URIMethod("POST", "/listAccounts"), listAccountsURIHandler);
-        */
         ConnectionURIHandler connectionURIHandler = new ConnectionURIHandler();
         connectionURIHandler.setP2PService(host.getP2PService());
         connectionURIHandler.setPeerManager(host.getPeerManager());
