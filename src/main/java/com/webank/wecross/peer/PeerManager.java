@@ -115,7 +115,7 @@ public class PeerManager {
     }
 
     public class ChainInfoDetails {
-        public String name;
+        public String path;
         public String stubType;
     }
 
@@ -142,7 +142,7 @@ public class PeerManager {
 
             for (ChainInfo chainInfo : peer.getChainInfos().values()) {
                 ChainInfoDetails chainInfoDetails = new ChainInfoDetails();
-                chainInfoDetails.name = chainInfo.getName();
+                chainInfoDetails.path = chainInfo.getZone() + "." + chainInfo.getName();
                 chainInfoDetails.stubType = chainInfo.getStubType();
                 detail.chainInfos.add(chainInfoDetails);
             }
