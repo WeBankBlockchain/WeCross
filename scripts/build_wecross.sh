@@ -203,6 +203,9 @@ gen_conf() {
     caCert = 'classpath:ca.crt'
     sslCert = 'classpath:ssl.crt'
     sslKey = 'classpath:ssl.key'
+    sslSwitch = 2  # SSL_OFF(2), SSL_ON(1), SSL_ON_CLIENT_AUTH(0);
+    webRoot = 'classpath:pages'
+    mimeTypesFile = 'classpath:conf/mime.types' # set the content-types of a file
 
 [p2p]
     listenIP = '0.0.0.0'

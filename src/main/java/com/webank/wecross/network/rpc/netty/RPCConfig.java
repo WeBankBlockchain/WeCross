@@ -4,6 +4,51 @@ import org.springframework.core.io.Resource;
 
 public class RPCConfig {
 
+    public String getWebRoot() {
+        return webRoot;
+    }
+
+    public void setWebRoot(String webRoot) {
+        this.webRoot = webRoot;
+    }
+
+    public String getMimeTypesFile() {
+        return mimeTypesFile;
+    }
+
+    public void setMimeTypesFile(String mimeTypesFile) {
+        this.mimeTypesFile = mimeTypesFile;
+    }
+
+    @Override
+    public String toString() {
+        return "RPCConfig{"
+                + "listenIP='"
+                + listenIP
+                + '\''
+                + ", listenPort="
+                + listenPort
+                + ", sslSwitch="
+                + sslSwitch
+                + ", caCert="
+                + caCert
+                + ", sslCert="
+                + sslCert
+                + ", sslKey="
+                + sslKey
+                + ", threadNum="
+                + threadNum
+                + ", threadQueueCapacity="
+                + threadQueueCapacity
+                + ", webRoot='"
+                + webRoot
+                + '\''
+                + ", mimeTypesFile='"
+                + mimeTypesFile
+                + '\''
+                + '}';
+    }
+
     public enum SSLSwitch {
         SSL_OFF(2),
         SSL_ON(1),
@@ -33,6 +78,9 @@ public class RPCConfig {
 
     private Long threadNum;
     private Long threadQueueCapacity;
+
+    private String webRoot;
+    private String mimeTypesFile;
 
     public Resource getCaCert() {
         return caCert;
@@ -96,28 +144,5 @@ public class RPCConfig {
 
     public void setThreadQueueCapacity(Long threadQueueCapacity) {
         this.threadQueueCapacity = threadQueueCapacity;
-    }
-
-    @Override
-    public String toString() {
-        return "RPCConfig{"
-                + "listenIP='"
-                + listenIP
-                + '\''
-                + ", listenPort="
-                + listenPort
-                + ", sslSwitch="
-                + sslSwitch
-                + ", caCert="
-                + caCert
-                + ", sslCert="
-                + sslCert
-                + ", sslKey="
-                + sslKey
-                + ", threadNum="
-                + threadNum
-                + ", threadQueueCapacity="
-                + threadQueueCapacity
-                + '}';
     }
 }

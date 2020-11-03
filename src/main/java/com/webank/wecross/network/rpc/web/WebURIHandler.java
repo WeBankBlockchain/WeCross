@@ -12,8 +12,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 public class WebURIHandler implements URIHandler {
     private static Logger logger = LoggerFactory.getLogger(WebURIHandler.class);
-
-    private static final String WEB_ROOT = getWebRoot("classpath:/pages/");
+    private String webRoot;
 
     @Override
     public void handle(
@@ -43,7 +42,7 @@ public class WebURIHandler implements URIHandler {
         File file = new File(localPath);
         String absolutePath = file.getAbsolutePath();
 
-        if (!absolutePath.startsWith(WEB_ROOT)) {
+        if (!absolutePath.startsWith(getWebRoot())) {
             logger.warn("Invalid uri, path:" + localPath);
             throw new Exception("Invalid uri");
         }
@@ -68,10 +67,10 @@ public class WebURIHandler implements URIHandler {
 
     private String toLocalPath(String uri) {
 
-        return uri.replaceFirst("/s/", WEB_ROOT).replace("/", File.separator);
+        return uri.replaceFirst("/s/", getWebRoot()).replace("/", File.separator);
     }
 
-    private static String getWebRoot(String rootPath) {
+    public void setWebRoot(String rootPath) {
         try {
             Path path;
 
@@ -79,11 +78,14 @@ public class WebURIHandler implements URIHandler {
                     new PathMatchingResourcePatternResolver();
             path = Paths.get(resolver.getResource(rootPath).getURI());
 
-            return path.toString() + File.separator;
+            this.webRoot = path.toString() + File.separator;
 
         } catch (Exception e) {
             logger.error("Web root: {} not found", rootPath);
-            return "";
         }
+    }
+
+    public String getWebRoot() {
+        return webRoot;
     }
 }

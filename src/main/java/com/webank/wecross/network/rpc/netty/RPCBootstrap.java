@@ -26,6 +26,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import javax.activation.MimetypesFileTypeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -135,6 +136,9 @@ public class RPCBootstrap {
                 ThreadPoolTaskExecutorFactory.build(
                         config.getThreadNum(), config.getThreadQueueCapacity(), "http-callback");
 
+        MimetypesFileTypeMap mimetypesFileTypeMap =
+                new MimetypesFileTypeMap(config.getMimeTypesFile());
+
         serverBootstrap
                 .group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
@@ -165,8 +169,9 @@ public class RPCBootstrap {
                                                 new HttpServerHandler(
                                                         getUriHandlerDispatcher(),
                                                         threadPoolTaskExecutor,
-                                                        accountManager,
-                                                        authFilter));
+                                                        mimetypesFileTypeMap,
+                                                        authFilter,
+                                                        accountManager));
                             }
                         });
 
