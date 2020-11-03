@@ -121,6 +121,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
                     .set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
             // close connection
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+            return;
         }
 
         threadPoolTaskExecutor.execute(
