@@ -13,6 +13,7 @@ src_dir=$(pwd)'/src/'
 wecross_account_manager_url=https://github.com/WeBankFinTech/WeCross-Account-Manager.git
 wecross_account_manager_branch=${default_compatibility_version}
 
+need_db_config_ask=true
 DB_IP=localhost
 DB_PORT=3306
 DB_USERNAME=root
@@ -33,10 +34,11 @@ Usage:
     -s                              [Optional] Get wecross account manager by: gradle build from github Source Code.
     -b                              [Optional] Download from certain branch
     -t                              [Optional] Download from certain tag (same as -b)
+    -d                              [Optional] Use default db configuration
     -h  call for help
 e.g
-    bash $0 
-    bash $0 -s 
+    bash $0
+    bash $0 -s
 EOF
     exit 0
 }
@@ -55,6 +57,9 @@ parse_command() {
         t)
             wecross_account_manager_branch=$OPTARG
             compatibility_version=$OPTARG
+            ;;
+        d)
+            need_db_config_ask=false
             ;;
         h) help ;;
         esac
@@ -101,6 +106,14 @@ db_config_ask() {
     echo "" # \n
     LOG_INFO "Database connetion with: ${DB_IP}:${DB_PORT} ${DB_USERNAME} "
     check_db_service
+}
+
+config_database() {
+    if ${need_db_config_ask}; then
+        db_config_ask
+    else
+        check_db_service
+    fi
 }
 
 download_wecross_account_manager_pkg() {
@@ -230,7 +243,7 @@ database_init() {
 }
 
 main() {
-    db_config_ask
+    config_database
     if [ 1 -eq ${enable_build_from_resource} ]; then
         build_from_source
     else
