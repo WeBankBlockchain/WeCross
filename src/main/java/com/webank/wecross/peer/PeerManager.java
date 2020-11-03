@@ -10,6 +10,7 @@ import com.webank.wecross.zone.ChainInfo;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
@@ -127,7 +128,7 @@ public class PeerManager {
     }
 
     public Collection<PeerDetails> getPeerDetails() {
-        Collection<PeerDetails> peerDetails = new HashSet<>();
+        Collection<PeerDetails> peerDetails = new LinkedHashSet<>();
         for (Peer peer : peerInfos.values()) {
             PeerDetails detail = new PeerDetails();
             detail.nodeID = peer.node.getNodeID();

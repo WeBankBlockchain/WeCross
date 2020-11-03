@@ -10,7 +10,7 @@ public class Zone {
 
     private Logger logger = LoggerFactory.getLogger(Zone.class);
 
-    private Map<String, Chain> chains = new LinkedHashMap<>();
+    private Map<String, Chain> chains = new LinkedHashMap<>(); // need order output
 
     // Access control
     private Boolean visible;
