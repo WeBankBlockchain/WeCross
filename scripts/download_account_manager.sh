@@ -44,7 +44,7 @@ EOF
 }
 
 parse_command() {
-    while getopts "b:t:sh" option; do
+    while getopts "b:t:sdh" option; do
         # shellcheck disable=SC2220
         case ${option} in
         s)
