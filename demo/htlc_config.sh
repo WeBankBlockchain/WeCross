@@ -87,15 +87,15 @@ install_fabric_chaincode() {
     LOG_INFO "Install Fabric chaincode ..."
 
     # install ledger
-    docker exec -it cli peer chaincode install -n ${FABRIC_LEDGER} -v ${version} -p github.com/chaincode/ledger/
-    docker exec -it cli peer chaincode instantiate -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n ${FABRIC_LEDGER} -l golang -v ${version} -c '{"Args":["init","HTLCoin","htc","100000000"]}' -P 'OR ('\''Org1MSP.peer'\'','\''Org2MSP.peer'\'')'
+    docker exec -i cli peer chaincode install -n ${FABRIC_LEDGER} -v ${version} -p github.com/chaincode/ledger/
+    docker exec -i cli peer chaincode instantiate -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n ${FABRIC_LEDGER} -l golang -v ${version} -c '{"Args":["init","HTLCoin","htc","100000000"]}' -P 'OR ('\''Org1MSP.peer'\'','\''Org2MSP.peer'\'')'
 
     # install htlc
-    docker exec -it cli peer chaincode install -n ${FABRIC_HTLC} -v ${version} -p github.com/chaincode/htlc/
-    docker exec -it cli peer chaincode instantiate -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n ${FABRIC_HTLC} -l golang -v ${version} -c '{"Args":["init",'"\"${FABRIC_LEDGER}\""',"mychannel"]}'
+    docker exec -i cli peer chaincode install -n ${FABRIC_HTLC} -v ${version} -p github.com/chaincode/htlc/
+    docker exec -i cli peer chaincode instantiate -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n ${FABRIC_HTLC} -l golang -v ${version} -c '{"Args":["init",'"\"${FABRIC_LEDGER}\""',"mychannel"]}'
 
     # approve
-    docker exec -it cli peer chaincode invoke -C mychannel -n ${FABRIC_LEDGER} -c '{"Args":["createEscrowAccount","1000000"]}' -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+    docker exec -i cli peer chaincode invoke -C mychannel -n ${FABRIC_LEDGER} -c '{"Args":["createEscrowAccount","1000000"]}' -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
 }
 
 update_wecross_config() {
