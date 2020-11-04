@@ -36,7 +36,7 @@
 
 ## 快速开始
 
-阅读[快速入门](https://wecross.readthedocs.io/zh_CN/latest/docs/tutorial/demo.html)，从连通两个区块链开始，快速体验WeCross的强大功能。
+阅读[快速入门](https://wecross.readthedocs.io/zh_CN/latest/docs/tutorial/demo/index.html)，从连通两个区块链开始，快速体验WeCross的强大功能。
 
 ## 技术文档
 

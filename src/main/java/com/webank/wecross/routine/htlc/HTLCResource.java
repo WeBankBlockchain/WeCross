@@ -1,6 +1,7 @@
 package com.webank.wecross.routine.htlc;
 
 import com.webank.wecross.account.UniversalAccount;
+import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.peer.Peer;
@@ -71,7 +72,7 @@ public class HTLCResource extends Resource {
                             if (exception != null) {
                                 TransactionResponse transactionResponse = new TransactionResponse();
                                 transactionResponse.setErrorCode(exception.getErrorCode());
-                                transactionResponse.setErrorMessage(exception.getMessage());
+                                transactionResponse.setMessage(exception.getMessage());
                                 callback.onTransactionResponse(
                                         new TransactionException(0, null), transactionResponse);
                             } else {
@@ -192,7 +193,7 @@ public class HTLCResource extends Resource {
                                 logger.error(
                                         "UNLOCK_INITIATOR_ERROR: {}, {}",
                                         transactionResponse.getErrorCode(),
-                                        transactionResponse.getErrorMessage());
+                                        transactionResponse.getMessage());
                                 return;
                             }
 
@@ -258,7 +259,9 @@ public class HTLCResource extends Resource {
 
             TransactionRequest transactionRequest = booleanTransactionRequestPair.getValue();
             if (transactionRequest == null) {
-                response.setErrorCode(ErrorCode.DECODE_TRANSACTION_REQUEST_ERROR);
+                response.setErrorCode(
+                        NetworkQueryStatus.HTLC_ERROR
+                                + HTLCErrorCode.DECODE_TRANSACTION_REQUEST_ERROR);
                 response.setErrorMessage("decode transaction request failed");
                 if (logger.isDebugEnabled()) {
                     logger.debug("onRemoteTransaction, response: {}", response);
@@ -279,7 +282,8 @@ public class HTLCResource extends Resource {
                         exception -> {
                             if (exception != null) {
                                 Response newResponse = new Response();
-                                newResponse.setErrorCode(ErrorCode.HTLC_ERROR);
+                                newResponse.setErrorCode(
+                                        NetworkQueryStatus.HTLC_ERROR + HTLCErrorCode.UNLOCK_ERROR);
                                 newResponse.setErrorMessage(exception.getMessage());
                                 if (logger.isDebugEnabled()) {
                                     logger.debug("onRemoteTransaction, response: {}", newResponse);
@@ -304,7 +308,7 @@ public class HTLCResource extends Resource {
 
             if (!P2P_ACCESS_WHITE_LIST.contains(method)) {
                 response = new Response();
-                response.setErrorCode(ErrorCode.HTLC_ERROR);
+                response.setErrorCode(NetworkQueryStatus.HTLC_ERROR + HTLCErrorCode.NO_PERMISSION);
                 response.setErrorMessage(
                         "HTLCResource doesn't allow peers to call,request: " + transactionRequest);
                 if (logger.isDebugEnabled()) {

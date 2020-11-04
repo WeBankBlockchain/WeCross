@@ -1,7 +1,7 @@
 package com.webank.wecross.zone;
 
 import com.webank.wecross.stub.Path;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +10,7 @@ public class Zone {
 
     private Logger logger = LoggerFactory.getLogger(Zone.class);
 
-    private Map<String, Chain> chains = new HashMap<>();
+    private Map<String, Chain> chains = new LinkedHashMap<>();
 
     // Access control
     private Boolean visible;

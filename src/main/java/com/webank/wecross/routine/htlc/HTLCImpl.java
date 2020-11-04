@@ -84,7 +84,7 @@ public class HTLCImpl implements HTLC {
                                         ErrorCode.HTLC_ERROR,
                                         method.toUpperCase() + "_COUNTERPARTY_ERROR",
                                         HTLCErrorCode.TRANSACTION_ERROR,
-                                        transactionResponse.getErrorMessage()),
+                                        transactionResponse.getMessage()),
                                 null);
                         return;
                     }
@@ -156,6 +156,7 @@ public class HTLCImpl implements HTLC {
                 txHash,
                 blockNumber,
                 blockManager,
+                true,
                 connection,
                 (exception, transaction) -> {
                     if (exception != null) {
@@ -314,13 +315,13 @@ public class HTLCImpl implements HTLC {
                     type,
                     method,
                     response.getErrorCode(),
-                    response.getErrorMessage());
+                    response.getMessage());
 
             throw new WeCrossException(
                     ErrorCode.HTLC_ERROR,
                     method.toUpperCase() + "_ERROR",
                     HTLCErrorCode.TRANSACTION_ERROR,
-                    response.getErrorMessage());
+                    response.getMessage());
         }
 
         if (logger.isDebugEnabled()) {

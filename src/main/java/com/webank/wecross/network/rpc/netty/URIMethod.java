@@ -32,16 +32,20 @@ public class URIMethod {
             return false;
         }
 
-        // /network/stub/resource/method
-        // /network/stub/method
+        // /resource/network/stub/resource/metchod
+        // /resource/network/stub/method
         int count = uri.substring(1).split("/").length;
-        return uri.startsWith("/") && (count == 4 || count == 3);
+        return uri.startsWith("/resource/") && (count == 5 || count == 4);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         URIMethod path = (URIMethod) o;
         return Objects.equals(method, path.method) && Objects.equals(uri, path.uri);
     }

@@ -1,16 +1,20 @@
 package com.webank.wecross.stub;
 
-public class Transaction {
+import java.util.Arrays;
 
+public class Transaction {
     private byte[] txBytes; // raw transaction info
     private byte[] receiptBytes; // raw transaction receipt info
 
-    private String transactionID;
-    private String seq;
+    private String accountIdentity; // sender's chain account identity
+
+    private String xaTransactionID;
+    private long xaTransactionSeq;
+
     private String resource;
 
     private long blockNumber;
-    private String transactionHash;
+    private String txHash;
     private TransactionRequest transactionRequest;
     private TransactionResponse transactionResponse;
 
@@ -18,11 +22,11 @@ public class Transaction {
 
     public Transaction(
             long blockNumber,
-            String transactionHash,
+            String txHash,
             TransactionRequest transactionRequest,
             TransactionResponse transactionResponse) {
         this.blockNumber = blockNumber;
-        this.transactionHash = transactionHash;
+        this.txHash = txHash;
         this.transactionRequest = transactionRequest;
         this.transactionResponse = transactionResponse;
     }
@@ -35,12 +39,12 @@ public class Transaction {
         this.blockNumber = blockNumber;
     }
 
-    public String getTransactionHash() {
-        return transactionHash;
+    public String getTxHash() {
+        return txHash;
     }
 
-    public void setTransactionHash(String transactionHash) {
-        this.transactionHash = transactionHash;
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
     }
 
     public String getResource() {
@@ -83,12 +87,12 @@ public class Transaction {
         this.receiptBytes = receiptBytes;
     }
 
-    public String getTransactionID() {
-        return transactionID;
+    public String getAccountIdentity() {
+        return accountIdentity;
     }
 
-    public void setTransactionID(String transactionID) {
-        this.transactionID = transactionID;
+    public void setAccountIdentity(String accountIdentity) {
+        this.accountIdentity = accountIdentity;
     }
 
     public boolean isTransactionByProxy() {
@@ -99,35 +103,51 @@ public class Transaction {
         this.transactionByProxy = transactionByProxy;
     }
 
-    public String getSeq() {
-        return seq;
+    public String getXaTransactionID() {
+        return xaTransactionID;
     }
 
-    public void setSeq(String seq) {
-        this.seq = seq;
+    public void setXaTransactionID(String xaTransactionID) {
+        this.xaTransactionID = xaTransactionID;
+    }
+
+    public long getXaTransactionSeq() {
+        return xaTransactionSeq;
+    }
+
+    public void setXaTransactionSeq(long xaTransactionSeq) {
+        this.xaTransactionSeq = xaTransactionSeq;
     }
 
     @Override
     public String toString() {
         return "Transaction{"
-                + "transactionID='"
-                + transactionID
+                + "txBytes="
+                + Arrays.toString(txBytes)
+                + ", receiptBytes="
+                + Arrays.toString(receiptBytes)
+                + ", accountIdentity='"
+                + accountIdentity
                 + '\''
-                + ", seq="
-                + seq
-                + ", resource="
+                + ", xaTransactionID='"
+                + xaTransactionID
+                + '\''
+                + ", xaTransactionSeq="
+                + xaTransactionSeq
+                + ", resource='"
                 + resource
+                + '\''
                 + ", blockNumber="
                 + blockNumber
                 + ", transactionHash='"
-                + transactionHash
+                + txHash
                 + '\''
-                + ", transactionByProxy="
-                + transactionByProxy
                 + ", transactionRequest="
                 + transactionRequest
                 + ", transactionResponse="
                 + transactionResponse
+                + ", transactionByProxy="
+                + transactionByProxy
                 + '}';
     }
 }

@@ -62,4 +62,12 @@ public class TaskManager {
     public void setTasks(List<Task> tasks) {
         this.tasks = tasks;
     }
+
+    public Scheduler getScheduler() {
+        return scheduler;
+    }
+
+    public void setScheduler(Scheduler scheduler) {
+        this.scheduler = scheduler;
+    }
 }

@@ -1,16 +1,11 @@
 package com.webank.wecross.network.rpc;
 
 import com.webank.wecross.host.WeCrossHost;
-import com.webank.wecross.network.rpc.handler.ConnectionURIHandler;
-import com.webank.wecross.network.rpc.handler.ListResourcesURIHandler;
-import com.webank.wecross.network.rpc.handler.ListStubsURIHandler;
-import com.webank.wecross.network.rpc.handler.ResourceURIHandler;
-import com.webank.wecross.network.rpc.handler.StateURIHandler;
-import com.webank.wecross.network.rpc.handler.TestURIHandler;
-import com.webank.wecross.network.rpc.handler.URIHandler;
-import com.webank.wecross.network.rpc.handler.XATransactionHandler;
+import com.webank.wecross.network.rpc.handler.*;
 import com.webank.wecross.network.rpc.netty.URIMethod;
 import com.webank.wecross.network.rpc.web.WebService;
+import com.webank.wecross.restserver.fetcher.ResourceFetcher;
+import com.webank.wecross.restserver.fetcher.TransactionFetcher;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -22,7 +17,7 @@ public class URIHandlerDispatcher {
     private static final Logger logger = LoggerFactory.getLogger(URIHandlerDispatcher.class);
 
     public static final URIMethod RESOURCE_URIMETHOD =
-            new URIMethod("POST", "/network/stub/resource/method");
+            new URIMethod("POST", "/resource/network/stub/resource/method");
 
     private Map<URIMethod, URIHandler> requestURIMapper = new HashMap<>();
 
@@ -45,27 +40,27 @@ public class URIHandlerDispatcher {
 
         // Others
         TestURIHandler testURIHandler = new TestURIHandler();
-        registerURIHandler(new URIMethod("GET", "/test"), testURIHandler);
-        registerURIHandler(new URIMethod("POST", "/test"), testURIHandler);
+        registerURIHandler(new URIMethod("GET", "/sys/test"), testURIHandler);
+        registerURIHandler(new URIMethod("POST", "/sys/test"), testURIHandler);
 
         StateURIHandler stateURIHandler = new StateURIHandler(host);
-        registerURIHandler(new URIMethod("GET", "/state"), stateURIHandler);
-        registerURIHandler(new URIMethod("POST", "/state"), stateURIHandler);
+        registerURIHandler(new URIMethod("GET", "/sys/state"), stateURIHandler);
 
         ListStubsURIHandler listStubsURIHandler = new ListStubsURIHandler(host);
-        registerURIHandler(new URIMethod("GET", "/supportedStubs"), listStubsURIHandler);
-        registerURIHandler(new URIMethod("POST", "/supportedStubs"), listStubsURIHandler);
+        registerURIHandler(new URIMethod("GET", "/sys/supportedStubs"), listStubsURIHandler);
 
-        ListResourcesURIHandler listResourcesURIHandler = new ListResourcesURIHandler(host);
-        registerURIHandler(new URIMethod("GET", "/listResources"), listResourcesURIHandler);
-        registerURIHandler(new URIMethod("POST", "/listResources"), listResourcesURIHandler);
+        ResourceFetcher resourceFetcher = new ResourceFetcher(host.getZoneManager());
+        ListResourcesURIHandler listResourcesURIHandler =
+                new ListResourcesURIHandler(resourceFetcher);
+        registerURIHandler(new URIMethod("GET", "/sys/listResources"), listResourcesURIHandler);
+        registerURIHandler(new URIMethod("POST", "/sys/listResources"), listResourcesURIHandler);
 
-        /*
-                ListAccountsURIHandler listAccountsURIHandler = new ListAccountsURIHandler(host);
-                listAccountsURIHandler.setUserContext(userContext);
-                registerURIHandler(new URIMethod("GET", "/listAccounts"), listAccountsURIHandler);
-                registerURIHandler(new URIMethod("POST", "/listAccounts"), listAccountsURIHandler);
-        */
+        TransactionFetcher transactionFetcher =
+                new TransactionFetcher(host.getZoneManager(), host.getAccountManager());
+        TransactionURIHandler transactionURIHandler = new TransactionURIHandler(transactionFetcher);
+        registerURIHandler(new URIMethod("GET", "/trans/getTransaction"), transactionURIHandler);
+        registerURIHandler(new URIMethod("GET", "/trans/listTransactions"), transactionURIHandler);
+
         ConnectionURIHandler connectionURIHandler = new ConnectionURIHandler();
         connectionURIHandler.setP2PService(host.getP2PService());
         connectionURIHandler.setPeerManager(host.getPeerManager());
@@ -82,11 +77,12 @@ public class URIHandlerDispatcher {
         xaTransactionHandler.setXaTransactionManager(
                 host.getRoutineManager().getXaTransactionManager());
         xaTransactionHandler.setHost(host);
-        registerURIHandler(new URIMethod("POST", "/startTransaction"), xaTransactionHandler);
-        registerURIHandler(new URIMethod("POST", "/commitTransaction"), xaTransactionHandler);
-        registerURIHandler(new URIMethod("POST", "/rollbackTransaction"), xaTransactionHandler);
-        registerURIHandler(new URIMethod("POST", "/getTransactionInfo"), xaTransactionHandler);
-        registerURIHandler(new URIMethod("POST", "/getTransactionIDs"), xaTransactionHandler);
+        registerURIHandler(new URIMethod("POST", "/xa/startXATransaction"), xaTransactionHandler);
+        registerURIHandler(new URIMethod("POST", "/xa/commitXATransaction"), xaTransactionHandler);
+        registerURIHandler(
+                new URIMethod("POST", "/xa/rollbackXATransaction"), xaTransactionHandler);
+        registerURIHandler(new URIMethod("POST", "/xa/getXATransaction"), xaTransactionHandler);
+        registerURIHandler(new URIMethod("POST", "/xa/listXATransactions"), xaTransactionHandler);
 
         ResourceURIHandler resourceURIHandler = new ResourceURIHandler(host);
         registerURIHandler(RESOURCE_URIMETHOD, resourceURIHandler);

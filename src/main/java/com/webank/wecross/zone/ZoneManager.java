@@ -14,9 +14,7 @@ import com.webank.wecross.stubmanager.MemoryBlockManager;
 import com.webank.wecross.stubmanager.MemoryBlockManagerFactory;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.utils.core.PathUtils;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -25,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 public class ZoneManager {
     private Logger logger = LoggerFactory.getLogger(ZoneManager.class);
-    private Map<String, Zone> zones = new HashMap<>();
+    private Map<String, Zone> zones = new LinkedHashMap<>();
     private AtomicInteger seq = new AtomicInteger(1);
     private P2PService p2PService;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -298,6 +296,22 @@ public class ZoneManager {
             lock.writeLock().unlock();
         }
         return changed;
+    }
+
+    public Map<String, Resource> getChainResources(Path chainPath) {
+        Map<String, Resource> resources = new LinkedHashMap<>();
+        lock.readLock().lock();
+        try {
+            for (Map.Entry<String, Resource> resourceEntry :
+                    getChain(chainPath).getResources().entrySet()) {
+                String resourceName = PathUtils.toPureName(resourceEntry.getKey());
+                chainPath.setResource(resourceName);
+                resources.put(chainPath.toString(), resourceEntry.getValue());
+            }
+        } finally {
+            lock.readLock().unlock();
+        }
+        return resources;
     }
 
     public Map<String, Resource> getAllResources(boolean ignoreRemote) {

@@ -62,7 +62,7 @@ public class TransactionValidator {
         boolean isEqual =
                 // path.getResource().equals(transaction.getResource()) &&
                 getBlockNumber() == transaction.getBlockNumber()
-                        && getTransactionHash().equals(transaction.getTransactionHash())
+                        && getTransactionHash().equals(transaction.getTxHash())
                         && getMethod().equals(request.getMethod())
                         && Arrays.equals(getArgs(), request.getArgs())
                         && Arrays.equals(getResult(), response.getResult());

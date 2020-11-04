@@ -83,10 +83,18 @@ public class Path {
 
     @Override
     public String toString() {
-        return zone + "." + chain + "." + resource;
+        if (Objects.nonNull(resource)) {
+            return zone + "." + chain + "." + resource;
+        } else {
+            return zone + "." + chain;
+        }
     }
 
     public String toURI() {
-        return zone + "/" + chain + "/" + resource;
+        if (Objects.nonNull(resource)) {
+            return zone + "/" + chain + "/" + resource;
+        } else {
+            return zone + "/" + chain;
+        }
     }
 }

@@ -9,18 +9,18 @@ import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.host.WeCrossHost;
-import com.webank.wecross.resource.Resource;
+import com.webank.wecross.network.UriDecoder;
 import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.routine.xa.XATransactionManager;
 import com.webank.wecross.stub.ObjectMapperFactory;
 import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.StubConstant;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** POST/GET /xa/method */
 public class XATransactionHandler implements URIHandler {
     private Logger logger = LoggerFactory.getLogger(XATransactionHandler.class);
     private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
@@ -28,108 +28,45 @@ public class XATransactionHandler implements URIHandler {
 
     private WeCrossHost host;
 
-    public static class XAStartTransactionRequest {
-        private String transactionID;
-        private List<String> paths;
+    public static class XATransactionRequest {
+        private String xaTransactionID;
+        private Set<String> paths;
 
-        public String getTransactionID() {
-            return transactionID;
+        public String getXaTransactionID() {
+            return xaTransactionID;
         }
 
-        public void setTransactionID(String transactionID) {
-            this.transactionID = transactionID;
+        public void setXaTransactionID(String xaTransactionID) {
+            this.xaTransactionID = xaTransactionID;
         }
 
-        public List<String> getPaths() {
+        public Set<String> getPaths() {
             return paths;
         }
 
-        public void setPaths(List<String> paths) {
+        public void setPaths(Set<String> paths) {
             this.paths = paths;
         }
     }
 
-    public static class XACommitTransactionRequest {
-        private String transactionID;
-        private List<String> paths;
+    public static class ListXATransactionsRequest {
+        private int size;
+        private Map<String, Integer> offsets = Collections.synchronizedMap(new HashMap<>());
 
-        public String getTransactionID() {
-            return transactionID;
+        public int getSize() {
+            return size;
         }
 
-        public void setTransactionID(String transactionID) {
-            this.transactionID = transactionID;
+        public void setSize(int size) {
+            this.size = size;
         }
 
-        public List<String> getPaths() {
-            return paths;
+        public Map<String, Integer> getOffsets() {
+            return offsets;
         }
 
-        public void setPaths(List<String> paths) {
-            this.paths = paths;
-        }
-    }
-
-    public static class XARollbackTransactionRequest {
-        private String transactionID;
-        private List<String> paths;
-
-        public String getTransactionID() {
-            return transactionID;
-        }
-
-        public void setTransactionID(String transactionID) {
-            this.transactionID = transactionID;
-        }
-
-        public List<String> getPaths() {
-            return paths;
-        }
-
-        public void setPaths(List<String> paths) {
-            this.paths = paths;
-        }
-    }
-
-    public static class XAGetTransactionInfoRequest {
-        private String transactionID;
-        private List<String> paths;
-
-        public String getTransactionID() {
-            return transactionID;
-        }
-
-        public void setTransactionID(String transactionID) {
-            this.transactionID = transactionID;
-        }
-
-        public List<String> getPaths() {
-            return paths;
-        }
-
-        public void setPaths(List<String> paths) {
-            this.paths = paths;
-        }
-    }
-
-    public static class XAGetTransactionIDRequest {
-        private String path;
-        private int option;
-
-        public String getPath() {
-            return path;
-        }
-
-        public void setPath(String path) {
-            this.path = path;
-        }
-
-        public int getOption() {
-            return option;
-        }
-
-        public void setOption(int option) {
-            this.option = option;
+        public void setOffsets(Map<String, Integer> offsets) {
+            this.offsets = offsets;
         }
     }
 
@@ -142,153 +79,111 @@ public class XATransactionHandler implements URIHandler {
             Callback callback) {
         RestResponse<Object> restResponse = new RestResponse<Object>();
 
+        UniversalAccount ua;
         try {
-            UniversalAccount ua = host.getAccountManager().getUniversalAccount(userContext);
+            ua = host.getAccountManager().getUniversalAccount(userContext);
             if (ua == null) {
-                throw new WeCrossException(GET_UA_FAILED, "");
+                throw new WeCrossException(GET_UA_FAILED, "Failed to get universal account");
+            }
+        } catch (WeCrossException e) {
+            restResponse.setErrorCode(
+                    NetworkQueryStatus.UNIVERSAL_ACCOUNT_ERROR + e.getErrorCode());
+            restResponse.setMessage(e.getMessage());
+            callback.onResponse(restResponse);
+            return;
+        }
+
+        try {
+            UriDecoder uriDecoder = new UriDecoder(uri);
+            String method = uriDecoder.getMethod();
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("uri: {}, method: {}, request string: {}", uri, method, content);
             }
 
-            String method = uri.substring(1);
-
             switch (method) {
-                case "startTransaction":
+                case "startXATransaction":
                     {
-                        RestRequest<XAStartTransactionRequest> xaRequest =
+                        RestRequest<XATransactionRequest> xaRequest =
                                 objectMapper.readValue(
                                         content,
-                                        new TypeReference<
-                                                RestRequest<XAStartTransactionRequest>>() {});
+                                        new TypeReference<RestRequest<XATransactionRequest>>() {});
 
-                        xaTransactionManager.asyncStartTransaction(
-                                xaRequest.getData().getTransactionID(),
+                        xaTransactionManager.asyncStartXATransaction(
+                                xaRequest.getData().getXaTransactionID(),
                                 ua,
-                                listPathsToSet(xaRequest.getData().getPaths()),
-                                (e, result) -> {
-                                    if (e != null) {
-                                        logger.error("Error while startTransaction", e);
-
-                                        restResponse.setErrorCode(
-                                                NetworkQueryStatus.XA_ERROR + e.getErrorCode());
-                                        restResponse.setMessage(e.getMessage());
-                                        callback.onResponse(restResponse);
-
-                                        return;
-                                    }
-
-                                    restResponse.setData(result);
+                                decodePathSet(xaRequest.getData().getPaths()),
+                                (response) -> {
+                                    restResponse.setData(response);
                                     callback.onResponse(restResponse);
                                 });
                         return;
                     }
-                case "commitTransaction":
+                case "commitXATransaction":
                     {
-                        RestRequest<XACommitTransactionRequest> xaRequest =
+                        RestRequest<XATransactionRequest> xaRequest =
                                 objectMapper.readValue(
                                         content,
-                                        new TypeReference<
-                                                RestRequest<XACommitTransactionRequest>>() {});
+                                        new TypeReference<RestRequest<XATransactionRequest>>() {});
 
-                        xaTransactionManager.asyncCommitTransaction(
-                                xaRequest.getData().getTransactionID(),
+                        xaTransactionManager.asyncCommitXATransaction(
+                                xaRequest.getData().getXaTransactionID(),
                                 ua,
-                                listPathsToSet(xaRequest.getData().getPaths()),
-                                (e, result) -> {
-                                    if (e != null) {
-                                        logger.error("Error while commitTransaction", e);
-
-                                        restResponse.setErrorCode(
-                                                NetworkQueryStatus.XA_ERROR + e.getErrorCode());
-                                        restResponse.setMessage(e.getMessage());
-                                        callback.onResponse(restResponse);
-
-                                        return;
-                                    }
-
-                                    restResponse.setData(result);
+                                filterAndSortChainPaths(xaRequest.getData().getPaths()),
+                                (response) -> {
+                                    restResponse.setData(response);
                                     callback.onResponse(restResponse);
                                 });
-
                         return;
                     }
-                case "rollbackTransaction":
+                case "rollbackXATransaction":
                     {
-                        RestRequest<XARollbackTransactionRequest> xaRequest =
+                        RestRequest<XATransactionRequest> xaRequest =
                                 objectMapper.readValue(
                                         content,
-                                        new TypeReference<
-                                                RestRequest<XARollbackTransactionRequest>>() {});
+                                        new TypeReference<RestRequest<XATransactionRequest>>() {});
 
-                        xaTransactionManager.asyncRollback(
-                                xaRequest.getData().getTransactionID(),
+                        xaTransactionManager.asyncRollbackXATransaction(
+                                xaRequest.getData().getXaTransactionID(),
                                 ua,
-                                listPathsToSet(xaRequest.getData().getPaths()),
-                                (e, result) -> {
-                                    if (e != null) {
-                                        logger.error("Error while rollbackTransaction", e);
+                                filterAndSortChainPaths(xaRequest.getData().getPaths()),
+                                (response) -> {
+                                    restResponse.setData(response);
+                                    callback.onResponse(restResponse);
+                                });
+                        return;
+                    }
+                case "getXATransaction":
+                    {
+                        RestRequest<XATransactionRequest> xaRequest =
+                                objectMapper.readValue(
+                                        content,
+                                        new TypeReference<RestRequest<XATransactionRequest>>() {});
 
-                                        restResponse.setErrorCode(
-                                                NetworkQueryStatus.XA_ERROR + e.getErrorCode());
-                                        restResponse.setMessage(e.getMessage());
-                                        callback.onResponse(restResponse);
-
-                                        return;
-                                    }
-
-                                    restResponse.setData(result);
+                        xaTransactionManager.asyncGetXATransaction(
+                                xaRequest.getData().getXaTransactionID(),
+                                ua,
+                                filterAndSortChainPaths(xaRequest.getData().getPaths()),
+                                (xaTransactionResponse) -> {
+                                    restResponse.setData(xaTransactionResponse);
                                     callback.onResponse(restResponse);
                                 });
 
                         return;
                     }
-                case "getTransactionInfo":
+                case "listXATransactions":
                     {
-                        RestRequest<XAGetTransactionInfoRequest> xaRequest =
+                        RestRequest<ListXATransactionsRequest> xaRequest =
                                 objectMapper.readValue(
                                         content,
                                         new TypeReference<
-                                                RestRequest<XAGetTransactionInfoRequest>>() {});
+                                                RestRequest<ListXATransactionsRequest>>() {});
 
-                        xaTransactionManager.asyncGetTransactionInfo(
-                                xaRequest.getData().getTransactionID(),
+                        xaTransactionManager.asyncListXATransactions(
                                 ua,
-                                listPathsToSet(xaRequest.getData().getPaths()),
-                                (e, info) -> {
-                                    if (e != null) {
-                                        logger.error("Error while getTransactionInfo", e);
-
-                                        restResponse.setErrorCode(
-                                                NetworkQueryStatus.XA_ERROR + e.getErrorCode());
-                                        restResponse.setMessage(e.getMessage());
-                                        callback.onResponse(restResponse);
-
-                                        return;
-                                    }
-
-                                    restResponse.setData(info.toString());
-                                    callback.onResponse(restResponse);
-                                });
-
-                        return;
-                    }
-                case "getTransactionIDs":
-                    {
-                        RestRequest<XAGetTransactionIDRequest> xaRequest =
-                                objectMapper.readValue(
-                                        content,
-                                        new TypeReference<
-                                                RestRequest<XAGetTransactionIDRequest>>() {});
-
-                        Path path = Path.decode(xaRequest.getData().getPath());
-                        Path proxyPath = new Path(path);
-                        proxyPath.setResource(StubConstant.PROXY_NAME);
-                        Resource resource =
-                                xaTransactionManager.getZoneManager().fetchResource(proxyPath);
-
-                        xaTransactionManager.asyncGetTransactionIDs(
-                                resource,
-                                ua,
-                                xaRequest.getData().getOption(),
-                                (exception, ids) -> {
+                                xaRequest.getData().getOffsets(),
+                                xaRequest.getData().getSize(),
+                                (exception, xaTransactionListResponse) -> {
                                     if (Objects.nonNull(exception)) {
                                         restResponse.setErrorCode(
                                                 NetworkQueryStatus.XA_ERROR
@@ -298,45 +193,69 @@ public class XATransactionHandler implements URIHandler {
                                         return;
                                     }
 
-                                    restResponse.setData(ids);
+                                    restResponse.setData(xaTransactionListResponse);
                                     callback.onResponse(restResponse);
                                 });
-
                         return;
                     }
                 default:
                     {
                         logger.warn("Unsupported method: {}", method);
-                        restResponse.setErrorCode(NetworkQueryStatus.METHOD_ERROR);
+                        restResponse.setErrorCode(NetworkQueryStatus.URI_PATH_ERROR);
                         restResponse.setMessage("Unsupported method: " + method);
                         break;
                     }
             }
         } catch (WeCrossException e) {
-            logger.error("Error while process xa", e);
-            restResponse.setErrorCode(NetworkQueryStatus.EXCEPTION_FLAG + e.getErrorCode());
+            logger.error("Error while processing xa: ", e);
+            restResponse.setErrorCode(NetworkQueryStatus.XA_ERROR + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
         } catch (Exception e) {
-            logger.error("Error while process xa", e);
+            logger.error("Error while processing xa: ", e);
             restResponse.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
-            restResponse.setMessage("Undefined error");
+            restResponse.setMessage("Undefined error: " + e.getMessage());
         }
 
         callback.onResponse(restResponse);
     }
 
-    private Set<Path> listPathsToSet(List<String> paths) {
-        return paths.parallelStream()
-                .map(
-                        (s) -> {
-                            try {
-                                return Path.decode(s);
-                            } catch (Exception e) {
-                                logger.error("error", e);
-                                return null;
-                            }
-                        })
-                .collect(Collectors.toSet());
+    private Set<Path> decodePathSet(Set<String> paths) throws WeCrossException {
+        Set<Path> res =
+                paths.parallelStream()
+                        .map(
+                                (s) -> {
+                                    try {
+                                        return Path.decode(s);
+                                    } catch (Exception e) {
+                                        logger.error("Decode path error: ", e);
+                                        return null;
+                                    }
+                                })
+                        .collect(Collectors.toSet());
+
+        if (res.isEmpty() || res.size() < paths.size()) {
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.POST_DATA_ERROR, "Invalid path found");
+        }
+
+        return res;
+    }
+
+    public Set<Path> filterAndSortChainPaths(Set<String> paths) throws WeCrossException {
+        Set<String> tempPaths = new HashSet<>();
+        for (String path : paths) {
+            try {
+                String[] splits = path.split("\\.");
+                tempPaths.add(splits[0] + "." + splits[1]);
+            } catch (Exception e) {
+                throw new WeCrossException(
+                        WeCrossException.ErrorCode.POST_DATA_ERROR, "Invalid path found");
+            }
+        }
+
+        Set<Path> sortSet = new TreeSet<>(Comparator.comparing(Path::toString));
+        sortSet.addAll(decodePathSet(tempPaths));
+        return sortSet;
     }
 
     public XATransactionManager getXaTransactionManager() {

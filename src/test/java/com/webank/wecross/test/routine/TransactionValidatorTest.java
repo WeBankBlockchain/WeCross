@@ -26,8 +26,8 @@ public class TransactionValidatorTest {
         response.setResult(new String[] {"hello", "world"});
         Transaction transaction = new Transaction(100, "0x", request, response);
 
-        transaction.setSeq("0");
-        transaction.setTransactionID("0");
+        transaction.setXaTransactionSeq(0);
+        transaction.setXaTransactionID("0");
         transaction.setResource("c");
 
         Assert.assertEquals(true, transactionValidator.verify(transaction));
