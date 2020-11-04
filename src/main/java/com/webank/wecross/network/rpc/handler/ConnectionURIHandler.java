@@ -83,16 +83,49 @@ public class ConnectionURIHandler implements URIHandler {
     }
 
     public static class ChainDetails {
-        public static class ResourceInfoDetails {
-            public String path;
-            public String stubType;
+        private String zone;
+        private String chain;
+        private String type;
+        private boolean isLocal;
+        private long blockNumber;
+        private Map<String, String> properties;
+        
+        public String getZone() {
+            return zone;
         }
-
-        public String zone;
-        public String chain;
-        public String type;
-        // public Collection<ResourceInfoDetails> resources;
-        public Map<String, String> properties;
+        public void setZone(String zone) {
+            this.zone = zone;
+        }
+        public String getChain() {
+            return chain;
+        }
+        public void setChain(String chain) {
+            this.chain = chain;
+        }
+        public String getType() {
+            return type;
+        }
+        public void setType(String type) {
+            this.type = type;
+        }
+        public boolean isLocal() {
+            return isLocal;
+        }
+        public void setLocal(boolean isLocal) {
+            this.isLocal = isLocal;
+        }
+        public long getBlockNumber() {
+            return blockNumber;
+        }
+        public void setBlockNumber(long blockNumber) {
+            this.blockNumber = blockNumber;
+        }
+        public Map<String, String> getProperties() {
+            return properties;
+        }
+        public void setProperties(Map<String, String> properties) {
+            this.properties = properties;
+        }
     }
 
     private Object handleListChains(
@@ -121,7 +154,14 @@ public class ConnectionURIHandler implements URIHandler {
                 */
 
                 ChainDetails chainDetails = new ChainDetails();
-                chainDetails.zone = zone;
+                chainDetails.setZone(zone);
+                chainDetails.setChain(chain);
+                chainDetails.setType(type);
+                chainDetails.setLocal(chainEntry.getValue().hasLocalConnection());
+                chainEntry.getValue().getBlockManager().asyncGetBlockNumber((exception, number) -> {
+                    chainDetails.setBlockNumber(number);
+                }); 
+                
                 chainDetails.chain = chain;
                 chainDetails.type = type;
                 chainDetails.properties = properties;
