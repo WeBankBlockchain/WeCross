@@ -77,7 +77,6 @@ public class RemoteAuthFilter implements AuthFilter {
         }
     }
 
-    @Override
     public void registerAuthUri(String uri) {
         uriNeedAuth.add(uri);
     }

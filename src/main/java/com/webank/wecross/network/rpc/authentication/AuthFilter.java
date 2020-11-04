@@ -10,6 +10,4 @@ public interface AuthFilter {
 
     void doAuth(ChannelHandlerContext ctx, HttpRequest httpRequest, Handler handler)
             throws Exception;
-
-    void registerAuthUri(String uri);
 }

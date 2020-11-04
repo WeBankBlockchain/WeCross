@@ -13,14 +13,18 @@ src_dir=$(pwd)'/src/'
 wecross_account_manager_url=https://github.com/WeBankFinTech/WeCross-Account-Manager.git
 wecross_account_manager_branch=${default_compatibility_version}
 
+need_db_config_ask=true
+DB_IP=localhost
+DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=
+
 LOG_INFO() {
-    local content=${1}
-    echo -e "\033[32m[INFO] ${content}\033[0m"
+    echo -e "\033[32m[INFO] $@\033[0m"
 }
 
 LOG_ERROR() {
-    local content=${1}
-    echo -e "\033[31m[ERROR] ${content}\033[0m"
+    echo -e "\033[31m[ERROR] $@\033[0m"
 }
 
 help() {
@@ -30,16 +34,17 @@ Usage:
     -s                              [Optional] Get wecross account manager by: gradle build from github Source Code.
     -b                              [Optional] Download from certain branch
     -t                              [Optional] Download from certain tag (same as -b)
+    -d                              [Optional] Use default db configuration
     -h  call for help
 e.g
-    bash $0 
-    bash $0 -s 
+    bash $0
+    bash $0 -s
 EOF
     exit 0
 }
 
 parse_command() {
-    while getopts "b:t:sh" option; do
+    while getopts "b:t:sdh" option; do
         # shellcheck disable=SC2220
         case ${option} in
         s)
@@ -53,10 +58,62 @@ parse_command() {
             wecross_account_manager_branch=$OPTARG
             compatibility_version=$OPTARG
             ;;
+        d)
+            need_db_config_ask=false
+            ;;
         h) help ;;
         esac
     done
 
+}
+
+check_command() {
+    local cmd=${1}
+    if [ -z "$(command -v ${cmd})" ]; then
+        LOG_ERROR "${cmd} is not installed."
+        exit 1
+    fi
+}
+
+query_db() {
+    if [ ${DB_PASSWORD} ]; then
+        mysql -u ${DB_USERNAME} --password="${DB_PASSWORD}" -h ${DB_IP} -P ${DB_PORT} $@ 2>/dev/null
+    else
+        mysql -u ${DB_USERNAME} -h ${DB_IP} -P ${DB_PORT} $@ 2>/dev/null
+    fi
+}
+
+check_db_service() {
+    LOG_INFO "Checking database configuration"
+    set +e
+    if ! query_db -e "status;" >/dev/null; then
+        LOG_ERROR "Database configuration error."
+        LOG_INFO "Please config database, username and password. And use this command to check:"
+        echo -e "\033[32m        mysql -u ${DB_USERNAME} --password=\"<your password>\" -h ${DB_IP} -P ${DB_PORT} -e \"status;\" \033[0m"
+        exit 1
+    fi
+    set -e
+    LOG_INFO "Database configuration OK!"
+}
+
+db_config_ask() {
+    check_command mysql
+    LOG_INFO "Database connection:"
+    read -r -p "[1/4]> ip: " DB_IP
+    read -r -p "[2/4]> port: " DB_PORT
+    read -r -p "[3/4]> username: " DB_USERNAME
+    read -r -p "[4/4]> password: " -s DB_PASSWORD
+    echo "" # \n
+    LOG_INFO "Database connetion with: ${DB_IP}:${DB_PORT} ${DB_USERNAME} "
+    check_db_service
+}
+
+config_database() {
+    if ${need_db_config_ask}; then
+        db_config_ask
+    else
+        check_db_service
+    fi
 }
 
 download_wecross_account_manager_pkg() {
@@ -180,12 +237,19 @@ build_from_source() {
     LOG_INFO "Build WeCross Account Manager successfully"
 }
 
+database_init() {
+    query_db < ./WeCross-Account-Manager/conf/db_setup.sql
+    LOG_INFO "Database initialize success:" $(cat ./WeCross-Account-Manager/conf/db_setup.sql)
+}
+
 main() {
+    config_database
     if [ 1 -eq ${enable_build_from_resource} ]; then
         build_from_source
     else
         download_wecross_account_manager_pkg
     fi
+    database_init
 }
 
 print_result() {

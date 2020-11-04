@@ -41,6 +41,18 @@ public class ConfigUtils {
         }
     }
 
+    public static String classpath2Absolute(String fileName) throws WeCrossException {
+        try {
+            PathMatchingResourcePatternResolver resolver =
+                    new PathMatchingResourcePatternResolver();
+            return resolver.getResource(fileName).getFile().getAbsolutePath();
+        } catch (Exception e) {
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.INTERNAL_ERROR,
+                    "Something wrong with parse " + fileName + ": " + e.getMessage());
+        }
+    }
+
     public static Map<String, Object> getTomlMap(String fileName) throws WeCrossException {
         return getToml(fileName).toMap();
     }

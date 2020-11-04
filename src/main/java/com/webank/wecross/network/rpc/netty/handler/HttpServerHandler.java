@@ -45,18 +45,21 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
 
     private URIHandlerDispatcher uriHandlerDispatcher;
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
-    private AccountManager accountManager;
 
     private AuthFilter authFilter;
     private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+    private MimetypesFileTypeMap mimeTypesMap;
+    private AccountManager accountManager;
 
     public HttpServerHandler(
             URIHandlerDispatcher uriHandlerDispatcher,
             ThreadPoolTaskExecutor threadPoolTaskExecutor,
-            AccountManager accountManager,
-            AuthFilter authFilter) {
-        this.accountManager = accountManager;
+            MimetypesFileTypeMap mimeTypesMap,
+            AuthFilter authFilter,
+            AccountManager accountManager) {
+        this.mimeTypesMap = mimeTypesMap;
         this.authFilter = authFilter;
+        this.accountManager = accountManager;
         this.setUriHandlerDispatcher(uriHandlerDispatcher);
         this.setThreadPoolTaskExecutor(threadPoolTaskExecutor);
     }
@@ -121,12 +124,27 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
                     .set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
             // close connection
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+            return;
         }
 
         threadPoolTaskExecutor.execute(
                 () -> {
                     UserContext userContext = new UserContext();
                     userContext.setToken(getTokenFromHeader(httpRequest));
+
+                    if (shouldLogin(uri)) {
+
+                        if (!hasLogin(userContext)) {
+                            String errorMessage =
+                                    "Login check failed, uri: "
+                                            + uri
+                                            + " token:"
+                                            + userContext.getToken();
+                            logger.warn(errorMessage);
+                            unauthorizedResponse(ctx, errorMessage);
+                            return; // not auth, just return
+                        }
+                    }
 
                     uriHandler.handle(
                             userContext,
@@ -223,8 +241,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
                                                     HttpVersion.HTTP_1_1,
                                                     HttpResponseStatus.OK,
                                                     Unpooled.wrappedBuffer(content));
-
-                                    MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
 
                                     response.headers()
                                             .set(
@@ -350,5 +366,42 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
         } else {
             return tokenStr;
         }
+    }
+
+    private boolean shouldLogin(String uri) {
+        String[] splits = uri.split("/");
+        String uriMethod = splits[splits.length - 1];
+
+        if (uriMethod.startsWith("test")
+                || uriMethod.startsWith("status")
+                || uriMethod.startsWith("supportedStubs")
+                || uriMethod.startsWith("login")
+                || uriMethod.startsWith("register")) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean hasLogin(UserContext userContext) {
+        try {
+            accountManager.checkLogin(userContext);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void unauthorizedResponse(ChannelHandlerContext ctx, String message) {
+        FullHttpResponse response =
+                new DefaultFullHttpResponse(
+                        HttpVersion.HTTP_1_1,
+                        HttpResponseStatus.UNAUTHORIZED,
+                        Unpooled.wrappedBuffer(message.getBytes()));
+
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain");
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+        // close connection
+        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
 }
