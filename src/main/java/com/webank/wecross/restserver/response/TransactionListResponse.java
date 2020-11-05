@@ -1,11 +1,24 @@
 package com.webank.wecross.restserver.response;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public class TransactionListResponse {
     private long nextBlockNumber;
     private int nextOffset;
-    private Transaction[] transactions;
+    private List<Transaction> transactions = Collections.synchronizedList(new LinkedList<>());
+
+    public TransactionListResponse() {}
+
+    public void addTransaction(Transaction transaction) {
+        this.transactions.add(transaction);
+    }
+
+    public void addTransactions(List<Transaction> transactions) {
+        this.transactions.addAll(transactions);
+    }
 
     public long getNextBlockNumber() {
         return nextBlockNumber;
@@ -23,11 +36,11 @@ public class TransactionListResponse {
         this.nextOffset = nextOffset;
     }
 
-    public Transaction[] getTransactions() {
+    public List<Transaction> getTransactions() {
         return transactions;
     }
 
-    public void setTransactions(Transaction[] transactions) {
+    public void setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
     }
 
@@ -39,7 +52,7 @@ public class TransactionListResponse {
                 + ", nextOffset="
                 + nextOffset
                 + ", transactions="
-                + Arrays.toString(transactions)
+                + Arrays.toString(transactions.toArray())
                 + '}';
     }
 
@@ -65,7 +78,13 @@ public class TransactionListResponse {
 
         @Override
         public String toString() {
-            return "TxInfo{" + "txHash='" + txHash + '\'' + ", blockNumber=" + blockNumber + '}';
+            return "Transaction{"
+                    + "txHash='"
+                    + txHash
+                    + '\''
+                    + ", blockNumber="
+                    + blockNumber
+                    + '}';
         }
     }
 }

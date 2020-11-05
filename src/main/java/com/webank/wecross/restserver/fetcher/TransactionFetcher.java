@@ -4,15 +4,11 @@ import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.restserver.response.CompleteTransactionResponse;
 import com.webank.wecross.restserver.response.TransactionListResponse;
-import com.webank.wecross.stub.Block;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.ZoneManager;
-import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,10 +26,6 @@ public class TransactionFetcher {
 
     public interface FetchTransactionCallback {
         void onResponse(WeCrossException e, CompleteTransactionResponse response);
-    }
-
-    public interface FetchTransactionListCallback {
-        void onResponse(WeCrossException e, TransactionListResponse response);
     }
 
     public void asyncFetchTransaction(
@@ -89,6 +81,10 @@ public class TransactionFetcher {
                 });
     }
 
+    public interface FetchTransactionListCallback {
+        void onResponse(WeCrossException e, TransactionListResponse response);
+    }
+
     public void asyncFetchTransactionList(
             Path chainPath,
             long blockNumber,
@@ -101,114 +97,109 @@ public class TransactionFetcher {
         driver.asyncGetBlockNumber(
                 chain.chooseConnection(),
                 (getBlockNumberException, currentBlockNumber) -> {
-                    try {
-                        if (Objects.nonNull(getBlockNumberException)) {
-                            logger.warn("Failed to get block number: ", getBlockNumberException);
-                            throw new WeCrossException(
-                                    WeCrossException.ErrorCode.GET_BLOCK_NUMBER_ERROR,
-                                    getBlockNumberException.getMessage());
-                        }
-
-                        // update real block number for query
-                        long newBlockNumber = blockNumber;
-                        if (blockNumber < 0 || blockNumber > currentBlockNumber) {
-                            newBlockNumber = currentBlockNumber;
-                        }
-
-                        TransactionListResponse response = new TransactionListResponse();
-                        TransactionListResponse.Transaction[] transactions =
-                                new TransactionListResponse.Transaction[size];
-
-                        int count = 0;
-                        int nextOffset = offset;
-                        while (count < size) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug(
-                                        "blockNumber: {}, offset: {}, count: {}",
-                                        newBlockNumber,
-                                        nextOffset,
-                                        count);
-                            }
-
-                            CompletableFuture<Block> future = new CompletableFuture<>();
-                            driver.asyncGetBlock(
-                                    newBlockNumber,
-                                    false,
-                                    chain.chooseConnection(),
-                                    (getBlockException, block) -> {
-                                        if (Objects.nonNull(getBlockException)) {
-                                            logger.warn("Failed to get block: ", getBlockException);
-                                            if (!future.isCancelled()) {
-                                                future.complete(null);
-                                            }
-                                        } else {
-                                            if (!future.isCancelled()) {
-                                                future.complete(block);
-                                            }
-                                        }
-                                    });
-
-                            Block block;
-                            try {
-                                block = future.get(10000, TimeUnit.MILLISECONDS);
-                            } catch (Exception e) {
-                                future.cancel(true);
-                                logger.warn("Failed to get block: ", e);
-                                throw new WeCrossException(
-                                        WeCrossException.ErrorCode.GET_BLOCK_ERROR, e.getMessage());
-                            }
-
-                            if (Objects.isNull(block)) {
-                                throw new WeCrossException(
-                                        WeCrossException.ErrorCode.GET_BLOCK_ERROR,
-                                        "Failed to get block");
-                            }
-
-                            List<String> transactionsHashes = block.getTransactionsHashes();
-                            int index = nextOffset;
-                            if (index >= transactionsHashes.size()) {
-                                throw new WeCrossException(
-                                        WeCrossException.ErrorCode.GET_BLOCK_ERROR, "Wrong offset");
-                            }
-
-                            for (; index < transactionsHashes.size() && count < size; index++) {
-                                TransactionListResponse.Transaction transaction =
-                                        new TransactionListResponse.Transaction();
-                                transaction.setBlockNumber(newBlockNumber);
-                                transaction.setTxHash(transactionsHashes.get(index));
-                                transactions[count++] = transaction;
-                            }
-
-                            // update offset
-                            long nextBlockNumber =
-                                    index == transactionsHashes.size()
-                                            ? (newBlockNumber - 1)
-                                            : newBlockNumber;
-                            nextOffset = nextBlockNumber == newBlockNumber ? index : 0;
-
-                            // done
-                            if (count == size) {
-                                response.setNextBlockNumber(nextBlockNumber);
-                                response.setNextOffset(index);
-                                response.setTransactions(transactions);
-                                callback.onResponse(null, response);
-                                return;
-                            }
-
-                            // next block
-                            newBlockNumber = nextBlockNumber;
-
-                            // there is no block anymore
-                            if (newBlockNumber < 0) {
-                                response.setNextBlockNumber(-1);
-                                response.setNextOffset(0);
-                                callback.onResponse(null, response);
-                                return;
-                            }
-                        }
-                    } catch (WeCrossException e) {
-                        callback.onResponse(e, null);
+                    if (Objects.nonNull(getBlockNumberException)) {
+                        logger.warn("Failed to get block number: ", getBlockNumberException);
+                        callback.onResponse(
+                                new WeCrossException(
+                                        WeCrossException.ErrorCode.GET_BLOCK_NUMBER_ERROR,
+                                        getBlockNumberException.getMessage()),
+                                null);
+                        return;
                     }
+
+                    // update real block number for query
+                    long newBlockNumber = blockNumber;
+                    int newOffset = offset;
+                    if (blockNumber < 0 || blockNumber > currentBlockNumber) {
+                        newBlockNumber = currentBlockNumber;
+                        newOffset = 0;
+                    }
+
+                    TransactionListResponse response = new TransactionListResponse();
+                    response.setNextBlockNumber(newBlockNumber);
+                    response.setNextOffset(newOffset);
+
+                    recursiveFetchTransactionList(chain, driver, size, response, callback);
+                });
+    }
+
+    private void recursiveFetchTransactionList(
+            Chain chain,
+            Driver driver,
+            int size,
+            TransactionListResponse response,
+            FetchTransactionListCallback mainCallback) {
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Fetch transaction list, size: {}, response: {}", size, response);
+        }
+
+        long blockNumber = response.getNextBlockNumber();
+        if (size == 0 || blockNumber == -1) {
+            mainCallback.onResponse(null, response);
+            return;
+        }
+
+        driver.asyncGetBlock(
+                blockNumber,
+                false,
+                chain.chooseConnection(),
+                (getBlockException, block) -> {
+                    if (Objects.nonNull(getBlockException)) {
+                        logger.warn(
+                                "Failed to get block, response: {}, error: ",
+                                response,
+                                getBlockException);
+                        mainCallback.onResponse(null, response);
+                        return;
+                    }
+
+                    if (Objects.isNull(block)) {
+                        logger.warn("Current block is null, response: {}", response);
+                        mainCallback.onResponse(null, response);
+                        return;
+                    }
+
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(
+                                "Fetch block, blockNumber: {}, block: {}, response: {}",
+                                blockNumber,
+                                block,
+                                response);
+                    }
+
+                    int offset = response.getNextOffset();
+                    if (offset >= block.transactionsHashes.size()) {
+                        logger.warn(
+                                "Wrong offset, total txHash: {}, offset: {}, response: {}",
+                                block.transactionsHashes.size(),
+                                offset,
+                                response);
+                        mainCallback.onResponse(null, response);
+                        return;
+                    }
+
+                    int index;
+                    int count = size;
+                    for (index = offset;
+                            index < block.transactionsHashes.size() && count > 0;
+                            index++, count--) {
+                        TransactionListResponse.Transaction transaction =
+                                new TransactionListResponse.Transaction();
+                        transaction.setBlockNumber(blockNumber);
+                        transaction.setTxHash(block.transactionsHashes.get(index));
+                        response.addTransaction(transaction);
+                    }
+
+                    long nextBlockNumber =
+                            index == block.transactionsHashes.size()
+                                    ? blockNumber - 1
+                                    : blockNumber;
+                    int nextOffset = index == block.transactionsHashes.size() ? 0 : index;
+                    response.setNextBlockNumber(nextBlockNumber);
+                    response.setNextOffset(nextOffset);
+
+                    recursiveFetchTransactionList(chain, driver, count, response, mainCallback);
                 });
     }
 

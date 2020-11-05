@@ -77,6 +77,13 @@ public class TransactionURIHandler implements URIHandler {
                                 chain,
                                 txHash,
                                 (fetchException, response) -> {
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(
+                                                "getTransaction, response: {}, fetchException: ",
+                                                response,
+                                                fetchException);
+                                    }
+
                                     if (Objects.nonNull(fetchException)) {
                                         logger.warn(
                                                 "Failed to fetch transaction: ", fetchException);
@@ -120,7 +127,7 @@ public class TransactionURIHandler implements URIHandler {
                         if (offset < 0 || size <= 0 || size > WeCrossDefault.MAX_SIZE_FOR_LIST) {
                             restResponse.setErrorCode(NetworkQueryStatus.URI_QUERY_ERROR);
                             restResponse.setMessage(
-                                    "Wrong offset or size, offset >= 1, 1 <= size <= "
+                                    "Wrong offset or size, offset >= 0, 1 <= size <= "
                                             + WeCrossDefault.MAX_SIZE_FOR_LIST);
                             callback.onResponse(restResponse);
                             return;
@@ -143,6 +150,13 @@ public class TransactionURIHandler implements URIHandler {
                                 offset,
                                 size,
                                 (fetchException, response) -> {
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(
+                                                "listTransactions, response: {}, fetchException: ",
+                                                response,
+                                                fetchException);
+                                    }
+
                                     if (Objects.nonNull(fetchException)) {
                                         logger.warn(
                                                 "Failed to list transactions: ", fetchException);
