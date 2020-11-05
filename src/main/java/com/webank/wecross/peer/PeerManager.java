@@ -10,8 +10,8 @@ import com.webank.wecross.zone.ChainInfo;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,15 +120,20 @@ public class PeerManager {
         public String stubType;
     }
 
-    public class PeerDetails {
+    public class PeerDetails implements Comparable<PeerDetails> {
         public String nodeID;
         public String address;
         public int seq;
         public Collection<ChainInfoDetails> chainInfos;
+
+        @Override
+        public int compareTo(PeerDetails o) {
+            return this.nodeID.compareTo(o.nodeID);
+        }
     }
 
     public Collection<PeerDetails> getPeerDetails() {
-        Collection<PeerDetails> peerDetails = new LinkedHashSet<>();
+        Collection<PeerDetails> peerDetails = new TreeSet<>();
         for (Peer peer : peerInfos.values()) {
             PeerDetails detail = new PeerDetails();
             detail.nodeID = peer.node.getNodeID();

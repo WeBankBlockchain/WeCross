@@ -26,6 +26,11 @@ public class UriDecoder {
         return splits[splits.length - 1];
     }
 
+    public String getURIWithoutQueryString() {
+        int end = uri.contains("?") ? uri.indexOf("?") : uri.length();
+        return uri.substring(0, end);
+    }
+
     public String getUri() {
         return uri;
     }

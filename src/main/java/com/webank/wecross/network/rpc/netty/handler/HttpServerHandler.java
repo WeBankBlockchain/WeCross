@@ -113,6 +113,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
 
         // Not found handler
         if (Objects.isNull(uriHandler)) {
+            logger.debug("Not found, uri: {}, method: {}", uri, method);
+
             FullHttpResponse response =
                     new DefaultFullHttpResponse(
                             HttpVersion.HTTP_1_1,
@@ -376,7 +378,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
                 || uriMethod.startsWith("status")
                 || uriMethod.startsWith("supportedStubs")
                 || uriMethod.startsWith("login")
-                || uriMethod.startsWith("register")) {
+                || uriMethod.startsWith("register")
+                || splits[1].equalsIgnoreCase("s")) {
             return false;
         }
 
