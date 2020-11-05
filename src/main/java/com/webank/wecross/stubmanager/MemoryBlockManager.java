@@ -194,8 +194,7 @@ public class MemoryBlockManager implements BlockManager {
                 long blockNumber = blockDataCache.peekLast().getBlockHeader().getNumber();
                 threadPool.execute(
                         () -> {
-                            callback.onResponse(
-                                    null, blockNumber);
+                            callback.onResponse(null, blockNumber);
                         });
             }
         } finally {

@@ -1,6 +1,7 @@
 package com.webank.wecross.network.rpc;
 
 import com.webank.wecross.host.WeCrossHost;
+import com.webank.wecross.network.UriDecoder;
 import com.webank.wecross.network.rpc.handler.*;
 import com.webank.wecross.network.rpc.netty.URIMethod;
 import com.webank.wecross.network.rpc.web.WebService;
@@ -112,7 +113,11 @@ public class URIHandlerDispatcher {
             return uriHandler;
         }
 
-        uriHandler = requestURIMapper.get(uriMethod);
+        UriDecoder uriDecoder = new UriDecoder(uriMethod.getUri());
+        uriHandler =
+                requestURIMapper.get(
+                        new URIMethod(
+                                uriMethod.getMethod(), uriDecoder.getURIWithoutQueryString()));
 
         if (Objects.isNull(uriHandler) && uriMethod.isResourceURI()) {
             uriHandler = requestURIMapper.get(RESOURCE_URIMETHOD);
