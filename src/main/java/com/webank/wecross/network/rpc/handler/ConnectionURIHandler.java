@@ -14,9 +14,9 @@ import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ public class ConnectionURIHandler implements URIHandler {
         public void onResponse(Exception e, Object response);
     }
 
-    private static class ListData {
+    public class ListData {
         private long size;
         private Object data;
 
@@ -98,6 +98,9 @@ public class ConnectionURIHandler implements URIHandler {
                 case "listChains":
                     handleListChains(userContext, uri, method, content, handleCallback);
                     break;
+                case "listZones":
+                    handleListZones(userContext, uri, method, content, handleCallback);
+                    break;
                     /*
                      * case "addChain": data = handleAddChain(userContext, uri, method, content);
                      * break; case "updateChain": data = handleUpdateChain(userContext, uri, method,
@@ -128,7 +131,7 @@ public class ConnectionURIHandler implements URIHandler {
             RestResponse<Object> restResponse = new RestResponse<Object>();
 
             String message = "Handle rpc connection request exception: " + e.getMessage();
-            logger.warn(message);
+            logger.warn("ERROR", e);
             restResponse.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
             restResponse.setMessage(message);
             callback.onResponse(restResponse);
@@ -136,7 +139,7 @@ public class ConnectionURIHandler implements URIHandler {
         }
     }
 
-    public static class ChainDetail {
+    public class ChainDetail {
         private String zone;
         private String chain;
         private String type;
@@ -200,33 +203,32 @@ public class ConnectionURIHandler implements URIHandler {
             String content,
             HandleCallback callback) {
         UriDecoder uriDecoder = new UriDecoder(uri);
+        String zone = "";
         int offset = 0;
         int size = 0;
         try {
+            zone = uriDecoder.getQueryBykey("zone");
             offset = Integer.valueOf(uriDecoder.getQueryBykey("offset"));
             size = Integer.valueOf(uriDecoder.getQueryBykey("size"));
         } catch (Exception e) {
             // can't get offset and size, query all
         }
 
-        Collection<ChainDetail> chains = new HashSet<>();
-        long total = 0;
+        List<ChainDetail> chains = new LinkedList<ChainDetail>();
 
-        for (Map.Entry<String, Zone> zoneEntry : zoneManager.getZones().entrySet()) {
-            total += zoneEntry.getValue().getChains().size();
-        }
-
+        long total = zoneManager.getZone(zone).getChains().size();
         if (total > offset + size) {
             total = offset + size;
         }
 
         int i = 0;
         AtomicLong current = new AtomicLong(0);
-        for (Map.Entry<String, Zone> zoneEntry : zoneManager.getZones().entrySet()) {
-            String zone = zoneEntry.getKey();
 
+        if (zoneManager.getZone(zone).getChains().isEmpty()) {
+            callback.onResponse(null, new ListData(0, chains));
+        } else {
             for (Map.Entry<String, Chain> chainEntry :
-                    zoneEntry.getValue().getChains().entrySet()) {
+                    zoneManager.getZone(zone).getChains().entrySet()) {
                 if ((offset == 0 && size == 0) || (i >= offset && i < total)) {
                     String chain = chainEntry.getKey();
                     String type = chainEntry.getValue().getStubType();
@@ -241,7 +243,8 @@ public class ConnectionURIHandler implements URIHandler {
                     chainDetails.setLocal(chainEntry.getValue().hasLocalConnection());
                     chainDetails.setProperties(properties);
 
-                    final long totalSize = total;
+                    final long totalEnd = total;
+                    final long totalSize = zoneManager.getZone(zone).getChains().size();
                     chainEntry
                             .getValue()
                             .getBlockManager()
@@ -250,7 +253,7 @@ public class ConnectionURIHandler implements URIHandler {
                                         chainDetails.setBlockNumber(number);
 
                                         long finish = current.addAndGet(1);
-                                        if (finish == totalSize) {
+                                        if (finish == totalEnd) {
                                             callback.onResponse(
                                                     null, new ListData(totalSize, chains));
                                         }
@@ -260,8 +263,41 @@ public class ConnectionURIHandler implements URIHandler {
                 } else {
                     current.addAndGet(1);
                 }
+                ++i;
             }
         }
+    }
+
+    private void handleListZones(
+            UserContext userContext,
+            String uri,
+            String method,
+            String content,
+            HandleCallback callback) {
+        UriDecoder uriDecoder = new UriDecoder(uri);
+        int offset = 0;
+        int size = 0;
+        try {
+            offset = Integer.valueOf(uriDecoder.getQueryBykey("offset"));
+            size = Integer.valueOf(uriDecoder.getQueryBykey("size"));
+        } catch (Exception e) {
+            // can't get offset and size, query all
+        }
+
+        List<String> zones = new LinkedList<String>();
+
+        long i = 0;
+        for (Map.Entry<String, Zone> zoneEntry : zoneManager.getZones().entrySet()) {
+            if ((offset == 0 && size == 0) || (i >= offset && i < offset + size)) {
+                zones.add(zoneEntry.getKey());
+            } else if (i >= offset + size) {
+                break;
+            }
+
+            ++i;
+        }
+
+        callback.onResponse(null, new ListData(zoneManager.getZones().size(), zones));
     }
 
     private Object handleAddChain(
