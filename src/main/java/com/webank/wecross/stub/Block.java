@@ -1,5 +1,6 @@
 package com.webank.wecross.stub;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -30,5 +31,17 @@ public class Block {
 
     public void setRawBytes(byte[] rawBytes) {
         this.rawBytes = rawBytes;
+    }
+
+    @Override
+    public String toString() {
+        return "Block{"
+                + "rawBytes="
+                + Arrays.toString(rawBytes)
+                + ", blockHeader="
+                + blockHeader
+                + ", transactionsHashes="
+                + Arrays.toString(transactionsHashes.toArray())
+                + '}';
     }
 }
