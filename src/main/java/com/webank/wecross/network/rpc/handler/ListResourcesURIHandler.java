@@ -47,7 +47,7 @@ public class ListResourcesURIHandler implements URIHandler {
         }
 
         try {
-            /** /sys/listResource?path=payment.bcos&offset=10&size=10 */
+            /** /sys/listResources?path=payment.bcos&offset=10&size=10 */
             if (uri.contains("path=") && uri.contains("offset=") && uri.contains("size=")) {
                 UriDecoder uriDecoder = new UriDecoder(uri);
                 String path;

@@ -11,8 +11,8 @@ public class XATransactionListResponse {
     private Map<String, Integer> nextOffsets = Collections.synchronizedMap(new HashMap<>());
     private boolean finished = false;
 
-    public void addXATransactionInfo(XA info) {
-        xaList.add(info);
+    public void addXATransactionInfo(XA xa) {
+        xaList.add(xa);
     }
 
     public void addOffset(String chain, Integer offset) {
@@ -72,6 +72,7 @@ public class XATransactionListResponse {
         private String username;
         private String status;
         private long timestamp;
+        private String[] paths;
 
         public String getXaTransactionID() {
             return xaTransactionID;
@@ -113,9 +114,17 @@ public class XATransactionListResponse {
             this.timestamp = timestamp;
         }
 
+        public String[] getPaths() {
+            return paths;
+        }
+
+        public void setPaths(String[] paths) {
+            this.paths = paths;
+        }
+
         @Override
         public String toString() {
-            return "XATransactionInfo{"
+            return "XA{"
                     + "xaTransactionID='"
                     + xaTransactionID
                     + '\''
@@ -130,6 +139,8 @@ public class XATransactionListResponse {
                     + '\''
                     + ", timestamp="
                     + timestamp
+                    + ", paths="
+                    + Arrays.toString(paths)
                     + '}';
         }
     }
