@@ -216,7 +216,12 @@ public class ConnectionURIHandler implements URIHandler {
             total += zoneEntry.getValue().getChains().size();
         }
 
-        if (total > offset + size) {
+        if (offset >= total) {
+            callback.onResponse(null, new ListData(total, null));
+            return;
+        }
+
+        if (total > offset + size && size != 0) {
             total = offset + size;
         }
 
