@@ -484,88 +484,78 @@ public class XATransactionManager {
                 }
 
                 while (num < xaResponses.size() && total < size) {
-                    for (String firstTravChain : xaResponses.keySet()) {
-                        if (finishedChains.contains(firstTravChain)) {
+                    long maxTimestamp = 0;
+                    String maxTimestampChain = null;
+
+                    for (String currentChain : xaResponses.keySet()) {
+                        if (finishedChains.contains(currentChain)) {
                             continue;
                         }
 
-                        if (indexs.get(firstTravChain) == xaResponses.get(firstTravChain).size()) {
+                        if (indexs.get(currentChain) == xaResponses.get(currentChain).size()) {
                             // current chain finished, update offset and index
                             int nextOffset =
-                                    indexs.get(firstTravChain) == size
-                                            ? offsets.get(firstTravChain) + size
+                                    indexs.get(currentChain) == size
+                                            ? offsets.get(currentChain) + size
                                             : -1;
-                            nextOffsets.put(firstTravChain, nextOffset);
-                            finishedChains.add(firstTravChain);
+                            nextOffsets.put(currentChain, nextOffset);
+                            finishedChains.add(currentChain);
                             num++;
                         } else {
-                            int currentIndex = indexs.get(firstTravChain);
-                            String xaTransaction =
+                            int currentIndex = indexs.get(currentChain);
+                            String currentXATransactionID =
                                     xaResponses
-                                            .get(firstTravChain)
+                                            .get(currentChain)
                                             .get(currentIndex)
                                             .getXaTransactionID();
 
-                            if (xaTransactionIDs.contains(xaTransaction)) {
-                                // this xaTransaction existed
-                                indexs.put(firstTravChain, currentIndex + 1);
-                                int nextOffset = nextOffsets.get(firstTravChain) + 1;
-                                nextOffsets.put(firstTravChain, nextOffset);
+                            if (xaTransactionIDs.contains(currentXATransactionID)) {
+                                // current xa transactionID existed
+                                indexs.put(currentChain, currentIndex + 1);
+                                int nextOffset = nextOffsets.get(currentChain) + 1;
+                                nextOffsets.put(currentChain, nextOffset);
                             } else {
-                                // check timestamp
-                                boolean isCurrentMax = true;
-                                long timestamp =
+                                // check current timestamp
+                                long currentTimestamp =
                                         xaResponses
-                                                .get(firstTravChain)
+                                                .get(currentChain)
                                                 .get(currentIndex)
                                                 .getTimestamp();
-                                for (String secondTravChain : xaResponses.keySet()) {
-                                    if (secondTravChain.equals(firstTravChain)
-                                            || finishedChains.contains(secondTravChain)) {
-                                        continue;
-                                    }
-
-                                    if (indexs.get(secondTravChain)
-                                            == xaResponses.get(secondTravChain).size()) {
-                                        // current chain finished
-                                        int nextOffset =
-                                                indexs.get(secondTravChain) == size
-                                                        ? offsets.get(secondTravChain) + size
-                                                        : -1;
-                                        nextOffsets.put(secondTravChain, nextOffset);
-                                        finishedChains.add(secondTravChain);
-                                        num++;
-                                    } else {
-                                        int tempIndex = indexs.get(secondTravChain);
-                                        if (timestamp
-                                                < xaResponses
-                                                        .get(secondTravChain)
-                                                        .get(tempIndex)
-                                                        .getTimestamp()) {
-                                            isCurrentMax = false;
-                                        }
-                                    }
-                                }
-
-                                // this is max one
-                                if (isCurrentMax) {
-                                    // add new xa
-                                    xaTransactionIDs.add(xaTransaction);
-                                    response.addXATransactionInfo(
-                                            xaResponses.get(firstTravChain).get(currentIndex));
-                                    total++;
-
-                                    // update offset and index
-                                    indexs.put(firstTravChain, currentIndex + 1);
-                                    int nextOffset = nextOffsets.get(firstTravChain) + 1;
-                                    nextOffsets.put(firstTravChain, nextOffset);
+                                if (currentTimestamp > maxTimestamp) {
+                                    maxTimestamp = currentTimestamp;
+                                    maxTimestampChain = currentChain;
                                 }
                             }
                         }
 
-                        if (num == xaResponses.size() || total == size) {
+                        if (num == xaResponses.size()) {
                             break;
                         }
+                    }
+
+                    // find one with max timestamp
+                    if (Objects.nonNull(maxTimestampChain)) {
+                        int maxOneIndex = indexs.get(maxTimestampChain);
+                        String maxOneXATransactionID =
+                                xaResponses
+                                        .get(maxTimestampChain)
+                                        .get(maxOneIndex)
+                                        .getXaTransactionID();
+
+                        // add new xa
+                        xaTransactionIDs.add(maxOneXATransactionID);
+                        response.addXATransactionInfo(
+                                xaResponses.get(maxTimestampChain).get(maxOneIndex));
+                        total++;
+
+                        // update offset and index
+                        indexs.put(maxTimestampChain, maxOneIndex + 1);
+                        int nextOffset = nextOffsets.get(maxTimestampChain) + 1;
+                        nextOffsets.put(maxTimestampChain, nextOffset);
+                    }
+
+                    if (num == xaResponses.size() || total == size) {
+                        break;
                     }
                 }
 

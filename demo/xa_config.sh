@@ -62,7 +62,7 @@ sed_i() {
     fi
 }
 
-deploy_fabric_2pc_evidence_chiancode() {
+deploy_fabric_xa_evidence_chiancode() {
     # deploy from 8250
     LOG_INFO "Deploy Fabric 2PC chaincode: payment.fabric.evidence"
     cd ${ROOT}/WeCross-Console/
@@ -93,7 +93,7 @@ EOF
     cd -
 }
 
-deploy_bcos_2pc_evidence_contract() {
+deploy_bcos_xa_evidence_contract() {
     # deploy from 8250
     LOG_INFO "Deploy BCOS 2PC contract: payment.bcos.evidence"
     cd ${ROOT}/WeCross-Console/
@@ -121,8 +121,8 @@ console_ask() {
 
 main() {
     check_wecross_network
-    deploy_fabric_2pc_evidence_chiancode
-    deploy_bcos_2pc_evidence_contract
+    deploy_fabric_xa_evidence_chiancode
+    deploy_bcos_xa_evidence_contract
     LOG_INFO "SUCCESS: 2PC evidence example has been deployed to FISCO BCOS and Fabric:"
     echo -e "
       FISCO BCOS                    Fabric

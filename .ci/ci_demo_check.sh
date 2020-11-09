@@ -143,11 +143,11 @@ EOF
     check_console_log ${ROOT}/WeCross-Console-8251/logs/warn.log
 }
 
-# 2pc test
-2pc_test() {
+# xa test
+xa_test() {
     cd ${ROOT}
 
-    bash -x 2pc_config.sh n
+    bash -x xa_config.sh n
 
     cd WeCross-Console/
     bash start.sh <<EOF
@@ -224,7 +224,7 @@ main() {
     prepare_demo
     demo_test
     htlc_test
-    2pc_test
+    xa_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then
