@@ -14,10 +14,10 @@ wecross_account_manager_url=https://github.com/WeBankFinTech/WeCross-Account-Man
 wecross_account_manager_branch=${default_compatibility_version}
 
 need_db_config_ask=true
-DB_IP=localhost
+DB_IP=127.0.0.1
 DB_PORT=3306
 DB_USERNAME=root
-DB_PASSWORD=
+DB_PASSWORD=${CI_DB_PASSWORD}
 
 LOG_INFO() {
     echo -e "\033[32m[INFO] $@\033[0m"
@@ -75,6 +75,14 @@ check_command() {
     fi
 }
 
+check_command() {
+    local cmd=${1}
+    if [ -z "$(command -v ${cmd})" ]; then
+        LOG_ERROR "${cmd} is not installed."
+        exit 1
+    fi
+}
+
 query_db() {
     if [ ${DB_PASSWORD} ]; then
         mysql -u ${DB_USERNAME} --password="${DB_PASSWORD}" -h ${DB_IP} -P ${DB_PORT} $@ 2>/dev/null
@@ -86,7 +94,7 @@ query_db() {
 check_db_service() {
     LOG_INFO "Checking database configuration"
     set +e
-    if ! query_db -e "status;" >/dev/null; then
+    if ! query_db -e "status;" ; then
         LOG_ERROR "Database configuration error."
         LOG_INFO "Please config database, username and password. And use this command to check:"
         echo -e "\033[32m        mysql -u ${DB_USERNAME} --password=\"<your password>\" -h ${DB_IP} -P ${DB_PORT} -e \"status;\" \033[0m"
@@ -243,6 +251,7 @@ database_init() {
 }
 
 main() {
+    check_command mysql
     config_database
     if [ 1 -eq ${enable_build_from_resource} ]; then
         build_from_source

@@ -224,7 +224,7 @@ public class ConnectionURIHandler implements URIHandler {
         int i = 0;
         AtomicLong current = new AtomicLong(0);
 
-        if (zoneManager.getZone(zone).getChains().isEmpty()) {
+        if (zoneManager.getZone(zone).getChains().isEmpty() || offset >= total) {
             callback.onResponse(null, new ListData(0, chains));
         } else {
             for (Map.Entry<String, Chain> chainEntry :
