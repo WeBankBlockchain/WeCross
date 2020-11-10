@@ -65,7 +65,7 @@ public class AccountManager {
             if (!fetchHasLoginStatus(token)) {
                 token2UA.remove(token);
                 ua = null;
-                throw new WeCrossException(GET_UA_FAILED, "login expired");
+                throw new WeCrossException(GET_UA_FAILED, "UA is not exist or login expired");
             } else {
                 ((UniversalAccount) ua).activate();
             }
