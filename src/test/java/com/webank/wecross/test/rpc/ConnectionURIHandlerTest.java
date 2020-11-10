@@ -1,0 +1,267 @@
+package com.webank.wecross.test.rpc;
+
+import com.webank.wecross.network.rpc.handler.ConnectionURIHandler;
+import com.webank.wecross.network.rpc.handler.ConnectionURIHandler.ChainDetail;
+import com.webank.wecross.network.rpc.handler.ConnectionURIHandler.ListData;
+import com.webank.wecross.network.rpc.handler.URIHandler.Callback;
+import com.webank.wecross.restserver.RestResponse;
+import com.webank.wecross.stub.BlockManager;
+import com.webank.wecross.stub.BlockManager.GetBlockNumberCallback;
+import com.webank.wecross.zone.Chain;
+import com.webank.wecross.zone.ChainInfo;
+import com.webank.wecross.zone.Zone;
+import com.webank.wecross.zone.ZoneManager;
+import java.io.File;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+public class ConnectionURIHandlerTest {
+    @Test
+    public void testListChains() throws Exception {
+        ConnectionURIHandler connectionURIHandler = new ConnectionURIHandler();
+        Map<String, Chain> chains = new HashMap<String, Chain>();
+
+        BlockManager blockManager = Mockito.mock(BlockManager.class);
+        Mockito.doAnswer(
+                        new Answer<Object>() {
+                            @Override
+                            public Object answer(InvocationOnMock invocation) throws Throwable {
+                                GetBlockNumberCallback callback = invocation.getArgument(0);
+                                callback.onResponse(null, 100);
+                                return null;
+                            }
+                        })
+                .when(blockManager)
+                .asyncGetBlockNumber(Mockito.any());
+
+        for (int i = 0; i < 100; ++i) {
+            String chainName = "test-chain" + String.valueOf(i);
+
+            ChainInfo chainInfo = new ChainInfo();
+            chainInfo.setZone("test-zone");
+            chainInfo.setName(chainName);
+
+            Chain chain = new Chain("test-chain" + String.valueOf(i), chainInfo, null, null);
+            chain.setBlockManager(blockManager);
+            chains.put(chainName, chain);
+        }
+
+        Zone zone = Mockito.mock(Zone.class);
+        Mockito.when(zone.getChains()).thenReturn(chains);
+        ZoneManager zoneManager = Mockito.mock(ZoneManager.class);
+        Mockito.when(zoneManager.getZone("test-zone")).thenReturn(zone);
+        Mockito.when(zoneManager.getZone("test-zone2")).thenReturn(new Zone());
+
+        connectionURIHandler.setZoneManager(zoneManager);
+
+        Set<String> paths = new HashSet<String>();
+        for (int i = 0; i < 10; ++i) {
+            String queryString = "zone=test-zone&offset=" + String.valueOf(i * 10) + "&size=10";
+
+            final int index = i;
+            connectionURIHandler.handle(
+                    null,
+                    "/listChains?" + queryString,
+                    "GET",
+                    "",
+                    new Callback() {
+                        @Override
+                        public void onResponse(File restResponse) {
+                            Assert.fail();
+                        }
+
+                        @Override
+                        public void onResponse(RestResponse restResponse) {
+                            ListData data = (ListData) restResponse.getData();
+                            Assert.assertEquals(100, data.getSize());
+
+                            List<ChainDetail> chainDetails = (List<ChainDetail>) data.getData();
+                            Assert.assertEquals(10, chainDetails.size());
+
+                            for (int j = 0; j < 10; ++j) {
+                                Assert.assertFalse(paths.contains(chainDetails.get(j).getChain()));
+                                paths.add(chainDetails.get(j).getChain());
+                                Assert.assertEquals(100, chainDetails.get(j).getBlockNumber());
+                            }
+                        }
+
+                        @Override
+                        public void onResponse(String restResponse) {
+                            Assert.fail();
+                        }
+                    });
+        }
+
+        connectionURIHandler.handle(
+                null,
+                "/listChains?zone=test-zone2",
+                "GET",
+                "",
+                new Callback() {
+                    @Override
+                    public void onResponse(File restResponse) {
+                        Assert.fail();
+                    }
+
+                    @Override
+                    public void onResponse(RestResponse restResponse) {
+                        ListData data = (ListData) restResponse.getData();
+                        Assert.assertEquals(0, data.getSize());
+                    }
+
+                    @Override
+                    public void onResponse(String restResponse) {
+                        Assert.fail();
+                    }
+                });
+
+        connectionURIHandler.handle(
+                null,
+                "/listChains?zone=test-zone&offset=0&size=0",
+                "GET",
+                "",
+                new Callback() {
+                    @Override
+                    public void onResponse(File restResponse) {
+                        Assert.fail();
+                    }
+
+                    @Override
+                    public void onResponse(RestResponse restResponse) {
+                        ListData data = (ListData) restResponse.getData();
+                        Assert.assertEquals(0, data.getSize());
+                    }
+
+                    @Override
+                    public void onResponse(String restResponse) {
+                        Assert.fail();
+                    }
+                });
+
+        paths.clear();
+        connectionURIHandler.handle(
+                null,
+                "/listChains?zone=test-zone&offset=95&size=50",
+                "GET",
+                "",
+                new Callback() {
+                    @Override
+                    public void onResponse(File restResponse) {
+                        Assert.fail();
+                    }
+
+                    @Override
+                    public void onResponse(RestResponse restResponse) {
+                        ListData data = (ListData) restResponse.getData();
+                        Assert.assertEquals(100, data.getSize());
+
+                        List<ChainDetail> chainDetails = (List<ChainDetail>) data.getData();
+                        Assert.assertEquals(5, chainDetails.size());
+
+                        for (int j = 95; j < 100; ++j) {
+                            Assert.assertFalse(paths.contains(chainDetails.get(j - 95).getChain()));
+                            paths.add(chainDetails.get(j - 95).getChain());
+                            Assert.assertEquals(100, chainDetails.get(j - 95).getBlockNumber());
+                        }
+                    }
+
+                    @Override
+                    public void onResponse(String restResponse) {
+                        Assert.fail();
+                    }
+                });
+    }
+
+    @Test
+    public void testListZones() throws Exception {
+        ConnectionURIHandler connectionURIHandler = new ConnectionURIHandler();
+
+        Map<String, Zone> zones = new HashMap<String, Zone>();
+        for (int i = 0; i < 100; ++i) {
+            Zone zone = new Zone();
+            zones.put("test-zone" + String.valueOf(i), zone);
+        }
+
+        ZoneManager zoneManager = Mockito.mock(ZoneManager.class);
+        Mockito.when(zoneManager.getZones()).thenReturn(zones);
+
+        connectionURIHandler.setZoneManager(zoneManager);
+
+        Set<String> paths = new HashSet<String>();
+        for (int i = 0; i < 10; ++i) {
+            String queryString = "offset=" + String.valueOf(i * 10) + "&size=10";
+
+            final int index = i;
+            connectionURIHandler.handle(
+                    null,
+                    "/listZones?" + queryString,
+                    "GET",
+                    "",
+                    new Callback() {
+                        @Override
+                        public void onResponse(File restResponse) {
+                            Assert.fail();
+                        }
+
+                        @Override
+                        public void onResponse(RestResponse restResponse) {
+                            ListData data = (ListData) restResponse.getData();
+                            Assert.assertEquals(100, data.getSize());
+
+                            List<String> zoneDetails = (List<String>) data.getData();
+                            Assert.assertEquals(10, zoneDetails.size());
+
+                            for (int j = 0; j < 10; ++j) {
+                                Assert.assertFalse(paths.contains(zoneDetails.get(j)));
+                                paths.add(zoneDetails.get(j));
+                            }
+                        }
+
+                        @Override
+                        public void onResponse(String restResponse) {
+                            Assert.fail();
+                        }
+                    });
+        }
+
+        paths.clear();
+        connectionURIHandler.handle(
+                null,
+                "/listZones?offset=95&size=50",
+                "GET",
+                "",
+                new Callback() {
+                    @Override
+                    public void onResponse(File restResponse) {
+                        Assert.fail();
+                    }
+
+                    @Override
+                    public void onResponse(RestResponse restResponse) {
+                        ListData data = (ListData) restResponse.getData();
+                        Assert.assertEquals(100, data.getSize());
+
+                        List<String> zoneDetails = (List<String>) data.getData();
+                        Assert.assertEquals(5, zoneDetails.size());
+
+                        for (int j = 0; j < 5; ++j) {
+                            Assert.assertFalse(paths.contains(zoneDetails.get(j)));
+                            paths.add(zoneDetails.get(j));
+                        }
+                    }
+
+                    @Override
+                    public void onResponse(String restResponse) {
+                        Assert.fail();
+                    }
+                });
+    }
+}
