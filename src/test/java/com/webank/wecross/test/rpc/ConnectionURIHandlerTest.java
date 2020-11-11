@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -62,7 +63,101 @@ public class ConnectionURIHandlerTest {
 
         connectionURIHandler.setZoneManager(zoneManager);
 
+        AtomicInteger hit = new AtomicInteger(0);
+        connectionURIHandler.handle(
+                null,
+                "/listChains",
+                "GET",
+                "",
+                new Callback() {
+                    @Override
+                    public void onResponse(File restResponse) {
+                        Assert.fail();
+                    }
+
+                    @Override
+                    public void onResponse(RestResponse restResponse) {
+                        ListData data = (ListData) restResponse.getData();
+                        Assert.assertEquals(0, data.getSize());
+
+                        List<ChainDetail> chainDetails = (List<ChainDetail>) data.getData();
+                        Assert.assertEquals(0, chainDetails.size());
+
+                        hit.addAndGet(1);
+                    }
+
+                    @Override
+                    public void onResponse(String restResponse) {
+                        Assert.fail();
+                    }
+                });
+
+        Assert.assertEquals(1, hit.intValue());
+
+        connectionURIHandler.handle(
+                null,
+                "/listChains?zone=test-zone&offset=1000&size=100",
+                "GET",
+                "",
+                new Callback() {
+                    @Override
+                    public void onResponse(File restResponse) {
+                        Assert.fail();
+                    }
+
+                    @Override
+                    public void onResponse(RestResponse restResponse) {
+                        ListData data = (ListData) restResponse.getData();
+                        Assert.assertEquals(0, data.getSize());
+
+                        List<ChainDetail> chainDetails = (List<ChainDetail>) data.getData();
+                        Assert.assertEquals(0, chainDetails.size());
+
+                        hit.addAndGet(1);
+                    }
+
+                    @Override
+                    public void onResponse(String restResponse) {
+                        Assert.fail();
+                    }
+                });
+
+        Assert.assertEquals(2, hit.intValue());
+
         Set<String> paths = new HashSet<String>();
+        connectionURIHandler.handle(
+                null,
+                "/listChains?zone=test-zone&offset=0&size=0",
+                "GET",
+                "",
+                new Callback() {
+                    @Override
+                    public void onResponse(File restResponse) {
+                        Assert.fail();
+                    }
+
+                    @Override
+                    public void onResponse(RestResponse restResponse) {
+                        ListData data = (ListData) restResponse.getData();
+                        Assert.assertEquals(100, data.getSize());
+
+                        List<ChainDetail> chainDetails = (List<ChainDetail>) data.getData();
+                        Assert.assertEquals(100, chainDetails.size());
+
+                        for (int j = 0; j < 100; ++j) {
+                            Assert.assertFalse(paths.contains(chainDetails.get(j).getChain()));
+                            paths.add(chainDetails.get(j).getChain());
+                            Assert.assertEquals(100, chainDetails.get(j).getBlockNumber());
+                        }
+                    }
+
+                    @Override
+                    public void onResponse(String restResponse) {
+                        Assert.fail();
+                    }
+                });
+
+        paths.clear();
         for (int i = 0; i < 10; ++i) {
             String queryString = "zone=test-zone&offset=" + String.valueOf(i * 10) + "&size=10";
 

@@ -216,7 +216,18 @@ public class ConnectionURIHandler implements URIHandler {
 
         List<ChainDetail> chains = new LinkedList<ChainDetail>();
 
+        Zone zoneObj = zoneManager.getZone(zone);
+        if (zoneObj == null) {
+            callback.onResponse(null, new ListData(0, chains));
+            return;
+        }
+
         long total = zoneManager.getZone(zone).getChains().size();
+        if (offset > total) {
+            callback.onResponse(null, new ListData(0, chains));
+            return;
+        }
+
         if (total > offset + size) {
             total = offset + size;
         }
@@ -224,7 +235,7 @@ public class ConnectionURIHandler implements URIHandler {
         int i = 0;
         AtomicLong current = new AtomicLong(0);
 
-        if (zoneManager.getZone(zone).getChains().isEmpty() || offset >= total) {
+        if (zoneManager.getZone(zone).getChains().isEmpty()) {
             callback.onResponse(null, new ListData(0, chains));
         } else {
             for (Map.Entry<String, Chain> chainEntry :
