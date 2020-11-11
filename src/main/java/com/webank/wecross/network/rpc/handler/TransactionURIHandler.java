@@ -164,10 +164,9 @@ public class TransactionURIHandler implements URIHandler {
                                                 NetworkQueryStatus.TRANSACTION_ERROR
                                                         + fetchException.getErrorCode());
                                         restResponse.setMessage(fetchException.getMessage());
-                                    } else {
-                                        restResponse.setData(response);
                                     }
 
+                                    restResponse.setData(response);
                                     callback.onResponse(restResponse);
                                 });
                         return;
