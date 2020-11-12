@@ -254,8 +254,12 @@ public class ConnectionURIHandler implements URIHandler {
                     chainDetails.setLocal(chainEntry.getValue().hasLocalConnection());
                     chainDetails.setProperties(properties);
 
-                    final long totalEnd = total;
+                    long totalEnd = total;
                     final long totalSize = zoneManager.getZone(zone).getChains().size();
+                    if (offset == 0 && size == 0) {
+                        totalEnd = totalSize;
+                    }
+                    final long totalEnd2 = totalEnd;
                     chainEntry
                             .getValue()
                             .getBlockManager()
@@ -264,7 +268,7 @@ public class ConnectionURIHandler implements URIHandler {
                                         chainDetails.setBlockNumber(number);
 
                                         long finish = current.addAndGet(1);
-                                        if (finish == totalEnd) {
+                                        if (finish == totalEnd2) {
                                             callback.onResponse(
                                                     null, new ListData(totalSize, chains));
                                         }
