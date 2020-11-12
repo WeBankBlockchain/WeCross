@@ -203,7 +203,7 @@ gen_conf() {
     caCert = 'classpath:ca.crt'
     sslCert = 'classpath:ssl.crt'
     sslKey = 'classpath:ssl.key'
-    # sslSwitch = 2  # SSL_OFF(2), SSL_ON(1), SSL_ON_CLIENT_AUTH(0);
+    sslSwitch = 2  # disable ssl:2, SSL without client auth:1 , SSL with client and server auth: 0
     webRoot = 'classpath:pages'
     mimeTypesFile = 'classpath:conf/mime.types' # set the content-types of a file
 
