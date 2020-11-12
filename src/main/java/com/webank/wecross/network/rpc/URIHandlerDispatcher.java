@@ -67,6 +67,7 @@ public class URIHandlerDispatcher {
         connectionURIHandler.setPeerManager(host.getPeerManager());
         connectionURIHandler.setZoneManager(host.getZoneManager());
         registerURIHandler(new URIMethod("GET", "/conn/listChains"), connectionURIHandler);
+        registerURIHandler(new URIMethod("GET", "/conn/listZones"), connectionURIHandler);
         registerURIHandler(new URIMethod("POST", "/conn/addChain"), connectionURIHandler);
         registerURIHandler(new URIMethod("POST", "/conn/updateChain"), connectionURIHandler);
         registerURIHandler(new URIMethod("POST", "/conn/removeChain"), connectionURIHandler);
