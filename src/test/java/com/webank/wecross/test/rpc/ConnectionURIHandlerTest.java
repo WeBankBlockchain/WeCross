@@ -149,6 +149,8 @@ public class ConnectionURIHandlerTest {
                             paths.add(chainDetails.get(j).getChain());
                             Assert.assertEquals(100, chainDetails.get(j).getBlockNumber());
                         }
+
+                        hit.addAndGet(1);
                     }
 
                     @Override
@@ -156,6 +158,8 @@ public class ConnectionURIHandlerTest {
                         Assert.fail();
                     }
                 });
+
+        Assert.assertEquals(3, hit.intValue());
 
         paths.clear();
         for (int i = 0; i < 10; ++i) {
@@ -186,6 +190,8 @@ public class ConnectionURIHandlerTest {
                                 paths.add(chainDetails.get(j).getChain());
                                 Assert.assertEquals(100, chainDetails.get(j).getBlockNumber());
                             }
+
+                            hit.addAndGet(1);
                         }
 
                         @Override
@@ -194,6 +200,8 @@ public class ConnectionURIHandlerTest {
                         }
                     });
         }
+
+        Assert.assertEquals(13, hit.intValue());
 
         connectionURIHandler.handle(
                 null,
@@ -210,6 +218,8 @@ public class ConnectionURIHandlerTest {
                     public void onResponse(RestResponse restResponse) {
                         ListData data = (ListData) restResponse.getData();
                         Assert.assertEquals(0, data.getSize());
+
+                        hit.addAndGet(1);
                     }
 
                     @Override
@@ -217,6 +227,8 @@ public class ConnectionURIHandlerTest {
                         Assert.fail();
                     }
                 });
+
+        Assert.assertEquals(14, hit.intValue());
 
         connectionURIHandler.handle(
                 null,
@@ -232,7 +244,9 @@ public class ConnectionURIHandlerTest {
                     @Override
                     public void onResponse(RestResponse restResponse) {
                         ListData data = (ListData) restResponse.getData();
-                        Assert.assertEquals(0, data.getSize());
+                        Assert.assertEquals(100, data.getSize());
+
+                        hit.addAndGet(1);
                     }
 
                     @Override
@@ -240,6 +254,8 @@ public class ConnectionURIHandlerTest {
                         Assert.fail();
                     }
                 });
+
+        Assert.assertEquals(15, hit.intValue());
 
         paths.clear();
         connectionURIHandler.handle(
@@ -266,6 +282,8 @@ public class ConnectionURIHandlerTest {
                             paths.add(chainDetails.get(j - 95).getChain());
                             Assert.assertEquals(100, chainDetails.get(j - 95).getBlockNumber());
                         }
+
+                        hit.addAndGet(1);
                     }
 
                     @Override
@@ -273,6 +291,8 @@ public class ConnectionURIHandlerTest {
                         Assert.fail();
                     }
                 });
+
+        Assert.assertEquals(16, hit.intValue());
     }
 
     @Test
