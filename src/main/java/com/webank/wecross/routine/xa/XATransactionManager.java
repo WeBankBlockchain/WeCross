@@ -461,18 +461,33 @@ public class XATransactionManager {
         AtomicInteger finished = new AtomicInteger();
         Map<String, List<XATransactionListResponse.XA>> xaResponses =
                 Collections.synchronizedMap(new HashMap<>());
+        List<XAResponse.ChainErrorMessage> errors =
+                Collections.synchronizedList(new LinkedList<>());
 
         return (chain, listXAResponse) -> {
-            xaResponses.put(chain, listXAResponse.getXaList());
+            if (Objects.nonNull(listXAResponse.getChainErrorMessage())) {
+                errors.add(listXAResponse.getChainErrorMessage());
+            } else {
+                xaResponses.put(chain, listXAResponse.getXaList());
+            }
+
             int current = finished.addAndGet(1);
 
             // all finished
             if (current == count) {
+                XATransactionListResponse response = new XATransactionListResponse();
+                XAResponse xaResponse = new XAResponse();
+
+                if (!errors.isEmpty()) {
+                    xaResponse.setStatus(-1);
+                    xaResponse.setChainErrorMessages(errors);
+                    response.setXaResponse(xaResponse);
+                }
+
                 int num = 0;
                 int total = 0;
                 Set<String> xaTransactionIDs = new HashSet<>();
                 Set<String> finishedChains = new HashSet<>();
-                XATransactionListResponse response = new XATransactionListResponse();
 
                 // deep copy
                 Map<String, Integer> nextOffsets = new HashMap<>(offsets);
@@ -652,16 +667,23 @@ public class XATransactionManager {
                         }
 
                         ListXAResponse response = new ListXAResponse();
+                        XAResponse.ChainErrorMessage chainErrorMessage = null;
 
                         if (Objects.nonNull(transactionException)
                                 && !transactionException.isSuccess()) {
                             logger.warn(
                                     "Failed to list xa transaction: {}",
                                     transactionException.getMessage());
+                            chainErrorMessage =
+                                    new XAResponse.ChainErrorMessage(
+                                            path.toString(), transactionException.getMessage());
                         } else if (transactionResponse.getErrorCode() != 0) {
                             logger.warn(
                                     "Failed to list xa transaction: {}",
                                     transactionResponse.getMessage());
+                            chainErrorMessage =
+                                    new XAResponse.ChainErrorMessage(
+                                            path.toString(), transactionResponse.getMessage());
                         } else {
                             String result = transactionResponse.getResult()[0];
                             if (Objects.nonNull(result) && !"[]".equals(result)) {
@@ -679,16 +701,32 @@ public class XATransactionManager {
                                 response.setXaList(Arrays.asList(xas));
                             }
                         }
+
+                        response.setChainErrorMessage(chainErrorMessage);
                         callback.onResponse(path.toString(), response);
                     });
         } catch (Exception e) {
             logger.warn("Failed to list xa transaction: ", e);
-            callback.onResponse(path.toString(), new ListXAResponse());
+            ListXAResponse response = new ListXAResponse();
+            XAResponse.ChainErrorMessage chainErrorMessage =
+                    new XAResponse.ChainErrorMessage(path.toString(), "Internal error");
+            response.setChainErrorMessage(chainErrorMessage);
+            callback.onResponse(path.toString(), response);
         }
     }
 
     private static class ListXAResponse {
+        private XAResponse.ChainErrorMessage chainErrorMessage;
+
         private List<XATransactionListResponse.XA> xaList = new ArrayList<>();
+
+        public XAResponse.ChainErrorMessage getChainErrorMessage() {
+            return chainErrorMessage;
+        }
+
+        public void setChainErrorMessage(XAResponse.ChainErrorMessage chainErrorMessage) {
+            this.chainErrorMessage = chainErrorMessage;
+        }
 
         public List<XATransactionListResponse.XA> getXaList() {
             return xaList;
@@ -700,7 +738,12 @@ public class XATransactionManager {
 
         @Override
         public String toString() {
-            return "ListXAResponse{" + "infoList=" + xaList + ", nextOffset=" + '}';
+            return "ListXAResponse{"
+                    + "chainErrorMessage="
+                    + chainErrorMessage
+                    + ", xaList="
+                    + xaList
+                    + '}';
         }
     }
 

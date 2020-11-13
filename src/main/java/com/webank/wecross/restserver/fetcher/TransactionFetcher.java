@@ -150,13 +150,21 @@ public class TransactionFetcher {
                                 "Failed to get block, response: {}, error: ",
                                 response,
                                 getBlockException);
-                        mainCallback.onResponse(null, response);
+                        mainCallback.onResponse(
+                                new WeCrossException(
+                                        WeCrossException.ErrorCode.GET_BLOCK_ERROR,
+                                        getBlockException.getMessage()),
+                                null);
                         return;
                     }
 
                     if (Objects.isNull(block)) {
                         logger.warn("Current block is null, response: {}", response);
-                        mainCallback.onResponse(null, response);
+                        mainCallback.onResponse(
+                                new WeCrossException(
+                                        WeCrossException.ErrorCode.GET_BLOCK_ERROR,
+                                        "Block is null"),
+                                null);
                         return;
                     }
 
@@ -168,6 +176,14 @@ public class TransactionFetcher {
                                 response);
                     }
 
+                    if (block.transactionsHashes.isEmpty()) {
+                        // blank block
+                        response.setNextBlockNumber(blockNumber - 1);
+                        response.setNextOffset(0);
+                        recursiveFetchTransactionList(chain, driver, size, response, mainCallback);
+                        return;
+                    }
+
                     int offset = response.getNextOffset();
                     if (offset >= block.transactionsHashes.size()) {
                         logger.warn(
@@ -175,7 +191,10 @@ public class TransactionFetcher {
                                 block.transactionsHashes.size(),
                                 offset,
                                 response);
-                        mainCallback.onResponse(null, response);
+                        mainCallback.onResponse(
+                                new WeCrossException(
+                                        WeCrossException.ErrorCode.GET_BLOCK_ERROR, "Wrong offset"),
+                                null);
                         return;
                     }
 
@@ -183,12 +202,16 @@ public class TransactionFetcher {
                     int count = size;
                     for (index = offset;
                             index < block.transactionsHashes.size() && count > 0;
-                            index++, count--) {
-                        TransactionListResponse.Transaction transaction =
-                                new TransactionListResponse.Transaction();
-                        transaction.setBlockNumber(blockNumber);
-                        transaction.setTxHash(block.transactionsHashes.get(index));
-                        response.addTransaction(transaction);
+                            index++) {
+                        // hash is blank
+                        if (!"".equals(block.transactionsHashes.get(index).trim())) {
+                            TransactionListResponse.Transaction transaction =
+                                    new TransactionListResponse.Transaction();
+                            transaction.setBlockNumber(blockNumber);
+                            transaction.setTxHash(block.transactionsHashes.get(index));
+                            response.addTransaction(transaction);
+                            count--;
+                        }
                     }
 
                     long nextBlockNumber =

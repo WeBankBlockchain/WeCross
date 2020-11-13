@@ -7,6 +7,7 @@ import java.util.*;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class XATransactionListResponse {
+    private XAResponse xaResponse;
     private List<XA> xaList = new ArrayList<>();
     private Map<String, Integer> nextOffsets = Collections.synchronizedMap(new HashMap<>());
     private boolean finished = false;
@@ -28,6 +29,14 @@ public class XATransactionListResponse {
             xa.setUsername(username);
             xa.setAccountIdentity(null);
         }
+    }
+
+    public XAResponse getXaResponse() {
+        return xaResponse;
+    }
+
+    public void setXaResponse(XAResponse xaResponse) {
+        this.xaResponse = xaResponse;
     }
 
     public List<XA> getXaList() {
@@ -57,7 +66,9 @@ public class XATransactionListResponse {
     @Override
     public String toString() {
         return "XATransactionListResponse{"
-                + "xaList="
+                + "xaResponse="
+                + xaResponse
+                + ", xaList="
                 + xaList
                 + ", nextOffsets="
                 + nextOffsets
