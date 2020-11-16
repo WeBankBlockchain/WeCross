@@ -22,6 +22,7 @@ public class AuthFilterConfig {
         remoteAuthFilter.registerAuthUri("/auth/addChainAccount");
         remoteAuthFilter.registerAuthUri("/auth/setDefaultAccount");
         remoteAuthFilter.registerAuthUri("/auth/listAccount");
+        remoteAuthFilter.registerAuthUri("/auth/imageAuthCode");
 
         return remoteAuthFilter;
     }
