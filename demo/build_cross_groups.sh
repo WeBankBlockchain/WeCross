@@ -2,10 +2,10 @@
 set -e
 LANG=en_US.utf8
 ROOT=$(pwd)
-DB_IP=127.0.0.1
+DB_IP=localhost
 DB_PORT=3306
 DB_USERNAME=root
-DB_PASSWORD=${CI_DB_PASSWORD}
+DB_PASSWORD=
 
 need_db_config_ask=true
 
@@ -388,7 +388,7 @@ EOF
 
 deploy_chain_account() {
     mkdir -p ${ROOT}/WeCross-Console/conf/accounts/
-    rm -rf $(ls ${ROOT}/WeCross-Console/conf/accounts/ | grep -v .sh)
+    cd ${ROOT}/WeCross-Console/conf/accounts/ && rm -rf $(ls | grep -v .sh) && cd -
     cp -r ${ROOT}/bcos/accounts/* ${ROOT}/WeCross-Console/conf/accounts/
 
     add_bcos_account bcos_user1 # 0
