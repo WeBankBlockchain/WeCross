@@ -106,11 +106,11 @@ download_release_pkg()
             curl -C - -LO ${github_url}/${compatibility_version}/${release_pkg}
         fi
 
-        if ! md5sum -c ${release_pkg_checksum_file}; then
-            LOG_ERROR "Download package error"
-            rm -f ${release_pkg}
-            exit 1
-        fi
+        # if ! md5sum -c ${release_pkg_checksum_file}; then
+        #     LOG_ERROR "Download package error"
+        #     rm -f ${release_pkg}
+        #     exit 1
+        # fi
     fi
 
     tar -zxf ${release_pkg}
