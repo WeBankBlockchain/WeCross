@@ -164,4 +164,8 @@ public class P2PService implements NetworkService {
             callback.execute();
         }
     }
+
+    public NettyService getNettyService() {
+        return nettyService;
+    }
 }

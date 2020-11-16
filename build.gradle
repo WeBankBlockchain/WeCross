@@ -16,15 +16,14 @@ apply plugin: 'jacoco'
 repositories {
     // Use jcenter for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
-    maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
-    maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
     jcenter()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url "https://maven.aliyun.com/nexus/content/groups/public/" }
+    maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+    maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
 }
 
 sourceCompatibility = '1.8'
-version = '1.0.0-rc5-09271-SNAPSHOT'
+version = '1.0.0-rc5-1029-SNAPSHOT'
 
 task stubSourceJar(type: Jar) {
     into 'com/webank/wecross/stub', { from 'src/main/java/com/webank/wecross/stub' }
@@ -136,6 +135,7 @@ dependencies {
     compile 'org.asynchttpclient:async-http-client:2.12.0'
     compile 'org.bouncycastle:bcprov-jdk15on:1.60'
     compile 'commons-codec:commons-codec:1.14'
+    compile 'javax.activation:activation:1.1.1'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'

@@ -6,7 +6,7 @@ import java.util.List;
 
 public class TransactionResponse {
     private Integer errorCode = 0;
-    private String errorMessage = new String();
+    private String message = new String();
     private String hash = new String();
     private List<String> extraHashes;
     private long blockNumber;
@@ -20,12 +20,12 @@ public class TransactionResponse {
         this.errorCode = errorCode;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    public String getMessage() {
+        return message;
     }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public String getHash() {
@@ -73,7 +73,7 @@ public class TransactionResponse {
                 + "errorCode="
                 + errorCode
                 + ", errorMessage='"
-                + errorMessage
+                + message
                 + '\''
                 + ", hash='"
                 + hash

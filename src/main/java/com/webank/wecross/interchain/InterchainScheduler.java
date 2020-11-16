@@ -1,12 +1,17 @@
 package com.webank.wecross.interchain;
 
+import static com.webank.wecross.interchain.InterchainDefault.TIMEOUT_DELAY;
+
 import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.*;
 import com.webank.wecross.utils.Sha256Utils;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timer;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +31,8 @@ public class InterchainScheduler {
     }
 
     public void start(InterchainCallback callback) {
-        getTransactionState(
-                (getTransactionStateException, tid, seq) -> {
+        getXATransactionState(
+                (getTransactionStateException, xaTransactionID, xaTransactionSeq) -> {
                     if (Objects.nonNull(getTransactionStateException)) {
                         callback.onReturn(getTransactionStateException);
                         return;
@@ -35,9 +40,9 @@ public class InterchainScheduler {
 
                     if (logger.isDebugEnabled()) {
                         logger.debug(
-                                "Transaction state, tid: {}, seq: {}, inter chain request: {}",
-                                tid,
-                                seq,
+                                "Transaction state, xaTransactionID: {}, xaTransactionSeq: {}, inter chain request: {}",
+                                xaTransactionID,
+                                xaTransactionSeq,
                                 interchainRequest);
                     }
 
@@ -45,10 +50,14 @@ public class InterchainScheduler {
                             Sha256Utils.sha256String(
                                     (systemResource.getHubResource() + interchainRequest.getUid())
                                             .getBytes(StandardCharsets.UTF_8));
+
+                    long timestamp = System.currentTimeMillis();
+                    long callTargetChainSeq =
+                            timestamp > xaTransactionSeq ? timestamp : (xaTransactionSeq + 1L);
                     callTargetChain(
                             realUid,
-                            tid,
-                            seq + 1,
+                            xaTransactionID,
+                            callTargetChainSeq,
                             (callTargetChainException, callTargetChainResult) -> {
                                 boolean state = true;
                                 String result = callTargetChainResult;
@@ -65,24 +74,29 @@ public class InterchainScheduler {
 
                                 if (logger.isDebugEnabled()) {
                                     logger.debug(
-                                            "Call target chain, tid: {}, seq: {}, state: {}, result: {},  inter chain request: {}",
-                                            tid,
-                                            seq + 1,
+                                            "Call target chain, xaTransactionID: {}, xaTransactionSeq: {}, state: {}, result: {},  inter chain request: {}",
+                                            xaTransactionID,
+                                            callTargetChainSeq,
                                             state,
                                             result,
                                             interchainRequest);
                                 }
 
+                                long newTimestamp = System.currentTimeMillis();
+                                long callCallbackSeq =
+                                        newTimestamp > callTargetChainSeq
+                                                ? newTimestamp
+                                                : (callTargetChainSeq + 1L);
                                 callCallback(
                                         Sha256Utils.sha256String(
                                                 realUid.getBytes(StandardCharsets.UTF_8)),
-                                        tid,
-                                        seq + 2,
+                                        xaTransactionID,
+                                        callCallbackSeq,
                                         state,
                                         result,
                                         (callCallbackException,
                                                 errorCode,
-                                                errorMsg,
+                                                message,
                                                 callCallbackResult) -> {
                                             if (Objects.nonNull(callCallbackException)) {
                                                 /* exception occurred, no need to register result */
@@ -92,27 +106,27 @@ public class InterchainScheduler {
 
                                             if (logger.isDebugEnabled()) {
                                                 logger.debug(
-                                                        "Call callback, tid: {}, seq: {}, result: {},  inter chain request: {}",
-                                                        tid,
-                                                        seq + 2,
+                                                        "Call callback, xaTransactionID: {}, xaTransactionSeq: {}, result: {},  inter chain request: {}",
+                                                        xaTransactionID,
+                                                        callCallbackSeq,
                                                         callCallbackResult,
                                                         interchainRequest);
                                             }
 
                                             registerCallbackResult(
-                                                    tid,
-                                                    seq + 2,
+                                                    xaTransactionID,
+                                                    callCallbackSeq,
                                                     errorCode,
-                                                    errorMsg,
+                                                    message,
                                                     callCallbackResult,
                                                     registerCallbackResultException -> {
                                                         if (logger.isDebugEnabled()) {
                                                             logger.debug(
-                                                                    "Register callback result, tid: {}, seq: {}, errorCode: {}, errorMsg: {}, result: {}, inter chain request: {}",
-                                                                    tid,
-                                                                    seq + 2,
+                                                                    "Register callback result, xaTransactionID: {}, xaTransactionSeq: {}, errorCode: {}, message: {}, result: {}, inter chain request: {}",
+                                                                    xaTransactionID,
+                                                                    callCallbackSeq,
                                                                     errorCode,
-                                                                    errorMsg,
+                                                                    message,
                                                                     callCallbackResult,
                                                                     interchainRequest);
                                                         }
@@ -125,14 +139,14 @@ public class InterchainScheduler {
     }
 
     public interface GetTransactionStateCallback {
-        void onReturn(WeCrossException exception, String tid, int seq);
+        void onReturn(WeCrossException exception, String xaTransactionID, long xaTransactionSeq);
     }
 
-    public void getTransactionState(GetTransactionStateCallback callback) {
+    public void getXATransactionState(GetTransactionStateCallback callback) {
         Resource proxyResource = systemResource.getProxyResource();
         TransactionRequest transactionRequest = new TransactionRequest();
         transactionRequest.setArgs(new String[] {interchainRequest.getPath()});
-        transactionRequest.setMethod(InterchainDefault.GET_TRANSACTION_STATE_METHOD);
+        transactionRequest.setMethod(InterchainDefault.GET_XA_TRANSACTION_STATE_METHOD);
         transactionRequest.getOptions().put(Resource.RAW_TRANSACTION, true);
 
         proxyResource.asyncCall(
@@ -144,8 +158,8 @@ public class InterchainScheduler {
                         callback.onReturn(
                                 new WeCrossException(
                                         WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
-                                        "GET_TRANSACTION_STATE_ERROR",
-                                        InterchainErrorCode.GET_TRANSACTION_STATE_ERROR,
+                                        "GET_XA_TRANSACTION_STATE_ERROR",
+                                        InterchainErrorCode.GET_XA_TRANSACTION_STATE_ERROR,
                                         transactionException.getMessage()),
                                 null,
                                 0);
@@ -153,9 +167,9 @@ public class InterchainScheduler {
                         callback.onReturn(
                                 new WeCrossException(
                                         WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
-                                        "GET_TRANSACTION_STATE_ERROR",
-                                        InterchainErrorCode.GET_TRANSACTION_STATE_ERROR,
-                                        transactionResponse.getErrorMessage()),
+                                        "GET_XA_TRANSACTION_STATE_ERROR",
+                                        InterchainErrorCode.GET_XA_TRANSACTION_STATE_ERROR,
+                                        transactionResponse.getMessage()),
                                 null,
                                 0);
                     } else {
@@ -164,8 +178,8 @@ public class InterchainScheduler {
                             callback.onReturn(
                                     new WeCrossException(
                                             WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
-                                            "GET_TRANSACTION_STATE_ERROR",
-                                            InterchainErrorCode.GET_TRANSACTION_STATE_ERROR,
+                                            "GET_XA_TRANSACTION_STATE_ERROR",
+                                            InterchainErrorCode.GET_XA_TRANSACTION_STATE_ERROR,
                                             "No response found"),
                                     null,
                                     0);
@@ -189,7 +203,11 @@ public class InterchainScheduler {
         void onReturn(WeCrossException exception, String result);
     }
 
-    public void callTargetChain(String uid, String tid, int seq, CallTargetChainCallback callback) {
+    public void callTargetChain(
+            String uid,
+            String xaTransactionID,
+            long xaTransactionSeq,
+            CallTargetChainCallback callback) {
         try {
             Path path = Path.decode(interchainRequest.getPath());
             Resource resource = systemResource.getZoneManager().fetchResource(path);
@@ -209,38 +227,50 @@ public class InterchainScheduler {
             transactionRequest.setMethod(interchainRequest.getMethod());
 
             transactionRequest.getOptions().put(StubConstant.TRANSACTION_UNIQUE_ID, uid);
-            if (Objects.nonNull(tid)
-                    && !tid.isEmpty()
-                    && !InterchainDefault.NON_TRANSACTION.equals(tid)) {
-                transactionRequest.getOptions().put(StubConstant.TRANSACTION_ID, tid);
+            if (Objects.nonNull(xaTransactionID)
+                    && !xaTransactionID.isEmpty()
+                    && !InterchainDefault.NON_TRANSACTION.equals(xaTransactionID)) {
                 transactionRequest
                         .getOptions()
-                        .put(StubConstant.TRANSACTION_SEQ, String.valueOf(seq));
+                        .put(StubConstant.XA_TRANSACTION_ID, xaTransactionID);
+                transactionRequest
+                        .getOptions()
+                        .put(StubConstant.XA_TRANSACTION_SEQ, String.valueOf(xaTransactionSeq));
             }
 
             if (InterchainDefault.CALL_TYPE_INVOKE == interchainRequest.getCallType()) {
+
+                Timer timer = new HashedWheelTimer();
+                timer.newTimeout(
+                        timeout ->
+                                callback.onReturn(
+                                        new WeCrossException(
+                                                WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
+                                                "CALL_TARGET_CHAIN_ERROR",
+                                                InterchainErrorCode.CALL_TARGET_CHAIN_ERROR,
+                                                "Timeout"),
+                                        null),
+                        TIMEOUT_DELAY,
+                        TimeUnit.SECONDS);
+
                 resource.asyncSendTransaction(
                         transactionRequest,
                         userUA,
                         (transactionException, transactionResponse) -> {
+                            // call back after timeout if call target failed
                             if (Objects.nonNull(transactionException)
                                     && !transactionException.isSuccess()) {
-                                callback.onReturn(
-                                        new WeCrossException(
-                                                WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
-                                                "CALL_TARGET_CHAIN_ERROR",
-                                                InterchainErrorCode.CALL_TARGET_CHAIN_ERROR,
-                                                transactionException.getMessage()),
-                                        null);
+                                logger.error(
+                                        "Call target chain failed, error code: {}, message: {}",
+                                        transactionException.getErrorCode(),
+                                        transactionException.getMessage());
                             } else if (transactionResponse.getErrorCode() != 0) {
-                                callback.onReturn(
-                                        new WeCrossException(
-                                                WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
-                                                "CALL_TARGET_CHAIN_ERROR",
-                                                InterchainErrorCode.CALL_TARGET_CHAIN_ERROR,
-                                                transactionResponse.getErrorMessage()),
-                                        null);
+                                logger.error(
+                                        "Call target chain failed, error code: {}, message: {}",
+                                        transactionResponse.getErrorCode(),
+                                        transactionResponse.getMessage());
                             } else {
+                                timer.stop();
                                 if (Objects.isNull(transactionResponse.getResult())
                                         || transactionResponse.getResult().length == 0) {
                                     callback.onReturn(null, "");
@@ -263,13 +293,13 @@ public class InterchainScheduler {
     }
 
     public interface CallCallbackCallback {
-        void onReturn(WeCrossException exception, int errorCode, String errorMsg, String result);
+        void onReturn(WeCrossException exception, int errorCode, String message, String result);
     }
 
     public void callCallback(
             String uid,
-            String tid,
-            int seq,
+            String xaTransactionID,
+            long xaTransactionSeq,
             Boolean state,
             String result,
             CallCallbackCallback callback) {
@@ -293,13 +323,15 @@ public class InterchainScheduler {
             transactionRequest.setArgs(new String[] {state.toString(), result});
             transactionRequest.setMethod(interchainRequest.getCallbackMethod());
             transactionRequest.getOptions().put(StubConstant.TRANSACTION_UNIQUE_ID, uid);
-            if (Objects.nonNull(tid)
-                    && !tid.isEmpty()
-                    && !InterchainDefault.NON_TRANSACTION.equals(tid)) {
-                transactionRequest.getOptions().put(StubConstant.TRANSACTION_ID, tid);
+            if (Objects.nonNull(xaTransactionID)
+                    && !xaTransactionID.isEmpty()
+                    && !InterchainDefault.NON_TRANSACTION.equals(xaTransactionID)) {
                 transactionRequest
                         .getOptions()
-                        .put(StubConstant.TRANSACTION_SEQ, String.valueOf(seq));
+                        .put(StubConstant.XA_TRANSACTION_ID, xaTransactionID);
+                transactionRequest
+                        .getOptions()
+                        .put(StubConstant.XA_TRANSACTION_SEQ, String.valueOf(xaTransactionSeq));
             }
 
             resource.asyncSendTransaction(
@@ -321,7 +353,7 @@ public class InterchainScheduler {
                             callback.onReturn(
                                     null,
                                     transactionResponse.getErrorCode(),
-                                    transactionResponse.getErrorMessage(),
+                                    transactionResponse.getMessage(),
                                     "");
                         } else {
                             if (Objects.isNull(transactionResponse.getResult())
@@ -352,20 +384,22 @@ public class InterchainScheduler {
     }
 
     public void registerCallbackResult(
-            String tid,
-            int seq,
+            String xaTransactionID,
+            long xaTransactionSeq,
             int errorCode,
-            String errorMsg,
+            String message,
             String result,
             RegisterResultCallback callback) {
 
-        if (Objects.isNull(tid) || tid.isEmpty() || InterchainDefault.NON_TRANSACTION.equals(tid)) {
-            tid = InterchainDefault.NON_TRANSACTION;
-            seq = 0;
+        if (Objects.isNull(xaTransactionID)
+                || xaTransactionID.isEmpty()
+                || InterchainDefault.NON_TRANSACTION.equals(xaTransactionID)) {
+            xaTransactionID = InterchainDefault.NON_TRANSACTION;
+            xaTransactionSeq = 0;
         }
 
         if (errorCode == 0) {
-            errorMsg = InterchainDefault.SUCCESS_FLAG;
+            message = InterchainDefault.SUCCESS_FLAG;
         }
 
         Resource hubResource = systemResource.getHubResource();
@@ -373,10 +407,10 @@ public class InterchainScheduler {
         transactionRequest.setArgs(
                 new String[] {
                     interchainRequest.getUid(),
-                    tid,
-                    String.valueOf(seq),
+                    xaTransactionID,
+                    String.valueOf(xaTransactionSeq),
                     String.valueOf(errorCode),
-                    errorMsg,
+                    message,
                     result
                 });
         transactionRequest.setMethod(InterchainDefault.REGISTER_CALLBACK_RESULT_METHOD);
@@ -399,7 +433,7 @@ public class InterchainScheduler {
                                         WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
                                         "REGISTER_CALLBACK_RESULT_ERROR",
                                         InterchainErrorCode.REGISTER_CALLBACK_RESULT_ERROR,
-                                        transactionResponse.getErrorMessage()));
+                                        transactionResponse.getMessage()));
                     } else {
                         callback.onReturn(null);
                     }

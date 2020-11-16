@@ -2,10 +2,10 @@
 set -e
 LANG=en_US.utf8
 ROOT=$(pwd)
-DB_IP=localhost
+DB_IP=127.0.0.1
 DB_PORT=3306
 DB_USERNAME=root
-DB_PASSWORD=
+DB_PASSWORD=${CI_DB_PASSWORD}
 
 need_db_config_ask=true
 
@@ -426,12 +426,26 @@ main() {
     config_router_8250 ${ROOT}/routers-payment/127.0.0.1-8250-25500/
     config_router_8251 ${ROOT}/routers-payment/127.0.0.1-8251-25501/
 
+    netstat -napl |grep 20200
+    netstat -napl |grep 20210
+
+
     # Start up routers
     cd ${ROOT}/routers-payment/127.0.0.1-8250-25500/
-    bash start.sh
+    if ! bash start.sh; then
+        netstat -napl |grep 20200
+        netstat -napl |grep 20210
+        cat ${ROOT}/bcos/nodes/127.0.0.1/node0/log/*
+        exit 1
+    fi
 
     cd ${ROOT}/routers-payment/127.0.0.1-8251-25501/
-    bash start.sh
+    if ! bash start.sh; then
+        netstat -napl |grep 20200
+        netstat -napl |grep 20210
+        cat ${ROOT}/bcos/nodes/127.0.0.1/node0/log/*
+        exit 1
+    fi
 
     cd ${ROOT}
 

@@ -2,10 +2,10 @@
 set -e
 LANG=en_US.utf8
 ROOT=$(pwd)
-DB_IP=localhost
+DB_IP=127.0.0.1
 DB_PORT=3306
 DB_USERNAME=root
-DB_PASSWORD=
+DB_PASSWORD=${CI_DB_PASSWORD}
 
 need_db_config_ask=true
 
@@ -79,7 +79,7 @@ check_port_avaliable() {
     port=$1
     name=$2
     if [ "$(lsof -i:$port | wc -l)" -ne "0" ]; then
-        LOG_ERROR "${name} port ${port} is not avaliable. Are there any other blockchain is running?"
+        LOG_ERROR "${name} port ${port} is not avaliable. Are there any other blockchain or application is running?"
         exit 1
     fi
 }
@@ -242,8 +242,8 @@ config_router_8250() {
     bash add_account.sh -t BCOS2.0 -n bcos_admin -d conf/accounts
 
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos bcos_admin
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos bcos_admin
+    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos bcos_admin
+    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos bcos_admin
 
     cd -
 }
@@ -269,8 +269,8 @@ config_router_8251() {
     sed_i 's/Org1MSP/Org2MSP/g' conf/accounts/fabric_admin_org2/account.toml
 
     # deploy system chaincodes
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy chains/fabric
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.hub.HubChaincodeDeployment deploy chains/fabric
+    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy chains/fabric
+    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.fabric.hub.HubChaincodeDeployment deploy chains/fabric
 
     cd -
 }

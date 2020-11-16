@@ -2,10 +2,10 @@
 set -e
 LANG=en_US.utf8
 ROOT=$(pwd)
-DB_IP=localhost
+DB_IP=127.0.0.1
 DB_PORT=3306
 DB_USERNAME=root
-DB_PASSWORD=
+DB_PASSWORD=${CI_DB_PASSWORD}
 
 need_db_config_ask=true
 

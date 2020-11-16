@@ -12,14 +12,7 @@ import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.stub.TransactionException;
 import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -39,7 +32,7 @@ public class Chain {
 
     private Connection localConnection;
     private Set<Peer> peers = new HashSet<>();
-    private Map<String, Resource> resources = new HashMap<String, Resource>();
+    private Map<String, Resource> resources = new LinkedHashMap<String, Resource>();
     private Driver driver;
     private BlockManager blockManager;
     private Random random = new SecureRandom();
@@ -71,6 +64,7 @@ public class Chain {
 
     public ChainInfo getChainInfo() {
         ChainInfo chainInfo = new ChainInfo();
+        chainInfo.setZone(zoneName);
         chainInfo.setName(name);
         chainInfo.setStubType(stubType);
         chainInfo.setProperties(properties);
@@ -417,5 +411,9 @@ public class Chain {
                         getBlockManager(),
                         chooseConnection(),
                         callback);
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
     }
 }

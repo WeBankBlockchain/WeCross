@@ -41,9 +41,9 @@ check_docker_service() {
 
 remove_mycc() {
     LOG_INFO "Remove default mycc chaincode"
-    docker exec -it peer0.org1.example.com rm /var/hyperledger/production/chaincodes/mycc.1.0
-    docker exec -it peer0.org2.example.com rm /var/hyperledger/production/chaincodes/mycc.1.0
-    docker exec -it peer1.org2.example.com rm /var/hyperledger/production/chaincodes/mycc.1.0
+    docker exec -i peer0.org1.example.com rm /var/hyperledger/production/chaincodes/mycc.1.0
+    docker exec -i peer0.org2.example.com rm /var/hyperledger/production/chaincodes/mycc.1.0
+    docker exec -i peer1.org2.example.com rm /var/hyperledger/production/chaincodes/mycc.1.0
     docker stop $(docker ps | grep mycc | awk '{print $1}')
     docker rm $(docker ps -a | grep mycc | awk '{print $1}')
 }

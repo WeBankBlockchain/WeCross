@@ -36,6 +36,10 @@ public class AccountManager {
         return ua.getAccounts();
     }
 
+    public void checkLogin(UserContext userContext) throws WeCrossException {
+        getUniversalAccount(userContext);
+    }
+
     public UniversalAccount getUniversalAccount(UserContext userContext) throws WeCrossException {
 
         String token = userContext.getToken();

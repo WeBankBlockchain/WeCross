@@ -2,11 +2,16 @@ package com.webank.wecross.peer;
 
 import static com.webank.wecross.stub.ResourceInfo.isEqualInfos;
 
+import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.network.p2p.netty.common.Node;
 import com.webank.wecross.stub.ResourceInfo;
 import com.webank.wecross.utils.core.SeqUtils;
+import com.webank.wecross.zone.ChainInfo;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +22,7 @@ public class PeerManager {
     private Map<Node, Peer> peerInfos = new ConcurrentHashMap<Node, Peer>(); // peer
     private int seq = 1; // Seq of the host
     private long peerActiveTimeout;
+    private P2PService p2PService;
 
     private Map<String, ResourceInfo> activeResources = new HashMap<>();
 
@@ -103,5 +109,53 @@ public class PeerManager {
             logger.info(
                     "Update active resources newSeq:{}, resource:{}", seq, this.activeResources);
         }
+    }
+
+    public void setP2PService(P2PService p2PService) {
+        this.p2PService = p2PService;
+    }
+
+    public class ChainInfoDetails {
+        public String path;
+        public String stubType;
+    }
+
+    public class PeerDetails implements Comparable<PeerDetails> {
+        public String nodeID;
+        public String address;
+        public int seq;
+        public Collection<ChainInfoDetails> chainInfos;
+
+        @Override
+        public int compareTo(PeerDetails o) {
+            return this.nodeID.compareTo(o.nodeID);
+        }
+    }
+
+    public Collection<PeerDetails> getPeerDetails() {
+        Collection<PeerDetails> peerDetails = new TreeSet<>();
+        for (Peer peer : peerInfos.values()) {
+            PeerDetails detail = new PeerDetails();
+            detail.nodeID = peer.node.getNodeID();
+            detail.address =
+                    p2PService
+                            .getNettyService()
+                            .getConnections()
+                            .getIPPortIDByNodeID(detail.nodeID);
+            detail.seq = peer.getSeq();
+
+            detail.chainInfos = new HashSet<>();
+
+            for (ChainInfo chainInfo : peer.getChainInfos().values()) {
+                ChainInfoDetails chainInfoDetails = new ChainInfoDetails();
+                chainInfoDetails.path = chainInfo.getZone() + "." + chainInfo.getName();
+                chainInfoDetails.stubType = chainInfo.getStubType();
+                detail.chainInfos.add(chainInfoDetails);
+            }
+
+            peerDetails.add(detail);
+        }
+
+        return peerDetails;
     }
 }

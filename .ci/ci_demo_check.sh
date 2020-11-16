@@ -58,7 +58,7 @@ prepare_demo() {
 demo_test() {
     cd ${ROOT}
 
-    bash -x build.sh n
+    bash build.sh n
 
     ensure_bcos_nodes_running
 
@@ -67,6 +67,7 @@ demo_test() {
 listResources
 login
 listAccount
+listResources
 call payment.bcos.HelloWorld get
 sendTransaction payment.bcos.HelloWorld set Tom
 call payment.bcos.HelloWorld get
@@ -95,6 +96,8 @@ htlc_test() {
     cd WeCross-Console-8251/
     bash start.sh <<EOF
 login
+listAccount
+listResources
 setDefaultAccount Fabric1.4 1
 call payment.fabric.htlc balanceOf User1@org1.example.com
 newHTLCProposal payment.fabric.htlc bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 null false 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
@@ -105,6 +108,8 @@ EOF
     cd WeCross-Console/
     bash start.sh <<EOF
 login
+listAccount
+listResources
 call payment.bcos.htlc balanceOf 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf
 newHTLCProposal payment.bcos.htlc bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 9dda9a5e175a919ee98ff0198927b0a765ef96cf917144b589bb8e510e04843c true 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
 quit
@@ -116,6 +121,8 @@ EOF
     cd WeCross-Console/
     bash start.sh <<EOF
 login
+listAccount
+listResources
 call payment.bcos.htlc balanceOf 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf
 quit
 EOF
@@ -124,6 +131,8 @@ EOF
     cd WeCross-Console-8251/
     bash start.sh <<EOF
 login
+listAccount
+listResources
 call payment.fabric.htlc balanceOf User1@org1.example.com
 quit
 EOF
@@ -134,15 +143,17 @@ EOF
     check_console_log ${ROOT}/WeCross-Console-8251/logs/warn.log
 }
 
-# 2pc test
-2pc_test() {
+# xa test
+xa_test() {
     cd ${ROOT}
 
-    bash -x 2pc_config.sh n
+    bash -x xa_config.sh n
 
     cd WeCross-Console/
     bash start.sh <<EOF
 login
+listAccount
+listResources
 call payment.bcos.evidence queryEvidence evidence0
 call payment.fabric.evidence queryEvidence evidence0
 
@@ -195,7 +206,7 @@ prepare_wecross_console() {
 prepare_account_manager() {
     cd ${ROOT}/
     LOG_INFO "Download wecross account manager from branch: ${PLUGIN_BRANCH}"
-    bash WeCross/download_account_manager.sh -s -t ${PLUGIN_BRANCH}
+    bash -x WeCross/download_account_manager.sh -d -s -t ${PLUGIN_BRANCH}
     cd -
 }
 
@@ -213,7 +224,7 @@ main() {
     prepare_demo
     demo_test
     htlc_test
-    2pc_test
+    xa_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then

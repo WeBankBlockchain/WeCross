@@ -163,6 +163,7 @@ gen_one_wecross() {
     mkdir -p ${output}/conf/accounts
     mkdir -p ${output}/conf/chains
     mkdir -p ${output}/plugin
+    mkdir -p ${output}/pages
 
     # copy files
     chmod u+x ${wecross_dir}./*.sh
@@ -171,7 +172,7 @@ gen_one_wecross() {
     cp -r ${wecross_dir}/lib "${output}/"
 
     # Configure plugin
-    cp ${wecross_dir}/plugin/* ${output}/plugin/
+    cp -r ${wecross_dir}/plugin ${output}/
 
     cp -r "${wecross_dir}/conf" "${output}/"
     cp -r "${cert_dir}"/* "${output}"/conf/
@@ -202,6 +203,9 @@ gen_conf() {
     caCert = 'classpath:ca.crt'
     sslCert = 'classpath:ssl.crt'
     sslKey = 'classpath:ssl.key'
+    sslSwitch = 2  # disable ssl:2, SSL without client auth:1 , SSL with client and server auth: 0
+    webRoot = 'classpath:pages'
+    mimeTypesFile = 'classpath:conf/mime.types' # set the content-types of a file
 
 [p2p]
     listenIP = '0.0.0.0'

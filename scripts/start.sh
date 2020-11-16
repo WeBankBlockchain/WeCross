@@ -1,8 +1,8 @@
 #!/bin/bash
 
 APPS_FOLDER=$(pwd)/apps
-CLASS_PATH=$(pwd)'/apps/*:lib/*:conf:plugin/*'
-WINDS_CLASS_PATH=$(pwd)'/apps/*;lib/*;conf;plugin/*'
+CLASS_PATH=$(pwd)'/apps/*:lib/*:conf:plugin/*:./'
+WINDS_CLASS_PATH=$(pwd)'/apps/*;lib/*;conf;plugin/*;./'
 
 STATUS_STARTING="Starting"
 STATUS_RUNNING="Running"

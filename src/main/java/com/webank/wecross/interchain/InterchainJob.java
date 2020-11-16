@@ -148,7 +148,7 @@ public class InterchainJob implements Job {
                         logger.error(
                                 "Failed to get interchain requests, path: {}, errorMessage: {}",
                                 hubResource.getPath(),
-                                transactionResponse.getErrorMessage());
+                                transactionResponse.getMessage());
                         if (!future.isCancelled()) {
                             future.complete(InterchainDefault.NULL_FLAG);
                         }
@@ -229,7 +229,7 @@ public class InterchainJob implements Job {
                         logger.error(
                                 "Failed to update current interchain request index: {}, errorMessage: {}",
                                 hubResource.getPath(),
-                                transactionResponse.getErrorMessage());
+                                transactionResponse.getMessage());
                     } else {
                         logger.info("Current interchain requests finished, index: {}", index);
                     }

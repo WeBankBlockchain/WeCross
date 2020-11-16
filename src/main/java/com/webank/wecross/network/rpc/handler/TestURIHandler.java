@@ -3,7 +3,7 @@ package com.webank.wecross.network.rpc.handler;
 import com.webank.wecross.account.UserContext;
 import com.webank.wecross.restserver.RestResponse;
 
-/** GET/POST /test */
+/** GET /sys/test */
 public class TestURIHandler implements URIHandler {
 
     @Override

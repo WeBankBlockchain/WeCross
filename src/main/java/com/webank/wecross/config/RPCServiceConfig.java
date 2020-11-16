@@ -6,6 +6,7 @@ import com.webank.wecross.network.rpc.URIHandlerDispatcher;
 import com.webank.wecross.network.rpc.authentication.AuthFilter;
 import com.webank.wecross.network.rpc.netty.RPCBootstrap;
 import com.webank.wecross.network.rpc.netty.RPCConfig;
+import com.webank.wecross.network.rpc.web.WebService;
 import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,8 @@ public class RPCServiceConfig {
 
     @Resource AccountManager accountManager;
 
+    @Resource WebService webService;
+
     @Bean
     public RPCService newRPCService() {
         RPCBootstrap rpcBootstrap = new RPCBootstrap();
@@ -26,6 +29,8 @@ public class RPCServiceConfig {
         rpcBootstrap.setAuthFilter(authFilter);
 
         URIHandlerDispatcher uriHandlerDispatcher = new URIHandlerDispatcher();
+        uriHandlerDispatcher.setWebService(webService);
+
         rpcBootstrap.setUriHandlerDispatcher(uriHandlerDispatcher);
 
         RPCService rpcService = new RPCService();

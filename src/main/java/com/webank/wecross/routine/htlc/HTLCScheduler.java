@@ -462,6 +462,7 @@ public class HTLCScheduler {
                         txHash,
                         blockNum,
                         htlcResource.getBlockManager(),
+                        true,
                         htlcResource.chooseConnection(),
                         (exception, verifiedTransaction) -> {
                             if (exception != null) {

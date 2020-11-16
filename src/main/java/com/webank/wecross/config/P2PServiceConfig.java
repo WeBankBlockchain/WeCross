@@ -48,6 +48,8 @@ public class P2PServiceConfig {
 
         P2PService p2PService = new P2PService();
         p2PService.setNettyService(nettyService);
+
+        peerManager.setP2PService(p2PService);
         return p2PService;
     }
 }

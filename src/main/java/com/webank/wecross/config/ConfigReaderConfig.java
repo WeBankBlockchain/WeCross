@@ -7,6 +7,7 @@ import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.p2p.netty.factory.P2PConfig;
 import com.webank.wecross.network.rpc.netty.RPCConfig;
+import com.webank.wecross.utils.ConfigUtils;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
@@ -198,6 +199,26 @@ public class ConfigReaderConfig {
             logger.info("rpc threadQueueCapacity not set, use default: {}", threadQueueCapacity);
         }
         rpcConfig.setThreadQueueCapacity(threadQueueCapacity);
+
+        String webRoot = (String) rpcMap.get("webRoot");
+        if (webRoot == null) {
+            String errorMessage =
+                    "\"webRoot\" in [rpc] item  not found, please check "
+                            + WeCrossDefault.MAIN_CONFIG_FILE;
+            throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
+        }
+        rpcConfig.setWebRoot(webRoot);
+
+        String mimeTypesFile = (String) rpcMap.get("mimeTypesFile");
+        if (mimeTypesFile == null) {
+            String errorMessage =
+                    "\"mimeTypesFile\" in [rpc] item  not found, please check "
+                            + WeCrossDefault.MAIN_CONFIG_FILE;
+            throw new WeCrossException(WeCrossException.ErrorCode.FIELD_MISSING, errorMessage);
+        } else {
+            mimeTypesFile = ConfigUtils.classpath2Absolute(mimeTypesFile);
+        }
+        rpcConfig.setMimeTypesFile(mimeTypesFile);
 
         Long sslSwitch = (Long) rpcMap.get("sslSwitch");
         if (sslSwitch == null) {
