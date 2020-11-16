@@ -332,6 +332,7 @@ build_wecross_console() {
     sslKey = 'classpath:ssl.key'
     sslCert = 'classpath:ssl.crt'
     caCert = 'classpath:ca.crt'
+    sslSwitch = 2 # disable ssl:2, SSL without client auth:1 , SSL with client and server auth: 0
 [login]
     username = 'org1-admin'
     password = '123456'
