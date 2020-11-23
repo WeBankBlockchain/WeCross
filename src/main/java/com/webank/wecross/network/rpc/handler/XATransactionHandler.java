@@ -51,7 +51,7 @@ public class XATransactionHandler implements URIHandler {
 
     public static class ListXATransactionsRequest {
         private int size;
-        private Map<String, Integer> offsets = Collections.synchronizedMap(new HashMap<>());
+        private Map<String, Long> offsets = Collections.synchronizedMap(new HashMap<>());
 
         public int getSize() {
             return size;
@@ -61,11 +61,11 @@ public class XATransactionHandler implements URIHandler {
             this.size = size;
         }
 
-        public Map<String, Integer> getOffsets() {
+        public Map<String, Long> getOffsets() {
             return offsets;
         }
 
-        public void setOffsets(Map<String, Integer> offsets) {
+        public void setOffsets(Map<String, Long> offsets) {
             this.offsets = offsets;
         }
     }
@@ -114,6 +114,10 @@ public class XATransactionHandler implements URIHandler {
                                 ua,
                                 decodePathSet(xaRequest.getData().getPaths()),
                                 (response) -> {
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(
+                                                "startXATransaction, final response: {}", response);
+                                    }
                                     restResponse.setData(response);
                                     callback.onResponse(restResponse);
                                 });
@@ -131,6 +135,11 @@ public class XATransactionHandler implements URIHandler {
                                 ua,
                                 filterAndSortChainPaths(xaRequest.getData().getPaths()),
                                 (response) -> {
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(
+                                                "commitXATransaction, final response: {}",
+                                                response);
+                                    }
                                     restResponse.setData(response);
                                     callback.onResponse(restResponse);
                                 });
@@ -148,6 +157,11 @@ public class XATransactionHandler implements URIHandler {
                                 ua,
                                 filterAndSortChainPaths(xaRequest.getData().getPaths()),
                                 (response) -> {
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(
+                                                "rollbackXATransaction, final response: {}",
+                                                response);
+                                    }
                                     restResponse.setData(response);
                                     callback.onResponse(restResponse);
                                 });
@@ -165,6 +179,11 @@ public class XATransactionHandler implements URIHandler {
                                 ua,
                                 filterAndSortChainPaths(xaRequest.getData().getPaths()),
                                 (xaTransactionResponse) -> {
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(
+                                                "getXATransaction, final response: {}",
+                                                xaTransactionResponse);
+                                    }
                                     restResponse.setData(xaTransactionResponse);
                                     callback.onResponse(restResponse);
                                 });
@@ -184,6 +203,12 @@ public class XATransactionHandler implements URIHandler {
                                 xaRequest.getData().getOffsets(),
                                 xaRequest.getData().getSize(),
                                 (exception, xaTransactionListResponse) -> {
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug(
+                                                "listXATransactions, final response: {}, error: ",
+                                                xaTransactionListResponse,
+                                                exception);
+                                    }
                                     if (Objects.nonNull(exception)) {
                                         restResponse.setErrorCode(
                                                 NetworkQueryStatus.XA_ERROR
