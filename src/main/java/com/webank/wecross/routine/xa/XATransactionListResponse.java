@@ -9,14 +9,14 @@ import java.util.*;
 public class XATransactionListResponse {
     private XAResponse xaResponse;
     private List<XA> xaList = new ArrayList<>();
-    private Map<String, Integer> nextOffsets = Collections.synchronizedMap(new HashMap<>());
+    private Map<String, Long> nextOffsets = Collections.synchronizedMap(new HashMap<>());
     private boolean finished = false;
 
     public void addXATransactionInfo(XA xa) {
         xaList.add(xa);
     }
 
-    public void addOffset(String chain, Integer offset) {
+    public void addOffset(String chain, Long offset) {
         nextOffsets.put(chain, offset);
     }
 
@@ -24,7 +24,7 @@ public class XATransactionListResponse {
         for (XA xa : xaList) {
             UniversalAccount ua =
                     accountManager.getUniversalAccountByIdentity(xa.getAccountIdentity());
-            String username = Objects.nonNull(ua) ? ua.getUsername() : "unknown";
+            String username = Objects.nonNull(ua) ? ua.getUsername() : "Unknown";
 
             xa.setUsername(username);
             xa.setAccountIdentity(null);
@@ -47,11 +47,11 @@ public class XATransactionListResponse {
         this.xaList = xaList;
     }
 
-    public Map<String, Integer> getNextOffsets() {
+    public Map<String, Long> getNextOffsets() {
         return nextOffsets;
     }
 
-    public void setNextOffsets(Map<String, Integer> nextOffsets) {
+    public void setNextOffsets(Map<String, Long> nextOffsets) {
         this.nextOffsets = nextOffsets;
     }
 
@@ -75,6 +75,37 @@ public class XATransactionListResponse {
                 + ", finished="
                 + finished
                 + '}';
+    }
+
+    public static class XAList {
+        private Long total;
+        private XA[] xaTransactions;
+
+        public Long getTotal() {
+            return total;
+        }
+
+        public void setTotal(Long total) {
+            this.total = total;
+        }
+
+        public XA[] getXaTransactions() {
+            return xaTransactions;
+        }
+
+        public void setXaTransactions(XA[] xaTransactions) {
+            this.xaTransactions = xaTransactions;
+        }
+
+        @Override
+        public String toString() {
+            return "XAList{"
+                    + "total="
+                    + total
+                    + ", xaTransactions="
+                    + Arrays.toString(xaTransactions)
+                    + '}';
+        }
     }
 
     public static class XA {
