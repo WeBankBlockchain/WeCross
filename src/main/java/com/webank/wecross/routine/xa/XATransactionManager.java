@@ -694,8 +694,10 @@ public class XATransactionManager {
                 return;
             }
 
-            // reset offsets
+            boolean requireIgnore = true;
             if (offsets.isEmpty()) {
+                // first time to list, reset offsets
+                requireIgnore = false;
                 for (Path chain : chainPaths) {
                     offsets.put(chain.toString(), -1L);
                 }
@@ -704,8 +706,13 @@ public class XATransactionManager {
             ListXAReduceCallback reduceCallback =
                     getListXAReduceCallback(offsets.size(), offsets, size, callback);
             for (String chain : offsets.keySet()) {
-                asyncListXATransactions(
-                        ua, Path.decode(chain), offsets.get(chain), size, reduceCallback);
+                if (!requireIgnore || offsets.get(chain) != -1L) {
+                    asyncListXATransactions(
+                            ua, Path.decode(chain), offsets.get(chain), size, reduceCallback);
+                } else {
+                    // not first time to list, -1 means finished
+                    reduceCallback.onResponse(chain, new ListXAResponse());
+                }
             }
 
         } catch (WeCrossException e) {
