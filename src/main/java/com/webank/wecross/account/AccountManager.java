@@ -65,13 +65,37 @@ public class AccountManager {
         UniversalAccount ua = token2UA.get(token);
 
         // query login state every x seconds
-        if (!((UniversalAccount) ua).isActive()) {
-            if (!fetchHasLoginStatus(token)) {
+        if (!ua.isActive()) {
+            Long knownUAVersion = fetchUAVersion(token);
+            if (knownUAVersion < 0) {
                 token2UA.remove(token);
                 ua = null;
                 throw new WeCrossException(GET_UA_FAILED, "UA is not exist or login expired");
             } else {
-                ((UniversalAccount) ua).activate();
+                // check version and update if version expires
+                if (ua.getVersion() < knownUAVersion) {
+                    UniversalAccount newUA = fetchUA(token);
+
+                    if (newUA == null) {
+                        throw new WeCrossException(
+                                GET_UA_FAILED,
+                                "UA is not exist or login expired when fetch new version("
+                                        + knownUAVersion
+                                        + ") UA");
+                    } else if (newUA.getVersion() < knownUAVersion) {
+                        throw new WeCrossException(
+                                GET_UA_FAILED,
+                                "Exception when ua version update, fetchUA version:"
+                                        + newUA.getVersion()
+                                        + " known Version:"
+                                        + knownUAVersion);
+                    } else {
+                        logger.info("Update ua to: " + newUA.toString());
+                        token2UA.put(token, newUA);
+                    }
+                } else {
+                    ua.activate();
+                }
             }
         }
 
@@ -124,23 +148,29 @@ public class AccountManager {
         this.adminContext = adminContext;
     }
 
-    private boolean fetchHasLoginStatus(String token) {
+    /**
+     * Fetch ua version from Account-Manager
+     *
+     * @param token user login token
+     * @return The version of ua, return -1 if token login failed
+     */
+    private Long fetchUAVersion(String token) {
         Request<Object> request = new Request();
         request.setData(null);
-        request.setMethod("/auth/hasLogin");
+        request.setMethod("/auth/getUAVersion");
         request.setAuth(token);
 
         try {
-            Response<?> response = engine.send(request, new TypeReference<Response<?>>() {});
+            Response<Long> response = engine.send(request, new TypeReference<Response<Long>>() {});
 
             if (response.getErrorCode() != 0) {
-                return false;
+                return new Long(-1);
             }
 
-            return true;
+            return response.getData();
 
         } catch (Exception e) {
-            return false;
+            return new Long(-1);
         }
     }
 

@@ -137,7 +137,13 @@ public class AccountSyncManager {
 
     public void onNewUA(UniversalAccount ua) {
         String uaID = ua.getUAID();
-        logger.debug("On newUA" + ua.getName() + " " + ua.getUAID());
+        logger.debug(
+                "On newUA"
+                        + ua.getName()
+                        + " version: "
+                        + ua.getVersion()
+                        + " UAID:"
+                        + ua.getUAID());
         for (Account account : ua.getAccounts()) {
             String caID = account.getIdentity();
 

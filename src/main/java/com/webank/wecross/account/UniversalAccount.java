@@ -18,6 +18,7 @@ public class UniversalAccount {
     private String pubKey;
     private String secKey;
     private boolean isAdmin;
+    private Long version;
     private long lastActiveTimestamp;
 
     private final long QUERY_ACTIVE_EXPIRES = 1000; // 1s
@@ -126,12 +127,46 @@ public class UniversalAccount {
         return new UniversalAccountBuilder();
     }
 
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    @Override
+    public String toString() {
+        return "UniversalAccount{"
+                + "username='"
+                + username
+                + '\''
+                + ", uaID='"
+                + uaID
+                + '\''
+                + ", pubKey='"
+                + pubKey
+                + '\''
+                + ", secKey='"
+                + secKey
+                + '\''
+                + ", isAdmin="
+                + isAdmin
+                + ", version="
+                + version
+                + ", lastActiveTimestamp="
+                + lastActiveTimestamp
+                + '}';
+    }
+
     public static final class UniversalAccountBuilder {
         private String username;
         private String uaID;
         private String pubKey;
         private String secKey;
         private boolean isAdmin;
+        private Long version;
+
         private long lastActiveTimestamp;
 
         private UniversalAccountBuilder() {}
@@ -170,6 +205,11 @@ public class UniversalAccount {
             return this;
         }
 
+        public UniversalAccountBuilder version(Long version) {
+            this.version = version;
+            return this;
+        }
+
         public UniversalAccount build() {
             UniversalAccount universalAccount = new UniversalAccount();
             universalAccount.setUsername(username);
@@ -178,6 +218,7 @@ public class UniversalAccount {
             universalAccount.setSecKey(secKey);
             universalAccount.isAdmin = this.isAdmin;
             universalAccount.lastActiveTimestamp = this.lastActiveTimestamp;
+            universalAccount.version = this.version;
             return universalAccount;
         }
     }

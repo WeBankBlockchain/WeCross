@@ -11,6 +11,7 @@ public class UADetails {
     private String password;
     private String secKey;
     private String role;
+    private Long version;
 
     private boolean isAdmin;
 
@@ -81,5 +82,13 @@ public class UADetails {
     public void setType2ChainAccountDetails(
             Map<String, Map<Integer, ChainAccountDetails>> type2ChainAccountDetails) {
         this.type2ChainAccountDetails = type2ChainAccountDetails;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }
