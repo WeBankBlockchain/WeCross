@@ -20,6 +20,7 @@ public class UniversalAccountFactory {
                         .secKey(uaDetails.getSecKey())
                         .isAdmin(uaDetails.isAdmin())
                         .lastActiveTimestamp(System.currentTimeMillis())
+                        .version(uaDetails.getVersion())
                         .build();
 
         // foreach details, set default account into ua
