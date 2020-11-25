@@ -60,7 +60,7 @@ check_port_avaliable()
 {
     port=$1
     name=$2
-    if [ "$(netstat -na 2>/dev/null |grep $port | wc -l)" -ne "0" ]; then
+    if [ "$(netstat -na 2>/dev/null |grep '\<$port\>' | wc -l)" -ne "0" ]; then
         LOG_ERROR "${name} port ${port} is not avaliable. Are there any other blockchain is running?"
         exit 1
     fi
