@@ -39,6 +39,7 @@ public class UniversalAccountFactory {
                     continue;
                 }
 
+                // TODO: no need to add account, just to use default account
                 ua.addAccount(type, details.getKeyID(), account, details);
 
                 if (details.getIsDefault().booleanValue()) {
