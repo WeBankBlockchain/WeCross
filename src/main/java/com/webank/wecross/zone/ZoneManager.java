@@ -302,11 +302,11 @@ public class ZoneManager {
         Map<String, Resource> resources = new LinkedHashMap<>();
         lock.readLock().lock();
         try {
-            for (Map.Entry<String, Resource> resourceEntry :
-                    getChain(chainPath).getResources().entrySet()) {
-                String resourceName = PathUtils.toPureName(resourceEntry.getKey());
+            for (Resource resourceEntry :
+                    getChain(chainPath).getResources().values()) {
+                String resourceName = PathUtils.toPureName(resourceEntry.getPath().toString());
                 chainPath.setResource(resourceName);
-                resources.put(chainPath.toString(), resourceEntry.getValue());
+                resources.put(chainPath.toString(), resourceEntry);
             }
         } finally {
             lock.readLock().unlock();
