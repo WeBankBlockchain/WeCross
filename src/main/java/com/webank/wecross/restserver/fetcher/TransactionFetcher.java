@@ -1,11 +1,13 @@
 package com.webank.wecross.restserver.fetcher;
 
 import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.restserver.response.CompleteTransactionResponse;
 import com.webank.wecross.restserver.response.TransactionListResponse;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
+import com.webank.wecross.stub.StubConstant;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.Objects;
@@ -29,19 +31,23 @@ public class TransactionFetcher {
     }
 
     public void asyncFetchTransaction(
-            Path chainPath, String txHash, FetchTransactionCallback callback) {
+            Path chainPath, String txHash, Long blockNumber, FetchTransactionCallback callback) {
         Chain chain = zoneManager.getChain(chainPath);
         Driver driver = chain.getDriver();
 
         driver.asyncGetTransaction(
                 txHash,
-                0,
+                blockNumber,
                 chain.getBlockManager(),
-                false,
+                true,
                 chain.chooseConnection(),
                 (e, transaction) -> {
                     if (Objects.nonNull(e)) {
-                        logger.warn("Failed to get transaction: ", e);
+                        logger.warn(
+                                "Failed to get transaction, chain: {}, txHash: {}, e:",
+                                chainPath,
+                                txHash,
+                                e);
                         callback.onResponse(
                                 new WeCrossException(
                                         WeCrossException.ErrorCode.GET_TRANSACTION_ERROR,
@@ -54,18 +60,18 @@ public class TransactionFetcher {
                             new CompleteTransactionResponse();
                     completeTransactionResponse.setTxBytes(transaction.getTxBytes());
                     completeTransactionResponse.setReceiptBytes(transaction.getReceiptBytes());
-                    completeTransactionResponse.setBlockNumber(transaction.getBlockNumber());
+                    completeTransactionResponse.setBlockNumber(blockNumber);
                     completeTransactionResponse.setTxHash(txHash);
 
                     if (transaction.isTransactionByProxy()) {
                         completeTransactionResponse.setByProxy(true);
                         completeTransactionResponse.setPath(
                                 chainPath + "." + transaction.getResource());
-                        completeTransactionResponse.setUsername(
-                                accountManager
-                                        .getUniversalAccountByIdentity(
-                                                transaction.getAccountIdentity())
-                                        .getName());
+                        UniversalAccount ua =
+                                accountManager.getUniversalAccountByIdentity(
+                                        transaction.getAccountIdentity());
+                        String username = Objects.nonNull(ua) ? ua.getUsername() : "Unknown";
+                        completeTransactionResponse.setUsername(username);
                         completeTransactionResponse.setMethod(
                                 transaction.getTransactionRequest().getMethod());
                         completeTransactionResponse.setArgs(
@@ -73,9 +79,17 @@ public class TransactionFetcher {
                         completeTransactionResponse.setResult(
                                 transaction.getTransactionResponse().getResult());
                         completeTransactionResponse.setXaTransactionID(
-                                transaction.getXaTransactionID());
+                                (String)
+                                        transaction
+                                                .getTransactionRequest()
+                                                .getOptions()
+                                                .get(StubConstant.XA_TRANSACTION_ID));
                         completeTransactionResponse.setXaTransactionSeq(
-                                transaction.getXaTransactionSeq());
+                                (Long)
+                                        transaction
+                                                .getTransactionRequest()
+                                                .getOptions()
+                                                .get(StubConstant.XA_TRANSACTION_SEQ));
                     }
                     callback.onResponse(null, completeTransactionResponse);
                 });

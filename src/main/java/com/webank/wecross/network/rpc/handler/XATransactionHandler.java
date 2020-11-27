@@ -112,7 +112,7 @@ public class XATransactionHandler implements URIHandler {
                         xaTransactionManager.asyncStartXATransaction(
                                 xaRequest.getData().getXaTransactionID(),
                                 ua,
-                                decodePathSet(xaRequest.getData().getPaths()),
+                                xaRequest.getData().getPaths(),
                                 (response) -> {
                                     if (logger.isDebugEnabled()) {
                                         logger.debug(
