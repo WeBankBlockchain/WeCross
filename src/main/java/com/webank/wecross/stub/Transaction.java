@@ -7,44 +7,19 @@ public class Transaction {
     private byte[] receiptBytes; // raw transaction receipt info
 
     private String accountIdentity; // sender's chain account identity
-
-    private String xaTransactionID;
-    private long xaTransactionSeq;
-
     private String resource;
 
-    private long blockNumber;
-    private String txHash;
-    private TransactionRequest transactionRequest;
-    private TransactionResponse transactionResponse;
+    private TransactionRequest transactionRequest = new TransactionRequest();
+    private TransactionResponse transactionResponse = new TransactionResponse();
 
     private boolean transactionByProxy = false;
 
+    public Transaction() {}
+
     public Transaction(
-            long blockNumber,
-            String txHash,
-            TransactionRequest transactionRequest,
-            TransactionResponse transactionResponse) {
-        this.blockNumber = blockNumber;
-        this.txHash = txHash;
+            TransactionRequest transactionRequest, TransactionResponse transactionResponse) {
         this.transactionRequest = transactionRequest;
         this.transactionResponse = transactionResponse;
-    }
-
-    public long getBlockNumber() {
-        return blockNumber;
-    }
-
-    public void setBlockNumber(long blockNumber) {
-        this.blockNumber = blockNumber;
-    }
-
-    public String getTxHash() {
-        return txHash;
-    }
-
-    public void setTxHash(String txHash) {
-        this.txHash = txHash;
     }
 
     public String getResource() {
@@ -103,22 +78,6 @@ public class Transaction {
         this.transactionByProxy = transactionByProxy;
     }
 
-    public String getXaTransactionID() {
-        return xaTransactionID;
-    }
-
-    public void setXaTransactionID(String xaTransactionID) {
-        this.xaTransactionID = xaTransactionID;
-    }
-
-    public long getXaTransactionSeq() {
-        return xaTransactionSeq;
-    }
-
-    public void setXaTransactionSeq(long xaTransactionSeq) {
-        this.xaTransactionSeq = xaTransactionSeq;
-    }
-
     @Override
     public String toString() {
         return "Transaction{"
@@ -129,18 +88,8 @@ public class Transaction {
                 + ", accountIdentity='"
                 + accountIdentity
                 + '\''
-                + ", xaTransactionID='"
-                + xaTransactionID
-                + '\''
-                + ", xaTransactionSeq="
-                + xaTransactionSeq
                 + ", resource='"
                 + resource
-                + '\''
-                + ", blockNumber="
-                + blockNumber
-                + ", transactionHash='"
-                + txHash
                 + '\''
                 + ", transactionRequest="
                 + transactionRequest

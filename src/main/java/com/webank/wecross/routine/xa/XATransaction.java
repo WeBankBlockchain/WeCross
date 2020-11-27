@@ -21,7 +21,7 @@ public class XATransaction {
     public void recoverUsername(AccountManager accountManager) {
         if (Objects.nonNull(accountIdentity)) {
             UniversalAccount ua = accountManager.getUniversalAccountByIdentity(accountIdentity);
-            username = Objects.nonNull(ua) ? ua.getUsername() : "unknown";
+            username = Objects.nonNull(ua) ? ua.getUsername() : "Unknown";
             // hide identity
             accountIdentity = null;
         }
@@ -30,7 +30,7 @@ public class XATransaction {
                 if (Objects.nonNull(step.getAccountIdentity())) {
                     UniversalAccount ua =
                             accountManager.getUniversalAccountByIdentity(step.getAccountIdentity());
-                    step.setUsername(Objects.nonNull(ua) ? ua.getUsername() : "unknown");
+                    step.setUsername(Objects.nonNull(ua) ? ua.getUsername() : "Unknown");
                     step.setAccountIdentity(null);
                 }
             }

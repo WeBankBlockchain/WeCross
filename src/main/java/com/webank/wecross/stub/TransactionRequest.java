@@ -9,7 +9,7 @@ public class TransactionRequest {
     private String[] args;
 
     // Optional args
-    // transactionID, peers, etc...
+    // xaTransactionID, xaTransactionSeq, peers, etc...
     private Map<String, Object> options = new HashMap<String, Object>();
 
     public TransactionRequest() {}
