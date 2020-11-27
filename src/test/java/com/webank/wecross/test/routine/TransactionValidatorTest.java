@@ -24,15 +24,14 @@ public class TransactionValidatorTest {
                 new TransactionRequest("test", new String[] {"hello", "world"});
         TransactionResponse response = new TransactionResponse();
         response.setResult(new String[] {"hello", "world"});
-        Transaction transaction = new Transaction(100, "0x", request, response);
-
-        transaction.setXaTransactionSeq(0);
-        transaction.setXaTransactionID("0");
-        transaction.setResource("c");
-
+        response.setHash("0x");
+        response.setBlockNumber(100);
+        Transaction transaction = new Transaction(request, response);
         Assert.assertEquals(true, transactionValidator.verify(transaction));
 
-        Transaction transaction1 = new Transaction(1000, "0xx", request, response);
+        response.setHash("0xx");
+        response.setBlockNumber(1000);
+        Transaction transaction1 = new Transaction(request, response);
         Assert.assertEquals(false, transactionValidator.verify(transaction1));
     }
 }

@@ -29,14 +29,14 @@ public class XATransactionManager {
         void onResponse(XAResponse xaResponse);
     }
 
-    public Map<String, Set<Path>> getChainPaths(Set<Path> resources) {
-        Map<String, Set<Path>> zone2Path = new HashMap<String, Set<Path>>();
-        for (Path path : resources) {
+    public Map<String, Set<String>> getChainPaths(Set<String> resources) throws Exception {
+        Map<String, Set<String>> zone2Path = new HashMap<>();
+        for (String resource : resources) {
+            Path path = Path.decode(resource);
             String key = path.getZone() + "." + path.getChain();
             zone2Path.computeIfAbsent(key, k -> new HashSet<>());
-            zone2Path.get(key).add(path);
+            zone2Path.get(key).add(resource);
         }
-
         return zone2Path;
     }
 
@@ -145,42 +145,67 @@ public class XATransactionManager {
     public void asyncStartXATransaction(
             String xaTransactionID,
             UniversalAccount ua,
-            Set<Path> resources,
-            XAReduceCallback callback) {
+            Set<String> resources,
+            XAReduceCallback callback)
+            throws WeCrossException {
 
         logger.info("startXATransaction, resources: {}", resources);
 
-        Map<String, Set<Path>> paths = getChainPaths(resources);
+        Map<String, Set<String>> paths;
+        try {
+            paths = getChainPaths(resources);
+        } catch (Exception e) {
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.POST_DATA_ERROR, "Invalid path found");
+        }
 
         XAReduceCallback xaReduceCallback =
                 getStartXAReduceCallback(
                         paths.size(), xaTransactionID, ua, paths.keySet(), callback);
 
-        for (Map.Entry<String, Set<Path>> entry : paths.entrySet()) {
-            Path tempPath = entry.getValue().iterator().next();
+        for (Map.Entry<String, Set<String>> entry : paths.entrySet()) {
             // send prepare transaction
             TransactionRequest transactionRequest = new TransactionRequest();
             transactionRequest.setMethod("startXATransaction");
-            String[] args = new String[entry.getValue().size() + resources.size() + 2];
+            String[] args = new String[3];
 
             args[0] = xaTransactionID;
-            args[1] = String.valueOf(entry.getValue().size());
+            String[] selfPaths = new String[entry.getValue().size()];
+            String[] otherPaths = new String[resources.size() - entry.getValue().size()];
 
             int i = 0;
-            for (Path path : entry.getValue()) {
-                args[i + 2] = path.toString();
+            for (String path : entry.getValue()) {
+                selfPaths[i] = path;
                 ++i;
             }
 
-            for (Path path : resources) {
-                args[i + 2] = path.toString();
-                ++i;
+            i = 0;
+            for (String path : resources) {
+                if (!entry.getValue().contains(path)) {
+                    otherPaths[i] = path;
+                    ++i;
+                }
+            }
+
+            try {
+                args[1] = objectMapper.writeValueAsString(selfPaths);
+                args[2] = objectMapper.writeValueAsString(otherPaths);
+            } catch (Exception e) {
+                throw new WeCrossException(
+                        WeCrossException.ErrorCode.INTERNAL_ERROR, "Format string array failed");
             }
 
             transactionRequest.setArgs(args);
             transactionRequest.getOptions().put(Resource.RAW_TRANSACTION, true);
 
-            Path proxyPath = new Path(tempPath);
+            Path proxyPath;
+            try {
+                proxyPath = Path.decode(entry.getValue().iterator().next());
+            } catch (Exception e) {
+                throw new WeCrossException(
+                        WeCrossException.ErrorCode.POST_DATA_ERROR, "Invalid path found");
+            }
+
             proxyPath.setResource(StubConstant.PROXY_NAME);
             Resource resource = zoneManager.fetchResource(proxyPath);
 

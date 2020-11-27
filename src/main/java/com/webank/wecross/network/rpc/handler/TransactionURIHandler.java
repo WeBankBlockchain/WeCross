@@ -52,9 +52,11 @@ public class TransactionURIHandler implements URIHandler {
                 case "getTransaction":
                     {
                         String path, txHash;
+                        Long blockNumber;
                         try {
                             path = uriDecoder.getQueryBykey("path");
                             txHash = uriDecoder.getQueryBykey("txHash");
+                            blockNumber = Long.valueOf(uriDecoder.getQueryBykey("blockNumber"));
                         } catch (Exception e) {
                             restResponse.setErrorCode(NetworkQueryStatus.URI_QUERY_ERROR);
                             restResponse.setMessage(e.getMessage());
@@ -76,6 +78,7 @@ public class TransactionURIHandler implements URIHandler {
                         transactionFetcher.asyncFetchTransaction(
                                 chain,
                                 txHash,
+                                blockNumber,
                                 (fetchException, response) -> {
                                     if (logger.isDebugEnabled()) {
                                         logger.debug(
