@@ -302,8 +302,7 @@ public class ZoneManager {
         Map<String, Resource> resources = new LinkedHashMap<>();
         lock.readLock().lock();
         try {
-            for (Resource resourceEntry :
-                    getChain(chainPath).getResources().values()) {
+            for (Resource resourceEntry : getChain(chainPath).getResources().values()) {
                 String resourceName = PathUtils.toPureName(resourceEntry.getPath().toString());
                 chainPath.setResource(resourceName);
                 resources.put(chainPath.toString(), resourceEntry);
