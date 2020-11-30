@@ -39,13 +39,13 @@ public class AdminContext extends UserContext {
         }
     }
 
-    public void login() throws WeCrossException {
+    public void routerLogin() throws WeCrossException {
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.username = username;
         loginRequest.password = password;
 
         Request<LoginRequest> request = new Request<>();
-        request.setMethod("/auth/login");
+        request.setMethod("/auth/routerLogin");
         request.setData(loginRequest);
 
         try {
@@ -76,25 +76,25 @@ public class AdminContext extends UserContext {
 
             super.setToken(response.getData().credential);
 
-            logger.info("Admin login success with token: " + getToken());
+            logger.info("routerLogin login success with token: " + getToken());
         } catch (WeCrossException e) {
             logger.error(
-                    "Admin login failed for {}, (Please check WeCross-Account-Manager service is available)",
+                    "routerLogin failed for {}, (Please check WeCross-Account-Manager service is available)",
                     e.getMessage());
             throw new WeCrossException(
                     WeCrossException.ErrorCode.ADMIN_LOGIN_FAILED,
-                    "Admin login failed for: " + e.getMessage());
+                    "routerLogin failed for: " + e.getMessage());
         } catch (Exception e) {
-            logger.error("Admin login failed for: " + e.getMessage());
+            logger.error("routerLogin failed for: " + e.getMessage());
             throw new WeCrossException(
                     WeCrossException.ErrorCode.ADMIN_LOGIN_FAILED,
-                    "Admin login failed for: " + e.getMessage());
+                    "routerLogin failed for: " + e.getMessage());
         }
     }
 
     public void reLogin() {
         try {
-            login();
+            routerLogin();
         } catch (WeCrossException e) {
             logger.error(e.getMessage());
         }
