@@ -183,7 +183,7 @@ public class SystemInfoHandler implements URIHandler {
         Provider provider = Security.getProviders()[0];
         status.setProviderInfo(provider.getInfo());
         status.setProviderName(provider.getName());
-        status.setProviderVersion(provider.getVersionStr());
+        status.setProviderVersion(String.valueOf(provider.getVersion()));
 
         RestResponse<SystemStatus> restResponse = new RestResponse<SystemStatus>();
         restResponse.setData(status);
