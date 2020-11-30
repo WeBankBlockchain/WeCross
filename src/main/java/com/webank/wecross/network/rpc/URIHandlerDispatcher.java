@@ -47,8 +47,10 @@ public class URIHandlerDispatcher {
         StateURIHandler stateURIHandler = new StateURIHandler(host);
         registerURIHandler(new URIMethod("GET", "/sys/state"), stateURIHandler);
 
-        ListStubsURIHandler listStubsURIHandler = new ListStubsURIHandler(host);
-        registerURIHandler(new URIMethod("GET", "/sys/supportedStubs"), listStubsURIHandler);
+        SystemInfoHandler systemInfoHandler = new SystemInfoHandler(host);
+        registerURIHandler(new URIMethod("GET", "/sys/supportedStubs"), systemInfoHandler);
+        registerURIHandler(new URIMethod("GET", "/sys/systemStatus"), systemInfoHandler);
+        registerURIHandler(new URIMethod("GET", "/sys/routerStatus"), systemInfoHandler);
 
         ResourceFetcher resourceFetcher = new ResourceFetcher(host.getZoneManager());
         ListResourcesURIHandler listResourcesURIHandler =
