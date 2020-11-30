@@ -56,6 +56,14 @@ public class TransactionFetcher {
                         return;
                     }
 
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(
+                                "txHash: {}, blockNumber: {}, transaction: {}",
+                                txHash,
+                                blockNumber,
+                                transaction);
+                    }
+
                     CompleteTransactionResponse completeTransactionResponse =
                             new CompleteTransactionResponse();
                     completeTransactionResponse.setTxBytes(transaction.getTxBytes());
@@ -78,18 +86,22 @@ public class TransactionFetcher {
                                 transaction.getTransactionRequest().getArgs());
                         completeTransactionResponse.setResult(
                                 transaction.getTransactionResponse().getResult());
-                        completeTransactionResponse.setXaTransactionID(
+                        String xaTransactionID =
                                 (String)
                                         transaction
                                                 .getTransactionRequest()
                                                 .getOptions()
-                                                .get(StubConstant.XA_TRANSACTION_ID));
-                        completeTransactionResponse.setXaTransactionSeq(
+                                                .get(StubConstant.XA_TRANSACTION_ID);
+                        completeTransactionResponse.setXaTransactionID(
+                                Objects.isNull(xaTransactionID) ? "0" : xaTransactionID);
+                        Long xaTransactionSeq =
                                 (Long)
                                         transaction
                                                 .getTransactionRequest()
                                                 .getOptions()
-                                                .get(StubConstant.XA_TRANSACTION_SEQ));
+                                                .get(StubConstant.XA_TRANSACTION_SEQ);
+                        completeTransactionResponse.setXaTransactionSeq(
+                                Objects.isNull(xaTransactionSeq) ? 0 : xaTransactionSeq);
                     }
                     callback.onResponse(null, completeTransactionResponse);
                 });
