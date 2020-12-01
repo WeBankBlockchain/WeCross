@@ -155,26 +155,35 @@ login
 listAccount
 listResources
 call payment.bcos.evidence queryEvidence evidence0
+call payment.bcos.asset balanceOf Alice
 call payment.fabric.evidence queryEvidence evidence0
+call payment.fabric.asset balanceOf Alice
 
-startTransaction payment.bcos.evidence payment.fabric.evidence
+startTransaction payment.bcos.evidence payment.bcos.asset payment.fabric.evidence payment.fabric.asset
 execTransaction payment.bcos.evidence newEvidence evidence0 "I'm Tom"
+execTransaction payment.bcos.asset transfer Alice Oscar 100
 execTransaction payment.fabric.evidence newEvidence evidence0 "I'm Jerry"
+execTransaction payment.fabric.asset transfer Alice Oscar 100
 commitTransaction payment.bcos.evidence payment.fabric.evidence
 
 call payment.bcos.evidence queryEvidence evidence0
+call payment.bcos.asset balanceOf Alice
 call payment.fabric.evidence queryEvidence evidence0
+call payment.fabric.asset balanceOf Alice
 
-startTransaction payment.bcos.evidence payment.fabric.evidence
+startTransaction payment.bcos.evidence payment.bcos.asset payment.fabric.evidence payment.fabric.asset
 execTransaction payment.bcos.evidence newEvidence evidence1 "I'm TomGG"
+execTransaction payment.bcos.asset transfer Alice Oscar 100
 execTransaction payment.fabric.evidence newEvidence evidence1 "I'm JerryMM"
-callTransaction payment.bcos.evidence queryEvidence evidence1
+execTransaction payment.fabric.asset transfer Alice Oscar 100
 callTransaction payment.fabric.evidence queryEvidence evidence1
 callTransaction payment.bcos.evidence queryEvidence evidence1
 rollbackTransaction payment.bcos.evidence payment.fabric.evidence
 
 call payment.bcos.evidence queryEvidence evidence1
+call payment.bcos.asset balanceOf Alice
 call payment.fabric.evidence queryEvidence evidence1
+call payment.fabric.asset balanceOf Alice
 
 quit
 EOF
