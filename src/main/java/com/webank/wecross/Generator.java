@@ -7,12 +7,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 public class Generator {
+    private static final int ARGS_LENGTH = 3;
+    private static ApplicationContext context;
 
     public static void main(String[] args) {
-        ApplicationContext context =
-                new AnnotationConfigApplicationContext(StubManagerConfig.class);
+        context = new AnnotationConfigApplicationContext(StubManagerConfig.class);
 
-        if (args.length < 3) {
+        if (args.length < ARGS_LENGTH) {
             System.out.println("Usage: connection/account <type> <path> <args>");
             return;
         }
@@ -20,7 +21,7 @@ public class Generator {
         String op = args[0];
         String type = args[1];
         String path = args[2];
-        System.out.println("operator: " + op + " type: " + type + " path: " + path);
+        System.out.println(String.format("operator: " + op + " type: " + type + " path: " + path));
 
         StubManager stubManager = context.getBean(StubManager.class);
         try {

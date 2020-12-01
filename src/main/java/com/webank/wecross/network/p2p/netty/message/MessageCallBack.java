@@ -67,13 +67,14 @@ public class MessageCallBack {
             MessageSerializer messageSerializer = new MessageSerializer();
             Message message = messageSerializer.deserialize(byteBuf);
 
-            logger.trace(
-                    " receive message seq: {}, type: {}, host: {}, ctx: {}",
-                    message.getSeq(),
-                    message.getType(),
-                    node,
-                    hashCode);
-
+            if (logger.isTraceEnabled()) {
+                logger.trace(
+                        " receive message seq: {}, type: {}, host: {}, ctx: {}",
+                        message.getSeq(),
+                        message.getType(),
+                        node,
+                        hashCode);
+            }
             Processor processor = getProcessor(message.getType());
             if (processor != null) {
                 processor.process(ctx, node, message);

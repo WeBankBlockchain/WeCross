@@ -33,11 +33,15 @@ public class StubManagerConfig {
                             ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
                                     + ClassUtils.convertClassNameToResourcePath("com.webank")
                                     + "/**/*.class");
-            logger.debug("Total {} resources", resources.length);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Total {} resources", resources.length);
+            }
 
             MetadataReaderFactory metadataReaderFabtFactory = new SimpleMetadataReaderFactory();
             for (Resource resource : resources) {
-                logger.trace("Scan stub plugin: {}", resource.getURI().toString());
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Scan stub plugin: {}", resource.getURI().toString());
+                }
                 MetadataReader metadataReader =
                         metadataReaderFabtFactory.getMetadataReader(resource);
                 if (metadataReader.getAnnotationMetadata().hasAnnotation(Stub.class.getName())) {
