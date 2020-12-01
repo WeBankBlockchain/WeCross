@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 ROOT=$(pwd)
 DB_IP=127.0.0.1
 DB_PORT=3306
@@ -84,9 +84,9 @@ check_bcos_avaliable() {
     check_port_avaliable 20200 BCOS-Channel
     check_port_avaliable 8545 BCOS-RPC
 
-    check_port_avaliable 30301 BCOS-P2P
-    check_port_avaliable 20201 BCOS-Channel
-    check_port_avaliable 8546 BCOS-RPC
+    check_port_avaliable 30310 BCOS-GM-P2P
+    check_port_avaliable 20210 BCOS-GM-Channel
+    check_port_avaliable 8555 BCOS-GM-RPC
 }
 
 check_wecross_avaliable() {
@@ -139,6 +139,10 @@ check_bcos() {
     check_process bcos/nodes/127.0.0.1/node1/../fisco-bcos
 }
 
+check_bcos_gm() {
+    check_process bcos/nodes_gm/127.0.0.1/node0/../fisco-bcos
+}
+
 check_wecross() {
     check_process routers-payment/127.0.0.1-8250-25500
     check_process routers-payment/127.0.0.1-8251-25501
@@ -146,6 +150,7 @@ check_wecross() {
 
 check_wecross_network() {
     check_bcos
+    check_bcos_gm
     check_wecross
 }
 

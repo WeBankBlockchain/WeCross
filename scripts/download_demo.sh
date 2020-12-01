@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 
 default_compatibility_version=v1.0.0-rc4 # update this every release
 

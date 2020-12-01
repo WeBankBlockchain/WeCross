@@ -81,6 +81,7 @@ prepare_wecross() {
     LOG_INFO "Download plugin from branch: ${PLUGIN_BRANCH}"
     bash download_plugin.sh BCOS2 ${PLUGIN_BRANCH}
     bash download_plugin.sh Fabric1 ${PLUGIN_BRANCH}
+    bash download_pages.sh ${PLUGIN_BRANCH}
     cd -
 
     mv dist demo/WeCross

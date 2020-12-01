@@ -1,13 +1,14 @@
 #!/bin/bash
 set -e
 
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 
 enable_build_from_resource=0
 compatibility_version=
 
 default_compatibility_version=v1.0.0-rc4 # update this every release
 deps_dir=$(pwd)'/WeCross/plugin/'
+pages_dir=$(pwd)'/WeCross/pages/'
 src_dir=$(pwd)'/src/'
 
 wecross_url=https://github.com/WeBankFinTech/WeCross.git
@@ -18,6 +19,9 @@ bcos_stub_branch=${default_compatibility_version}
 
 fabric_stub_url=https://github.com/WeBankFinTech/WeCross-Fabric1-Stub.git
 fabric_stub_branch=${default_compatibility_version}
+
+wecross_webapp_url=https://github.com/WeBankFinTech/WeCross-WebApp.git
+wecross_webapp_branch=${default_compatibility_version}
 
 LOG_INFO() {
     local content=${1}
@@ -55,12 +59,14 @@ parse_command() {
             wecross_branch=$OPTARG
             bcos_stub_branch=$OPTARG
             fabric_stub_branch=$OPTARG
+            wecross_webapp_branch=$OPTARG
             compatibility_version=$OPTARG
             ;;
         t)
             wecross_branch=$OPTARG
             bcos_stub_branch=$OPTARG
             fabric_stub_branch=$OPTARG
+            wecross_webapp_branch=$OPTARG
             compatibility_version=$OPTARG
             ;;
         h) help ;;
@@ -197,11 +203,6 @@ build_plugin_from_source() {
 
     LOG_INFO "Build ${name} from source"
 
-    if [ -d ${name} ]; then
-        LOG_INFO "./${name}/ exists"
-        return
-    fi
-
     mkdir -p ${src_dir}/
     cd ${src_dir}/
 
@@ -219,11 +220,42 @@ build_plugin_from_source() {
     cd ${origin_dir}
 }
 
+build_webapp_from_source() {
+    LOG_INFO "Build WeCross WebApp from source"
+
+    local url=${wecross_webapp_url}
+    local branch=${wecross_webapp_branch}
+
+    mkdir -p ${src_dir}/
+    cd ${src_dir}/
+
+    download_latest_code WeCross-WebApp ${url} ${branch}
+
+    cd WeCross-WebApp
+    rm -rf dist
+    npm install
+
+    if ! npm run build:prod ; then
+        LOG_ERROR "Build Wecross WebApp project failed"
+        exit 1
+    fi
+    echo "================================================================"
+
+
+    mkdir -p ${pages_dir}
+    cp -r dist/* ${pages_dir}/
+
+    cd -
+
+    LOG_INFO "Build WeCross WebApp successfully"
+}
+
 main() {
     if [ 1 -eq ${enable_build_from_resource} ]; then
         build_from_source
         build_plugin_from_source WeCross-BCOS2-Stub ${bcos_stub_url} ${bcos_stub_branch}
         build_plugin_from_source WeCross-Fabric1-Stub ${fabric_stub_url} ${fabric_stub_branch}
+        build_webapp_from_source
     else
         download_wecross_pkg
     fi

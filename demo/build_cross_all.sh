@@ -102,9 +102,9 @@ check_bcos_avaliable() {
     check_port_avaliable 20200 BCOS-Channel
     check_port_avaliable 8545 BCOS-RPC
 
-    check_port_avaliable 30301 BCOS-P2P
-    check_port_avaliable 20201 BCOS-Channel
-    check_port_avaliable 8546 BCOS-RPC
+    check_port_avaliable 30310 BCOS-GM-P2P
+    check_port_avaliable 20210 BCOS-GM-Channel
+    check_port_avaliable 8555 BCOS-GM-RPC
 }
 
 check_wecross_avaliable() {
@@ -130,8 +130,27 @@ check_env() {
 build_bcos() {
     LOG_INFO "Build BCOS ..."
     cd ${ROOT}/bcos
+
+    # Setting to build 2 groups
+    cat <<EOF >ipconf
+127.0.0.1:4 agency1 1,2
+EOF
+
     bash build.sh
 
+    cd ${ROOT}
+}
+
+build_bcos_gm() {
+    LOG_INFO "Build BCOS ..."
+    cd ${ROOT}/bcos
+
+    # Setting to build 2 groups
+    cat <<EOF >ipconf
+127.0.0.1:1 agency1 1
+EOF
+
+    bash build_gm.sh
     cd ${ROOT}
 }
 
@@ -163,6 +182,10 @@ check_bcos() {
     check_process bcos/nodes/127.0.0.1/node1/../fisco-bcos
 }
 
+check_bcos_gm() {
+    check_process bcos/nodes_gm/127.0.0.1/node0/../fisco-bcos
+}
+
 check_fabric() {
     check_container peer0.org1.example.com
     check_container peer1.org1.example.com
@@ -178,6 +201,7 @@ check_wecross() {
 
 check_wecross_network() {
     check_bcos
+    check_bcos_gm
     check_fabric
     check_wecross
 }
@@ -224,31 +248,89 @@ db_config_ask() {
     check_db_service
 }
 
-config_router_8250() {
+
+config_router_group1() {
     router_dir=${1}
-    fabric_demo_dir=${2}
-    bcos_demo_dir=${3}
 
     LOG_INFO "Configure router ${router_dir}"
 
     cd ${router_dir}
 
     # stubs
-    bash add_chain.sh -t BCOS2.0 -n bcos -d conf/chains
+    bash add_chain.sh -t BCOS2.0 -n group1 -d conf/chains
     # copy cert
-    cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/bcos/
+    cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/group1/
 
     # bcos stub internal account
-    bash add_account.sh -t BCOS2.0 -n bcos_admin -d conf/accounts
+    bash add_account.sh -t BCOS2.0 -n bcos_admin1 -d conf/accounts
 
     # deploy system contracts
-    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos bcos_admin
-    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos bcos_admin
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/group1 bcos_admin1
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/group1 bcos_admin1
 
     cd -
 }
 
-config_router_8251() {
+config_router_group2() {
+    router_dir=${1}
+
+    LOG_INFO "Configure router ${router_dir}"
+
+    cd ${router_dir}
+    # stubs
+    bash add_chain.sh -t BCOS2.0 -n group2 -d conf/chains
+    # copy cert
+    cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/group2/
+
+    # configure to group2
+    if [ "$(uname)" == "Darwin" ]; then
+        # Mac
+        sed -i "" 's/groupId = 1/groupId = 2/g' conf/chains/group2/stub.toml
+    else
+        sed -i 's/groupId = 1/groupId = 2/g' conf/chains/group2/stub.toml
+    fi
+
+    # bcos stub internal account
+    bash add_account.sh -t BCOS2.0 -n bcos_admin2 -d conf/accounts
+
+    # deploy system contracts
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/group2 bcos_admin2
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/group2 bcos_admin2
+
+    cd -
+}
+
+config_router_gm() {
+    router_dir=${1}
+
+    LOG_INFO "Configure router ${router_dir}"
+
+    cd ${router_dir}
+
+    # stubs
+    bash add_chain.sh -t GM_BCOS2.0 -n bcos_gm -d conf/chains
+    # copy cert
+    cp -r ${ROOT}/bcos/nodes_gm/127.0.0.1/sdk/* conf/chains/bcos_gm/
+
+    # configure guomi
+    if [ "$(uname)" == "Darwin" ]; then
+        # Mac
+        sed -i "" 's/20200/20210/g' conf/chains/bcos_gm/stub.toml
+    else
+        sed -i 's/20200/20210/g' conf/chains/bcos_gm/stub.toml
+    fi
+
+    # bcos gm stub internal account
+    bash add_account.sh -t GM_BCOS2.0 -n bcos_gm_admin -d conf/accounts
+
+    # deploy system contracts
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.ProxyContractDeployment deploy chains/bcos_gm bcos_gm_admin
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.HubContractDeployment deploy chains/bcos_gm bcos_gm_admin
+
+    cd -
+}
+
+config_router_fabric() {
     router_dir=${1}
     fabric_demo_dir=${2}
 
@@ -273,6 +355,21 @@ config_router_8251() {
     java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.fabric.hub.HubChaincodeDeployment deploy chains/fabric
 
     cd -
+}
+
+config_router_8250() {
+    router_dir=${ROOT}/routers-payment/127.0.0.1-8250-25500/
+
+    config_router_group1 ${router_dir}
+    config_router_group2 ${router_dir}
+}
+
+config_router_8251() {
+    router_dir=${ROOT}/routers-payment/127.0.0.1-8251-25501/
+    fabric_demo_dir=${ROOT}/fabric
+
+    config_router_gm ${router_dir}
+    config_router_fabric ${router_dir} ${fabric_demo_dir}
 }
 
 config_database() {
@@ -382,11 +479,12 @@ deploy_bcos_sample_resource() {
     # deploy from 8250
     LOG_INFO "Deploy bcos contract HelloWorld"
     cd ${ROOT}/WeCross-Console/
-    sed_i 's/8251/8250/g' conf/application.toml
 
     bash start.sh <<EOF
 login
-bcosDeploy payment.bcos.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
+bcosDeploy payment.group1.HelloWorldGroup1 conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
+bcosDeploy payment.group2.HelloWorldGroup2 conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
+bcosDeploy payment.bcos_gm.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
 quit
 EOF
     cd -
@@ -396,7 +494,6 @@ deploy_fabric_sample_resource() {
     # deploy from 8250
     LOG_INFO "Deploy fabric chaincode sacc"
     cd ${ROOT}/WeCross-Console/
-    sed_i 's/8250/8251/g' conf/application.toml
 
     bash start.sh <<EOF
 login
@@ -480,6 +577,8 @@ EOF
     cd -
 }
 
+
+
 deploy_chain_account() {
     mkdir -p ${ROOT}/WeCross-Console/conf/accounts/
     cd ${ROOT}/WeCross-Console/conf/accounts/ && rm -rf $(ls | grep -v .sh) && cd -
@@ -490,7 +589,7 @@ deploy_chain_account() {
     add_fabric_account fabric_admin_org1 Org1MSP # 1
     add_fabric_account fabric_admin_org2 Org2MSP # 2
     add_fabric_account fabric_user1 Org1MSP      # 3
-    # add_bcos_gm_account bcos_gm_user1 # 4
+    add_bcos_gm_account bcos_gm_user1 # 4
 }
 
 deploy_sample_resource() {
@@ -511,13 +610,15 @@ main() {
 
     # Build BCOS
     build_bcos
+    # Build BCOS Guomi
+    build_bcos_gm
 
     # Build Fabric
     build_fabric
 
     # config routers
-    config_router_8250 ${ROOT}/routers-payment/127.0.0.1-8250-25500/ ${ROOT}/fabric ${ROOT}/bcos
-    config_router_8251 ${ROOT}/routers-payment/127.0.0.1-8251-25501/ ${ROOT}/fabric
+    config_router_8250
+    config_router_8251
 
     # Start up routers
     cd ${ROOT}/routers-payment/127.0.0.1-8250-25500/
@@ -536,16 +637,16 @@ main() {
 
     LOG_INFO "Success! WeCross demo network is running. Framework:"
     echo -e "
-      FISCO BCOS                    Fabric
-     (4node pbft)              (first-network)
-    (HelloWorld.sol)              (sacc.go)
-           |                          |
-           |                          |
-    WeCross Router <----------> WeCross Router
-(127.0.0.1-8250-25500)      (127.0.0.1-8251-25501)
-           | 
-           | 
-    WeCross Console
+       FISCO BCOS          FISCO BCOS          FISCO BCOS            Fabric
+        Group 1             Group 2              Guomi           first-network
+   (HelloWorldGroup1)  (HelloWorldGroup2)     (HelloWorld)         (sacc.go)
+            \                 /                     \                 /
+             \               /                       \               /
+              WeCross  Router  <------------------->  WeCross  Router
+           (127.0.0.1-8250-25500)                  (127.0.0.1-8251-25501)
+                     |
+                     |
+              WeCross WebApp
 "
 
 }

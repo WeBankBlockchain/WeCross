@@ -1,5 +1,5 @@
 #!/bin/bash
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 
 CHANNEL_NAME=$1
 echo "Channel name : "$CHANNEL_NAME
