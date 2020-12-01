@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 ROOT=$(pwd)
 DB_IP=127.0.0.1
 DB_PORT=3306

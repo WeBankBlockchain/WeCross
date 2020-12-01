@@ -11,6 +11,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+    - uses: actions/setup-node@v2-beta
+      with:
+        node-version: '10'
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
       with:
@@ -18,7 +21,7 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew assemble
     - name: Download plugin
-      run: cd dist/ && bash download_plugin.sh BCOS2 v1.0.0-rc4 && bash download_plugin.sh Fabric1 v1.0.0-rc4 && rm -rf src && cd -
+      run: cd dist/ && bash download_plugin.sh BCOS2 v1.0.0 && bash download_plugin.sh Fabric1 v1.0.0 && bash download_pages.sh v1.0.0  && rm -rf src && cd -
     - name: Pack
       run: chmod +x dist/*.sh && mv dist WeCross && tar -zcvf WeCross.tar.gz WeCross
     - name: Checksum

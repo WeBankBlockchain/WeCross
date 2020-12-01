@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 
 counter=0
 zone=

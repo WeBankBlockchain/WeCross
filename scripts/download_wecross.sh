@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 
 enable_build_from_resource=0
 compatibility_version=
@@ -236,7 +236,7 @@ build_webapp_from_source() {
     npm install
 
     if ! npm run build:prod ; then
-        LOG_ERROR "Build Wecross Console project failed"
+        LOG_ERROR "Build Wecross WebApp project failed"
         exit 1
     fi
     echo "================================================================"
@@ -247,7 +247,7 @@ build_webapp_from_source() {
 
     cd -
 
-    LOG_INFO "Build WeCross Console successfully"
+    LOG_INFO "Build WeCross WebApp successfully"
 }
 
 main() {

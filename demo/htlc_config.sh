@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 ROOT=$(pwd)
 
 version=$RANDOM
