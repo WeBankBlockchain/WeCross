@@ -8,6 +8,7 @@ import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.*;
 import com.webank.wecross.utils.Sha256Utils;
+import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -185,15 +186,13 @@ public class InterchainScheduler {
                                     null,
                                     0);
                         } else {
-                            String result = transactionResponse.getResult()[0];
-                            if (InterchainDefault.NULL_FLAG.equals(result.trim())) {
+                            String result = transactionResponse.getResult()[0].trim();
+                            if (InterchainDefault.NULL_FLAG.equals(result)) {
                                 callback.onReturn(null, null, 0);
                             } else {
                                 /* state = "tid uid" */
-                                String[] states =
-                                        transactionResponse.getResult()[0].split(
-                                                InterchainDefault.SPLIT_REGEX);
-                                callback.onReturn(null, states[0], Integer.parseInt(states[1]));
+                                String[] states = result.split(InterchainDefault.SPLIT_REGEX);
+                                callback.onReturn(null, states[0], Long.parseLong(states[1]));
                             }
                         }
                     }
@@ -238,23 +237,25 @@ public class InterchainScheduler {
                         .put(StubConstant.XA_TRANSACTION_ID, xaTransactionID);
                 transactionRequest
                         .getOptions()
-                        .put(StubConstant.XA_TRANSACTION_SEQ, String.valueOf(xaTransactionSeq));
+                        .put(StubConstant.XA_TRANSACTION_SEQ, xaTransactionSeq);
             }
 
             if (InterchainDefault.CALL_TYPE_INVOKE == interchainRequest.getCallType()) {
 
                 Timer timer = systemResource.getTimer();
-                timer.newTimeout(
-                        timeout ->
-                                callback.onReturn(
-                                        new WeCrossException(
-                                                WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
-                                                "CALL_TARGET_CHAIN_ERROR",
-                                                InterchainErrorCode.CALL_TARGET_CHAIN_ERROR,
-                                                "Timeout"),
-                                        "[]"),
-                        TIMEOUT_DELAY,
-                        TimeUnit.SECONDS);
+                Timeout callTargetChainTimeout =
+                        timer.newTimeout(
+                                timeout ->
+                                        callback.onReturn(
+                                                new WeCrossException(
+                                                        WeCrossException.ErrorCode
+                                                                .INTER_CHAIN_ERROR,
+                                                        "CALL_TARGET_CHAIN_ERROR",
+                                                        InterchainErrorCode.CALL_TARGET_CHAIN_ERROR,
+                                                        "Timeout"),
+                                                "[]"),
+                                TIMEOUT_DELAY,
+                                TimeUnit.SECONDS);
 
                 resource.asyncSendTransaction(
                         transactionRequest,
@@ -273,7 +274,7 @@ public class InterchainScheduler {
                                         transactionResponse.getErrorCode(),
                                         transactionResponse.getMessage());
                             } else {
-                                timer.stop();
+                                callTargetChainTimeout.cancel();
                                 if (Objects.isNull(transactionResponse.getResult())
                                         || transactionResponse.getResult().length == 0) {
                                     callback.onReturn(null, "[]");
@@ -335,7 +336,7 @@ public class InterchainScheduler {
                         .put(StubConstant.XA_TRANSACTION_ID, xaTransactionID);
                 transactionRequest
                         .getOptions()
-                        .put(StubConstant.XA_TRANSACTION_SEQ, String.valueOf(xaTransactionSeq));
+                        .put(StubConstant.XA_TRANSACTION_SEQ, xaTransactionSeq);
             }
 
             resource.asyncSendTransaction(
