@@ -3,6 +3,11 @@ package com.webank.wecross.network.rpc.web;
 import com.webank.wecross.account.UserContext;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.rpc.handler.URIHandler;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,7 +29,7 @@ public class WebURIHandler implements URIHandler {
             callback.onResponse(file);
         } catch (WeCrossException e) {
             if (e.getErrorCode().equals(WeCrossException.ErrorCode.PAGE_NOT_FOUND)) {
-                responseError("Not found! " + e.getMessage(), callback);
+                response404(callback);
             } else {
                 responseError("Error: " + e.getMessage(), callback);
             }
@@ -36,6 +41,17 @@ public class WebURIHandler implements URIHandler {
 
     private void responseError(String message, Callback callback) {
         callback.onResponse(message);
+    }
+
+    private void response404(Callback callback) {
+        FullHttpResponse response =
+                new DefaultFullHttpResponse(
+                        HttpVersion.HTTP_1_1, HttpResponseStatus.PERMANENT_REDIRECT);
+
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html");
+
+        response.headers().set(HttpHeaderNames.LOCATION, "/s/index.html#/404");
+        callback.onResponse(response);
     }
 
     private void checkLocalPath(String localPath) throws Exception {

@@ -25,11 +25,13 @@ public class RequestProcessor implements Processor {
         try {
             String content = new String(message.getData(), "utf-8");
 
-            logger.debug(
-                    "  resource request message, host: {}, seq: {}, content: {}",
-                    node,
-                    message.getSeq(),
-                    content);
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                        "  resource request message, host: {}, seq: {}, content: {}",
+                        node,
+                        message.getSeq(),
+                        content);
+            }
 
             networkProcessor.process(
                     node,
@@ -48,11 +50,13 @@ public class RequestProcessor implements Processor {
                                 serializer.serialize(message, byteBuf);
                                 ctx.writeAndFlush(byteBuf);
 
-                                logger.debug(
-                                        " Response network message, resource request, host: {}, seq: {}, response content: {}",
-                                        node,
-                                        message.getSeq(),
-                                        responseContent);
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug(
+                                            " Response network message, resource request, host: {}, seq: {}, response content: {}",
+                                            node,
+                                            message.getSeq(),
+                                            responseContent);
+                                }
                             } else {
                                 logger.error(
                                         "response content is null, node: "

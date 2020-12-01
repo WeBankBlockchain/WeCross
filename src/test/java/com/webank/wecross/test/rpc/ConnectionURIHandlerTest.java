@@ -11,6 +11,7 @@ import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.ChainInfo;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
+import io.netty.handler.codec.http.FullHttpResponse;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,6 +91,12 @@ public class ConnectionURIHandlerTest {
                     public void onResponse(String restResponse) {
                         Assert.fail();
                     }
+
+                    @Override
+                    public void onResponse(FullHttpResponse fullHttpResponse) {
+
+                        Assert.fail();
+                    }
                 });
 
         Assert.assertEquals(1, hit.intValue());
@@ -118,6 +125,11 @@ public class ConnectionURIHandlerTest {
 
                     @Override
                     public void onResponse(String restResponse) {
+                        Assert.fail();
+                    }
+
+                    @Override
+                    public void onResponse(FullHttpResponse fullHttpResponse) {
                         Assert.fail();
                     }
                 });
@@ -155,6 +167,11 @@ public class ConnectionURIHandlerTest {
 
                     @Override
                     public void onResponse(String restResponse) {
+                        Assert.fail();
+                    }
+
+                    @Override
+                    public void onResponse(FullHttpResponse fullHttpResponse) {
                         Assert.fail();
                     }
                 });
@@ -198,6 +215,11 @@ public class ConnectionURIHandlerTest {
                         public void onResponse(String restResponse) {
                             Assert.fail();
                         }
+
+                        @Override
+                        public void onResponse(FullHttpResponse fullHttpResponse) {
+                            Assert.fail();
+                        }
                     });
         }
 
@@ -226,6 +248,11 @@ public class ConnectionURIHandlerTest {
                     public void onResponse(String restResponse) {
                         Assert.fail();
                     }
+
+                    @Override
+                    public void onResponse(FullHttpResponse fullHttpResponse) {
+                        Assert.fail();
+                    }
                 });
 
         Assert.assertEquals(14, hit.intValue());
@@ -251,6 +278,11 @@ public class ConnectionURIHandlerTest {
 
                     @Override
                     public void onResponse(String restResponse) {
+                        Assert.fail();
+                    }
+
+                    @Override
+                    public void onResponse(FullHttpResponse fullHttpResponse) {
                         Assert.fail();
                     }
                 });
@@ -288,6 +320,11 @@ public class ConnectionURIHandlerTest {
 
                     @Override
                     public void onResponse(String restResponse) {
+                        Assert.fail();
+                    }
+
+                    @Override
+                    public void onResponse(FullHttpResponse fullHttpResponse) {
                         Assert.fail();
                     }
                 });
@@ -344,6 +381,11 @@ public class ConnectionURIHandlerTest {
                         public void onResponse(String restResponse) {
                             Assert.fail();
                         }
+
+                        @Override
+                        public void onResponse(FullHttpResponse fullHttpResponse) {
+                            Assert.fail();
+                        }
                     });
         }
 
@@ -375,6 +417,11 @@ public class ConnectionURIHandlerTest {
 
                     @Override
                     public void onResponse(String restResponse) {
+                        Assert.fail();
+                    }
+
+                    @Override
+                    public void onResponse(FullHttpResponse fullHttpResponse) {
                         Assert.fail();
                     }
                 });

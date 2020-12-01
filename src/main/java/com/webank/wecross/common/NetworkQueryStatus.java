@@ -17,13 +17,13 @@ public class NetworkQueryStatus {
     public static final int UNIVERSAL_ACCOUNT_ERROR = 30000;
 
     /**
-     * 40000+ is resource error for sendTransaction、 call real_state = 40000 +
+     * 40000+ is resource error for sendTransaction, call real_state = 40000 +
      * TransactionException.ErrorCode
      */
     public static final int RESOURCE_ERROR = 40000;
 
     /**
-     * 50000+ is resource error for listTransactions、 getTransaction real_state = 50000 +
+     * 50000+ is resource error for listTransactions, getTransaction real_state = 50000 +
      * WeCrossException.ErrorCode
      */
     public static final int TRANSACTION_ERROR = 50000;
