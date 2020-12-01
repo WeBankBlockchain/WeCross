@@ -174,6 +174,9 @@ gen_one_wecross() {
     # Configure plugin
     cp -r ${wecross_dir}/plugin ${output}/
 
+    # Configure pages
+    cp -r ${wecross_dir}/pages ${output}/
+
     cp -r "${wecross_dir}/conf" "${output}/"
     cp -r "${cert_dir}"/* "${output}"/conf/
     gen_conf "${output}"/conf/wecross.toml "${2}" "${3}" "${4}" "${5}"
