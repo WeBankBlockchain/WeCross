@@ -62,20 +62,28 @@ sed_i() {
     fi
 }
 
-deploy_fabric_xa_evidence_chiancode() {
+deploy_fabric_xa_chiancodes() {
     # deploy from 8250
-    LOG_INFO "Deploy Fabric 2PC chaincode: payment.fabric.evidence"
+    LOG_INFO "Deploy Fabric xa chaincodes: payment.fabric.evidence payment.fabric.asset"
     cd ${ROOT}/WeCross-Console/
     sed_i 's/8250/8251/g' conf/application.toml
 
     bash start.sh <<EOF
     login
+    setDefaultAccount Fabric1.4 2
+    login
+    fabricInstall payment.fabric.evidence Org2 contracts/chaincode/evidence 1.0 GO_LANG
+    fabricInstall payment.fabric.asset Org2 contracts/chaincode/asset 1.0 GO_LANG
+    setDefaultAccount Fabric1.4 1
+    login
     fabricInstall payment.fabric.evidence Org1 contracts/chaincode/evidence 1.0 GO_LANG
-    fabricInstantiate payment.fabric.evidence ["Org1"] contracts/chaincode/evidence 1.0 GO_LANG default []
+    fabricInstall payment.fabric.asset Org1 contracts/chaincode/asset 1.0 GO_LANG
+    fabricInstantiate payment.fabric.evidence ["Org1","Org2"] contracts/chaincode/evidence 1.0 GO_LANG default []
+    fabricInstantiate payment.fabric.asset ["Org1","Org2"] contracts/chaincode/asset 1.0 GO_LANG default []
     quit
 EOF
     # wait the chaincode instantiate
-    try_times=80
+    try_times=90
     i=0
     echo -e "\033[32mevidence chaincode is instantiating ...\033[0m\c"
     while [ ! -n "$(docker ps | grep evidence | awk '{print $1}')" ]; do
@@ -90,18 +98,32 @@ EOF
         fi
     done
 
+    i=0
+    echo -e "\033[32mevidence chaincode is instantiating ...\033[0m\c"
+    while [ ! -n "$(docker ps | grep asset | awk '{print $1}')" ]; do
+        sleep 1
+
+        ((i = i + 1))
+        if [ $i -lt ${try_times} ]; then
+            echo -e "\033[32m.\033[0m\c"
+        else
+            LOG_ERROR "Instantiate payment.fabric.asset timeout!"
+            exit 1
+        fi
+    done
     cd -
 }
 
-deploy_bcos_xa_evidence_contract() {
+deploy_bcos_xa_contracts() {
     # deploy from 8250
-    LOG_INFO "Deploy BCOS 2PC contract: payment.bcos.evidence"
+    LOG_INFO "Deploy BCOS xa contract: payment.bcos.evidence payment.fabric.asset"
     cd ${ROOT}/WeCross-Console/
     sed_i 's/8251/8250/g' conf/application.toml
 
     bash start.sh <<EOF
     login
-    bcosDeploy payment.bcos.evidence conf/contracts/solidity/EvidenceSample2PC.sol Evidence 1.0
+    bcosDeploy payment.bcos.evidence conf/contracts/solidity/EvidenceSample.sol Evidence 1.0
+    bcosDeploy payment.bcos.asset contracts/solidity/AssetSample.sol Asset 1.0
     quit
 EOF
     cd -
@@ -121,12 +143,12 @@ console_ask() {
 
 main() {
     check_wecross_network
-    deploy_fabric_xa_evidence_chiancode
-    deploy_bcos_xa_evidence_contract
-    LOG_INFO "SUCCESS: 2PC evidence example has been deployed to FISCO BCOS and Fabric:"
+    deploy_fabric_xa_chiancodes
+    deploy_bcos_xa_contracts
+    LOG_INFO "SUCCESS: xa evidence example has been deployed to FISCO BCOS and Fabric:"
     echo -e "
       FISCO BCOS                    Fabric
-\033[32m(payment.bcos.evidence)    (payment.fabric.evidence)\033[0m
+\033[32m(payment.bcos.evidence payment.bcos.asset)    (payment.fabric.evidence payment.fabric.asset)\033[0m
            |                          |
            |                          |
     WeCross Router <----------> WeCross Router

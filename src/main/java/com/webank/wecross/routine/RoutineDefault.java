@@ -17,5 +17,5 @@ public class RoutineDefault {
 
     // milli seconds
     public static final int POLLING_CYCLE = 1000;
-    public static final long CALLBACK_TIMEOUT = 10000;
+    public static final long CALLBACK_TIMEOUT = 30000;
 }

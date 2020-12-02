@@ -184,7 +184,7 @@ public class InterchainJob implements Job {
             return objectMapper.readValue(
                     result.replace(new String(Character.toChars(0)), ""), String[].class);
         } catch (Exception e) {
-            logger.error(
+            logger.warn(
                     "Failed to get interchain requests, result: {} path: {}",
                     result,
                     hubResource.getPath(),
