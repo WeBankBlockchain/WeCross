@@ -23,16 +23,29 @@ public class XATransactionManager {
     private ZoneManager zoneManager;
     private AccountManager accountManager;
 
-    private static final String SUCCESS = "success";
+    private static final String SUCCESS = "Success";
 
     public interface XAReduceCallback {
         void onResponse(XAResponse xaResponse);
     }
 
+    /**
+     * check and reorganize resources by chain type used by startXATransaction forbid system
+     * contracts
+     */
     public Map<String, Set<String>> getChainPaths(Set<String> resources) throws Exception {
         Map<String, Set<String>> zone2Path = new HashMap<>();
         for (String resource : resources) {
-            Path path = Path.decode(resource);
+            Path path;
+            try {
+                path = Path.decode(resource);
+            } catch (Exception e) {
+                throw new Exception("Invalid path found");
+            }
+            if (StubConstant.HUB_NAME.equals(path.getResource())
+                    || StubConstant.PROXY_NAME.equals(path.getResource())) {
+                throw new Exception("System contracts cannot be in xa transaction");
+            }
             String key = path.getZone() + "." + path.getChain();
             zone2Path.computeIfAbsent(key, k -> new HashSet<>());
             zone2Path.get(key).add(resource);
@@ -155,8 +168,7 @@ public class XATransactionManager {
         try {
             paths = getChainPaths(resources);
         } catch (Exception e) {
-            throw new WeCrossException(
-                    WeCrossException.ErrorCode.POST_DATA_ERROR, "Invalid path found");
+            throw new WeCrossException(WeCrossException.ErrorCode.POST_DATA_ERROR, e.getMessage());
         }
 
         XAReduceCallback xaReduceCallback =
@@ -187,12 +199,17 @@ public class XATransactionManager {
                 }
             }
 
+            XAResponse xaResponse = new XAResponse();
             try {
                 args[1] = objectMapper.writeValueAsString(selfPaths);
                 args[2] = objectMapper.writeValueAsString(otherPaths);
             } catch (Exception e) {
-                throw new WeCrossException(
-                        WeCrossException.ErrorCode.INTERNAL_ERROR, "Format string array failed");
+                xaResponse.addChainErrorMessage(
+                        new XAResponse.ChainErrorMessage(
+                                entry.getKey(),
+                                "Other succeeded chains will be committed, this chain failed: formatting string array error"));
+                xaReduceCallback.onResponse(xaResponse);
+                continue;
             }
 
             transactionRequest.setArgs(args);
@@ -202,14 +219,17 @@ public class XATransactionManager {
             try {
                 proxyPath = Path.decode(entry.getValue().iterator().next());
             } catch (Exception e) {
-                throw new WeCrossException(
-                        WeCrossException.ErrorCode.POST_DATA_ERROR, "Invalid path found");
+                xaResponse.addChainErrorMessage(
+                        new XAResponse.ChainErrorMessage(
+                                entry.getKey(),
+                                "Other succeeded chains will be committed, this chain failed: decoding path error"));
+                xaReduceCallback.onResponse(xaResponse);
+                continue;
             }
 
             proxyPath.setResource(StubConstant.PROXY_NAME);
             Resource resource = zoneManager.fetchResource(proxyPath);
 
-            XAResponse xaResponse = new XAResponse();
             resource.asyncSendTransaction(
                     transactionRequest,
                     ua,

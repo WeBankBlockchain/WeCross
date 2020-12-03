@@ -78,7 +78,9 @@ public class ConnectionURIHandler implements URIHandler {
                             if (e == null) {
                                 restResponse.setData(response);
                                 restResponse.setErrorCode(NetworkQueryStatus.SUCCESS);
-                                restResponse.setMessage("success");
+                                restResponse.setMessage(
+                                        NetworkQueryStatus.getStatusMessage(
+                                                NetworkQueryStatus.SUCCESS));
                                 callback.onResponse(restResponse);
                             } else {
                                 String message =
@@ -445,7 +447,7 @@ public class ConnectionURIHandler implements URIHandler {
         public static StatusResponse buildSuccessResponse() {
             StatusResponse response = new StatusResponse();
             response.errorCode = 0;
-            response.message = "success";
+            response.message = "Success";
             return response;
         }
 
