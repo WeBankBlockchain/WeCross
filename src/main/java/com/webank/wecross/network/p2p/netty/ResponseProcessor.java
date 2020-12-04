@@ -48,7 +48,7 @@ public class ResponseProcessor implements Processor {
             callback.cancelTimer();
 
             Response response =
-                    Response.build(StatusCode.SUCCESS, "success", message.getSeq(), content);
+                    Response.build(StatusCode.SUCCESS, "Success", message.getSeq(), content);
             callback.onResponse(response);
 
         } catch (Exception e) {
