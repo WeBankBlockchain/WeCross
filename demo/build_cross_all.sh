@@ -257,16 +257,16 @@ config_router_group1() {
     cd ${router_dir}
 
     # stubs
-    bash add_chain.sh -t BCOS2.0 -n group1 -d conf/chains
+    bash add_chain.sh -t BCOS2.0 -n bcos-group1 -d conf/chains
     # copy cert
-    cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/group1/
+    cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/bcos-group1/
 
     # bcos stub internal account
     bash add_account.sh -t BCOS2.0 -n bcos_admin1 -d conf/accounts
 
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/group1 bcos_admin1
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/group1 bcos_admin1
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos-group1 bcos_admin1
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos-group1 bcos_admin1
 
     cd -
 }
@@ -278,24 +278,24 @@ config_router_group2() {
 
     cd ${router_dir}
     # stubs
-    bash add_chain.sh -t BCOS2.0 -n group2 -d conf/chains
+    bash add_chain.sh -t BCOS2.0 -n bcos-group2 -d conf/chains
     # copy cert
-    cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/group2/
+    cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/bcos-group2/
 
-    # configure to group2
+    # configure to bcos-group2
     if [ "$(uname)" == "Darwin" ]; then
         # Mac
-        sed -i "" 's/groupId = 1/groupId = 2/g' conf/chains/group2/stub.toml
+        sed -i "" 's/groupId = 1/groupId = 2/g' conf/chains/bcos-group2/stub.toml
     else
-        sed -i 's/groupId = 1/groupId = 2/g' conf/chains/group2/stub.toml
+        sed -i 's/groupId = 1/groupId = 2/g' conf/chains/bcos-group2/stub.toml
     fi
 
     # bcos stub internal account
     bash add_account.sh -t BCOS2.0 -n bcos_admin2 -d conf/accounts
 
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/group2 bcos_admin2
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/group2 bcos_admin2
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos-group2 bcos_admin2
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos-group2 bcos_admin2
 
     cd -
 }
@@ -308,24 +308,24 @@ config_router_gm() {
     cd ${router_dir}
 
     # stubs
-    bash add_chain.sh -t GM_BCOS2.0 -n bcos_gm -d conf/chains
+    bash add_chain.sh -t GM_BCOS2.0 -n bcos-gm -d conf/chains
     # copy cert
-    cp -r ${ROOT}/bcos/nodes_gm/127.0.0.1/sdk/* conf/chains/bcos_gm/
+    cp -r ${ROOT}/bcos/nodes_gm/127.0.0.1/sdk/* conf/chains/bcos-gm/
 
     # configure guomi
     if [ "$(uname)" == "Darwin" ]; then
         # Mac
-        sed -i "" 's/20200/20210/g' conf/chains/bcos_gm/stub.toml
+        sed -i "" 's/20200/20210/g' conf/chains/bcos-gm/stub.toml
     else
-        sed -i 's/20200/20210/g' conf/chains/bcos_gm/stub.toml
+        sed -i 's/20200/20210/g' conf/chains/bcos-gm/stub.toml
     fi
 
     # bcos gm stub internal account
     bash add_account.sh -t GM_BCOS2.0 -n bcos_gm_admin -d conf/accounts
 
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.ProxyContractDeployment deploy chains/bcos_gm bcos_gm_admin
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.HubContractDeployment deploy chains/bcos_gm bcos_gm_admin
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.ProxyContractDeployment deploy chains/bcos-gm bcos_gm_admin
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.HubContractDeployment deploy chains/bcos-gm bcos_gm_admin
 
     cd -
 }
@@ -338,8 +338,9 @@ config_router_fabric() {
 
     cd ${router_dir}
     # stubs
-    bash add_chain.sh -t Fabric1.4 -n fabric -d conf/chains
-    cp ${fabric_demo_dir}/certs/chains/fabric/* conf/chains/fabric/
+    bash add_chain.sh -t Fabric1.4 -n fabric-mychannel -d conf/chains
+    cp ${fabric_demo_dir}/certs/chains/fabric/* conf/chains/fabric-mychannel/
+
 
     # fabric stub internal accounts
     bash add_account.sh -t Fabric1.4 -n fabric_admin -d conf/accounts
@@ -351,8 +352,8 @@ config_router_fabric() {
     sed_i 's/Org1MSP/Org2MSP/g' conf/accounts/fabric_admin_org2/account.toml
 
     # deploy system chaincodes
-    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy chains/fabric
-    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.fabric.hub.HubChaincodeDeployment deploy chains/fabric
+    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy chains/fabric-mychannel
+    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.fabric.hub.HubChaincodeDeployment deploy chains/fabric-mychannel
 
     cd -
 }
@@ -482,9 +483,9 @@ deploy_bcos_sample_resource() {
 
     bash start.sh <<EOF
 login
-bcosDeploy payment.group1.HelloWorldGroup1 conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
-bcosDeploy payment.group2.HelloWorldGroup2 conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
-bcosDeploy payment.bcos_gm.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
+bcosDeploy payment.bcos-group1.HelloWorldGroup1 conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
+bcosDeploy payment.bcos-group2.HelloWorldGroup2 conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
+bcosDeploy payment.bcos-gm.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
 quit
 EOF
     cd -
@@ -499,11 +500,11 @@ deploy_fabric_sample_resource() {
 login
 setDefaultAccount Fabric1.4 2
 login
-fabricInstall payment.fabric.sacc Org2 contracts/chaincode/sacc 1.0 GO_LANG
+fabricInstall payment.fabric-mychannel.sacc Org2 contracts/chaincode/sacc 1.0 GO_LANG
 setDefaultAccount Fabric1.4 1
 login
-fabricInstall payment.fabric.sacc Org1 contracts/chaincode/sacc 1.0 GO_LANG
-fabricInstantiate payment.fabric.sacc ["Org1","Org2"] contracts/chaincode/sacc 1.0 GO_LANG policy.yaml ["a","10"]
+fabricInstall payment.fabric-mychannel.sacc Org1 contracts/chaincode/sacc 1.0 GO_LANG
+fabricInstantiate payment.fabric-mychannel.sacc ["Org1","Org2"] contracts/chaincode/sacc 1.0 GO_LANG policy.yaml ["a","10"]
 quit
 EOF
     # wait the chaincode instantiate
@@ -642,11 +643,13 @@ main() {
    (HelloWorldGroup1)  (HelloWorldGroup2)     (HelloWorld)         (sacc.go)
             \                 /                     \                 /
              \               /                       \               /
-              WeCross  Router  <------------------->  WeCross  Router
-           (127.0.0.1-8250-25500)                  (127.0.0.1-8251-25501)
-                     |
-                     |
-              WeCross WebApp
+              \             /                         \             /
+              WeCross  Router  <------------------->  WeCross  Router <----------> WeCross Account Manager
+           (127.0.0.1-8250-25500)                  (127.0.0.1-8251-25501)             (127.0.0.1:8340)
+              /            \\
+             /              \\
+            /                \\
+     WeCross WebApp     WeCross Console
 "
 
 }
