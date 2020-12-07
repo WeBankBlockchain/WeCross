@@ -329,6 +329,9 @@ build_account_manager() {
     cd ${ROOT}/WeCross-Account-Manager/
     query_db <conf/db_setup.sql
 
+    # generate rsa_keypair
+    bash create_rsa_keypair.sh -d conf/
+
     bash start.sh
     sed_i 's/create/update/g' ${ROOT}/WeCross-Account-Manager/conf/application.properties
 }
