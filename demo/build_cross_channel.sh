@@ -396,17 +396,19 @@ EOF
 
     LOG_INFO "Success! WeCross demo network is running. Framework:"
     echo -e "
-                Hyperledger Fabric
-        Channel 1                  Channel 2
-   (payment1_Channel1)        (payment2_Channel2)
-       (sacc1.go)                 (sacc2.go)
-           |                          |
-           |                          |
-    WeCross Router <----------> WeCross Router
-(127.0.0.1-8250-25500)      (127.0.0.1-8251-25501)
-           | 
-           | 
-    WeCross Console
+                      Hyperledger Fabric
+              Channel 1                  Channel 2
+         (payment1_Channel1)        (payment2_Channel2)
+             (sacc1.go)                 (sacc2.go)
+                 |                          |
+                 |                          |
+                 |                          |
+          WeCross Router <----------> WeCross Router <----------> WeCross Account Manager
+      (127.0.0.1-8250-25500)      (127.0.0.1-8251-25501)             (127.0.0.1:8340)
+          /            \\
+         /              \\
+        /                \\
+ WeCross WebApp     WeCross Console
 "
 
 }

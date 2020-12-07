@@ -434,16 +434,18 @@ main() {
 
     LOG_INFO "Success! WeCross demo network is running. Framework:"
     echo -e "
-                    FISCO BCOS
-        Group 1                    Group 2
-   (HelloWorldGroup1)         (HelloWorldGroup2)
-           |                          |
-           |                          |
-    WeCross Router <----------> WeCross Router
-(127.0.0.1-8250-25500)      (127.0.0.1-8251-25501)
-           | 
-           | 
-    WeCross Console
+                          FISCO BCOS
+              Group 1                    Group 2
+         (HelloWorldGroup1)         (HelloWorldGroup2)
+                 |                          |
+                 |                          |
+                 |                          |
+          WeCross Router <----------> WeCross Router <----------> WeCross Account Manager
+      (127.0.0.1-8250-25500)      (127.0.0.1-8251-25501)             (127.0.0.1:8340)
+          /            \\
+         /              \\
+        /                \\
+ WeCross WebApp     WeCross Console
 "
 
 }
