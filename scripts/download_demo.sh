@@ -80,7 +80,7 @@ download_release_pkg() {
     LOG_INFO "Try to Download checksum from ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}"
     if ! curl --fail -LO ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}; then
         LOG_INFO "Download checksum from ${github_url}/${compatibility_version}/${release_pkg_checksum_file}"
-        curl -LO ${github_url}/${compatibility_version}/${release_pkg_checksum_file}
+        curl -#LO ${github_url}/${compatibility_version}/${release_pkg_checksum_file}
     fi
 
     if [ ! -e ${release_pkg_checksum_file} ] || [ -z "$(grep ${release_pkg} ${release_pkg_checksum_file})" ]; then

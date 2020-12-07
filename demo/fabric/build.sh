@@ -15,7 +15,7 @@ Download() {
     local url=${1}
     local file=$(basename ${url})
     if [ ! -e ${file} ]; then
-        curl -LO ${url}
+        curl -#LO ${url}
     fi
 }
 
