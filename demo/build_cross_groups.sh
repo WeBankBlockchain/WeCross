@@ -196,12 +196,9 @@ config_router_8250() {
     # copy cert
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/group1/
 
-    # bcos stub internal account
-    bash add_account.sh -t BCOS2.0 -n bcos_admin1 -d conf/accounts
-
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/group1 bcos_admin1
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/group1 bcos_admin1
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/group1
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/group1
 
     cd -
 }
@@ -225,12 +222,9 @@ config_router_8251() {
         sed -i 's/groupId = 1/groupId = 2/g' conf/chains/group2/stub.toml
     fi
 
-    # bcos stub internal account
-    bash add_account.sh -t BCOS2.0 -n bcos_admin2 -d conf/accounts
-
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/group2 bcos_admin2
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/group2 bcos_admin2
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/group2
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/group2
 
     cd -
 }
