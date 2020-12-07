@@ -23,7 +23,7 @@ Download() {
     local url=${1}
     local file=$(basename ${url})
     if [ ! -e ${file} ]; then
-        curl -LO ${url}
+        curl -#LO ${url}
     fi
 }
 
@@ -238,12 +238,9 @@ config_router_8250() {
     # copy cert
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/bcos/
 
-    # bcos stub internal account
-    bash add_account.sh -t BCOS2.0 -n bcos_admin -d conf/accounts
-
     # deploy system contracts
-    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos bcos_admin
-    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos bcos_admin
+    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos
+    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos
 
     cd -
 }

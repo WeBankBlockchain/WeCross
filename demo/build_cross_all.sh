@@ -23,7 +23,7 @@ Download() {
     local url=${1}
     local file=$(basename ${url})
     if [ ! -e ${file} ]; then
-        curl -LO ${url}
+        curl -#LO ${url}
     fi
 }
 
@@ -261,12 +261,9 @@ config_router_group1() {
     # copy cert
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/bcos-group1/
 
-    # bcos stub internal account
-    bash add_account.sh -t BCOS2.0 -n bcos_admin1 -d conf/accounts
-
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos-group1 bcos_admin1
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos-group1 bcos_admin1
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos-group1
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos-group1
 
     cd -
 }
@@ -290,12 +287,9 @@ config_router_group2() {
         sed -i 's/groupId = 1/groupId = 2/g' conf/chains/bcos-group2/stub.toml
     fi
 
-    # bcos stub internal account
-    bash add_account.sh -t BCOS2.0 -n bcos_admin2 -d conf/accounts
-
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos-group2 bcos_admin2
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos-group2 bcos_admin2
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos-group2
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos-group2
 
     cd -
 }
@@ -320,12 +314,9 @@ config_router_gm() {
         sed -i 's/20200/20210/g' conf/chains/bcos-gm/stub.toml
     fi
 
-    # bcos gm stub internal account
-    bash add_account.sh -t GM_BCOS2.0 -n bcos_gm_admin -d conf/accounts
-
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.ProxyContractDeployment deploy chains/bcos-gm bcos_gm_admin
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.HubContractDeployment deploy chains/bcos-gm bcos_gm_admin
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.ProxyContractDeployment deploy chains/bcos-gm
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.HubContractDeployment deploy chains/bcos-gm
 
     cd -
 }
