@@ -489,7 +489,7 @@ deploy_chain_account() {
     add_bcos_account bcos_user1                  # 0
     add_fabric_account fabric_admin_org1 Org1MSP # 1
     add_fabric_account fabric_admin_org2 Org2MSP # 2
-    add_fabric_account fabric_user1 Org1MSP      # 3
+    # add_fabric_account fabric_user1 Org1MSP      # 3
     # add_bcos_gm_account bcos_gm_user1 # 4
 }
 

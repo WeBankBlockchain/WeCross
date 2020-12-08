@@ -19,7 +19,7 @@ LOG_INFO() {
     echo -e "\033[32m[INFO] ${content}\033[0m"
 }
 
-config_bcos_sender_account() {
+config_org2_admin() {
     LOG_INFO "Config account for BCOS htlc sender ..."
     mkdir ${ROOT}/WeCross-Console/conf/accounts/bcos_sender
     cd ${ROOT}/WeCross-Console/conf/accounts/bcos_sender
@@ -34,7 +34,8 @@ EOF
     # addChainAccount
     cd ${ROOT}/WeCross-Console
     bash start.sh <<EOF
-    login
+    registerAccount org2-admin 123456
+    login org2-admin 123456
     addChainAccount BCOS2.0 conf/accounts/bcos_sender/0x4305196480b029bbecb071b4b68e95dfef36a7b7.public.pem conf/accounts/bcos_sender/0x4305196480b029bbecb071b4b68e95dfef36a7b7.pem 0x4305196480b029bbecb071b4b68e95dfef36a7b7 true
     quit
 EOF
@@ -47,7 +48,7 @@ init_bcos_htlc() {
     cd ${ROOT}/WeCross-Console
     rm -rf logs
     bash start.sh <<EOF
-  login
+  login org2-admin 123456
   bcosDeploy payment.bcos.ledger contracts/solidity/LedgerSample.sol LedgerSample ${version} htlc token 1 100000000
 quit
 EOF
@@ -56,7 +57,7 @@ EOF
 
     rm -rf logs
     bash start.sh <<EOF
-  login
+  login org2-admin 123456
   bcosDeploy payment.bcos.htlc contracts/solidity/LedgerSampleHTLC.sol LedgerSampleHTLC ${version}
 quit
 EOF
@@ -65,7 +66,7 @@ EOF
     BCOS_HTLC=$(echo ${var2:5:42})
 
     bash start.sh <<EOF
-  login
+  login org2-admin 123456
   sendTransaction payment.bcos.ledger approve ${BCOS_HTLC} 1000000
   sendTransaction payment.bcos.htlc init ${BCOS_LEDGER}
 quit
@@ -101,7 +102,6 @@ install_fabric_chaincode() {
 update_wecross_config() {
     LOG_INFO "Update wecross.toml ..."
 
-
     cat >>${ROOT}/routers-payment/127.0.0.1-8250-25500/conf/wecross.toml <<EOF
 
 [[htlc]]
@@ -117,24 +117,6 @@ EOF
 EOF
 }
 
-copy_console() {
-    LOG_INFO "Copy console for router-8251 ..."
-
-    cd ${ROOT}
-    cp -r WeCross-Console WeCross-Console-8251
-    rm WeCross-Console-8251/conf/application.toml
-    cat <<EOF >WeCross-Console-8251/conf/application.toml
-[connection]
-    server =  '127.0.0.1:8251'
-    sslKey = 'classpath:ssl.key'
-    sslCert = 'classpath:ssl.crt'
-    caCert = 'classpath:ca.crt'
-    sslSwitch = 2 # disable ssl:2, SSL without client auth:1 , SSL with client and server auth: 0
-[login]
-    username = 'org1-admin'
-    password = '123456'
-EOF
-}
 
 restart_router() {
     LOG_INFO "Restart routers ..."
@@ -152,8 +134,7 @@ restart_router() {
 
 main() {
 
-    config_bcos_sender_account
-    copy_console
+    config_org2_admin
 
     init_bcos_htlc
 

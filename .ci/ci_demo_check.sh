@@ -93,9 +93,9 @@ htlc_test() {
 
     ensure_bcos_nodes_running
 
-    cd WeCross-Console-8251/
+    cd WeCross-Console/
     bash start.sh <<EOF
-login
+login org1-admin 123456
 listAccount
 listResources
 setDefaultAccount Fabric1.4 1
@@ -107,7 +107,7 @@ EOF
 
     cd WeCross-Console/
     bash start.sh <<EOF
-login
+login org2-admin 123456
 listAccount
 listResources
 call payment.bcos.htlc balanceOf 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf
@@ -120,7 +120,7 @@ EOF
 
     cd WeCross-Console/
     bash start.sh <<EOF
-login
+login org2-admin 123456
 listAccount
 listResources
 call payment.bcos.htlc balanceOf 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf
@@ -128,9 +128,9 @@ quit
 EOF
     cd ..
 
-    cd WeCross-Console-8251/
+    cd WeCross-Console/
     bash start.sh <<EOF
-login
+login org1-admin 123456
 listAccount
 listResources
 call payment.fabric.htlc balanceOf User1@org1.example.com
@@ -140,7 +140,6 @@ EOF
 
     check_log
     check_console_log ${ROOT}/WeCross-Console/logs/warn.log
-    check_console_log ${ROOT}/WeCross-Console-8251/logs/warn.log
 }
 
 # xa test
