@@ -80,6 +80,7 @@ EOF
 
     check_log
     check_console_log ${ROOT}/WeCross-Console/logs/warn.log
+    check_console_log ${ROOT}/WeCross-Console/logs/error.log
 
 }
 
@@ -140,13 +141,14 @@ EOF
 
     check_log
     check_console_log ${ROOT}/WeCross-Console/logs/warn.log
+    check_console_log ${ROOT}/WeCross-Console/logs/error.log
 }
 
 # xa test
-xa_test() {
+xa_evidence_test() {
     cd ${ROOT}
 
-    bash -x xa_config.sh n
+    bash -x xa_config_evidence.sh n
 
     cd WeCross-Console/
     bash start.sh <<EOF
@@ -154,34 +156,63 @@ login
 listAccount
 listResources
 call payment.bcos.evidence queryEvidence evidence0
-call payment.bcos.asset balanceOf Alice
 call payment.fabric.evidence queryEvidence evidence0
-call payment.fabric.asset balanceOf Alice
 
-startTransaction payment.bcos.evidence payment.bcos.asset payment.fabric.evidence payment.fabric.asset
+startTransaction payment.bcos.evidence payment.fabric.evidence
 execTransaction payment.bcos.evidence newEvidence evidence0 "I'm Tom"
-execTransaction payment.bcos.asset transfer Alice Oscar 100
 execTransaction payment.fabric.evidence newEvidence evidence0 "I'm Jerry"
-execTransaction payment.fabric.asset transfer Alice Oscar 100
 commitTransaction payment.bcos.evidence payment.fabric.evidence
 
 call payment.bcos.evidence queryEvidence evidence0
-call payment.bcos.asset balanceOf Alice
 call payment.fabric.evidence queryEvidence evidence0
-call payment.fabric.asset balanceOf Alice
 
-startTransaction payment.bcos.evidence payment.bcos.asset payment.fabric.evidence payment.fabric.asset
+startTransaction payment.bcos.evidence payment.fabric.evidence
 execTransaction payment.bcos.evidence newEvidence evidence1 "I'm TomGG"
-execTransaction payment.bcos.asset transfer Alice Oscar 100
 execTransaction payment.fabric.evidence newEvidence evidence1 "I'm JerryMM"
-execTransaction payment.fabric.asset transfer Alice Oscar 100
 callTransaction payment.fabric.evidence queryEvidence evidence1
 callTransaction payment.bcos.evidence queryEvidence evidence1
 rollbackTransaction payment.bcos.evidence payment.fabric.evidence
 
 call payment.bcos.evidence queryEvidence evidence1
-call payment.bcos.asset balanceOf Alice
 call payment.fabric.evidence queryEvidence evidence1
+
+quit
+EOF
+
+    cd -
+
+    check_log
+    check_console_log ${ROOT}/WeCross-Console/logs/warn.log
+    check_console_log ${ROOT}/WeCross-Console/logs/error.log
+}
+
+xa_asset_test() {
+    cd ${ROOT}
+
+    bash -x xa_config_asset.sh n
+
+    cd WeCross-Console/
+    bash start.sh <<EOF
+login
+listAccount
+listResources
+call payment.bcos.asset balanceOf Alice
+call payment.fabric.asset balanceOf Alice
+
+startTransaction payment.bcos.asset payment.fabric.asset
+execTransaction payment.bcos.asset transfer Alice Oscar 100
+execTransaction payment.fabric.asset transfer Alice Oscar 100
+commitTransaction payment.bcos.asset payment.fabric.asset
+
+call payment.bcos.asset balanceOf Alice
+call payment.fabric.asset balanceOf Alice
+
+startTransaction payment.bcos.asset payment.fabric.asset
+execTransaction payment.bcos.asset transfer Alice Oscar 100
+execTransaction payment.fabric.asset transfer Alice Oscar 100
+rollbackTransaction payment.bcos.asset payment.fabric.asset
+
+call payment.bcos.asset balanceOf Alice
 call payment.fabric.asset balanceOf Alice
 
 quit
@@ -191,6 +222,7 @@ EOF
 
     check_log
     check_console_log ${ROOT}/WeCross-Console/logs/warn.log
+    check_console_log ${ROOT}/WeCross-Console/logs/error.log
 }
 
 prepare_wecross() {
@@ -233,7 +265,8 @@ main() {
     prepare_demo
     demo_test
     htlc_test
-    xa_test
+    xa_evidence_test
+    xa_asset_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then
