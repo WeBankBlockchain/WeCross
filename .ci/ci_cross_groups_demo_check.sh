@@ -79,6 +79,7 @@ EOF
 
     check_log
     check_console_log ${ROOT}/WeCross-Console/logs/warn.log
+    check_console_log ${ROOT}/WeCross-Console/logs/error.log
 }
 
 prepare_wecross() {
