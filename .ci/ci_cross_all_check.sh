@@ -79,9 +79,6 @@ call payment.bcos-group2.HelloWorldGroup2 get
 sendTransaction payment.bcos-group2.HelloWorldGroup2 set Jerry
 call payment.bcos-group2.HelloWorldGroup2 get
 
-call payment.bcos.HelloWorld get
-sendTransaction payment.bcos.HelloWorld set Tom
-call payment.bcos.HelloWorld get
 call payment.bcos-gm.HelloWorld get
 sendTransaction payment.bcos-gm.HelloWorld set Jerry
 call payment.bcos-gm.HelloWorld get
