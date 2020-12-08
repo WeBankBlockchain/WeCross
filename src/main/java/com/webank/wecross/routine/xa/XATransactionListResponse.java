@@ -24,7 +24,7 @@ public class XATransactionListResponse {
         for (XA xa : xaList) {
             UniversalAccount ua =
                     accountManager.getUniversalAccountByIdentity(xa.getAccountIdentity());
-            String username = Objects.nonNull(ua) ? ua.getUsername() : "Unknown";
+            String username = Objects.nonNull(ua) ? ua.getUsername() : null;
 
             xa.setUsername(username);
             xa.setAccountIdentity(null);
