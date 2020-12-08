@@ -265,7 +265,8 @@ main() {
     prepare_demo
     demo_test
     htlc_test
-    xa_test
+    xa_evidence_test
+    xa_asset_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then
