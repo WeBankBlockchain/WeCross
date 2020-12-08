@@ -102,7 +102,7 @@ download_release_pkg() {
 
     #download checksum
     LOG_INFO "Try to Download checksum from ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}"
-    if ! curl --fail -LO ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}; then
+    if ! curl --fail -#LO ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}; then
         LOG_INFO "Download checksum from ${github_url}/${compatibility_version}/${release_pkg_checksum_file}"
         curl -#LO ${github_url}/${compatibility_version}/${release_pkg_checksum_file}
     fi
@@ -117,10 +117,10 @@ download_release_pkg() {
         LOG_INFO "Latest release ${release_pkg} exists."
     else
         LOG_INFO "Try to download from: ${cdn_url}/${compatibility_version}/${release_pkg}"
-        if ! curl --fail -LO ${cdn_url}/${compatibility_version}/${release_pkg}; then
+        if ! curl --fail -#LO ${cdn_url}/${compatibility_version}/${release_pkg}; then
             # If CDN failed, download from github release
             LOG_INFO "Download from: ${github_url}/${compatibility_version}/${release_pkg}"
-            curl -C - -LO ${github_url}/${compatibility_version}/${release_pkg}
+            curl -C - -#LO ${github_url}/${compatibility_version}/${release_pkg}
         fi
 
         if ! md5sum -c ${release_pkg_checksum_file}; then
