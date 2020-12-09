@@ -59,7 +59,8 @@ public class WeCrossHost {
                                     System.out.println("WeCross router start success!");
                                     mainLoop();
                                 }
-                            });
+                            },
+                            "mainLoop");
             mainLoopThread.start();
         } catch (Exception e) {
             String errorInfo = "Startup host error: " + e.toString();
@@ -74,13 +75,13 @@ public class WeCrossHost {
         while (flag) {
             try {
                 Thread.sleep(1000);
+                broadcastStatus();
+                dumpStatus();
+
             } catch (Exception e) {
-                logger.warn("Thread exception", e);
+                logger.warn("Mainloop thread exception", e);
                 flag = false;
             }
-
-            broadcastStatus();
-            dumpStatus();
         }
         System.exit(0);
     }

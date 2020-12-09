@@ -150,6 +150,10 @@ xa_evidence_test() {
 
     bash -x xa_config_evidence.sh n
 
+    docker ps | grep evidence
+    sleep 20
+    docker ps | grep evidence
+
     cd WeCross-Console/
     bash start.sh <<EOF
 login
@@ -190,6 +194,10 @@ xa_asset_test() {
     cd ${ROOT}
 
     bash -x xa_config_asset.sh n
+
+    docker ps | grep asset
+    sleep 20
+    docker ps | grep asset
 
     cd WeCross-Console/
     bash start.sh <<EOF
