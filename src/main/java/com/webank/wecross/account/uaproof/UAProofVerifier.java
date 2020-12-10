@@ -38,7 +38,7 @@ public class UAProofVerifier {
                 return false;
             }
 
-            logger.debug("Verify UAProof Success: {}", uaProof);
+            logger.trace("Verify UAProof Success: {}", uaProof);
 
             return true; // ok
 

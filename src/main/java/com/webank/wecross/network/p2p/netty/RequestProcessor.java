@@ -50,8 +50,8 @@ public class RequestProcessor implements Processor {
                                 serializer.serialize(message, byteBuf);
                                 ctx.writeAndFlush(byteBuf);
 
-                                if (logger.isDebugEnabled()) {
-                                    logger.debug(
+                                if (logger.isTraceEnabled()) {
+                                    logger.trace(
                                             " Response network message, resource request, host: {}, seq: {}, response content: {}",
                                             node,
                                             message.getSeq(),

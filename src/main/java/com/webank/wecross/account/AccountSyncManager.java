@@ -186,6 +186,10 @@ public class AccountSyncManager {
         return dumpStr;
     }
 
+    public long getCaID2UaIDSize() {
+        return caID2UaID.size();
+    }
+
     public void setUaProofVerifier(UAProofVerifier uaProofVerifier) {
         this.uaProofVerifier = uaProofVerifier;
     }
