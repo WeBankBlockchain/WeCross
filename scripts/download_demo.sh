@@ -3,7 +3,7 @@ set -e
 
 LANG=en_US.UTF-8
 
-default_compatibility_version=v1.0.0-rc4 # update this every release
+default_compatibility_version=v1.0.0 # update this every release
 
 compatibility_version=
 
