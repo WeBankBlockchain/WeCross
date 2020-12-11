@@ -184,12 +184,20 @@ console_ask() {
     esac
 }
 
+exit_when_empty_db_pwd() {
+    if mysql -u ${DB_USERNAME} -h ${DB_IP} -P ${DB_PORT} -e "status" 2>/dev/null; then
+        LOG_ERROR "Not support to use account with no password. Please try another account."
+        exit 1
+    fi
+}
+
 db_config_ask() {
     check_command mysql
     LOG_INFO "Database connection:"
     read -r -p "[1/4]> ip: " DB_IP
     read -r -p "[2/4]> port: " DB_PORT
     read -r -p "[3/4]> username: " DB_USERNAME
+    exit_when_empty_db_pwd
     read -r -p "[4/4]> password: " -s DB_PASSWORD
     echo "" # \n
     LOG_INFO "Database connetion with: ${DB_IP}:${DB_PORT} ${DB_USERNAME} "

@@ -38,6 +38,7 @@ public class AccountManagerConfig {
             remoteAccountManager.setAccounts(
                     localAccountManager.getAccounts()); // set according with rpcContext
         */
+        accountManager.start();
         return accountManager;
     }
 }

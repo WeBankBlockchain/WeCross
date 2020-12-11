@@ -147,9 +147,6 @@ public class UniversalAccount {
                 + ", pubKey='"
                 + pubKey
                 + '\''
-                + ", secKey='"
-                + secKey
-                + '\''
                 + ", isAdmin="
                 + isAdmin
                 + ", version="

@@ -1,7 +1,5 @@
 package com.webank.wecross.account;
 
-import static com.webank.wecross.exception.WeCrossException.ErrorCode;
-
 import com.webank.wecross.account.uaproof.UAProof;
 import com.webank.wecross.account.uaproof.UAProofGenerator;
 import com.webank.wecross.account.uaproof.UAProofInfo;
@@ -40,20 +38,7 @@ public class AccountSyncManager {
     }
 
     public void addCaID2UaID(String chainAccountID, String uaID) throws WeCrossException {
-        String currentUAID = caID2UaID.get(chainAccountID);
-
-        if (currentUAID != null && !currentUAID.equals(uaID)) {
-            throw new WeCrossException(
-                    ErrorCode.DIFFRENT_CHAIN_ACCOUNT_ID_TO_UA_ID,
-                    "got different chain account id to ua id. caid: "
-                            + chainAccountID
-                            + " current ua: "
-                            + currentUAID
-                            + " receive ua: "
-                            + uaID);
-        }
-
-        caID2UaID.putIfAbsent(chainAccountID, uaID);
+        caID2UaID.put(chainAccountID, uaID);
     }
 
     public Integer getSeq() {
@@ -184,6 +169,10 @@ public class AccountSyncManager {
                             + ") ";
         }
         return dumpStr;
+    }
+
+    public long getCaID2UaIDSize() {
+        return caID2UaID.size();
     }
 
     public void setUaProofVerifier(UAProofVerifier uaProofVerifier) {

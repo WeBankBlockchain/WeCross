@@ -8,9 +8,12 @@ import com.webank.wecross.network.client.ClientMessageEngine;
 import com.webank.wecross.network.client.Request;
 import com.webank.wecross.network.client.Response;
 import com.webank.wecross.stub.Account;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +27,33 @@ public class AccountManager {
     private AdminContext adminContext;
     private AccountSyncManager accountSyncManager;
 
+    private static Timer timer = new Timer("checkTokenTimer");
+    private static final long checkTokenStateExpires = 9000; // s, 2.5h
+
     private Map<String, UniversalAccount> token2UA = new ConcurrentHashMap<>();
+
+    public void start() {
+        timer.schedule(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        // check token expires
+                        try {
+                            Collection<String> tokens = token2UA.keySet();
+                            for (String token : tokens) {
+                                if (hasTokenExpired(token)) {
+                                    logger.info("Remove expired token: " + token);
+                                    token2UA.remove(token);
+                                }
+                            }
+                        } catch (Exception e) {
+                            logger.error("checkTokenTimer exception: ", e);
+                        }
+                    }
+                },
+                checkTokenStateExpires,
+                checkTokenStateExpires);
+    }
 
     public List<Account> getAccounts(UserContext userContext) throws WeCrossException {
         String token = userContext.getToken();
@@ -110,6 +139,10 @@ public class AccountManager {
         this.accountSyncManager = accountSyncManager;
     }
 
+    public void setTimer(Timer timer) {
+        this.timer = timer;
+    }
+
     public static class GetUniversalAccountByChainAccountIdentityRequest {
         public String identity;
     }
@@ -172,6 +205,10 @@ public class AccountManager {
         } catch (Exception e) {
             return new Long(-1);
         }
+    }
+
+    private boolean hasTokenExpired(String token) {
+        return fetchUAVersion(token) < 0;
     }
 
     private UniversalAccount fetchUA(String token) {
