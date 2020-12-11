@@ -136,7 +136,7 @@ public class WeCrossHost {
         String dumpStr = "Current account info: ";
 
         dumpStr += " seq: " + accountSyncManager.getSeq();
-        dumpStr += " table size:: " + accountSyncManager.getCaID2UaIDSize();
+        dumpStr += " table size: " + accountSyncManager.getCaID2UaIDSize();
 
         dumpByTime(dumpStr);
     }

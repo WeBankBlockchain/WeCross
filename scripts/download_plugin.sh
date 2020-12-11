@@ -36,8 +36,8 @@ Usage:
 
     <tag/branch>:   certain tag or branch to download
 e.g
-    bash $0 BCOS2 v1.0.0-rc4
-    bash $0 Fabric1 v1.0.0-rc4
+    bash $0 BCOS2 v1.0.0
+    bash $0 Fabric1 v1.0.0
 EOF
     exit 0
 }
