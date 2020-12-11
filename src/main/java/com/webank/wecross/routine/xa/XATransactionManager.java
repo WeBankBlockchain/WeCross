@@ -34,7 +34,7 @@ public class XATransactionManager {
      * contracts
      */
     public Map<String, Set<String>> getChainPaths(Set<String> resources) throws Exception {
-        Map<String, Set<String>> zone2Path = new HashMap<>();
+        Map<String, Set<String>> zone2Path = Collections.synchronizedMap(new Hashtable<>());
         for (String resource : resources) {
             Path path;
             try {
@@ -207,7 +207,7 @@ public class XATransactionManager {
                 xaResponse.addChainErrorMessage(
                         new XAResponse.ChainErrorMessage(
                                 entry.getKey(),
-                                "Other succeeded chains will be committed, this chain failed: formatting string array error"));
+                                "Failed to format path lists, and other succeeded chains will be committed."));
                 xaReduceCallback.onResponse(xaResponse);
                 continue;
             }
@@ -222,7 +222,7 @@ public class XATransactionManager {
                 xaResponse.addChainErrorMessage(
                         new XAResponse.ChainErrorMessage(
                                 entry.getKey(),
-                                "Other succeeded chains will be committed, this chain failed: decoding path error"));
+                                "Failed to decode path, and other succeeded chains will be committed."));
                 xaReduceCallback.onResponse(xaResponse);
                 continue;
             }
@@ -246,8 +246,9 @@ public class XATransactionManager {
                             xaResponse.addChainErrorMessage(
                                     new XAResponse.ChainErrorMessage(
                                             entry.getKey(),
-                                            "Other succeeded chains will be committed, this chain failed: "
-                                                    + exception.getMessage()));
+                                            "Failed: "
+                                                    + exception.getMessage()
+                                                    + ", and other succeeded chains will be committed."));
                             xaReduceCallback.onResponse(xaResponse);
                             return;
                         }
@@ -261,8 +262,9 @@ public class XATransactionManager {
                             xaResponse.addChainErrorMessage(
                                     new XAResponse.ChainErrorMessage(
                                             entry.getKey(),
-                                            "Other succeeded chains will be committed, this chain failed: "
-                                                    + response.getMessage()));
+                                            "Failed: "
+                                                    + response.getMessage()
+                                                    + ", and other succeeded chains will be committed."));
                             xaReduceCallback.onResponse(xaResponse);
                             return;
                         }

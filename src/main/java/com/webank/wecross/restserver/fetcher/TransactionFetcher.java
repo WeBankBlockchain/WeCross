@@ -78,7 +78,7 @@ public class TransactionFetcher {
                         UniversalAccount ua =
                                 accountManager.getUniversalAccountByIdentity(
                                         transaction.getAccountIdentity());
-                        String username = Objects.nonNull(ua) ? ua.getUsername() : "Unknown";
+                        String username = Objects.nonNull(ua) ? ua.getUsername() : null;
                         completeTransactionResponse.setUsername(username);
                         completeTransactionResponse.setMethod(
                                 transaction.getTransactionRequest().getMethod());
