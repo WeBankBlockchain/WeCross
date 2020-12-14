@@ -50,14 +50,3 @@
 ```          
 ./gradlew verGJF
 ```
-
-## 持续集成（CI）
-
-持续集成框架
-
-* travis-ci: [![Build Status](https://travis-ci.org/WeBankFinTech/WeCross.svg?branch=master)](https://travis-ci.org/WeBankFinTech/WeCross)
-
-
-代码质量
-
-* Codacy: [![Codacy Badge](https://api.codacy.com/project/badge/Grade/a2a6c2eb499e42739d066ff775d1b288)](https://www.codacy.com/app/WeBankFinTech/WeCross?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=WeBankFinTech/WeCross&amp;utm_campaign=Badge_Grade)
