@@ -1,16 +1,18 @@
 ### v1.0.0
 
-(2020-12-14)
+(2020-12-17)
 
 **功能**
 
 * 合约跨链调用：支持由合约发起跨链调用
 * 跨链账户管理：支持跨链账户管理，统一跨链身份
+* 网页管理台：可视化的跨链管理组件
 
 **新增**
 
 * 桥接合约：合约跨链调用统一入口，管理跨链调用请求
 * 账户管理：新增UniversalAccount管理链账户，新增注册与登录接口，透传账户相关请求至账户服务
+* 网页管理台：支持网页管理台静态资源的打包和加载
 * RPC接口：新增listTransactions、getTransaction、listXATransactions、getXATransaction等接口
 * 更多Demo：新增跨 FISCO BCOS 群组、FISCO BCOS 国密链、Hyperledger Fabric 链 Demo
 
