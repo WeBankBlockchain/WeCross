@@ -10,7 +10,7 @@ enable_build_from_resource=0
 
 src_dir=$(pwd)'/src/'
 
-wecross_console_url=https://github.com/WeBankFinTech/WeCross-Console.git
+wecross_console_url=https://github.com/WebankBlockchain/WeCross-Console.git
 wecross_console_branch=${default_compatibility_version}
 
 LOG_INFO() {
@@ -68,7 +68,7 @@ parse_command() {
 }
 
 download_wecross_console_pkg() {
-    local github_url=https://github.com/WeBankFinTech/WeCross-Console/releases/download/
+    local github_url=https://github.com/WebankBlockchain/WeCross-Console/releases/download/
     local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross-Console/
     local release_pkg=WeCross-Console.tar.gz
     local release_pkg_checksum_file=WeCross-Console.tar.gz.md5
@@ -80,7 +80,7 @@ download_wecross_console_pkg() {
 
     LOG_INFO "Checking latest release"
     if [ -z "${compatibility_version}" ]; then
-        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross-Console/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
+        compatibility_version=$(curl -s https://api.github.com/repos/WebankBlockchain/WeCross-Console/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
     fi
 
     if [ -z "${compatibility_version}" ]; then

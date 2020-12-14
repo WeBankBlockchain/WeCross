@@ -8,10 +8,10 @@ enable_build_from_resource=0
 deps_dir=$(pwd)'/plugin/'
 src_dir=$(pwd)'/src/'
 
-bcos_stub_url=https://github.com/WeBankFinTech/WeCross-BCOS2-Stub.git
+bcos_stub_url=https://github.com/WebankBlockchain/WeCross-BCOS2-Stub.git
 bcos_stub_branch=
 
-fabric_stub_url=https://github.com/WeBankFinTech/WeCross-Fabric1-Stub.git
+fabric_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric1-Stub.git
 fabric_stub_branch=
 
 LOG_INFO() {

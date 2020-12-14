@@ -59,7 +59,7 @@ build_bcos_chain() {
 build_console() {
     # Download console
     LOG_INFO "Download HelloWeCross.sol ..."
-    Download https://github.com/WeBankFinTech/WeCross/releases/download/resources/HelloWeCross.sol
+    Download https://github.com/WebankBlockchain/WeCross/releases/download/resources/HelloWeCross.sol
 
     LOG_INFO "Download console ..."
     if [ -e console.tar.gz ]; then

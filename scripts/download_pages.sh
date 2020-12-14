@@ -7,7 +7,7 @@ LANG=en_US.UTF-8
 pages_dir=$(pwd)'/pages/'
 src_dir=$(pwd)'/src/'
 
-wecross_webapp_url=https://github.com/WeBankFinTech/WeCross-WebApp.git
+wecross_webapp_url=https://github.com/WebankBlockchain/WeCross-WebApp.git
 
 LOG_INFO() {
     local content=${1}

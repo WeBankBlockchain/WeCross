@@ -91,7 +91,7 @@ update_wecross_sdk() {
 
     mkdir -p ${ROOT}/src
     cd ${ROOT}/src
-    git clone --depth 1 -b ${PLUGIN_BRANCH} https://github.com/WeBankFinTech/WeCross-Java-SDK.git
+    git clone --depth 1 -b ${PLUGIN_BRANCH} https://github.com/WebankBlockchain/WeCross-Java-SDK.git
     cd WeCross-Java-SDK
     bash gradlew assemble
 

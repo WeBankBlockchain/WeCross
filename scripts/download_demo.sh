@@ -43,7 +43,7 @@ parse_command() {
 }
 
 download_demo() {
-    local github_url=https://github.com/WeBankFinTech/WeCross/releases/download/
+    local github_url=https://github.com/WebankBlockchain/WeCross/releases/download/
     local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/Demo/
     #local compatibility_version=
     local release_pkg=demo.tar.gz
@@ -56,7 +56,7 @@ download_demo() {
 
     LOG_INFO "Checking latest release"
     if [ -z "${compatibility_version}" ]; then
-        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
+        compatibility_version=$(curl -s https://api.github.com/repos/WebankBlockchain/WeCross/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
     fi
 
     if [ -z "${compatibility_version}" ]; then

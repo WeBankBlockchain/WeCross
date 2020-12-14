@@ -299,7 +299,7 @@ build_wecross() {
         if [ -e download_wecross.sh ]; then
             bash download_wecross.sh -t v1.0.0
         else
-            bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0
         fi
     fi
 
@@ -322,7 +322,7 @@ build_wecross_console() {
         if [ -e download_console.sh ]; then
             bash download_console.sh -t v1.0.0
         else
-            bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_console.sh) -t v1.0.0
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t v1.0.0
         fi
     fi
 
@@ -360,7 +360,7 @@ build_account_manager() {
         if [ -e download_account_manager.sh ]; then
             bash download_account_manager.sh -t v1.0.0
         else
-            bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_account_manager.sh) -t v1.0.0
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_account_manager.sh) -t v1.0.0
         fi
     fi
 

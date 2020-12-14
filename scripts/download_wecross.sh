@@ -11,16 +11,16 @@ deps_dir=$(pwd)'/WeCross/plugin/'
 pages_dir=$(pwd)'/WeCross/pages/'
 src_dir=$(pwd)'/src/'
 
-wecross_url=https://github.com/WeBankFinTech/WeCross.git
+wecross_url=https://github.com/WebankBlockchain/WeCross.git
 wecross_branch=${default_compatibility_version}
 
-bcos_stub_url=https://github.com/WeBankFinTech/WeCross-BCOS2-Stub.git
+bcos_stub_url=https://github.com/WebankBlockchain/WeCross-BCOS2-Stub.git
 bcos_stub_branch=${default_compatibility_version}
 
-fabric_stub_url=https://github.com/WeBankFinTech/WeCross-Fabric1-Stub.git
+fabric_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric1-Stub.git
 fabric_stub_branch=${default_compatibility_version}
 
-wecross_webapp_url=https://github.com/WeBankFinTech/WeCross-WebApp.git
+wecross_webapp_url=https://github.com/WebankBlockchain/WeCross-WebApp.git
 wecross_webapp_branch=${default_compatibility_version}
 
 LOG_INFO() {
@@ -76,7 +76,7 @@ parse_command() {
 }
 
 download_wecross_pkg() {
-    local github_url=https://github.com/WeBankFinTech/WeCross/releases/download/
+    local github_url=https://github.com/WebankBlockchain/WeCross/releases/download/
     local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross/
     local release_pkg=WeCross.tar.gz
     local release_pkg_checksum_file=WeCross.tar.gz.md5
@@ -88,7 +88,7 @@ download_wecross_pkg() {
 
     LOG_INFO "Checking latest release"
     if [ -z "${compatibility_version}" ]; then
-        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
+        compatibility_version=$(curl -s https://api.github.com/repos/WebankBlockchain/WeCross/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
     fi
 
     if [ -z "${compatibility_version}" ]; then

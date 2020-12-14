@@ -1,7 +1,7 @@
 ![](./docs/images/menu_logo_wecross.png)
 
-[![CodeFactor](https://www.codefactor.io/repository/github/webankblockchain/wecross/badge)](https://www.codefactor.io/repository/github/webankblockchain/wecross) [![Build Status](https://travis-ci.org/WeBankFinTech/WeCross.svg?branch=dev)](https://travis-ci.org/WeBankFinTech/WeCross) [![Latest release](https://img.shields.io/github/release/WeBankFinTech/WeCross.svg)](https://github.com/WeBankFinTech/WeCross/releases/latest)
- [![License](https://img.shields.io/github/license/WeBankFinTech/WeCross)](https://www.apache.org/licenses/LICENSE-2.0) [![Language](https://img.shields.io/badge/Language-Java-blue.svg)](https://www.java.com)
+[![CodeFactor](https://www.codefactor.io/repository/github/webankblockchain/wecross/badge)](https://www.codefactor.io/repository/github/webankblockchain/wecross) [![Build Status](https://travis-ci.org/WebankBlockchain/WeCross.svg?branch=dev)](https://travis-ci.org/WebankBlockchain/WeCross) [![Latest release](https://img.shields.io/github/release/WebankBlockchain/WeCross.svg)](https://github.com/WebankBlockchain/WeCross/releases/latest)
+ [![License](https://img.shields.io/github/license/WebankBlockchain/WeCross)](https://www.apache.org/licenses/LICENSE-2.0) [![Language](https://img.shields.io/badge/Language-Java-blue.svg)](https://www.java.com)
 
 WeCross是由微众银行自主研发并完全开源的区块链跨链协作平台，致力于促进跨行业、机构和地域的跨区块链信任传递和商业合作。
 
@@ -35,8 +35,8 @@ WeCross支持应用与异构链交互、同/异构链间交互等多维度跨链
 
 ## 项目贡献
 
-- 提交代码(Pull requests)，可参考[代码贡献流程](CONTRIBUTING.md)以及[wiki指南](https://github.com/WeBankFinTech/WeCross/wiki/%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81)
-- [提问和提交BUG](https://github.com/WeBankFinTech/WeCross/issues)
+- 提交代码(Pull requests)，可参考[代码贡献流程](CONTRIBUTING.md)以及[wiki指南](https://github.com/WebankBlockchain/WeCross/wiki/%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81)
+- [提问和提交BUG](https://github.com/WebankBlockchain/WeCross/issues)
 
 ## 社区
 

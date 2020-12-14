@@ -10,7 +10,7 @@ enable_build_from_resource=0
 
 src_dir=$(pwd)'/src/'
 
-wecross_account_manager_url=https://github.com/WeBankFinTech/WeCross-Account-Manager.git
+wecross_account_manager_url=https://github.com/WebankBlockchain/WeCross-Account-Manager.git
 wecross_account_manager_branch=${default_compatibility_version}
 
 need_db_config_ask=true
@@ -133,7 +133,7 @@ config_database() {
 }
 
 download_wecross_account_manager_pkg() {
-    local github_url=https://github.com/WeBankFinTech/WeCross-Account-Manager/releases/download/
+    local github_url=https://github.com/WebankBlockchain/WeCross-Account-Manager/releases/download/
     local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross-Account-Manager/
     local release_pkg=WeCross-Account-Manager.tar.gz
     local release_pkg_checksum_file=WeCross-Account-Manager.tar.gz.md5
@@ -145,7 +145,7 @@ download_wecross_account_manager_pkg() {
 
     LOG_INFO "Checking latest release"
     if [ -z "${compatibility_version}" ]; then
-        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross-Account-Manager/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
+        compatibility_version=$(curl -s https://api.github.com/repos/WebankBlockchain/WeCross-Account-Manager/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
     fi
 
     if [ -z "${compatibility_version}" ]; then

@@ -64,7 +64,7 @@ publishing {
             pom {
                 name = "WeCross-Stub"
                 description = "Stub interface for WeCross"
-                url = "https://github.com/WeBankFinTech/WeCross"
+                url = "https://github.com/WebankBlockchain/WeCross"
                 licenses {
                     license {
                         name = "The Apache License, Version 2.0"
@@ -79,9 +79,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection = "scm:git:git://github.com/WeBankFinTech/WeCross.git"
-                    developerConnection = "scm:git:ssh://github.com/WeBankFinTech/WeCross.git"
-                    url = "https://github.com/WeBankFinTech/WeCross"
+                    connection = "scm:git:git://github.com/WebankBlockchain/WeCross.git"
+                    developerConnection = "scm:git:ssh://github.com/WebankBlockchain/WeCross.git"
+                    url = "https://github.com/WebankBlockchain/WeCross"
                 }
             }
         }
