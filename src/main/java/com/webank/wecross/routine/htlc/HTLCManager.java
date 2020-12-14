@@ -1,8 +1,9 @@
 package com.webank.wecross.routine.htlc;
 
+import com.webank.wecross.polling.Task;
+import com.webank.wecross.polling.TaskManager;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.routine.task.Task;
-import com.webank.wecross.routine.task.TaskManager;
+import com.webank.wecross.routine.RoutineDefault;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.*;
@@ -12,30 +13,32 @@ import org.slf4j.LoggerFactory;
 public class HTLCManager {
     private Logger logger = LoggerFactory.getLogger(HTLCManager.class);
 
-    Map<String, HTLCTaskData> htlcTaskDataMap = new HashMap<>();
-    HTLCResourcePair[] htlcResourcePairs;
+    private ZoneManager zoneManager;
+    private Map<String, HTLCContext> htlcContextMap = new HashMap<>();
 
     public void registerTask(TaskManager taskManager) {
-        if (htlcResourcePairs != null) {
-            try {
-                HTLCTaskFactory htlcTaskFactory = new HTLCTaskFactory();
-                Task[] tasks = htlcTaskFactory.load(htlcResourcePairs);
-                taskManager.addTasks(tasks);
-            } catch (Exception e) {
-                logger.error("Failed to add htlc tasks: {}", e.getMessage(), e);
-            }
+        if (Objects.isNull(zoneManager)) {
+            logger.error("HTLCManager has not been initialized");
+            return;
+        }
+
+        HTLCResourcePair[] htlcResourcePairs = initHTLCResourcePairs();
+        if (Objects.nonNull(htlcResourcePairs) && htlcResourcePairs.length > 0) {
+            HTLCTaskFactory htlcTaskFactory = new HTLCTaskFactory();
+            Task[] tasks =
+                    htlcTaskFactory.load(
+                            htlcResourcePairs, RoutineDefault.HTLC_JOB_DATA_KEY, HTLCJob.class);
+            taskManager.registerTasks(tasks);
         }
     }
 
     public Resource filterHTLCResource(ZoneManager zoneManager, Path path, Resource resource) {
-        if (htlcTaskDataMap.containsKey(path.toString())) {
-            HTLCTaskData htlcTaskData = htlcTaskDataMap.get(path.toString());
+        if (htlcContextMap.containsKey(path.toString())) {
+            HTLCContext htlcContext = htlcContextMap.get(path.toString());
 
             HTLCResource htlcResource =
-                    new HTLCResource(zoneManager, path, htlcTaskData.getCounterpartyPath());
-            htlcResource.setAccount1(htlcTaskData.getAccount1());
-            htlcResource.setAccount2(htlcTaskData.getAccount2());
-            htlcResource.setCounterpartyAddress(htlcTaskData.getCounterpartyAddress());
+                    new HTLCResource(zoneManager, path, htlcContext.getCounterpartyPath());
+            htlcResource.setAdminUa(htlcContext.getAdminUA());
             htlcResource.setDriver(resource.getDriver());
 
             return htlcResource;
@@ -43,44 +46,42 @@ public class HTLCManager {
         return resource;
     }
 
-    public void initHTLCResourcePairs(ZoneManager zoneManager) {
-        htlcResourcePairs = new HTLCResourcePair[htlcTaskDataMap.size()];
+    private HTLCResourcePair[] initHTLCResourcePairs() {
+        HTLCResourcePair[] htlcResourcePairs = new HTLCResourcePair[htlcContextMap.size()];
         int num = 0;
-        for (HTLCTaskData htlcTaskData : htlcTaskDataMap.values()) {
-            Path selfPath = htlcTaskData.getSelfPath();
-            Path counterpartyPath = htlcTaskData.getCounterpartyPath();
+        for (HTLCContext htlcContext : htlcContextMap.values()) {
+            Path selfPath = htlcContext.getSelfPath();
+            Path counterpartyPath = htlcContext.getCounterpartyPath();
 
             HTLCResource selfHTLCResource =
                     new HTLCResource(zoneManager, selfPath, counterpartyPath);
-            selfHTLCResource.setAccount1(htlcTaskData.getAccount1());
-            selfHTLCResource.setAccount2(htlcTaskData.getAccount2());
-            selfHTLCResource.setCounterpartyAddress(htlcTaskData.getCounterpartyAddress());
+            selfHTLCResource.setAdminUa(htlcContext.getAdminUA());
 
             // no need to set counterpartyAddress
             HTLCResource counterpartyHTLCResource =
                     new HTLCResource(zoneManager, counterpartyPath, selfPath);
-            counterpartyHTLCResource.setAccount1(htlcTaskData.getAccount2());
-            counterpartyHTLCResource.setAccount2(htlcTaskData.getAccount1());
+            counterpartyHTLCResource.setAdminUa(htlcContext.getAdminUA());
 
-            HTLC weCrossHTLC = new AssetHTLC();
+            HTLC weCrossHTLC = new HTLCImpl();
             htlcResourcePairs[num++] =
                     new HTLCResourcePair(weCrossHTLC, selfHTLCResource, counterpartyHTLCResource);
         }
-    }
-
-    public Map<String, HTLCTaskData> getHtlcTaskDataMap() {
-        return htlcTaskDataMap;
-    }
-
-    public void setHtlcTaskDataMap(Map<String, HTLCTaskData> htlcTaskDataMap) {
-        this.htlcTaskDataMap = htlcTaskDataMap;
-    }
-
-    public HTLCResourcePair[] getHtlcResourcePairs() {
         return htlcResourcePairs;
     }
 
-    public void setHtlcResourcePairs(HTLCResourcePair[] htlcResourcePairs) {
-        this.htlcResourcePairs = htlcResourcePairs;
+    public ZoneManager getZoneManager() {
+        return zoneManager;
+    }
+
+    public void setZoneManager(ZoneManager zoneManager) {
+        this.zoneManager = zoneManager;
+    }
+
+    public Map<String, HTLCContext> getHtlcContextMap() {
+        return htlcContextMap;
+    }
+
+    public void setHtlcContextMap(Map<String, HTLCContext> htlcContextMap) {
+        this.htlcContextMap = htlcContextMap;
     }
 }

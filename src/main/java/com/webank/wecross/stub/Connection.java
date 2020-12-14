@@ -4,23 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 public interface Connection {
-    public interface ConnectionEventHandler {
-        void onResourcesChange(List<ResourceInfo> resourceInfos);
-    }
 
     // Callback for asyncSend
     interface Callback {
         void onResponse(Response response);
     }
-
-    /**
-     * send request to blockchain
-     *
-     * @param request
-     * @return
-     */
-    @Deprecated
-    Response send(Request request);
 
     /**
      * asyncSend request to blockchain
@@ -29,24 +17,12 @@ public interface Connection {
      * @param callback
      * @return
      */
-    default void asyncSend(Request request, Connection.Callback callback) {
-        callback.onResponse(send(request));
+    void asyncSend(Request request, Connection.Callback callback);
+
+    // Callback for setConnectionEventHandler
+    interface ConnectionEventHandler {
+        void onResourcesChange(List<ResourceInfo> resourceInfos);
     }
-
-    /**
-     * get resources name
-     *
-     * @return resources
-     */
-    List<ResourceInfo> getResources();
-
-    /**
-     * get properties
-     *
-     * @return Map<String , String>
-     */
-    Map<String, String> getProperties();
-
     /**
      * set the callback of connection events
      *
@@ -54,4 +30,11 @@ public interface Connection {
      * @return
      */
     void setConnectionEventHandler(ConnectionEventHandler eventHandler);
+
+    /**
+     * get properties
+     *
+     * @return Map<String , String>
+     */
+    Map<String, String> getProperties();
 }

@@ -1,14 +1,15 @@
 package com.webank.wecross.config;
 
 import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.AccountSyncManager;
 import com.webank.wecross.common.BCManager;
 import com.webank.wecross.host.WeCrossHost;
 import com.webank.wecross.network.p2p.P2PProcessor;
 import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.network.rpc.RPCService;
 import com.webank.wecross.peer.PeerManager;
+import com.webank.wecross.polling.PollingManager;
 import com.webank.wecross.routine.RoutineManager;
-import com.webank.wecross.routine.xa.XATransactionManager;
 import com.webank.wecross.zone.ZoneManager;
 import javax.annotation.Resource;
 import org.springframework.context.annotation.Bean;
@@ -29,9 +30,11 @@ public class WeCrossHostConfig {
 
     @Resource private AccountManager accountManager;
 
+    @Resource private AccountSyncManager accountSyncManager;
+
     @Resource private BCManager bcManager;
 
-    @Resource private XATransactionManager xaTransactionManager;
+    @Resource private PollingManager pollingManager;
 
     // Network layer
     @Resource private P2PService p2PService;
@@ -45,10 +48,11 @@ public class WeCrossHostConfig {
         host.setZoneManager(zoneManager);
         host.setPeerManager(peerManager);
         host.setAccountManager(accountManager);
+        host.setAccountSyncManager(accountSyncManager);
         host.setRoutineManager(routineManager);
         host.setP2PService(p2PService);
         host.setRpcService(rpcService);
-        host.setXaTransactionManager(xaTransactionManager);
+        host.setPollingManager(pollingManager);
 
         // set the p2p engine here to avoid circular reference
         zoneManager.setP2PService(p2PService);

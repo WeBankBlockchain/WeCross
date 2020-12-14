@@ -1,37 +1,32 @@
 #!/bin/bash
 set -e
 
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 
 enable_build_from_resource=0
 
 deps_dir=$(pwd)'/plugin/'
 src_dir=$(pwd)'/src/'
 
-
-bcos_stub_url=https://github.com/WeBankFinTech/WeCross-BCOS2-Stub.git
+bcos_stub_url=https://github.com/WebankBlockchain/WeCross-BCOS2-Stub.git
 bcos_stub_branch=
 
-fabric_stub_url=https://github.com/WeBankFinTech/WeCross-Fabric1-Stub.git
+fabric_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric1-Stub.git
 fabric_stub_branch=
 
-
-LOG_INFO()
-{
+LOG_INFO() {
     local content=${1}
     echo -e "\033[32m[INFO] ${content}\033[0m"
 }
 
-LOG_ERROR()
-{
+LOG_ERROR() {
     local content=${1}
     echo -e "\033[31m[ERROR] ${content}\033[0m"
 }
 
-help()
-{
+help() {
     echo "$1"
-    cat << EOF
+    cat <<EOF
 Download certain plugin to the dir: plugin/
 Usage:
     bash $0 <name>  <tag/branch>
@@ -41,20 +36,18 @@ Usage:
 
     <tag/branch>:   certain tag or branch to download
 e.g
-    bash $0 BCOS2 v1.0.0-rc4
-    bash $0 Fabric1 v1.0.0-rc4
+    bash $0 BCOS2 v1.0.0
+    bash $0 Fabric1 v1.0.0
 EOF
-exit 0
+    exit 0
 }
 
-
-download_latest_code()
-{
+download_latest_code() {
     local name=${1}
     local url=${2}
     local branch=${3}
 
-    if [ -d ${name} ];then
+    if [ -d ${name} ]; then
         cd ${name}
         git checkout ${branch}
         git pull
@@ -65,8 +58,7 @@ download_latest_code()
     fi
 }
 
-build_plugin_from_source()
-{
+build_plugin_from_source() {
     local name=${1}
     local url=${2}
     local branch=${3}
@@ -93,20 +85,19 @@ build_plugin_from_source()
     LOG_INFO "Download ${name} success!"
 }
 
-main()
-{
+main() {
     local name=${1}
     local tag=${2}
     case ${name} in
     BCOS2)
         build_plugin_from_source WeCross-BCOS2-Stub ${bcos_stub_url} ${tag}
-    ;;
+        ;;
     Fabric1)
         build_plugin_from_source WeCross-Fabric1-Stub ${fabric_stub_url} ${tag}
-    ;;
+        ;;
     *)
         LOG_ERROR "Unsupported plugin name: "
-    ;;
+        ;;
     esac
 }
 

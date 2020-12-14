@@ -1,7 +1,9 @@
 package com.webank.wecross.network.rpc.netty;
 
+import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.network.p2p.netty.factory.ThreadPoolTaskExecutorFactory;
 import com.webank.wecross.network.rpc.URIHandlerDispatcher;
+import com.webank.wecross.network.rpc.authentication.AuthFilter;
 import com.webank.wecross.network.rpc.netty.handler.HttpServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -24,6 +26,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import javax.activation.MimetypesFileTypeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -41,6 +44,17 @@ public class RPCBootstrap {
     private ServerBootstrap serverBootstrap = new ServerBootstrap();
     private RPCConfig config;
     private URIHandlerDispatcher uriHandlerDispatcher;
+
+    private AccountManager accountManager;
+    private AuthFilter authFilter;
+
+    public AccountManager getAccountManager() {
+        return accountManager;
+    }
+
+    public void setAccountManager(AccountManager accountManager) {
+        this.accountManager = accountManager;
+    }
 
     public RPCConfig getConfig() {
         return config;
@@ -122,6 +136,9 @@ public class RPCBootstrap {
                 ThreadPoolTaskExecutorFactory.build(
                         config.getThreadNum(), config.getThreadQueueCapacity(), "http-callback");
 
+        MimetypesFileTypeMap mimetypesFileTypeMap =
+                new MimetypesFileTypeMap(config.getMimeTypesFile());
+
         serverBootstrap
                 .group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
@@ -151,7 +168,10 @@ public class RPCBootstrap {
                                                 new HttpObjectAggregator(Integer.MAX_VALUE),
                                                 new HttpServerHandler(
                                                         getUriHandlerDispatcher(),
-                                                        threadPoolTaskExecutor));
+                                                        threadPoolTaskExecutor,
+                                                        mimetypesFileTypeMap,
+                                                        authFilter,
+                                                        accountManager));
                             }
                         });
 
@@ -162,5 +182,9 @@ public class RPCBootstrap {
                 " start rpc http server, listen ip: {}, port: {}",
                 config.getListenIP(),
                 config.getListenPort());
+    }
+
+    public void setAuthFilter(AuthFilter authFilter) {
+        this.authFilter = authFilter;
     }
 }

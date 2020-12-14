@@ -21,6 +21,7 @@ import io.netty.handler.ssl.*;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AttributeKey;
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -29,6 +30,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
 /** init P2P service */
 public class NettyBootstrap {
@@ -77,7 +79,8 @@ public class NettyBootstrap {
     private final Bootstrap bootstrap = new Bootstrap();
     private final ServerBootstrap serverBootstrap = new ServerBootstrap();
 
-    private ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1);
+    private ScheduledExecutorService scheduledExecutorService =
+            new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("p2pbootstrap-"));
 
     /**
      * init SslContext for p2p connection
@@ -292,7 +295,8 @@ public class NettyBootstrap {
     }
 
     /** reconnect all configured nodes */
-    public void reconnect() {
+    public synchronized void reconnect() {
+
         getConnections()
                 .shouldConnectNodes()
                 .forEach(
@@ -319,5 +323,44 @@ public class NettyBootstrap {
                                 logger.debug(" try to connect {}", host);
                             }
                         });
+    }
+
+    public synchronized void removeConnect(String ipPort) {
+
+        String nodeID = getConnections().getHost2NodeID().get(ipPort);
+        if (nodeID == null) {
+            return;
+        }
+
+        ChannelHandlerContext ctx = getConnections().getChannelHandler(nodeID);
+        if (ctx != null) {
+            logger.debug("Try to disconnect {}", nodeID);
+            getChannelHandlerCallBack().onDisconnect(ctx);
+            ctx.disconnect();
+            ctx.close();
+            logger.debug("Disconnected: {}", nodeID);
+        }
+    }
+
+    public void addConfiguredPeer(String ipPort) throws InvalidParameterException {
+        addConfiguredPeer(P2PConfig.toHost(ipPort));
+    }
+
+    public void addConfiguredPeer(Node node) {
+        getConnections().addConfiguredPeer(node);
+        reconnect();
+        logger.info(
+                "Add configured peer {}, configuredPeers: {}",
+                node,
+                getConnections().getConfiguredPeers());
+    }
+
+    public void removeConfiguredPeer(String ipPort) {
+        getConnections().removeConfiguredPeer(ipPort);
+        removeConnect(ipPort);
+        logger.info(
+                "Remove configured peer {}, configuredPeers: {}",
+                ipPort,
+                getConnections().getConfiguredPeers());
     }
 }

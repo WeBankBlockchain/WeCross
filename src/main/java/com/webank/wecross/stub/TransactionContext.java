@@ -1,31 +1,17 @@
 package com.webank.wecross.stub;
 
-public class TransactionContext<T> {
-    private T data;
+public class TransactionContext {
     private Account account;
     private Path path;
     private ResourceInfo resourceInfo;
-    private BlockHeaderManager blockHeaderManager;
+    private BlockManager blockManager;
 
     public TransactionContext(
-            T data,
-            Account account,
-            Path path,
-            ResourceInfo resourceInfo,
-            BlockHeaderManager blockHeaderManager) {
-        this.data = data;
+            Account account, Path path, ResourceInfo resourceInfo, BlockManager blockManager) {
         this.account = account;
         this.path = path;
         this.resourceInfo = resourceInfo;
-        this.blockHeaderManager = blockHeaderManager;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
+        this.blockManager = blockManager;
     }
 
     public Account getAccount() {
@@ -44,25 +30,23 @@ public class TransactionContext<T> {
         this.resourceInfo = resourceInfo;
     }
 
-    public BlockHeaderManager getBlockHeaderManager() {
-        return blockHeaderManager;
+    public BlockManager getBlockManager() {
+        return blockManager;
     }
 
-    public void setBlockHeaderManager(BlockHeaderManager blockHeaderManager) {
-        this.blockHeaderManager = blockHeaderManager;
+    public void setBlockManager(BlockManager blockManager) {
+        this.blockManager = blockManager;
     }
 
     @Override
     public String toString() {
         return "TransactionContext{"
-                + "data="
-                + data.toString()
-                + ", account="
+                + "account="
                 + account
                 + ", resourceInfo="
                 + resourceInfo.toString()
-                + ", blockHeaderManager="
-                + blockHeaderManager
+                + ", blockManager="
+                + blockManager
                 + '}';
     }
 

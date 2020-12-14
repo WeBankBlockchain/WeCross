@@ -10,7 +10,7 @@ generate_ca=''
 
 help() {
     echo $1
-    cat << EOF
+    cat <<EOF
 Usage: 
     -c                                  [Optional] generate ca certificate
     -C <number>                         [Optional] the number of node certificate generated, work with '-n' opt, default: 1
@@ -25,30 +25,26 @@ e.g
     bash $0 -n -D ./ca -d ./ca/node -C 10
 EOF
 
-exit 0
+    exit 0
 }
 
-LOG_WARN()
-{
+LOG_WARN() {
     local content=${1}
     echo -e "\033[31m[ERROR] ${content}\033[0m"
 }
 
-LOG_INFO()
-{
+LOG_INFO() {
     local content=${1}
     echo -e "\033[32m[INFO] ${content}\033[0m"
 }
 
-LOG_FALT()
-{
+LOG_FALT() {
     local content=${1}
     echo -e "\033[31m[FALT] ${content}\033[0m"
     exit 1
 }
 
-check_env()
-{
+check_env() {
     # shellcheck disable=SC2143
     # shellcheck disable=SC2236
     [ ! -z "$(openssl version | grep 1.0.2)" ] || [ ! -z "$(openssl version | grep 1.1)" ] || [ ! -z "$(openssl version | grep reSSL)" ] || {
@@ -57,13 +53,13 @@ check_env()
         LOG_INFO "Use \"openssl version\" command to check."
         exit 1
     }
-    if [ ! -z "$(openssl version | grep reSSL)" ];then
+    if [ ! -z "$(openssl version | grep reSSL)" ]; then
         export PATH="/usr/local/opt/openssl/bin:$PATH"
     fi
-    if [ "$(uname)" == "Darwin" ];then
+    if [ "$(uname)" == "Darwin" ]; then
         macOS="macOS"
     fi
-    if [ "$(uname -m)" != "x86_64" ];then
+    if [ "$(uname -m)" != "x86_64" ]; then
         x86_64_arch="false"
     fi
 }
@@ -100,10 +96,9 @@ dir_must_not_exists() {
     fi
 }
 
-generate_cert_conf()
-{
+generate_cert_conf() {
     local output=$1
-    cat << EOF > ${output} 
+    cat <<EOF >${output}
 [ca]
 default_ca=default_ca
 [default_ca]
@@ -137,24 +132,24 @@ EOF
 }
 
 gen_chain_cert() {
-    
-    if [ ! -e "${cert_conf}" ];then
+
+    if [ ! -e "${cert_conf}" ]; then
         generate_cert_conf 'cert.cnf'
-    else 
+    else
         cp "${cert_conf}" . 2>/dev/null
     fi
 
     local chaindir="${1}"
-    
+
     file_must_not_exists $chaindir/ca.key
     file_must_not_exists $chaindir/ca.crt
     file_must_exists 'cert.cnf'
-    
+
     mkdir -p $chaindir
 
     openssl genrsa -out $chaindir/ca.key 2048
     openssl req -new -x509 -days 3650 -subj "/CN=fisco-bcos/O=fisco-bcos/OU=chain" -key $chaindir/ca.key -out $chaindir/ca.crt
-    cp "cert.cnf" $chaindir 2> /dev/null
+    cp "cert.cnf" $chaindir 2>/dev/null
 
     LOG_INFO "Build ca cert successful!"
 }
@@ -167,10 +162,10 @@ gen_cert_secp256k1() {
     openssl genpkey -paramfile $certpath/${type}.param -out $certpath/${type}.key
     openssl pkey -in $certpath/${type}.key -pubout -out $certpath/${type}.pubkey
     openssl req -new -sha256 -subj "/CN=fisco-bcos/O=fisco-bcos/OU=${type}" -key $certpath/${type}.key -config $capath/cert.cnf -out $certpath/${type}.csr
-    openssl x509 -req -days 3650 -sha256 -in $certpath/${type}.csr -CAkey $capath/ca.key -CA $capath/ca.crt\
+    openssl x509 -req -days 3650 -sha256 -in $certpath/${type}.csr -CAkey $capath/ca.key -CA $capath/ca.crt \
         -force_pubkey $certpath/${type}.pubkey -out $certpath/${type}.crt -CAcreateserial -extensions v3_req -extfile $capath/cert.cnf
     # openssl ec -in $certpath/${type}.key -outform DER | tail -c +8 | head -c 32 | xxd -p -c 32 | cat >$certpath/${type}.private
-    cat ${capath}/ca.crt >> $certpath/${type}.crt
+    cat ${capath}/ca.crt >>$certpath/${type}.crt
     rm -f $certpath/${type}.csr $certpath/${type}.pubkey $certpath/${type}.param
 }
 
@@ -219,8 +214,8 @@ gen_rsa_node_cert() {
 
     openssl genrsa -out $ndpath/ssl.key 2048
     openssl req -new -sha256 -subj "/CN=FISCO-BCOS/O=fisco-bcos/OU=agency" -key $ndpath/ssl.key -config $capath/cert.cnf -out $ndpath/node.csr
-    openssl x509 -req -days 3650 -sha256 -CA $capath/ca.crt -CAkey $capath/ca.key -CAcreateserial\
-        -in $ndpath/node.csr -out $ndpath/ssl.crt  -extensions v4_req -extfile $capath/cert.cnf
+    openssl x509 -req -days 3650 -sha256 -CA $capath/ca.crt -CAkey $capath/ca.key -CAcreateserial \
+        -in $ndpath/node.csr -out $ndpath/ssl.crt -extensions v4_req -extfile $capath/cert.cnf
 
     cp $capath/ca.crt $capath/cert.cnf $ndpath/
     rm -f $ndpath/node.csr
@@ -233,13 +228,14 @@ gen_all_node_cert() {
     local target_dir=$2
     mkdir -p ${target_dir}
 
-    for ((i=0;i<${node_count};++i));do {
-        gen_node_cert "${ca_dir}" "${target_dir}/node${i}" "node${i}"
-    }
+    for ((i = 0; i < ${node_count}; ++i)); do
+        {
+            gen_node_cert "${ca_dir}" "${target_dir}/node${i}" "node${i}"
+        }
     done
 }
 
-while getopts "cC:d:D:nt:h" option;do
+while getopts "cC:d:D:nt:h" option; do
     case $option in
     c) generate_ca='true' ;;
     C) node_count=$OPTARG ;;
@@ -247,14 +243,14 @@ while getopts "cC:d:D:nt:h" option;do
     D) ca_cert_dir=$OPTARG ;;
     n) generate_ca='false' ;;
     t) cert_conf=$OPTARG ;;
-    *) help;;
+    *) help ;;
     esac
 done
 
 main() {
-    if [[ ${generate_ca} == 'true' ]];then
+    if [[ ${generate_ca} == 'true' ]]; then
         gen_chain_cert "${target_dir}" 2>&1
-    elif [[ ${generate_ca} == 'false' ]];then
+    elif [[ ${generate_ca} == 'false' ]]; then
         if [[ -z "$node_count" ]]; then
             gen_node_cert "${ca_cert_dir}" "${target_dir}" "node" 2>&1
         else

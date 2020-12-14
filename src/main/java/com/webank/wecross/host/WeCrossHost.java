@@ -1,18 +1,19 @@
 package com.webank.wecross.host;
 
 import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.AccountSyncManager;
 import com.webank.wecross.network.NetworkMessage;
 import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.network.rpc.RPCService;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.peer.PeerManager;
 import com.webank.wecross.peer.PeerSeqMessageData;
+import com.webank.wecross.polling.PollingManager;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.restserver.request.StateRequest;
 import com.webank.wecross.restserver.response.StateResponse;
 import com.webank.wecross.routine.RoutineManager;
-import com.webank.wecross.routine.xa.XATransactionManager;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
@@ -27,10 +28,11 @@ public class WeCrossHost {
     private ZoneManager zoneManager;
     private PeerManager peerManager;
     private AccountManager accountManager;
+    private AccountSyncManager accountSyncManager;
     private RoutineManager routineManager;
     private P2PService p2PService;
     private RPCService rpcService;
-    private XATransactionManager xaTransactionManager;
+    private PollingManager pollingManager;
 
     Thread mainLoopThread;
 
@@ -57,7 +59,8 @@ public class WeCrossHost {
                                     System.out.println("WeCross router start success!");
                                     mainLoop();
                                 }
-                            });
+                            },
+                            "mainLoop");
             mainLoopThread.start();
         } catch (Exception e) {
             String errorInfo = "Startup host error: " + e.toString();
@@ -72,13 +75,13 @@ public class WeCrossHost {
         while (flag) {
             try {
                 Thread.sleep(1000);
+                broadcastStatus();
+                dumpStatus();
+
             } catch (Exception e) {
-                logger.warn("Thread exception", e);
+                logger.warn("Mainloop thread exception", e);
                 flag = false;
             }
-
-            broadcastResourceSeq();
-            dumpStatus();
         }
         System.exit(0);
     }
@@ -101,11 +104,13 @@ public class WeCrossHost {
         }
     }
 
-    private void broadcastResourceSeq() {
+    private void broadcastStatus() {
         int seq = zoneManager.getSeq();
+        int accountSeq = accountSyncManager.getSeq();
 
         PeerSeqMessageData peerSeqMessageData = new PeerSeqMessageData();
         peerSeqMessageData.setSeq(seq);
+        peerSeqMessageData.setAccountSeq(accountSeq);
 
         NetworkMessage<Object> msg = new NetworkMessage<>();
         msg.newSeq();
@@ -124,6 +129,16 @@ public class WeCrossHost {
     private void dumpStatus() {
         dumpChainsStatus();
         dumpActiveResources();
+        dumpAccountStatus();
+    }
+
+    private void dumpAccountStatus() {
+        String dumpStr = "Current account info: ";
+
+        dumpStr += " seq: " + accountSyncManager.getSeq();
+        dumpStr += " table size: " + accountSyncManager.getCaID2UaIDSize();
+
+        dumpByTime(dumpStr);
     }
 
     private void dumpChainsStatus() {
@@ -232,11 +247,23 @@ public class WeCrossHost {
         this.rpcService = rpcService;
     }
 
-    public XATransactionManager getXaTransactionManager() {
-        return xaTransactionManager;
+    public PollingManager getPollingManager() {
+        return pollingManager;
     }
 
-    public void setXaTransactionManager(XATransactionManager xaTransactionManager) {
-        this.xaTransactionManager = xaTransactionManager;
+    public void setPollingManager(PollingManager pollingManager) {
+        this.pollingManager = pollingManager;
+    }
+
+    public void setAccountSyncManager(AccountSyncManager accountSyncManager) {
+        this.accountSyncManager = accountSyncManager;
+    }
+
+    public AccountSyncManager getAccountSyncManager() {
+        return accountSyncManager;
+    }
+
+    public P2PService getP2PService() {
+        return p2PService;
     }
 }

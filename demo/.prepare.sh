@@ -2,26 +2,26 @@
 # copy and download requirements for demo.tar.gz
 
 set -e
-LANG=en_US.utf8
-ROOT=$(cd "$(dirname "$0")";pwd)
+LANG=en_US.UTF-8
+ROOT=$(
+    cd "$(dirname "$0")"
+    pwd
+)
 WECROSS_ROOT=${ROOT}/../
 BCOS_VERSION=v2.6.0
 BCOS_CONSOLE_VERSION=v1.0.10
 
-LOG_INFO()
-{
+LOG_INFO() {
     local content=${1}
     echo -e "\033[32m[INFO] ${content}\033[0m"
 }
 
-LOG_ERROR()
-{
+LOG_ERROR() {
     local content=${1}
     echo -e "\033[31m[ERROR] ${content}\033[0m"
 }
 
-Download()
-{
+Download() {
     local url=${1}
     local file=$(basename ${url})
     if [ ! -e ${file} ]; then
@@ -29,21 +29,33 @@ Download()
     fi
 }
 
-prepare_bcos()
-{
+prepare_bcos() {
     cd ${ROOT}/bcos/
     # Download
     LOG_INFO "Download build_chain.sh ..."
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/build_chain.sh
     chmod u+x build_chain.sh
 
+    LOG_INFO "Download get_account.sh ..."
+    Download https://raw.githubusercontent.com/FISCO-BCOS/console/master/tools/get_account.sh
+    chmod u+x get_account.sh
+
+    LOG_INFO "Download get_gm_account.sh ..."
+    Download https://raw.githubusercontent.com/FISCO-BCOS/console/master/tools/get_gm_account.sh
+    chmod u+x get_gm_account.sh
+
     LOG_INFO "Download fisco-bcos binary"
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos.tar.gz
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos-macOS.tar.gz
 
     LOG_INFO "Download tassl requirements"
-    Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl.tar.gz
-    Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl_mac.tar.gz
+    if ! Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl.tar.gz; then
+        Download https://github.com/FISCO-BCOS/LargeFiles/blob/master/tools/tassl.tar.gz
+    fi
+
+    if ! Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl_mac.tar.gz; then
+        Download https://github.com/FISCO-BCOS/LargeFiles/blob/master/tools/tassl_mac.tar.gz
+    fi
 
     # LOG_INFO "Download HelloWeCross.sol ..."
     # cp ${WECROSS_ROOT}/src/main/resources/chains-sample/bcos/HelloWeCross.sol ./
@@ -59,8 +71,7 @@ prepare_bcos()
     cd -
 }
 
-prepare_fabric()
-{
+prepare_fabric() {
     cd ${ROOT}/fabric/
     # Download
     LOG_INFO "Download fabric tools ..."
@@ -73,16 +84,15 @@ prepare_fabric()
     cd -
 }
 
-prepare_wecross()
-{
+prepare_wecross() {
     cd ${ROOT}
     LOG_INFO "Copy WeCross scripts"
     cp ${WECROSS_ROOT}/scripts/download_wecross.sh ./
     cp ${WECROSS_ROOT}/scripts/download_console.sh ./
+    cp ${WECROSS_ROOT}/scripts/download_account_manager.sh ./
 }
 
-main()
-{
+main() {
     if [ -n "$1" ]; then
         WECROSS_ROOT=$1/
     fi
@@ -93,4 +103,3 @@ main()
 }
 
 main $@
-

@@ -9,8 +9,7 @@ import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
-import com.webank.wecross.stub.StubFactory;
-import com.webank.wecross.stubmanager.MemoryBlockHeaderManagerFactory;
+import com.webank.wecross.stubmanager.MemoryBlockManagerFactory;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.ChainInfo;
@@ -46,21 +45,19 @@ public class ZoneManagerTest {
 
     @Test
     public void addRemoteResourcesTest() throws Exception {
-        StubFactory stubFactory = Mockito.spy(StubFactory.class);
-        Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
-        Mockito.when(stubFactory.newDriver()).thenReturn(null);
-
         StubManager stubManager = Mockito.mock(StubManager.class);
-        Mockito.when(stubManager.getStubFactory(Mockito.anyString())).thenReturn(stubFactory);
+        Mockito.when(stubManager.newStubConnection(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(null);
+        Mockito.when(stubManager.getStubDriver(Mockito.anyString())).thenReturn(null);
 
         ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
                 new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
-        MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
-                new MemoryBlockHeaderManagerFactory(resourceThreadPool);
+        MemoryBlockManagerFactory memoryBlockManagerFactory =
+                new MemoryBlockManagerFactory(resourceThreadPool);
 
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setStubManager(stubManager);
-        zoneManager.setResourceBlockHeaderManagerFactory(resourceBlockHeaderManagerFactory);
+        zoneManager.setMemoryBlockManagerFactory(memoryBlockManagerFactory);
 
         assertEquals(stubManager, zoneManager.getStubManager());
 
@@ -116,21 +113,19 @@ public class ZoneManagerTest {
 
     @Test
     public void removeRemoteResourcesTest() throws Exception {
-        StubFactory stubFactory = Mockito.spy(StubFactory.class);
-        Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
-        Mockito.when(stubFactory.newDriver()).thenReturn(null);
-
         StubManager stubManager = Mockito.mock(StubManager.class);
-        Mockito.when(stubManager.getStubFactory("test")).thenReturn(stubFactory);
+        Mockito.when(stubManager.newStubConnection(Mockito.contains("test"), Mockito.anyString()))
+                .thenReturn(null);
+        Mockito.when(stubManager.getStubDriver("test")).thenReturn(null);
 
         ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
                 new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
-        MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
-                new MemoryBlockHeaderManagerFactory(resourceThreadPool);
+        MemoryBlockManagerFactory resourceBlockHeaderManagerFactory =
+                new MemoryBlockManagerFactory(resourceThreadPool);
 
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setStubManager(stubManager);
-        zoneManager.setResourceBlockHeaderManagerFactory(resourceBlockHeaderManagerFactory);
+        zoneManager.setMemoryBlockManagerFactory(resourceBlockHeaderManagerFactory);
 
         Peer peer = new Peer(new Node("aaa", "127.0.0.1", 100));
 
@@ -212,21 +207,19 @@ public class ZoneManagerTest {
 
     @Test
     public void testGetResource() throws Exception {
-        StubFactory stubFactory = Mockito.spy(StubFactory.class);
-        Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
-        Mockito.when(stubFactory.newDriver()).thenReturn(null);
-
         StubManager stubManager = Mockito.mock(StubManager.class);
-        Mockito.when(stubManager.getStubFactory("test")).thenReturn(stubFactory);
+        Mockito.when(stubManager.newStubConnection(Mockito.contains("test"), Mockito.anyString()))
+                .thenReturn(null);
+        Mockito.when(stubManager.getStubDriver("test")).thenReturn(null);
 
         ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
                 new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
-        MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
-                new MemoryBlockHeaderManagerFactory(resourceThreadPool);
+        MemoryBlockManagerFactory resourceBlockHeaderManagerFactory =
+                new MemoryBlockManagerFactory(resourceThreadPool);
 
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setStubManager(stubManager);
-        zoneManager.setResourceBlockHeaderManagerFactory(resourceBlockHeaderManagerFactory);
+        zoneManager.setMemoryBlockManagerFactory(resourceBlockHeaderManagerFactory);
 
         Peer peer = new Peer(new Node("aaa", "127.0.0.1", 100));
 
@@ -278,21 +271,19 @@ public class ZoneManagerTest {
 
     @Test
     public void checksumTest() throws Exception {
-        StubFactory stubFactory = Mockito.spy(StubFactory.class);
-        Mockito.when(stubFactory.newConnection(Mockito.anyString())).thenReturn(null);
-        Mockito.when(stubFactory.newDriver()).thenReturn(null);
-
         StubManager stubManager = Mockito.mock(StubManager.class);
-        Mockito.when(stubManager.getStubFactory("test")).thenReturn(stubFactory);
+        Mockito.when(stubManager.newStubConnection(Mockito.contains("test"), Mockito.anyString()))
+                .thenReturn(null);
+        Mockito.when(stubManager.getStubDriver("test")).thenReturn(null);
 
         ResourceThreadPoolConfig.ResourceThreadPool resourceThreadPool =
                 new ResourceThreadPoolConfig.ResourceThreadPool(10, 10, 200);
-        MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory =
-                new MemoryBlockHeaderManagerFactory(resourceThreadPool);
+        MemoryBlockManagerFactory resourceBlockManagerFactory =
+                new MemoryBlockManagerFactory(resourceThreadPool);
 
         ZoneManager zoneManager = new ZoneManager();
         zoneManager.setStubManager(stubManager);
-        zoneManager.setResourceBlockHeaderManagerFactory(resourceBlockHeaderManagerFactory);
+        zoneManager.setMemoryBlockManagerFactory(resourceBlockManagerFactory);
 
         // Add resource 1
         String path = "payment.bcos";

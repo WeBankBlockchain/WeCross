@@ -4,6 +4,7 @@ branches:
         - /.*/
 
 services:
+    - mysql
     - docker
 
 deploy:
@@ -12,15 +13,24 @@ deploy:
 matrix:
     fast_finish: true
     include:
-        -   language: python
-            python: 3.6
+#        -   language: python
+#            python: 3.6
+#            dist: xenial
+#            before_cache:
+#            cache:
+#            before_install:
+#            name: "security scan"
+#            script: |
+#                bash .ci/ci_check_commit.sh
+
+        -   language: java
+            jdk: openjdk8
+            os: linux
             dist: xenial
-            before_cache:
-            cache:
-            before_install:
-            name: "security scan"
+            sudo: required
+            name: "unitest"
             script: |
-                bash .ci/ci_check_commit.sh
+                bash .ci/ci_check.sh
 
         -   language: java
             jdk: openjdk8
@@ -29,25 +39,25 @@ matrix:
             sudo: required
             name: "2 groups"
             script: |
-                bash .ci/ci_check.sh && bash .ci/ci_cross_groups_demo_check.sh
+                bash .ci/ci_cross_groups_demo_check.sh
+#
+#        -   language: java
+#            jdk: openjdk11
+#            os: linux
+#            dist: xenial
+#            sudo: required
+#            name: "normal & gm"
+#            script: |
+#                bash .ci/ci_cross_gm_demo_check.sh
 
-        -   language: java
-            jdk: openjdk11
-            os: linux
-            dist: xenial
-            sudo: required
-            name: "normal & gm"
-            script: |
-                bash .ci/ci_check.sh && bash .ci/ci_cross_gm_demo_check.sh
-
-        -   language: java
-            jdk: openjdk11
-            os: linux
-            dist: xenial
-            sudo: required
-            name: "bcos2.0 & fabric1.4"
-            script: |
-                bash .ci/ci_check.sh && bash .ci/ci_demo_check.sh
+#        -   language: java
+#            jdk: openjdk11
+#            os: linux
+#            dist: xenial
+#            sudo: required
+#            name: "bcos2.0 & fabric1.4"
+#            script: |
+#                bash .ci/ci_demo_check.sh
 
         #-   language: java
         #    jdk: openjdk11
@@ -82,7 +92,8 @@ cache:
 before_install:
     - gradle wrapper
 script: |
-    bash .ci/ci_check.sh && bash .ci/ci_demo_check.sh
-
+    bash .ci/ci_check.sh
+#script: |
+#    bash .ci/ci_check.sh && bash .ci/ci_demo_check.sh
 after_success:
     - bash <(curl -s https://codecov.io/bash)

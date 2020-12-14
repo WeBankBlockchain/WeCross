@@ -18,12 +18,12 @@ repositories {
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url 'https://dl.bintray.com/ethereum/maven/' }
+    maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+    maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
 }
 
 sourceCompatibility = '1.8'
-version = '1.0.0-rc4'
-
+version = '1.0.0-1127-SNAPSHOT'
 
 task stubSourceJar(type: Jar) {
     into 'com/webank/wecross/stub', { from 'src/main/java/com/webank/wecross/stub' }
@@ -41,6 +41,17 @@ task javadocJar(type: Jar) {
     classifier = 'javadoc'
 }
 
+ext {
+    if (!project.hasProperty("NEXUS_USERNAME")) {
+        NEXUS_USERNAME="xxx"
+    }
+
+    if (!project.hasProperty("NEXUS_PASSWORD")) {
+        NEXUS_PASSWORD="xxx"
+    }
+}
+
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -53,7 +64,7 @@ publishing {
             pom {
                 name = "WeCross-Stub"
                 description = "Stub interface for WeCross"
-                url = "https://github.com/WeBankFinTech/WeCross"
+                url = "https://github.com/WebankBlockchain/WeCross"
                 licenses {
                     license {
                         name = "The Apache License, Version 2.0"
@@ -68,9 +79,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection = "scm:git:git://github.com/WeBankFinTech/WeCross.git"
-                    developerConnection = "scm:git:ssh://github.com/WeBankFinTech/WeCross.git"
-                    url = "https://github.com/WeBankFinTech/WeCross"
+                    connection = "scm:git:git://github.com/WebankBlockchain/WeCross.git"
+                    developerConnection = "scm:git:ssh://github.com/WebankBlockchain/WeCross.git"
+                    url = "https://github.com/WebankBlockchain/WeCross"
                 }
             }
         }
@@ -80,22 +91,17 @@ publishing {
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-            
-            //*
-            def NEXUS_USERNAME = ''
-            def NEXUS_PASSWORD = ''
-            //*/
+
             credentials {
                 username = NEXUS_USERNAME
                 password = NEXUS_PASSWORD
             }
-
         }
     }
-}
 
-signing {
-    sign publishing.publications.mavenJava
+    signing {
+        sign publishing.publications.mavenJava
+    }
 }
 
 
@@ -120,12 +126,16 @@ configurations.all {
 dependencies {
     compile 'org.quartz-scheduler:quartz:2.3.2'
     compile 'com.moandjiezana.toml:toml4j:0.7.2'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.11.0' // must not lower than 2.11.0 to support abi translate
-    compile 'org.springframework.boot:spring-boot-starter-log4j2:2.1.13.RELEASE'
-    compile 'org.springframework.boot:spring-boot-starter-actuator:2.1.13.RELEASE'
-    compile 'org.springframework.boot:spring-boot-configuration-processor:2.1.4.RELEASE'
-    compile 'io.netty:netty-all:4.1.47.Final'
+    compile 'org.apache.commons:commons-lang3:3.11'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.11.2' // must not lower than 2.11.0 to support abi translate
+    compile 'org.springframework.boot:spring-boot-starter-log4j2:2.1.16.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-actuator:2.1.16.RELEASE'
+    compile 'org.springframework.boot:spring-boot-configuration-processor:2.1.16.RELEASE'
+    compile 'io.netty:netty-all:4.1.51.Final'
+    compile 'org.asynchttpclient:async-http-client:2.12.0'
     compile 'org.bouncycastle:bcprov-jdk15on:1.60'
+    compile 'commons-codec:commons-codec:1.14'
+    compile 'javax.activation:activation:1.1.1'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
@@ -188,7 +198,10 @@ task makeStubJAR(type: org.gradle.api.tasks.bundling.Jar) {
 }
 
 test {
-    testLogging.showStandardStreams = true
+    testLogging {
+                showStandardStreams = false
+                events "passed","skipped","failed"
+            }
 }
 
 jacocoTestReport {

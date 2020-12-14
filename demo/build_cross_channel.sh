@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 ROOT=$(pwd)
 
 
@@ -21,7 +21,7 @@ Download()
     local url=${1}
     local file=$(basename ${url})
     if [ ! -e ${file} ]; then
-        curl -LO ${url}
+        curl -#LO ${url}
     fi
 }
 
@@ -259,9 +259,9 @@ download_wecross()
     # Download
     LOG_INFO "Download WeCross ..."
     if [ -e download_wecross.sh ];then
-        bash download_wecross.sh -t v1.0.0-rc4
+        bash download_wecross.sh -t v1.0.0
     else
-        bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0-rc4
+        bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0
     fi
 }
 
@@ -269,9 +269,9 @@ download_wecross_console()
 {
     LOG_INFO "Download WeCross Console ..."
     if [ -e download_console.sh ];then
-        bash download_console.sh -t v1.0.0-rc4
+        bash download_console.sh -t v1.0.0
     else
-        bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_console.sh) -t v1.0.0-rc4
+        bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t v1.0.0
     fi
 }
 
@@ -396,17 +396,19 @@ EOF
 
     LOG_INFO "Success! WeCross demo network is running. Framework:"
     echo -e "
-                Hyperledger Fabric
-        Channel 1                  Channel 2
-   (payment1_Channel1)        (payment2_Channel2)
-       (sacc1.go)                 (sacc2.go)
-           |                          |
-           |                          |
-    WeCross Router <----------> WeCross Router
-(127.0.0.1-8250-25500)      (127.0.0.1-8251-25501)
-           | 
-           | 
-    WeCross Console
+                      Hyperledger Fabric
+              Channel 1                  Channel 2
+         (payment1_Channel1)        (payment2_Channel2)
+             (sacc1.go)                 (sacc2.go)
+                 |                          |
+                 |                          |
+                 |                          |
+          WeCross Router <----------> WeCross Router <----------> WeCross Account Manager
+      (127.0.0.1-8250-25500)      (127.0.0.1-8251-25501)             (127.0.0.1:8340)
+          /            \\
+         /              \\
+        /                \\
+ WeCross WebApp     WeCross Console
 "
 
 }

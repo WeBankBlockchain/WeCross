@@ -10,13 +10,11 @@ import com.webank.wecross.stub.Connection;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.ResourceInfo;
-import com.webank.wecross.stubmanager.MemoryBlockHeaderManager;
-import com.webank.wecross.stubmanager.MemoryBlockHeaderManagerFactory;
+import com.webank.wecross.stubmanager.MemoryBlockManager;
+import com.webank.wecross.stubmanager.MemoryBlockManagerFactory;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.utils.core.PathUtils;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -25,12 +23,12 @@ import org.slf4j.LoggerFactory;
 
 public class ZoneManager {
     private Logger logger = LoggerFactory.getLogger(ZoneManager.class);
-    private Map<String, Zone> zones = new HashMap<>();
+    private Map<String, Zone> zones = new LinkedHashMap<>();
     private AtomicInteger seq = new AtomicInteger(1);
     private P2PService p2PService;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
     private StubManager stubManager;
-    private MemoryBlockHeaderManagerFactory memoryBlockHeaderManagerFactory;
+    private MemoryBlockManagerFactory memoryBlockManagerFactory;
     private PeerManager peerManager;
 
     public Chain getChain(Path path) {
@@ -83,7 +81,7 @@ public class ZoneManager {
                             // not found, build default resource
                             resource = new Resource();
                             resource.setPath(path);
-                            resource.setBlockHeaderManager(chain.getBlockHeaderManager());
+                            resource.setBlockManager(chain.getBlockManager());
                             resource.setDriver(chain.getDriver());
                             resource.setStubType(chain.getStubType());
                             resource.setResourceInfo(resourceInfo);
@@ -183,13 +181,14 @@ public class ZoneManager {
                 Chain chain = zone.getChains().get(chainPath.getChain());
 
                 if (chain == null) {
-                    Driver driver = stubManager.getStubFactory(chainInfo.getStubType()).newDriver();
+                    Driver driver = stubManager.getStubDriver(chainInfo.getStubType());
 
                     chain = new Chain(chainPath.getZone(), chainInfo, driver, null);
-                    MemoryBlockHeaderManager resourceBlockHeaderManager =
-                            memoryBlockHeaderManagerFactory.build(chain);
+                    MemoryBlockManager resourceBlockHeaderManager =
+                            memoryBlockManagerFactory.build(chain);
 
-                    chain.setBlockHeaderManager(resourceBlockHeaderManager);
+                    chain.setStubType(chainInfo.getStubType());
+                    chain.setBlockManager(resourceBlockHeaderManager);
 
                     zone.getChains().put(chainPath.getChain(), chain);
                 } else {
@@ -305,6 +304,21 @@ public class ZoneManager {
         return changed;
     }
 
+    public Map<String, Resource> getChainResources(Path chainPath) {
+        Map<String, Resource> resources = new LinkedHashMap<>();
+        lock.readLock().lock();
+        try {
+            for (Resource resourceEntry : getChain(chainPath).getResources().values()) {
+                String resourceName = PathUtils.toPureName(resourceEntry.getPath().toString());
+                chainPath.setResource(resourceName);
+                resources.put(chainPath.toString(), resourceEntry);
+            }
+        } finally {
+            lock.readLock().unlock();
+        }
+        return resources;
+    }
+
     public Map<String, Resource> getAllResources(boolean ignoreRemote) {
         Map<String, Resource> resources = new HashMap<String, Resource>();
 
@@ -379,13 +393,12 @@ public class ZoneManager {
         this.stubManager = stubManager;
     }
 
-    public MemoryBlockHeaderManagerFactory getResourceBlockHeaderManagerFactory() {
-        return memoryBlockHeaderManagerFactory;
+    public MemoryBlockManagerFactory getMemoryBlockManagerFactory() {
+        return memoryBlockManagerFactory;
     }
 
-    public void setResourceBlockHeaderManagerFactory(
-            MemoryBlockHeaderManagerFactory resourceBlockHeaderManagerFactory) {
-        this.memoryBlockHeaderManagerFactory = resourceBlockHeaderManagerFactory;
+    public void setMemoryBlockManagerFactory(MemoryBlockManagerFactory memoryBlockManagerFactory) {
+        this.memoryBlockManagerFactory = memoryBlockManagerFactory;
     }
 
     public void setPeerManager(PeerManager peerManager) {

@@ -1,9 +1,16 @@
 package com.webank.wecross.zone;
 
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.remote.RemoteConnection;
 import com.webank.wecross.resource.Resource;
-import com.webank.wecross.stub.*;
+import com.webank.wecross.stub.Account;
+import com.webank.wecross.stub.BlockManager;
+import com.webank.wecross.stub.Connection;
+import com.webank.wecross.stub.Driver;
+import com.webank.wecross.stub.Path;
+import com.webank.wecross.stub.ResourceInfo;
+import com.webank.wecross.stub.TransactionException;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -25,9 +32,9 @@ public class Chain {
 
     private Connection localConnection;
     private Set<Peer> peers = new HashSet<>();
-    private Map<String, Resource> resources = new HashMap<String, Resource>();
+    private Map<String, Resource> resources = new LinkedHashMap<String, Resource>();
     private Driver driver;
-    private BlockHeaderManager blockHeaderManager;
+    private BlockManager blockManager;
     private Random random = new SecureRandom();
     private ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -48,15 +55,16 @@ public class Chain {
     }
 
     public void start() {
-        blockHeaderManager.start();
+        blockManager.start();
     }
 
     public void stop() {
-        blockHeaderManager.stop();
+        blockManager.stop();
     }
 
     public ChainInfo getChainInfo() {
         ChainInfo chainInfo = new ChainInfo();
+        chainInfo.setZone(zoneName);
         chainInfo.setName(name);
         chainInfo.setStubType(stubType);
         chainInfo.setProperties(properties);
@@ -91,28 +99,25 @@ public class Chain {
         this.driver = driver;
     }
 
-    public BlockHeaderManager getBlockHeaderManager() {
-        return blockHeaderManager;
+    public BlockManager getBlockManager() {
+        return blockManager;
     }
 
-    public void setBlockHeaderManager(BlockHeaderManager blockHeaderManager) {
-        this.blockHeaderManager = blockHeaderManager;
+    public void setBlockManager(BlockManager blockManager) {
+        this.blockManager = blockManager;
     }
 
     public long getBlockNumber() {
         long blockNumber = 0;
         try {
             CompletableFuture<Long> future = new CompletableFuture<>();
-            this.blockHeaderManager.asyncGetBlockNumber(
-                    new BlockHeaderManager.GetBlockNumberCallback() {
-                        @Override
-                        public void onResponse(Exception e, long blockNumber) {
-                            if (e != null) {
-                                logger.warn("getBlockNumber exception: " + e);
-                                future.complete(Long.valueOf(0));
-                            } else {
-                                future.complete(blockNumber);
-                            }
+            this.blockManager.asyncGetBlockNumber(
+                    (e, blockNumber1) -> {
+                        if (e != null) {
+                            logger.warn("getBlockNumber exception: " + e);
+                            future.complete(Long.valueOf(0));
+                        } else {
+                            future.complete(blockNumber1);
                         }
                     });
             blockNumber = future.get(10, TimeUnit.SECONDS).longValue();
@@ -132,10 +137,11 @@ public class Chain {
             }
 
             for (Resource resource : resources.values()) {
-                for (Map.Entry<Peer, Connection> entry : resource.getConnections().entrySet())
+                for (Map.Entry<Peer, Connection> entry : resource.getConnections().entrySet()) {
                     if (!connections.containsKey(entry.getKey())) {
                         connections.put(entry.getKey(), entry.getValue());
                     }
+                }
             }
 
             if (connections.size() == 0) {
@@ -144,9 +150,7 @@ public class Chain {
 
             return connections;
         } catch (Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Exception: " + e);
-            }
+            logger.debug("Exception: " + e);
             return null;
         } finally {
             lock.readLock().unlock();
@@ -185,14 +189,11 @@ public class Chain {
         Resource oldResource = getResource(name);
         lock.writeLock().lock();
         try {
-
             if (oldResource != null && replaceIfExist || oldResource == null) {
                 resources.put(name, resource);
             }
         } catch (Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Exception: " + e);
-            }
+            logger.debug("Exception: " + e);
         } finally {
             lock.writeLock().unlock();
         }
@@ -215,9 +216,7 @@ public class Chain {
                 resources.remove(name);
             }
         } catch (Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Exception: " + e);
-            }
+            logger.debug("Exception: " + e);
         } finally {
             lock.writeLock().unlock();
         }
@@ -228,9 +227,7 @@ public class Chain {
         try {
             return resources.get(name);
         } catch (Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Exception: " + e);
-            }
+            logger.debug("Exception: " + e);
             return null;
         } finally {
             lock.readLock().unlock();
@@ -246,9 +243,7 @@ public class Chain {
         try {
             return resources;
         } catch (Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Exception: " + e);
-            }
+            logger.debug("Exception: " + e);
             return null;
         } finally {
             lock.readLock().unlock();
@@ -302,7 +297,7 @@ public class Chain {
                 resource.setStubType(stubType);
                 resource.setTemporary(false);
                 resource.setResourceInfo(newResourceInfo);
-                resource.setBlockHeaderManager(blockHeaderManager);
+                resource.setBlockManager(blockManager);
                 resource.setDriver(driver);
                 resource.addConnection(null, localConnection);
 
@@ -311,9 +306,7 @@ public class Chain {
             }
 
         } catch (Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Exception: " + e);
-            }
+            logger.debug("Exception: " + e);
         } finally {
             lock.writeLock().unlock();
         }
@@ -345,7 +338,7 @@ public class Chain {
             resource.setStubType(stubType);
             resource.setTemporary(false);
             resource.setResourceInfo(resourceInfo);
-            resource.setBlockHeaderManager(blockHeaderManager);
+            resource.setBlockManager(blockManager);
             resource.setDriver(driver);
             resource.addConnection(peer, remoteConnection);
 
@@ -356,9 +349,7 @@ public class Chain {
                     peer.toString());
 
         } catch (Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Exception: " + e);
-            }
+            logger.debug("Exception: " + e);
         } finally {
             lock.writeLock().unlock();
         }
@@ -371,9 +362,7 @@ public class Chain {
                 peers.remove(peer);
             }
         } catch (Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Exception: " + e);
-            }
+            logger.debug("Exception: " + e);
         } finally {
             lock.writeLock().unlock();
         }
@@ -385,5 +374,45 @@ public class Chain {
 
     public Connection getLocalConnection() {
         return localConnection;
+    }
+
+    public void asyncCustomCommand(
+            String command,
+            Path path,
+            Object[] args,
+            UniversalAccount ua,
+            Driver.CustomCommandCallback callback) {
+        if (Objects.isNull(ua)) {
+            callback.onResponse(
+                    new TransactionException(
+                            TransactionException.ErrorCode.ACCOUNT_ERRPR,
+                            "UniversalAccount is null"),
+                    null);
+            return;
+        }
+
+        Account account = ua.getAccount(getStubType());
+        if (Objects.isNull(account)) {
+            callback.onResponse(
+                    new TransactionException(
+                            TransactionException.ErrorCode.ACCOUNT_ERRPR,
+                            "Account with type '" + stubType + "' not found for " + ua.getName()),
+                    null);
+            return;
+        }
+
+        getDriver()
+                .asyncCustomCommand(
+                        command,
+                        path,
+                        args,
+                        account,
+                        getBlockManager(),
+                        chooseConnection(),
+                        callback);
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
     }
 }

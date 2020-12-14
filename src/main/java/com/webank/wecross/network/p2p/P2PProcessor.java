@@ -2,6 +2,9 @@ package com.webank.wecross.network.p2p;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.account.AccountSyncManager;
+import com.webank.wecross.account.AccountSyncMessageData;
+import com.webank.wecross.account.uaproof.UAProofInfo;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.NetworkCallback;
@@ -17,12 +20,10 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.routine.RoutineManager;
 import com.webank.wecross.routine.htlc.HTLCManager;
-import com.webank.wecross.stub.Connection;
-import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.Request;
-import com.webank.wecross.stub.Response;
+import com.webank.wecross.stub.*;
 import com.webank.wecross.zone.ChainInfo;
 import com.webank.wecross.zone.ZoneManager;
+import java.util.Collection;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +32,11 @@ public class P2PProcessor implements NetworkProcessor {
     private Logger logger = LoggerFactory.getLogger(P2PProcessor.class);
 
     private PeerManager peerManager;
+    private AccountSyncManager accountSyncManager;
     private ZoneManager zoneManager;
     private P2PService p2PService;
     private RoutineManager routineManager;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     public PeerManager getPeerManager() {
         return peerManager;
@@ -75,17 +77,14 @@ public class P2PProcessor implements NetworkProcessor {
         response.setVersion(Versions.currentVersion);
         response.setErrorCode(NetworkQueryStatus.SUCCESS);
         response.setMessage(NetworkQueryStatus.getStatusMessage(NetworkQueryStatus.SUCCESS));
-        if (logger.isDebugEnabled()) {
-            logger.debug("request string: {}", p2pRequestString);
-        }
+
+        logger.debug("request string: {}", p2pRequestString);
 
         try {
             switch (method) {
                 case "requestPeerInfo":
                     {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Receive requestPeerInfo from peer {}", method, peerInfo);
-                        }
+                        logger.debug("Receive requestPeerInfo from peer {}", method, peerInfo);
                         NetworkMessage<Object> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
@@ -105,11 +104,32 @@ public class P2PProcessor implements NetworkProcessor {
                         response.setData(data);
                         break;
                     }
+                case "requestUAProof":
+                    {
+                        logger.debug("Receive requestUAProof from peer:{}", peerInfo);
+                        NetworkMessage<Object> p2pRequest =
+                                objectMapper.readValue(
+                                        p2pRequestString,
+                                        new TypeReference<NetworkMessage<Object>>() {});
+
+                        p2pRequest.checkP2PMessage(method);
+
+                        Collection<UAProofInfo> uaProofInfos = accountSyncManager.getUAProofs();
+
+                        AccountSyncMessageData data = new AccountSyncMessageData();
+                        data.setSeq(accountSyncManager.getSeq());
+                        data.setUaProofInfos(uaProofInfos);
+
+                        response.setErrorCode(NetworkQueryStatus.SUCCESS);
+                        response.setMessage("request " + method + " success");
+                        response.setSeq(p2pRequest.getSeq());
+                        response.setData(data);
+
+                        break;
+                    }
                 case "seq":
                     {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Receive seq from peer:{}", peerInfo);
-                        }
+                        logger.debug("Receive seq from peer:{}", peerInfo);
                         NetworkMessage<PeerSeqMessageData> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
@@ -117,101 +137,8 @@ public class P2PProcessor implements NetworkProcessor {
 
                         PeerSeqMessageData data = (PeerSeqMessageData) p2pRequest.getData();
                         if (data != null && p2pRequest.getMethod().equals("seq")) {
-                            int currentSeq = data.getSeq();
-                            if (peerManager.hasPeerChanged(peerInfo.getNode(), currentSeq)) {
-                                NetworkMessage<Object> msg = new NetworkMessage<>();
-                                msg.newSeq();
-
-                                msg.setData(null);
-                                msg.setVersion(Versions.currentVersion);
-                                msg.setMethod("requestPeerInfo");
-                                if (logger.isDebugEnabled()) {
-                                    logger.debug(
-                                            "Request peerInfo to peer:{}, seq:{}",
-                                            peerInfo,
-                                            msg.getSeq());
-                                }
-
-                                NetworkCallback<PeerInfoMessageData> callback =
-                                        new NetworkCallback<PeerInfoMessageData>() {
-                                            @Override
-                                            public void onResponse(
-                                                    int status,
-                                                    String message,
-                                                    NetworkResponse<PeerInfoMessageData>
-                                                            responseMsg) {
-                                                if (logger.isTraceEnabled()) {
-                                                    logger.trace("Receive peerInfo:{}", peerInfo);
-                                                }
-                                                try {
-                                                    if (responseMsg != null
-                                                            && responseMsg.getData() != null) {
-
-                                                        PeerInfoMessageData data =
-                                                                (PeerInfoMessageData)
-                                                                        responseMsg.getData();
-                                                        int newSeq = data.getSeq();
-                                                        if (peerManager.hasPeerChanged(
-                                                                peerInfo.getNode(), newSeq)) {
-
-                                                            // compare and update
-                                                            Map<String, ChainInfo> newChains =
-                                                                    data.getChainInfos();
-
-                                                            // update zonemanager
-                                                            boolean changed = false;
-                                                            changed |=
-                                                                    zoneManager.removeRemoteChains(
-                                                                            peerInfo,
-                                                                            peerInfo
-                                                                                    .getChainInfos(),
-                                                                            false);
-                                                            changed |=
-                                                                    zoneManager.addRemoteChains(
-                                                                            peerInfo, newChains);
-                                                            if (changed) {
-                                                                if (logger.isDebugEnabled()) {
-                                                                    logger.debug(
-                                                                            "Update peerInfo from {}, seq:{}, resource:{}",
-                                                                            peerInfo,
-                                                                            newSeq,
-                                                                            newChains);
-                                                                    peerInfo.setChainInfos(
-                                                                            newSeq, newChains);
-                                                                }
-                                                            }
-                                                        } else {
-                                                            if (logger.isDebugEnabled()) {
-                                                                logger.debug(
-                                                                        "Peer info not changed, seq:{}",
-                                                                        newSeq);
-                                                            }
-                                                        }
-                                                    } else {
-                                                        logger.warn(
-                                                                "Receive unrecognized seq message("
-                                                                        + responseMsg
-                                                                        + ") from peer:"
-                                                                        + peerInfo);
-                                                    }
-                                                } catch (WeCrossException e) {
-                                                    logger.error(
-                                                            "Update peerInfo error({}): {}",
-                                                            e.getErrorCode(),
-                                                            e);
-                                                } catch (Exception e) {
-                                                    logger.error(
-                                                            "Update peerInfo error(Internal error): {}",
-                                                            e);
-                                                }
-                                            }
-                                        };
-                                callback.setTypeReference(
-                                        new TypeReference<
-                                                NetworkResponse<PeerInfoMessageData>>() {});
-
-                                p2PService.asyncSendMessage(peerInfo, msg, callback);
-                            }
+                            onPeerSeq(peerInfo, data.getSeq());
+                            onAccountSeq(peerInfo, data.getAccountSeq());
                         } else {
                             logger.warn("Receive unrecognized seq message from peer:" + peerInfo);
                         }
@@ -220,14 +147,12 @@ public class P2PProcessor implements NetworkProcessor {
                     }
                 default:
                     {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("request method: " + method);
-                        }
+                        logger.debug("request method: " + method);
                         NetworkMessage<Object> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
                                         new TypeReference<NetworkMessage<Object>>() {});
-                        response.setErrorCode(NetworkQueryStatus.METHOD_ERROR);
+                        response.setErrorCode(NetworkQueryStatus.URI_PATH_ERROR);
                         response.setSeq(p2pRequest.getSeq());
                         response.setMessage("Unsupported method: " + method);
                         break;
@@ -236,7 +161,7 @@ public class P2PProcessor implements NetworkProcessor {
 
         } catch (WeCrossException e) {
             logger.warn("Process request error: {}", e.getMessage());
-            response.setErrorCode(NetworkQueryStatus.EXCEPTION_FLAG + e.getErrorCode());
+            response.setErrorCode(NetworkQueryStatus.NETWORK_PACKAGE_ERROR + e.getErrorCode());
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error:", e);
@@ -244,10 +169,147 @@ public class P2PProcessor implements NetworkProcessor {
             response.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
             response.setMessage(e.getMessage());
         }
-        if (logger.isTraceEnabled()) {
-            logger.trace("Response " + response);
-        }
+
+        logger.trace("Response " + response);
         return response;
+    }
+
+    private void onPeerSeq(Peer peerInfo, int seq) {
+
+        if (peerManager.hasPeerChanged(peerInfo.getNode(), seq)) {
+            NetworkMessage<Object> msg = new NetworkMessage<>();
+            msg.newSeq();
+
+            msg.setData(null);
+            msg.setVersion(Versions.currentVersion);
+            msg.setMethod("requestPeerInfo");
+
+            logger.debug("Request peerInfo to peer:{}, seq:{}", peerInfo, msg.getSeq());
+
+            NetworkCallback<PeerInfoMessageData> callback =
+                    new NetworkCallback<PeerInfoMessageData>() {
+                        @Override
+                        public void onResponse(
+                                int status,
+                                String message,
+                                NetworkResponse<PeerInfoMessageData> responseMsg) {
+                            logger.trace("Receive peerInfo: {}", responseMsg);
+                            try {
+                                if (status == 0
+                                        && responseMsg != null
+                                        && responseMsg.getData() != null) {
+
+                                    PeerInfoMessageData data =
+                                            (PeerInfoMessageData) responseMsg.getData();
+                                    int newSeq = data.getSeq();
+                                    if (peerManager.hasPeerChanged(peerInfo.getNode(), newSeq)) {
+
+                                        // compare and update
+                                        Map<String, ChainInfo> newChains = data.getChainInfos();
+
+                                        // update zonemanager
+                                        boolean changed = false;
+                                        changed |=
+                                                zoneManager.removeRemoteChains(
+                                                        peerInfo, peerInfo.getChainInfos(), false);
+                                        changed |= zoneManager.addRemoteChains(peerInfo, newChains);
+                                        if (changed) {
+                                            logger.debug(
+                                                    "Update peerInfo from {}, seq:{}, resource:{}",
+                                                    peerInfo,
+                                                    newSeq,
+                                                    newChains);
+                                            peerInfo.setChainInfos(newSeq, newChains);
+                                        }
+                                    } else {
+                                        logger.debug("Peer info not changed, seq:{}", newSeq);
+                                    }
+                                } else {
+                                    logger.warn(
+                                            "Receive wrong seq message( status:"
+                                                    + status
+                                                    + " message:"
+                                                    + message
+                                                    + " responseMsg:"
+                                                    + responseMsg
+                                                    + ") from peer:"
+                                                    + peerInfo);
+                                }
+                            } catch (WeCrossException e) {
+                                logger.error("Update peerInfo error({}): {}", e.getErrorCode(), e);
+                            } catch (Exception e) {
+                                logger.error("Update peerInfo error(Internal error): {}", e);
+                            }
+                        }
+                    };
+            callback.setTypeReference(new TypeReference<NetworkResponse<PeerInfoMessageData>>() {});
+
+            p2PService.asyncSendMessage(peerInfo, msg, callback);
+        }
+    }
+
+    public void onAccountSeq(Peer peerInfo, int seq) {
+        if (accountSyncManager.hasPeerChanged(peerInfo.getNode(), seq)) {
+            NetworkMessage<Object> msg = new NetworkMessage<>();
+            msg.newSeq();
+
+            msg.setData(null);
+            msg.setVersion(Versions.currentVersion);
+            msg.setMethod("requestUAProof");
+
+            logger.debug("Request UAProof to peer:{}, seq:{}", peerInfo, msg.getSeq());
+
+            NetworkCallback<AccountSyncMessageData> callback =
+                    new NetworkCallback<AccountSyncMessageData>() {
+                        @Override
+                        public void onResponse(
+                                int status,
+                                String message,
+                                NetworkResponse<AccountSyncMessageData> responseMsg) {
+                            logger.trace("Receive peerInfo: {}", responseMsg);
+                            try {
+                                if (status == 0
+                                        && responseMsg != null
+                                        && responseMsg.getData() != null) {
+
+                                    AccountSyncMessageData data =
+                                            (AccountSyncMessageData) responseMsg.getData();
+                                    int newSeq = data.getSeq();
+                                    if (accountSyncManager.hasPeerChanged(
+                                            peerInfo.getNode(), newSeq)) {
+
+                                        // update
+                                        Collection<UAProofInfo> uaProofInfos =
+                                                data.getUaProofInfos();
+                                        accountSyncManager.updateByUAProofs(uaProofInfos);
+                                        accountSyncManager.updatePeerSeq(
+                                                peerInfo.getNode(), newSeq);
+
+                                    } else {
+                                        logger.debug("Peer info not changed, seq:{}", newSeq);
+                                    }
+                                } else {
+                                    logger.warn(
+                                            "Receive wrong seq message( status:"
+                                                    + status
+                                                    + " message:"
+                                                    + message
+                                                    + " responseMsg:"
+                                                    + responseMsg
+                                                    + ") from peer:"
+                                                    + peerInfo);
+                                }
+                            } catch (Exception e) {
+                                logger.error("Update peerInfo error(Internal error): {}", e);
+                            }
+                        }
+                    };
+
+            callback.setTypeReference(
+                    new TypeReference<NetworkResponse<AccountSyncMessageData>>() {});
+
+            p2PService.asyncSendMessage(peerInfo, msg, callback);
+        }
     }
 
     public void onTransactionMessage(
@@ -266,27 +328,31 @@ public class P2PProcessor implements NetworkProcessor {
         networkResponse.setVersion(Versions.currentVersion);
         networkResponse.setErrorCode(NetworkQueryStatus.SUCCESS);
         networkResponse.setMessage(NetworkQueryStatus.getStatusMessage(NetworkQueryStatus.SUCCESS));
-        if (logger.isDebugEnabled()) {
-            logger.debug("request string: {}", p2pRequestString);
+
+        logger.debug("request string: {}", p2pRequestString);
+
+        Resource resourceObj = zoneManager.fetchResource(path);
+        if (resourceObj == null) {
+            logger.warn("Unable to find resource: {}.{}.{}", network, chain, resource);
+
+            networkResponse.setErrorCode(NetworkQueryStatus.URI_PATH_ERROR);
+            networkResponse.setMessage("Resource not found");
+            try {
+                callback.onResponse(objectMapper.writeValueAsString(networkResponse));
+            } catch (Exception e1) {
+                logger.error("Can't serialize error response: " + resource.toString());
+            }
+            return;
         }
 
         try {
-            // Resource resourceObj = zoneManager.getResource(path);
-            Resource resourceObj = zoneManager.fetchResource(path);
-            if (resourceObj == null) {
-                logger.warn("Unable to find resource: {}.{}.{}", network, chain, resource);
-                throw new Exception("Resource not found");
-            } else {
-                HTLCManager htlcManager = routineManager.getHtlcManager();
-                resourceObj = htlcManager.filterHTLCResource(zoneManager, path, resourceObj);
-            }
+            HTLCManager htlcManager = routineManager.getHtlcManager();
+            resourceObj = htlcManager.filterHTLCResource(zoneManager, path, resourceObj);
 
             switch (method) {
                 case "transaction":
                     {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("On remote transaction request");
-                        }
+                        logger.debug("On remote transaction request");
                         NetworkMessage<Request> p2pRequest =
                                 objectMapper.readValue(
                                         p2pRequestString,
@@ -336,7 +402,7 @@ public class P2PProcessor implements NetworkProcessor {
                                         p2pRequestString,
                                         new TypeReference<NetworkMessage<Object>>() {});
                         logger.warn("Unsupported method: {}", method);
-                        networkResponse.setErrorCode(NetworkQueryStatus.METHOD_ERROR);
+                        networkResponse.setErrorCode(NetworkQueryStatus.URI_PATH_ERROR);
                         networkResponse.setMessage("Unsupported method: " + method);
                         networkResponse.setSeq(p2pRequest.getSeq());
                         break;
@@ -344,11 +410,11 @@ public class P2PProcessor implements NetworkProcessor {
             }
         } catch (WeCrossException e) {
             logger.warn("Process request error: {}", e.getMessage());
-            networkResponse.setErrorCode(NetworkQueryStatus.EXCEPTION_FLAG + e.getErrorCode());
+            networkResponse.setErrorCode(
+                    NetworkQueryStatus.NETWORK_PACKAGE_ERROR + e.getErrorCode());
             networkResponse.setMessage(e.getMessage());
         } catch (Exception e) {
             logger.warn("Process request error:", e);
-
             networkResponse.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
             networkResponse.setMessage(e.getLocalizedMessage());
         }
@@ -397,5 +463,9 @@ public class P2PProcessor implements NetworkProcessor {
                 logger.error("writeValueAsString exception: {}, e: {}", node, e1);
             }
         }
+    }
+
+    public void setAccountSyncManager(AccountSyncManager accountSyncManager) {
+        this.accountSyncManager = accountSyncManager;
     }
 }

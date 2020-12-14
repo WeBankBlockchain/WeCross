@@ -1,22 +1,12 @@
 package com.webank.wecross.resource;
 
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.peer.Peer;
-import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.BlockHeaderManager;
-import com.webank.wecross.stub.Connection;
-import com.webank.wecross.stub.Driver;
-import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.Request;
-import com.webank.wecross.stub.ResourceInfo;
-import com.webank.wecross.stub.Response;
-import com.webank.wecross.stub.StubQueryStatus;
-import com.webank.wecross.stub.TransactionContext;
-import com.webank.wecross.stub.TransactionException;
-import com.webank.wecross.stub.TransactionRequest;
-import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.stub.*;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -24,16 +14,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Resource {
-    private final Logger logger = LoggerFactory.getLogger(Response.class);
+    private Logger logger = LoggerFactory.getLogger(Response.class);
     private String stubType;
     private Driver driver;
-    private Map<Peer, Connection> connections = new HashMap<>();
+    private Map<Peer, Connection> connections = new HashMap<Peer, Connection>();
     private Path path;
     private ResourceInfo resourceInfo;
-    private BlockHeaderManager blockHeaderManager;
+    private BlockManager blockManager;
     boolean hasLocalConnection = false;
     boolean isTemporary = false;
-    private final Random random = new SecureRandom();
+    private Random random = new SecureRandom();
 
     public static final String RAW_TRANSACTION = "RAW_TRANSACTION";
 
@@ -88,24 +78,25 @@ public class Resource {
                 TransactionException transactionException, TransactionResponse transactionResponse);
     }
 
-    @Deprecated
-    public TransactionResponse call(TransactionRequest request, Account account)
-            throws TransactionException {
-        TransactionContext<TransactionRequest> context =
-                new TransactionContext<>(
-                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
-        return driver.call(context, chooseConnection());
-    }
+    public void asyncCall(
+            TransactionRequest request, UniversalAccount ua, Resource.Callback callback) {
+        try {
+            checkAccount(ua);
+        } catch (TransactionException e) {
+            callback.onTransactionResponse(e, null);
+            return;
+        }
 
-    public void asyncCall(TransactionRequest request, Account account, Resource.Callback callback) {
-        TransactionContext<TransactionRequest> context =
-                new TransactionContext<>(
-                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
+        Account account = ua.getAccount(stubType);
+        TransactionContext context =
+                new TransactionContext(account, this.path, this.resourceInfo, this.blockManager);
         boolean isRawTransaction =
                 (boolean) request.getOptions().getOrDefault(RAW_TRANSACTION, false);
         if (isRawTransaction) {
             driver.asyncCall(
                     context,
+                    request,
+                    false,
                     chooseConnection(),
                     (transactionException, transactionResponse) -> {
                         if (logger.isDebugEnabled()) {
@@ -117,8 +108,10 @@ public class Resource {
                         callback.onTransactionResponse(transactionException, transactionResponse);
                     });
         } else {
-            driver.asyncCallByProxy(
+            driver.asyncCall(
                     context,
+                    request,
+                    true,
                     chooseConnection(),
                     (transactionException, transactionResponse) -> {
                         if (logger.isDebugEnabled()) {
@@ -132,43 +125,45 @@ public class Resource {
         }
     }
 
-    @Deprecated
-    public TransactionResponse sendTransaction(TransactionRequest request, Account account)
-            throws TransactionException {
-        TransactionContext<TransactionRequest> context =
-                new TransactionContext<>(
-                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
-        return driver.sendTransaction(context, chooseConnection());
-    }
-
     public void asyncSendTransaction(
-            TransactionRequest request, Account account, Resource.Callback callback) {
-        TransactionContext<TransactionRequest> context =
-                new TransactionContext<>(
-                        request, account, this.path, this.resourceInfo, this.blockHeaderManager);
+            TransactionRequest request, UniversalAccount ua, Resource.Callback callback) {
+        try {
+            checkAccount(ua);
+        } catch (TransactionException e) {
+            callback.onTransactionResponse(e, null);
+            return;
+        }
+
+        Account account = ua.getAccount(stubType);
+        TransactionContext context =
+                new TransactionContext(account, this.path, this.resourceInfo, this.blockManager);
         boolean isRawTransaction =
                 (boolean) request.getOptions().getOrDefault(RAW_TRANSACTION, false);
         if (isRawTransaction) {
             driver.asyncSendTransaction(
                     context,
+                    request,
+                    false,
                     chooseConnection(),
                     (transactionException, transactionResponse) -> {
                         if (logger.isDebugEnabled()) {
                             logger.debug(
-                                    "asyncCall response: {}, exception: ",
+                                    "asyncSendTransaction response: {}, exception: ",
                                     transactionResponse,
                                     transactionException);
                         }
                         callback.onTransactionResponse(transactionException, transactionResponse);
                     });
         } else {
-            driver.asyncSendTransactionByProxy(
+            driver.asyncSendTransaction(
                     context,
+                    request,
+                    true,
                     chooseConnection(),
                     (transactionException, transactionResponse) -> {
                         if (logger.isDebugEnabled()) {
                             logger.debug(
-                                    "asyncCall response: {}, exception: ",
+                                    "asyncSendTransaction response: {}, exception: ",
                                     transactionResponse,
                                     transactionException);
                         }
@@ -178,18 +173,6 @@ public class Resource {
     }
 
     public void onRemoteTransaction(Request request, Connection.Callback callback) {
-        if (driver.isTransaction(request)) {
-
-            /*
-            TransactionContext<TransactionRequest> transactionRequest =
-                    driver.decodeTransactionRequest(request.getData());
-                    */
-
-            // TODO: check request
-
-            // fail or return
-        }
-
         request.setResourceInfo(resourceInfo);
         chooseConnection().asyncSend(request, callback);
     }
@@ -197,7 +180,7 @@ public class Resource {
     public Response onRemoteTransaction(Request request) {
         CompletableFuture<Response> completableFuture = new CompletableFuture<>();
 
-        onRemoteTransaction(request, completableFuture::complete);
+        onRemoteTransaction(request, response -> completableFuture.complete(response));
 
         try {
             return completableFuture.get(10, TimeUnit.SECONDS);
@@ -205,8 +188,21 @@ public class Resource {
             Response response = new Response();
             response.setErrorCode(StubQueryStatus.TIMEOUT);
             response.setErrorMessage("onRemoteTransaction completableFuture exception: " + e);
-            logger.error("onRemoteTransaction timeout, resource: " + getResourceInfo());
+            logger.error("onRemoteTransaction timeout, resource: {}", getResourceInfo());
             return response;
+        }
+    }
+
+    private void checkAccount(UniversalAccount ua) throws TransactionException {
+        if (Objects.isNull(ua)) {
+            throw new TransactionException(
+                    TransactionException.ErrorCode.ACCOUNT_ERRPR, "UniversalAccount is null");
+        }
+
+        if (Objects.isNull(ua.getAccount(stubType))) {
+            throw new TransactionException(
+                    TransactionException.ErrorCode.ACCOUNT_ERRPR,
+                    "Account with type '" + stubType + "' not found for " + ua.getName());
         }
     }
 
@@ -240,12 +236,12 @@ public class Resource {
         this.resourceInfo = resourceInfo;
     }
 
-    public BlockHeaderManager getBlockHeaderManager() {
-        return blockHeaderManager;
+    public BlockManager getBlockManager() {
+        return blockManager;
     }
 
-    public void setBlockHeaderManager(BlockHeaderManager resourceBlockHeaderManager) {
-        this.blockHeaderManager = resourceBlockHeaderManager;
+    public void setBlockManager(BlockManager blockManager) {
+        this.blockManager = blockManager;
     }
 
     public boolean hasLocalConnection() {

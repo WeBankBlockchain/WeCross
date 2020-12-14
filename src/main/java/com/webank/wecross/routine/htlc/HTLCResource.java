@@ -1,26 +1,19 @@
 package com.webank.wecross.routine.htlc;
 
+import com.webank.wecross.account.UniversalAccount;
+import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.exception.WeCrossException.ErrorCode;
 import com.webank.wecross.peer.Peer;
 import com.webank.wecross.resource.EventCallback;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.routine.RoutineDefault;
-import com.webank.wecross.stub.Account;
-import com.webank.wecross.stub.BlockHeaderManager;
-import com.webank.wecross.stub.Connection;
-import com.webank.wecross.stub.Driver;
-import com.webank.wecross.stub.Path;
-import com.webank.wecross.stub.Request;
-import com.webank.wecross.stub.ResourceInfo;
-import com.webank.wecross.stub.Response;
-import com.webank.wecross.stub.TransactionContext;
-import com.webank.wecross.stub.TransactionException;
-import com.webank.wecross.stub.TransactionRequest;
-import com.webank.wecross.stub.TransactionResponse;
+import com.webank.wecross.routine.TransactionValidator;
+import com.webank.wecross.stub.*;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,11 +22,10 @@ public class HTLCResource extends Resource {
     private Logger logger = LoggerFactory.getLogger(HTLCResource.class);
 
     private ZoneManager zoneManager;
+    private UniversalAccount adminUa;
     private Path selfPath;
-    private Account account1;
     private Path counterpartyPath;
-    private Account account2;
-    private String counterpartyAddress;
+
     private static final Set<String> P2P_ACCESS_WHITE_LIST =
             new HashSet<String>() {
                 {
@@ -62,18 +54,15 @@ public class HTLCResource extends Resource {
         this.counterpartyPath = counterpartyPath;
     }
 
-    interface Callback {
-        void onReturn(WeCrossException exception);
-    }
-
     @Override
-    public void asyncCall(TransactionRequest request, Account account, Resource.Callback callback) {
-        getSelfResource().asyncCall(request, account, callback);
+    public void asyncCall(
+            TransactionRequest request, UniversalAccount ua, Resource.Callback callback) {
+        getSelfResource().asyncCall(request, ua, callback);
     }
 
     @Override
     public void asyncSendTransaction(
-            TransactionRequest request, Account account, Resource.Callback callback) {
+            TransactionRequest request, UniversalAccount ua, Resource.Callback callback) {
         if (getSelfResource().hasLocalConnection()) {
             TransactionRequest transactionRequest = request;
             if (RoutineDefault.UNLOCK_METHOD.equals(transactionRequest.getMethod())) {
@@ -83,22 +72,27 @@ public class HTLCResource extends Resource {
                             if (exception != null) {
                                 TransactionResponse transactionResponse = new TransactionResponse();
                                 transactionResponse.setErrorCode(exception.getErrorCode());
-                                transactionResponse.setErrorMessage(exception.getMessage());
+                                transactionResponse.setMessage(exception.getMessage());
                                 callback.onTransactionResponse(
                                         new TransactionException(0, null), transactionResponse);
                             } else {
-                                getSelfResource().asyncSendTransaction(request, account, callback);
+                                getSelfResource().asyncSendTransaction(request, ua, callback);
                             }
                         });
             } else {
-                getSelfResource().asyncSendTransaction(request, account, callback);
+                getSelfResource().asyncSendTransaction(request, ua, callback);
             }
         } else {
-            getSelfResource().asyncSendTransaction(request, account, callback);
+            getSelfResource().asyncSendTransaction(request, ua, callback);
         }
     }
 
-    private void handleUnlockRequest(TransactionRequest request, Callback callback) {
+    public interface HandleUnlockRequestCallback {
+        void onReturn(WeCrossException exception);
+    }
+
+    public void handleUnlockRequest(
+            TransactionRequest request, HandleUnlockRequestCallback callback) {
         String[] args = request.getArgs();
         if (args == null || args.length != 2) {
             callback.onReturn(new WeCrossException(HTLCErrorCode.UNLOCK_ERROR, "incomplete args"));
@@ -106,10 +100,10 @@ public class HTLCResource extends Resource {
         }
 
         String hash = args[0];
-        HTLC htlc = new AssetHTLC();
+        HTLC htlc = new HTLCImpl();
         htlc.getProposalInfo(
                 getSelfResource(),
-                account1,
+                adminUa,
                 hash,
                 (exception, result) -> {
                     if (exception != null) {
@@ -153,7 +147,7 @@ public class HTLCResource extends Resource {
 
                                     htlc.setCounterpartyUnlockState(
                                             getSelfResource(),
-                                            account1,
+                                            adminUa,
                                             hash,
                                             (exception2, result2) -> callback.onReturn(exception2));
                                 });
@@ -163,7 +157,12 @@ public class HTLCResource extends Resource {
                 });
     }
 
-    private void unlockCounterparty(TransactionRequest request, Callback callback) {
+    public interface UnlockCounterpartyCallback {
+        void onReturn(WeCrossException exception);
+    }
+
+    public void unlockCounterparty(
+            TransactionRequest request, UnlockCounterpartyCallback callback) {
         if (logger.isDebugEnabled()) {
             logger.debug(
                     "Participant receives a unlock request, and unlocks initiator firstly, request: {}",
@@ -172,7 +171,7 @@ public class HTLCResource extends Resource {
         getCounterpartyResource()
                 .asyncSendTransaction(
                         request,
-                        account2,
+                        adminUa,
                         (transactionException, transactionResponse) -> {
                             if (transactionException != null && !transactionException.isSuccess()) {
                                 callback.onReturn(
@@ -194,7 +193,7 @@ public class HTLCResource extends Resource {
                                 logger.error(
                                         "UNLOCK_INITIATOR_ERROR: {}, {}",
                                         transactionResponse.getErrorCode(),
-                                        transactionResponse.getErrorMessage());
+                                        transactionResponse.getMessage());
                                 return;
                             }
 
@@ -214,25 +213,25 @@ public class HTLCResource extends Resource {
                         });
     }
 
-    interface VerifyUnlockCallback {
+    public interface VerifyUnlockCallback {
         void onReturn(WeCrossException exception, boolean result);
     }
 
-    private void verifyUnlock(
+    public void verifyUnlock(
             TransactionResponse transactionResponse, String[] args, VerifyUnlockCallback callback) {
-        HTLC htlc = new AssetHTLC();
+        HTLC htlc = new HTLCImpl();
 
-        VerifyData verifyData =
-                new VerifyData(
+        TransactionValidator transactionValidator =
+                new TransactionValidator(
                         transactionResponse.getBlockNumber(),
                         transactionResponse.getHash(),
                         RoutineDefault.UNLOCK_METHOD,
                         args,
                         new String[] {RoutineDefault.SUCCESS_FLAG});
-
+        transactionValidator.setPath(getCounterpartyPath());
         htlc.verifyHtlcTransaction(
                 getCounterpartyResource(),
-                verifyData,
+                transactionValidator,
                 (exception, result) -> {
                     if (exception != null) {
                         logger.error("failed to verify unlock,", exception);
@@ -247,31 +246,22 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public TransactionResponse call(TransactionRequest request, Account account)
-            throws TransactionException {
-        return getSelfResource().call(request, account);
-    }
-
-    @Override
-    public TransactionResponse sendTransaction(TransactionRequest request, Account account)
-            throws TransactionException {
-        return getSelfResource().sendTransaction(request, account);
-    }
-
-    @Override
     public void onRemoteTransaction(Request request, Connection.Callback callback) {
         Response response = new Response();
         Driver driver = getDriver();
-        if (driver.isTransaction(request)) {
+
+        ImmutablePair<Boolean, TransactionRequest> booleanTransactionRequestPair =
+                driver.decodeTransactionRequest(request);
+        if (booleanTransactionRequestPair.getKey()) {
             if (logger.isDebugEnabled()) {
                 logger.debug("onRemoteTransaction, request: {}", request);
             }
 
-            TransactionContext<TransactionRequest> context =
-                    driver.decodeTransactionRequest(request.getData());
-
-            if (context == null) {
-                response.setErrorCode(ErrorCode.DECODE_TRANSACTION_REQUEST_ERROR);
+            TransactionRequest transactionRequest = booleanTransactionRequestPair.getValue();
+            if (transactionRequest == null) {
+                response.setErrorCode(
+                        NetworkQueryStatus.HTLC_ERROR
+                                + HTLCErrorCode.DECODE_TRANSACTION_REQUEST_ERROR);
                 response.setErrorMessage("decode transaction request failed");
                 if (logger.isDebugEnabled()) {
                     logger.debug("onRemoteTransaction, response: {}", response);
@@ -281,7 +271,6 @@ public class HTLCResource extends Resource {
                 return;
             }
 
-            TransactionRequest transactionRequest = context.getData();
             if (logger.isDebugEnabled()) {
                 logger.debug("onRemoteTransaction, transactionRequest: {}", transactionRequest);
             }
@@ -292,13 +281,14 @@ public class HTLCResource extends Resource {
                         transactionRequest,
                         exception -> {
                             if (exception != null) {
-                                Response response1 = new Response();
-                                response1.setErrorCode(ErrorCode.HTLC_ERROR);
-                                response1.setErrorMessage(exception.getMessage());
+                                Response newResponse = new Response();
+                                newResponse.setErrorCode(
+                                        NetworkQueryStatus.HTLC_ERROR + HTLCErrorCode.UNLOCK_ERROR);
+                                newResponse.setErrorMessage(exception.getMessage());
                                 if (logger.isDebugEnabled()) {
-                                    logger.debug("onRemoteTransaction, response: {}", response1);
+                                    logger.debug("onRemoteTransaction, response: {}", newResponse);
                                 }
-                                callback.onResponse(response1);
+                                callback.onResponse(newResponse);
                             } else {
                                 getSelfResource()
                                         .onRemoteTransaction(
@@ -318,8 +308,9 @@ public class HTLCResource extends Resource {
 
             if (!P2P_ACCESS_WHITE_LIST.contains(method)) {
                 response = new Response();
-                response.setErrorCode(ErrorCode.HTLC_ERROR);
-                response.setErrorMessage("HTLCResource doesn't allow peers to call " + method);
+                response.setErrorCode(NetworkQueryStatus.HTLC_ERROR + HTLCErrorCode.NO_PERMISSION);
+                response.setErrorMessage(
+                        "HTLCResource doesn't allow peers to call,request: " + transactionRequest);
                 if (logger.isDebugEnabled()) {
                     logger.debug("onRemoteTransaction, response: {}", response);
                 }
@@ -357,6 +348,14 @@ public class HTLCResource extends Resource {
         this.zoneManager = zoneManager;
     }
 
+    public UniversalAccount getAdminUa() {
+        return adminUa;
+    }
+
+    public void setAdminUa(UniversalAccount adminUa) {
+        this.adminUa = adminUa;
+    }
+
     public Path getSelfPath() {
         return selfPath;
     }
@@ -365,36 +364,12 @@ public class HTLCResource extends Resource {
         this.selfPath = selfPath;
     }
 
-    public Account getAccount1() {
-        return account1;
-    }
-
-    public void setAccount1(Account account1) {
-        this.account1 = account1;
-    }
-
     public Path getCounterpartyPath() {
         return counterpartyPath;
     }
 
     public void setCounterpartyPath(Path counterpartyPath) {
         this.counterpartyPath = counterpartyPath;
-    }
-
-    public Account getAccount2() {
-        return account2;
-    }
-
-    public void setAccount2(Account account2) {
-        this.account2 = account2;
-    }
-
-    public String getCounterpartyAddress() {
-        return counterpartyAddress;
-    }
-
-    public void setCounterpartyAddress(String counterpartyAddress) {
-        this.counterpartyAddress = counterpartyAddress;
     }
 
     @Override
@@ -463,13 +438,13 @@ public class HTLCResource extends Resource {
     }
 
     @Override
-    public BlockHeaderManager getBlockHeaderManager() {
-        return getSelfResource().getBlockHeaderManager();
+    public BlockManager getBlockManager() {
+        return getSelfResource().getBlockManager();
     }
 
     @Override
-    public void setBlockHeaderManager(BlockHeaderManager resourceBlockHeaderManager) {
-        getSelfResource().setBlockHeaderManager(resourceBlockHeaderManager);
+    public void setBlockManager(BlockManager blockManager) {
+        getSelfResource().setBlockManager(blockManager);
     }
 
     @Override
@@ -482,17 +457,12 @@ public class HTLCResource extends Resource {
         return "HTLCResource{"
                 + "zoneManager="
                 + zoneManager
+                + ", adminUa="
+                + adminUa
                 + ", selfPath="
                 + selfPath
-                + ", account1="
-                + account1
                 + ", counterpartyPath="
                 + counterpartyPath
-                + ", account2="
-                + account2
-                + ", counterpartyAddress='"
-                + counterpartyAddress
-                + '\''
                 + '}';
     }
 }
