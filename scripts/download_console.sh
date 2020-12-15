@@ -215,10 +215,10 @@ download_get_account_scripts() {
 main() {
     if [ 1 -eq ${enable_build_from_resource} ]; then
         build_from_source
+        download_get_account_scripts
     else
         download_wecross_console_pkg
     fi
-    download_get_account_scripts
 }
 
 print_result() {
