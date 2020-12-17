@@ -34,7 +34,7 @@ Usage:
     -s                              [Optional] Get wecross account manager by: gradle build from github Source Code.
     -b                              [Optional] Download from certain branch
     -t                              [Optional] Download from certain tag (same as -b)
-    -d                              [Optional] Use default db configuration: -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
+    -d                              [Optional] Use default db configuration: -u ${DB_USERNAME} -H ${DB_IP} -P ${DB_PORT}
     -u                              [Optional] DB username
     -p                              [Optional] DB password
     -H                              [Optional] DB ip
