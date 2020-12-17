@@ -7,7 +7,7 @@
 
 WeCross是由微众银行自主研发并完全开源的区块链跨链协作平台，致力于促进跨行业、机构和地域的跨区块链信任传递和商业合作。WeCross支持应用与多链互操作、同/异构链间互操作等多维跨链交互，实现了:
 
-- **便捷式跨链管理**
+- **一站式跨链管理**
 
     WeCross为方便开发、维护和管理跨链应用，配套多种跨链工具，包括命令行[终端控制台](https://github.com/WeBankBlockchain/WeCross-Console)和**可视化**[网页管理平台](https://github.com/WeBankBlockchain/WeCross-WebApp)。
 
@@ -27,7 +27,7 @@ WeCross是由微众银行自主研发并完全开源的区块链跨链协作平�
 
     WeCross基于[两阶段提交](https://wecross.readthedocs.io/zh_CN/latest/docs/routine/xa.html)实现多链的事务写操作。回滚时，事务中的操作都会被重置，最终恢复到事务前的状态。
 
-- **链间资产原子交换**
+- **资产原子交换**
 
     WeCross基于[哈希时间锁合约](https://wecross.readthedocs.io/zh_CN/latest/docs/routine/htlc.html)实现异构链间资产原子交换，无需更改原链上的资产模型和资产合约，通用性较强。
 
