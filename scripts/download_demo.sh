@@ -76,6 +76,9 @@ download_release_pkg() {
     local release_pkg=${4}
     local release_pkg_checksum_file=${5}
 
+    mkdir -p ~/.wecross_pkg
+    cd ~/.wecross_pkg
+
     #download checksum
     LOG_INFO "Try to Download checksum from ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}"
     if ! curl --fail -#LO ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}; then
@@ -107,6 +110,9 @@ download_release_pkg() {
     fi
 
     tar -zxf ${release_pkg}
+
+    cd -
+    mv ~/.wecross_pkg/demo wecross-demo
 }
 
 main() {
@@ -116,7 +122,7 @@ main() {
 
 print_result() {
     LOG_INFO "Download completed. WeCross Demo is in: ./demo/"
-    LOG_INFO "Please: \"cd ./demo/ \" and \"bash build.sh\" to build the demo."
+    LOG_INFO "Please: \"cd ./wecross-demo/ \" and \"bash build.sh\" to build the demo."
 }
 
 parse_command $@

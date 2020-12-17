@@ -34,7 +34,11 @@ Usage:
     -s                              [Optional] Get wecross account manager by: gradle build from github Source Code.
     -b                              [Optional] Download from certain branch
     -t                              [Optional] Download from certain tag (same as -b)
-    -d                              [Optional] Use default db configuration
+    -d                              [Optional] Use default db configuration: -u ${DB_USERNAME} -H ${DB_IP} -P ${DB_PORT}
+    -u                              [Optional] DB username
+    -p                              [Optional] DB password
+    -H                              [Optional] DB ip
+    -P                              [Optional] DB port
     -h  call for help
 e.g
     bash $0
@@ -44,7 +48,7 @@ EOF
 }
 
 parse_command() {
-    while getopts "b:t:sdh" option; do
+    while getopts "u:p:H:P:b:t:sdh" option; do
         # shellcheck disable=SC2220
         case ${option} in
         s)
@@ -59,6 +63,22 @@ parse_command() {
             compatibility_version=$OPTARG
             ;;
         d)
+            need_db_config_ask=false
+            ;;
+        u)
+            DB_USERNAME=$OPTARG
+            need_db_config_ask=false
+            ;;
+        p)
+            DB_PASSWORD=$OPTARG
+            need_db_config_ask=false
+            ;;
+        H)
+            DB_IP=$OPTARG
+            need_db_config_ask=false
+            ;;
+        P)
+            DB_PORT=$OPTARG
             need_db_config_ask=false
             ;;
         h) help ;;

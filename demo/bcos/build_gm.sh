@@ -70,29 +70,7 @@ build_accounts() {
     cd -
 }
 
-check_and_install_tassl() {
-    local TASSL_HOME="${HOME}"/.fisco
-    local TASSL_CMD=${TASSL_HOME}/tassl
-
-    if [ ! -f "${TASSL_CMD}" ]; then
-        LOG_INFO "Downloading tassl binary ..."
-        mkdir -p ${TASSL_HOME}
-        if [[ -n "${macOS}" ]]; then
-            if [ ! -f tassl_mac.tar.gz ]; then
-                Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl_mac.tar.gz
-            fi
-            tar -zxvf tassl_mac.tar.gz -C ${TASSL_HOME}
-        else
-            if [ ! -f tassl.tar.gz ]; then
-                Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl.tar.gz
-            fi
-            tar -zxvf tassl.tar.gz -C ${TASSL_HOME}
-        fi
-    fi
-}
-
 main() {
-    check_and_install_tassl
     build_bcos_chain
     build_accounts
     LOG_INFO "SUCCESS: Build FISCO BCOS Guomi demo finish."
