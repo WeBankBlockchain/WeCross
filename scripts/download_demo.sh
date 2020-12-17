@@ -112,7 +112,7 @@ download_release_pkg() {
     tar -zxf ${release_pkg}
 
     cd -
-    mv ~/.wecross_pkg/demo wecross_demo
+    mv ~/.wecross_pkg/demo wecross-demo
 }
 
 main() {
@@ -122,7 +122,7 @@ main() {
 
 print_result() {
     LOG_INFO "Download completed. WeCross Demo is in: ./demo/"
-    LOG_INFO "Please: \"cd ./wecross_demo/ \" and \"bash build.sh\" to build the demo."
+    LOG_INFO "Please: \"cd ./wecross-demo/ \" and \"bash build.sh\" to build the demo."
 }
 
 parse_command $@
