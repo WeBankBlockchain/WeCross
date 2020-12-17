@@ -100,8 +100,8 @@ login org1-admin 123456
 listAccount
 listResources
 setDefaultAccount Fabric1.4 1
-call payment.fabric.htlc balanceOf User1@org1.example.com
-newHTLCProposal payment.fabric.htlc bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 null false 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
+call payment.fabric.htlc balanceOf User1@org2.example.com
+newHTLCProposal payment.fabric.htlc bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 null false 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org2.example.com 500 2000000000
 quit
 EOF
     cd ..
@@ -112,7 +112,7 @@ login org2-admin 123456
 listAccount
 listResources
 call payment.bcos.htlc balanceOf 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf
-newHTLCProposal payment.bcos.htlc bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 9dda9a5e175a919ee98ff0198927b0a765ef96cf917144b589bb8e510e04843c true 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
+newHTLCProposal payment.bcos.htlc bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 9dda9a5e175a919ee98ff0198927b0a765ef96cf917144b589bb8e510e04843c true 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org2.example.com 500 2000000000
 quit
 EOF
     cd ..
@@ -134,7 +134,7 @@ EOF
 login org1-admin 123456
 listAccount
 listResources
-call payment.fabric.htlc balanceOf User1@org1.example.com
+call payment.fabric.htlc balanceOf User1@org2.example.com
 quit
 EOF
     cd ..
