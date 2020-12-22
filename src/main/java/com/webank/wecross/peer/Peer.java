@@ -9,7 +9,6 @@ import java.util.Objects;
 public class Peer {
     Node node;
     private int seq = 0;
-    private int accountSeq = 0;
     private Map<String, ChainInfo> chainInfos = new HashMap<String, ChainInfo>();
     private long lastActiveTimestamp = System.currentTimeMillis();
 
@@ -58,14 +57,6 @@ public class Peer {
         this.chainInfos = chainInfos;
     }
 
-    public int getAccountSeq() {
-        return accountSeq;
-    }
-
-    public void setAccountSeq(int accountSeq) {
-        this.accountSeq = accountSeq;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -81,6 +72,6 @@ public class Peer {
 
     @Override
     public String toString() {
-        return "Peer{" + "node=" + node + ", seq=" + seq + ", accountSeq=" + accountSeq + '}';
+        return "Peer{" + "node=" + node + ", seq=" + seq + '}';
     }
 }

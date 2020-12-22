@@ -4,7 +4,7 @@ public class UAProofInfo {
 
     public UAProofInfo() {}
 
-    private String chainAccountID;
+    private String chainAccountID; // caID
     private String uaID;
     private String type;
     private String uaProof;
@@ -43,6 +43,24 @@ public class UAProofInfo {
 
     public static UAProofInfoBuilder builder() {
         return new UAProofInfoBuilder();
+    }
+
+    @Override
+    public String toString() {
+        return "UAProofInfo{"
+                + "caID='"
+                + chainAccountID
+                + '\''
+                + ", uaID='"
+                + uaID
+                + '\''
+                + ", type='"
+                + type
+                + '\''
+                + ", uaProof='"
+                + uaProof
+                + '\''
+                + '}';
     }
 
     public static final class UAProofInfoBuilder {
