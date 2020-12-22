@@ -3,7 +3,7 @@
 
 name: all-2groups-gm-fabric
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   cross-all:
