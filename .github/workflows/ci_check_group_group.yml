@@ -3,7 +3,7 @@
 
 name: group-group
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   group-group:
