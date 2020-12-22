@@ -257,7 +257,7 @@ public class P2PProcessor implements NetworkProcessor {
             msg.setVersion(Versions.currentVersion);
             msg.setMethod("requestUAProof");
 
-            logger.debug("Request UAProof to peer:{}, seq:{}", peerInfo, msg.getSeq());
+            logger.debug("Request UAProof to peer:{}, seq:{}", peerInfo, seq);
 
             NetworkCallback<AccountSyncMessageData> callback =
                     new NetworkCallback<AccountSyncMessageData>() {
