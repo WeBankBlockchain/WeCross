@@ -7,6 +7,7 @@ import com.webank.wecross.account.uaproof.UAProofVerifier;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.p2p.netty.common.Node;
 import com.webank.wecross.stub.Account;
+import com.webank.wecross.utils.core.SeqUtils;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,31 +23,30 @@ public class AccountSyncManager {
 
     private Map<Node, Integer> nodeSeq = new HashMap<>();
 
+    private Integer seq;
+
+    // TODO: save myUAProofs in disk
     private Map<String, UAProofInfo> myUAProofs = new HashMap<>(); // caID 2 UAPRoof
 
+    // TODO: save caID2UaID in disk
     private Map<String, String> caID2UaID = new HashMap<>(); // chain account id 2 uaid
 
-    public void addMyUAProof(String chainAccountID, String uaID, String type, String uaProof) {
-        myUAProofs.put(
-                chainAccountID,
-                UAProofInfo.builder()
-                        .chainAccountID(chainAccountID)
-                        .uaID(uaID)
-                        .type(type)
-                        .uaProof(uaProof)
-                        .build());
+    public AccountSyncManager() {
+        updateSeq();
     }
 
-    public void addCaID2UaID(String chainAccountID, String uaID) throws WeCrossException {
-        caID2UaID.put(chainAccountID, uaID);
+    public synchronized Integer getSeq() {
+        return seq;
     }
 
-    public Integer getSeq() {
-        return myUAProofs.size();
+    private void updateSeq() {
+        seq = SeqUtils.newSeq();
     }
 
     public void updatePeerSeq(Node node, Integer seq) {
-        nodeSeq.putIfAbsent(node, seq);
+        logger.info("update peer account seq, from: {}, to: {}", nodeSeq.get(node), seq);
+
+        nodeSeq.put(node, seq);
     }
 
     public void removeNodeSeq(Node node) {
@@ -55,20 +55,25 @@ public class AccountSyncManager {
         }
     }
 
+    public void updateCA2UA(String caID, String uaID, UAProofInfo uaProof, boolean needUpdateSeq) {
+        logger.info("updateCA2UA {}", uaProof);
+        caID2UaID.put(caID, uaID);
+        myUAProofs.put(caID, uaProof);
+        if (needUpdateSeq) {
+            updateSeq();
+        }
+    }
+
     public boolean hasPeerChanged(Node node, Integer currentSeq) {
         Integer recordSeq = nodeSeq.get(node);
         return recordSeq == null || !currentSeq.equals(recordSeq);
     }
 
-    public String getUAIDByChainAccountIdentity(String identity) {
-        return caID2UaID.get(identity);
-    }
-
-    public Collection<UAProofInfo> getUAProofs() {
+    public synchronized Collection<UAProofInfo> getUAProofs() {
         return myUAProofs.values();
     }
 
-    public void updateByUAProofs(Collection<UAProofInfo> uaProofInfos) {
+    public synchronized void updateByUAProofs(Collection<UAProofInfo> uaProofInfos) {
         for (UAProofInfo info : uaProofInfos) {
             String uaID = info.getUaID();
             String caID = info.getChainAccountID();
@@ -76,11 +81,11 @@ public class AccountSyncManager {
             if (verifyUAProof(info)) {
                 String oldUAID = caID2UaID.get(caID);
 
-                if (oldUAID != null && !oldUAID.equals(uaID)) {
-                    logger.warn("Overwrite account {} uaID from {} to {}", caID, oldUAID, uaID);
+                if (oldUAID != null && oldUAID.equals(uaID)) {
+                    continue;
                 }
 
-                caID2UaID.put(caID, uaID);
+                updateCA2UA(caID, uaID, info, false); // only newUA need update seq
             } else {
                 logger.warn("Receive invalid UAProof: " + uaProofInfos);
             }
@@ -120,7 +125,7 @@ public class AccountSyncManager {
         }
     }
 
-    public void onNewUA(UniversalAccount ua) {
+    public synchronized void onNewUA(UniversalAccount ua) {
         String uaID = ua.getUAID();
         logger.debug(
                 "On newUA"
@@ -146,9 +151,7 @@ public class AccountSyncManager {
                                 .uaProof(uaProof)
                                 .build();
 
-                myUAProofs.put(caID, info);
-
-                addCaID2UaID(caID, uaID);
+                updateCA2UA(caID, uaID, info, true); // only newUA need update seq
             } catch (WeCrossException e) {
                 logger.warn("onNewUA: ", e);
             } catch (Exception e) {

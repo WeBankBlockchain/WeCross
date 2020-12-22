@@ -120,7 +120,8 @@ public class WeCrossHost {
 
         for (Peer peer : peerManager.getPeerInfos().values()) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Send peer seq, to peer:{}, seq:{}", peer, seq);
+                logger.debug(
+                        "Send peer seq, to peer:{}, seq:{}, accountSeq:{}", peer, seq, accountSeq);
             }
             zoneManager.getP2PService().asyncSendMessage(peer, msg, null);
         }
