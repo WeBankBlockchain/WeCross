@@ -42,7 +42,9 @@ public class ZoneManager {
                 return chain;
             }
         } catch (Exception e) {
-            logger.debug("Exception: " + e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Exception: " + e);
+            }
         } finally {
             lock.readLock().unlock();
         }
@@ -113,7 +115,9 @@ public class ZoneManager {
 
             return null;
         } catch (Exception e) {
-            logger.debug("Exception: " + e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Exception: " + e);
+            }
         } finally {
             lock.readLock().unlock();
         }
@@ -132,7 +136,9 @@ public class ZoneManager {
     public Zone getZone(String name) {
         lock.readLock().lock();
         try {
-            logger.trace("get zone: {}", name);
+            if (logger.isTraceEnabled()) {
+                logger.trace("get zone: {}", name);
+            }
             Zone zone = zones.get(name);
             return zone;
         } finally {
@@ -302,11 +308,10 @@ public class ZoneManager {
         Map<String, Resource> resources = new LinkedHashMap<>();
         lock.readLock().lock();
         try {
-            for (Map.Entry<String, Resource> resourceEntry :
-                    getChain(chainPath).getResources().entrySet()) {
-                String resourceName = PathUtils.toPureName(resourceEntry.getKey());
+            for (Resource resourceEntry : getChain(chainPath).getResources().values()) {
+                String resourceName = PathUtils.toPureName(resourceEntry.getPath().toString());
                 chainPath.setResource(resourceName);
-                resources.put(chainPath.toString(), resourceEntry.getValue());
+                resources.put(chainPath.toString(), resourceEntry);
             }
         } finally {
             lock.readLock().unlock();

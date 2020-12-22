@@ -1,3 +1,29 @@
+### v1.0.0
+
+(2020-12-17)
+
+**功能**
+
+* 合约跨链调用：支持由合约发起跨链调用
+* 跨链账户管理：支持跨链账户管理，统一跨链身份
+* 网页管理台：可视化的跨链管理组件
+
+**新增**
+
+* 桥接合约：合约跨链调用统一入口，管理跨链调用请求
+* 账户管理：新增UniversalAccount管理链账户，新增注册与登录接口，透传账户相关请求至账户服务
+* 网页管理台：支持网页管理台静态资源的打包和加载
+* RPC接口：新增listTransactions、getTransaction、listXATransactions、getXATransaction等接口
+* 更多Demo：新增跨 FISCO BCOS 群组、FISCO BCOS 国密链、Hyperledger Fabric 链 Demo
+
+**更改**
+
+* 资源调用：参数链账户名替换为跨链账户用户名
+* 账户配置：无需在跨链路由配置链账户，账户统一由账户服务管理
+* 默认账户：跨链路由新增默认账户，负责合约跨链和HTLC的调度
+* 事务优化：开启事务若部分链失败则提交已成功的链，优化各个步骤的错误反馈
+* HTLC优化：删除默认账户配置，HTLC合约初始化无需指定对手方合约地址
+
 ### v1.0.0-rc4
 
 (2020-08-18)
@@ -16,7 +42,7 @@
   * 跨 FISCO BCOS 群组 Demo
   * 跨 FISCO BCOS 国密与非国密链 Demo
 
-**更新**
+**更改**
 
 * 区块头同步逻辑更新：去除区块头落盘、router重启拉取最新区块头
 * HTLC更新：提案处理异步化、使用WeCross-Console替代ledger-tool来初始化资产
@@ -29,7 +55,7 @@
 
 * Driver新增异步API定义：asyncCall、asyncSendTransaction，采用异步的方式调用插件接口
 
-**更新**
+**更改**
 
 * P2P通信：Router间的通信更新为异步的方式
 * RPC接口：将性能较差的spring boot tomcat替换成netty的http server
@@ -47,7 +73,7 @@
 * 安全通讯：WeCross SDK和Router之间采用TLS协议通讯
 * 跨链Demo: 支持快速搭建WeCross Demo，体验简单跨链调用
 
-**更新**
+**更改**
 
 * 跨链接口：跨链调用需要指定账户名
 * 跨链合约：跨链合约的参数类型和返回值类型限定为字符串数组

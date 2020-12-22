@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 
 LOG_INFO() {
     local content=${1}
@@ -16,7 +16,7 @@ Download() {
     local url=${1}
     local file=$(basename ${url})
     if [ ! -e ${file} ]; then
-        curl -LO ${url}
+        curl -#LO ${url}
     fi
 }
 
@@ -59,7 +59,7 @@ build_bcos_chain() {
 build_console() {
     # Download console
     LOG_INFO "Download HelloWeCross.sol ..."
-    Download https://github.com/WeBankFinTech/WeCross/releases/download/resources/HelloWeCross.sol
+    Download https://github.com/WebankBlockchain/WeCross/releases/download/resources/HelloWeCross.sol
 
     LOG_INFO "Download console ..."
     if [ -e console.tar.gz ]; then
@@ -79,6 +79,9 @@ build_console() {
 }
 
 build_accounts() {
+    LOG_INFO "Download get_account.sh ..."
+    Download https://raw.githubusercontent.com/FISCO-BCOS/console/master/tools/get_account.sh
+    chmod u+x get_account.sh
     # generate accounts
     mkdir -p accounts
     cd accounts

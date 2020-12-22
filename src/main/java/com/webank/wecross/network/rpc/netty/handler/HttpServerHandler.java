@@ -228,6 +228,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
                                 }
 
                                 @Override
+                                public void onResponse(FullHttpResponse fullHttpResponse) {
+                                    write(fullHttpResponse);
+                                }
+
+                                @Override
                                 public void onResponse(File restResponse) {
                                     byte[] content;
 

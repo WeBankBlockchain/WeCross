@@ -2,12 +2,13 @@ package com.webank.wecross.interchain;
 
 import static com.webank.wecross.interchain.InterchainDefault.TIMEOUT_DELAY;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.*;
 import com.webank.wecross.utils.Sha256Utils;
-import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 public class InterchainScheduler {
     private Logger logger = LoggerFactory.getLogger(InterchainScheduler.class);
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     private SystemResource systemResource;
     private InterchainRequest interchainRequest;
@@ -69,7 +71,7 @@ public class InterchainScheduler {
                                             callTargetChainException.getInternalMessage());
 
                                     state = false;
-                                    result = "";
+                                    result = "[]";
                                 }
 
                                 if (logger.isDebugEnabled()) {
@@ -184,15 +186,13 @@ public class InterchainScheduler {
                                     null,
                                     0);
                         } else {
-                            String result = transactionResponse.getResult()[0];
-                            if (InterchainDefault.NULL_FLAG.equals(result.trim())) {
+                            String result = transactionResponse.getResult()[0].trim();
+                            if (InterchainDefault.NULL_FLAG.equals(result)) {
                                 callback.onReturn(null, null, 0);
                             } else {
                                 /* state = "tid uid" */
-                                String[] states =
-                                        transactionResponse.getResult()[0].split(
-                                                InterchainDefault.SPLIT_REGEX);
-                                callback.onReturn(null, states[0], Integer.parseInt(states[1]));
+                                String[] states = result.split(InterchainDefault.SPLIT_REGEX);
+                                callback.onReturn(null, states[0], Long.parseLong(states[1]));
                             }
                         }
                     }
@@ -200,6 +200,7 @@ public class InterchainScheduler {
     }
 
     public interface CallTargetChainCallback {
+        // result is json form of string array
         void onReturn(WeCrossException exception, String result);
     }
 
@@ -218,12 +219,13 @@ public class InterchainScheduler {
                                 "CALL_TARGET_CHAIN_ERROR",
                                 InterchainErrorCode.CALL_TARGET_CHAIN_ERROR,
                                 "Target path '" + path + "' not found"),
-                        null);
+                        "[]");
                 return;
             }
 
             TransactionRequest transactionRequest = new TransactionRequest();
-            transactionRequest.setArgs(interchainRequest.getArgs());
+            transactionRequest.setArgs(
+                    new String[] {objectMapper.writeValueAsString(interchainRequest.getArgs())});
             transactionRequest.setMethod(interchainRequest.getMethod());
 
             transactionRequest.getOptions().put(StubConstant.TRANSACTION_UNIQUE_ID, uid);
@@ -235,23 +237,25 @@ public class InterchainScheduler {
                         .put(StubConstant.XA_TRANSACTION_ID, xaTransactionID);
                 transactionRequest
                         .getOptions()
-                        .put(StubConstant.XA_TRANSACTION_SEQ, String.valueOf(xaTransactionSeq));
+                        .put(StubConstant.XA_TRANSACTION_SEQ, xaTransactionSeq);
             }
 
             if (InterchainDefault.CALL_TYPE_INVOKE == interchainRequest.getCallType()) {
 
-                Timer timer = new HashedWheelTimer();
-                timer.newTimeout(
-                        timeout ->
-                                callback.onReturn(
-                                        new WeCrossException(
-                                                WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
-                                                "CALL_TARGET_CHAIN_ERROR",
-                                                InterchainErrorCode.CALL_TARGET_CHAIN_ERROR,
-                                                "Timeout"),
-                                        null),
-                        TIMEOUT_DELAY,
-                        TimeUnit.SECONDS);
+                Timer timer = systemResource.getTimer();
+                Timeout callTargetChainTimeout =
+                        timer.newTimeout(
+                                timeout ->
+                                        callback.onReturn(
+                                                new WeCrossException(
+                                                        WeCrossException.ErrorCode
+                                                                .INTER_CHAIN_ERROR,
+                                                        "CALL_TARGET_CHAIN_ERROR",
+                                                        InterchainErrorCode.CALL_TARGET_CHAIN_ERROR,
+                                                        "Timeout"),
+                                                "[]"),
+                                TIMEOUT_DELAY,
+                                TimeUnit.SECONDS);
 
                 resource.asyncSendTransaction(
                         transactionRequest,
@@ -270,10 +274,10 @@ public class InterchainScheduler {
                                         transactionResponse.getErrorCode(),
                                         transactionResponse.getMessage());
                             } else {
-                                timer.stop();
+                                callTargetChainTimeout.cancel();
                                 if (Objects.isNull(transactionResponse.getResult())
                                         || transactionResponse.getResult().length == 0) {
-                                    callback.onReturn(null, "");
+                                    callback.onReturn(null, "[]");
                                 } else {
                                     callback.onReturn(null, transactionResponse.getResult()[0]);
                                 }
@@ -288,11 +292,12 @@ public class InterchainScheduler {
                             "CALL_TARGET_CHAIN_ERROR",
                             InterchainErrorCode.CALL_TARGET_CHAIN_ERROR,
                             "Exception occurred"),
-                    null);
+                    "[]");
         }
     }
 
     public interface CallCallbackCallback {
+        // result is json form of string array
         void onReturn(WeCrossException exception, int errorCode, String message, String result);
     }
 
@@ -315,7 +320,7 @@ public class InterchainScheduler {
                                 "Callback path '" + path + "' not found"),
                         0,
                         null,
-                        null);
+                        "[]");
                 return;
             }
 
@@ -331,7 +336,7 @@ public class InterchainScheduler {
                         .put(StubConstant.XA_TRANSACTION_ID, xaTransactionID);
                 transactionRequest
                         .getOptions()
-                        .put(StubConstant.XA_TRANSACTION_SEQ, String.valueOf(xaTransactionSeq));
+                        .put(StubConstant.XA_TRANSACTION_SEQ, xaTransactionSeq);
             }
 
             resource.asyncSendTransaction(
@@ -348,17 +353,17 @@ public class InterchainScheduler {
                                             transactionException.getMessage()),
                                     0,
                                     null,
-                                    null);
+                                    "[]");
                         } else if (transactionResponse.getErrorCode() != 0) {
                             callback.onReturn(
                                     null,
                                     transactionResponse.getErrorCode(),
                                     transactionResponse.getMessage(),
-                                    "");
+                                    "[]");
                         } else {
                             if (Objects.isNull(transactionResponse.getResult())
                                     || transactionResponse.getResult().length == 0) {
-                                callback.onReturn(null, 0, "", "");
+                                callback.onReturn(null, 0, "", "[]");
                             } else {
                                 callback.onReturn(null, 0, "", transactionResponse.getResult()[0]);
                             }
@@ -366,7 +371,7 @@ public class InterchainScheduler {
                     });
 
         } catch (Exception e) {
-            logger.error("Call call exception, ", e);
+            logger.error("Call callback exception, ", e);
             callback.onReturn(
                     new WeCrossException(
                             WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
@@ -375,7 +380,7 @@ public class InterchainScheduler {
                             "Exception occurred"),
                     0,
                     null,
-                    null);
+                    "[]");
         }
     }
 
@@ -390,54 +395,63 @@ public class InterchainScheduler {
             String message,
             String result,
             RegisterResultCallback callback) {
+        try {
+            if (Objects.isNull(xaTransactionID)
+                    || xaTransactionID.isEmpty()
+                    || InterchainDefault.NON_TRANSACTION.equals(xaTransactionID)) {
+                xaTransactionID = InterchainDefault.NON_TRANSACTION;
+                xaTransactionSeq = 0;
+            }
 
-        if (Objects.isNull(xaTransactionID)
-                || xaTransactionID.isEmpty()
-                || InterchainDefault.NON_TRANSACTION.equals(xaTransactionID)) {
-            xaTransactionID = InterchainDefault.NON_TRANSACTION;
-            xaTransactionSeq = 0;
+            if (errorCode == 0) {
+                message = InterchainDefault.SUCCESS_FLAG;
+            }
+
+            Resource hubResource = systemResource.getHubResource();
+            TransactionRequest transactionRequest = new TransactionRequest();
+            transactionRequest.setArgs(
+                    new String[] {
+                        interchainRequest.getUid(),
+                        xaTransactionID,
+                        String.valueOf(xaTransactionSeq),
+                        String.valueOf(errorCode),
+                        message,
+                        result
+                    });
+            transactionRequest.setMethod(InterchainDefault.REGISTER_CALLBACK_RESULT_METHOD);
+
+            hubResource.asyncSendTransaction(
+                    transactionRequest,
+                    adminUA,
+                    (transactionException, transactionResponse) -> {
+                        if (Objects.nonNull(transactionException)
+                                && !transactionException.isSuccess()) {
+                            callback.onReturn(
+                                    new WeCrossException(
+                                            WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
+                                            "REGISTER_CALLBACK_RESULT_ERROR",
+                                            InterchainErrorCode.REGISTER_CALLBACK_RESULT_ERROR,
+                                            transactionException.getMessage()));
+                        } else if (transactionResponse.getErrorCode() != 0) {
+                            callback.onReturn(
+                                    new WeCrossException(
+                                            WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
+                                            "REGISTER_CALLBACK_RESULT_ERROR",
+                                            InterchainErrorCode.REGISTER_CALLBACK_RESULT_ERROR,
+                                            transactionResponse.getMessage()));
+                        } else {
+                            callback.onReturn(null);
+                        }
+                    });
+        } catch (Exception e) {
+            logger.error("Register result of callback exception, ", e);
+            callback.onReturn(
+                    new WeCrossException(
+                            WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
+                            "REGISTER_CALLBACK_RESULT_ERROR",
+                            InterchainErrorCode.REGISTER_CALLBACK_RESULT_ERROR,
+                            "Exception occurred"));
         }
-
-        if (errorCode == 0) {
-            message = InterchainDefault.SUCCESS_FLAG;
-        }
-
-        Resource hubResource = systemResource.getHubResource();
-        TransactionRequest transactionRequest = new TransactionRequest();
-        transactionRequest.setArgs(
-                new String[] {
-                    interchainRequest.getUid(),
-                    xaTransactionID,
-                    String.valueOf(xaTransactionSeq),
-                    String.valueOf(errorCode),
-                    message,
-                    result
-                });
-        transactionRequest.setMethod(InterchainDefault.REGISTER_CALLBACK_RESULT_METHOD);
-
-        hubResource.asyncSendTransaction(
-                transactionRequest,
-                adminUA,
-                (transactionException, transactionResponse) -> {
-                    if (Objects.nonNull(transactionException)
-                            && !transactionException.isSuccess()) {
-                        callback.onReturn(
-                                new WeCrossException(
-                                        WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
-                                        "REGISTER_CALLBACK_RESULT_ERROR",
-                                        InterchainErrorCode.REGISTER_CALLBACK_RESULT_ERROR,
-                                        transactionException.getMessage()));
-                    } else if (transactionResponse.getErrorCode() != 0) {
-                        callback.onReturn(
-                                new WeCrossException(
-                                        WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
-                                        "REGISTER_CALLBACK_RESULT_ERROR",
-                                        InterchainErrorCode.REGISTER_CALLBACK_RESULT_ERROR,
-                                        transactionResponse.getMessage()));
-                    } else {
-                        callback.onReturn(null);
-                    }
-                });
     }
 
     public SystemResource getSystemResource() {

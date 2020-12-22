@@ -6,6 +6,7 @@ import com.webank.wecross.restserver.response.ResourceResponse;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.StubConstant;
 import com.webank.wecross.zone.ZoneManager;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -49,21 +50,25 @@ public class ResourceFetcher {
     }
 
     public ResourceResponse fetchResources(Path chainPath, int offset, int size) {
-        Map<String, Resource> resources = zoneManager.getChainResources(chainPath);
+        LinkedHashMap<String, Resource> resources =
+                (LinkedHashMap<String, Resource>) zoneManager.getChainResources(chainPath);
         LinkedList<ResourceDetail> details = new LinkedList<>();
         int index = 0;
         boolean start = false;
-        for (String path : resources.keySet()) {
+
+        for (Resource resource : resources.values()) {
             if (size == 0) {
                 break;
             }
 
             try {
-                if (Path.decode(path).getResource().equals(StubConstant.PROXY_NAME)) {
+                if (resource.getPath().getResource().equals(StubConstant.PROXY_NAME)) {
                     continue;
                 }
             } catch (Exception e) {
-                logger.warn("Could not decode path during fetchResources, path:{}", path);
+                logger.warn(
+                        "Could not decode path during fetchResources, path:{}",
+                        resource.getPath().toString());
             }
 
             if (index == offset) {
@@ -72,8 +77,7 @@ public class ResourceFetcher {
 
             if (start) {
                 ResourceDetail detail = new ResourceDetail();
-                Resource resource = resources.get(path);
-                details.add(detail.initResourceDetail(resource, path));
+                details.add(detail.initResourceDetail(resource, resource.getPath().toString()));
                 size--;
             }
 
@@ -81,7 +85,7 @@ public class ResourceFetcher {
         }
 
         ResourceResponse resourceResponse = new ResourceResponse();
-        resourceResponse.setTotal(resources.size() - 1);
+        resourceResponse.setTotal(resources.size() - 1); // Exclude proxy contract
         resourceResponse.setResourceDetails(details.toArray(new ResourceDetail[] {}));
 
         return resourceResponse;

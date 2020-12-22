@@ -1,16 +1,16 @@
 #!/bin/bash
 set -e
 
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 
-default_compatibility_version=v1.0.0-rc4 # update this every release
+default_compatibility_version=v1.0.0 # update this every release
 
 compatibility_version=
 enable_build_from_resource=0
 
 src_dir=$(pwd)'/src/'
 
-wecross_account_manager_url=https://github.com/WeBankFinTech/WeCross-Account-Manager.git
+wecross_account_manager_url=https://github.com/WebankBlockchain/WeCross-Account-Manager.git
 wecross_account_manager_branch=${default_compatibility_version}
 
 need_db_config_ask=true
@@ -34,7 +34,11 @@ Usage:
     -s                              [Optional] Get wecross account manager by: gradle build from github Source Code.
     -b                              [Optional] Download from certain branch
     -t                              [Optional] Download from certain tag (same as -b)
-    -d                              [Optional] Use default db configuration
+    -d                              [Optional] Use default db configuration: -u ${DB_USERNAME} -H ${DB_IP} -P ${DB_PORT}
+    -u                              [Optional] DB username
+    -p                              [Optional] DB password
+    -H                              [Optional] DB ip
+    -P                              [Optional] DB port
     -h  call for help
 e.g
     bash $0
@@ -44,7 +48,7 @@ EOF
 }
 
 parse_command() {
-    while getopts "b:t:sdh" option; do
+    while getopts "u:p:H:P:b:t:sdh" option; do
         # shellcheck disable=SC2220
         case ${option} in
         s)
@@ -59,6 +63,22 @@ parse_command() {
             compatibility_version=$OPTARG
             ;;
         d)
+            need_db_config_ask=false
+            ;;
+        u)
+            DB_USERNAME=$OPTARG
+            need_db_config_ask=false
+            ;;
+        p)
+            DB_PASSWORD=$OPTARG
+            need_db_config_ask=false
+            ;;
+        H)
+            DB_IP=$OPTARG
+            need_db_config_ask=false
+            ;;
+        P)
+            DB_PORT=$OPTARG
             need_db_config_ask=false
             ;;
         h) help ;;
@@ -104,12 +124,20 @@ check_db_service() {
     LOG_INFO "Database configuration OK!"
 }
 
+exit_when_empty_db_pwd() {
+    if mysql -u ${DB_USERNAME} -h ${DB_IP} -P ${DB_PORT} -e "status" 2>/dev/null; then
+        LOG_ERROR "Not support to use account with no password. Please try another account."
+        exit 1
+    fi
+}
+
 db_config_ask() {
     check_command mysql
     LOG_INFO "Database connection:"
     read -r -p "[1/4]> ip: " DB_IP
     read -r -p "[2/4]> port: " DB_PORT
     read -r -p "[3/4]> username: " DB_USERNAME
+    exit_when_empty_db_pwd
     read -r -p "[4/4]> password: " -s DB_PASSWORD
     echo "" # \n
     LOG_INFO "Database connetion with: ${DB_IP}:${DB_PORT} ${DB_USERNAME} "
@@ -125,7 +153,7 @@ config_database() {
 }
 
 download_wecross_account_manager_pkg() {
-    local github_url=https://github.com/WeBankFinTech/WeCross-Account-Manager/releases/download/
+    local github_url=https://github.com/WebankBlockchain/WeCross-Account-Manager/releases/download/
     local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross-Account-Manager/
     local release_pkg=WeCross-Account-Manager.tar.gz
     local release_pkg_checksum_file=WeCross-Account-Manager.tar.gz.md5
@@ -137,7 +165,7 @@ download_wecross_account_manager_pkg() {
 
     LOG_INFO "Checking latest release"
     if [ -z "${compatibility_version}" ]; then
-        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross-Account-Manager/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
+        compatibility_version=$(curl -s https://api.github.com/repos/WebankBlockchain/WeCross-Account-Manager/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
     fi
 
     if [ -z "${compatibility_version}" ]; then
@@ -159,9 +187,9 @@ download_release_pkg() {
 
     #download checksum
     LOG_INFO "Try to Download checksum from ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}"
-    if ! curl --fail -LO ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}; then
+    if ! curl --fail -#LO ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}; then
         LOG_INFO "Download checksum from ${github_url}/${compatibility_version}/${release_pkg_checksum_file}"
-        curl -LO ${github_url}/${compatibility_version}/${release_pkg_checksum_file}
+        curl -#LO ${github_url}/${compatibility_version}/${release_pkg_checksum_file}
     fi
 
     if [ ! -e ${release_pkg_checksum_file} ] || [ -z "$(grep ${release_pkg} ${release_pkg_checksum_file})" ]; then
@@ -174,10 +202,10 @@ download_release_pkg() {
         LOG_INFO "Latest release ${release_pkg} exists."
     else
         LOG_INFO "Try to download from: ${cdn_url}/${compatibility_version}/${release_pkg}"
-        if ! curl --fail -LO ${cdn_url}/${compatibility_version}/${release_pkg}; then
+        if ! curl --fail -#LO ${cdn_url}/${compatibility_version}/${release_pkg}; then
             # If CDN failed, download from github release
             LOG_INFO "Download from: ${github_url}/${compatibility_version}/${release_pkg}"
-            curl -C - -LO ${github_url}/${compatibility_version}/${release_pkg}
+            curl -C - -#LO ${github_url}/${compatibility_version}/${release_pkg}
         fi
 
         if ! md5sum -c ${release_pkg_checksum_file}; then

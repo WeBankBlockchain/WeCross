@@ -1,23 +1,27 @@
 #!/bin/bash
 set -e
 
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 
 enable_build_from_resource=0
 compatibility_version=
 
-default_compatibility_version=v1.0.0-rc4 # update this every release
+default_compatibility_version=v1.0.0 # update this every release
 deps_dir=$(pwd)'/WeCross/plugin/'
+pages_dir=$(pwd)'/WeCross/pages/'
 src_dir=$(pwd)'/src/'
 
-wecross_url=https://github.com/WeBankFinTech/WeCross.git
+wecross_url=https://github.com/WebankBlockchain/WeCross.git
 wecross_branch=${default_compatibility_version}
 
-bcos_stub_url=https://github.com/WeBankFinTech/WeCross-BCOS2-Stub.git
+bcos_stub_url=https://github.com/WebankBlockchain/WeCross-BCOS2-Stub.git
 bcos_stub_branch=${default_compatibility_version}
 
-fabric_stub_url=https://github.com/WeBankFinTech/WeCross-Fabric1-Stub.git
+fabric_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric1-Stub.git
 fabric_stub_branch=${default_compatibility_version}
+
+wecross_webapp_url=https://github.com/WebankBlockchain/WeCross-WebApp.git
+wecross_webapp_branch=${default_compatibility_version}
 
 LOG_INFO() {
     local content=${1}
@@ -55,12 +59,14 @@ parse_command() {
             wecross_branch=$OPTARG
             bcos_stub_branch=$OPTARG
             fabric_stub_branch=$OPTARG
+            wecross_webapp_branch=$OPTARG
             compatibility_version=$OPTARG
             ;;
         t)
             wecross_branch=$OPTARG
             bcos_stub_branch=$OPTARG
             fabric_stub_branch=$OPTARG
+            wecross_webapp_branch=$OPTARG
             compatibility_version=$OPTARG
             ;;
         h) help ;;
@@ -70,7 +76,7 @@ parse_command() {
 }
 
 download_wecross_pkg() {
-    local github_url=https://github.com/WeBankFinTech/WeCross/releases/download/
+    local github_url=https://github.com/WebankBlockchain/WeCross/releases/download/
     local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross/
     local release_pkg=WeCross.tar.gz
     local release_pkg_checksum_file=WeCross.tar.gz.md5
@@ -82,7 +88,7 @@ download_wecross_pkg() {
 
     LOG_INFO "Checking latest release"
     if [ -z "${compatibility_version}" ]; then
-        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
+        compatibility_version=$(curl -s https://api.github.com/repos/WebankBlockchain/WeCross/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
     fi
 
     if [ -z "${compatibility_version}" ]; then
@@ -104,9 +110,9 @@ download_release_pkg() {
 
     #download checksum
     LOG_INFO "Try to Download checksum from ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}"
-    if ! curl --fail -LO ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}; then
+    if ! curl --fail -#LO ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}; then
         LOG_INFO "Download checksum from ${github_url}/${compatibility_version}/${release_pkg_checksum_file}"
-        curl -LO ${github_url}/${compatibility_version}/${release_pkg_checksum_file}
+        curl -#LO ${github_url}/${compatibility_version}/${release_pkg_checksum_file}
     fi
 
     if [ ! -e ${release_pkg_checksum_file} ] || [ -z "$(grep ${release_pkg} ${release_pkg_checksum_file})" ]; then
@@ -119,10 +125,10 @@ download_release_pkg() {
         LOG_INFO "Latest release ${release_pkg} exists."
     else
         LOG_INFO "Try to download from: ${cdn_url}/${compatibility_version}/${release_pkg}"
-        if ! curl --fail -LO ${cdn_url}/${compatibility_version}/${release_pkg}; then
+        if ! curl --fail -#LO ${cdn_url}/${compatibility_version}/${release_pkg}; then
             # If CDN failed, download from github release
             LOG_INFO "Download from: ${github_url}/${compatibility_version}/${release_pkg}"
-            curl -C - -LO ${github_url}/${compatibility_version}/${release_pkg}
+            curl -C - -#LO ${github_url}/${compatibility_version}/${release_pkg}
         fi
 
         if ! md5sum -c ${release_pkg_checksum_file}; then
@@ -197,11 +203,6 @@ build_plugin_from_source() {
 
     LOG_INFO "Build ${name} from source"
 
-    if [ -d ${name} ]; then
-        LOG_INFO "./${name}/ exists"
-        return
-    fi
-
     mkdir -p ${src_dir}/
     cd ${src_dir}/
 
@@ -219,11 +220,42 @@ build_plugin_from_source() {
     cd ${origin_dir}
 }
 
+build_webapp_from_source() {
+    LOG_INFO "Build WeCross WebApp from source"
+
+    local url=${wecross_webapp_url}
+    local branch=${wecross_webapp_branch}
+
+    mkdir -p ${src_dir}/
+    cd ${src_dir}/
+
+    download_latest_code WeCross-WebApp ${url} ${branch}
+
+    cd WeCross-WebApp
+    rm -rf dist
+    npm install
+
+    if ! npm run build:prod ; then
+        LOG_ERROR "Build Wecross WebApp project failed"
+        exit 1
+    fi
+    echo "================================================================"
+
+
+    mkdir -p ${pages_dir}
+    cp -r dist/* ${pages_dir}/
+
+    cd -
+
+    LOG_INFO "Build WeCross WebApp successfully"
+}
+
 main() {
     if [ 1 -eq ${enable_build_from_resource} ]; then
         build_from_source
         build_plugin_from_source WeCross-BCOS2-Stub ${bcos_stub_url} ${bcos_stub_branch}
         build_plugin_from_source WeCross-Fabric1-Stub ${fabric_stub_url} ${fabric_stub_branch}
+        build_webapp_from_source
     else
         download_wecross_pkg
     fi

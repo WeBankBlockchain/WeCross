@@ -2,7 +2,7 @@
 # copy and download requirements for demo.tar.gz
 
 set -e
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 ROOT=$(
     cd "$(dirname "$0")"
     pwd
@@ -47,26 +47,6 @@ prepare_bcos() {
     LOG_INFO "Download fisco-bcos binary"
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos.tar.gz
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos-macOS.tar.gz
-
-    LOG_INFO "Download tassl requirements"
-    if ! Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl.tar.gz; then
-        Download https://github.com/FISCO-BCOS/LargeFiles/blob/master/tools/tassl.tar.gz
-    fi
-
-    if ! Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl_mac.tar.gz; then
-        Download https://github.com/FISCO-BCOS/LargeFiles/blob/master/tools/tassl_mac.tar.gz
-    fi
-
-    # LOG_INFO "Download HelloWeCross.sol ..."
-    # cp ${WECROSS_ROOT}/src/main/resources/chains-sample/bcos/HelloWeCross.sol ./
-
-    # LOG_INFO "Download FISCO-BCOS console"
-    # Download https://github.com/FISCO-BCOS/console/releases/download/${BCOS_CONSOLE_VERSION}/console.tar.gz
-
-    # LOG_INFO "Download ledger-tool ..."
-    # git clone --depth 1 https://github.com/Shareong/ledger-tool.git
-    # tar -zcf ledger-tool.tar.gz ledger-tool
-    # rm -rf ledger-tool
 
     cd -
 }

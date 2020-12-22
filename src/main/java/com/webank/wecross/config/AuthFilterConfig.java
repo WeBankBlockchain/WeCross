@@ -20,8 +20,11 @@ public class AuthFilterConfig {
         remoteAuthFilter.registerAuthUri("/auth/login");
         remoteAuthFilter.registerAuthUri("/auth/logout");
         remoteAuthFilter.registerAuthUri("/auth/addChainAccount");
+        remoteAuthFilter.registerAuthUri("/auth/removeChainAccount");
         remoteAuthFilter.registerAuthUri("/auth/setDefaultAccount");
         remoteAuthFilter.registerAuthUri("/auth/listAccount");
+        remoteAuthFilter.registerAuthUri("/auth/authCode");
+        remoteAuthFilter.registerAuthUri("/auth/pub");
 
         return remoteAuthFilter;
     }

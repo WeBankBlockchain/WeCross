@@ -80,6 +80,7 @@ EOF
 
     check_log
     check_console_log ${ROOT}/WeCross-Console/logs/warn.log
+    check_console_log ${ROOT}/WeCross-Console/logs/error.log
 
 }
 
@@ -93,25 +94,25 @@ htlc_test() {
 
     ensure_bcos_nodes_running
 
-    cd WeCross-Console-8251/
+    cd WeCross-Console/
     bash start.sh <<EOF
-login
+login org1-admin 123456
 listAccount
 listResources
 setDefaultAccount Fabric1.4 1
-call payment.fabric.htlc balanceOf User1@org1.example.com
-newHTLCProposal payment.fabric.htlc bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 null false 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
+call payment.fabric.htlc balanceOf User1@org2.example.com
+newHTLCProposal payment.fabric.htlc bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 null false 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org2.example.com 500 2000000000
 quit
 EOF
     cd ..
 
     cd WeCross-Console/
     bash start.sh <<EOF
-login
+login org2-admin 123456
 listAccount
 listResources
 call payment.bcos.htlc balanceOf 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf
-newHTLCProposal payment.bcos.htlc bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 9dda9a5e175a919ee98ff0198927b0a765ef96cf917144b589bb8e510e04843c true 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
+newHTLCProposal payment.bcos.htlc bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 9dda9a5e175a919ee98ff0198927b0a765ef96cf917144b589bb8e510e04843c true 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org2.example.com 500 2000000000
 quit
 EOF
     cd ..
@@ -120,7 +121,7 @@ EOF
 
     cd WeCross-Console/
     bash start.sh <<EOF
-login
+login org2-admin 123456
 listAccount
 listResources
 call payment.bcos.htlc balanceOf 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf
@@ -128,26 +129,30 @@ quit
 EOF
     cd ..
 
-    cd WeCross-Console-8251/
+    cd WeCross-Console/
     bash start.sh <<EOF
-login
+login org1-admin 123456
 listAccount
 listResources
-call payment.fabric.htlc balanceOf User1@org1.example.com
+call payment.fabric.htlc balanceOf User1@org2.example.com
 quit
 EOF
     cd ..
 
     check_log
     check_console_log ${ROOT}/WeCross-Console/logs/warn.log
-    check_console_log ${ROOT}/WeCross-Console-8251/logs/warn.log
+    check_console_log ${ROOT}/WeCross-Console/logs/error.log
 }
 
 # xa test
-xa_test() {
+xa_evidence_test() {
     cd ${ROOT}
 
-    bash -x xa_config.sh n
+    bash -x xa_config_evidence.sh n
+
+    docker ps | grep evidence
+    sleep 20
+    docker ps | grep evidence
 
     cd WeCross-Console/
     bash start.sh <<EOF
@@ -168,7 +173,6 @@ call payment.fabric.evidence queryEvidence evidence0
 startTransaction payment.bcos.evidence payment.fabric.evidence
 execTransaction payment.bcos.evidence newEvidence evidence1 "I'm TomGG"
 execTransaction payment.fabric.evidence newEvidence evidence1 "I'm JerryMM"
-callTransaction payment.bcos.evidence queryEvidence evidence1
 callTransaction payment.fabric.evidence queryEvidence evidence1
 callTransaction payment.bcos.evidence queryEvidence evidence1
 rollbackTransaction payment.bcos.evidence payment.fabric.evidence
@@ -183,6 +187,50 @@ EOF
 
     check_log
     check_console_log ${ROOT}/WeCross-Console/logs/warn.log
+    check_console_log ${ROOT}/WeCross-Console/logs/error.log
+}
+
+xa_asset_test() {
+    cd ${ROOT}
+
+    bash -x xa_config_asset.sh n
+
+    docker ps | grep asset
+    sleep 20
+    docker ps | grep asset
+
+    cd WeCross-Console/
+    bash start.sh <<EOF
+login
+listAccount
+listResources
+call payment.bcos.asset balanceOf Alice
+call payment.fabric.asset balanceOf Alice
+
+startTransaction payment.bcos.asset payment.fabric.asset
+execTransaction payment.bcos.asset transfer Alice Oscar 100
+execTransaction payment.fabric.asset transfer Alice Oscar 100
+commitTransaction payment.bcos.asset payment.fabric.asset
+
+call payment.bcos.asset balanceOf Alice
+call payment.fabric.asset balanceOf Alice
+
+startTransaction payment.bcos.asset payment.fabric.asset
+execTransaction payment.bcos.asset transfer Alice Oscar 100
+execTransaction payment.fabric.asset transfer Alice Oscar 100
+rollbackTransaction payment.bcos.asset payment.fabric.asset
+
+call payment.bcos.asset balanceOf Alice
+call payment.fabric.asset balanceOf Alice
+
+quit
+EOF
+
+    cd -
+
+    check_log
+    check_console_log ${ROOT}/WeCross-Console/logs/warn.log
+    check_console_log ${ROOT}/WeCross-Console/logs/error.log
 }
 
 prepare_wecross() {
@@ -191,6 +239,7 @@ prepare_wecross() {
     LOG_INFO "Download plugin from branch: ${PLUGIN_BRANCH}"
     bash download_plugin.sh BCOS2 ${PLUGIN_BRANCH}
     bash download_plugin.sh Fabric1 ${PLUGIN_BRANCH}
+    bash download_pages.sh ${PLUGIN_BRANCH}
     cd -
 
     mv dist demo/WeCross
@@ -224,7 +273,8 @@ main() {
     prepare_demo
     demo_test
     htlc_test
-    xa_test
+    xa_evidence_test
+    xa_asset_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then

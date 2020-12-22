@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 ROOT=$(pwd)
 DB_IP=127.0.0.1
 DB_PORT=3306
@@ -23,7 +23,7 @@ Download() {
     local url=${1}
     local file=$(basename ${url})
     if [ ! -e ${file} ]; then
-        curl -LO ${url}
+        curl -#LO ${url}
     fi
 }
 
@@ -84,9 +84,9 @@ check_bcos_avaliable() {
     check_port_avaliable 20200 BCOS-Channel
     check_port_avaliable 8545 BCOS-RPC
 
-    check_port_avaliable 30301 BCOS-P2P
-    check_port_avaliable 20201 BCOS-Channel
-    check_port_avaliable 8546 BCOS-RPC
+    check_port_avaliable 30310 BCOS-GM-P2P
+    check_port_avaliable 20210 BCOS-GM-Channel
+    check_port_avaliable 8555 BCOS-GM-RPC
 }
 
 check_wecross_avaliable() {
@@ -139,6 +139,10 @@ check_bcos() {
     check_process bcos/nodes/127.0.0.1/node1/../fisco-bcos
 }
 
+check_bcos_gm() {
+    check_process bcos/nodes_gm/127.0.0.1/node0/../fisco-bcos
+}
+
 check_wecross() {
     check_process routers-payment/127.0.0.1-8250-25500
     check_process routers-payment/127.0.0.1-8251-25501
@@ -146,6 +150,7 @@ check_wecross() {
 
 check_wecross_network() {
     check_bcos
+    check_bcos_gm
     check_wecross
 }
 
@@ -179,12 +184,20 @@ console_ask() {
     esac
 }
 
+exit_when_empty_db_pwd() {
+    if mysql -u ${DB_USERNAME} -h ${DB_IP} -P ${DB_PORT} -e "status" 2>/dev/null; then
+        LOG_ERROR "Not support to use account with no password. Please try another account."
+        exit 1
+    fi
+}
+
 db_config_ask() {
     check_command mysql
     LOG_INFO "Database connection:"
     read -r -p "[1/4]> ip: " DB_IP
     read -r -p "[2/4]> port: " DB_PORT
     read -r -p "[3/4]> username: " DB_USERNAME
+    exit_when_empty_db_pwd
     read -r -p "[4/4]> password: " -s DB_PASSWORD
     echo "" # \n
     LOG_INFO "Database connetion with: ${DB_IP}:${DB_PORT} ${DB_USERNAME} "
@@ -203,12 +216,9 @@ config_router_8250() {
     # copy cert
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/bcos/
 
-    # bcos stub internal account
-    bash add_account.sh -t BCOS2.0 -n bcos_admin -d conf/accounts #
-
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos bcos_admin
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos bcos_admin
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos
 
     cd -
 }
@@ -233,12 +243,9 @@ config_router_8251() {
         sed -i 's/20200/20210/g' conf/chains/bcos_gm/stub.toml
     fi
 
-    # bcos gm stub internal account
-    bash add_account.sh -t GM_BCOS2.0 -n bcos_gm_admin -d conf/accounts
-
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.ProxyContractDeployment deploy chains/bcos_gm bcos_gm_admin
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.HubContractDeployment deploy chains/bcos_gm bcos_gm_admin
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.ProxyContractDeployment deploy chains/bcos_gm
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.HubContractDeployment deploy chains/bcos_gm
 
     cd -
 }
@@ -260,9 +267,9 @@ build_wecross() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_wecross.sh ]; then
-            bash download_wecross.sh -t v1.0.0-rc4
+            bash download_wecross.sh -t v1.0.0
         else
-            bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0-rc4
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0
         fi
     fi
 
@@ -283,9 +290,9 @@ build_wecross_console() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_console.sh ]; then
-            bash download_console.sh -t v1.0.0-rc4
+            bash download_console.sh -t v1.0.0
         else
-            bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_console.sh) -t v1.0.0-rc4
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t v1.0.0
         fi
     fi
 
@@ -316,9 +323,9 @@ build_account_manager() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_account_manager.sh ]; then
-            bash download_account_manager.sh -t v1.0.0-rc4
+            bash download_account_manager.sh -t v1.0.0 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
         else
-            bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_account_manager.sh) -t v1.0.0-rc4
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_account_manager.sh) -t v1.0.0 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
         fi
     fi
 
@@ -336,6 +343,9 @@ build_account_manager() {
     LOG_INFO "Setup database"
     cd ${ROOT}/WeCross-Account-Manager/
     query_db <conf/db_setup.sql
+
+    # generate rsa_keypair
+    bash create_rsa_keypair.sh -d conf/
 
     bash start.sh
     sed_i 's/create/update/g' ${ROOT}/WeCross-Account-Manager/conf/application.properties
@@ -396,7 +406,7 @@ EOF
 
 deploy_chain_account() {
     mkdir -p ${ROOT}/WeCross-Console/conf/accounts/
-    rm -rf $(ls ${ROOT}/WeCross-Console/conf/accounts/ | grep -v .sh)
+    cd ${ROOT}/WeCross-Console/conf/accounts/ && rm -rf $(ls | grep -v .sh) && cd -
     cp -r ${ROOT}/bcos/accounts/* ${ROOT}/WeCross-Console/conf/accounts/
 
     add_bcos_account bcos_user1       # 0
@@ -426,23 +436,15 @@ main() {
     config_router_8250 ${ROOT}/routers-payment/127.0.0.1-8250-25500/
     config_router_8251 ${ROOT}/routers-payment/127.0.0.1-8251-25501/
 
-    netstat -napl |grep 20200
-    netstat -napl |grep 20210
-
-
     # Start up routers
     cd ${ROOT}/routers-payment/127.0.0.1-8250-25500/
     if ! bash start.sh; then
-        netstat -napl |grep 20200
-        netstat -napl |grep 20210
         cat ${ROOT}/bcos/nodes/127.0.0.1/node0/log/*
         exit 1
     fi
 
     cd ${ROOT}/routers-payment/127.0.0.1-8251-25501/
     if ! bash start.sh; then
-        netstat -napl |grep 20200
-        netstat -napl |grep 20210
         cat ${ROOT}/bcos/nodes/127.0.0.1/node0/log/*
         exit 1
     fi
@@ -457,16 +459,18 @@ main() {
 
     LOG_INFO "Success! WeCross demo network is running. Framework:"
     echo -e "
-                    FISCO BCOS
-         Normal                     Guomi
-      (HelloWorld)               (HelloWorld)
-           |                          |
-           |                          |
-    WeCross Router <----------> WeCross Router
-(127.0.0.1-8250-25500)      (127.0.0.1-8251-25501)
-           | 
-           | 
-    WeCross Console
+                          FISCO BCOS
+               Normal                     Guomi
+            (HelloWorld)               (HelloWorld)
+                 |                          |
+                 |                          |
+                 |                          |
+          WeCross Router <----------> WeCross Router <----------> WeCross Account Manager
+      (127.0.0.1-8250-25500)      (127.0.0.1-8251-25501)             (127.0.0.1:8340)
+          /            \\
+         /              \\
+        /                \\
+ WeCross WebApp     WeCross Console
 "
 
 }

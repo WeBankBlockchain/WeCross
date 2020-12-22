@@ -23,7 +23,7 @@ public class HTLCImpl implements HTLC {
                 (exception, result) -> {
                     if (exception != null) {
                         callback.onReturn(exception, null);
-                    } else if (!RoutineDefault.SUCCESS_FLAG.equals(result)) {
+                    } else if (!RoutineDefault.SUCCESS_FLAG.equalsIgnoreCase(result)) {
                         callback.onReturn(
                                 new WeCrossException(
                                         ErrorCode.HTLC_ERROR,
@@ -95,7 +95,7 @@ public class HTLCImpl implements HTLC {
                         res = result[0].trim();
                     }
 
-                    if (!RoutineDefault.SUCCESS_FLAG.equals(res)) {
+                    if (!RoutineDefault.SUCCESS_FLAG.equalsIgnoreCase(res)) {
                         int errorCode =
                                 RoutineDefault.LOCK_METHOD.equals(method)
                                         ? HTLCErrorCode.LOCK_ERROR

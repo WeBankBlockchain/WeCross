@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 
-default_compatibility_version=v1.0.0-rc4 # update this every release
+default_compatibility_version=v1.0.0 # update this every release
 
 compatibility_version=
 
@@ -43,7 +43,7 @@ parse_command() {
 }
 
 download_demo() {
-    local github_url=https://github.com/WeBankFinTech/WeCross/releases/download/
+    local github_url=https://github.com/WebankBlockchain/WeCross/releases/download/
     local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/Demo/
     #local compatibility_version=
     local release_pkg=demo.tar.gz
@@ -56,7 +56,7 @@ download_demo() {
 
     LOG_INFO "Checking latest release"
     if [ -z "${compatibility_version}" ]; then
-        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
+        compatibility_version=$(curl -s https://api.github.com/repos/WebankBlockchain/WeCross/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
     fi
 
     if [ -z "${compatibility_version}" ]; then
@@ -76,11 +76,14 @@ download_release_pkg() {
     local release_pkg=${4}
     local release_pkg_checksum_file=${5}
 
+    mkdir -p ~/.wecross_pkg
+    cd ~/.wecross_pkg
+
     #download checksum
     LOG_INFO "Try to Download checksum from ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}"
-    if ! curl --fail -LO ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}; then
+    if ! curl --fail -#LO ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}; then
         LOG_INFO "Download checksum from ${github_url}/${compatibility_version}/${release_pkg_checksum_file}"
-        curl -LO ${github_url}/${compatibility_version}/${release_pkg_checksum_file}
+        curl -#LO ${github_url}/${compatibility_version}/${release_pkg_checksum_file}
     fi
 
     if [ ! -e ${release_pkg_checksum_file} ] || [ -z "$(grep ${release_pkg} ${release_pkg_checksum_file})" ]; then
@@ -93,10 +96,10 @@ download_release_pkg() {
         LOG_INFO "Latest release ${release_pkg} exists."
     else
         LOG_INFO "Try to download from: ${cdn_url}/${compatibility_version}/${release_pkg}"
-        if ! curl --fail -LO ${cdn_url}/${compatibility_version}/${release_pkg}; then
+        if ! curl --fail -#LO ${cdn_url}/${compatibility_version}/${release_pkg}; then
             # If CDN failed, download from github release
             LOG_INFO "Download from: ${github_url}/${compatibility_version}/${release_pkg}"
-            curl -C - -LO ${github_url}/${compatibility_version}/${release_pkg}
+            curl -C - -#LO ${github_url}/${compatibility_version}/${release_pkg}
         fi
 
         if ! md5sum -c ${release_pkg_checksum_file}; then
@@ -107,6 +110,9 @@ download_release_pkg() {
     fi
 
     tar -zxf ${release_pkg}
+
+    cd -
+    mv ~/.wecross_pkg/demo wecross-demo
 }
 
 main() {
@@ -115,8 +121,8 @@ main() {
 }
 
 print_result() {
-    LOG_INFO "Download completed. WeCross Demo is in: ./demo/"
-    LOG_INFO "Please: \"cd ./demo/ \" and \"bash build.sh\" to build the demo."
+    LOG_INFO "Download completed. WeCross Demo is in: ./wecross-demo/"
+    LOG_INFO "Please: \"cd ./wecross-demo/ \" and \"bash build.sh\" to build the demo."
 }
 
 parse_command $@

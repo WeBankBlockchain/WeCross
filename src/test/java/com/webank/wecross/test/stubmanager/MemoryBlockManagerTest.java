@@ -75,7 +75,7 @@ public class MemoryBlockManagerTest {
                         (Answer<Void>)
                                 invocation -> {
                                     long blockNumber = invocation.getArgument(0);
-                                    Driver.GetBlockCallback callback = invocation.getArgument(2);
+                                    Driver.GetBlockCallback callback = invocation.getArgument(3);
 
                                     threadPool.execute(
                                             () -> {

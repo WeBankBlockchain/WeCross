@@ -1,17 +1,17 @@
 #!/bin/bash
 set -e
 
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 
 enable_build_from_resource=0
 
 deps_dir=$(pwd)'/plugin/'
 src_dir=$(pwd)'/src/'
 
-bcos_stub_url=https://github.com/WeBankFinTech/WeCross-BCOS2-Stub.git
+bcos_stub_url=https://github.com/WebankBlockchain/WeCross-BCOS2-Stub.git
 bcos_stub_branch=
 
-fabric_stub_url=https://github.com/WeBankFinTech/WeCross-Fabric1-Stub.git
+fabric_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric1-Stub.git
 fabric_stub_branch=
 
 LOG_INFO() {
@@ -36,8 +36,8 @@ Usage:
 
     <tag/branch>:   certain tag or branch to download
 e.g
-    bash $0 BCOS2 v1.0.0-rc4
-    bash $0 Fabric1 v1.0.0-rc4
+    bash $0 BCOS2 v1.0.0
+    bash $0 Fabric1 v1.0.0
 EOF
     exit 0
 }

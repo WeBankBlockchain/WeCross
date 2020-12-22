@@ -1,16 +1,16 @@
 #!/bin/bash
 set -e
 
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 
-default_compatibility_version=v1.0.0-rc4 # update this every release
+default_compatibility_version=v1.0.0 # update this every release
 
 compatibility_version=
 enable_build_from_resource=0
 
 src_dir=$(pwd)'/src/'
 
-wecross_console_url=https://github.com/WeBankFinTech/WeCross-Console.git
+wecross_console_url=https://github.com/WebankBlockchain/WeCross-Console.git
 wecross_console_branch=${default_compatibility_version}
 
 LOG_INFO() {
@@ -27,7 +27,7 @@ Download() {
     local url=${1}
     local file=$(basename ${url})
     if [ ! -e ${file} ]; then
-        curl -LO ${url}
+        curl -#LO ${url}
     fi
 }
 
@@ -68,7 +68,7 @@ parse_command() {
 }
 
 download_wecross_console_pkg() {
-    local github_url=https://github.com/WeBankFinTech/WeCross-Console/releases/download/
+    local github_url=https://github.com/WebankBlockchain/WeCross-Console/releases/download/
     local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross-Console/
     local release_pkg=WeCross-Console.tar.gz
     local release_pkg_checksum_file=WeCross-Console.tar.gz.md5
@@ -80,7 +80,7 @@ download_wecross_console_pkg() {
 
     LOG_INFO "Checking latest release"
     if [ -z "${compatibility_version}" ]; then
-        compatibility_version=$(curl -s https://api.github.com/repos/WeBankFinTech/WeCross-Console/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
+        compatibility_version=$(curl -s https://api.github.com/repos/WebankBlockchain/WeCross-Console/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
     fi
 
     if [ -z "${compatibility_version}" ]; then
@@ -102,9 +102,9 @@ download_release_pkg() {
 
     #download checksum
     LOG_INFO "Try to Download checksum from ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}"
-    if ! curl --fail -LO ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}; then
+    if ! curl --fail -#LO ${cdn_url}/${compatibility_version}/${release_pkg_checksum_file}; then
         LOG_INFO "Download checksum from ${github_url}/${compatibility_version}/${release_pkg_checksum_file}"
-        curl -LO ${github_url}/${compatibility_version}/${release_pkg_checksum_file}
+        curl -#LO ${github_url}/${compatibility_version}/${release_pkg_checksum_file}
     fi
 
     if [ ! -e ${release_pkg_checksum_file} ] || [ -z "$(grep ${release_pkg} ${release_pkg_checksum_file})" ]; then
@@ -117,10 +117,10 @@ download_release_pkg() {
         LOG_INFO "Latest release ${release_pkg} exists."
     else
         LOG_INFO "Try to download from: ${cdn_url}/${compatibility_version}/${release_pkg}"
-        if ! curl --fail -LO ${cdn_url}/${compatibility_version}/${release_pkg}; then
+        if ! curl --fail -#LO ${cdn_url}/${compatibility_version}/${release_pkg}; then
             # If CDN failed, download from github release
             LOG_INFO "Download from: ${github_url}/${compatibility_version}/${release_pkg}"
-            curl -C - -LO ${github_url}/${compatibility_version}/${release_pkg}
+            curl -C - -#LO ${github_url}/${compatibility_version}/${release_pkg}
         fi
 
         if ! md5sum -c ${release_pkg_checksum_file}; then
@@ -215,10 +215,10 @@ download_get_account_scripts() {
 main() {
     if [ 1 -eq ${enable_build_from_resource} ]; then
         build_from_source
+        download_get_account_scripts
     else
         download_wecross_console_pkg
     fi
-    download_get_account_scripts
 }
 
 print_result() {

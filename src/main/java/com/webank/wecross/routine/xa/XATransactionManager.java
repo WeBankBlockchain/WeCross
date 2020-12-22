@@ -10,6 +10,7 @@ import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.*;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -22,20 +23,33 @@ public class XATransactionManager {
     private ZoneManager zoneManager;
     private AccountManager accountManager;
 
-    private static final String SUCCESS = "success";
+    private static final String SUCCESS = "Success";
 
-    public interface ReduceCallback {
+    public interface XAReduceCallback {
         void onResponse(XAResponse xaResponse);
     }
 
-    public Map<String, Set<Path>> getChainPaths(Set<Path> resources) {
-        Map<String, Set<Path>> zone2Path = new HashMap<String, Set<Path>>();
-        for (Path path : resources) {
+    /**
+     * check and reorganize resources by chain type used by startXATransaction forbid system
+     * contracts
+     */
+    public Map<String, Set<String>> getChainPaths(Set<String> resources) throws Exception {
+        Map<String, Set<String>> zone2Path = Collections.synchronizedMap(new Hashtable<>());
+        for (String resource : resources) {
+            Path path;
+            try {
+                path = Path.decode(resource);
+            } catch (Exception e) {
+                throw new Exception("Invalid path found");
+            }
+            if (StubConstant.HUB_NAME.equals(path.getResource())
+                    || StubConstant.PROXY_NAME.equals(path.getResource())) {
+                throw new Exception("System contracts cannot be in xa transaction");
+            }
             String key = path.getZone() + "." + path.getChain();
             zone2Path.computeIfAbsent(key, k -> new HashSet<>());
-            zone2Path.get(key).add(path);
+            zone2Path.get(key).add(resource);
         }
-
         return zone2Path;
     }
 
@@ -53,7 +67,7 @@ public class XATransactionManager {
                 .collect(Collectors.toList());
     }
 
-    private ReduceCallback getListXAReduceCallback(int size, ReduceCallback callback) {
+    private XAReduceCallback getXAReduceCallback(int size, XAReduceCallback callback) {
         AtomicInteger finished = new AtomicInteger();
         List<XAResponse.ChainErrorMessage> errors =
                 Collections.synchronizedList(new LinkedList<>());
@@ -78,47 +92,144 @@ public class XATransactionManager {
         };
     }
 
+    private XAReduceCallback getStartXAReduceCallback(
+            int size,
+            String xaTransactionID,
+            UniversalAccount ua,
+            Set<String> chains,
+            XAReduceCallback callback) {
+        AtomicInteger finished = new AtomicInteger();
+        List<XAResponse.ChainErrorMessage> errors =
+                Collections.synchronizedList(new LinkedList<>());
+
+        return (response) -> {
+            if (!response.getChainErrorMessages().isEmpty()) {
+                errors.add(response.getChainErrorMessages().get(0));
+                chains.remove(response.getChainErrorMessages().get(0).getPath());
+            }
+
+            int current = finished.addAndGet(1);
+            if (current == size) {
+                // all finished
+                if (!errors.isEmpty()) {
+                    // error occurred
+                    XAResponse xaResponse = new XAResponse();
+                    xaResponse.setStatus(-1);
+                    xaResponse.setChainErrorMessages(errors);
+
+                    // commit succeeded chains
+                    if (!chains.isEmpty()) {
+                        Set<Path> chainPaths =
+                                chains.parallelStream()
+                                        .map(
+                                                (s) -> {
+                                                    try {
+                                                        return Path.decode(s);
+                                                    } catch (Exception e) {
+                                                        logger.error("Decode path error: ", e);
+                                                        return null;
+                                                    }
+                                                })
+                                        .collect(Collectors.toSet());
+                        asyncCommitXATransaction(
+                                xaTransactionID,
+                                ua,
+                                chainPaths,
+                                commitResponse -> {
+                                    if (commitResponse.getStatus() != 0
+                                            && !commitResponse.getChainErrorMessages().isEmpty()) {
+                                        for (XAResponse.ChainErrorMessage errorMessage :
+                                                commitResponse.getChainErrorMessages()) {
+                                            xaResponse.addChainErrorMessage(errorMessage);
+                                        }
+                                    }
+                                    callback.onResponse(xaResponse);
+                                });
+                    } else {
+                        callback.onResponse(xaResponse);
+                    }
+                } else {
+                    callback.onResponse(new XAResponse());
+                }
+            }
+        };
+    }
+
     public void asyncStartXATransaction(
             String xaTransactionID,
             UniversalAccount ua,
-            Set<Path> resources,
-            ReduceCallback callback) {
+            Set<String> resources,
+            XAReduceCallback callback)
+            throws WeCrossException {
 
         logger.info("startXATransaction, resources: {}", resources);
 
-        Map<String, Set<Path>> paths = getChainPaths(resources);
+        Map<String, Set<String>> paths;
+        try {
+            paths = getChainPaths(resources);
+        } catch (Exception e) {
+            throw new WeCrossException(WeCrossException.ErrorCode.POST_DATA_ERROR, e.getMessage());
+        }
 
-        ReduceCallback reduceCallback = getListXAReduceCallback(paths.size(), callback);
+        XAReduceCallback xaReduceCallback =
+                getStartXAReduceCallback(
+                        paths.size(), xaTransactionID, ua, paths.keySet(), callback);
 
-        for (Map.Entry<String, Set<Path>> entry : paths.entrySet()) {
-            Path tempPath = entry.getValue().iterator().next();
+        for (Map.Entry<String, Set<String>> entry : paths.entrySet()) {
             // send prepare transaction
             TransactionRequest transactionRequest = new TransactionRequest();
             transactionRequest.setMethod("startXATransaction");
-            String[] args = new String[entry.getValue().size() + resources.size() + 2];
+            String[] args = new String[3];
 
             args[0] = xaTransactionID;
-            args[1] = String.valueOf(entry.getValue().size());
+            String[] selfPaths = new String[entry.getValue().size()];
+            String[] otherPaths = new String[resources.size() - entry.getValue().size()];
 
             int i = 0;
-            for (Path path : entry.getValue()) {
-                args[i + 2] = path.toString();
+            for (String path : entry.getValue()) {
+                selfPaths[i] = path;
                 ++i;
             }
 
-            for (Path path : resources) {
-                args[i + 2] = path.toString();
-                ++i;
+            i = 0;
+            for (String path : resources) {
+                if (!entry.getValue().contains(path)) {
+                    otherPaths[i] = path;
+                    ++i;
+                }
+            }
+
+            XAResponse xaResponse = new XAResponse();
+            try {
+                args[1] = objectMapper.writeValueAsString(selfPaths);
+                args[2] = objectMapper.writeValueAsString(otherPaths);
+            } catch (Exception e) {
+                xaResponse.addChainErrorMessage(
+                        new XAResponse.ChainErrorMessage(
+                                entry.getKey(),
+                                "Failed to format path lists, and other succeeded chains will be committed."));
+                xaReduceCallback.onResponse(xaResponse);
+                continue;
             }
 
             transactionRequest.setArgs(args);
             transactionRequest.getOptions().put(Resource.RAW_TRANSACTION, true);
 
-            Path proxyPath = new Path(tempPath);
+            Path proxyPath;
+            try {
+                proxyPath = Path.decode(entry.getValue().iterator().next());
+            } catch (Exception e) {
+                xaResponse.addChainErrorMessage(
+                        new XAResponse.ChainErrorMessage(
+                                entry.getKey(),
+                                "Failed to decode path, and other succeeded chains will be committed."));
+                xaReduceCallback.onResponse(xaResponse);
+                continue;
+            }
+
             proxyPath.setResource(StubConstant.PROXY_NAME);
             Resource resource = zoneManager.fetchResource(proxyPath);
 
-            XAResponse xaResponse = new XAResponse();
             resource.asyncSendTransaction(
                     transactionRequest,
                     ua,
@@ -134,8 +245,11 @@ public class XATransactionManager {
                             logger.error("startXATransaction failed, ", exception);
                             xaResponse.addChainErrorMessage(
                                     new XAResponse.ChainErrorMessage(
-                                            entry.getKey(), exception.getMessage()));
-                            reduceCallback.onResponse(xaResponse);
+                                            entry.getKey(),
+                                            "Failed: "
+                                                    + exception.getMessage()
+                                                    + ", and other succeeded chains will be committed."));
+                            xaReduceCallback.onResponse(xaResponse);
                             return;
                         }
 
@@ -147,8 +261,11 @@ public class XATransactionManager {
 
                             xaResponse.addChainErrorMessage(
                                     new XAResponse.ChainErrorMessage(
-                                            entry.getKey(), response.getMessage()));
-                            reduceCallback.onResponse(xaResponse);
+                                            entry.getKey(),
+                                            "Failed: "
+                                                    + response.getMessage()
+                                                    + ", and other succeeded chains will be committed."));
+                            xaReduceCallback.onResponse(xaResponse);
                             return;
                         }
 
@@ -159,7 +276,7 @@ public class XATransactionManager {
                                     new XAResponse.ChainErrorMessage(entry.getKey(), result));
                         }
 
-                        reduceCallback.onResponse(xaResponse);
+                        xaReduceCallback.onResponse(xaResponse);
                     });
         }
     }
@@ -168,10 +285,9 @@ public class XATransactionManager {
             String xaTransactionID,
             UniversalAccount ua,
             Set<Path> chains,
-            ReduceCallback callback) {
+            XAReduceCallback callback) {
         logger.info("commitXATransaction, chains: {}", chains);
-
-        ReduceCallback reduceCallback = getListXAReduceCallback(chains.size(), callback);
+        XAReduceCallback xaReduceCallback = getXAReduceCallback(chains.size(), callback);
 
         for (Path chainPath : chains) {
             // send prepare transaction
@@ -184,8 +300,6 @@ public class XATransactionManager {
             Path proxyPath = new Path(chainPath);
             proxyPath.setResource(StubConstant.PROXY_NAME);
             Resource resource = zoneManager.fetchResource(proxyPath);
-
-            XAResponse xaResponse = new XAResponse();
             resource.asyncSendTransaction(
                     transactionRequest,
                     ua,
@@ -197,13 +311,16 @@ public class XATransactionManager {
                                     exception);
                         }
 
+                        XAResponse xaResponse = new XAResponse();
+
                         if (exception != null && !exception.isSuccess()) {
                             logger.error("commitXATransaction failed, ", exception);
 
                             xaResponse.addChainErrorMessage(
                                     new XAResponse.ChainErrorMessage(
-                                            chainPath.toString(), exception.getMessage()));
-                            reduceCallback.onResponse(xaResponse);
+                                            chainPath.toString(),
+                                            "Commit failed: " + exception.getMessage()));
+                            xaReduceCallback.onResponse(xaResponse);
                             return;
                         }
 
@@ -215,8 +332,9 @@ public class XATransactionManager {
 
                             xaResponse.addChainErrorMessage(
                                     new XAResponse.ChainErrorMessage(
-                                            chainPath.toString(), response.getMessage()));
-                            reduceCallback.onResponse(xaResponse);
+                                            chainPath.toString(),
+                                            "Commit failed: " + response.getMessage()));
+                            xaReduceCallback.onResponse(xaResponse);
                             return;
                         }
 
@@ -227,7 +345,7 @@ public class XATransactionManager {
                                     new XAResponse.ChainErrorMessage(chainPath.toString(), result));
                         }
 
-                        reduceCallback.onResponse(xaResponse);
+                        xaReduceCallback.onResponse(xaResponse);
                     });
         }
     }
@@ -236,9 +354,9 @@ public class XATransactionManager {
             String xaTransactionID,
             UniversalAccount ua,
             Set<Path> chains,
-            ReduceCallback callback) {
+            XAReduceCallback callback) {
 
-        ReduceCallback reduceCallback = getListXAReduceCallback(chains.size(), callback);
+        XAReduceCallback xaReduceCallback = getXAReduceCallback(chains.size(), callback);
 
         for (Path chainPath : chains) {
             // send rollback transaction
@@ -269,8 +387,9 @@ public class XATransactionManager {
 
                             xaResponse.addChainErrorMessage(
                                     new XAResponse.ChainErrorMessage(
-                                            chainPath.toString(), exception.getMessage()));
-                            reduceCallback.onResponse(xaResponse);
+                                            chainPath.toString(),
+                                            "Rollback failed: " + exception.getMessage()));
+                            xaReduceCallback.onResponse(xaResponse);
                             return;
                         }
 
@@ -282,8 +401,9 @@ public class XATransactionManager {
 
                             xaResponse.addChainErrorMessage(
                                     new XAResponse.ChainErrorMessage(
-                                            chainPath.toString(), response.getMessage()));
-                            reduceCallback.onResponse(xaResponse);
+                                            chainPath.toString(),
+                                            "Rollback failed: " + response.getMessage()));
+                            xaReduceCallback.onResponse(xaResponse);
                             return;
                         }
 
@@ -294,7 +414,7 @@ public class XATransactionManager {
                                     new XAResponse.ChainErrorMessage(chainPath.toString(), result));
                         }
 
-                        reduceCallback.onResponse(xaResponse);
+                        xaReduceCallback.onResponse(xaResponse);
                     });
         }
     }
@@ -454,21 +574,23 @@ public class XATransactionManager {
     }
 
     private ListXAReduceCallback getListXAReduceCallback(
-            int count,
-            Map<String, Integer> offsets,
-            int size,
-            ListXATransactionsCallback callback) {
+            int count, Map<String, Long> offsets, int size, ListXATransactionsCallback callback) {
         AtomicInteger finished = new AtomicInteger();
         Map<String, List<XATransactionListResponse.XA>> xaResponses =
                 Collections.synchronizedMap(new HashMap<>());
         List<XAResponse.ChainErrorMessage> errors =
                 Collections.synchronizedList(new LinkedList<>());
+        Map<String, Long> nextOffsets = new ConcurrentHashMap<>(offsets);
 
         return (chain, listXAResponse) -> {
             if (Objects.nonNull(listXAResponse.getChainErrorMessage())) {
                 errors.add(listXAResponse.getChainErrorMessage());
             } else {
-                xaResponses.put(chain, listXAResponse.getXaList());
+                xaResponses.put(chain, listXAResponse.getXaTransactions());
+            }
+
+            if (nextOffsets.get(chain) == -1) {
+                nextOffsets.put(chain, listXAResponse.getTotal() - 1);
             }
 
             int current = finished.addAndGet(1);
@@ -489,9 +611,6 @@ public class XATransactionManager {
                 Set<String> xaTransactionIDs = new HashSet<>();
                 Set<String> finishedChains = new HashSet<>();
 
-                // deep copy
-                Map<String, Integer> nextOffsets = new HashMap<>(offsets);
-
                 // init index for each chain
                 Map<String, Integer> indexs = new HashMap<>();
                 for (String key : xaResponses.keySet()) {
@@ -509,9 +628,9 @@ public class XATransactionManager {
 
                         if (indexs.get(currentChain) == xaResponses.get(currentChain).size()) {
                             // current chain finished, update offset and index
-                            int nextOffset =
+                            Long nextOffset =
                                     indexs.get(currentChain) == size
-                                            ? offsets.get(currentChain) + size
+                                            ? offsets.get(currentChain) - size
                                             : -1;
                             nextOffsets.put(currentChain, nextOffset);
                             finishedChains.add(currentChain);
@@ -527,7 +646,7 @@ public class XATransactionManager {
                             if (xaTransactionIDs.contains(currentXATransactionID)) {
                                 // current xa transactionID existed
                                 indexs.put(currentChain, currentIndex + 1);
-                                int nextOffset = nextOffsets.get(currentChain) + 1;
+                                Long nextOffset = nextOffsets.get(currentChain) - 1;
                                 nextOffsets.put(currentChain, nextOffset);
                             } else {
                                 // check current timestamp
@@ -565,7 +684,7 @@ public class XATransactionManager {
 
                         // update offset and index
                         indexs.put(maxTimestampChain, maxOneIndex + 1);
-                        int nextOffset = nextOffsets.get(maxTimestampChain) + 1;
+                        Long nextOffset = nextOffsets.get(maxTimestampChain) - 1;
                         nextOffsets.put(maxTimestampChain, nextOffset);
                     }
 
@@ -575,6 +694,18 @@ public class XATransactionManager {
                 }
 
                 response.setFinished(num == xaResponses.size() || total < size);
+
+                // check offsets
+                int finishedChain = 0;
+                for (String key : nextOffsets.keySet()) {
+                    if (nextOffsets.get(key) == -1) {
+                        finishedChain++;
+                    }
+                }
+                if (finishedChain == nextOffsets.size()) {
+                    response.setFinished(true);
+                }
+
                 response.setNextOffsets(nextOffsets);
                 response.recoverUsername(accountManager);
                 callback.onResponse(null, response);
@@ -584,7 +715,7 @@ public class XATransactionManager {
 
     public void asyncListXATransactions(
             UniversalAccount ua,
-            Map<String, Integer> offsets,
+            Map<String, Long> offsets,
             int size,
             ListXATransactionsCallback callback) {
 
@@ -610,23 +741,32 @@ public class XATransactionManager {
                 return;
             }
 
-            // reset offsets
+            boolean requireIgnore = true;
             if (offsets.isEmpty()) {
+                // first time to list, reset offsets
+                requireIgnore = false;
                 for (Path chain : chainPaths) {
-                    offsets.put(chain.toString(), 0);
+                    offsets.put(chain.toString(), -1L);
                 }
             }
 
             ListXAReduceCallback reduceCallback =
                     getListXAReduceCallback(offsets.size(), offsets, size, callback);
             for (String chain : offsets.keySet()) {
-                asyncListXATransactions(
-                        ua, Path.decode(chain), offsets.get(chain), size, reduceCallback);
+                if (!requireIgnore || offsets.get(chain) != -1L) {
+                    asyncListXATransactions(
+                            ua, Path.decode(chain), offsets.get(chain), size, reduceCallback);
+                } else {
+                    // not first time to list, -1 means finished
+                    reduceCallback.onResponse(chain, new ListXAResponse());
+                }
             }
 
         } catch (WeCrossException e) {
+            logger.warn("listXATransactions, error: ", e);
             callback.onResponse(e, null);
         } catch (Exception e) {
+            logger.warn("listXATransactions, error: ", e);
             callback.onResponse(
                     new WeCrossException(
                             WeCrossException.ErrorCode.INTERNAL_ERROR, "Internal error"),
@@ -635,14 +775,9 @@ public class XATransactionManager {
     }
 
     private void asyncListXATransactions(
-            UniversalAccount ua, Path path, int offset, int size, ListXAReduceCallback callback) {
+            UniversalAccount ua, Path path, Long offset, int size, ListXAReduceCallback callback) {
         if (logger.isDebugEnabled()) {
             logger.debug("listXATransactions, path: {}, offset: {}, size: {}", path, offset, size);
-        }
-
-        if (offset < 0) {
-            callback.onResponse(path.toString(), new ListXAResponse());
-            return;
         }
 
         try {
@@ -686,19 +821,20 @@ public class XATransactionManager {
                                             path.toString(), transactionResponse.getMessage());
                         } else {
                             String result = transactionResponse.getResult()[0];
-                            if (Objects.nonNull(result) && !"[]".equals(result)) {
-                                XATransactionListResponse.XA[] xas =
-                                        new XATransactionListResponse.XA[0];
+                            if (Objects.nonNull(result)
+                                    && !"{\"total\":0,\"xaTransactions\":[]}".equals(result)) {
                                 try {
-                                    xas =
+                                    XATransactionListResponse.XAList xaList =
                                             objectMapper.readValue(
                                                     result.replace(
                                                             new String(Character.toChars(0)), ""),
-                                                    XATransactionListResponse.XA[].class);
+                                                    XATransactionListResponse.XAList.class);
+                                    response.setXaTransactions(
+                                            Arrays.asList(xaList.getXaTransactions()));
+                                    response.setTotal(xaList.getTotal());
                                 } catch (Exception e) {
                                     logger.warn("Failed to decode json: {}", result);
                                 }
-                                response.setXaList(Arrays.asList(xas));
                             }
                         }
 
@@ -718,7 +854,9 @@ public class XATransactionManager {
     private static class ListXAResponse {
         private XAResponse.ChainErrorMessage chainErrorMessage;
 
-        private List<XATransactionListResponse.XA> xaList = new ArrayList<>();
+        private Long total = new Long(0);
+
+        private List<XATransactionListResponse.XA> xaTransactions = new ArrayList<>();
 
         public XAResponse.ChainErrorMessage getChainErrorMessage() {
             return chainErrorMessage;
@@ -728,12 +866,20 @@ public class XATransactionManager {
             this.chainErrorMessage = chainErrorMessage;
         }
 
-        public List<XATransactionListResponse.XA> getXaList() {
-            return xaList;
+        public Long getTotal() {
+            return total;
         }
 
-        public void setXaList(List<XATransactionListResponse.XA> xaList) {
-            this.xaList = xaList;
+        public void setTotal(Long total) {
+            this.total = total;
+        }
+
+        public List<XATransactionListResponse.XA> getXaTransactions() {
+            return xaTransactions;
+        }
+
+        public void setXaTransactions(List<XATransactionListResponse.XA> xaTransactions) {
+            this.xaTransactions = xaTransactions;
         }
 
         @Override
@@ -741,8 +887,10 @@ public class XATransactionManager {
             return "ListXAResponse{"
                     + "chainErrorMessage="
                     + chainErrorMessage
-                    + ", xaList="
-                    + xaList
+                    + ", total="
+                    + total
+                    + ", xaTransactions="
+                    + xaTransactions
                     + '}';
         }
     }

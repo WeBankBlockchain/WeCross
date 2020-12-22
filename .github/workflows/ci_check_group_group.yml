@@ -1,0 +1,25 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: group-group
+
+on: [push, pull_request]
+
+jobs:
+  group-group:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '10'
+      - uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql root password: '123456'
+      - name: install dependencies
+        run: sudo apt-get update && sudo apt-get install -y mysql-client git curl libssl-dev default-jdk build-essential
+      - name: run ci_cross_groups_demo_check.sh
+        # The script only use ${1} as branch name. if GITHUB_BASE_REF is blank use GITHUB_REF
+        run: bash .ci/ci_cross_groups_demo_check.sh ${GITHUB_BASE_REF} ${GITHUB_REF#refs/heads/}
+        env:
+          CI_DB_PASSWORD : '123456'

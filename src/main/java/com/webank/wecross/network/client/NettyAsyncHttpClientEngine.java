@@ -130,7 +130,9 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
                                                     new WeCrossException(
                                                             WeCrossException.ErrorCode
                                                                     .QUERY_SERVER_ERROR,
-                                                            "AsyncSend status: "
+                                                            "AsyncSend "
+                                                                    + url
+                                                                    + " status: "
                                                                     + httpResponse.getStatusCode()
                                                                     + " message: "
                                                                     + httpResponse

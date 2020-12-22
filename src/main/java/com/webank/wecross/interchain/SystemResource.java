@@ -3,6 +3,8 @@ package com.webank.wecross.interchain;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.zone.ZoneManager;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timer;
 
 public class SystemResource {
     private AccountManager accountManager;
@@ -10,6 +12,8 @@ public class SystemResource {
 
     private Resource proxyResource;
     private Resource hubResource;
+
+    private Timer timer = new HashedWheelTimer();
 
     public SystemResource() {}
 
@@ -54,6 +58,14 @@ public class SystemResource {
 
     public void setHubResource(Resource hubResource) {
         this.hubResource = hubResource;
+    }
+
+    public Timer getTimer() {
+        return timer;
+    }
+
+    public void setTimer(Timer timer) {
+        this.timer = timer;
     }
 
     @Override

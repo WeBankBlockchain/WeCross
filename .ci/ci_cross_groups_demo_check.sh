@@ -79,6 +79,7 @@ EOF
 
     check_log
     check_console_log ${ROOT}/WeCross-Console/logs/warn.log
+    check_console_log ${ROOT}/WeCross-Console/logs/error.log
 }
 
 prepare_wecross() {
@@ -87,6 +88,7 @@ prepare_wecross() {
     LOG_INFO "Download plugin from branch: ${PLUGIN_BRANCH}"
     bash download_plugin.sh BCOS2 ${PLUGIN_BRANCH}
     bash download_plugin.sh Fabric1 ${PLUGIN_BRANCH}
+    bash download_pages.sh ${PLUGIN_BRANCH}
     cd -
 
     mv dist demo/WeCross

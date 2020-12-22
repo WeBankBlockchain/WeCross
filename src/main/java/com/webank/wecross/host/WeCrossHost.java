@@ -59,7 +59,8 @@ public class WeCrossHost {
                                     System.out.println("WeCross router start success!");
                                     mainLoop();
                                 }
-                            });
+                            },
+                            "mainLoop");
             mainLoopThread.start();
         } catch (Exception e) {
             String errorInfo = "Startup host error: " + e.toString();
@@ -74,13 +75,13 @@ public class WeCrossHost {
         while (flag) {
             try {
                 Thread.sleep(1000);
+                broadcastStatus();
+                dumpStatus();
+
             } catch (Exception e) {
-                logger.warn("Thread exception", e);
+                logger.warn("Mainloop thread exception", e);
                 flag = false;
             }
-
-            broadcastStatus();
-            dumpStatus();
         }
         System.exit(0);
     }
@@ -118,7 +119,9 @@ public class WeCrossHost {
         msg.setMethod("seq");
 
         for (Peer peer : peerManager.getPeerInfos().values()) {
-            logger.debug("Send peer seq, to peer:{}, seq:{}", peer, seq);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Send peer seq, to peer:{}, seq:{}", peer, seq);
+            }
             zoneManager.getP2PService().asyncSendMessage(peer, msg, null);
         }
     }
@@ -133,7 +136,7 @@ public class WeCrossHost {
         String dumpStr = "Current account info: ";
 
         dumpStr += " seq: " + accountSyncManager.getSeq();
-        dumpStr += " table: " + accountSyncManager.dumpCaID2UaID();
+        dumpStr += " table size: " + accountSyncManager.getCaID2UaIDSize();
 
         dumpByTime(dumpStr);
     }
@@ -184,7 +187,9 @@ public class WeCrossHost {
             // dump to info every 10 seconds
             logger.info(dumpStr);
         } else {
-            logger.debug(dumpStr);
+            if (logger.isDebugEnabled()) {
+                logger.debug(dumpStr);
+            }
         }
     }
 

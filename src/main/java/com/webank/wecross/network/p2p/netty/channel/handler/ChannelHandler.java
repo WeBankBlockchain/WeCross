@@ -85,11 +85,13 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         int hashCode = System.identityHashCode(ctx);
-        logger.trace(
-                " channelActive, node: {}:{}, ctx: {}",
-                ((SocketChannel) ctx.channel()).remoteAddress().getAddress().getHostAddress(),
-                ((SocketChannel) ctx.channel()).remoteAddress().getPort(),
-                hashCode);
+        if (logger.isTraceEnabled()) {
+            logger.trace(
+                    " channelActive, node: {}:{}, ctx: {}",
+                    ((SocketChannel) ctx.channel()).remoteAddress().getAddress().getHostAddress(),
+                    ((SocketChannel) ctx.channel()).remoteAddress().getPort(),
+                    hashCode);
+        }
     }
 
     @Override

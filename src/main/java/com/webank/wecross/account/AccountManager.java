@@ -8,9 +8,12 @@ import com.webank.wecross.network.client.ClientMessageEngine;
 import com.webank.wecross.network.client.Request;
 import com.webank.wecross.network.client.Response;
 import com.webank.wecross.stub.Account;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +27,33 @@ public class AccountManager {
     private AdminContext adminContext;
     private AccountSyncManager accountSyncManager;
 
+    private static Timer timer = new Timer("checkTokenTimer");
+    private static final long checkTokenStateExpires = 9000; // s, 2.5h
+
     private Map<String, UniversalAccount> token2UA = new ConcurrentHashMap<>();
+
+    public void start() {
+        timer.schedule(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        // check token expires
+                        try {
+                            Collection<String> tokens = token2UA.keySet();
+                            for (String token : tokens) {
+                                if (hasTokenExpired(token)) {
+                                    logger.info("Remove expired token: " + token);
+                                    token2UA.remove(token);
+                                }
+                            }
+                        } catch (Exception e) {
+                            logger.error("checkTokenTimer exception: ", e);
+                        }
+                    }
+                },
+                checkTokenStateExpires,
+                checkTokenStateExpires);
+    }
 
     public List<Account> getAccounts(UserContext userContext) throws WeCrossException {
         String token = userContext.getToken();
@@ -65,13 +94,37 @@ public class AccountManager {
         UniversalAccount ua = token2UA.get(token);
 
         // query login state every x seconds
-        if (!((UniversalAccount) ua).isActive()) {
-            if (!fetchHasLoginStatus(token)) {
+        if (!ua.isActive()) {
+            Long knownUAVersion = fetchUAVersion(token);
+            if (knownUAVersion < 0) {
                 token2UA.remove(token);
                 ua = null;
-                throw new WeCrossException(GET_UA_FAILED, "login expired");
+                throw new WeCrossException(GET_UA_FAILED, "UA is not exist or login expired");
             } else {
-                ((UniversalAccount) ua).activate();
+                // check version and update if version expires
+                if (ua.getVersion() < knownUAVersion) {
+                    UniversalAccount newUA = fetchUA(token);
+
+                    if (newUA == null) {
+                        throw new WeCrossException(
+                                GET_UA_FAILED,
+                                "UA is not exist or login expired when fetch new version("
+                                        + knownUAVersion
+                                        + ") UA");
+                    } else if (newUA.getVersion() < knownUAVersion) {
+                        throw new WeCrossException(
+                                GET_UA_FAILED,
+                                "Exception when ua version update, fetchUA version:"
+                                        + newUA.getVersion()
+                                        + " known Version:"
+                                        + knownUAVersion);
+                    } else {
+                        logger.info("Update ua to: " + newUA.toString());
+                        token2UA.put(token, newUA);
+                    }
+                } else {
+                    ua.activate();
+                }
             }
         }
 
@@ -84,6 +137,10 @@ public class AccountManager {
 
     public void setAccountSyncManager(AccountSyncManager accountSyncManager) {
         this.accountSyncManager = accountSyncManager;
+    }
+
+    public void setTimer(Timer timer) {
+        this.timer = timer;
     }
 
     public static class GetUniversalAccountByChainAccountIdentityRequest {
@@ -124,24 +181,34 @@ public class AccountManager {
         this.adminContext = adminContext;
     }
 
-    private boolean fetchHasLoginStatus(String token) {
+    /**
+     * Fetch ua version from Account-Manager
+     *
+     * @param token user login token
+     * @return The version of ua, return -1 if token login failed
+     */
+    private Long fetchUAVersion(String token) {
         Request<Object> request = new Request();
         request.setData(null);
-        request.setMethod("/auth/hasLogin");
+        request.setMethod("/auth/getUAVersion");
         request.setAuth(token);
 
         try {
-            Response<?> response = engine.send(request, new TypeReference<Response<?>>() {});
+            Response<Long> response = engine.send(request, new TypeReference<Response<Long>>() {});
 
             if (response.getErrorCode() != 0) {
-                return false;
+                return new Long(-1);
             }
 
-            return true;
+            return response.getData();
 
         } catch (Exception e) {
-            return false;
+            return new Long(-1);
         }
+    }
+
+    private boolean hasTokenExpired(String token) {
+        return fetchUAVersion(token) < 0;
     }
 
     private UniversalAccount fetchUA(String token) {

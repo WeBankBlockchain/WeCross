@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 
 LOG_INFO() {
     local content=${1}
@@ -16,7 +16,7 @@ Download() {
     local url=${1}
     local file=$(basename ${url})
     if [ ! -e ${file} ]; then
-        curl -LO ${url}
+        curl -#LO ${url}
     fi
 }
 
@@ -57,6 +57,10 @@ build_bcos_chain() {
 }
 
 build_accounts() {
+    LOG_INFO "Download get_gm_account.sh ..."
+    Download https://raw.githubusercontent.com/FISCO-BCOS/console/master/tools/get_gm_account.sh
+    chmod u+x get_gm_account.sh
+
     # generate accounts
     mkdir -p accounts
     cd accounts
@@ -66,29 +70,7 @@ build_accounts() {
     cd -
 }
 
-check_and_install_tassl() {
-    local TASSL_HOME="${HOME}"/.fisco
-    local TASSL_CMD=${TASSL_HOME}/tassl
-
-    if [ ! -f "${TASSL_CMD}" ]; then
-        LOG_INFO "Downloading tassl binary ..."
-        mkdir -p ${TASSL_HOME}
-        if [[ -n "${macOS}" ]]; then
-            if [ ! -f tassl_mac.tar.gz ]; then
-                Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl_mac.tar.gz
-            fi
-            tar -zxvf tassl_mac.tar.gz -C ${TASSL_HOME}
-        else
-            if [ ! -f tassl.tar.gz ]; then
-                Download https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/FISCO-BCOS/FISCO-BCOS/tools/tassl-1.0.2/tassl.tar.gz
-            fi
-            tar -zxvf tassl.tar.gz -C ${TASSL_HOME}
-        fi
-    fi
-}
-
 main() {
-    check_and_install_tassl
     build_bcos_chain
     build_accounts
     LOG_INFO "SUCCESS: Build FISCO BCOS Guomi demo finish."

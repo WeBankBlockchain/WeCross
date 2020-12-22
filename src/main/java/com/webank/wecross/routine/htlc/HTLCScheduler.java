@@ -150,7 +150,7 @@ public class HTLCScheduler {
                             return;
                         }
 
-                        if (RoutineDefault.SUCCESS_FLAG.equals(result)) {
+                        if (RoutineDefault.SUCCESS_FLAG.equalsIgnoreCase(result)) {
                             callback.onReturn(null, true);
                             return;
                         }

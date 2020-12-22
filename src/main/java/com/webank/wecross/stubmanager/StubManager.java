@@ -7,8 +7,11 @@ import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.StubFactory;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StubManager {
+    private static Logger logger = LoggerFactory.getLogger(StubManager.class);
     private Map<String, StubFactory> stubFactories = new HashMap<>();
     private Map<String, Driver> drivers = new HashMap<>();
 
@@ -35,9 +38,13 @@ public class StubManager {
         return getStubFactory(type).newConnection(stubPath);
     }
 
-    public Account newStubAccount(String type, Map<String, Object> properties)
-            throws WeCrossException {
-        return getStubFactory(type).newAccount(properties);
+    public Account newStubAccount(String type, Map<String, Object> properties) {
+        try {
+            return getStubFactory(type).newAccount(properties);
+        } catch (Exception e) {
+            logger.info("newStubAccount exception: ", e);
+            return null;
+        }
     }
 
     public Map<String, StubFactory> getStubFactories() {

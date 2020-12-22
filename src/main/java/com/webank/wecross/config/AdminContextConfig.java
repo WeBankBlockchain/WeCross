@@ -25,7 +25,7 @@ public class AdminContextConfig {
         adminContext.setAccountManagerEngine(accountManagerEngine);
         adminContext.setUsername(admin);
         adminContext.setPassword(password);
-        adminContext.login();
+        adminContext.routerLogin();
 
         return adminContext;
     }

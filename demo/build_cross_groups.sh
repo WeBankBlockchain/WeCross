@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 ROOT=$(pwd)
 DB_IP=127.0.0.1
 DB_PORT=3306
@@ -23,7 +23,7 @@ Download() {
     local url=${1}
     local file=$(basename ${url})
     if [ ! -e ${file} ]; then
-        curl -LO ${url}
+        curl -#LO ${url}
     fi
 }
 
@@ -172,12 +172,20 @@ console_ask() {
     esac
 }
 
+exit_when_empty_db_pwd() {
+    if mysql -u ${DB_USERNAME} -h ${DB_IP} -P ${DB_PORT} -e "status" 2>/dev/null; then
+        LOG_ERROR "Not support to use account with no password. Please try another account."
+        exit 1
+    fi
+}
+
 db_config_ask() {
     check_command mysql
     LOG_INFO "Database connection:"
     read -r -p "[1/4]> ip: " DB_IP
     read -r -p "[2/4]> port: " DB_PORT
     read -r -p "[3/4]> username: " DB_USERNAME
+    exit_when_empty_db_pwd
     read -r -p "[4/4]> password: " -s DB_PASSWORD
     echo "" # \n
     LOG_INFO "Database connetion with: ${DB_IP}:${DB_PORT} ${DB_USERNAME} "
@@ -196,12 +204,9 @@ config_router_8250() {
     # copy cert
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/group1/
 
-    # bcos stub internal account
-    bash add_account.sh -t BCOS2.0 -n bcos_admin1 -d conf/accounts
-
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/group1 bcos_admin1
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/group1 bcos_admin1
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/group1
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/group1
 
     cd -
 }
@@ -225,12 +230,9 @@ config_router_8251() {
         sed -i 's/groupId = 1/groupId = 2/g' conf/chains/group2/stub.toml
     fi
 
-    # bcos stub internal account
-    bash add_account.sh -t BCOS2.0 -n bcos_admin2 -d conf/accounts
-
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/group2 bcos_admin2
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/group2 bcos_admin2
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/group2
+    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/group2
 
     cd -
 }
@@ -252,9 +254,9 @@ build_wecross() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_wecross.sh ]; then
-            bash download_wecross.sh -t v1.0.0-rc4
+            bash download_wecross.sh -t v1.0.0
         else
-            bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0-rc4
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0
         fi
     fi
 
@@ -275,9 +277,9 @@ build_wecross_console() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_console.sh ]; then
-            bash download_console.sh -t v1.0.0-rc4
+            bash download_console.sh -t v1.0.0
         else
-            bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_console.sh) -t v1.0.0-rc4
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t v1.0.0
         fi
     fi
 
@@ -308,9 +310,9 @@ build_account_manager() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_account_manager.sh ]; then
-            bash download_account_manager.sh -t v1.0.0-rc4
+            bash download_account_manager.sh -t v1.0.0 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
         else
-            bash <(curl -sL https://github.com/WeBankFinTech/WeCross/releases/download/resources/download_account_manager.sh) -t v1.0.0-rc4
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_account_manager.sh) -t v1.0.0 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
         fi
     fi
 
@@ -328,6 +330,9 @@ build_account_manager() {
     LOG_INFO "Setup database"
     cd ${ROOT}/WeCross-Account-Manager/
     query_db <conf/db_setup.sql
+
+    # generate rsa_keypair
+    bash create_rsa_keypair.sh -d conf/
 
     bash start.sh
     sed_i 's/create/update/g' ${ROOT}/WeCross-Account-Manager/conf/application.properties
@@ -388,7 +393,7 @@ EOF
 
 deploy_chain_account() {
     mkdir -p ${ROOT}/WeCross-Console/conf/accounts/
-    rm -rf $(ls ${ROOT}/WeCross-Console/conf/accounts/ | grep -v .sh)
+    cd ${ROOT}/WeCross-Console/conf/accounts/ && rm -rf $(ls | grep -v .sh) && cd -
     cp -r ${ROOT}/bcos/accounts/* ${ROOT}/WeCross-Console/conf/accounts/
 
     add_bcos_account bcos_user1 # 0
@@ -434,16 +439,18 @@ main() {
 
     LOG_INFO "Success! WeCross demo network is running. Framework:"
     echo -e "
-                    FISCO BCOS
-        Group 1                    Group 2
-   (HelloWorldGroup1)         (HelloWorldGroup2)
-           |                          |
-           |                          |
-    WeCross Router <----------> WeCross Router
-(127.0.0.1-8250-25500)      (127.0.0.1-8251-25501)
-           | 
-           | 
-    WeCross Console
+                          FISCO BCOS
+              Group 1                    Group 2
+         (HelloWorldGroup1)         (HelloWorldGroup2)
+                 |                          |
+                 |                          |
+                 |                          |
+          WeCross Router <----------> WeCross Router <----------> WeCross Account Manager
+      (127.0.0.1-8250-25500)      (127.0.0.1-8251-25501)             (127.0.0.1:8340)
+          /            \\
+         /              \\
+        /                \\
+ WeCross WebApp     WeCross Console
 "
 
 }

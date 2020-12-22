@@ -3,7 +3,7 @@ package com.webank.wecross.stub;
 import java.util.Map;
 
 public interface StubFactory {
-    public String version = "1.0.0";
+    public String version = "v1.0.0";
 
     /**
      * init a stub

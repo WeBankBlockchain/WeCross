@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-LANG=en_US.utf8
+LANG=en_US.UTF-8
 ROOT=$(pwd)
 
 version=$RANDOM
@@ -19,7 +19,7 @@ LOG_INFO() {
     echo -e "\033[32m[INFO] ${content}\033[0m"
 }
 
-config_bcos_sender_account() {
+config_org2_admin() {
     LOG_INFO "Config account for BCOS htlc sender ..."
     mkdir ${ROOT}/WeCross-Console/conf/accounts/bcos_sender
     cd ${ROOT}/WeCross-Console/conf/accounts/bcos_sender
@@ -34,7 +34,8 @@ EOF
     # addChainAccount
     cd ${ROOT}/WeCross-Console
     bash start.sh <<EOF
-    login
+    registerAccount org2-admin 123456
+    login org2-admin 123456
     addChainAccount BCOS2.0 conf/accounts/bcos_sender/0x4305196480b029bbecb071b4b68e95dfef36a7b7.public.pem conf/accounts/bcos_sender/0x4305196480b029bbecb071b4b68e95dfef36a7b7.pem 0x4305196480b029bbecb071b4b68e95dfef36a7b7 true
     quit
 EOF
@@ -47,7 +48,7 @@ init_bcos_htlc() {
     cd ${ROOT}/WeCross-Console
     rm -rf logs
     bash start.sh <<EOF
-  login
+  login org2-admin 123456
   bcosDeploy payment.bcos.ledger contracts/solidity/LedgerSample.sol LedgerSample ${version} htlc token 1 100000000
 quit
 EOF
@@ -56,7 +57,7 @@ EOF
 
     rm -rf logs
     bash start.sh <<EOF
-  login
+  login org2-admin 123456
   bcosDeploy payment.bcos.htlc contracts/solidity/LedgerSampleHTLC.sol LedgerSampleHTLC ${version}
 quit
 EOF
@@ -65,7 +66,7 @@ EOF
     BCOS_HTLC=$(echo ${var2:5:42})
 
     bash start.sh <<EOF
-  login
+  login org2-admin 123456
   sendTransaction payment.bcos.ledger approve ${BCOS_HTLC} 1000000
   sendTransaction payment.bcos.htlc init ${BCOS_LEDGER}
 quit
@@ -101,7 +102,6 @@ install_fabric_chaincode() {
 update_wecross_config() {
     LOG_INFO "Update wecross.toml ..."
 
-
     cat >>${ROOT}/routers-payment/127.0.0.1-8250-25500/conf/wecross.toml <<EOF
 
 [[htlc]]
@@ -117,23 +117,6 @@ EOF
 EOF
 }
 
-copy_console() {
-    LOG_INFO "Copy console for router-8251 ..."
-
-    cd ${ROOT}
-    cp -r WeCross-Console WeCross-Console-8251
-    rm WeCross-Console-8251/conf/application.toml
-    cat <<EOF >WeCross-Console-8251/conf/application.toml
-[connection]
-    server =  '127.0.0.1:8251'
-    sslKey = 'classpath:ssl.key'
-    sslCert = 'classpath:ssl.crt'
-    caCert = 'classpath:ca.crt'
-[login]
-    username = 'org1-admin'
-    password = '123456'
-EOF
-}
 
 restart_router() {
     LOG_INFO "Restart routers ..."
@@ -151,8 +134,7 @@ restart_router() {
 
 main() {
 
-    config_bcos_sender_account
-    copy_console
+    config_org2_admin
 
     init_bcos_htlc
 
@@ -165,8 +147,8 @@ main() {
 
     LOG_INFO "Config htlc successfully!\n"
     LOG_INFO "Now, you can make a cross-chain transfer by WeCross console using following command!\n"
-    echo -e "[BCOS  user ]: newHTLCProposal payment.bcos.htlc bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 9dda9a5e175a919ee98ff0198927b0a765ef96cf917144b589bb8e510e04843c true 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
-\n[Fabric user]: newHTLCProposal payment.fabric.${FABRIC_HTLC} bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 null false 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org1.example.com 500 2000000000
+    echo -e "[BCOS  user ]: newHTLCProposal payment.bcos.htlc bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 9dda9a5e175a919ee98ff0198927b0a765ef96cf917144b589bb8e510e04843c true 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org2.example.com 500 2000000000
+\n[Fabric user]: newHTLCProposal payment.fabric.${FABRIC_HTLC} bea2dfec011d830a86d0fbeeb383e622b576bb2c15287b1a86aacdba0a387e11 null false 0x4305196480b029bbecb071b4b68e95dfef36a7b7 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf 700 2000010000 Admin@org1.example.com User1@org2.example.com 500 2000000000
 "
 }
 

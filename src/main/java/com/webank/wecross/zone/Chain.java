@@ -189,7 +189,6 @@ public class Chain {
         Resource oldResource = getResource(name);
         lock.writeLock().lock();
         try {
-
             if (oldResource != null && replaceIfExist || oldResource == null) {
                 resources.put(name, resource);
             }

@@ -8,6 +8,7 @@ import com.webank.wecross.network.rpc.netty.URIMethod;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.Versions;
 import com.webank.wecross.routine.RoutineManager;
+import io.netty.handler.codec.http.FullHttpResponse;
 import java.io.File;
 import java.util.Objects;
 import org.junit.Assert;
@@ -25,7 +26,7 @@ public class URIHandlerDispatcherTest {
 
         URIHandlerDispatcher uriHandlerDispatcher = new URIHandlerDispatcher();
         uriHandlerDispatcher.initializeRequestMapper(host);
-        Assert.assertTrue(uriHandlerDispatcher.getRequestURIMapper().size() == 22);
+        Assert.assertTrue(uriHandlerDispatcher.getRequestURIMapper().size() == 24);
 
         Assert.assertTrue(
                 Objects.nonNull(
@@ -97,6 +98,11 @@ public class URIHandlerDispatcherTest {
                     @Override
                     public void onResponse(String restResponse) {
                         return;
+                    }
+
+                    @Override
+                    public void onResponse(FullHttpResponse fullHttpResponse) {
+                        Assert.fail();
                     }
 
                     @Override
