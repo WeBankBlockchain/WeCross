@@ -10,6 +10,10 @@ fi
 
 brew services start mysql
 
+mysql.server start
+
+cd .
+
 mysql_secure_installation <<EOF
 N
 ${DB_PASSWORD}
