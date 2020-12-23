@@ -19,5 +19,3 @@ mysql_secure_installation <<EOF
     N
     N
 EOF
-
-brew services restart mysql
