@@ -105,16 +105,6 @@ public class ResourceURIHandler implements URIHandler {
             }
 
             switch (method.toLowerCase()) {
-                case "status":
-                    {
-                        Resource resourceObj = getResource(path);
-                        if (resourceObj == null) {
-                            restResponse.setData("not exists");
-                        } else {
-                            restResponse.setData("exists");
-                        }
-                        break;
-                    }
                 case "detail":
                     {
                         Resource resourceObj = getResource(path);
