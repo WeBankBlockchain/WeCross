@@ -15,11 +15,11 @@ cd .
 brew services start mysql
 
 mysql_secure_installation <<EOF
-N
-${DB_PASSWORD}
-${DB_PASSWORD}
-N
-N
-N
-N
+n
+123456
+123456
+n
+n
+n
+n
 EOF
