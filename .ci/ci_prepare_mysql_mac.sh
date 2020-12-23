@@ -15,7 +15,6 @@ cd .
 brew services start mysql
 
 mysql_secure_installation <<EOF
-n
 123456
 123456
 n
