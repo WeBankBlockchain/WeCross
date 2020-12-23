@@ -20,11 +20,9 @@ public class AdminContextConfig {
     public AdminContext newAdminContext() throws WeCrossException {
         AdminContext adminContext = new AdminContext();
         String admin = ConfigUtils.parseString(toml, "account-manager.admin");
-        String password = ConfigUtils.parseString(toml, "account-manager.password");
 
         adminContext.setAccountManagerEngine(accountManagerEngine);
         adminContext.setUsername(admin);
-        adminContext.setPassword(password);
         adminContext.routerLogin();
 
         return adminContext;

@@ -176,7 +176,7 @@ public class XATransactionHandler implements URIHandler {
 
                         xaTransactionManager.asyncGetXATransaction(
                                 xaRequest.getData().getXaTransactionID(),
-                                ua,
+                                host.getAccountManager().getAdminUA(),
                                 filterAndSortChainPaths(xaRequest.getData().getPaths()),
                                 (xaTransactionResponse) -> {
                                     if (logger.isDebugEnabled()) {
@@ -199,7 +199,7 @@ public class XATransactionHandler implements URIHandler {
                                                 RestRequest<ListXATransactionsRequest>>() {});
 
                         xaTransactionManager.asyncListXATransactions(
-                                ua,
+                                host.getAccountManager().getAdminUA(),
                                 xaRequest.getData().getOffsets(),
                                 xaRequest.getData().getSize(),
                                 (exception, xaTransactionListResponse) -> {

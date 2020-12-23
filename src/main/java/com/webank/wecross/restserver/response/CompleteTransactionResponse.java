@@ -20,6 +20,9 @@ public class CompleteTransactionResponse {
     private byte[] txBytes; // raw transaction info
     private byte[] receiptBytes; // raw transaction receipt info
 
+    private int errorCode; // transaction rolled back
+    private String message;
+
     public String getPath() {
         return path;
     }
@@ -116,13 +119,29 @@ public class CompleteTransactionResponse {
         this.receiptBytes = receiptBytes;
     }
 
+    public int getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(int errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     @Override
     public String toString() {
-        return "TransactionResponse{"
+        return "CompleteTransactionResponse{"
                 + "path='"
                 + path
                 + '\''
-                + ", universalAccount='"
+                + ", username='"
                 + username
                 + '\''
                 + ", blockNumber="
@@ -148,6 +167,11 @@ public class CompleteTransactionResponse {
                 + Arrays.toString(txBytes)
                 + ", receiptBytes="
                 + Arrays.toString(receiptBytes)
+                + ", errorCode="
+                + errorCode
+                + ", message='"
+                + message
+                + '\''
                 + '}';
     }
 }
