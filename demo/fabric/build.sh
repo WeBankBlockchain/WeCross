@@ -85,7 +85,7 @@ rm -rf config
 # Startup
 LOG_INFO "Startup first-network"
 cd fabric-samples-1.4.4/first-network
-bash byfn.sh up <<EOF
+bash byfn.sh up -n <<EOF
 Y
 EOF
 cd -
@@ -118,6 +118,6 @@ cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com
 cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/*_sk ${fabric_admin_org2_dir}/account.key
 cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem ${fabric_admin_org2_dir}/account.crt
 
-remove_mycc
+# remove_mycc
 
 LOG_INFO "SUCCESS: Build Fabric demo finish."
