@@ -8,11 +8,11 @@ if [ ! ${DB_PASSWORD} ]; then
     DB_PASSWORD='123456'
 fi
 
-brew services start mysql
-
 mysql.server start
 
 cd .
+
+brew services start mysql
 
 mysql_secure_installation <<EOF
 N
