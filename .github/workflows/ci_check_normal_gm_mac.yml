@@ -1,23 +1,21 @@
-name: normal-gm
+name: mac_normal-gm
 
 on: [pull_request]
 
 jobs:
-  normal-gm:
-    runs-on: ubuntu-18.04
+  mac_normal-gm:
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
         with:
           node-version: '10'
-      - uses: mirromutth/mysql-action@v1.1
-        with:
-          mysql root password: '123456'
-      - name: install dependencies
-        run: sudo apt-get update && sudo apt-get install -y mysql-client git curl libssl-dev default-jdk build-essential
+      - name: mac prepare
+        run: bash -x .ci/ci_mac_prepare.sh
+        env:
+          CI_DB_PASSWORD: '123456'
       - name: Verify MySQL connection from host
         run: |
-          sudo apt-get install -y mysql-client
           mysql -u root --password=123456 -h 127.0.0.1 -P 3306 -e 'status;'
           mysql --host 127.0.0.1 --port 3306 -uroot -p123456 -e "SHOW DATABASES"
 
