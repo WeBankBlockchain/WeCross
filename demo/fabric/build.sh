@@ -39,15 +39,6 @@ check_docker_service() {
     set -e
 }
 
-remove_mycc() {
-    LOG_INFO "Remove default mycc chaincode"
-    docker exec -i peer0.org1.example.com rm /var/hyperledger/production/chaincodes/mycc.1.0
-    docker exec -i peer0.org2.example.com rm /var/hyperledger/production/chaincodes/mycc.1.0
-    docker exec -i peer1.org2.example.com rm /var/hyperledger/production/chaincodes/mycc.1.0
-    docker stop $(docker ps | grep mycc | awk '{print $1}')
-    docker rm $(docker ps -a | grep mycc | awk '{print $1}')
-}
-
 check_docker_service
 
 # Download
@@ -85,7 +76,7 @@ rm -rf config
 # Startup
 LOG_INFO "Startup first-network"
 cd fabric-samples-1.4.4/first-network
-bash byfn.sh up <<EOF
+bash byfn.sh up -n <<EOF
 Y
 EOF
 cd -
@@ -117,7 +108,5 @@ cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com
 
 cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/*_sk ${fabric_admin_org2_dir}/account.key
 cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem ${fabric_admin_org2_dir}/account.crt
-
-remove_mycc
 
 LOG_INFO "SUCCESS: Build Fabric demo finish."
