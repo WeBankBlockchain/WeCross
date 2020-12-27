@@ -8,6 +8,7 @@ DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=123456
 DB_NAME=wecross_account_manager
+NEED_ASK=true
 
 LOG_INFO() {
     # shellcheck disable=SC2145
@@ -33,31 +34,49 @@ Usage:
     -h  call for help
 e.g
     bash $0 -H ${DB_IP} -P ${DB_PORT} -u ${DB_USERNAME} -p ${DB_PASSWORD}
-    bash $0 -d
+    bash $0
 EOF
     exit 0
 }
 
 parse_command() {
-    while getopts "H:P:u:p:h" option; do
+    while getopts "H:P:u:p:dh" option; do
         # shellcheck disable=SC2220
         case ${option} in
+        d)
+            NEED_ASK=false
+            ;;
         H)
             DB_IP=$OPTARG
+            NEED_ASK=false
             ;;
         P)
             DB_PORT=$OPTARG
+            NEED_ASK=false
             ;;
         u)
             DB_USERNAME=$OPTARG
+            NEED_ASK=false
             ;;
         p)
             DB_PASSWORD=$OPTARG
+            NEED_ASK=false
             ;;
         h) help ;;
         *) help ;;
         esac
     done
+}
+
+db_config_ask() {
+    LOG_INFO "Database connection:"
+    read -r -p "[1/4]> ip: " DB_IP
+    read -r -p "[2/4]> port: " DB_PORT
+    read -r -p "[3/4]> username: " DB_USERNAME
+    read -r -p "[4/4]> password: " -s DB_PASSWORD
+    echo "" # \n
+    LOG_INFO "Database connetion with: ${DB_IP}:${DB_PORT} ${DB_USERNAME} "
+    check_db_service
 }
 
 query_db() {
@@ -71,6 +90,14 @@ drop_db() {
 EOF
 }
 
+config_database() {
+    if ${NEED_ASK}; then
+        db_config_ask
+    else
+        check_db_service
+    fi
+}
+
 check_db_service() {
     LOG_INFO "Checking database configuration"
     set +e
@@ -82,6 +109,6 @@ check_db_service() {
 }
 
 parse_command "$@"
-check_db_service
+config_database
 drop_db
 LOG_INFO "Drop database successfully."

@@ -5,7 +5,7 @@ ROOT=$(pwd)
 DB_IP=127.0.0.1
 DB_PORT=3306
 DB_USERNAME=root
-DB_PASSWORD=${CI_DB_PASSWORD}
+DB_PASSWORD=123456
 
 need_db_config_ask=true
 
@@ -560,11 +560,56 @@ main() {
 
 }
 
-if [ -n "$1" ]; then
-    need_db_config_ask=false
-fi
+help() {
+    echo "$1"
+    cat <<EOF
+Create a wecross demo with boss and fabric chains.
+Usage:
+    -d                              [Optional] Use default db configuration: -H ${DB_IP} -P ${DB_PORT} -u ${DB_USERNAME} -p ${DB_PASSWORD}
+    -H                              [Optional] DB ip
+    -P                              [Optional] DB port
+    -u                              [Optional] DB username
+    -p                              [Optional] DB password
+    -h  call for help
+e.g
+    bash $0 -H ${DB_IP} -P ${DB_PORT} -u ${DB_USERNAME} -p 123456
+    bash $0
+EOF
+    exit 0
+}
 
-main $@
+parse_command() {
+    while getopts "H:P:u:p:dh" option; do
+        # shellcheck disable=SC2220
+        case ${option} in
+        d)
+            need_db_config_ask=false
+            ;;
+        H)
+            DB_IP=$OPTARG
+            need_db_config_ask=false
+            ;;
+        P)
+            DB_PORT=$OPTARG
+            need_db_config_ask=false
+            ;;
+        u)
+            DB_USERNAME=$OPTARG
+            need_db_config_ask=false
+            ;;
+        p)
+            DB_PASSWORD=$OPTARG
+            need_db_config_ask=false
+            ;;
+        h) help ;;
+        *) help ;;
+        esac
+    done
+}
+
+parse_command "$@"
+
+main "$@"
 
 if [ ! -n "$1" ]; then
     console_ask
