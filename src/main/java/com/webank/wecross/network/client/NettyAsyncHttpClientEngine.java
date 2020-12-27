@@ -41,7 +41,6 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
     @Override
     public void init() throws WeCrossException {
         logger.info(clientConnection.toString());
-        System.setProperty("jdk.tls.namedGroups", "secp256k1");
         server = clientConnection.getServer();
         httpClient = getHttpAsyncClient(clientConnection);
     }
