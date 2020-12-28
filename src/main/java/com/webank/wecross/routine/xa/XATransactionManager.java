@@ -171,9 +171,9 @@ public class XATransactionManager {
             throw new WeCrossException(WeCrossException.ErrorCode.POST_DATA_ERROR, e.getMessage());
         }
 
+        Set<String> chains = Collections.synchronizedSet(new HashSet<>(paths.keySet()));
         XAReduceCallback xaReduceCallback =
-                getStartXAReduceCallback(
-                        paths.size(), xaTransactionID, ua, paths.keySet(), callback);
+                getStartXAReduceCallback(paths.size(), xaTransactionID, ua, chains, callback);
 
         for (Map.Entry<String, Set<String>> entry : paths.entrySet()) {
             // send prepare transaction
