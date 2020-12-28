@@ -17,7 +17,7 @@ need_db_config_ask=true
 DB_IP=127.0.0.1
 DB_PORT=3306
 DB_USERNAME=root
-DB_PASSWORD=${CI_DB_PASSWORD}
+DB_PASSWORD=123456
 
 LOG_INFO() {
     echo -e "\033[32m[INFO] $@\033[0m"
@@ -34,7 +34,7 @@ Usage:
     -s                              [Optional] Get wecross account manager by: gradle build from github Source Code.
     -b                              [Optional] Download from certain branch
     -t                              [Optional] Download from certain tag (same as -b)
-    -d                              [Optional] Use default db configuration: -u ${DB_USERNAME} -H ${DB_IP} -P ${DB_PORT}
+    -d                              [Optional] Use default db configuration: -H ${DB_IP} -P ${DB_PORT} -u ${DB_USERNAME} -p ${DB_PASSWORD}
     -u                              [Optional] DB username
     -p                              [Optional] DB password
     -H                              [Optional] DB ip

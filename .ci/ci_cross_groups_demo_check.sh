@@ -58,7 +58,7 @@ prepare_demo() {
 cross_group_demo_test() {
     cd ${ROOT}
 
-    bash build_cross_groups.sh n
+    bash build_cross_groups.sh -H 127.0.0.1 -P 3306 -u root -p 123456
 
     ensure_bcos_nodes_running
 
