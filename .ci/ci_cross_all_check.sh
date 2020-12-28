@@ -58,7 +58,7 @@ prepare_demo() {
 demo_test() {
     cd ${ROOT}
 
-    bash build_cross_all.sh n
+    bash build_cross_all.sh -H 127.0.0.1 -P 3306 -u root -p 123456
 
     ensure_bcos_nodes_running
 
