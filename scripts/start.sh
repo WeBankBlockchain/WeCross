@@ -1,4 +1,6 @@
 #!/bin/bash
+dirpath="$(cd "$(dirname "$0")" && pwd)"
+cd ${dirpath}
 
 APPS_FOLDER=$(pwd)/apps
 CLASS_PATH=$(pwd)'/apps/*:lib/*:conf:plugin/*:./'
