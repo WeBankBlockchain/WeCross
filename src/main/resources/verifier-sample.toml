@@ -1,0 +1,20 @@
+[verifiers]
+    [verifiers.payment.bcos-group1]
+    chainType = 'BCOS2.0'
+    pubKey = [
+        '...'
+    ]
+    [verifiers.payment.bcos-group2]
+    chainType = 'BCOS2.0'
+    pubKey = [
+        '...'
+    ]
+    [verifiers.payment.bcos-gm]
+    chainType = 'GM_BCOS2.0'
+    pubKey = [
+        '...'
+    ]
+    [verifiers.payment.fabric-mychannel]
+    chainType = 'Fabric1.4'
+    endorserCA = { Org1MSP = 'classpath:verifiers/ca.org1.example.com-cert.pem', Org2MSP = 'classpath:verifiers/ca.org2.example.com-cert.pem' }
+    ordererCA = { OrdererMSP = 'classpath:verifiers/ca.example.com-cert.pem' }

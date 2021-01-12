@@ -58,3 +58,5 @@ src/test/resources/stubs/
 db/
 routers/
 null/
+verifiers/
+/src/test/resources/verifier.toml

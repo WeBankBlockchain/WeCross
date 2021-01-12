@@ -1,5 +1,6 @@
 package com.webank.wecross.zone;
 
+import com.webank.wecross.config.BlockVerifierTomlConfig;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.peer.Peer;
@@ -22,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ZoneManager {
-    private Logger logger = LoggerFactory.getLogger(ZoneManager.class);
+    private final Logger logger = LoggerFactory.getLogger(ZoneManager.class);
     private Map<String, Zone> zones = new LinkedHashMap<>();
     private AtomicInteger seq = new AtomicInteger(1);
     private P2PService p2PService;
@@ -30,6 +31,7 @@ public class ZoneManager {
     private StubManager stubManager;
     private MemoryBlockManagerFactory memoryBlockManagerFactory;
     private PeerManager peerManager;
+    private BlockVerifierTomlConfig.Verifiers verifiers;
 
     public Chain getChain(Path path) {
         lock.readLock().lock();
@@ -158,6 +160,14 @@ public class ZoneManager {
         return seq.intValue();
     }
 
+    public BlockVerifierTomlConfig.Verifiers getVerifiers() {
+        return verifiers;
+    }
+
+    public void setVerifiers(BlockVerifierTomlConfig.Verifiers verifiers) {
+        this.verifiers = verifiers;
+    }
+
     public boolean addRemoteChains(Peer peer, Map<String, ChainInfo> chainInfos) throws Exception {
         lock.writeLock().lock();
         boolean changed = false;
@@ -209,6 +219,19 @@ public class ZoneManager {
                     resourcePath.setChain(chainPath.getChain());
                     resourcePath.setResource(resourceInfo.getName());
 
+                    // did config verifiers
+                    if (this.verifiers != null && this.verifiers.getVerifiers().size() > 0) {
+                        BlockVerifierTomlConfig.Verifiers.BlockVerifier blockVerifier =
+                                this.verifiers.getVerifiers().get(chainPath.toString());
+                        // did not config this chain
+                        if (blockVerifier != null) {
+                            chainInfo.getProperties().put("VERIFIER", blockVerifier.toJson());
+                        } else {
+                            logger.warn(
+                                    "Chain did not config verifier, chain: {}",
+                                    chainPath.toString());
+                        }
+                    }
                     RemoteConnection remoteConnection = new RemoteConnection();
                     remoteConnection.setP2PService(p2PService);
                     remoteConnection.setPeer(peer);
