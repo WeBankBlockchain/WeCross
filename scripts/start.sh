@@ -8,6 +8,8 @@ STATUS_STARTING="Starting"
 STATUS_RUNNING="Running"
 STATUS_STOPPED="Stopped"
 
+SECURIY_FILE='./.wecross.security'
+
 LOG_INFO() {
     local content=${1}
     echo -e "\033[32m${content}\033[0m"
@@ -18,6 +20,14 @@ LOG_ERROR() {
     echo -e "\033[31m${content}\033[0m"
 }
 
+create_jvm_security()
+{
+  if [[ ! -f ${SECURIY_FILE} ]];then
+    echo "jdk.disabled.namedCurves = " > ${SECURIY_FILE}
+    # LOG_INFO "create new file ${SECURIY_FILE}"
+  fi
+}
+
 wecross_pid() {
     ps -ef | grep com.webank.wecross.Service | grep ${APPS_FOLDER} | grep -v grep | awk '{print $2}'
 }
@@ -25,13 +35,13 @@ wecross_pid() {
 run_wecross() {
     if [ "$(uname)" == "Darwin" ]; then
         # Mac
-        nohup java -Djdk.disabled.namedCurves="" -Djdk.sunec.disableNative="false" -Djdk.tls.namedGroups="secp256k1" -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
+        nohup java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative="false" -Djdk.tls.namedGroups="secp256k1" -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
     elif [ "$(uname -s | grep MINGW | wc -l)" != "0" ]; then
         # Windows
-        nohup java -Djdk.disabled.namedCurves="" -Djdk.sunec.disableNative="false" -Djdk.tls.namedGroups="secp256k1" -cp ${WINDS_CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
+        nohup java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative="false" -Djdk.tls.namedGroups="secp256k1" -cp ${WINDS_CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
     else
         # GNU/Linux
-        nohup java -Djdk.disabled.namedCurves="" -Djdk.sunec.disableNative="false" -Djdk.tls.namedGroups="secp256k1" -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
+        nohup java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative="false" -Djdk.tls.namedGroups="secp256k1" -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
     fi
 }
 
@@ -79,6 +89,7 @@ before_start() {
 
 start() {
     rm -f start.out
+    create_jvm_security
     run_wecross
     echo -e "\033[32mWeCross booting up ..\033[0m\c"
     try_times=45
