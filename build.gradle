@@ -23,7 +23,7 @@ repositories {
 }
 
 sourceCompatibility = '1.8'
-version = '1.0.0'
+version = '1.0.1'
 
 task stubSourceJar(type: Jar) {
     into 'com/webank/wecross/stub', { from 'src/main/java/com/webank/wecross/stub' }

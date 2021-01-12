@@ -205,8 +205,8 @@ config_router_8250() {
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/group1/
 
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/group1
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/group1
+    bash deploy_system_contract.sh -t BCOS2.0 -c chains/group1 -P
+    bash deploy_system_contract.sh -t BCOS2.0 -c chains/group1 -H
 
     cd -
 }
@@ -231,8 +231,8 @@ config_router_8251() {
     fi
 
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/group2
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/group2
+    bash deploy_system_contract.sh -t BCOS2.0 -c chains/group2 -P
+    bash deploy_system_contract.sh -t BCOS2.0 -c chains/group2 -H
 
     cd -
 }
