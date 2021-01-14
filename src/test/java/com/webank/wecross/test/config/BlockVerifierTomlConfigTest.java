@@ -30,14 +30,9 @@ public class BlockVerifierTomlConfigTest {
                         + "        chainType = 'GM_BCOS2.0'\n"
                         + "        pubKey = [\n"
                         + "            'f9f3fd009bf954a2cb566ec50f2bc55a76298b179ca3105513c4'\n"
-                        + "        ]\n"
-                        + "    [verifiers.payment.fabric-mychannel]\n"
-                        + "        chainType = 'Fabric1.4'\n"
-                        + "        endorserCA = { Org1MSP = 'classpath:verifiers/ca.org1.example.com-cert.pem', Org2MSP = 'classpath:verifiers/ca.org2.example.com-cert.pem' }\n"
-                        + "        ordererCA = { OrdererMSP = 'classpath:verifiers/ca.example.com-cert.pem' }");
+                        + "        ]\n");
         BlockVerifierTomlConfig.Verifiers verifiers = new BlockVerifierTomlConfig.Verifiers();
         verifiers.addVerifiers(toml);
-        Assert.assertTrue(verifiers.getVerifiers().containsKey("payment.fabric-mychannel"));
         Assert.assertTrue(verifiers.getVerifiers().containsKey("payment.bcos-group1"));
         Assert.assertTrue(verifiers.getVerifiers().containsKey("payment.bcos-group2"));
         Assert.assertTrue(verifiers.getVerifiers().containsKey("payment.bcos-gm"));
@@ -48,8 +43,5 @@ public class BlockVerifierTomlConfigTest {
                 "BCOS2.0", verifiers.getVerifiers().get("payment.bcos-group2").getChainType());
         Assert.assertEquals(
                 "GM_BCOS2.0", verifiers.getVerifiers().get("payment.bcos-gm").getChainType());
-        Assert.assertEquals(
-                "Fabric1.4",
-                verifiers.getVerifiers().get("payment.fabric-mychannel").getChainType());
     }
 }
