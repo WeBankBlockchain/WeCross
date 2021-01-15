@@ -91,7 +91,7 @@ build_accounts() {
     cd -
 }
 
-deploy_contract() {
+deploy_system_contract() {
     cd console
     bash start.sh <<EOF
     deployByCNS HelloWeCross 1.0

@@ -270,8 +270,8 @@ config_router_group1() {
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/bcos-group1/
 
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos-group1
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos-group1
+    bash deploy_system_contract.sh -t BCOS2.0 -c chains/bcos-group1 -P
+    bash deploy_system_contract.sh -t BCOS2.0 -c chains/bcos-group1 -H
 
     cd -
 }
@@ -296,8 +296,8 @@ config_router_group2() {
     fi
 
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos-group2
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos-group2
+    bash deploy_system_contract.sh -t BCOS2.0 -c chains/bcos-group2 -P
+    bash deploy_system_contract.sh -t BCOS2.0 -c chains/bcos-group2 -H
 
     cd -
 }
@@ -323,8 +323,8 @@ config_router_gm() {
     fi
 
     # deploy system contracts
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.ProxyContractDeployment deploy chains/bcos-gm
-    java -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.HubContractDeployment deploy chains/bcos-gm
+    bash deploy_system_contract.sh -t GM_BCOS2.0 -c chains/bcos-gm -P
+    bash deploy_system_contract.sh -t GM_BCOS2.0 -c chains/bcos-gm -H
 
     cd -
 }
@@ -351,8 +351,8 @@ config_router_fabric() {
     sed_i 's/Org1MSP/Org2MSP/g' conf/accounts/fabric_admin_org2/account.toml
 
     # deploy system chaincodes
-    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy chains/fabric-mychannel
-    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.fabric.hub.HubChaincodeDeployment deploy chains/fabric-mychannel
+    bash deploy_system_contract.sh -t Fabric1.4 -c chains/fabric-mychannel -P
+    bash deploy_system_contract.sh -t Fabric1.4 -c chains/fabric-mychannel -H
 
     cd -
 }
@@ -389,9 +389,9 @@ build_wecross() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_wecross.sh ]; then
-            bash download_wecross.sh -t v1.0.0
+            bash download_wecross.sh -t v1.0.1
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.1
         fi
     fi
 
@@ -412,9 +412,9 @@ build_wecross_console() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_console.sh ]; then
-            bash download_console.sh -t v1.0.0
+            bash download_console.sh -t v1.0.1
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t v1.0.0
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t v1.0.1
         fi
     fi
 
@@ -450,9 +450,9 @@ build_account_manager() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_account_manager.sh ]; then
-            bash download_account_manager.sh -t v1.0.0 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
+            bash download_account_manager.sh -t v1.0.1 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_account_manager.sh) -t v1.0.0 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_account_manager.sh) -t v1.0.1 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
         fi
     fi
 
