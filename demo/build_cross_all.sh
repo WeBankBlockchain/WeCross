@@ -388,9 +388,9 @@ build_wecross() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_wecross.sh ]; then
-            bash download_wecross.sh -t v1.0.0
+            bash download_wecross.sh -t v1.0.1
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.1
         fi
     fi
 
@@ -411,9 +411,9 @@ build_wecross_console() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_console.sh ]; then
-            bash download_console.sh -t v1.0.0
+            bash download_console.sh -t v1.0.1
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t v1.0.0
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t v1.0.1
         fi
     fi
 
@@ -449,9 +449,9 @@ build_account_manager() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_account_manager.sh ]; then
-            bash download_account_manager.sh -t v1.0.0 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
+            bash download_account_manager.sh -t v1.0.1 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_account_manager.sh) -t v1.0.0 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_account_manager.sh) -t v1.0.1 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
         fi
     fi
 

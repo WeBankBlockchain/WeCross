@@ -259,9 +259,9 @@ download_wecross()
     # Download
     LOG_INFO "Download WeCross ..."
     if [ -e download_wecross.sh ];then
-        bash download_wecross.sh -t v1.0.0
+        bash download_wecross.sh -t v1.0.1
     else
-        bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0
+        bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.1
     fi
 }
 
@@ -269,9 +269,9 @@ download_wecross_console()
 {
     LOG_INFO "Download WeCross Console ..."
     if [ -e download_console.sh ];then
-        bash download_console.sh -t v1.0.0
+        bash download_console.sh -t v1.0.1
     else
-        bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t v1.0.0
+        bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t v1.0.1
     fi
 }
 
