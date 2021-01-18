@@ -22,6 +22,8 @@ public class ZoneManagerConfig {
 
     @Resource private MemoryBlockManagerFactory resourceBlockManagerFactory;
 
+    @Resource private BlockVerifierTomlConfig.Verifiers verifiers;
+
     @Bean
     public ZoneManager newZoneManager() {
         System.out.println("Initializing ZoneManager ...");
@@ -30,6 +32,7 @@ public class ZoneManagerConfig {
         zoneManager.setZones(zones);
         zoneManager.setStubManager(stubManager);
         zoneManager.setMemoryBlockManagerFactory(resourceBlockManagerFactory);
+        zoneManager.setVerifiers(verifiers);
         addChangeEvent(zoneManager);
 
         return zoneManager;

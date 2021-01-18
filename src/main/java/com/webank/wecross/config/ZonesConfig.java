@@ -32,6 +32,8 @@ public class ZonesConfig {
 
     @Resource StubManager stubManager;
 
+    @Resource BlockVerifierTomlConfig.Verifiers verifiers;
+
     @Resource MemoryBlockManagerFactory resourceBlockManagerFactory;
 
     @Bean
@@ -134,6 +136,17 @@ public class ZonesConfig {
             Driver driver = stubManager.getStubDriver(type);
             List<ResourceInfo> resources = driver.getResources(localConnection);
             Map<String, String> properties = localConnection.getProperties();
+
+            if (this.verifiers != null && this.verifiers.getVerifiers().size() > 0) {
+                BlockVerifierTomlConfig.Verifiers.BlockVerifier blockVerifier =
+                        this.verifiers.getVerifiers().get(zone + "." + chainName);
+                if (blockVerifier != null) {
+                    properties.put("VERIFIER", blockVerifier.toJson());
+                } else {
+                    logger.warn("Chain did not config verifier, chain: {}", chainName);
+                }
+            }
+
             String checksum = ChainInfo.buildChecksum(driver, localConnection);
 
             ChainInfo chainInfo = new ChainInfo();

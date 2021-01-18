@@ -90,7 +90,13 @@ fabric_user_dir=${certs_dir}/accounts/fabric_user1
 fabric_admin_org1_dir=${certs_dir}/accounts/fabric_admin_org1
 fabric_admin_org2_dir=${certs_dir}/accounts/fabric_admin_org2
 
-mkdir -p ${certs_dir} ${fabric_admin_dir} ${fabric_user_dir} ${fabric_stub_dir} ${fabric_admin_org1_dir} ${fabric_admin_org2_dir}
+fabric_verifiers_dir=${certs_dir}/verifiers
+fabric_verifiers_org1CA_dir=${certs_dir}/verifiers/org1CA
+fabric_verifiers_org2CA_dir=${certs_dir}/verifiers/org2CA
+fabric_verifiers_ordererCA_dir=${certs_dir}/verifiers/ordererCA
+
+mkdir -p ${certs_dir} ${fabric_admin_dir} ${fabric_user_dir} ${fabric_stub_dir} ${fabric_admin_org1_dir} ${fabric_admin_org2_dir} \
+${fabric_verifiers_dir} ${fabric_verifiers_org1CA_dir} ${fabric_verifiers_org2CA_dir} ${fabric_verifiers_ordererCA_dir}
 
 crypto_dir=fabric-samples-1.4.4/first-network/crypto-config/
 cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/*_sk ${fabric_admin_dir}/account.key
@@ -108,5 +114,9 @@ cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com
 
 cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/*_sk ${fabric_admin_org2_dir}/account.key
 cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem ${fabric_admin_org2_dir}/account.crt
+
+cp ${crypto_dir}/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem ${fabric_verifiers_org1CA_dir}/ca.org1.example.com-cert.pem
+cp ${crypto_dir}/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem ${fabric_verifiers_org2CA_dir}/ca.org2.example.com-cert.pem
+cp ${crypto_dir}/ordererOrganizations/example.com/ca/ca.example.com-cert.pem ${fabric_verifiers_ordererCA_dir}/ca.example.com-cert.pem
 
 LOG_INFO "SUCCESS: Build Fabric demo finish."
