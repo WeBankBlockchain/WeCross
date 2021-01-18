@@ -6,6 +6,7 @@ import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,14 @@ public class ConfigUtils {
             PathMatchingResourcePatternResolver resolver =
                     new PathMatchingResourcePatternResolver();
             return new Toml().read(resolver.getResource(fileName).getInputStream());
+        } catch (IllegalStateException e) {
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                    "Toml file " + fileName + "format error: " + e.getMessage());
+        } catch (FileNotFoundException e) {
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.DIR_NOT_EXISTS,
+                    "Toml file " + fileName + "not found: " + e.getMessage());
         } catch (Exception e) {
             throw new WeCrossException(
                     WeCrossException.ErrorCode.INTERNAL_ERROR,
