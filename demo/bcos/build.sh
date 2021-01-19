@@ -26,6 +26,13 @@ build_bcos_chain() {
     Download https://github.com/FISCO-BCOS/FISCO-BCOS/raw/master/tools/build_chain.sh
     chmod u+x build_chain.sh
 
+    local support_version="$1"
+    local support_version_cmd=""
+    if [[ -n ${support_version} ]]; then
+        LOG_INFO "Support version: ${support_version} "
+        support_version_cmd="-v ${support_version}"
+    fi
+
     # Build chain
     LOG_INFO "Build chain ..."
     if [ ! -e ipconf ]; then
@@ -38,18 +45,18 @@ build_bcos_chain() {
         if [ -e fisco-bcos-macOS.tar.gz ]; then
             rm -f ./fisco-bcos
             tar -zxvf fisco-bcos-macOS.tar.gz
-            ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos
+            ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos "${support_version_cmd}"
         else
-            ./build_chain.sh -f ipconf -p 30300,20200,8545
+            ./build_chain.sh -f ipconf -p 30300,20200,8545 "${support_version_cmd}"
         fi
     else
         # Other
         if [ -e fisco-bcos.tar.gz ]; then
             rm -f ./fisco-bcos
             tar -zxvf fisco-bcos.tar.gz
-            ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos
+            ./build_chain.sh -f ipconf -p 30300,20200,8545 -e ./fisco-bcos "${support_version_cmd}"
         else
-            ./build_chain.sh -f ipconf -p 30300,20200,8545
+            ./build_chain.sh -f ipconf -p 30300,20200,8545 "${support_version_cmd}"
         fi
     fi
 
@@ -101,9 +108,9 @@ EOF
 }
 
 main() {
-    build_bcos_chain
+    build_bcos_chain "$1"
     build_accounts
     LOG_INFO "SUCCESS: Build FISCO BCOS demo finish."
 }
 
-main
+main "$1"
