@@ -6,6 +6,7 @@ DB_IP=127.0.0.1
 DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=123456
+BCOS_VERSION=''
 
 need_db_config_ask=true
 
@@ -114,7 +115,7 @@ build_bcos() {
 127.0.0.1:4 agency1 1,2
 EOF
 
-    bash build.sh
+    bash build.sh "${BCOS_VERSION}"
 
     cd ${ROOT}
 }
@@ -465,16 +466,18 @@ Usage:
     -P                              [Optional] DB port
     -u                              [Optional] DB username
     -p                              [Optional] DB password
+    -f                              [Optional] bcos version, support versions: 2.1.0+
     -h  call for help
 e.g
     bash $0 -H ${DB_IP} -P ${DB_PORT} -u ${DB_USERNAME} -p 123456
+    bash $0 2.6.0
     bash $0
 EOF
     exit 0
 }
 
 parse_command() {
-    while getopts "H:P:u:p:dh" option; do
+    while getopts "H:P:u:p:df:h" option; do
         # shellcheck disable=SC2220
         case ${option} in
         d)
@@ -495,6 +498,9 @@ parse_command() {
         p)
             DB_PASSWORD=$OPTARG
             need_db_config_ask=false
+            ;;
+        f)
+            BCOS_VERSION=$OPTARG
             ;;
         h) help ;;
         *) help ;;

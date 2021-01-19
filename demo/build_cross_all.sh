@@ -6,6 +6,7 @@ DB_IP=127.0.0.1
 DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=123456
+BCOS_VERSION=''
 
 need_db_config_ask=true
 
@@ -136,7 +137,7 @@ build_bcos() {
 127.0.0.1:4 agency1 1,2
 EOF
 
-    bash build.sh
+    bash build.sh "${BCOS_VERSION}"
 
     cd ${ROOT}
 }
@@ -150,7 +151,7 @@ build_bcos_gm() {
 127.0.0.1:1 agency1 1
 EOF
 
-    bash build_gm.sh
+    bash build_gm.sh "${BCOS_VERSION}"
     cd ${ROOT}
 }
 
@@ -256,7 +257,6 @@ db_config_ask() {
     check_db_service
 }
 
-
 config_router_group1() {
     router_dir=${1}
 
@@ -339,7 +339,6 @@ config_router_fabric() {
     # stubs
     bash add_chain.sh -t Fabric1.4 -n fabric-mychannel -d conf/chains
     cp ${fabric_demo_dir}/certs/chains/fabric/* conf/chains/fabric-mychannel/
-
 
     # fabric stub internal accounts
     bash add_account.sh -t Fabric1.4 -n fabric_admin -d conf/accounts
@@ -580,8 +579,6 @@ EOF
     cd -
 }
 
-
-
 deploy_chain_account() {
     mkdir -p ${ROOT}/WeCross-Console/conf/accounts/
     cd ${ROOT}/WeCross-Console/conf/accounts/ && rm -rf $(ls | grep -v .sh) && cd -
@@ -592,7 +589,7 @@ deploy_chain_account() {
     add_fabric_account fabric_admin_org1 Org1MSP # 1
     add_fabric_account fabric_admin_org2 Org2MSP # 2
     add_fabric_account fabric_user1 Org1MSP      # 3
-    add_bcos_gm_account bcos_gm_user1 # 4
+    add_bcos_gm_account bcos_gm_user1            # 4
 }
 
 deploy_sample_resource() {
@@ -666,16 +663,18 @@ Usage:
     -P                              [Optional] DB port
     -u                              [Optional] DB username
     -p                              [Optional] DB password
+    -f                              [Optional] bcos version, support versions: 2.1.0+
     -h  call for help
 e.g
     bash $0 -H ${DB_IP} -P ${DB_PORT} -u ${DB_USERNAME} -p 123456
+    bash $0 -f 2.6.0
     bash $0
 EOF
     exit 0
 }
 
 parse_command() {
-    while getopts "H:P:u:p:dh" option; do
+    while getopts "H:P:u:p:df:h" option; do
         # shellcheck disable=SC2220
         case ${option} in
         d)
@@ -696,6 +695,9 @@ parse_command() {
         p)
             DB_PASSWORD=$OPTARG
             need_db_config_ask=false
+            ;;
+        f)
+            BCOS_VERSION=$OPTARG
             ;;
         h) help ;;
         *) help ;;
