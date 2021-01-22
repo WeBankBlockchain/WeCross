@@ -38,9 +38,11 @@ public class BlockVerifierTomlConfigTest {
         Assert.assertTrue(verifiers.getVerifierHashMap().containsKey("payment.bcos-gm"));
 
         Assert.assertEquals(
-                "BCOS2.0", verifiers.getVerifierHashMap().get("payment.bcos-group1").getChainType());
+                "BCOS2.0",
+                verifiers.getVerifierHashMap().get("payment.bcos-group1").getChainType());
         Assert.assertEquals(
-                "BCOS2.0", verifiers.getVerifierHashMap().get("payment.bcos-group2").getChainType());
+                "BCOS2.0",
+                verifiers.getVerifierHashMap().get("payment.bcos-group2").getChainType());
         Assert.assertEquals(
                 "GM_BCOS2.0", verifiers.getVerifierHashMap().get("payment.bcos-gm").getChainType());
     }

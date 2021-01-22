@@ -227,9 +227,7 @@ public class ZoneManager {
                             chainInfo.getProperties().put("VERIFIER", blockVerifier.toJson());
                         } else {
                             // did not config this chain
-                            logger.warn(
-                                    "Chain did not config verifier, chain: {}",
-                                    chainPath);
+                            logger.warn("Chain did not config verifier, chain: {}", chainPath);
                         }
                     }
                     RemoteConnection remoteConnection = new RemoteConnection();

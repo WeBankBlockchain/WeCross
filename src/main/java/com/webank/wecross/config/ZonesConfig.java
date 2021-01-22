@@ -141,8 +141,13 @@ public class ZonesConfig {
                 BlockVerifierTomlConfig.Verifiers.BlockVerifier blockVerifier =
                         this.verifiers.getVerifierHashMap().get(zone + "." + chainName);
                 if (blockVerifier != null) {
-                    if(! blockVerifier.chainType.equals(type)){
-                        throw new WeCrossException(WeCrossException.ErrorCode.UNEXPECTED_CONFIG, "Wrong chainType in blockVerifier, chainType: " + blockVerifier.chainType + " actual type: " + type);
+                    if (!blockVerifier.chainType.equals(type)) {
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                                "Wrong chainType in blockVerifier, chainType: "
+                                        + blockVerifier.chainType
+                                        + " actual type: "
+                                        + type);
                     }
                     properties.put("VERIFIER", blockVerifier.toJson());
                 } else {

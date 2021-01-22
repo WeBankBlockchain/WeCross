@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -154,12 +153,17 @@ public class BlockVerifierTomlConfig {
                 chainType = parseStringBase(blockVerifier, "chainType");
             }
 
-            public void checkBlockVerifier() throws WeCrossException{
-                if(chainType == null){
-                  throw new WeCrossException(WeCrossException.ErrorCode.UNEXPECTED_CONFIG, "chainType is null, please check.");
+            public void checkBlockVerifier() throws WeCrossException {
+                if (chainType == null) {
+                    throw new WeCrossException(
+                            WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                            "chainType is null, please check.");
                 }
-                if (!SUPPORTED_STUBS.contains(chainType)){
-                    throw new WeCrossException(WeCrossException.ErrorCode.UNEXPECTED_CONFIG, "Verifiers chainType is not supported, please check. chainType is : "+chainType);
+                if (!SUPPORTED_STUBS.contains(chainType)) {
+                    throw new WeCrossException(
+                            WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                            "Verifiers chainType is not supported, please check. chainType is : "
+                                    + chainType);
                 }
             }
 
@@ -199,17 +203,30 @@ public class BlockVerifierTomlConfig {
             @Override
             public void checkBlockVerifier() throws WeCrossException {
                 super.checkBlockVerifier();
-                if(endorserCA==null|| ordererCA==null||endorserCA.size()==0 || ordererCA.size()==0){
-                    throw new WeCrossException(WeCrossException.ErrorCode.UNEXPECTED_CONFIG, "Fabric block verifier config is wrong, endorserCA or ordererCA is null, please check.");
+                if (endorserCA == null
+                        || ordererCA == null
+                        || endorserCA.size() == 0
+                        || ordererCA.size() == 0) {
+                    throw new WeCrossException(
+                            WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                            "Fabric block verifier config is wrong, endorserCA or ordererCA is null, please check.");
                 }
                 for (Map.Entry<String, String> entry : endorserCA.entrySet()) {
-                    if(! Pattern.compile(CERT,Pattern.MULTILINE).matcher(entry.getValue()).matches()){
-                        throw new WeCrossException(WeCrossException.ErrorCode.UNEXPECTED_CONFIG, "Fabric endorserCA cert pattern matches error, please check.");
+                    if (!Pattern.compile(CERT, Pattern.MULTILINE)
+                            .matcher(entry.getValue())
+                            .matches()) {
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                                "Fabric endorserCA cert pattern matches error, please check.");
                     }
                 }
                 for (Map.Entry<String, String> entry : ordererCA.entrySet()) {
-                    if(! Pattern.compile(CERT,Pattern.MULTILINE).matcher(entry.getValue()).matches()){
-                        throw new WeCrossException(WeCrossException.ErrorCode.UNEXPECTED_CONFIG, "Fabric ordererCA cert pattern matches error, please check.");
+                    if (!Pattern.compile(CERT, Pattern.MULTILINE)
+                            .matcher(entry.getValue())
+                            .matches()) {
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                                "Fabric ordererCA cert pattern matches error, please check.");
                     }
                 }
             }
@@ -257,12 +274,19 @@ public class BlockVerifierTomlConfig {
             @Override
             public void checkBlockVerifier() throws WeCrossException {
                 super.checkBlockVerifier();
-                if(pubKey == null){
-                    throw new WeCrossException(WeCrossException.ErrorCode.UNEXPECTED_CONFIG, "pubKey is null in BCOS Verifier.");
+                if (pubKey == null) {
+                    throw new WeCrossException(
+                            WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                            "pubKey is null in BCOS Verifier.");
                 }
                 for (String key : pubKey) {
                     if (key.length() != BCOS_NODE_ID_LENGTH) {
-                        throw new WeCrossException(WeCrossException.ErrorCode.UNEXPECTED_CONFIG, "pubKey length is not in conformity with the BCOS right way, pubKey: " + key + " length is " + key.length());
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                                "pubKey length is not in conformity with the BCOS right way, pubKey: "
+                                        + key
+                                        + " length is "
+                                        + key.length());
                     }
                 }
             }
@@ -279,15 +303,13 @@ public class BlockVerifierTomlConfig {
                 return json;
             }
         }
-
     }
 
     public static void readCertInMap(Map<String, String> map) throws WeCrossException {
         for (Map.Entry<String, String> entry : map.entrySet()) {
             if (!fileIsExists(entry.getValue())) {
                 String errorMessage = "File: " + entry.getValue() + " is not exists";
-                throw new WeCrossException(
-                        WeCrossException.ErrorCode.DIR_NOT_EXISTS, errorMessage);
+                throw new WeCrossException(WeCrossException.ErrorCode.DIR_NOT_EXISTS, errorMessage);
             }
             PathMatchingResourcePatternResolver resolver =
                     new PathMatchingResourcePatternResolver();
@@ -304,12 +326,17 @@ public class BlockVerifierTomlConfig {
     }
 
     public static void checkVerifiers(Verifiers verifiers) throws WeCrossException {
-        for (Map.Entry<String, Verifiers.BlockVerifier> blockVerifierEntry : verifiers.verifierHashMap.entrySet()) {
-            if(blockVerifierEntry.getValue().chainType == null){
-                throw new WeCrossException(WeCrossException.ErrorCode.UNEXPECTED_CONFIG, "Verifiers chainType is null, please check.");
+        for (Map.Entry<String, Verifiers.BlockVerifier> blockVerifierEntry :
+                verifiers.verifierHashMap.entrySet()) {
+            if (blockVerifierEntry.getValue().chainType == null) {
+                throw new WeCrossException(
+                        WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                        "Verifiers chainType is null, please check.");
             } else {
-                if(logger.isTraceEnabled()){
-                    logger.trace("Check verifiers, verifier: {}, ", blockVerifierEntry.getValue().toJson());
+                if (logger.isTraceEnabled()) {
+                    logger.trace(
+                            "Check verifiers, verifier: {}, ",
+                            blockVerifierEntry.getValue().toJson());
                 }
                 blockVerifierEntry.getValue().checkBlockVerifier();
             }
