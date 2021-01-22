@@ -8,10 +8,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.AttributeKey;
-import java.security.Principal;
 import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.util.Objects;
 import javax.net.ssl.SSLPeerUnverifiedException;
-import javax.security.cert.X509Certificate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.TaskRejectedException;
@@ -63,27 +63,23 @@ public class ChannelHandlerCallBack {
 
     private PublicKey fetchCertificate(ChannelHandlerContext ctx)
             throws SSLPeerUnverifiedException {
-        SslHandler sslhandler = (SslHandler) ctx.channel().pipeline().get(SslHandler.class);
+        SslHandler sslhandler = ctx.channel().pipeline().get(SslHandler.class);
 
-        logger.info(String.valueOf(ctx.channel().pipeline().names()));
+        Certificate[] certs = sslhandler.engine().getSession().getPeerCertificates();
+        logger.info(
+                " ctx: {}, Certificate length: {}, pipeline sslHandlers: {}",
+                Objects.hashCode(ctx),
+                certs.length,
+                String.valueOf(ctx.channel().pipeline().names()));
 
-        X509Certificate cert = sslhandler.engine().getSession().getPeerCertificateChain()[0];
+        Certificate cert = certs[0];
         PublicKey publicKey = cert.getPublicKey();
-        Principal principal = cert.getSubjectDN();
 
         logger.info(
                 " algorithm: {}, format: {}, class name: {}",
                 publicKey.getAlgorithm(),
                 publicKey.getFormat(),
                 publicKey.getClass().getName());
-        logger.info(
-                " encoded: {}, hex encoded: {}",
-                publicKey.getEncoded(),
-                bytesToHex(publicKey.getEncoded()));
-        logger.info(
-                " principal name: {} ,principal class name: {}",
-                principal.getName(),
-                principal.getClass().getName());
 
         return publicKey;
     }
