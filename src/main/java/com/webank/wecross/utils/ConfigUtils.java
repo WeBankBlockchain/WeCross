@@ -7,7 +7,6 @@ import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +22,8 @@ public class ConfigUtils {
             "-----BEGIN\\s+.*CERTIFICATE[^-]*-+(?:\\s|\\r|\\n)+"
                     + "([A-Za-z0-9+/=\\r\\n]+)"
                     + "-----END\\s+.*CERTIFICATE[^-]*-+";
-    public static final String CERT = "^-{5}BEGIN CERTIFICATE-{5}$(?s).*?^-{5}END CERTIFICATE-{5}\n$";
+    public static final String CERT =
+            "^-{5}BEGIN CERTIFICATE-{5}$(?s).*?^-{5}END CERTIFICATE-{5}\n$";
 
     public static void checkPath(String path) throws WeCrossException {
         String templateUrl = WeCrossDefault.TEMPLATE_URL + path.replace('.', '/');
