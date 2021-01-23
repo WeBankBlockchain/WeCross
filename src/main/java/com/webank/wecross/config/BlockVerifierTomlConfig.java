@@ -1,6 +1,8 @@
 package com.webank.wecross.config;
 
-import static com.webank.wecross.utils.ConfigUtils.fileIsExists;
+import static com.webank.wecross.common.WeCrossDefault.BCOS_NODE_ID_LENGTH;
+import static com.webank.wecross.common.WeCrossDefault.SUPPORTED_STUBS;
+import static com.webank.wecross.utils.ConfigUtils.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -19,6 +21,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +30,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 @Configuration
 public class BlockVerifierTomlConfig {
-    private Logger logger = LoggerFactory.getLogger(BlockVerifierTomlConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(BlockVerifierTomlConfig.class);
 
     @Bean
     public Verifiers newVerifiers() {
@@ -36,19 +39,22 @@ public class BlockVerifierTomlConfig {
         try {
             toml = ConfigUtils.getToml(WeCrossDefault.BLOCK_VERIFIER_CONFIG_FILE);
         } catch (WeCrossException e) {
+            // did not have verifier toml
             if (e.getErrorCode() == WeCrossException.ErrorCode.DIR_NOT_EXISTS) {
-                logger.warn(
+                logger.info(
                         "Open verifier.toml fail: {}, do not verify block, err: {}",
                         e.getErrorCode(),
                         e.getMessage());
                 return verifiers;
+            } else {
+                // have verifier toml, but did not config in right way.
+                logger.error("Read verifier.toml fail, err: {}", e.getMessage());
+                System.exit(1);
             }
-            logger.error("Read verifier.toml fail, err: {}", e.getMessage());
-            System.exit(1);
         }
         try {
-            // have verifier toml, but did not config in right way.
             verifiers.addVerifiers(toml);
+            checkVerifiers(verifiers);
         } catch (Exception e) {
             logger.error(e.getMessage());
             System.exit(1);
@@ -73,7 +79,7 @@ public class BlockVerifierTomlConfig {
                 }
                 ordererCA = '/path/to/orderers/cacrt'
          */
-        private Map<String, BlockVerifier> verifiers = new HashMap<>();
+        private Map<String, BlockVerifier> verifierHashMap = new HashMap<>();
         private static final Logger logger = LoggerFactory.getLogger(Verifiers.class);
 
         public Verifiers() {}
@@ -99,11 +105,11 @@ public class BlockVerifierTomlConfig {
                     String chainType =
                             String.valueOf(zoneMap.get(zone).get(chain).get("chainType"));
                     if ("Fabric1.4".equals(chainType)) {
-                        verifiers.put(
+                        verifierHashMap.put(
                                 zone + "." + chain,
                                 new FabricVerifier(zoneMap.get(zone).get(chain)));
                     } else if ("BCOS2.0".equals(chainType) || "GM_BCOS2.0".equals(chainType)) {
-                        verifiers.put(
+                        verifierHashMap.put(
                                 zone + "." + chain, new BCOSVerifier(zoneMap.get(zone).get(chain)));
                     } else {
                         throw new Exception("Wrong chainType in toml.");
@@ -112,12 +118,12 @@ public class BlockVerifierTomlConfig {
             }
         }
 
-        public Map<String, BlockVerifier> getVerifiers() {
-            return verifiers;
+        public Map<String, BlockVerifier> getVerifierHashMap() {
+            return verifierHashMap;
         }
 
-        public void setVerifiers(Map<String, BlockVerifier> verifiers) {
-            this.verifiers = verifiers;
+        public void setVerifierHashMap(Map<String, BlockVerifier> verifierHashMap) {
+            this.verifierHashMap = verifierHashMap;
         }
 
         @JsonTypeInfo(
@@ -145,6 +151,20 @@ public class BlockVerifierTomlConfig {
 
             public BlockVerifier(Map<String, Object> blockVerifier) throws Exception {
                 chainType = parseStringBase(blockVerifier, "chainType");
+            }
+
+            public void checkBlockVerifier() throws WeCrossException {
+                if (chainType == null) {
+                    throw new WeCrossException(
+                            WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                            "chainType is null, please check.");
+                }
+                if (!SUPPORTED_STUBS.contains(chainType)) {
+                    throw new WeCrossException(
+                            WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                            "Verifiers chainType is not supported, please check. chainType is : "
+                                    + chainType);
+                }
             }
 
             public String getChainType() {
@@ -178,6 +198,37 @@ public class BlockVerifierTomlConfig {
                 // mspID => path to mspID => cert
                 readCertInMap(endorserCA);
                 readCertInMap(ordererCA);
+            }
+
+            @Override
+            public void checkBlockVerifier() throws WeCrossException {
+                super.checkBlockVerifier();
+                if (endorserCA == null
+                        || ordererCA == null
+                        || endorserCA.size() == 0
+                        || ordererCA.size() == 0) {
+                    throw new WeCrossException(
+                            WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                            "Fabric block verifier config is wrong, endorserCA or ordererCA is null, please check.");
+                }
+                for (Map.Entry<String, String> entry : endorserCA.entrySet()) {
+                    if (!Pattern.compile(CERT, Pattern.MULTILINE)
+                            .matcher(entry.getValue())
+                            .matches()) {
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                                "Fabric endorserCA cert pattern matches error, please check.");
+                    }
+                }
+                for (Map.Entry<String, String> entry : ordererCA.entrySet()) {
+                    if (!Pattern.compile(CERT, Pattern.MULTILINE)
+                            .matcher(entry.getValue())
+                            .matches()) {
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                                "Fabric ordererCA cert pattern matches error, please check.");
+                    }
+                }
             }
 
             public Map<String, String> getEndorserCA() {
@@ -221,6 +272,26 @@ public class BlockVerifierTomlConfig {
             }
 
             @Override
+            public void checkBlockVerifier() throws WeCrossException {
+                super.checkBlockVerifier();
+                if (pubKey == null) {
+                    throw new WeCrossException(
+                            WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                            "pubKey is null in BCOS Verifier.");
+                }
+                for (String key : pubKey) {
+                    if (key.length() != BCOS_NODE_ID_LENGTH) {
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                                "pubKey length is not in conformity with the BCOS right way, pubKey: "
+                                        + key
+                                        + " length is "
+                                        + key.length());
+                    }
+                }
+            }
+
+            @Override
             public String toJson() {
                 ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
                 String json = null;
@@ -232,56 +303,42 @@ public class BlockVerifierTomlConfig {
                 return json;
             }
         }
+    }
 
-        private static Map<String, String> parseMapBase(Map<String, Object> map, String key)
-                throws IOException {
-            Map<String, String> res = (Map<String, String>) map.get(key);
-
-            if (res == null) {
-                throw new IOException("'" + key + "' item not found");
+    public static void readCertInMap(Map<String, String> map) throws WeCrossException {
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (!fileIsExists(entry.getValue())) {
+                String errorMessage = "File: " + entry.getValue() + " is not exists";
+                throw new WeCrossException(WeCrossException.ErrorCode.DIR_NOT_EXISTS, errorMessage);
             }
-            return res;
-        }
-
-        private static String parseStringBase(Map<String, Object> map, String key)
-                throws IOException {
-            String res = (String) map.get(key);
-
-            if (res == null) {
-                throw new IOException("'" + key + "' item not found");
+            PathMatchingResourcePatternResolver resolver =
+                    new PathMatchingResourcePatternResolver();
+            try {
+                Path path = Paths.get(resolver.getResource(entry.getValue()).getURI());
+                String newContent = new String(Files.readAllBytes(path));
+                map.replace(entry.getKey(), newContent);
+            } catch (IOException e) {
+                throw new WeCrossException(
+                        WeCrossException.ErrorCode.DIR_NOT_EXISTS,
+                        "Read Cert fail: " + entry.getKey() + entry.getValue());
             }
-            return res;
         }
+    }
 
-        private static List<String> parseStringList(Map<String, Object> map, String key)
-                throws IOException {
-            @SuppressWarnings("unchecked")
-            List<String> res = (List<String>) map.get(key);
-
-            if (res == null) {
-                throw new IOException("'" + key + "' item illegal");
-            }
-            return res;
-        }
-
-        private static void readCertInMap(Map<String, String> map) throws WeCrossException {
-            for (Map.Entry<String, String> entry : map.entrySet()) {
-                if (!fileIsExists(entry.getValue())) {
-                    String errorMessage = "File: " + entry.getValue() + " is not exists";
-                    throw new WeCrossException(
-                            WeCrossException.ErrorCode.DIR_NOT_EXISTS, errorMessage);
+    public static void checkVerifiers(Verifiers verifiers) throws WeCrossException {
+        for (Map.Entry<String, Verifiers.BlockVerifier> blockVerifierEntry :
+                verifiers.verifierHashMap.entrySet()) {
+            if (blockVerifierEntry.getValue().chainType == null) {
+                throw new WeCrossException(
+                        WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                        "Verifiers chainType is null, please check.");
+            } else {
+                if (logger.isTraceEnabled()) {
+                    logger.trace(
+                            "Check verifiers, verifier: {}, ",
+                            blockVerifierEntry.getValue().toJson());
                 }
-                PathMatchingResourcePatternResolver resolver =
-                        new PathMatchingResourcePatternResolver();
-                try {
-                    Path path = Paths.get(resolver.getResource(entry.getValue()).getURI());
-                    String newContent = new String(Files.readAllBytes(path));
-                    map.replace(entry.getKey(), newContent);
-                } catch (IOException e) {
-                    throw new WeCrossException(
-                            WeCrossException.ErrorCode.DIR_NOT_EXISTS,
-                            "Read Cert fail: " + entry.getKey() + entry.getValue());
-                }
+                blockVerifierEntry.getValue().checkBlockVerifier();
             }
         }
     }

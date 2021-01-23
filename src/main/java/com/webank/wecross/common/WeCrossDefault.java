@@ -1,7 +1,10 @@
 package com.webank.wecross.common;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class WeCrossDefault {
-    public static final String VERSION = "v1.0.1";
+    public static final String VERSION = "v1.1.0";
 
     public static final String TEMPLATE_URL = "http://127.0.0.1:8080/";
 
@@ -15,4 +18,9 @@ public class WeCrossDefault {
 
     // User Context
     public static final String EMPTY_TOKEN = "_wecross_local_account_";
+
+    // Block Verifier Config
+    public static final int BCOS_NODE_ID_LENGTH = 128;
+    public static final List<String> SUPPORTED_STUBS =
+            Arrays.asList("BCOS2.0", "GM_BCOS2.0", "Fabric1.4");
 }
