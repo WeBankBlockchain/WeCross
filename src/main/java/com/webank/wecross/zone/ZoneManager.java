@@ -220,16 +220,14 @@ public class ZoneManager {
                     resourcePath.setResource(resourceInfo.getName());
 
                     // did config verifiers
-                    if (this.verifiers != null && this.verifiers.getVerifiers().size() > 0) {
+                    if (this.verifiers != null && this.verifiers.getVerifierHashMap().size() > 0) {
                         BlockVerifierTomlConfig.Verifiers.BlockVerifier blockVerifier =
-                                this.verifiers.getVerifiers().get(chainPath.toString());
-                        // did not config this chain
+                                this.verifiers.getVerifierHashMap().get(chainPath.toString());
                         if (blockVerifier != null) {
                             chainInfo.getProperties().put("VERIFIER", blockVerifier.toJson());
                         } else {
-                            logger.warn(
-                                    "Chain did not config verifier, chain: {}",
-                                    chainPath.toString());
+                            // did not config this chain
+                            logger.warn("Chain did not config verifier, chain: {}", chainPath);
                         }
                     }
                     RemoteConnection remoteConnection = new RemoteConnection();

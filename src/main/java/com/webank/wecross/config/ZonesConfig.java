@@ -137,10 +137,18 @@ public class ZonesConfig {
             List<ResourceInfo> resources = driver.getResources(localConnection);
             Map<String, String> properties = localConnection.getProperties();
 
-            if (this.verifiers != null && this.verifiers.getVerifiers().size() > 0) {
+            if (this.verifiers != null && this.verifiers.getVerifierHashMap().size() > 0) {
                 BlockVerifierTomlConfig.Verifiers.BlockVerifier blockVerifier =
-                        this.verifiers.getVerifiers().get(zone + "." + chainName);
+                        this.verifiers.getVerifierHashMap().get(zone + "." + chainName);
                 if (blockVerifier != null) {
+                    if (!blockVerifier.chainType.equals(type)) {
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                                "Wrong chainType in blockVerifier, chainType: "
+                                        + blockVerifier.chainType
+                                        + " actual type: "
+                                        + type);
+                    }
                     properties.put("VERIFIER", blockVerifier.toJson());
                 } else {
                     logger.warn("Chain did not config verifier, chain: {}", chainName);

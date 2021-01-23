@@ -33,15 +33,17 @@ public class BlockVerifierTomlConfigTest {
                         + "        ]\n");
         BlockVerifierTomlConfig.Verifiers verifiers = new BlockVerifierTomlConfig.Verifiers();
         verifiers.addVerifiers(toml);
-        Assert.assertTrue(verifiers.getVerifiers().containsKey("payment.bcos-group1"));
-        Assert.assertTrue(verifiers.getVerifiers().containsKey("payment.bcos-group2"));
-        Assert.assertTrue(verifiers.getVerifiers().containsKey("payment.bcos-gm"));
+        Assert.assertTrue(verifiers.getVerifierHashMap().containsKey("payment.bcos-group1"));
+        Assert.assertTrue(verifiers.getVerifierHashMap().containsKey("payment.bcos-group2"));
+        Assert.assertTrue(verifiers.getVerifierHashMap().containsKey("payment.bcos-gm"));
 
         Assert.assertEquals(
-                "BCOS2.0", verifiers.getVerifiers().get("payment.bcos-group1").getChainType());
+                "BCOS2.0",
+                verifiers.getVerifierHashMap().get("payment.bcos-group1").getChainType());
         Assert.assertEquals(
-                "BCOS2.0", verifiers.getVerifiers().get("payment.bcos-group2").getChainType());
+                "BCOS2.0",
+                verifiers.getVerifierHashMap().get("payment.bcos-group2").getChainType());
         Assert.assertEquals(
-                "GM_BCOS2.0", verifiers.getVerifiers().get("payment.bcos-gm").getChainType());
+                "GM_BCOS2.0", verifiers.getVerifierHashMap().get("payment.bcos-gm").getChainType());
     }
 }
