@@ -470,7 +470,7 @@ Usage:
     -h  call for help
 e.g
     bash $0 -H ${DB_IP} -P ${DB_PORT} -u ${DB_USERNAME} -p 123456
-    bash $0 2.6.0
+    bash $0 -f 2.6.0
     bash $0
 EOF
     exit 0
