@@ -3,9 +3,11 @@ package com.webank.wecross.network.client;
 import static org.asynchttpclient.Dsl.asyncHttpClient;
 import static org.asynchttpclient.Dsl.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.network.rpc.authentication.RemoteAuthFilter;
 import com.webank.wecross.stub.ObjectMapperFactory;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.ssl.ClientAuth;
@@ -201,6 +203,27 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
 
                         handler.onResponse(statusCode, statusText, responseHeaders, responseBody);
                         return response;
+                    }
+
+                    @Override
+                    public void onThrowable(Throwable t) {
+                        logger.error("asyncSendInternal onThrowable: ", t.getCause());
+
+                        RemoteAuthFilter.RemoteResponse.Data data =
+                                new RemoteAuthFilter.RemoteResponse.Data();
+                        data.setErrorCode(RemoteAuthFilter.RemoteResponse.Data.ERROR);
+                        data.setMessage(t.getCause().getMessage());
+
+                        RemoteAuthFilter.RemoteResponse remoteResponse =
+                                new RemoteAuthFilter.RemoteResponse();
+                        remoteResponse.setData(data);
+
+                        try {
+                            handler.onResponse(
+                                    200, "", null, objectMapper.writeValueAsString(remoteResponse));
+                        } catch (JsonProcessingException e) {
+                            logger.error("e: ", e);
+                        }
                     }
                 });
     }
