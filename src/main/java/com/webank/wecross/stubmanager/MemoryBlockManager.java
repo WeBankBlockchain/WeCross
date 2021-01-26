@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -34,6 +35,15 @@ public class MemoryBlockManager implements BlockManager {
     private ReadWriteLock lock = new ReentrantReadWriteLock();
     private long getBlockNumberDelay = 1000;
     private int maxCacheSize = 20;
+    private long startWaitingTimeOut = 30000; // ms
+
+    public long getStartWaitingTimeOut() {
+        return startWaitingTimeOut;
+    }
+
+    public void setStartWaitingTimeOut(long startWaitingTimeOut) {
+        this.startWaitingTimeOut = startWaitingTimeOut;
+    }
 
     public void onGetBlockNumber(Exception e, long blockNumber) {
         lock.readLock().lock();
@@ -143,15 +153,35 @@ public class MemoryBlockManager implements BlockManager {
         if (connection != null && driver != null && running.compareAndSet(false, true)) {
             logger.info("MemoryBlockHeaderManager started");
 
+            CompletableFuture<Long> blockNumberFuture = new CompletableFuture<>();
+            CompletableFuture<Exception> exceptionFuture = new CompletableFuture<>();
+
             chain.getDriver()
                     .asyncGetBlockNumber(
                             connection,
                             new Driver.GetBlockNumberCallback() {
                                 @Override
                                 public void onResponse(Exception e, long blockNumber) {
+                                    blockNumberFuture.complete(blockNumber);
+                                    exceptionFuture.complete(e);
                                     onGetBlockNumber(e, blockNumber);
                                 }
                             });
+            try {
+                Long initBlockNumber =
+                        blockNumberFuture.get(startWaitingTimeOut, TimeUnit.MILLISECONDS);
+                Exception e = exceptionFuture.get(startWaitingTimeOut, TimeUnit.MILLISECONDS);
+                if (e != null) {
+                    logger.error("MemoryBlockManager initialize, failed to getblockNumber, e: ", e);
+                } else {
+                    logger.info(
+                            "MemoryBlockManager initialize successfully, blockNumber: ",
+                            initBlockNumber);
+                }
+            } catch (Exception e) {
+                logger.error("MemoryBlockManager initialize failed, e: ", e);
+                throw new RuntimeException(e.getCause());
+            }
         }
     }
 
