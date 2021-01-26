@@ -19,10 +19,6 @@ public class ConfigUtils {
 
     public static final Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
     public static final String CERT_PATTERN =
-            "-----BEGIN\\s+.*CERTIFICATE[^-]*-+(?:\\s|\\r|\\n)+"
-                    + "([A-Za-z0-9+/=\\r\\n]+)"
-                    + "-----END\\s+.*CERTIFICATE[^-]*-+";
-    public static final String CERT =
             "^-{5}BEGIN CERTIFICATE-{5}$(?s).*?^-{5}END CERTIFICATE-{5}\n$";
 
     public static void checkPath(String path) throws WeCrossException {
