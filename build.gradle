@@ -121,6 +121,7 @@ verifyGoogleJavaFormat {
 configurations.all {
     exclude module: "spring-boot-starter-logging"
     exclude module: "spring-boot-starter-web"
+    exclude group: 'io.netty', module: 'netty-all'
 }
 
 dependencies {
@@ -131,11 +132,20 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-log4j2:2.1.16.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-actuator:2.1.16.RELEASE'
     compile 'org.springframework.boot:spring-boot-configuration-processor:2.1.16.RELEASE'
-    compile 'io.netty:netty-all:4.1.51.Final'
     compile 'org.asynchttpclient:async-http-client:2.12.0'
     compile 'org.bouncycastle:bcprov-jdk15on:1.60'
     compile 'commons-codec:commons-codec:1.14'
     compile 'javax.activation:activation:1.1.1'
+    compile 'org.fisco-bcos:tcnative:2.0.34.0'
+
+    compile group: 'io.netty', name: 'netty-buffer', version: '4.1.58.Final'
+    compile group: 'io.netty', name: 'netty-codec', version: '4.1.58.Final'
+    compile group: 'io.netty', name: 'netty-codec-http', version: '4.1.58.Final'
+    compile group: 'io.netty', name: 'netty-codec-http2', version: '4.1.58.Final'
+    compile group: 'io.netty', name: 'netty-common', version: '4.1.58.Final'
+    compile group: 'io.netty', name: 'netty-handler', version: '4.1.58.Final'
+    compile group: 'io.netty', name: 'netty-resolver', version: '4.1.58.Final'
+    compile group: 'io.netty', name: 'netty-transport', version: '4.1.58.Final'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
