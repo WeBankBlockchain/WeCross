@@ -1,7 +1,6 @@
 package com.webank.wecross.config;
 
 import static com.webank.wecross.common.WeCrossDefault.BCOS_NODE_ID_LENGTH;
-import static com.webank.wecross.common.WeCrossDefault.SUPPORTED_STUBS;
 import static com.webank.wecross.utils.ConfigUtils.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -13,6 +12,7 @@ import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.ObjectMapperFactory;
+import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.utils.ConfigUtils;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,7 +21,9 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
+import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +32,9 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 @Configuration
 public class BlockVerifierTomlConfig {
+
+    @Resource private StubManager stubManager;
+
     private static final Logger logger = LoggerFactory.getLogger(BlockVerifierTomlConfig.class);
 
     @Bean
@@ -54,7 +59,7 @@ public class BlockVerifierTomlConfig {
         }
         try {
             verifiers.addVerifiers(toml);
-            checkVerifiers(verifiers);
+            checkVerifiers(verifiers, this.stubManager.getStubFactories().keySet());
         } catch (Exception e) {
             logger.error(e.getMessage());
             System.exit(1);
@@ -153,19 +158,7 @@ public class BlockVerifierTomlConfig {
                 chainType = parseStringBase(blockVerifier, "chainType");
             }
 
-            public void checkBlockVerifier() throws WeCrossException {
-                if (chainType == null) {
-                    throw new WeCrossException(
-                            WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
-                            "chainType is null, please check.");
-                }
-                if (!SUPPORTED_STUBS.contains(chainType)) {
-                    throw new WeCrossException(
-                            WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
-                            "Verifiers chainType is not supported, please check. chainType is : "
-                                    + chainType);
-                }
-            }
+            public void checkBlockVerifier() throws WeCrossException {}
 
             public String getChainType() {
                 return chainType;
@@ -202,7 +195,6 @@ public class BlockVerifierTomlConfig {
 
             @Override
             public void checkBlockVerifier() throws WeCrossException {
-                super.checkBlockVerifier();
                 if (endorserCA == null
                         || ordererCA == null
                         || endorserCA.size() == 0
@@ -212,7 +204,7 @@ public class BlockVerifierTomlConfig {
                             "Fabric block verifier config is wrong, endorserCA or ordererCA is null, please check.");
                 }
                 for (Map.Entry<String, String> entry : endorserCA.entrySet()) {
-                    if (!Pattern.compile(CERT, Pattern.MULTILINE)
+                    if (!Pattern.compile(CERT_PATTERN, Pattern.MULTILINE)
                             .matcher(entry.getValue())
                             .matches()) {
                         throw new WeCrossException(
@@ -221,7 +213,7 @@ public class BlockVerifierTomlConfig {
                     }
                 }
                 for (Map.Entry<String, String> entry : ordererCA.entrySet()) {
-                    if (!Pattern.compile(CERT, Pattern.MULTILINE)
+                    if (!Pattern.compile(CERT_PATTERN, Pattern.MULTILINE)
                             .matcher(entry.getValue())
                             .matches()) {
                         throw new WeCrossException(
@@ -273,7 +265,6 @@ public class BlockVerifierTomlConfig {
 
             @Override
             public void checkBlockVerifier() throws WeCrossException {
-                super.checkBlockVerifier();
                 if (pubKey == null) {
                     throw new WeCrossException(
                             WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
@@ -325,13 +316,15 @@ public class BlockVerifierTomlConfig {
         }
     }
 
-    public static void checkVerifiers(Verifiers verifiers) throws WeCrossException {
+    public static void checkVerifiers(Verifiers verifiers, Set<String> stubTypes)
+            throws WeCrossException {
         for (Map.Entry<String, Verifiers.BlockVerifier> blockVerifierEntry :
                 verifiers.verifierHashMap.entrySet()) {
-            if (blockVerifierEntry.getValue().chainType == null) {
+            String chainType = blockVerifierEntry.getValue().chainType;
+            if (chainType == null || !stubTypes.contains(chainType)) {
                 throw new WeCrossException(
                         WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
-                        "Verifiers chainType is null, please check.");
+                        "Verifiers chainType is error, chainType: " + chainType);
             } else {
                 if (logger.isTraceEnabled()) {
                     logger.trace(
