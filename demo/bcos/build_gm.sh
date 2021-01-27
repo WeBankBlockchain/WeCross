@@ -45,18 +45,18 @@ build_bcos_chain() {
         if [ -e fisco-bcos-macOS.tar.gz ]; then
             rm -f ./fisco-bcos
             tar -zxvf fisco-bcos-macOS.tar.gz
-            ./build_chain.sh -f ipconf -p 30310,20210,8555 -e ./fisco-bcos -g -o nodes_gm "${support_version_cmd}"
+            ./build_chain.sh -f ipconf -p 30310,20210,8555 -e ./fisco-bcos -g -G -o nodes_gm "${support_version_cmd}"
         else
-            ./build_chain.sh -f ipconf -p 30310,20210,8555 -g -o nodes_gm "${support_version_cmd}"
+            ./build_chain.sh -f ipconf -p 30310,20210,8555 -g -G -o nodes_gm "${support_version_cmd}"
         fi
     else
         # Other
         if [ -e fisco-bcos.tar.gz ]; then
             rm -f ./fisco-bcos
             tar -zxvf fisco-bcos.tar.gz
-            ./build_chain.sh -f ipconf -p 30310,20210,8555 -e ./fisco-bcos -g -o nodes_gm "${support_version_cmd}"
+            ./build_chain.sh -f ipconf -p 30310,20210,8555 -e ./fisco-bcos -g -G -o nodes_gm "${support_version_cmd}"
         else
-            ./build_chain.sh -f ipconf -p 30310,20210,8555 -g -o nodes_gm "${support_version_cmd}"
+            ./build_chain.sh -f ipconf -p 30310,20210,8555 -g -G -o nodes_gm "${support_version_cmd}"
         fi
     fi
 
