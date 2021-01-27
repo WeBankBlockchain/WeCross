@@ -15,7 +15,6 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import java.awt.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;

@@ -1,21 +1,42 @@
 [common]
-    network = 'network'
-    visible = true
+zone = 'payment'
+visible = true
 
-[stubs]
-    path = 'classpath:stubs'
+[chains]
+path = 'classpath:chains'
 
 [rpc] # rpc ip & port
-    address = '127.0.0.1'
-    port = 8250
-    caCert = 'classpath:ca.crt'
-    sslCert = 'classpath:ssl.crt'
-    sslKey = 'classpath:ssl.key'
+address = '127.0.0.1'
+port = 8250
+caCert = 'classpath:ca.crt'
+sslCert = 'classpath:ssl.crt'
+sslKey = 'classpath:ssl.key'
+threadNum = 16
+threadQueueCapacity = 10000
+sslSwitch = 2  # disable ssl:2, SSL without client auth:1 , SSL with client and server auth: 0
+webRoot = 'classpath:pages'
+mimeTypesFile = 'classpath:conf/mime.types' # set the content-types of a file
 
 [p2p]
-    listenIP = '0.0.0.0'
-    listenPort = 25500
-    caCert = 'classpath:ca.crt'
-    sslCert = 'classpath:ssl.crt'
-    sslKey = 'classpath:ssl.key'
-    peers = ['127.0.0.1:25501']
+listenIP = '0.0.0.0'
+listenPort = 25500
+caCert = 'classpath:ca.crt'
+sslCert = 'classpath:ssl.crt'
+sslKey = 'classpath:ssl.key'
+peers = ['127.0.0.1:25501']
+threadNum = 16
+threadQueueCapacity = 100000
+
+[account-manager]
+server =  '127.0.0.1:8250'
+admin = 'org1-admin'
+sslKey = 'classpath:ssl.key'
+sslCert = 'classpath:ssl.crt'
+caCert = 'classpath:ca.crt'
+maxTotal = 200
+maxPerRoute = 8
+
+
+#[[htlc]]
+#    selfPath = 'payment.bcos.htlc'
+#    counterpartyPath = 'payment.fabric.htlc'
