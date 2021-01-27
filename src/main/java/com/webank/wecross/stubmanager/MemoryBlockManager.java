@@ -13,9 +13,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
@@ -23,7 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 public class MemoryBlockManager implements BlockManager {
-    private Logger logger = LoggerFactory.getLogger(MemoryBlockManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(MemoryBlockManager.class);
+
     private ThreadPoolTaskExecutor threadPool;
     private Map<Long, List<GetBlockCallback>> getBlockCallbacks =
             new HashMap<Long, List<GetBlockCallback>>();
@@ -35,17 +37,33 @@ public class MemoryBlockManager implements BlockManager {
     private ReadWriteLock lock = new ReentrantReadWriteLock();
     private long getBlockNumberDelay = 1000;
     private int maxCacheSize = 20;
-    private long startWaitingTimeOut = 30000; // ms
+    private AtomicLong latestBlockNumber = new AtomicLong(-1L);
 
-    public long getStartWaitingTimeOut() {
-        return startWaitingTimeOut;
+    private static class Status {
+        public static final int Starting = 0;
+        public static final int OK = 1;
+        public static final int Failure = 2;
     }
 
-    public void setStartWaitingTimeOut(long startWaitingTimeOut) {
-        this.startWaitingTimeOut = startWaitingTimeOut;
-    }
+    private AtomicInteger fetchBlockNumberStatus = new AtomicInteger(Status.Starting);
 
     public void onGetBlockNumber(Exception e, long blockNumber) {
+
+        if (Objects.nonNull(e)) {
+            logger.warn("onGetBlockNumber failed, e: ", e);
+            fetchBlockNumberStatus.set(Status.Failure);
+            waitAndSyncBlock(getGetBlockNumberDelay());
+            return;
+        }
+
+        // reset latestBlockNumber field
+        latestBlockNumber.set(blockNumber);
+        fetchBlockNumberStatus.set(Status.OK);
+
+        if (logger.isTraceEnabled()) {
+            logger.trace("onGetBlockNumber, blockNumber: {}", blockNumber);
+        }
+
         lock.readLock().lock();
         long current = 0;
         try {
@@ -80,9 +98,16 @@ public class MemoryBlockManager implements BlockManager {
 
     public void onSyncBlock(Exception e, Block block, long target) {
         if (Objects.nonNull(e)) {
-            logger.warn("On block header exception: ", e);
+            logger.warn("onSyncBlock failed, e: ", e);
             waitAndSyncBlock(getGetBlockNumberDelay());
             return;
+        }
+
+        if (logger.isTraceEnabled()) {
+            logger.trace(
+                    "On sync block, blockNumber: {}, blockHash: {}",
+                    block.getBlockHeader().getNumber(),
+                    block.getBlockHeader().getHash());
         }
 
         lock.writeLock().lock();
@@ -153,35 +178,23 @@ public class MemoryBlockManager implements BlockManager {
         if (connection != null && driver != null && running.compareAndSet(false, true)) {
             logger.info("MemoryBlockHeaderManager started");
 
-            CompletableFuture<Long> blockNumberFuture = new CompletableFuture<>();
-            CompletableFuture<Exception> exceptionFuture = new CompletableFuture<>();
-
             chain.getDriver()
                     .asyncGetBlockNumber(
                             connection,
                             new Driver.GetBlockNumberCallback() {
                                 @Override
                                 public void onResponse(Exception e, long blockNumber) {
-                                    blockNumberFuture.complete(blockNumber);
-                                    exceptionFuture.complete(e);
                                     onGetBlockNumber(e, blockNumber);
+                                    if (Objects.isNull(e)) {
+                                        logger.info(
+                                                "MemoryBlockManager initialize successfully, blockNumber: {}",
+                                                blockNumber);
+                                    } else {
+                                        logger.error(
+                                                "MemoryBlockManager initialize failed, e: ", e);
+                                    }
                                 }
                             });
-            try {
-                Long initBlockNumber =
-                        blockNumberFuture.get(startWaitingTimeOut, TimeUnit.MILLISECONDS);
-                Exception e = exceptionFuture.get(startWaitingTimeOut, TimeUnit.MILLISECONDS);
-                if (e != null) {
-                    logger.error("MemoryBlockManager initialize, failed to getblockNumber, e: ", e);
-                } else {
-                    logger.info(
-                            "MemoryBlockManager initialize successfully, blockNumber: ",
-                            initBlockNumber);
-                }
-            } catch (Exception e) {
-                logger.error("MemoryBlockManager initialize failed, e: ", e);
-                throw new RuntimeException(e.getCause());
-            }
         }
     }
 
@@ -213,23 +226,24 @@ public class MemoryBlockManager implements BlockManager {
 
     @Override
     public void asyncGetBlockNumber(GetBlockNumberCallback callback) {
-        lock.readLock().lock();
-        try {
-            if (blockDataCache.isEmpty()) {
-                threadPool.execute(
-                        () -> {
-                            callback.onResponse(null, 0);
-                        });
-            } else {
-                long blockNumber = blockDataCache.peekLast().getBlockHeader().getNumber();
-                threadPool.execute(
-                        () -> {
-                            callback.onResponse(null, blockNumber);
-                        });
-            }
-        } finally {
-            lock.readLock().unlock();
+
+        long blockNumber = 0;
+        WeCrossException e = null;
+        if (fetchBlockNumberStatus.get() == Status.OK) {
+            blockNumber = latestBlockNumber.get();
+        } else {
+            e =
+                    new WeCrossException(
+                            WeCrossException.ErrorCode.GET_BLOCK_NUMBER_ERROR,
+                            "get blockNumber failed");
         }
+
+        long finalBlockNumber = blockNumber;
+        Exception finalE = e;
+        threadPool.execute(
+                () -> {
+                    callback.onResponse(finalE, finalBlockNumber);
+                });
     }
 
     @Override
