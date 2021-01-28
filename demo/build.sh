@@ -2,6 +2,7 @@
 set -e
 LANG=en_US.UTF-8
 ROOT=$(pwd)
+
 DB_IP=127.0.0.1
 DB_PORT=3306
 DB_USERNAME=root
@@ -19,6 +20,15 @@ LOG_ERROR() {
     local content=${1}
     echo -e "\033[31m[ERROR] ${content}\033[0m"
 }
+
+version_file="profile_version.sh"
+[[ ! -f "${version_file}" ]] && {
+  LOG_ERROR " ${version_file} not exist, please check if the demo is the latest. "
+  exit 1
+}
+
+source "${version_file}"
+LOG_INFO "source ${version_file}, WeCross Version=${WECROSS_VERSION}"
 
 Download() {
     local url=${1}
@@ -298,9 +308,9 @@ build_wecross() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_wecross.sh ]; then
-            bash download_wecross.sh -t v1.0.1
+            bash download_wecross.sh -t ${WECROSS_VERSION}
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.1
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t ${WECROSS_VERSION}
         fi
     fi
 
@@ -321,9 +331,9 @@ build_wecross_console() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_console.sh ]; then
-            bash download_console.sh -t v1.0.1
+            bash download_console.sh -t "${WECROSS_CONSOLE_VERSION}"
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t v1.0.1
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t "${WECROSS_CONSOLE_VERSION}"
         fi
     fi
 
@@ -359,9 +369,9 @@ build_account_manager() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_account_manager.sh ]; then
-            bash download_account_manager.sh -t v1.0.1 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
+            bash download_account_manager.sh -t "${WECROSS_ACCOUNT_MANAGER_VERSION}" -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_account_manager.sh) -t v1.0.1 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_account_manager.sh) -t "${WECROSS_ACCOUNT_MANAGER_VERSION}" -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
         fi
     fi
 
@@ -571,11 +581,9 @@ Usage:
     -P                              [Optional] DB port
     -u                              [Optional] DB username
     -p                              [Optional] DB password
-    -f                              [Optional] bcos version, support versions: 2.1.0+
     -h  call for help
 e.g
     bash $0 -H ${DB_IP} -P ${DB_PORT} -u ${DB_USERNAME} -p 123456
-    bash $0 -f 2.6.0
     bash $0
 EOF
     exit 0

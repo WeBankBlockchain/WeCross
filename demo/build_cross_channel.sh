@@ -3,7 +3,6 @@ set -e
 LANG=en_US.UTF-8
 ROOT=$(pwd)
 
-
 LOG_INFO()
 {
     local content=${1}
@@ -15,6 +14,15 @@ LOG_ERROR()
     local content=${1}
     echo -e "\033[31m[ERROR] ${content}\033[0m"
 }
+
+version_file="profile_version.sh"
+[[ ! -f "${version_file}" ]] && {
+  LOG_ERROR " ${version_file} not exist, please check if the demo is the latest. "
+  exit 1
+}
+
+source "${version_file}"
+LOG_INFO "source ${version_file}, WeCross Version=${WECROSS_VERSION}"
 
 Download()
 {
@@ -259,9 +267,9 @@ download_wecross()
     # Download
     LOG_INFO "Download WeCross ..."
     if [ -e download_wecross.sh ];then
-        bash download_wecross.sh -t v1.0.1
+        bash download_wecross.sh -t "${WECROSS_VERSION}"
     else
-        bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.1
+        bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t "${WECROSS_VERSION}"
     fi
 }
 
@@ -269,9 +277,9 @@ download_wecross_console()
 {
     LOG_INFO "Download WeCross Console ..."
     if [ -e download_console.sh ];then
-        bash download_console.sh -t v1.0.1
+        bash download_console.sh -t "${WECROSS_CONSOLE_VERSION}"
     else
-        bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t v1.0.1
+        bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t "${WECROSS_CONSOLE_VERSION}"
     fi
 }
 
