@@ -1,4 +1,7 @@
 #!/bin/bash
+dirpath="$(cd "$(dirname "$0")" && pwd)"
+cd ${dirpath}
+
 set -e
 LANG=en_US.UTF-8
 
@@ -12,6 +15,15 @@ LOG_ERROR() {
     echo -e "\033[31m[ERROR][FISCO BCOS] ${content}\033[0m"
 }
 
+version_file="../profile_version.sh"
+[[ ! -f "${version_file}" ]] && {
+  LOG_ERROR " ${version_file} not exist, please check if the demo is the latest. "
+  exit 1
+}
+
+source "${version_file}"
+LOG_INFO "source ${version_file}, WeCross Version=${WECROSS_VERSION}"
+
 Download() {
     local url=${1}
     local file=$(basename ${url})
@@ -23,7 +35,7 @@ Download() {
 build_bcos_chain() {
     # Download
     LOG_INFO "Download build_chain.sh ..."
-    Download https://github.com/FISCO-BCOS/FISCO-BCOS/raw/master/tools/build_chain.sh
+    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/build_chain.sh
     chmod u+x build_chain.sh
 
     local support_version="$1"
