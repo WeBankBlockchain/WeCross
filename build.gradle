@@ -1,5 +1,6 @@
 plugins {
     id 'com.github.sherter.google-java-format' version '0.8'
+    id 'org.ajoberstar.grgit' version '4.0.1'
 }
 
 // Apply the java-library plugin to add support for Java Library
@@ -23,7 +24,7 @@ repositories {
 }
 
 sourceCompatibility = '1.8'
-version = '1.1.0-dev-011101-SNAPSHOT'
+version = '1.1.0-dev-01310-SNAPSHOT'
 
 task stubSourceJar(type: Jar) {
     into 'com/webank/wecross/stub', { from 'src/main/java/com/webank/wecross/stub' }
@@ -129,10 +130,10 @@ dependencies {
     compile 'com.moandjiezana.toml:toml4j:0.7.2'
     compile 'org.apache.commons:commons-lang3:3.11'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.11.2' // must not lower than 2.11.0 to support abi translate
-    compile 'org.springframework.boot:spring-boot-starter-log4j2:2.1.16.RELEASE'
-    compile 'org.springframework.boot:spring-boot-starter-actuator:2.1.16.RELEASE'
-    compile 'org.springframework.boot:spring-boot-configuration-processor:2.1.16.RELEASE'
-    compile 'org.asynchttpclient:async-http-client:2.12.0'
+    compile 'org.springframework.boot:spring-boot-starter-log4j2:2.3.8.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-actuator:2.3.8.RELEASE'
+    compile 'org.springframework.boot:spring-boot-configuration-processor:2.3.8.RELEASE'
+    compile 'org.asynchttpclient:async-http-client:2.12.2'
     compile 'org.bouncycastle:bcprov-jdk15on:1.60'
     compile 'commons-codec:commons-codec:1.14'
     compile 'javax.activation:activation:1.1.1'
@@ -175,6 +176,27 @@ jar {
                 'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
                 'Main-Class': 'com.webank.wecross.Application'
         )
+
+        try {
+            def repo = grgit.open(dir: file('.').canonicalPath)
+            if (repo != null) {
+                def date = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+                def branch = repo.branch.getCurrent().getName()
+                def commit = repo.head().getAbbreviatedId(40)
+
+                attributes(["Implementation-Timestamp": date,
+                            "Git-Branch"              : branch,
+                            "Git-Commit"              : commit
+                ])
+
+                logger.info("  Commit : ")
+                logger.info("  => date: {}", date)
+                logger.info("  => branch: {}", branch)
+                logger.info("  => commit: {}", commit)
+            }
+        } catch (Exception e) {
+            // logger.warn(' .git not exist, cannot found commit info')
+        }
     }
 
     doLast {
