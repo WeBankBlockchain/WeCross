@@ -3,7 +3,13 @@ package com.webank.wecross.routine.xa;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.account.UniversalAccount;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class XATransactionListResponse {

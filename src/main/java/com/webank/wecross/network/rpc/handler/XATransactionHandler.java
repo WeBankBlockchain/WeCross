@@ -15,7 +15,14 @@ import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.routine.xa.XATransactionManager;
 import com.webank.wecross.stub.ObjectMapperFactory;
 import com.webank.wecross.stub.Path;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,7 +183,7 @@ public class XATransactionHandler implements URIHandler {
 
                         xaTransactionManager.asyncGetXATransaction(
                                 xaRequest.getData().getXaTransactionID(),
-                                ua,
+                                host.getAccountManager().getAdminUA(),
                                 filterAndSortChainPaths(xaRequest.getData().getPaths()),
                                 (xaTransactionResponse) -> {
                                     if (logger.isDebugEnabled()) {
@@ -199,7 +206,7 @@ public class XATransactionHandler implements URIHandler {
                                                 RestRequest<ListXATransactionsRequest>>() {});
 
                         xaTransactionManager.asyncListXATransactions(
-                                ua,
+                                host.getAccountManager().getAdminUA(),
                                 xaRequest.getData().getOffsets(),
                                 xaRequest.getData().getSize(),
                                 (exception, xaTransactionListResponse) -> {

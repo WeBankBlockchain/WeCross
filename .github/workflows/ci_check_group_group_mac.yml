@@ -1,20 +1,19 @@
-name: group-group
+name: mac_group-group
 
 on: [pull_request]
 
 jobs:
-  group-group:
-    runs-on: ubuntu-18.04
+  mac_group-group:
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
         with:
           node-version: '10'
-      - uses: mirromutth/mysql-action@v1.1
-        with:
-          mysql root password: '123456'
-      - name: install dependencies
-        run: sudo apt-get update && sudo apt-get install -y mysql-client git curl libssl-dev default-jdk build-essential
+      - name: mac prepare
+        run: bash -x .ci/ci_mac_prepare.sh
+        env:
+          CI_DB_PASSWORD: '123456'
       - name: run ci_cross_groups_demo_check.sh
         # The script only use ${1} as branch name. if GITHUB_BASE_REF is blank use GITHUB_REF
         run: bash .ci/ci_cross_groups_demo_check.sh ${GITHUB_BASE_REF} ${GITHUB_REF#refs/heads/}

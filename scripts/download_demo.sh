@@ -121,7 +121,7 @@ main() {
 }
 
 print_result() {
-    LOG_INFO "Download completed. WeCross Demo is in: ./demo/"
+    LOG_INFO "Download completed. WeCross Demo is in: ./wecross-demo/"
     LOG_INFO "Please: \"cd ./wecross-demo/ \" and \"bash build.sh\" to build the demo."
 }
 

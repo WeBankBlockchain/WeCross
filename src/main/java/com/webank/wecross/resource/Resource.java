@@ -101,7 +101,7 @@ public class Resource {
                     (transactionException, transactionResponse) -> {
                         if (logger.isDebugEnabled()) {
                             logger.debug(
-                                    "asyncCall response: {}, exception: ",
+                                    "asyncCall response: {}, exception: {}",
                                     transactionResponse,
                                     transactionException);
                         }
@@ -116,7 +116,7 @@ public class Resource {
                     (transactionException, transactionResponse) -> {
                         if (logger.isDebugEnabled()) {
                             logger.debug(
-                                    "asyncCall response: {}, exception: ",
+                                    "asyncCall response: {}, exception: {}",
                                     transactionResponse,
                                     transactionException);
                         }

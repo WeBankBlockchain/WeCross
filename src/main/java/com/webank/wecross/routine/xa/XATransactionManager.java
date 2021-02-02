@@ -9,7 +9,18 @@ import com.webank.wecross.polling.TaskManager;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.stub.*;
 import com.webank.wecross.zone.ZoneManager;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -171,9 +182,9 @@ public class XATransactionManager {
             throw new WeCrossException(WeCrossException.ErrorCode.POST_DATA_ERROR, e.getMessage());
         }
 
+        Set<String> chains = Collections.synchronizedSet(new HashSet<>(paths.keySet()));
         XAReduceCallback xaReduceCallback =
-                getStartXAReduceCallback(
-                        paths.size(), xaTransactionID, ua, paths.keySet(), callback);
+                getStartXAReduceCallback(paths.size(), xaTransactionID, ua, chains, callback);
 
         for (Map.Entry<String, Set<String>> entry : paths.entrySet()) {
             // send prepare transaction

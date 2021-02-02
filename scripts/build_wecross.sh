@@ -201,7 +201,7 @@ gen_conf() {
     path = 'classpath:chains'
 
 [rpc] # rpc ip & port
-    address = '${2}'
+    address = '127.0.0.1'
     port = ${3}
     caCert = 'classpath:ca.crt'
     sslCert = 'classpath:ssl.crt'

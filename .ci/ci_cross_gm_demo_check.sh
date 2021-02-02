@@ -54,7 +54,7 @@ prepare_demo() {
 cross_normal_guomi_demo_test() {
     cd ${ROOT}
 
-    bash build_cross_gm.sh n
+    bash build_cross_gm.sh -H 127.0.0.1 -P 3306 -u root -p 123456
 
     cd WeCross-Console/
     bash start.sh <<EOF

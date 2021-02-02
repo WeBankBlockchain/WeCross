@@ -30,7 +30,6 @@
 [account-manager]
     server =  '127.0.0.1:8250'
     admin = 'org1-admin'
-    password = '123456' # This field is not used at v1.0.0, just for future
     sslKey = 'classpath:ssl.key'
     sslCert = 'classpath:ssl.crt'
     caCert = 'classpath:ca.crt'

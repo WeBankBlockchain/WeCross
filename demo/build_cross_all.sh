@@ -2,10 +2,12 @@
 set -e
 LANG=en_US.UTF-8
 ROOT=$(pwd)
+
 DB_IP=127.0.0.1
 DB_PORT=3306
 DB_USERNAME=root
-DB_PASSWORD=${CI_DB_PASSWORD}
+DB_PASSWORD=123456
+BCOS_VERSION=''
 
 need_db_config_ask=true
 
@@ -18,6 +20,15 @@ LOG_ERROR() {
     local content=${1}
     echo -e "\033[31m[ERROR] ${content}\033[0m"
 }
+
+version_file="profile_version.sh"
+[[ ! -f "${version_file}" ]] && {
+  LOG_ERROR " ${version_file} not exist, please check if the demo is the latest. "
+  exit 1
+}
+
+source "${version_file}"
+LOG_INFO "source ${version_file}, WeCross Version=${WECROSS_VERSION}"
 
 Download() {
     local url=${1}
@@ -136,7 +147,7 @@ build_bcos() {
 127.0.0.1:4 agency1 1,2
 EOF
 
-    bash build.sh
+    bash build.sh "${BCOS_VERSION}"
 
     cd ${ROOT}
 }
@@ -150,7 +161,7 @@ build_bcos_gm() {
 127.0.0.1:1 agency1 1
 EOF
 
-    bash build_gm.sh
+    bash build_gm.sh "${BCOS_VERSION}"
     cd ${ROOT}
 }
 
@@ -256,7 +267,6 @@ db_config_ask() {
     check_db_service
 }
 
-
 config_router_group1() {
     router_dir=${1}
 
@@ -340,7 +350,6 @@ config_router_fabric() {
     bash add_chain.sh -t Fabric1.4 -n fabric-mychannel -d conf/chains
     cp ${fabric_demo_dir}/certs/chains/fabric/* conf/chains/fabric-mychannel/
 
-
     # fabric stub internal accounts
     bash add_account.sh -t Fabric1.4 -n fabric_admin -d conf/accounts
     cp ${fabric_demo_dir}/certs/accounts/fabric_admin/* conf/accounts/fabric_admin/
@@ -389,9 +398,9 @@ build_wecross() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_wecross.sh ]; then
-            bash download_wecross.sh -t v1.0.1
+            bash download_wecross.sh -t "${WECROSS_VERSION}"
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.1
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t "${WECROSS_VERSION}"
         fi
     fi
 
@@ -412,9 +421,9 @@ build_wecross_console() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_console.sh ]; then
-            bash download_console.sh -t v1.0.1
+            bash download_console.sh -t "${WECROSS_CONSOLE_VERSION}"
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t v1.0.1
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t "${WECROSS_CONSOLE_VERSION}"
         fi
     fi
 
@@ -450,9 +459,9 @@ build_account_manager() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_account_manager.sh ]; then
-            bash download_account_manager.sh -t v1.0.1 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
+            bash download_account_manager.sh -t "${WECROSS_ACCOUNT_MANAGER_VERSION}" -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_account_manager.sh) -t v1.0.1 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_account_manager.sh) -t "${WECROSS_ACCOUNT_MANAGER_VERSION}" -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
         fi
     fi
 
@@ -580,8 +589,6 @@ EOF
     cd -
 }
 
-
-
 deploy_chain_account() {
     mkdir -p ${ROOT}/WeCross-Console/conf/accounts/
     cd ${ROOT}/WeCross-Console/conf/accounts/ && rm -rf $(ls | grep -v .sh) && cd -
@@ -592,7 +599,7 @@ deploy_chain_account() {
     add_fabric_account fabric_admin_org1 Org1MSP # 1
     add_fabric_account fabric_admin_org2 Org2MSP # 2
     add_fabric_account fabric_user1 Org1MSP      # 3
-    add_bcos_gm_account bcos_gm_user1 # 4
+    add_bcos_gm_account bcos_gm_user1            # 4
 }
 
 deploy_sample_resource() {
@@ -656,11 +663,59 @@ main() {
 
 }
 
-if [ -n "$1" ]; then
-    need_db_config_ask=false
-fi
+help() {
+    echo "$1"
+    cat <<EOF
+Create a wecross demo with boss, bcos_guomi and fabric chains.
+Usage:
+    -d                              [Optional] Use default db configuration: -H ${DB_IP} -P ${DB_PORT} -u ${DB_USERNAME} -p ${DB_PASSWORD}
+    -H                              [Optional] DB ip
+    -P                              [Optional] DB port
+    -u                              [Optional] DB username
+    -p                              [Optional] DB password
+    -h  call for help
+e.g
+    bash $0 -H ${DB_IP} -P ${DB_PORT} -u ${DB_USERNAME} -p 123456
+    bash $0
+EOF
+    exit 0
+}
 
-main $@
+parse_command() {
+    while getopts "H:P:u:p:df:h" option; do
+        # shellcheck disable=SC2220
+        case ${option} in
+        d)
+            need_db_config_ask=false
+            ;;
+        H)
+            DB_IP=$OPTARG
+            need_db_config_ask=false
+            ;;
+        P)
+            DB_PORT=$OPTARG
+            need_db_config_ask=false
+            ;;
+        u)
+            DB_USERNAME=$OPTARG
+            need_db_config_ask=false
+            ;;
+        p)
+            DB_PASSWORD=$OPTARG
+            need_db_config_ask=false
+            ;;
+        f)
+            BCOS_VERSION=$OPTARG
+            ;;
+        h) help ;;
+        *) help ;;
+        esac
+    done
+}
+
+parse_command "$@"
+
+main "$@"
 
 if [ ! -n "$1" ]; then
     console_ask

@@ -102,6 +102,12 @@ public class TransactionFetcher {
                                                 .get(StubConstant.XA_TRANSACTION_SEQ);
                         completeTransactionResponse.setXaTransactionSeq(
                                 Objects.isNull(xaTransactionSeq) ? 0 : xaTransactionSeq);
+                        if (transaction.getTransactionResponse().getErrorCode() != 0) {
+                            completeTransactionResponse.setErrorCode(
+                                    transaction.getTransactionResponse().getErrorCode());
+                            completeTransactionResponse.setMessage(
+                                    transaction.getTransactionResponse().getMessage());
+                        }
                     }
                     callback.onResponse(null, completeTransactionResponse);
                 });

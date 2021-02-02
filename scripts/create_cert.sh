@@ -7,6 +7,7 @@ target_dir=$(pwd)
 node_count=
 cert_conf='cert.cnf'
 generate_ca=''
+generate_rsa_cert='true'
 
 help() {
     echo $1
@@ -16,6 +17,7 @@ Usage:
     -C <number>                         [Optional] the number of node certificate generated, work with '-n' opt, default: 1
     -D <dir>                            [Optional] the ca certificate directory, work with '-n', default: './'
     -d <dir>                            [Required] generated target_directory
+    -e                                  [optional] generate ecc node cert, default rsa node cert
     -n                                  [Optional] generate node certificate
     -t                                  [Optional] cert.cnf path, default: cert.cnf
     -h                                  [Optional] Help
@@ -116,9 +118,9 @@ stateOrProvinceName_default =GuangDong
 localityName = Locality Name (eg, city)
 localityName_default = ShenZhen
 organizationalUnitName = Organizational Unit Name (eg, section)
-organizationalUnitName_default = fisco-bcos
-commonName =  Organizational  commonName (eg, fisco-bcos)
-commonName_default = fisco-bcos
+organizationalUnitName_default = WeCross
+commonName =  Organizational  commonName (eg, WeCross)
+commonName_default = WeCross
 commonName_max = 64
 
 [ v3_req ]
@@ -147,8 +149,8 @@ gen_chain_cert() {
 
     mkdir -p $chaindir
 
-    openssl genrsa -out $chaindir/ca.key 2048
-    openssl req -new -x509 -days 3650 -subj "/CN=fisco-bcos/O=fisco-bcos/OU=chain" -key $chaindir/ca.key -out $chaindir/ca.crt
+    openssl genrsa -out $chaindir/ca.key 4096
+    openssl req -new -x509 -days 3650 -subj "/CN=WeCross/O=WeCross/OU=chain" -key $chaindir/ca.key -out $chaindir/ca.crt
     cp "cert.cnf" $chaindir 2>/dev/null
 
     LOG_INFO "Build ca cert successful!"
@@ -161,7 +163,7 @@ gen_cert_secp256k1() {
     openssl ecparam -out $certpath/${type}.param -name secp256k1
     openssl genpkey -paramfile $certpath/${type}.param -out $certpath/${type}.key
     openssl pkey -in $certpath/${type}.key -pubout -out $certpath/${type}.pubkey
-    openssl req -new -sha256 -subj "/CN=fisco-bcos/O=fisco-bcos/OU=${type}" -key $certpath/${type}.key -config $capath/cert.cnf -out $certpath/${type}.csr
+    openssl req -new -sha256 -subj "/CN=WeCross/O=WeCross/OU=${type}" -key $certpath/${type}.key -config $capath/cert.cnf -out $certpath/${type}.csr
     openssl x509 -req -days 3650 -sha256 -in $certpath/${type}.csr -CAkey $capath/ca.key -CA $capath/ca.crt \
         -force_pubkey $certpath/${type}.pubkey -out $certpath/${type}.crt -CAcreateserial -extensions v3_req -extfile $capath/cert.cnf
     # openssl ec -in $certpath/${type}.key -outform DER | tail -c +8 | head -c 32 | xxd -p -c 32 | cat >$certpath/${type}.private
@@ -169,7 +171,7 @@ gen_cert_secp256k1() {
     rm -f $certpath/${type}.csr $certpath/${type}.pubkey $certpath/${type}.param
 }
 
-gen_node_cert() {
+gen_ecc_node_cert() {
     if [ "" == "$(openssl ecparam -list_curves 2>&1 | grep secp256k1)" ]; then
         LOG_FALT "Openssl don't support secp256k1, please upgrade openssl!"
     fi
@@ -196,7 +198,7 @@ gen_node_cert() {
     cp $capath/ca.crt $ndpath
     # cd $ndpath
 
-    LOG_INFO "Build ${node} cert successful!"
+    LOG_INFO "Build ecc ${node} cert successful!"
 }
 
 gen_rsa_node_cert() {
@@ -212,15 +214,28 @@ gen_rsa_node_cert() {
     file_must_not_exists "$ndpath"/ssl.crt
     mkdir -p $ndpath
 
-    openssl genrsa -out $ndpath/ssl.key 2048
-    openssl req -new -sha256 -subj "/CN=FISCO-BCOS/O=fisco-bcos/OU=agency" -key $ndpath/ssl.key -config $capath/cert.cnf -out $ndpath/node.csr
+    openssl genrsa -out $ndpath/ssl.key 4096
+    openssl req -new -sha256 -subj "/CN=FISCO-BCOS/O=fisco-bcos/OU=agency" -key $ndpath/ssl.key -config $capath/cert.cnf -out $ndpath/ssl.csr
     openssl x509 -req -days 3650 -sha256 -CA $capath/ca.crt -CAkey $capath/ca.key -CAcreateserial \
-        -in $ndpath/node.csr -out $ndpath/ssl.crt -extensions v4_req -extfile $capath/cert.cnf
+        -in $ndpath/ssl.csr -out $ndpath/ssl.crt -extensions v4_req -extfile $capath/cert.cnf
 
+    openssl pkcs8 -topk8 -in "$ndpath"/ssl.key -out "$ndpath"/pkcs8_ssl.key -nocrypt
     cp $capath/ca.crt $capath/cert.cnf $ndpath/
-    rm -f $ndpath/node.csr
 
-    LOG_INFO "Build ${node} cert successful!"
+    rm -f $ndpath/ssl.csr
+    rm -f $ndpath/ssl.key
+
+    mv "$ndpath"/pkcs8_ssl.key "$ndpath"/ssl.key
+
+    LOG_INFO "Build rsa ${node} cert successful!"
+}
+
+gen_node_cert() {
+    if [[ ${generate_rsa_cert} == 'true' ]]; then
+        gen_rsa_node_cert "$1" "$2" "$3" 2>&1
+    else
+        gen_ecc_node_cert "$1" "$2" "$3" 2>&1
+    fi
 }
 
 gen_all_node_cert() {
@@ -235,12 +250,13 @@ gen_all_node_cert() {
     done
 }
 
-while getopts "cC:d:D:nt:h" option; do
+while getopts "cC:d:eD:nt:h" option; do
     case $option in
     c) generate_ca='true' ;;
     C) node_count=$OPTARG ;;
     d) target_dir=$OPTARG ;;
     D) ca_cert_dir=$OPTARG ;;
+    e) generate_rsa_cert='false' ;;
     n) generate_ca='false' ;;
     t) cert_conf=$OPTARG ;;
     *) help ;;
