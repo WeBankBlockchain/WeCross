@@ -76,6 +76,45 @@ check_db_service() {
     LOG_INFO "Database configuration OK!"
 }
 
+check_java_avaliable() {
+    # java version "9"
+    # java version "1.8.0_281"
+    # openjdk version "15.0.2" 2021-01-19
+    java_version_string=$(java -version 2>&1 | head -n 1)
+    LOG_INFO "java version: ${java_version_string}"
+
+    # 9
+    # 1.8.0_281
+    # 15.0.2
+    java_version=$(echo "${java_version_string}" | awk -F '"' '{print $2}')
+
+    major_version=$(echo "${java_version}" | awk -F '.'  '{print $1}')
+    minor_version=$(echo "${java_version}" | awk -F '.'  '{print $2}')
+
+    temp_version=$(echo "${java_version}" | awk -F '.'  '{print $3}')
+
+    patch_version=$(echo "${temp_version}" | awk -F '_'  '{print $1}')
+    ext_version=$(echo "${temp_version}" | awk -F '_'  '{print $2}')
+
+    LOG_INFO "java major: ${major_version} minor: ${minor_version} patch: ${patch_version} ext: ${ext_version}"
+
+  # java version 1.8-
+    [[ "${major_version}" -eq 1 ]] && [[ "${minor_version}" -lt 8 ]] && {
+      LOG_ERROR "Unsupport Java version => ${java_version}"
+      exit 1;
+    }
+
+      # java version 1.8.0_251
+    [[ "${major_version}" -eq 1 ]] && [[ "${minor_version}" -eq 8 ]] && [[ "${ext_version}" -lt 251 ]] && {
+      LOG_ERROR "Unsupport Java version => ${java_version}"
+      exit 1;
+    }
+
+    # Support Java Version
+    set -e
+    LOG_INFO "Java check OK!"
+}
+
 check_port_avaliable() {
     port=$1
     name=$2
@@ -111,6 +150,7 @@ check_env() {
     LOG_INFO "Check environments"
     check_command java
     check_command mysql
+    check_java_avaliable
     check_bcos_avaliable
     check_wecross_avaliable
     check_account_manager_avaliable
