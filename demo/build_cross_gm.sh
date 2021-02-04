@@ -489,7 +489,7 @@ main() {
 help() {
     echo "$1"
     cat <<EOF
-Create a wecross demo with boss and bcos_guomi chains.
+Create a wecross demo with bcos and bcos_guomi chains.
 Usage:
     -d                              [Optional] Use default db configuration: -H ${DB_IP} -P ${DB_PORT} -u ${DB_USERNAME} -p ${DB_PASSWORD}
     -H                              [Optional] DB ip
