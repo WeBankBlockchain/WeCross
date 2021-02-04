@@ -38,6 +38,7 @@ public class MemoryBlockManager implements BlockManager {
     private long getBlockNumberDelay = 1000;
     private int maxCacheSize = 20;
     private AtomicLong latestBlockNumber = new AtomicLong(-1L);
+    private long lastBlockNumberAcquired = 0;
 
     private static class Status {
         public static final int Starting = 0;
@@ -46,6 +47,14 @@ public class MemoryBlockManager implements BlockManager {
     }
 
     private AtomicInteger fetchBlockNumberStatus = new AtomicInteger(Status.Starting);
+
+    public long getLastBlockNumberAcquired() {
+        return lastBlockNumberAcquired;
+    }
+
+    public void setLastBlockNumberAcquired(long lastBlockNumberAcquired) {
+        this.lastBlockNumberAcquired = lastBlockNumberAcquired;
+    }
 
     public void onGetBlockNumber(Exception e, long blockNumber) {
 
@@ -61,18 +70,22 @@ public class MemoryBlockManager implements BlockManager {
         fetchBlockNumberStatus.set(Status.OK);
 
         if (logger.isTraceEnabled()) {
-            logger.trace("onGetBlockNumber, blockNumber: {}", blockNumber);
+            logger.trace(
+                    "onGetBlockNumber, blockNumber: {}, lastBlockNumberAcquired: {}",
+                    blockNumber,
+                    lastBlockNumberAcquired);
         }
 
+        long current = lastBlockNumberAcquired;
+        /*
         lock.readLock().lock();
-        long current = 0;
         try {
             if (!blockDataCache.isEmpty()) {
                 current = blockDataCache.peekLast().getBlockHeader().getNumber();
             }
         } finally {
             lock.readLock().unlock();
-        }
+        }*/
 
         if (current < blockNumber) {
             long blockNumberToGet = 0;
@@ -82,13 +95,14 @@ public class MemoryBlockManager implements BlockManager {
                 blockNumberToGet = current + 1;
             }
 
+            long finalBlockNumberToGet = blockNumberToGet;
             chain.getDriver()
                     .asyncGetBlock(
                             blockNumberToGet,
                             true,
                             chain.chooseConnection(),
                             (error, data) -> {
-                                onSyncBlock(error, data, blockNumber);
+                                onSyncBlock(error, data, finalBlockNumberToGet, blockNumber);
                             });
 
         } else {
@@ -96,59 +110,70 @@ public class MemoryBlockManager implements BlockManager {
         }
     }
 
-    public void onSyncBlock(Exception e, Block block, long target) {
-        if (Objects.nonNull(e)) {
-            logger.warn("onSyncBlock failed, e: ", e);
-            waitAndSyncBlock(getGetBlockNumberDelay());
-            return;
-        }
+    public void onSyncBlock(Exception e, Block block, long currentBlockNumber, long target) {
 
-        if (logger.isTraceEnabled()) {
-            logger.trace(
-                    "On sync block, blockNumber: {}, blockHash: {}",
-                    block.getBlockHeader().getNumber(),
-                    block.getBlockHeader().getHash());
+        long blockNumber = currentBlockNumber;
+        if (Objects.isNull(e)) {
+            blockNumber = block.getBlockHeader().getNumber();
         }
 
         lock.writeLock().lock();
-
         try {
-
-            blockDataCache.add(block);
-            List<GetBlockCallback> callbacks =
-                    getBlockCallbacks.get(block.getBlockHeader().getNumber());
+            List<GetBlockCallback> callbacks = getBlockCallbacks.get(blockNumber);
             if (callbacks != null) {
                 for (GetBlockCallback callback : callbacks) {
                     threadPool.execute(
                             new Runnable() {
                                 @Override
                                 public void run() {
-                                    callback.onResponse(null, block);
+                                    callback.onResponse(e, block);
                                 }
                             });
                 }
+                getBlockCallbacks.remove(blockNumber);
             }
-            getBlockCallbacks.remove(block.getBlockHeader().getNumber());
 
-            if (blockDataCache.size() > maxCacheSize) {
-                blockDataCache.pop();
+            if (Objects.isNull(e)) {
+                blockDataCache.add(block);
+                if (blockDataCache.size() > maxCacheSize) {
+                    blockDataCache.pop();
+                }
             }
 
         } finally {
             lock.writeLock().unlock();
         }
 
-        if (block.getBlockHeader().getNumber() < target) {
-            chain.getDriver()
-                    .asyncGetBlock(
-                            block.getBlockHeader().getNumber() + 1,
-                            true,
-                            chain.chooseConnection(),
-                            (error, blockData) -> {
-                                onSyncBlock(error, blockData, target);
-                            });
+        lastBlockNumberAcquired = blockNumber;
+
+        if (Objects.isNull(e)) {
+
+            if (logger.isTraceEnabled()) {
+                logger.trace(
+                        "onSyncBlock, blockNumber: {}, blockHash: {}",
+                        block.getBlockHeader().getNumber(),
+                        block.getBlockHeader().getHash());
+            }
+
+            if (block.getBlockHeader().getNumber() < target) {
+                chain.getDriver()
+                        .asyncGetBlock(
+                                block.getBlockHeader().getNumber() + 1,
+                                true,
+                                chain.chooseConnection(),
+                                (error, blockData) -> {
+                                    onSyncBlock(
+                                            error,
+                                            blockData,
+                                            block.getBlockHeader().getNumber() + 1,
+                                            target);
+                                });
+            } else {
+                waitAndSyncBlock(0);
+            }
         } else {
-            waitAndSyncBlock(0);
+            logger.warn("onSyncBlock failed, currentBlockNumber: {}, e: ", currentBlockNumber, e);
+            waitAndSyncBlock(getGetBlockNumberDelay());
         }
     }
 
