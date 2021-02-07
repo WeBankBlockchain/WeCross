@@ -14,6 +14,7 @@ import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.Zone;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -342,15 +343,18 @@ public class ConnectionURIHandler implements URIHandler {
         int offset = 0;
         int size = 0;
         try {
-            offset = Integer.valueOf(uriDecoder.getQueryBykey("offset"));
-            size = Integer.valueOf(uriDecoder.getQueryBykey("size"));
+            offset = Integer.parseInt(uriDecoder.getQueryBykey("offset"));
+            size = Integer.parseInt(uriDecoder.getQueryBykey("size"));
         } catch (Exception e) {
             // can't get offset and size, query all
         }
 
         Collection<PeerDetails> peers = peerManager.getPeerDetails();
+        PeerDetails localRouter = getLocalDetails();
+        peers.add(localRouter);
+
         Iterator<PeerDetails> iterator = peers.iterator();
-        Collection<PeerDetails> result = new LinkedList<PeerDetails>();
+        Collection<PeerDetails> result = new LinkedList<>();
 
         if (offset > peers.size()) {
             callback.onResponse(null, new ListData(peers.size(), result));
@@ -376,7 +380,30 @@ public class ConnectionURIHandler implements URIHandler {
             ++i;
         }
 
-        callback.onResponse(null, new ListData(peers.size(), peerManager.getPeerDetails()));
+        callback.onResponse(null, new ListData(peers.size(), peers));
+    }
+
+    private PeerDetails getLocalDetails() {
+        PeerDetails localRouter = peerManager.new PeerDetails();
+        localRouter.nodeID = "Local";
+        localRouter.address =
+                p2PService.getNettyService().getInitializer().getConfig().getListenIP()
+                        + ":"
+                        + p2PService.getNettyService().getInitializer().getConfig().getListenPort();
+        localRouter.chainInfos = new HashSet<>();
+        for (Zone zone : zoneManager.getZones().values()) {
+            Map<String, Chain> zoneChains = zone.getChains();
+            for (Map.Entry<String, Chain> chainEntry : zoneChains.entrySet()) {
+                if (chainEntry.getValue().getLocalConnection() != null) {
+                    PeerManager.ChainInfoDetails chainInfoDetails =
+                            peerManager.new ChainInfoDetails();
+                    chainInfoDetails.path = chainEntry.getKey();
+                    chainInfoDetails.stubType = chainEntry.getValue().getStubType();
+                    localRouter.chainInfos.add(chainInfoDetails);
+                }
+            }
+        }
+        return localRouter;
     }
 
     public void setZoneManager(ZoneManager zoneManager) {

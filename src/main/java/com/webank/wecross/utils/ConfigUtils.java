@@ -6,6 +6,7 @@ import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +17,9 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 public class ConfigUtils {
 
-    public static Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
+    public static final Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
+    public static final String CERT_PATTERN =
+            "^-{5}BEGIN CERTIFICATE-{5}$(?s).*?^-{5}END CERTIFICATE-{5}\n$";
 
     public static void checkPath(String path) throws WeCrossException {
         String templateUrl = WeCrossDefault.TEMPLATE_URL + path.replace('.', '/');
@@ -34,6 +37,14 @@ public class ConfigUtils {
             PathMatchingResourcePatternResolver resolver =
                     new PathMatchingResourcePatternResolver();
             return new Toml().read(resolver.getResource(fileName).getInputStream());
+        } catch (IllegalStateException e) {
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                    "Toml file " + fileName + "format error: " + e.getMessage());
+        } catch (FileNotFoundException e) {
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.DIR_NOT_EXISTS,
+                    "Toml file " + fileName + "not found: " + e.getMessage());
         } catch (Exception e) {
             throw new WeCrossException(
                     WeCrossException.ErrorCode.INTERNAL_ERROR,
@@ -67,7 +78,7 @@ public class ConfigUtils {
             dir = resolver.getResource(stubsPath).getFile();
             // dir = new File(ConfigUtils.class.getClassLoader().getResource(stubsPath).getFile());
         } catch (Exception e) {
-            logger.debug("Local stubs: " + stubsPath + " is empty");
+            logger.debug("Local stubs: {} is empty", stubsPath);
             // throw new WeCrossException(FIELD_MISSING,ResourceQueryStatus.DIR_NOT_EXISTS,
             // errorMessage);
             return result;
@@ -83,7 +94,7 @@ public class ConfigUtils {
             thisPath = stubsPath.substring(0, stubsPath.length() - 1);
         }
 
-        String stubsDir[] = dir.list();
+        String[] stubsDir = dir.list();
         for (String stub : stubsDir) {
             // ignore hidden dir
             if (stub.startsWith(".")) {
@@ -118,17 +129,17 @@ public class ConfigUtils {
         Boolean res = toml.getBoolean(key);
 
         if (res == null) {
-            logger.info(key + " has not set, default to " + defaultReturn);
+            logger.info("{} has not set, default to {}", key, defaultReturn);
             return defaultReturn;
         }
-        return res.booleanValue();
+        return res;
     }
 
     public static int parseInt(Toml toml, String key, int defaultReturn) {
         Long res = toml.getLong(key);
 
         if (res == null) {
-            logger.info(key + " has not set, default to " + defaultReturn);
+            logger.info(key + " has not set, default to {}", defaultReturn);
             return defaultReturn;
         }
         return res.intValue();
@@ -138,7 +149,7 @@ public class ConfigUtils {
         Long res = toml.getLong(key);
 
         if (res == null) {
-            String errorMessage = "\"" + key + "\" item not found";
+            String errorMessage = "'" + key + "' item not found";
             throw new WeCrossException(FIELD_MISSING, errorMessage);
         }
         return res.intValue();
@@ -148,7 +159,7 @@ public class ConfigUtils {
         Long res = toml.getLong(key);
 
         if (res == null) {
-            logger.info(key + " has not set, default to " + defaultReturn);
+            logger.info(key + " has not set, default to {}", defaultReturn);
             return defaultReturn;
         }
         return res.longValue();
@@ -202,6 +213,17 @@ public class ConfigUtils {
         if (res == null) {
             String errorMessage = "\"" + key + "\" item illegal";
             throw new WeCrossException(FIELD_MISSING, errorMessage);
+        }
+        return res;
+    }
+
+    public static Map<String, String> parseMapBase(Map<String, Object> map, String key)
+            throws WeCrossException {
+        @SuppressWarnings("unchecked")
+        Map<String, String> res = (Map<String, String>) map.get(key);
+
+        if (res == null) {
+            throw new WeCrossException(FIELD_MISSING, "'" + key + "' item not found");
         }
         return res;
     }

@@ -8,8 +8,6 @@ ROOT=$(
     pwd
 )
 WECROSS_ROOT=${ROOT}/../
-BCOS_VERSION=v2.7.1
-BCOS_CONSOLE_VERSION=v1.0.10
 
 LOG_INFO() {
     local content=${1}
@@ -20,6 +18,15 @@ LOG_ERROR() {
     local content=${1}
     echo -e "\033[31m[ERROR] ${content}\033[0m"
 }
+
+version_file="profile_version.sh"
+[[ ! -f "${version_file}" ]] && {
+  LOG_ERROR " ${version_file} not exist, please check if the demo is the latest. "
+  exit 1
+}
+
+source "${version_file}"
+LOG_INFO "source ${version_file}, WeCross Version=${WECROSS_VERSION}"
 
 Download() {
     local url=${1}

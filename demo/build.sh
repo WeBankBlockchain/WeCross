@@ -2,10 +2,12 @@
 set -e
 LANG=en_US.UTF-8
 ROOT=$(pwd)
+
 DB_IP=127.0.0.1
 DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=123456
+BCOS_VERSION=''
 
 need_db_config_ask=true
 
@@ -18,6 +20,15 @@ LOG_ERROR() {
     local content=${1}
     echo -e "\033[31m[ERROR] ${content}\033[0m"
 }
+
+version_file="profile_version.sh"
+[[ ! -f "${version_file}" ]] && {
+  LOG_ERROR " ${version_file} not exist, please check if the demo is the latest. "
+  exit 1
+}
+
+source "${version_file}"
+LOG_INFO "source ${version_file}, WeCross Version=${WECROSS_VERSION}"
 
 Download() {
     local url=${1}
@@ -130,7 +141,7 @@ check_env() {
 build_bcos() {
     LOG_INFO "Build BCOS ..."
     cd ${ROOT}/bcos
-    bash build.sh
+    bash build.sh "${BCOS_VERSION}"
 
     cd ${ROOT}
 }
@@ -247,8 +258,8 @@ config_router_8250() {
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/bcos/
 
     # deploy system contracts
-    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy chains/bcos
-    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy chains/bcos
+    bash deploy_system_contract.sh -t BCOS2.0 -c chains/bcos -P
+    bash deploy_system_contract.sh -t BCOS2.0 -c chains/bcos -H
 
     cd -
 }
@@ -274,8 +285,8 @@ config_router_8251() {
     sed_i 's/Org1MSP/Org2MSP/g' conf/accounts/fabric_admin_org2/account.toml
 
     # deploy system chaincodes
-    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy chains/fabric
-    java -cp 'conf/:lib/*:plugin/*' com.webank.wecross.stub.fabric.hub.HubChaincodeDeployment deploy chains/fabric
+    bash deploy_system_contract.sh -t Fabric1.4 -c chains/fabric -P
+    bash deploy_system_contract.sh -t Fabric1.4 -c chains/fabric -H
 
     cd -
 }
@@ -297,9 +308,9 @@ build_wecross() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_wecross.sh ]; then
-            bash download_wecross.sh -t v1.0.0
+            bash download_wecross.sh -t ${WECROSS_VERSION}
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t v1.0.0
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t ${WECROSS_VERSION}
         fi
     fi
 
@@ -320,9 +331,9 @@ build_wecross_console() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_console.sh ]; then
-            bash download_console.sh -t v1.0.0
+            bash download_console.sh -t "${WECROSS_CONSOLE_VERSION}"
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t v1.0.0
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t "${WECROSS_CONSOLE_VERSION}"
         fi
     fi
 
@@ -358,9 +369,9 @@ build_account_manager() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_account_manager.sh ]; then
-            bash download_account_manager.sh -t v1.0.0 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
+            bash download_account_manager.sh -t "${WECROSS_ACCOUNT_MANAGER_VERSION}" -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_account_manager.sh) -t v1.0.0 -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
+            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_account_manager.sh) -t "${WECROSS_ACCOUNT_MANAGER_VERSION}" -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
         fi
     fi
 
@@ -563,7 +574,7 @@ main() {
 help() {
     echo "$1"
     cat <<EOF
-Create a wecross demo with boss and fabric chains.
+Create a wecross demo with bcos and fabric chains.
 Usage:
     -d                              [Optional] Use default db configuration: -H ${DB_IP} -P ${DB_PORT} -u ${DB_USERNAME} -p ${DB_PASSWORD}
     -H                              [Optional] DB ip
@@ -579,7 +590,7 @@ EOF
 }
 
 parse_command() {
-    while getopts "H:P:u:p:dh" option; do
+    while getopts "H:P:u:p:df:h" option; do
         # shellcheck disable=SC2220
         case ${option} in
         d)
@@ -600,6 +611,9 @@ parse_command() {
         p)
             DB_PASSWORD=$OPTARG
             need_db_config_ask=false
+            ;;
+        f)
+            BCOS_VERSION=$OPTARG
             ;;
         h) help ;;
         *) help ;;

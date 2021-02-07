@@ -21,7 +21,7 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew assemble
     - name: Download plugin
-      run: cd dist/ && bash download_plugin.sh BCOS2 v1.0.0 && bash download_plugin.sh Fabric1 v1.0.0 && bash download_pages.sh v1.0.0  && rm -rf src && cd -
+      run: cd dist/ && bash download_plugin.sh BCOS2 v1.1.0 && bash download_plugin.sh Fabric1 v1.1.0 && bash download_pages.sh v1.1.0  && rm -rf src && cd -
     - name: Pack
       run: chmod +x dist/*.sh && mv dist WeCross && tar -zcvf WeCross.tar.gz WeCross
     - name: Checksum

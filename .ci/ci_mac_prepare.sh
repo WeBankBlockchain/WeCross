@@ -50,11 +50,15 @@ if [ ! "${DB_PASSWORD}" ]; then
     DB_PASSWORD='123456'
 fi
 
+mysqld --initialize-insecure
 mysql.server start
+cat /usr/local/var/mysql/*.err
 
 cd .
 
-brew services start mysql
+#brew services start mysql
+
+brew info mysql
 
 expect <<EOF
 spawn mysql_secure_installation 2>/dev/null
