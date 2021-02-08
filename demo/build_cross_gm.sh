@@ -76,7 +76,7 @@ check_db_service() {
     LOG_INFO "Database configuration OK!"
 }
 
-check_java_avaliable() {
+check_java_available() {
     # java version "9"
     # java version "1.8.0_281"
     # openjdk version "15.0.2" 2021-01-19
@@ -115,45 +115,45 @@ check_java_avaliable() {
     LOG_INFO "Java check OK!"
 }
 
-check_port_avaliable() {
+check_port_available() {
     port=$1
     name=$2
     if [ "$(lsof -i:$port | wc -l)" -ne "0" ]; then
-        LOG_ERROR "${name} port ${port} is not avaliable. Are there any other blockchain is running?"
+        LOG_ERROR "${name} port ${port} is not available. Are there any other blockchain is running?"
         exit 1
     fi
 }
 
-check_account_manager_avaliable() {
-    check_port_avaliable 8340 WeCross-Account-Manager
+check_account_manager_available() {
+    check_port_available 8340 WeCross-Account-Manager
 }
 
-check_bcos_avaliable() {
+check_bcos_available() {
     # 30300,20200,8545
-    check_port_avaliable 30300 BCOS-P2P
-    check_port_avaliable 20200 BCOS-Channel
-    check_port_avaliable 8545 BCOS-RPC
+    check_port_available 30300 BCOS-P2P
+    check_port_available 20200 BCOS-Channel
+    check_port_available 8545 BCOS-RPC
 
-    check_port_avaliable 30310 BCOS-GM-P2P
-    check_port_avaliable 20210 BCOS-GM-Channel
-    check_port_avaliable 8555 BCOS-GM-RPC
+    check_port_available 30310 BCOS-GM-P2P
+    check_port_available 20210 BCOS-GM-Channel
+    check_port_available 8555 BCOS-GM-RPC
 }
 
-check_wecross_avaliable() {
-    check_port_avaliable 8250 WeCross-8250-25500
-    check_port_avaliable 25500 WeCross-8250-25500
-    check_port_avaliable 8251 WeCross-8251-25501
-    check_port_avaliable 25501 WeCross-8251-25501
+check_wecross_available() {
+    check_port_available 8250 WeCross-8250-25500
+    check_port_available 25500 WeCross-8250-25500
+    check_port_available 8251 WeCross-8251-25501
+    check_port_available 25501 WeCross-8251-25501
 }
 
 check_env() {
     LOG_INFO "Check environments"
     check_command java
     check_command mysql
-    check_java_avaliable
-    check_bcos_avaliable
-    check_wecross_avaliable
-    check_account_manager_avaliable
+    check_java_available
+    check_bcos_available
+    check_wecross_available
+    check_account_manager_available
 }
 
 build_bcos() {
