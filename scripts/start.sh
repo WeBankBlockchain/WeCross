@@ -30,7 +30,7 @@ create_jvm_security()
   fi
 }
 
-check_java_avaliable() {
+check_java_available() {
     # java version "9"
     # java version "1.8.0_281"
     # openjdk version "15.0.2" 2021-01-19
@@ -129,7 +129,7 @@ before_start() {
 
 start() {
     rm -f start.out
-    check_java_avaliable
+    check_java_available
     create_jvm_security
     run_wecross
     echo -e "\033[32mWeCross booting up ..\033[0m\c"
