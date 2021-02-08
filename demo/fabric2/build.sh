@@ -84,7 +84,7 @@ fi
 LOG_INFO "Startup test-network"
 cd fabric-samples-${samples_version}/test-network
 bash network.sh up createChannel -ca -c mychannel -i ${fabric_version}
-bash network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-go -ccl go <<EOF
+bash network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-javascript/ -ccl javascript <<EOF
 Y
 EOF
 LOG_INFO "Startup test-network down"
