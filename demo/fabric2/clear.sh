@@ -1,6 +1,6 @@
 #!/bin/bash
 samples_version=2.3.0
-samples_dir=fabric-samples-${samples_version}/first-network
+samples_dir=fabric-samples-${samples_version}/test-network
 if [ -d ${samples_dir} ]; then
     cd ${samples_dir}
     bash samples.sh down <<EOF
