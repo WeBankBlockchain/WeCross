@@ -87,7 +87,7 @@ bash network.sh up createChannel -ca -c mychannel -i ${fabric_version}
 bash network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-javascript/ -ccl javascript <<EOF
 Y
 EOF
-LOG_INFO "Startup test-network down"
+LOG_INFO "Startup test-network done"
 cd -
 
 # Dump cert files
