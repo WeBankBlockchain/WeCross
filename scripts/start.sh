@@ -23,8 +23,8 @@ LOG_ERROR() {
 
 show_version() {
   LOG_INFO "--------------------------------------------------------------------"
-  LOG_INFO "WeCross Router: [" $(ls ${APPS_FOLDER} |awk '{gsub(/.jar$/,""); print}') "]"
-  LOG_INFO "With Stub Plugins: [" $(ls ${PLUGLIN_FOLDER} |awk '{gsub(/.jar$/,""); print}') "]"
+  LOG_INFO "Router version:" $(ls ${APPS_FOLDER} |awk '{gsub(/.jar$/,""); print}')
+  LOG_INFO "Stub plugins: [" $(ls ${PLUGLIN_FOLDER} |awk '{gsub(/.jar$/,""); print}') "]"
   LOG_INFO "--------------------------------------------------------------------"
 }
 
@@ -78,7 +78,6 @@ wecross_pid() {
 }
 
 run_wecross() {
-    show_version
     if [ "$(uname)" == "Darwin" ]; then
         # Mac
         nohup java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative="false" -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448,ffdhe2048,ffdhe3072,ffdhe4096,ffdhe6144,ffdhe8192" -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
@@ -135,6 +134,7 @@ before_start() {
 
 start() {
     rm -f start.out
+    show_version
     check_java_available
     create_jvm_security
     run_wecross
