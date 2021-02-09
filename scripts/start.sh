@@ -3,6 +3,7 @@ dirpath="$(cd "$(dirname "$0")" && pwd)"
 cd ${dirpath}
 
 APPS_FOLDER=$(pwd)/apps
+PLUGLIN_FOLDER=$(pwd)/plugin
 CLASS_PATH=$(pwd)'/apps/*:lib/*:conf:plugin/*:./'
 WINDS_CLASS_PATH=$(pwd)'/apps/*;lib/*;conf;plugin/*;./'
 
@@ -13,17 +14,21 @@ STATUS_STOPPED="Stopped"
 SECURIY_FILE='./.wecross.security'
 
 LOG_INFO() {
-    local content=${1}
-    echo -e "\033[32m${content}\033[0m"
+    echo -e "\033[32m$@\033[0m"
 }
 
 LOG_ERROR() {
-    local content=${1}
-    echo -e "\033[31m${content}\033[0m"
+    echo -e "\033[31m$@\033[0m"
 }
 
-create_jvm_security()
-{
+show_version() {
+  LOG_INFO "--------------------------------------------------------------------"
+  LOG_INFO "WeCross Router: [" $(ls ${APPS_FOLDER} |awk '{gsub(/.jar$/,""); print}') "]"
+  LOG_INFO "With Stub Plugins: [" $(ls ${PLUGLIN_FOLDER} |awk '{gsub(/.jar$/,""); print}') "]"
+  LOG_INFO "--------------------------------------------------------------------"
+}
+
+create_jvm_security() {
   if [[ ! -f ${SECURIY_FILE} ]];then
     echo "jdk.disabled.namedCurves = " > ${SECURIY_FILE}
     # LOG_INFO "create new file ${SECURIY_FILE}"
@@ -73,6 +78,7 @@ wecross_pid() {
 }
 
 run_wecross() {
+    show_version
     if [ "$(uname)" == "Darwin" ]; then
         # Mac
         nohup java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative="false" -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448,ffdhe2048,ffdhe3072,ffdhe4096,ffdhe6144,ffdhe8192" -cp ${CLASS_PATH} com.webank.wecross.Service >start.out 2>&1 &
