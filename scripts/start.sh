@@ -3,6 +3,7 @@ dirpath="$(cd "$(dirname "$0")" && pwd)"
 cd ${dirpath}
 
 APPS_FOLDER=$(pwd)/apps
+PLUGLIN_FOLDER=$(pwd)/plugin
 CLASS_PATH=$(pwd)'/apps/*:lib/*:conf:plugin/*:./'
 WINDS_CLASS_PATH=$(pwd)'/apps/*;lib/*;conf;plugin/*;./'
 
@@ -13,17 +14,21 @@ STATUS_STOPPED="Stopped"
 SECURIY_FILE='./.wecross.security'
 
 LOG_INFO() {
-    local content=${1}
-    echo -e "\033[32m${content}\033[0m"
+    echo -e "\033[32m$@\033[0m"
 }
 
 LOG_ERROR() {
-    local content=${1}
-    echo -e "\033[31m${content}\033[0m"
+    echo -e "\033[31m$@\033[0m"
 }
 
-create_jvm_security()
-{
+show_version() {
+  LOG_INFO "--------------------------------------------------------------------"
+  LOG_INFO "Router version:" $(ls ${APPS_FOLDER} |awk '{gsub(/.jar$/,""); print}')
+  LOG_INFO "Stub plugins: [" $(ls ${PLUGLIN_FOLDER} |awk '{gsub(/.jar$/,""); print}') "]"
+  LOG_INFO "--------------------------------------------------------------------"
+}
+
+create_jvm_security() {
   if [[ ! -f ${SECURIY_FILE} ]];then
     echo "jdk.disabled.namedCurves = " > ${SECURIY_FILE}
     # LOG_INFO "create new file ${SECURIY_FILE}"
@@ -129,6 +134,7 @@ before_start() {
 
 start() {
     rm -f start.out
+    show_version
     check_java_available
     create_jvm_security
     run_wecross
