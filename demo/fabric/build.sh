@@ -29,6 +29,15 @@ Download_IMG() {
     fi
 }
 
+sed_i() {
+    if [ "$(uname)" == "Darwin" ]; then
+        # Mac
+        sed -i "" $@
+    else
+        sed -i $@
+    fi
+}
+
 check_docker_service() {
     set +e
     if ! docker ps >/dev/null; then
@@ -75,7 +84,7 @@ rm -rf config
 
 # configure
 # set default ccenv to 1.4.4, add the line in yaml: - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:1.4.4
-sed -i '/CORE_PEER_TLS_ROOTCERT_FILE/a\ \ \ \ \ \ - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:1.4.4' fabric-samples-1.4.4/first-network/base/peer-base.yaml
+sed_i '/CORE_PEER_TLS_ROOTCERT_FILE/a\ \ \ \ \ \ - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:1.4.4' fabric-samples-1.4.4/first-network/base/peer-base.yaml
 
 # Startup
 LOG_INFO "Startup first-network"
