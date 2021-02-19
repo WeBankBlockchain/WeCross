@@ -73,10 +73,14 @@ fi
 mv -f bin fabric-samples-1.4.4/
 rm -rf config
 
+# configure
+# set default ccenv to 1.4.4, add the line in yaml: - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:1.4.4
+sed -i '/CORE_PEER_TLS_ROOTCERT_FILE/a\ \ \ \ \ \ - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:1.4.4' fabric-samples-1.4.4/first-network/base/peer-base.yaml
+
 # Startup
 LOG_INFO "Startup first-network"
 cd fabric-samples-1.4.4/first-network
-bash byfn.sh up -n <<EOF
+bash byfn.sh up -n -i 1.4.4 <<EOF
 Y
 EOF
 cd -
