@@ -4,8 +4,6 @@ import static com.webank.wecross.common.WeCrossDefault.BCOS_NODE_ID_LENGTH;
 import static com.webank.wecross.utils.ConfigUtils.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moandjiezana.toml.Toml;
@@ -78,11 +76,11 @@ public class BlockVerifierTomlConfig {
                 ]
              [verifiers.payment.fabric]
                 chainType = 'Fabric1.4'
-                endorserCA = {
+                [verifiers.payment.fabric.endorserCA]
                     Org1MSP = '/path/to/org1/cacrt',
                     Org2MSP = '/path/to/org2/cacrt'
-                }
-                ordererCA = '/path/to/orderers/cacrt'
+                [verifiers.payment.fabric.ordererCA]
+                    OrdererMSP = '/path/to/orderers/cacrt'
          */
         private Map<String, BlockVerifier> verifierHashMap = new HashMap<>();
         private static final Logger logger = LoggerFactory.getLogger(Verifiers.class);
@@ -131,17 +129,6 @@ public class BlockVerifierTomlConfig {
             this.verifierHashMap = verifierHashMap;
         }
 
-        @JsonTypeInfo(
-                use = JsonTypeInfo.Id.NAME,
-                property = "chainType",
-                visible = true,
-                include = JsonTypeInfo.As.EXISTING_PROPERTY)
-        @JsonSubTypes(
-                value = {
-                    @JsonSubTypes.Type(value = BCOSVerifier.class, name = "BCOS2.0"),
-                    @JsonSubTypes.Type(value = BCOSVerifier.class, name = "GM_BCOS2.0"),
-                    @JsonSubTypes.Type(value = FabricVerifier.class, name = "Fabric1.4")
-                })
         public static class BlockVerifier {
             protected String chainType;
 
@@ -318,6 +305,11 @@ public class BlockVerifierTomlConfig {
 
     public static void checkVerifiers(Verifiers verifiers, Set<String> stubTypes)
             throws WeCrossException {
+        if (stubTypes == null || stubTypes.isEmpty()) {
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                    "StubType is empty, please check plugins");
+        }
         for (Map.Entry<String, Verifiers.BlockVerifier> blockVerifierEntry :
                 verifiers.verifierHashMap.entrySet()) {
             String chainType = blockVerifierEntry.getValue().chainType;

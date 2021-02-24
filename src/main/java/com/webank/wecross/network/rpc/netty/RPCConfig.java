@@ -81,6 +81,7 @@ public class RPCConfig {
 
     private String webRoot;
     private String mimeTypesFile;
+    private String urlPrefix;
 
     public Resource getCaCert() {
         return caCert;
@@ -144,5 +145,13 @@ public class RPCConfig {
 
     public void setThreadQueueCapacity(Long threadQueueCapacity) {
         this.threadQueueCapacity = threadQueueCapacity;
+    }
+
+    public String getUrlPrefix() {
+        return urlPrefix;
+    }
+
+    public void setUrlPrefix(String urlPrefix) {
+        this.urlPrefix = urlPrefix;
     }
 }
