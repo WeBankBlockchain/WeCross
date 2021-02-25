@@ -20,7 +20,6 @@ public class WeCrossDefault {
     public static final String EMPTY_TOKEN = "_wecross_local_account_";
 
     // Block Verifier Config
-    public static final int BCOS_NODE_ID_LENGTH = 128;
     public static final List<String> SUPPORTED_STUBS =
             Arrays.asList("BCOS2.0", "GM_BCOS2.0", "Fabric1.4");
 }

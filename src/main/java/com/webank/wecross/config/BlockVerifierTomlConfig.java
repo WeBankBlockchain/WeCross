@@ -1,15 +1,11 @@
 package com.webank.wecross.config;
 
-import static com.webank.wecross.common.WeCrossDefault.BCOS_NODE_ID_LENGTH;
-import static com.webank.wecross.utils.ConfigUtils.*;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
-import com.webank.wecross.stub.ObjectMapperFactory;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.utils.ConfigUtils;
 import java.io.IOException;
@@ -17,10 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,15 +101,14 @@ public class BlockVerifierTomlConfig {
                 for (String chain : zoneMap.get(zone).keySet()) {
                     String chainType =
                             String.valueOf(zoneMap.get(zone).get(chain).get("chainType"));
-                    if ("Fabric1.4".equals(chainType)) {
+                    if (!WeCrossDefault.SUPPORTED_STUBS.contains(chainType)) {
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                                "Wrong chainType in toml.");
+                    } else {
                         verifierHashMap.put(
                                 zone + "." + chain,
-                                new FabricVerifier(zoneMap.get(zone).get(chain)));
-                    } else if ("BCOS2.0".equals(chainType) || "GM_BCOS2.0".equals(chainType)) {
-                        verifierHashMap.put(
-                                zone + "." + chain, new BCOSVerifier(zoneMap.get(zone).get(chain)));
-                    } else {
-                        throw new Exception("Wrong chainType in toml.");
+                                new BlockVerifier(zoneMap.get(zone).get(chain)));
                     }
                 }
             }
@@ -130,162 +123,33 @@ public class BlockVerifierTomlConfig {
         }
 
         public static class BlockVerifier {
-            protected String chainType;
+            protected Map<String, Object> verifierMap = new HashMap<>();
 
             @JsonIgnore
             protected static final Logger logger = LoggerFactory.getLogger(BlockVerifier.class);
 
             public BlockVerifier() {}
 
-            public BlockVerifier(String chainType) {
-                this.chainType = chainType;
-            }
-
-            public BlockVerifier(Map<String, Object> blockVerifier) throws Exception {
-                chainType = parseStringBase(blockVerifier, "chainType");
+            public BlockVerifier(Map<String, Object> verifierMap) {
+                this.verifierMap = verifierMap;
             }
 
             public void checkBlockVerifier() throws WeCrossException {}
 
-            public String getChainType() {
-                return chainType;
+            public Map<String, Object> getVerifierMap() {
+                return verifierMap;
             }
 
-            public String toJson() {
-                return "{\n" + "\t\"chainType\": " + chainType + "\n}";
-            }
-        }
-
-        public static class FabricVerifier extends BlockVerifier {
-            Map<String, String> endorserCA;
-            Map<String, String> ordererCA;
-
-            public FabricVerifier() {}
-
-            public FabricVerifier(
-                    String chainType,
-                    Map<String, String> endorserCA,
-                    Map<String, String> ordererCA) {
-                super(chainType);
-                this.endorserCA = endorserCA;
-                this.ordererCA = ordererCA;
-            }
-
-            public FabricVerifier(Map<String, Object> blockVerifier) throws Exception {
-                super(blockVerifier);
-                endorserCA = parseMapBase(blockVerifier, "endorserCA");
-                ordererCA = parseMapBase(blockVerifier, "ordererCA");
-                // mspID => path to mspID => cert
-                readCertInMap(endorserCA);
-                readCertInMap(ordererCA);
-            }
-
-            @Override
-            public void checkBlockVerifier() throws WeCrossException {
-                if (endorserCA == null
-                        || ordererCA == null
-                        || endorserCA.size() == 0
-                        || ordererCA.size() == 0) {
-                    throw new WeCrossException(
-                            WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
-                            "Fabric block verifier config is wrong, endorserCA or ordererCA is null, please check.");
-                }
-                for (Map.Entry<String, String> entry : endorserCA.entrySet()) {
-                    if (!Pattern.compile(CERT_PATTERN, Pattern.MULTILINE)
-                            .matcher(entry.getValue())
-                            .matches()) {
-                        throw new WeCrossException(
-                                WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
-                                "Fabric endorserCA cert pattern matches error, please check.");
-                    }
-                }
-                for (Map.Entry<String, String> entry : ordererCA.entrySet()) {
-                    if (!Pattern.compile(CERT_PATTERN, Pattern.MULTILINE)
-                            .matcher(entry.getValue())
-                            .matches()) {
-                        throw new WeCrossException(
-                                WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
-                                "Fabric ordererCA cert pattern matches error, please check.");
-                    }
-                }
-            }
-
-            public Map<String, String> getEndorserCA() {
-                return endorserCA;
-            }
-
-            public Map<String, String> getOrdererCA() {
-                return ordererCA;
-            }
-
-            @Override
-            public String toJson() {
-                ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-                String json = null;
-                try {
-                    json = objectMapper.writeValueAsString(this);
-                } catch (JsonProcessingException e) {
-                    logger.error("Write FabricVerifier to JSON error.");
-                }
-                return json;
-            }
-        }
-
-        public static class BCOSVerifier extends BlockVerifier {
-            List<String> pubKey;
-
-            public BCOSVerifier() {}
-
-            public BCOSVerifier(String blockType, List<String> pubKey) {
-                super(blockType);
-                this.pubKey = pubKey;
-            }
-
-            public BCOSVerifier(Map<String, Object> blockVerifier) throws Exception {
-                super(blockVerifier);
-                pubKey = parseStringList(blockVerifier, "pubKey");
-            }
-
-            public List<String> getPubKey() {
-                return pubKey;
-            }
-
-            @Override
-            public void checkBlockVerifier() throws WeCrossException {
-                if (pubKey == null) {
-                    throw new WeCrossException(
-                            WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
-                            "pubKey is null in BCOS Verifier.");
-                }
-                for (String key : pubKey) {
-                    if (key.length() != BCOS_NODE_ID_LENGTH) {
-                        throw new WeCrossException(
-                                WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
-                                "pubKey length is not in conformity with the BCOS right way, pubKey: "
-                                        + key
-                                        + " length is "
-                                        + key.length());
-                    }
-                }
-            }
-
-            @Override
-            public String toJson() {
-                ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-                String json = null;
-                try {
-                    json = objectMapper.writeValueAsString(this);
-                } catch (JsonProcessingException e) {
-                    logger.error("Write BCOSVerifier to JSON error.");
-                }
-                return json;
+            public String toJson() throws JsonProcessingException {
+                ObjectMapper objectMapper = new ObjectMapper();
+                return objectMapper.writeValueAsString(verifierMap);
             }
         }
     }
 
     public static void readCertInMap(Map<String, String> map) throws WeCrossException {
         for (Map.Entry<String, String> entry : map.entrySet()) {
-            if (!fileIsExists(entry.getValue())) {
+            if (!ConfigUtils.fileIsExists(entry.getValue())) {
                 String errorMessage = "File: " + entry.getValue() + " is not exists";
                 throw new WeCrossException(WeCrossException.ErrorCode.DIR_NOT_EXISTS, errorMessage);
             }
@@ -303,8 +167,7 @@ public class BlockVerifierTomlConfig {
         }
     }
 
-    public static void checkVerifiers(Verifiers verifiers, Set<String> stubTypes)
-            throws WeCrossException {
+    public static void checkVerifiers(Verifiers verifiers, Set<String> stubTypes) throws Exception {
         if (stubTypes == null || stubTypes.isEmpty()) {
             throw new WeCrossException(
                     WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
@@ -312,7 +175,8 @@ public class BlockVerifierTomlConfig {
         }
         for (Map.Entry<String, Verifiers.BlockVerifier> blockVerifierEntry :
                 verifiers.verifierHashMap.entrySet()) {
-            String chainType = blockVerifierEntry.getValue().chainType;
+            String chainType =
+                    (String) blockVerifierEntry.getValue().getVerifierMap().get("chainType");
             if (chainType == null || !stubTypes.contains(chainType)) {
                 throw new WeCrossException(
                         WeCrossException.ErrorCode.UNEXPECTED_CONFIG,

@@ -1,5 +1,6 @@
 package com.webank.wecross.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
@@ -141,15 +142,22 @@ public class ZonesConfig {
                 BlockVerifierTomlConfig.Verifiers.BlockVerifier blockVerifier =
                         this.verifiers.getVerifierHashMap().get(zone + "." + chainName);
                 if (blockVerifier != null) {
-                    if (!blockVerifier.chainType.equals(type)) {
+                    if (!blockVerifier.getVerifierMap().get("chainType").equals(type)) {
                         throw new WeCrossException(
                                 WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
                                 "Wrong chainType in blockVerifier, chainType: "
-                                        + blockVerifier.chainType
+                                        + blockVerifier.getVerifierMap().get("chainType")
                                         + " actual type: "
                                         + type);
                     }
-                    properties.put("VERIFIER", blockVerifier.toJson());
+                    try {
+                        properties.put("VERIFIER", blockVerifier.toJson());
+                    } catch (JsonProcessingException e) {
+                        throw new WeCrossException(
+                                WeCrossException.ErrorCode.FIELD_MISSING,
+                                "Verifier toJson error",
+                                e.getCause());
+                    }
                 } else {
                     logger.warn("Chain did not config verifier, chain: {}", chainName);
                 }
