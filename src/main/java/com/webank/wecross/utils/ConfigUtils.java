@@ -18,8 +18,6 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 public class ConfigUtils {
 
     public static final Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
-    public static final String CERT_PATTERN =
-            "^-{5}BEGIN CERTIFICATE-{5}$(?s).*?^-{5}END CERTIFICATE-{5}\n$";
 
     public static void checkPath(String path) throws WeCrossException {
         String templateUrl = WeCrossDefault.TEMPLATE_URL + path.replace('.', '/');

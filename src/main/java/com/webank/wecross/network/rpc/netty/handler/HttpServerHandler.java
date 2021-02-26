@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.account.UserContext;
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.rpc.URIHandlerDispatcher;
 import com.webank.wecross.network.rpc.authentication.AuthFilter;
 import com.webank.wecross.network.rpc.handler.URIHandler;
@@ -75,6 +76,21 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpRequest httpRequest)
             throws Exception {
+        String urlPrefix = this.uriHandlerDispatcher.getUrlPrefix();
+        if (urlPrefix != null) {
+            if (!httpRequest.uri().startsWith(urlPrefix)) {
+                logger.error(
+                        "URI did not start with prefix, URI:{}, prefix:{}",
+                        httpRequest.uri(),
+                        urlPrefix);
+                throw new WeCrossException(
+                        WeCrossException.ErrorCode.PAGE_NOT_FOUND,
+                        "URI did not start with prefix while prefix is not null, prefix:"
+                                + urlPrefix);
+            } else {
+                httpRequest.setUri(httpRequest.uri().substring(urlPrefix.length()));
+            }
+        }
         authFilter.doAuth(
                 ctx,
                 httpRequest,

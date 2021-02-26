@@ -3,6 +3,39 @@ package com.webank.wecross.network.rpc.netty;
 import org.springframework.core.io.Resource;
 
 public class RPCConfig {
+    public enum SSLSwitch {
+        SSL_OFF(2),
+        SSL_ON(1),
+        SSL_ON_CLIENT_AUTH(0);
+        private int swh;
+
+        SSLSwitch(int swh) {
+            this.swh = swh;
+        }
+
+        public int getSwh() {
+            return swh;
+        }
+
+        public void setSwh(int swh) {
+            this.swh = swh;
+        }
+    }
+
+    private String listenIP;
+    private int listenPort;
+    private int sslSwitch = SSLSwitch.SSL_ON_CLIENT_AUTH.getSwh();
+
+    private Resource caCert;
+    private Resource sslCert;
+    private Resource sslKey;
+
+    private Long threadNum;
+    private Long threadQueueCapacity;
+
+    private String webRoot;
+    private String mimeTypesFile;
+    private String urlPrefix;
 
     public String getWebRoot() {
         return webRoot;
@@ -48,39 +81,6 @@ public class RPCConfig {
                 + '\''
                 + '}';
     }
-
-    public enum SSLSwitch {
-        SSL_OFF(2),
-        SSL_ON(1),
-        SSL_ON_CLIENT_AUTH(0);
-        private int swh;
-
-        SSLSwitch(int swh) {
-            this.swh = swh;
-        }
-
-        public int getSwh() {
-            return swh;
-        }
-
-        public void setSwh(int swh) {
-            this.swh = swh;
-        }
-    }
-
-    private String listenIP;
-    private int listenPort;
-    private int sslSwitch = SSLSwitch.SSL_ON_CLIENT_AUTH.getSwh();
-
-    private Resource caCert;
-    private Resource sslCert;
-    private Resource sslKey;
-
-    private Long threadNum;
-    private Long threadQueueCapacity;
-
-    private String webRoot;
-    private String mimeTypesFile;
 
     public Resource getCaCert() {
         return caCert;
@@ -144,5 +144,13 @@ public class RPCConfig {
 
     public void setThreadQueueCapacity(Long threadQueueCapacity) {
         this.threadQueueCapacity = threadQueueCapacity;
+    }
+
+    public String getUrlPrefix() {
+        return urlPrefix;
+    }
+
+    public void setUrlPrefix(String urlPrefix) {
+        this.urlPrefix = urlPrefix;
     }
 }
