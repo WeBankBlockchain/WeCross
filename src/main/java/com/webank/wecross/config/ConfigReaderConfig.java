@@ -282,8 +282,9 @@ public class ConfigReaderConfig {
         return rpcConfig;
     }
 
-    private String formatUrlPrefix(String prefix) {
+    private String formatUrlPrefix(String urlPrefix) {
         String pattern = "^/(?!_)(?!-)(?!.*?_$)(?!.*?-$)[\\w-]{1,18}$";
+        String prefix = urlPrefix;
         if (prefix == null) {
             logger.info("urlPrefix is null, use default");
             return null;
