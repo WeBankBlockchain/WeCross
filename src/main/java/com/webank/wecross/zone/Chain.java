@@ -154,6 +154,7 @@ public class Chain {
 
             if (connections.size() == 0) {
                 logger.warn("getConnections: Chain {} has no connection", name);
+                throw new RuntimeException("Empty connections, chainName: " + name);
             }
 
             return connections;
