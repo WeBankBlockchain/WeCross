@@ -64,7 +64,7 @@ public class PeerManager {
     public synchronized void removePeerInfo(Node node) {
         Peer peerInfo = peerInfos.get(node);
         if (peerInfo == null) {
-            logger.error("Peer not exists, bug?");
+            logger.error("Peer not exists, bug? node: {}", node);
             return;
         }
 
