@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class WeCrossDefault {
-    public static final String VERSION = "v1.1.0";
+    public static final String VERSION = "v1.1.1";
 
     public static final String TEMPLATE_URL = "http://127.0.0.1:8080/";
 
