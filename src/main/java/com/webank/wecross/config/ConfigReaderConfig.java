@@ -282,7 +282,7 @@ public class ConfigReaderConfig {
         return rpcConfig;
     }
 
-    private String formatUrlPrefix(String urlPrefix) {
+    private String formatUrlPrefix(String urlPrefix) throws WeCrossException {
         String pattern = "^/(?!_)(?!-)(?!.*?_$)(?!.*?-$)[\\w-]{1,18}$";
         String prefix = urlPrefix;
         if (prefix == null) {
@@ -301,11 +301,9 @@ public class ConfigReaderConfig {
         if (Pattern.matches(pattern, prefix)) {
             return prefix;
         } else {
-            logger.error(
-                    "URL prefix: '{}' is wrong, does not match pattern: '{}', use default: null.",
-                    prefix,
-                    pattern);
-            return null;
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                    "Error 'urlPrefix' in config, it should matches pattern: " + pattern);
         }
     }
 }
