@@ -170,7 +170,7 @@ after_start() {
 
     case ${status} in
     ${STATUS_STARTING})
-        kill $(wecross_pid)
+        kill -9 $(wecross_pid)
         LOG_ERROR "Exceed waiting time. Killed. Please try to start WeCross again"
         tail_log
         exit 1
