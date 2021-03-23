@@ -73,7 +73,8 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
 
                     @Override
                     public void onFailed(WeCrossException e) {
-                        logger.warn("send onFailed: " + e.getMessage());
+
+                        logger.debug("send onFailed: " + e.getMessage());
                         responseFuture.complete(null);
                         exceptionFuture.complete(e);
                     }
