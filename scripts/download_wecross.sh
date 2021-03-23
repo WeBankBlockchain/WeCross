@@ -12,15 +12,19 @@ pages_dir=$(pwd)'/WeCross/pages/'
 src_dir=$(pwd)'/src/'
 
 wecross_url=https://github.com/WebankBlockchain/WeCross.git
+wecross_url_bak=https://gitee.com/Webank/WeCross.git
 wecross_branch=${default_compatibility_version}
 
 bcos_stub_url=https://github.com/WebankBlockchain/WeCross-BCOS2-Stub.git
+bcos_stub_url_bak=https://gitee.com/Webank/WeCross-BCOS2-Stub.git
 bcos_stub_branch=${default_compatibility_version}
 
 fabric_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric1-Stub.git
+fabric_stub_url_bak=https://gitee.com/Webank/WeCross-Fabric1-Stub.git
 fabric_stub_branch=${default_compatibility_version}
 
 wecross_webapp_url=https://github.com/WebankBlockchain/WeCross-WebApp.git
+wecross_webapp_url_bak=https://gitee.com/Webank/WeCross-WebApp.git
 wecross_webapp_branch=${default_compatibility_version}
 
 LOG_INFO() {
@@ -144,7 +148,8 @@ download_release_pkg() {
 download_latest_code() {
     local name=${1}
     local url=${2}
-    local branch=${3}
+    local url_bak=${3}
+    local branch=${4}
 
     if [ -d ${name} ]; then
         cd ${name}
@@ -152,7 +157,11 @@ download_latest_code() {
         git pull
         cd -
     else
-        git clone --depth 1 -b ${branch} ${url}
+        LOG_INFO "Try to clone from ${url}"
+        if ! git clone --depth 1 -b ${branch} ${url}; then
+            LOG_INFO "Try to clone from ${url_bak}"
+            git clone --depth 1 -b ${branch} ${url_bak}
+        fi
     fi
 }
 
@@ -160,6 +169,7 @@ build_from_source() {
     LOG_INFO "Build WeCross from source"
 
     local url=${wecross_url}
+    local url_bak=${wecross_url_bak}
     local branch=${wecross_branch}
     local output_dir=$(pwd)
 
@@ -171,7 +181,7 @@ build_from_source() {
     mkdir -p ${src_dir}/
     cd ${src_dir}/
 
-    download_latest_code WeCross ${url} ${branch}
+    download_latest_code WeCross ${url} ${url_bak} ${branch}
 
     cd WeCross
     rm -rf dist
@@ -198,7 +208,8 @@ build_from_source() {
 build_plugin_from_source() {
     local name=${1}
     local url=${2}
-    local branch=${3}
+    local url_bak=${3}
+    local branch=${4}
     local origin_dir=$(pwd)
 
     LOG_INFO "Build ${name} from source"
@@ -206,7 +217,7 @@ build_plugin_from_source() {
     mkdir -p ${src_dir}/
     cd ${src_dir}/
 
-    download_latest_code ${name} ${url} ${branch}
+    download_latest_code ${name} ${url} ${url_bak} ${branch}
 
     cd ${name}
     bash ./gradlew assemble 2>&1 | tee output.log
@@ -224,12 +235,13 @@ build_webapp_from_source() {
     LOG_INFO "Build WeCross WebApp from source"
 
     local url=${wecross_webapp_url}
+    local url_bak=${wecross_webapp_url_bak}
     local branch=${wecross_webapp_branch}
 
     mkdir -p ${src_dir}/
     cd ${src_dir}/
 
-    download_latest_code WeCross-WebApp ${url} ${branch}
+    download_latest_code WeCross-WebApp ${url} ${url_bak} ${branch}
 
     cd WeCross-WebApp
     rm -rf dist
@@ -253,8 +265,8 @@ build_webapp_from_source() {
 main() {
     if [ 1 -eq ${enable_build_from_resource} ]; then
         build_from_source
-        build_plugin_from_source WeCross-BCOS2-Stub ${bcos_stub_url} ${bcos_stub_branch}
-        build_plugin_from_source WeCross-Fabric1-Stub ${fabric_stub_url} ${fabric_stub_branch}
+        build_plugin_from_source WeCross-BCOS2-Stub ${bcos_stub_url} ${bcos_stub_url_bak} ${bcos_stub_branch}
+        build_plugin_from_source WeCross-Fabric1-Stub ${fabric_stub_url} ${fabric_stub_url_bak} ${fabric_stub_branch}
         build_webapp_from_source
     else
         download_wecross_pkg

@@ -22,7 +22,7 @@ version_file="profile_version.sh"
 }
 
 source "${version_file}"
-LOG_INFO "source ${version_file}, WeCross Version=${WECROSS_VERSION}"
+LOG_INFO "WeCross Version: ${WECROSS_VERSION}"
 
 Download()
 {

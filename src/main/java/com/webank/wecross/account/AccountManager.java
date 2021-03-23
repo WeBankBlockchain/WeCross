@@ -28,7 +28,7 @@ public class AccountManager {
     private AccountSyncManager accountSyncManager;
 
     private static Timer timer = new Timer("checkTokenTimer");
-    private static final long checkTokenStateExpires = 9000; // s, 2.5h
+    private static final long checkTokenStateExpires = 25 * 6 * 60 * 1000; // s, 2.5h
 
     private Map<String, UniversalAccount> token2UA = new ConcurrentHashMap<>();
 

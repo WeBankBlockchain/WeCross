@@ -11,6 +11,7 @@ enable_build_from_resource=0
 src_dir=$(pwd)'/src/'
 
 wecross_account_manager_url=https://github.com/WebankBlockchain/WeCross-Account-Manager.git
+wecross_account_manager_url_bak=https://gitee.com/Webank/WeCross-Account-Manager.git
 wecross_account_manager_branch=${default_compatibility_version}
 
 need_db_config_ask=true
@@ -213,7 +214,8 @@ download_release_pkg() {
 download_latest_code() {
     local name=${1}
     local url=${2}
-    local branch=${3}
+    local url_bak=${3}
+    local branch=${4}
 
     if [ -d ${name} ]; then
         cd ${name}
@@ -221,7 +223,11 @@ download_latest_code() {
         git pull
         cd -
     else
-        git clone --depth 1 -b ${branch} ${url}
+        LOG_INFO "Try to clone from ${url}"
+        if ! git clone --depth 1 -b ${branch} ${url}; then
+            LOG_INFO "Try to clone from ${url_bak}"
+            git clone --depth 1 -b ${branch} ${url_bak}
+        fi
     fi
 }
 
@@ -229,6 +235,7 @@ build_from_source() {
     LOG_INFO "Build WeCross Account Manager from source"
 
     local url=${wecross_account_manager_url}
+    local url_bak=${wecross_account_manager_url_bak}
     local branch=${wecross_account_manager_branch}
     local output_dir=$(pwd)
 
@@ -240,7 +247,7 @@ build_from_source() {
     mkdir -p ${src_dir}/
     cd ${src_dir}/
 
-    download_latest_code WeCross-Account-Manager ${url} ${branch}
+    download_latest_code WeCross-Account-Manager ${url} ${url_bak} ${branch}
 
     cd WeCross-Account-Manager
     rm -rf dist

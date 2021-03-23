@@ -114,7 +114,7 @@
     </Appenders>
 
     <Loggers>
-        <Root level="DEBUG">
+        <Root level="INFO">
             <AppenderRef ref="asyncTRACE"/>
             <AppenderRef ref="asyncDEBUG"/>
             <AppenderRef ref="asyncINFO"/>

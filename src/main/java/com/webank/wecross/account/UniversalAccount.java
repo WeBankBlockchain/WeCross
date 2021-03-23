@@ -21,7 +21,7 @@ public class UniversalAccount {
     private Long version;
     private long lastActiveTimestamp;
 
-    private final long QUERY_ACTIVE_EXPIRES = 1000; // 1s
+    private final long QUERY_ACTIVE_EXPIRES = 10 * 1000; // 10s
 
     private Map<String, Map<Integer, Account>> type2ChainAccounts = new HashMap<>();
 
