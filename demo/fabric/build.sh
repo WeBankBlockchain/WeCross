@@ -87,7 +87,7 @@ fi
 # Startup
 LOG_INFO "Startup first-network"
 cd fabric-samples-1.4.4/first-network
-bash byfn.sh up -n <<EOF
+bash byfn.sh up -n  <<EOF
 Y
 EOF
 cd -

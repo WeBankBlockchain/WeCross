@@ -11,6 +11,7 @@ enable_build_from_resource=0
 src_dir=$(pwd)'/src/'
 
 wecross_console_url=https://github.com/WebankBlockchain/WeCross-Console.git
+wecross_console_url_bak=https://gitee.com/Webank/WeCross-Console.git
 wecross_console_branch=${default_compatibility_version}
 
 LOG_INFO() {
@@ -136,7 +137,8 @@ download_release_pkg() {
 download_latest_code() {
     local name=${1}
     local url=${2}
-    local branch=${3}
+    local url_bak=${3}
+    local branch=${4}
 
     if [ -d ${name} ]; then
         cd ${name}
@@ -144,7 +146,11 @@ download_latest_code() {
         git pull
         cd -
     else
-        git clone --depth 1 -b ${branch} ${url}
+        LOG_INFO "Try to clone from ${url}"
+        if ! git clone --depth 1 -b ${branch} ${url}; then
+            LOG_INFO "Try to clone from ${url_bak}"
+            git clone --depth 1 -b ${branch} ${url_bak}
+        fi
     fi
 }
 
@@ -152,6 +158,7 @@ build_from_source() {
     LOG_INFO "Build WeCross Console from source"
 
     local url=${wecross_console_url}
+    local url_bak=${wecross_console_url_bak}
     local branch=${wecross_console_branch}
     local output_dir=$(pwd)
 
@@ -163,7 +170,7 @@ build_from_source() {
     mkdir -p ${src_dir}/
     cd ${src_dir}/
 
-    download_latest_code WeCross-Console ${url} ${branch}
+    download_latest_code WeCross-Console ${url} ${url_bak} ${branch}
 
     cd WeCross-Console
     rm -rf dist
