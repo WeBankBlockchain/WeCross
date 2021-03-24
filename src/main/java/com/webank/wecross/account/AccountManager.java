@@ -217,16 +217,20 @@ public class AccountManager {
         request.setData(null);
         request.setMethod("/auth/getUniversalAccount");
         request.setAuth(token);
-
+        Response<UADetails> response = null;
         try {
 
-            Response<UADetails> response =
-                    engine.send(request, new TypeReference<Response<UADetails>>() {});
+            response = engine.send(request, new TypeReference<Response<UADetails>>() {});
 
             if (response.getErrorCode() != 0) {
                 throw new WeCrossException(GET_UA_FAILED, response.getMessage());
             }
+        } catch (Exception e) {
+            logger.error("Account-Manager is not available, please check! ");
+            return null;
+        }
 
+        try {
             UniversalAccount ua = universalAccountFactory.buildUA(response.getData());
 
             accountSyncManager.onNewUA(ua);
