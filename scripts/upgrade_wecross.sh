@@ -7,17 +7,17 @@ router_upgrade_dir=${dirpath}/WeCross
 
 LOG_WARN() {
     local content=${1}
-    echo -e "\033[31m[ERROR] ${content}\033[0m"
+    echo -e "\033[31m[ERROR] $@\033[0m"
 }
 
 LOG_INFO() {
     local content=${1}
-    echo -e "\033[32m[INFO] ${content}\033[0m"
+    echo -e "\033[32m[INFO] $@\033[0m"
 }
 
 LOG_FALT() {
     local content=${1}
-    echo -e "\033[31m[FALT] ${content}\033[0m"
+    echo -e "\033[31m[FALT] $@\033[0m"
     exit 1
 }
 
@@ -95,9 +95,9 @@ main() {
     cp "${router_upgrade_dir}"/stop.sh "${router_deploy_dir}"/
     cp -r "${router_upgrade_dir}"/pages "${router_deploy_dir}"/
 
-    LOG_INFO " Router complete upgrade:"
-    LOG_INFO " \t router: "$(ls "${router_deploy_dir}/apps/")
-    LOG_INFO " \t plugin: $(ls "${router_deploy_dir}/plugin/")"
+    LOG_INFO " Router upgrade completed:"
+    LOG_INFO " \t router version: "$(ls ${router_deploy_dir}/apps/ |awk '{gsub(/.jar$/,""); print}')
+    LOG_INFO " \t plugin version: "$(ls ${router_deploy_dir}/plugin/ |awk '{gsub(/.jar$/,""); print}')
 }
 
 main
