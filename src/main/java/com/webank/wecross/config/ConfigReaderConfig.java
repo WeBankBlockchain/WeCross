@@ -10,6 +10,7 @@ import com.webank.wecross.network.rpc.netty.RPCConfig;
 import com.webank.wecross.utils.ConfigUtils;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -220,6 +221,10 @@ public class ConfigReaderConfig {
         }
         rpcConfig.setMimeTypesFile(mimeTypesFile);
 
+        String urlPrefix = (String) rpcMap.get("urlPrefix");
+        urlPrefix = formatUrlPrefix(urlPrefix);
+        rpcConfig.setUrlPrefix(urlPrefix);
+
         Long sslSwitch = (Long) rpcMap.get("sslSwitch");
         if (sslSwitch == null) {
             sslSwitch = Long.valueOf(RPCConfig.SSLSwitch.SSL_ON_CLIENT_AUTH.getSwh());
@@ -275,5 +280,30 @@ public class ConfigReaderConfig {
         logger.info(" RPC config: {}", rpcConfig);
 
         return rpcConfig;
+    }
+
+    private String formatUrlPrefix(String urlPrefix) throws WeCrossException {
+        String pattern = "^/(?!_)(?!-)(?!.*?_$)(?!.*?-$)[\\w-]{1,18}$";
+        String prefix = urlPrefix;
+        if (prefix == null) {
+            logger.info("urlPrefix is null, use default");
+            return null;
+        }
+        // /something/ => /something
+        if (prefix.endsWith("/")) {
+            prefix = prefix.substring(0, prefix.length() - 1);
+        }
+        // something => /something
+        if (!prefix.startsWith("/")) {
+            prefix = '/' + prefix;
+        }
+        // /something
+        if (Pattern.matches(pattern, prefix)) {
+            return prefix;
+        } else {
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.UNEXPECTED_CONFIG,
+                    "Error 'urlPrefix' in config, it should matches pattern: " + pattern);
+        }
     }
 }

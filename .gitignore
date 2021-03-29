@@ -60,3 +60,5 @@ routers/
 null/
 verifiers/
 /src/test/resources/verifier.toml
+/src/test/resources/pages
+/src/test/resources/conf

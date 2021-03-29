@@ -38,7 +38,7 @@ Usage:
     -l  <ip:rpc-port:p2p-port>      [Optional]   "ip:rpc-port:p2p-port" e.g:"127.0.0.1:8250:25500"
     -f  <ip list file>              [Optional]   split by line, every line should be "ip:rpc-port:p2p-port". eg "127.0.0.1:8250:25500"
     -c  <ca dir>                    [Optional]   dir of existing ca
-    -o  <output dir>                [Optional]   default ./${router_output}/
+    -o  <output dir>                [Optional]   default ${router_output}/
     -z  <generate tar packet>       [Optional]   default no
     -T  <enable test mode>          [Optional]   default no. Enable test resource.
     -h  call for help
@@ -152,7 +152,7 @@ gen_crt() {
 }
 
 #index ip rpc_port p2p_port peers
-gen_one_wecross() {
+gen_one_router() {
     #default execute dir: ../WeCross
     cert_dir=${1}
     output=${router_output}/${2}-${3}-${4}
@@ -164,10 +164,15 @@ gen_one_wecross() {
     mkdir -p ${output}/conf/chains
     mkdir -p ${output}/plugin
     mkdir -p ${output}/pages
+    mkdir -p ${wecross_dir}/pages
 
     # copy files
     chmod u+x ${wecross_dir}./*.sh
-    cp -r ${wecross_dir}./*.sh "${output}/"
+    cp -r ${wecross_dir}./add_account.sh "${output}/"
+    cp -r ${wecross_dir}./add_chain.sh "${output}/"
+    cp -r ${wecross_dir}./deploy_system_contract.sh "${output}/"
+    cp -r ${wecross_dir}./start.sh "${output}/"
+    cp -r ${wecross_dir}./stop.sh "${output}/"
     cp -r ${wecross_dir}/apps "${output}/"
     cp -r ${wecross_dir}/lib "${output}/"
 
@@ -252,7 +257,7 @@ parse_ip_file() {
 }
 
 # shellcheck disable=SC2120
-gen_wecross_tars() {
+gen_some_routers() {
     certs_dir_prefix=${1}
     for ((i = 0; i < counter; i++)); do
         for ((j = 0; j < counter; j++)); do
@@ -263,8 +268,14 @@ gen_wecross_tars() {
         done
 
         peers_array[i]=$(echo "${peers_array[i]}" | awk '{sub(/.$/,"")}1')
-        gen_one_wecross "${certs_dir_prefix}${i}" "${ip_array[i]}" "${rpc_port_array[i]}" "${p2p_port_array[i]}" "${peers_array[i]}"
+        gen_one_router "${certs_dir_prefix}${i}" "${ip_array[i]}" "${rpc_port_array[i]}" "${p2p_port_array[i]}" "${peers_array[i]}"
     done
+}
+
+gen_scripts() {
+    cp ${wecross_dir}/start_all.sh ${router_output}/
+    cp ${wecross_dir}/stop_all.sh ${router_output}/
+    cp ${wecross_dir}/create_cert.sh ${router_output}/cert/
 }
 
 main() {
@@ -273,11 +284,13 @@ main() {
     if [ ${use_file} -eq 0 ]; then
         ip_rpc_p2p=(${ip_param//:/ })
         gen_crt ${wecross_dir} "$router_output"/cert/ 1
-        gen_one_wecross "$router_output"/cert/node0 "${ip_rpc_p2p[0]}" "${ip_rpc_p2p[1]}" "${ip_rpc_p2p[2]}"
+        gen_one_router "$router_output"/cert/node0 "${ip_rpc_p2p[0]}" "${ip_rpc_p2p[1]}" "${ip_rpc_p2p[2]}"
+        gen_scripts
     elif [ ${use_file} -eq 1 ]; then
         parse_ip_file "${ip_file}"
         gen_crt ${wecross_dir} "$router_output"/cert/ ${counter}
-        gen_wecross_tars "$router_output"/cert/node
+        gen_some_routers "$router_output"/cert/node
+        gen_scripts
     else
         help
     fi

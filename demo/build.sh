@@ -28,7 +28,7 @@ version_file="profile_version.sh"
 }
 
 source "${version_file}"
-LOG_INFO "source ${version_file}, WeCross Version=${WECROSS_VERSION}"
+LOG_INFO "WeCross Version: ${WECROSS_VERSION}"
 
 Download() {
     local url=${1}
@@ -86,43 +86,43 @@ check_db_service() {
     LOG_INFO "Database configuration OK!"
 }
 
-check_port_avaliable() {
+check_port_available() {
     port=$1
     name=$2
     if [ "$(lsof -i:$port | wc -l)" -ne "0" ]; then
-        LOG_ERROR "${name} port ${port} is not avaliable. Are there any other blockchain or application is running?"
+        LOG_ERROR "${name} port ${port} is not available. Are there any other blockchain or application is running?"
         exit 1
     fi
 }
 
-check_account_manager_avaliable() {
-    check_port_avaliable 8340 WeCross-Account-Manager
+check_account_manager_available() {
+    check_port_available 8340 WeCross-Account-Manager
 }
 
-check_fabric_avaliable() {
-    check_port_avaliable 7050 Fabric-Orderer
-    check_port_avaliable 7051 Fabric-Peer
-    check_port_avaliable 8051 Fabric-Peer
-    check_port_avaliable 9051 Fabric-Peer
-    check_port_avaliable 10051 Fabric-Peer
+check_fabric_available() {
+    check_port_available 7050 Fabric-Orderer
+    check_port_available 7051 Fabric-Peer
+    check_port_available 8051 Fabric-Peer
+    check_port_available 9051 Fabric-Peer
+    check_port_available 10051 Fabric-Peer
 }
 
-check_bcos_avaliable() {
+check_bcos_available() {
     # 30300,20200,8545
-    check_port_avaliable 30300 BCOS-P2P
-    check_port_avaliable 20200 BCOS-Channel
-    check_port_avaliable 8545 BCOS-RPC
+    check_port_available 30300 BCOS-P2P
+    check_port_available 20200 BCOS-Channel
+    check_port_available 8545 BCOS-RPC
 
-    check_port_avaliable 30301 BCOS-P2P
-    check_port_avaliable 20201 BCOS-Channel
-    check_port_avaliable 8546 BCOS-RPC
+    check_port_available 30301 BCOS-P2P
+    check_port_available 20201 BCOS-Channel
+    check_port_available 8546 BCOS-RPC
 }
 
-check_wecross_avaliable() {
-    check_port_avaliable 8250 WeCross-8250-25500
-    check_port_avaliable 25500 WeCross-8250-25500
-    check_port_avaliable 8251 WeCross-8251-25501
-    check_port_avaliable 25501 WeCross-8251-25501
+check_wecross_available() {
+    check_port_available 8250 WeCross-8250-25500
+    check_port_available 25500 WeCross-8250-25500
+    check_port_available 8251 WeCross-8251-25501
+    check_port_available 25501 WeCross-8251-25501
 }
 
 check_env() {
@@ -132,10 +132,10 @@ check_env() {
     check_command docker-compose
     check_command mysql
     check_docker_service
-    check_fabric_avaliable
-    check_bcos_avaliable
-    check_wecross_avaliable
-    check_account_manager_avaliable
+    check_fabric_available
+    check_bcos_available
+    check_wecross_available
+    check_account_manager_available
 }
 
 build_bcos() {

@@ -3,6 +3,7 @@ dirpath="$(cd "$(dirname "$0")" && pwd)"
 cd ${dirpath}
 
 APPS_FOLDER=$(pwd)/apps
+PLUGLIN_FOLDER=$(pwd)/plugin
 CLASS_PATH=$(pwd)'/apps/*:lib/*:conf:plugin/*:./'
 WINDS_CLASS_PATH=$(pwd)'/apps/*;lib/*;conf;plugin/*;./'
 
@@ -13,21 +14,63 @@ STATUS_STOPPED="Stopped"
 SECURIY_FILE='./.wecross.security'
 
 LOG_INFO() {
-    local content=${1}
-    echo -e "\033[32m${content}\033[0m"
+    echo -e "\033[32m$@\033[0m"
 }
 
 LOG_ERROR() {
-    local content=${1}
-    echo -e "\033[31m${content}\033[0m"
+    echo -e "\033[31m$@\033[0m"
 }
 
-create_jvm_security()
-{
+show_version() {
+  LOG_INFO "--------------------------------------------------------------------"
+  LOG_INFO "Router version:" $(ls ${APPS_FOLDER} |awk '{gsub(/.jar$/,""); print}')
+  LOG_INFO "Stub plugins: [" $(ls ${PLUGLIN_FOLDER} |awk '{gsub(/.jar$/,""); print}') "]"
+  LOG_INFO "--------------------------------------------------------------------"
+}
+
+create_jvm_security() {
   if [[ ! -f ${SECURIY_FILE} ]];then
     echo "jdk.disabled.namedCurves = " > ${SECURIY_FILE}
     # LOG_INFO "create new file ${SECURIY_FILE}"
   fi
+}
+
+check_java_available() {
+    # java version "9"
+    # java version "1.8.0_281"
+    # openjdk version "15.0.2" 2021-01-19
+    java_version_string=$(java -version 2>&1 | head -n 1)
+    LOG_INFO "java version: ${java_version_string}"
+
+    # 9
+    # 1.8.0_281
+    # 15.0.2
+    java_version=$(echo "${java_version_string}" | awk -F '"' '{print $2}')
+
+    major_version=$(echo "${java_version}" | awk -F '.'  '{print $1}')
+    minor_version=$(echo "${java_version}" | awk -F '.'  '{print $2}')
+
+    temp_version=$(echo "${java_version}" | awk -F '.'  '{print $3}')
+
+    patch_version=$(echo "${temp_version}" | awk -F '_'  '{print $1}')
+    ext_version=$(echo "${temp_version}" | awk -F '_'  '{print $2}')
+
+    LOG_INFO "java major: ${major_version} minor: ${minor_version} patch: ${patch_version} ext: ${ext_version}"
+
+    # java version 1.8-
+    [[ "${major_version}" -eq 1 ]] && [[ "${minor_version}" -lt 8 ]] && {
+      LOG_ERROR "Unsupport Java version => ${java_version}"
+      exit 1;
+    }
+
+      # java version 1.8.0_251
+    [[ "${major_version}" -eq 1 ]] && [[ "${minor_version}" -eq 8 ]] && [[ "${ext_version}" -lt 251 ]] && {
+      LOG_ERROR "Unsupport Java version => ${java_version}"
+      exit 1;
+    }
+
+    # Support Java Version
+    LOG_INFO "Java check OK!"
 }
 
 wecross_pid() {
@@ -91,6 +134,8 @@ before_start() {
 
 start() {
     rm -f start.out
+    show_version
+    check_java_available
     create_jvm_security
     run_wecross
     echo -e "\033[32mWeCross booting up ..\033[0m\c"
@@ -125,7 +170,7 @@ after_start() {
 
     case ${status} in
     ${STATUS_STARTING})
-        kill $(wecross_pid)
+        kill -9 $(wecross_pid)
         LOG_ERROR "Exceed waiting time. Killed. Please try to start WeCross again"
         tail_log
         exit 1

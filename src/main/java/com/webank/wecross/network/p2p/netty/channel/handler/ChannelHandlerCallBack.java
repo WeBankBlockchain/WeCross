@@ -144,7 +144,7 @@ public class ChannelHandlerCallBack {
     public void onDisconnect(ChannelHandlerContext ctx) {
         Node node = (Node) ctx.channel().attr(AttributeKey.valueOf("node")).get();
 
-        if (null != node.getNodeID()) {
+        if ((null != node) && (null != node.getNodeID())) {
             getConnections().removeChannelHandler(node, ctx);
             logger.info(
                     " disconnect, host: {}, nodeID: {}, ctx: {}",
@@ -153,7 +153,7 @@ public class ChannelHandlerCallBack {
                     System.identityHashCode(ctx));
         } else {
             logger.warn(
-                    " disconnect, nodeID null handshake not success, host: {}, ctx: {}",
+                    " disconnect, node or nodeID null handshake not success, host: {}, ctx: {}",
                     node,
                     System.identityHashCode(ctx));
         }

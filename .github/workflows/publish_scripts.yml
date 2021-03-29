@@ -1,0 +1,39 @@
+name: Upload files to resources
+# upload scripts to release on push to master: WeCross latest download resources
+on:
+  release:
+    types: [prereleased]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Upload upgrade_account_manager.sh
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: scripts/upgrade_account_manager.sh
+        asset_name: upgrade_account_manager.sh
+        tag: ${{ github.ref }}
+        overwrite: true
+
+    - name: Upload upgrade_console.sh
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: scripts/upgrade_console.sh
+        asset_name: upgrade_console.sh
+        tag: ${{ github.ref }}
+        overwrite: true
+
+    - name: Upload upgrade_wecross.sh
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: scripts/upgrade_wecross.sh
+        asset_name: upgrade_wecross.sh
+        tag: ${{ github.ref }}
+        overwrite: true

@@ -24,6 +24,8 @@ public class URIHandlerDispatcher {
 
     private WebService webService;
 
+    private String urlPrefix;
+
     public Map<URIMethod, URIHandler> getRequestURIMapper() {
         return requestURIMapper;
     }
@@ -38,6 +40,13 @@ public class URIHandlerDispatcher {
      * @param host
      */
     public void initializeRequestMapper(WeCrossHost host) {
+        if (host.getRpcService() == null
+                || host.getRpcService().getRpcBootstrap() == null
+                || host.getRpcService().getRpcBootstrap().getConfig() == null) {
+            setUrlPrefix(null);
+        } else {
+            setUrlPrefix(host.getRpcService().getRpcBootstrap().getConfig().getUrlPrefix());
+        }
 
         // Others
         TestURIHandler testURIHandler = new TestURIHandler();
@@ -148,5 +157,13 @@ public class URIHandlerDispatcher {
 
     public void setWebService(WebService webService) {
         this.webService = webService;
+    }
+
+    public String getUrlPrefix() {
+        return urlPrefix;
+    }
+
+    public void setUrlPrefix(String urlPrefix) {
+        this.urlPrefix = urlPrefix;
     }
 }

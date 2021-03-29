@@ -73,10 +73,21 @@ fi
 mv -f bin fabric-samples-1.4.4/
 rm -rf config
 
+# configure
+# set default ccenv to 1.4.4, add the line in yaml: - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:$IMAGE_TAG
+if [ "$(uname)" == "Darwin" ]; then
+    # Mac
+    sed -i '' "/CORE_PEER_TLS_ROOTCERT_FILE/ a\\
+      - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:\$IMAGE_TAG
+    " fabric-samples-1.4.4/first-network/base/peer-base.yaml
+else
+    sed -i '/CORE_PEER_TLS_ROOTCERT_FILE/a\ \ \ \ \ \ - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:$IMAGE_TAG' fabric-samples-1.4.4/first-network/base/peer-base.yaml
+fi
+
 # Startup
 LOG_INFO "Startup first-network"
 cd fabric-samples-1.4.4/first-network
-bash byfn.sh up -n <<EOF
+bash byfn.sh up -n  <<EOF
 Y
 EOF
 cd -

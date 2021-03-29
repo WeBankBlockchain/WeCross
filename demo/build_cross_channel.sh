@@ -22,7 +22,7 @@ version_file="profile_version.sh"
 }
 
 source "${version_file}"
-LOG_INFO "source ${version_file}, WeCross Version=${WECROSS_VERSION}"
+LOG_INFO "WeCross Version: ${WECROSS_VERSION}"
 
 Download()
 {
@@ -64,32 +64,32 @@ check_docker_service()
     set -e
 }
 
-check_port_avaliable()
+check_port_available()
 {
     port=$1
     name=$2
     if [ "$(lsof -i:$port | wc -l)" -ne "0" ]; then
-        LOG_ERROR "${name} port ${port} is not avaliable. Are there any other blockchain is running?"
+        LOG_ERROR "${name} port ${port} is not available. Are there any other blockchain is running?"
         exit 1
     fi
 }
 
-check_fabric_avaliable()
+check_fabric_available()
 {
     #7050，7051，8051，9051，10051
-    check_port_avaliable 7050 Fabric-Orderer
-    check_port_avaliable 7051 Fabric-Peer
-    check_port_avaliable 8051 Fabric-Peer
-    check_port_avaliable 9051 Fabric-Peer
-    check_port_avaliable 10051 Fabric-Peer
+    check_port_available 7050 Fabric-Orderer
+    check_port_available 7051 Fabric-Peer
+    check_port_available 8051 Fabric-Peer
+    check_port_available 9051 Fabric-Peer
+    check_port_available 10051 Fabric-Peer
 }
 
-check_wecross_avaliable()
+check_wecross_available()
 {
-    check_port_avaliable 8250 WeCross-8250-25500
-    check_port_avaliable 25500 WeCross-8250-25500
-    check_port_avaliable 8251 WeCross-8251-25501
-    check_port_avaliable 25501 WeCross-8251-25501
+    check_port_available 8250 WeCross-8250-25500
+    check_port_available 25500 WeCross-8250-25500
+    check_port_available 8251 WeCross-8251-25501
+    check_port_available 25501 WeCross-8251-25501
 }
 
 
@@ -100,8 +100,8 @@ check_env()
     check_command docker
     check_command docker-compose
     check_docker_service
-    check_fabric_avaliable
-    check_wecross_avaliable
+    check_fabric_available
+    check_wecross_available
 }
 
 
