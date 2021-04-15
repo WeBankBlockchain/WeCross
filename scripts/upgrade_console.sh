@@ -7,17 +7,17 @@ wecross_console_upgrade_dir=${dirpath}/WeCross-Console
 
 LOG_WARN() {
     local content=${1}
-    echo -e "\033[31m[ERROR] ${content}\033[0m"
+    echo -e "\033[31m[ERROR] $@\033[0m"
 }
 
 LOG_INFO() {
     local content=${1}
-    echo -e "\033[32m[INFO] ${content}\033[0m"
+    echo -e "\033[32m[INFO] $@\033[0m"
 }
 
 LOG_FALT() {
     local content=${1}
-    echo -e "\033[31m[FALT] ${content}\033[0m"
+    echo -e "\033[31m[FALT] $@\033[0m"
     exit 1
 }
 
@@ -85,8 +85,8 @@ main() {
     cp "${wecross_console_upgrade_dir}"/lib/*jar "${wecross_console_deploy_dir}"/lib/
     cp "${wecross_console_upgrade_dir}"/start.sh "${wecross_console_deploy_dir}"/
 
-    LOG_INFO " WeCross-Console complete upgrade:"
-    LOG_INFO " \t console: "$(ls "${wecross_console_deploy_dir}/apps/")
+    LOG_INFO " WeCross-Console upgrade completed:"
+    LOG_INFO " \t version: "$(ls ${wecross_console_deploy_dir}/apps/ |awk '{gsub(/.jar$/,""); print}')
 }
 
 main

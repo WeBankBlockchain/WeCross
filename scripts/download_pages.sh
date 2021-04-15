@@ -8,6 +8,7 @@ pages_dir=$(pwd)'/pages/'
 src_dir=$(pwd)'/src/'
 
 wecross_webapp_url=https://github.com/WebankBlockchain/WeCross-WebApp.git
+wecross_webapp_url_bak=https://github.com/WebankBlockchain/WeCross-WebApp.git
 
 LOG_INFO() {
     local content=${1}
@@ -27,7 +28,7 @@ Usage:
     bash $0  <tag/branch>
     <tag/branch>:   certain tag or branch to download
 e.g
-    bash $0 v1.0.0
+    bash $0 v1.1.1
 EOF
     exit 0
 }
@@ -35,7 +36,8 @@ EOF
 download_latest_code() {
     local name=${1}
     local url=${2}
-    local branch=${3}
+    local url_bak=${3}
+    local branch=${4}
 
     if [ -d ${name} ]; then
         cd ${name}
@@ -43,8 +45,11 @@ download_latest_code() {
         git pull
         cd -
     else
-        git clone --depth 1 -b ${branch} ${url}
-
+        LOG_INFO "Try to clone from ${url}"
+        if ! git clone --depth 1 -b ${branch} ${url}; then
+            LOG_INFO "Try to clone from ${url_bak}"
+            git clone --depth 1 -b ${branch} ${url_bak}
+        fi
     fi
 }
 
@@ -52,12 +57,13 @@ build_webapp_from_source() {
     LOG_INFO "Build WeCross WebApp from source"
 
     local url=${wecross_webapp_url}
+    local url_bak=${wecross_webapp_url_bak}
     local branch=${1}
 
     mkdir -p ${src_dir}/
     cd ${src_dir}/
 
-    download_latest_code WeCross-WebApp ${url} ${branch}
+    download_latest_code WeCross-WebApp ${url} ${url_bak} ${branch}
 
     cd WeCross-WebApp
     rm -rf dist

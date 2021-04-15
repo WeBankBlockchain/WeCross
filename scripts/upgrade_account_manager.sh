@@ -7,17 +7,17 @@ wecross_account_manager_upgrade_dir=${dirpath}/WeCross-Account-Manager
 
 LOG_WARN() {
     local content=${1}
-    echo -e "\033[31m[ERROR] ${content}\033[0m"
+    echo -e "\033[31m[ERROR] $@\033[0m"
 }
 
 LOG_INFO() {
     local content=${1}
-    echo -e "\033[32m[INFO] ${content}\033[0m"
+    echo -e "\033[32m[INFO] $@\033[0m"
 }
 
 LOG_FALT() {
     local content=${1}
-    echo -e "\033[31m[FALT] ${content}\033[0m"
+    echo -e "\033[31m[FALT] $@\033[0m"
     exit 1
 }
 
@@ -86,8 +86,8 @@ main() {
     cp "${wecross_account_manager_upgrade_dir}"/start.sh "${wecross_account_manager_deploy_dir}"
     cp "${wecross_account_manager_upgrade_dir}"/stop.sh "${wecross_account_manager_deploy_dir}"
 
-    LOG_INFO " WeCross-Account-Manager complete upgrade:"
-    LOG_INFO " \t console: "$(ls "${wecross_account_manager_deploy_dir}/apps/")
+    LOG_INFO " WeCross-Account-Manager upgrade completed:"
+    LOG_INFO " \t version: "$(ls ${wecross_account_manager_deploy_dir}/apps/ |awk '{gsub(/.jar$/,""); print}')
 }
 
 main
