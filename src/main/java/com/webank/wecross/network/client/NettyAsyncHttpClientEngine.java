@@ -160,6 +160,7 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
 
                                 @Override
                                 public void onThrowable(Throwable t) {
+                                    logger.debug("AsyncSend exception: ", t);
                                     callback.callOnFailed(
                                             new WeCrossException(
                                                     WeCrossException.ErrorCode.QUERY_CLIENT_ERROR,
