@@ -94,7 +94,7 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
 
             return response;
         } catch (TimeoutException e) {
-            logger.warn("http request timeout");
+            logger.warn("http request timeout", e);
             throw new WeCrossException(
                     WeCrossException.ErrorCode.QUERY_TIMEOUT, "http request timeout");
         } catch (Exception e) {
