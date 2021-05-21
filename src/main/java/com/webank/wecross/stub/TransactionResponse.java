@@ -7,7 +7,7 @@ import java.util.List;
 public class TransactionResponse {
     private int errorCode = 0;
     private String message = new String();
-    private String hash = new String();
+    private String hash = new String(); // Transaction hash
     private List<String> extraHashes;
     private long blockNumber;
     private String[] result;

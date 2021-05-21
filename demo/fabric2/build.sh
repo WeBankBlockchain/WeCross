@@ -94,37 +94,37 @@ cd -
 # copy cert
 # If you run the full "Wecross" demo, open the comments below!
 
-# certs_dir=certs
-# fabric_stub_dir=${certs_dir}/chains/fabric
-# fabric_admin_dir=${certs_dir}/accounts/fabric_admin
-# fabric_user_dir=${certs_dir}/accounts/fabric_user1
-# fabric_admin_org1_dir=${certs_dir}/accounts/fabric_admin_org1
-# fabric_admin_org2_dir=${certs_dir}/accounts/fabric_admin_org2
+certs_dir=certs
+fabric_stub_dir=${certs_dir}/chains/fabric
+fabric_admin_dir=${certs_dir}/accounts/fabric_admin
+fabric_user_dir=${certs_dir}/accounts/fabric_user1
+fabric_admin_org1_dir=${certs_dir}/accounts/fabric_admin_org1
+fabric_admin_org2_dir=${certs_dir}/accounts/fabric_admin_org2
 
-# fabric_verifiers_dir=${certs_dir}/verifiers
-# fabric_verifiers_org1CA_dir=${certs_dir}/verifiers/org1CA
-# fabric_verifiers_org2CA_dir=${certs_dir}/verifiers/org2CA
-# fabric_verifiers_ordererCA_dir=${certs_dir}/verifiers/ordererCA
+fabric_verifiers_dir=${certs_dir}/verifiers
+fabric_verifiers_org1CA_dir=${certs_dir}/verifiers/org1CA
+fabric_verifiers_org2CA_dir=${certs_dir}/verifiers/org2CA
+fabric_verifiers_ordererCA_dir=${certs_dir}/verifiers/ordererCA
 
-# mkdir -p ${certs_dir} ${fabric_admin_dir} ${fabric_user_dir} ${fabric_stub_dir} ${fabric_admin_org1_dir} ${fabric_admin_org2_dir} \
-# ${fabric_verifiers_dir} ${fabric_verifiers_org1CA_dir} ${fabric_verifiers_org2CA_dir} ${fabric_verifiers_ordererCA_dir}
+mkdir -p ${certs_dir} ${fabric_admin_dir} ${fabric_user_dir} ${fabric_stub_dir} ${fabric_admin_org1_dir} ${fabric_admin_org2_dir} \
+        ${fabric_verifiers_dir} ${fabric_verifiers_org1CA_dir} ${fabric_verifiers_org2CA_dir} ${fabric_verifiers_ordererCA_dir}
 
-# crypto_dir=fabric-samples-${samples_version}/test-network/organizations/
-# cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/*_sk ${fabric_admin_dir}/account.key
-# cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem ${fabric_admin_dir}/account.crt
+crypto_dir=fabric-samples-2.3.0/test-network/organizations/
+cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/*_sk ${fabric_admin_dir}/account.key
+cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/cert.pem ${fabric_admin_dir}/account.crt
 
-# cp ${crypto_dir}/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore/*_sk ${fabric_user_dir}/account.key
-# cp ${crypto_dir}/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem ${fabric_user_dir}/account.crt
+cp ${crypto_dir}/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore/*_sk ${fabric_user_dir}/account.key
+cp ${crypto_dir}/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/cert.pem ${fabric_user_dir}/account.crt
 
-# cp ${crypto_dir}/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem ${fabric_stub_dir}/orderer-tlsca.crt
-# cp ${crypto_dir}/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt ${fabric_stub_dir}/org1-tlsca.crt
-# cp ${crypto_dir}/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt ${fabric_stub_dir}/org2-tlsca.crt
+cp ${crypto_dir}/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem ${fabric_stub_dir}/orderer-tlsca.crt
+cp ${crypto_dir}/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt ${fabric_stub_dir}/org1-tlsca.crt
+cp ${crypto_dir}/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt ${fabric_stub_dir}/org2-tlsca.crt
 
-# cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/*_sk ${fabric_admin_org1_dir}/account.key
-# cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem ${fabric_admin_org1_dir}/account.crt
+cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/*_sk ${fabric_admin_org1_dir}/account.key
+cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/cert.pem ${fabric_admin_org1_dir}/account.crt
 
-# cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/*_sk ${fabric_admin_org2_dir}/account.key
-# cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem ${fabric_admin_org2_dir}/account.crt
+cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/*_sk ${fabric_admin_org2_dir}/account.key
+cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/cert.pem ${fabric_admin_org2_dir}/account.crt
 
 # cp ${crypto_dir}/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem ${fabric_verifiers_org1CA_dir}/ca.org1.example.com-cert.pem
 # cp ${crypto_dir}/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem ${fabric_verifiers_org2CA_dir}/ca.org2.example.com-cert.pem
