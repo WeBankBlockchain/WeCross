@@ -3,6 +3,7 @@ package com.webank.wecross.network.rpc.netty.handler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.RouterLoginAccountContext;
 import com.webank.wecross.account.UserContext;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.rpc.URIHandlerDispatcher;
@@ -33,8 +34,12 @@ import io.netty.handler.timeout.IdleStateEvent;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.InvalidParameterException;
+import java.util.List;
 import java.util.Objects;
 import javax.activation.MimetypesFileTypeMap;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -148,9 +153,45 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
         threadPoolTaskExecutor.execute(
                 () -> {
                     UserContext userContext = new UserContext();
-                    userContext.setToken(getTokenFromHeader(httpRequest));
+
+                    String token = getTokenFromHeader(httpRequest);
+                    userContext.setToken(token);
 
                     if (shouldLogin(uri)) {
+                        // if accountName auth allowed
+                        boolean useNameToken =
+                                accountManager.getClientConnection().isAllowNameToken();
+                        if (useNameToken && Objects.isNull(token)) {
+                            logger.debug("useNameToken, token is null.");
+                            try {
+                                String userName = getUserNameFromURI(uri);
+                                if (userName == null) {
+                                    throw new InvalidParameterException(
+                                            "not found wecross-name-token parameter");
+                                }
+                                logger.info("useNameToken ,useName: {}, uri: {}", userName, uri);
+                                // routerLogin for token
+                                RouterLoginAccountContext routerLoginAccountContext =
+                                        new RouterLoginAccountContext();
+                                routerLoginAccountContext.setUsername(userName);
+                                routerLoginAccountContext.setAccountManagerEngine(
+                                        accountManager.getEngine());
+
+                                routerLoginAccountContext.routerLogin();
+                                token = routerLoginAccountContext.getToken();
+                                if (token == null) {
+                                    throw new RuntimeException("routerLogin token is null");
+                                }
+                                // add token to http header
+                                userContext.setToken(token);
+                            } catch (Exception e) {
+                                String errorMessage = "routerLogin check failed, uri: " + uri;
+                                logger.warn(
+                                        "routerLogin to fetch token failed, uri: {}, e:", uri, e);
+                                unauthorizedResponse(ctx, errorMessage);
+                                return; // not auth, just return
+                            }
+                        }
 
                         if (!hasLogin(userContext)) {
                             String errorMessage =
@@ -391,8 +432,26 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
         }
     }
 
+    private String getUserNameFromURI(String uri) {
+        // &wecross-name-token
+        try {
+            List<NameValuePair> nameValuePairs = new URIBuilder(uri).getQueryParams();
+            for (int i = 0; i < nameValuePairs.size(); i++) {
+                if ("wecross-name-token".equals(nameValuePairs.get(i).getName())) {
+                    return nameValuePairs.get(i).getValue();
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("getUserNameFromURI: e:", e);
+        }
+
+        return null;
+    }
+
     private boolean shouldLogin(String uri) {
-        String[] splits = uri.split("/");
+
+        String[] rawUriSplits = uri.split("\\?");
+        String[] splits = rawUriSplits[0].split("/");
         String uriMethod = splits[splits.length - 1];
 
         if (uriMethod.startsWith("test")

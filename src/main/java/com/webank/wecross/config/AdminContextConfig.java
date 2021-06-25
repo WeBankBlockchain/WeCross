@@ -1,7 +1,7 @@
 package com.webank.wecross.config;
 
 import com.moandjiezana.toml.Toml;
-import com.webank.wecross.account.AdminContext;
+import com.webank.wecross.account.RouterLoginAccountContext;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.client.ClientMessageEngine;
 import com.webank.wecross.utils.ConfigUtils;
@@ -17,8 +17,8 @@ public class AdminContextConfig {
     ClientMessageEngine accountManagerEngine;
 
     @Bean
-    public AdminContext newAdminContext() throws WeCrossException {
-        AdminContext adminContext = new AdminContext();
+    public RouterLoginAccountContext newAdminContext() throws WeCrossException {
+        RouterLoginAccountContext adminContext = new RouterLoginAccountContext();
         String admin = ConfigUtils.parseString(toml, "account-manager.admin");
 
         adminContext.setAccountManagerEngine(accountManagerEngine);

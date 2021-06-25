@@ -2,9 +2,10 @@ package com.webank.wecross.config;
 
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.account.AccountSyncManager;
-import com.webank.wecross.account.AdminContext;
+import com.webank.wecross.account.RouterLoginAccountContext;
 import com.webank.wecross.account.UniversalAccountFactory;
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.network.client.ClientConnection;
 import com.webank.wecross.network.client.ClientMessageEngine;
 import java.io.IOException;
 import javax.annotation.Resource;
@@ -14,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AccountManagerConfig {
 
-    @Resource AdminContext adminContext;
+    @Resource RouterLoginAccountContext adminContext;
 
     @Resource(name = "newAccountManagerEngine")
     ClientMessageEngine accountManagerEngine;
@@ -22,6 +23,9 @@ public class AccountManagerConfig {
     @Resource UniversalAccountFactory universalAccountFactory;
 
     @Resource AccountSyncManager accountSyncManager;
+
+    @Resource(name = "newClientConnection")
+    ClientConnection clientConnection;
 
     @Bean
     public AccountManager newAccountManager() throws IOException, WeCrossException {
@@ -31,6 +35,7 @@ public class AccountManagerConfig {
         accountManager.setAdminContext(adminContext);
         accountManager.setUniversalAccountFactory(universalAccountFactory);
         accountManager.setAccountSyncManager(accountSyncManager);
+        accountManager.setClientConnection(clientConnection);
 
         /*
             AccountManager localAccountManager = newLocalAccountManager();

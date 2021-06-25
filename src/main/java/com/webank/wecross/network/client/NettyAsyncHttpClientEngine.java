@@ -44,6 +44,8 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
         logger.info(clientConnection.toString());
         server = clientConnection.getServer();
         httpClient = getHttpAsyncClient(clientConnection);
+
+        logger.info("clientConnection: {}", clientConnection);
     }
 
     private void checkRequest(Request<?> request) throws WeCrossException {

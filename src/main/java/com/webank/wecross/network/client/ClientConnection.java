@@ -7,6 +7,7 @@ public class ClientConnection {
     String sslKey;
     String sslCert;
     String caCert;
+    boolean allowNameToken;
 
     public String getServer() {
         return server;
@@ -56,9 +57,17 @@ public class ClientConnection {
         this.caCert = caCert;
     }
 
+    public boolean isAllowNameToken() {
+        return allowNameToken;
+    }
+
+    public void setAllowNameToken(boolean allowNameToken) {
+        this.allowNameToken = allowNameToken;
+    }
+
     @Override
     public String toString() {
-        return "Connection{"
+        return "ClientConnection{"
                 + "server='"
                 + server
                 + '\''
@@ -75,6 +84,8 @@ public class ClientConnection {
                 + ", caCert='"
                 + caCert
                 + '\''
+                + ", allowNameToken="
+                + allowNameToken
                 + '}';
     }
 }
