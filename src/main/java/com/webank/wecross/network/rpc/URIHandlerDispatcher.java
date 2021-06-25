@@ -63,7 +63,7 @@ public class URIHandlerDispatcher {
 
         ResourceFetcher resourceFetcher = new ResourceFetcher(host.getZoneManager());
         ListResourcesURIHandler listResourcesURIHandler =
-                new ListResourcesURIHandler(resourceFetcher);
+                new ListResourcesURIHandler(resourceFetcher, host.getAccountManager());
         registerURIHandler(new URIMethod("GET", "/sys/listResources"), listResourcesURIHandler);
         registerURIHandler(new URIMethod("POST", "/sys/listResources"), listResourcesURIHandler);
 

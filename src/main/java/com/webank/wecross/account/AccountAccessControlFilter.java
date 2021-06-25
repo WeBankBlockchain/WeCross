@@ -2,6 +2,7 @@ package com.webank.wecross.account;
 
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.stub.Path;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -194,5 +195,10 @@ public class AccountAccessControlFilter {
             }
         }
         return res.toArray(new String[0]);
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(this.dumpPermission());
     }
 }

@@ -26,7 +26,8 @@ public class UniversalAccountFactory {
                         .build();
 
         AccountAccessControlFilter filter =
-                filterFactory.buildFilter(ua.getName(), uaDetails.getAllowChainPaths());
+                filterFactory.buildFilter(
+                        ua.getName(), ua.isAdmin(), uaDetails.getAllowChainPaths());
         ua.setAccessControlFilter(filter);
 
         // foreach details, set default account into ua

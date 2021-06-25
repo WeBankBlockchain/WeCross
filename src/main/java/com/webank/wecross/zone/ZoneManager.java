@@ -1,5 +1,6 @@
 package com.webank.wecross.zone;
 
+import com.webank.wecross.account.AccountAccessControlFilter;
 import com.webank.wecross.config.BlockVerifierTomlConfig;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.p2p.P2PService;
@@ -343,6 +344,15 @@ public class ZoneManager {
         return resources;
     }
 
+    public Map<String, Resource> getChainResourcesWithFilter(
+            AccountAccessControlFilter filter, Path chainPath) {
+        if (!filter.hasPermission(chainPath)) {
+            return new HashMap<>();
+        } else {
+            return getChainResources(chainPath);
+        }
+    }
+
     public Map<String, Resource> getAllResources(boolean ignoreRemote) {
         Map<String, Resource> resources = new HashMap<String, Resource>();
 
@@ -353,15 +363,17 @@ public class ZoneManager {
 
                 for (Map.Entry<String, Chain> stubEntry :
                         zoneEntry.getValue().getChains().entrySet()) {
-                    String stubName = PathUtils.toPureName(stubEntry.getKey());
+                    String chainName = PathUtils.toPureName(stubEntry.getKey());
 
                     for (Map.Entry<String, Resource> resourceEntry :
                             stubEntry.getValue().getResources().entrySet()) {
                         if (resourceEntry.getValue().hasLocalConnection() || !ignoreRemote) {
                             String resourceName = PathUtils.toPureName(resourceEntry.getKey());
-                            resources.put(
-                                    zoneName + "." + stubName + "." + resourceName,
-                                    resourceEntry.getValue());
+                            Path path = new Path();
+                            path.setZone(zoneName);
+                            path.setChain(chainName);
+                            path.setResource(resourceName);
+                            resources.put(path.toString(), resourceEntry.getValue());
                         }
                     }
                 }
@@ -371,6 +383,25 @@ public class ZoneManager {
         }
 
         return resources;
+    }
+
+    public Map<String, Resource> getAllResourcesWithFilter(
+            AccountAccessControlFilter filter, boolean ignoreRemote) {
+        Map<String, Resource> originResources = getAllResources(ignoreRemote);
+        Map<String, Resource> filteredResources = new HashMap<>();
+        for (Map.Entry<String, Resource> entry : originResources.entrySet()) {
+            try {
+                Path path = Path.decode(entry.getKey());
+                if (filter.hasPermission(path)) {
+                    filteredResources.put(entry.getKey(), entry.getValue());
+                }
+
+            } catch (Exception e) {
+                logger.warn("getAllResourcesWithFilter decode path failed, {}", e);
+                continue;
+            }
+        }
+        return filteredResources;
     }
 
     public Map<String, ChainInfo> getAllChainsInfo(boolean ignoreRemote) {

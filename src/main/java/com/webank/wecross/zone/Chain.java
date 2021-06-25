@@ -421,6 +421,14 @@ public class Chain {
                         callback);
     }
 
+    public String getZoneName() {
+        return zoneName;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     public Map<String, String> getProperties() {
         return properties;
     }

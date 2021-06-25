@@ -3,6 +3,7 @@ package com.webank.wecross.network.rpc.handler;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.exception.WeCrossException;
@@ -207,7 +208,8 @@ public class ConnectionURIHandler implements URIHandler {
             String uri,
             String method,
             String content,
-            HandleCallback callback) {
+            HandleCallback callback)
+            throws WeCrossException {
         UriDecoder uriDecoder = new UriDecoder(uri);
         String zone = "";
         int offset = 0;
@@ -228,7 +230,12 @@ public class ConnectionURIHandler implements URIHandler {
             return;
         }
 
-        long total = zoneManager.getZone(zone).getChains().size();
+        UniversalAccount ua = accountManager.getUniversalAccount(userContext);
+
+        Map<String, Chain> chainMap =
+                zoneManager.getZone(zone).getChainsWithFilter(ua.getAccessControlFilter());
+
+        long total = chainMap.size();
         if (offset > total) {
             callback.onResponse(null, new ListData(0, chains));
             return;
@@ -240,12 +247,10 @@ public class ConnectionURIHandler implements URIHandler {
 
         int i = 0;
         AtomicLong current = new AtomicLong(0);
-
-        if (zoneManager.getZone(zone).getChains().isEmpty()) {
+        if (chainMap.isEmpty()) {
             callback.onResponse(null, new ListData(0, chains));
         } else {
-            for (Map.Entry<String, Chain> chainEntry :
-                    zoneManager.getZone(zone).getChains().entrySet()) {
+            for (Map.Entry<String, Chain> chainEntry : chainMap.entrySet()) {
                 if ((offset == 0 && size == 0) || (i >= offset && i < total)) {
                     String chain = chainEntry.getKey();
                     String type = chainEntry.getValue().getStubType();
@@ -261,7 +266,7 @@ public class ConnectionURIHandler implements URIHandler {
                     chainDetails.setProperties(properties);
 
                     long totalEnd = total;
-                    final long totalSize = zoneManager.getZone(zone).getChains().size();
+                    final long totalSize = chainMap.size();
                     if (offset == 0 && size == 0) {
                         totalEnd = totalSize;
                     }

@@ -10,9 +10,10 @@ public class AccountAccessControlFilterFactory {
 
     private boolean enableAccessControl;
 
-    public AccountAccessControlFilter buildFilter(String username, String[] accountAllowPaths)
-            throws WeCrossException {
-        if (enableAccessControl) {
+    public AccountAccessControlFilter buildFilter(
+            String username, boolean isAdmin, String[] accountAllowPaths) throws WeCrossException {
+        if (enableAccessControl && !isAdmin) {
+            // if (enableAccessControl) { XXX
             AccountAccessControlFilter filter = new AccountAccessControlFilter(accountAllowPaths);
             if (logger.isDebugEnabled()) {
                 logger.debug(
