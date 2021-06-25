@@ -26,6 +26,7 @@ public class AuthFilterConfig {
         remoteAuthFilter.registerAuthUri("/auth/authCode");
         remoteAuthFilter.registerAuthUri("/auth/pub");
         remoteAuthFilter.registerAuthUri("/auth/changePassword");
+        remoteAuthFilter.registerAuthUri("/auth/admin/accessControlList");
 
         return remoteAuthFilter;
     }

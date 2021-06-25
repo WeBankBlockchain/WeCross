@@ -77,6 +77,7 @@ public class URIHandlerDispatcher {
         connectionURIHandler.setP2PService(host.getP2PService());
         connectionURIHandler.setPeerManager(host.getPeerManager());
         connectionURIHandler.setZoneManager(host.getZoneManager());
+        connectionURIHandler.setAccountManager(host.getAccountManager());
         registerURIHandler(new URIMethod("GET", "/conn/listChains"), connectionURIHandler);
         registerURIHandler(new URIMethod("GET", "/conn/listZones"), connectionURIHandler);
         registerURIHandler(new URIMethod("POST", "/conn/addChain"), connectionURIHandler);

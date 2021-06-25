@@ -2,8 +2,10 @@ package com.webank.wecross.network.rpc.handler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.UriDecoder;
 import com.webank.wecross.network.p2p.P2PService;
 import com.webank.wecross.peer.PeerManager;
@@ -30,6 +32,7 @@ public class ConnectionURIHandler implements URIHandler {
     private P2PService p2PService;
     private PeerManager peerManager;
     private ZoneManager zoneManager;
+    private AccountManager accountManager;
 
     private static interface HandleCallback {
         public void onResponse(Exception e, Object response);
@@ -422,6 +425,8 @@ public class ConnectionURIHandler implements URIHandler {
             HandleCallback callback) {
 
         try {
+            onlyAdmin(userContext);
+
             RestRequest<AddressData> restRequest =
                     objectMapper.readValue(
                             content, new TypeReference<RestRequest<AddressData>>() {});
@@ -444,6 +449,7 @@ public class ConnectionURIHandler implements URIHandler {
             HandleCallback callback) {
 
         try {
+            onlyAdmin(userContext);
 
             RestRequest<AddressData> restRequest =
                     objectMapper.readValue(
@@ -467,6 +473,10 @@ public class ConnectionURIHandler implements URIHandler {
         this.peerManager = peerManager;
     }
 
+    public void setAccountManager(AccountManager accountManager) {
+        this.accountManager = accountManager;
+    }
+
     public static class StatusResponse {
         public int errorCode;
         public String message;
@@ -483,6 +493,13 @@ public class ConnectionURIHandler implements URIHandler {
             response.errorCode = 1;
             response.message = message;
             return response;
+        }
+    }
+
+    private void onlyAdmin(UserContext userContext) throws WeCrossException {
+        if (!accountManager.getUniversalAccount(userContext).isAdmin()) {
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.PERMISSION_DENIED, "Permission denied");
         }
     }
 }

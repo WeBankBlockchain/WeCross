@@ -17,6 +17,7 @@ public class WeCrossException extends java.lang.Exception {
         public static final int VERSION_ERROR = 201;
         public static final int METHOD_ERROR = 202;
         public static final int POST_DATA_ERROR = 203;
+        public static final int PATH_FORMAT_ERROR = 204;
 
         // transaction
         public static final int CALL_CONTRACT_ERROR = 301;
@@ -34,6 +35,7 @@ public class WeCrossException extends java.lang.Exception {
         public static final int GET_UA_BY_ACCOUNT_FAILED = 503;
         public static final int DIFFRENT_CHAIN_ACCOUNT_ID_TO_UA_ID = 504;
         public static final int UAPROOF_VERIFYIER_EXCEPTION = 505;
+        public static final int PERMISSION_DENIED = 506;
 
         // client engine
         public static final int QUERY_TIMEOUT = 601;
