@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/** Input allowPath, verify whether the path can be access */
 public class AccountAccessControlFilter {
     Map<String, Map<String, Collection<String>>> allowPaths =
             new HashMap<>(); // zone 2 chain 2 resource
@@ -94,6 +95,21 @@ public class AccountAccessControlFilter {
         }
         Collection<String> allowResourcePath = allowChainPaths.get(chain);
         allowResourcePath.add(resource);
+    }
+
+    public void checkPermissions(String[] paths) throws WeCrossException {
+        List<String> denied = new LinkedList<>();
+        for (String path : paths) {
+            if (!hasPermission(path)) {
+                denied.add(path);
+            }
+        }
+
+        if (!denied.isEmpty()) {
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.PERMISSION_DENIED,
+                    "Permission denied on paths: " + denied.toString());
+        }
     }
 
     public boolean hasPermission(String path) throws WeCrossException {

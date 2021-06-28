@@ -69,7 +69,8 @@ public class URIHandlerDispatcher {
 
         TransactionFetcher transactionFetcher =
                 new TransactionFetcher(host.getZoneManager(), host.getAccountManager());
-        TransactionURIHandler transactionURIHandler = new TransactionURIHandler(transactionFetcher);
+        TransactionURIHandler transactionURIHandler =
+                new TransactionURIHandler(transactionFetcher, host.getAccountManager());
         registerURIHandler(new URIMethod("GET", "/trans/getTransaction"), transactionURIHandler);
         registerURIHandler(new URIMethod("GET", "/trans/listTransactions"), transactionURIHandler);
 
