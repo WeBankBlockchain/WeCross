@@ -1,5 +1,9 @@
 package com.webank.wecross.test.rpc;
 
+import com.webank.wecross.account.AccountAccessControlFilter;
+import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.DisabledAccountAccessControlFilter;
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.network.rpc.handler.ConnectionURIHandler;
 import com.webank.wecross.network.rpc.handler.ConnectionURIHandler.ChainDetail;
 import com.webank.wecross.network.rpc.handler.ConnectionURIHandler.ListData;
@@ -56,13 +60,20 @@ public class ConnectionURIHandlerTest {
             chains.put(chainName, chain);
         }
 
-        Zone zone = Mockito.mock(Zone.class);
-        Mockito.when(zone.getChains()).thenReturn(chains);
+        Zone zone = new Zone();
+        zone.setChains(chains);
         ZoneManager zoneManager = Mockito.mock(ZoneManager.class);
         Mockito.when(zoneManager.getZone("test-zone")).thenReturn(zone);
         Mockito.when(zoneManager.getZone("test-zone2")).thenReturn(new Zone());
-
         connectionURIHandler.setZoneManager(zoneManager);
+
+        AccountAccessControlFilter filter = new DisabledAccountAccessControlFilter(new String[0]);
+        UniversalAccount mockAccount = Mockito.mock(UniversalAccount.class);
+        Mockito.when(mockAccount.getAccessControlFilter()).thenReturn(filter);
+
+        AccountManager accountManager = Mockito.mock(AccountManager.class);
+        Mockito.when(accountManager.getUniversalAccount(null)).thenReturn(mockAccount);
+        connectionURIHandler.setAccountManager(accountManager);
 
         AtomicInteger hit = new AtomicInteger(0);
         connectionURIHandler.handle(
