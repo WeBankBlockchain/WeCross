@@ -8,11 +8,10 @@ import com.webank.wecross.network.client.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AdminContext extends UserContext {
-    private static Logger logger = LoggerFactory.getLogger(AdminContext.class);
+public class RouterLoginAccountContext extends UserContext {
+    private static Logger logger = LoggerFactory.getLogger(RouterLoginAccountContext.class);
 
     private String username;
-    private String password;
 
     public void setAccountManagerEngine(ClientMessageEngine accountManagerEngine) {
         this.accountManagerEngine = accountManagerEngine;
@@ -22,7 +21,6 @@ public class AdminContext extends UserContext {
 
     static class LoginRequest {
         public String username;
-        public String password;
     }
 
     static class LoginResponse {
@@ -42,7 +40,6 @@ public class AdminContext extends UserContext {
     public void routerLogin() throws WeCrossException {
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.username = username;
-        loginRequest.password = password;
 
         Request<LoginRequest> request = new Request<>();
         request.setMethod("/auth/routerLogin");
@@ -69,10 +66,11 @@ public class AdminContext extends UserContext {
                                 + response.getData().message);
             }
 
+            /*
             if (!response.getData().universalAccount.isAdmin) {
                 throw new Exception(
                         "login error: " + username + " is not admin in account manager");
-            }
+            }*/
 
             super.setToken(response.getData().credential);
 
@@ -102,9 +100,5 @@ public class AdminContext extends UserContext {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 }

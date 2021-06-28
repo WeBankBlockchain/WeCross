@@ -4,6 +4,7 @@ import static com.webank.wecross.exception.WeCrossException.ErrorCode.GET_UA_FAI
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.network.client.ClientConnection;
 import com.webank.wecross.network.client.ClientMessageEngine;
 import com.webank.wecross.network.client.Request;
 import com.webank.wecross.network.client.Response;
@@ -23,8 +24,9 @@ public class AccountManager {
 
     private ClientMessageEngine engine;
     private UniversalAccountFactory universalAccountFactory;
+    private ClientConnection clientConnection;
 
-    private AdminContext adminContext;
+    private RouterLoginAccountContext adminContext;
     private AccountSyncManager accountSyncManager;
 
     private static Timer timer = new Timer("checkTokenTimer");
@@ -33,6 +35,7 @@ public class AccountManager {
     private Map<String, UniversalAccount> token2UA = new ConcurrentHashMap<>();
 
     public void start() {
+        logger.info("clientConnection: {}", clientConnection);
         timer.schedule(
                 new TimerTask() {
                     @Override
@@ -139,6 +142,14 @@ public class AccountManager {
         this.accountSyncManager = accountSyncManager;
     }
 
+    public ClientConnection getClientConnection() {
+        return clientConnection;
+    }
+
+    public void setClientConnection(ClientConnection clientConnection) {
+        this.clientConnection = clientConnection;
+    }
+
     public void setTimer(Timer timer) {
         this.timer = timer;
     }
@@ -177,7 +188,7 @@ public class AccountManager {
         }
     }
 
-    public void setAdminContext(AdminContext adminContext) {
+    public void setAdminContext(RouterLoginAccountContext adminContext) {
         this.adminContext = adminContext;
     }
 
@@ -256,5 +267,9 @@ public class AccountManager {
 
     public void setEngine(ClientMessageEngine engine) {
         this.engine = engine;
+    }
+
+    public ClientMessageEngine getEngine() {
+        return engine;
     }
 }
