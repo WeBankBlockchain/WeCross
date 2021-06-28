@@ -83,7 +83,7 @@ fi
 # Startup
 LOG_INFO "Startup test-network"
 cd fabric-samples-${samples_version}/test-network
-bash network.sh up createChannel -ca -c mychannel -i ${fabric_version}
+bash network.sh up createChannel -c mychannel -i ${fabric_version}
 bash network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-javascript/ -ccl javascript <<EOF
 Y
 EOF
@@ -111,20 +111,20 @@ mkdir -p ${certs_dir} ${fabric_admin_dir} ${fabric_user_dir} ${fabric_stub_dir} 
 
 crypto_dir=fabric-samples-2.3.0/test-network/organizations/
 cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/*_sk ${fabric_admin_dir}/account.key
-cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/cert.pem ${fabric_admin_dir}/account.crt
+cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem ${fabric_admin_dir}/account.crt
 
 cp ${crypto_dir}/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore/*_sk ${fabric_user_dir}/account.key
-cp ${crypto_dir}/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/cert.pem ${fabric_user_dir}/account.crt
+cp ${crypto_dir}/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem ${fabric_user_dir}/account.crt
 
 cp ${crypto_dir}/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem ${fabric_stub_dir}/orderer-tlsca.crt
 cp ${crypto_dir}/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt ${fabric_stub_dir}/org1-tlsca.crt
 cp ${crypto_dir}/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt ${fabric_stub_dir}/org2-tlsca.crt
 
 cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/*_sk ${fabric_admin_org1_dir}/account.key
-cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/cert.pem ${fabric_admin_org1_dir}/account.crt
+cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem ${fabric_admin_org1_dir}/account.crt
 
 cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/*_sk ${fabric_admin_org2_dir}/account.key
-cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/cert.pem ${fabric_admin_org2_dir}/account.crt
+cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem ${fabric_admin_org2_dir}/account.crt
 
 # cp ${crypto_dir}/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem ${fabric_verifiers_org1CA_dir}/ca.org1.example.com-cert.pem
 # cp ${crypto_dir}/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem ${fabric_verifiers_org2CA_dir}/ca.org2.example.com-cert.pem

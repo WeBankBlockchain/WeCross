@@ -63,13 +63,14 @@ public class URIHandlerDispatcher {
 
         ResourceFetcher resourceFetcher = new ResourceFetcher(host.getZoneManager());
         ListResourcesURIHandler listResourcesURIHandler =
-                new ListResourcesURIHandler(resourceFetcher);
+                new ListResourcesURIHandler(resourceFetcher, host.getAccountManager());
         registerURIHandler(new URIMethod("GET", "/sys/listResources"), listResourcesURIHandler);
         registerURIHandler(new URIMethod("POST", "/sys/listResources"), listResourcesURIHandler);
 
         TransactionFetcher transactionFetcher =
                 new TransactionFetcher(host.getZoneManager(), host.getAccountManager());
-        TransactionURIHandler transactionURIHandler = new TransactionURIHandler(transactionFetcher);
+        TransactionURIHandler transactionURIHandler =
+                new TransactionURIHandler(transactionFetcher, host.getAccountManager());
         registerURIHandler(new URIMethod("GET", "/trans/getTransaction"), transactionURIHandler);
         registerURIHandler(new URIMethod("GET", "/trans/listTransactions"), transactionURIHandler);
 
@@ -77,6 +78,7 @@ public class URIHandlerDispatcher {
         connectionURIHandler.setP2PService(host.getP2PService());
         connectionURIHandler.setPeerManager(host.getPeerManager());
         connectionURIHandler.setZoneManager(host.getZoneManager());
+        connectionURIHandler.setAccountManager(host.getAccountManager());
         registerURIHandler(new URIMethod("GET", "/conn/listChains"), connectionURIHandler);
         registerURIHandler(new URIMethod("GET", "/conn/listZones"), connectionURIHandler);
         registerURIHandler(new URIMethod("POST", "/conn/addChain"), connectionURIHandler);

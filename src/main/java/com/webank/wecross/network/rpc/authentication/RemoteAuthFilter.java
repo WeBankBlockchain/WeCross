@@ -168,7 +168,7 @@ public class RemoteAuthFilter implements AuthFilter {
     }
 
     private boolean shouldAuth(HttpRequest httpRequest) {
-        String uri = httpRequest.uri();
+        String uri = httpRequest.uri().split("\\?")[0];
         return uriNeedAuth.contains(uri);
     }
 
