@@ -23,6 +23,7 @@ public class AccountManager {
     private Logger logger = LoggerFactory.getLogger(AccountManager.class);
 
     private ClientMessageEngine engine;
+
     private UniversalAccountFactory universalAccountFactory;
     private ClientConnection clientConnection;
 
@@ -271,5 +272,9 @@ public class AccountManager {
 
     public ClientMessageEngine getEngine() {
         return engine;
+    }
+
+    public UniversalAccountFactory getUniversalAccountFactory() {
+        return universalAccountFactory;
     }
 }

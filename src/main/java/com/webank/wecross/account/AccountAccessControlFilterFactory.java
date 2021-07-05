@@ -29,4 +29,8 @@ public class AccountAccessControlFilterFactory {
     public void setEnableAccessControl(boolean enableAccessControl) {
         this.enableAccessControl = enableAccessControl;
     }
+
+    public boolean isEnableAccessControl() {
+        return enableAccessControl;
+    }
 }
