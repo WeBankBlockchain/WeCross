@@ -197,6 +197,7 @@ public class SystemInfoHandler implements URIHandler {
         private String rpcNetInfo;
         private String p2pNetInfo;
         private String adminAccount;
+        private boolean enableAccessControl;
 
         public String getVersion() {
             return version;
@@ -237,6 +238,14 @@ public class SystemInfoHandler implements URIHandler {
         public void setAdminAccount(String adminAccount) {
             this.adminAccount = adminAccount;
         }
+
+        public boolean isEnableAccessControl() {
+            return enableAccessControl;
+        }
+
+        public void setEnableAccessControl(boolean enableAccessControl) {
+            this.enableAccessControl = enableAccessControl;
+        }
     }
 
     private void routerStatus(
@@ -270,6 +279,12 @@ public class SystemInfoHandler implements URIHandler {
                 host.getRpcService().getRpcBootstrap().getConfig().getListenIP()
                         + ":"
                         + host.getRpcService().getRpcBootstrap().getConfig().getListenPort());
+
+        routerStatus.setEnableAccessControl(
+                host.getAccountManager()
+                        .getUniversalAccountFactory()
+                        .getFilterFactory()
+                        .isEnableAccessControl());
 
         RestResponse<RouterStatus> restResponse = new RestResponse<RouterStatus>();
         restResponse.setData(routerStatus);

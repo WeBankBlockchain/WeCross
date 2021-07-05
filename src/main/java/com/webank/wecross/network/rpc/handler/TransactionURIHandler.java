@@ -87,7 +87,7 @@ public class TransactionURIHandler implements URIHandler {
                             UniversalAccount ua = accountManager.getUniversalAccount(userContext);
                             AccountAccessControlFilter filter = ua.getAccessControlFilter();
                             if (!filter.hasPermission(path)) {
-                                throw new Exception("Access denied");
+                                throw new Exception("Permission denied");
                             }
                         } catch (Exception e) {
                             logger.warn("Verify permission failed. path:{} error: {}", path, e);
@@ -145,7 +145,7 @@ public class TransactionURIHandler implements URIHandler {
                             UniversalAccount ua = accountManager.getUniversalAccount(userContext);
                             AccountAccessControlFilter filter = ua.getAccessControlFilter();
                             if (!filter.hasPermission(path)) {
-                                throw new Exception("Access denied");
+                                throw new Exception("Permission denied");
                             }
                         } catch (Exception e) {
                             logger.warn("Verify permission exception. path:{} error: {}", path, e);

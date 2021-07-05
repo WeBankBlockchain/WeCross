@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 public class UniversalAccountFactory {
     private static Logger logger = LoggerFactory.getLogger(UniversalAccountFactory.class);
     private StubManager stubManager;
+
     private AccountAccessControlFilterFactory filterFactory;
 
     public UniversalAccount buildUA(UADetails uaDetails) throws WeCrossException {
@@ -64,5 +65,9 @@ public class UniversalAccountFactory {
 
     public void setFilterFactory(AccountAccessControlFilterFactory filterFactory) {
         this.filterFactory = filterFactory;
+    }
+
+    public AccountAccessControlFilterFactory getFilterFactory() {
+        return filterFactory;
     }
 }
