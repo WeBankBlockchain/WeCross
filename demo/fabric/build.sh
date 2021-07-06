@@ -78,7 +78,7 @@ rm -rf config
 if [ "$(uname)" == "Darwin" ]; then
     # Mac
     sed -i '' "/CORE_PEER_TLS_ROOTCERT_FILE/ a\\
-      - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:\$IMAGE_TAG
+\ \ \ \ \ \ - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:\$IMAGE_TAG
     " fabric-samples-1.4.4/first-network/base/peer-base.yaml
 else
     sed -i '/CORE_PEER_TLS_ROOTCERT_FILE/a\ \ \ \ \ \ - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:$IMAGE_TAG' fabric-samples-1.4.4/first-network/base/peer-base.yaml
