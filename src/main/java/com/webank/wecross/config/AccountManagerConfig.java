@@ -5,7 +5,6 @@ import com.webank.wecross.account.AccountSyncManager;
 import com.webank.wecross.account.RouterLoginAccountContext;
 import com.webank.wecross.account.UniversalAccountFactory;
 import com.webank.wecross.exception.WeCrossException;
-import com.webank.wecross.network.client.ClientConnection;
 import com.webank.wecross.network.client.ClientMessageEngine;
 import java.io.IOException;
 import javax.annotation.Resource;
@@ -24,9 +23,6 @@ public class AccountManagerConfig {
 
     @Resource AccountSyncManager accountSyncManager;
 
-    @Resource(name = "newClientConnection")
-    ClientConnection clientConnection;
-
     @Bean
     public AccountManager newAccountManager() throws IOException, WeCrossException {
 
@@ -35,7 +31,6 @@ public class AccountManagerConfig {
         accountManager.setAdminContext(adminContext);
         accountManager.setUniversalAccountFactory(universalAccountFactory);
         accountManager.setAccountSyncManager(accountSyncManager);
-        accountManager.setClientConnection(clientConnection);
 
         /*
             AccountManager localAccountManager = newLocalAccountManager();
