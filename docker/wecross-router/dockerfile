@@ -1,0 +1,10 @@
+FROM ubuntu:18.04
+COPY wecross-router.tar.gz /
+
+RUN apt-get update && \
+    ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    apt-get install -y tzdata vim git tar net-tools openjdk-8-jdk && \
+    tar -zxvf wecross-router.tar.gz && \
+    rm wecross-router.tar.gz
+
+CMD [ "bash", "/wecross-router/start.sh"]
