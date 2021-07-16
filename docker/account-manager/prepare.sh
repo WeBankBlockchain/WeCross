@@ -4,11 +4,42 @@
 # LANG=en_US.UTF-8
 
 ROOT=$(pwd)
+wecross_account_manager_branch=dev
+DB_IP=127.0.0.1
+DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=123456
+
+parse_command() {
+    while getopts "u:p:H:P:b:" option; do
+        # shellcheck disable=SC2220
+        case ${option} in
+        u)
+            DB_USERNAME=$OPTARG
+            ;;
+        p)
+            DB_PASSWORD=$OPTARG
+            ;;
+        H)
+            DB_IP=$OPTARG
+            ;;
+        P)
+            DB_PORT=$OPTARG
+            ;;
+        b)
+            wecross_account_manager_branch=$OPTARG
+            ;;
+        esac
+    done
+
+}
+
+parse_command $@
 
 cd ${ROOT}
 mkdir -p temp && cd temp
 
-bash <(curl -sL https://gitee.com/WeBank/WeCross/raw/master/scripts/download_account_manager.sh) -d -s -b $1
+bash <(curl -sL https://gitee.com/WeBank/WeCross/raw/master/scripts/download_account_manager.sh) -H ${DB_IP} -P ${DB_PORT} -u ${DB_USERNAME} -p ${DB_PASSWORD} -s -b ${wecross_account_manager_branch}
 
 cd ${ROOT}
 mkdir -p wecross-account-manager
