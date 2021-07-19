@@ -27,3 +27,6 @@ bash clear.sh
 
 cd ${ROOT}/fabric
 bash clear.sh
+
+cd ${ROOT}/fabric2
+bash clear.sh

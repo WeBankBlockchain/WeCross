@@ -14,6 +14,10 @@ bcos_stub_branch=
 fabric_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric1-Stub.git
 fabric_stub_branch=
 
+
+fabric2_stub_url=https://github.com/WebankBlockchain/WeCross-2-Stub.git
+fabric2_stub_branch=
+
 LOG_INFO() {
     local content=${1}
     echo -e "\033[32m[INFO] ${content}\033[0m"
@@ -94,6 +98,9 @@ main() {
         ;;
     Fabric1)
         build_plugin_from_source WeCross-Fabric1-Stub ${fabric_stub_url} ${tag}
+        ;;
+    Fabric2)
+        build_plugin_from_source WeCross-Fabric2-Stub ${fabric2_stub_url} ${tag}
         ;;
     *)
         LOG_ERROR "Unsupported plugin name: "

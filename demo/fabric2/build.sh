@@ -84,7 +84,7 @@ fi
 LOG_INFO "Startup test-network"
 cd fabric-samples-${samples_version}/test-network
 bash network.sh up createChannel -c mychannel -i ${fabric_version}
-bash network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-javascript/ -ccl javascript <<EOF
+bash network.sh deployCC -ccn sacc -ccp ../chaincode/sacc/ -ccl go <<EOF
 Y
 EOF
 LOG_INFO "Startup test-network done"
@@ -95,11 +95,11 @@ cd -
 # If you run the full "Wecross" demo, open the comments below!
 
 certs_dir=certs
-fabric_stub_dir=${certs_dir}/chains/fabric
-fabric_admin_dir=${certs_dir}/accounts/fabric_admin
-fabric_user_dir=${certs_dir}/accounts/fabric_user1
-fabric_admin_org1_dir=${certs_dir}/accounts/fabric_admin_org1
-fabric_admin_org2_dir=${certs_dir}/accounts/fabric_admin_org2
+fabric_stub_dir=${certs_dir}/chains/fabric2
+fabric_admin_dir=${certs_dir}/accounts/fabric2_admin
+fabric_user_dir=${certs_dir}/accounts/fabric2_user1
+fabric_admin_org1_dir=${certs_dir}/accounts/fabric2_admin_org1
+fabric_admin_org2_dir=${certs_dir}/accounts/fabric2_admin_org2
 
 fabric_verifiers_dir=${certs_dir}/verifiers
 fabric_verifiers_org1CA_dir=${certs_dir}/verifiers/org1CA

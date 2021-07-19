@@ -201,6 +201,7 @@ gen_conf() {
 [common]
     zone = '${zone}'
     visible = true
+    enableAccessControl = false
 
 [chains]
     path = 'classpath:chains'

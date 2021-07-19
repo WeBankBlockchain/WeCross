@@ -9,4 +9,6 @@ EOF
     cd -
 fi
 
+sleep 10 # waiting for container exit
+
 rm -rf fabric-samples-${samples_version} config bin certs
