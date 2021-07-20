@@ -126,8 +126,8 @@ cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com
 cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/*_sk ${fabric_admin_org2_dir}/account.key
 cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem ${fabric_admin_org2_dir}/account.crt
 
-# cp ${crypto_dir}/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem ${fabric_verifiers_org1CA_dir}/ca.org1.example.com-cert.pem
-# cp ${crypto_dir}/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem ${fabric_verifiers_org2CA_dir}/ca.org2.example.com-cert.pem
-# cp ${crypto_dir}/ordererOrganizations/example.com/ca/ca.example.com-cert.pem ${fabric_verifiers_ordererCA_dir}/ca.example.com-cert.pem
+ cp ${crypto_dir}/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem ${fabric_verifiers_org1CA_dir}/ca.org1.example.com-cert.pem
+ cp ${crypto_dir}/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem ${fabric_verifiers_org2CA_dir}/ca.org2.example.com-cert.pem
+ cp ${crypto_dir}/ordererOrganizations/example.com/ca/ca.example.com-cert.pem ${fabric_verifiers_ordererCA_dir}/ca.example.com-cert.pem
 
 LOG_INFO "SUCCESS: Build Fabric demo finish."

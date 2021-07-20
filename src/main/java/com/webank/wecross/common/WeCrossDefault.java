@@ -21,5 +21,5 @@ public class WeCrossDefault {
 
     // Block Verifier Config
     public static final List<String> SUPPORTED_STUBS =
-            Arrays.asList("BCOS2.0", "GM_BCOS2.0", "Fabric1.4");
+            Arrays.asList("BCOS2.0", "GM_BCOS2.0", "Fabric1.4", "Fabric2.0");
 }

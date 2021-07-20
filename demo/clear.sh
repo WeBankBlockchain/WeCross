@@ -20,6 +20,7 @@ if [ -d ${account_manager} ]; then
 fi
 
 cd ${ROOT}
+rm WeCross-Account-Manager/conf/rsa_p*
 rm -rf WeCross WeCross-Console WeCross-Console-8251 WeCross-Account-Manager ipfile routers-payment
 
 cd ${ROOT}/bcos
