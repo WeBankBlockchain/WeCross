@@ -15,7 +15,7 @@ fabric_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric1-Stub.git
 fabric_stub_branch=
 
 
-fabric2_stub_url=https://github.com/WebankBlockchain/WeCross-2-Stub.git
+fabric2_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric2-Stub.git
 fabric2_stub_branch=
 
 LOG_INFO() {
