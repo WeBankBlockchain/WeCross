@@ -37,6 +37,7 @@ Usage:
 
     <name>:         BCOS2   -> Repo: WeCross-BCOS2-Stub   ( BCOS2.0 & GM_BCOS2.0 )
                     Fabric1 -> Repo: WeCross-Fabric1-Stub ( Fabric1.4 )
+                    Fabric2 -> Repo: WeCross-Fabric2-Stub ( Fabric2.0 )
 
     <tag/branch>:   certain tag or branch to download
 e.g

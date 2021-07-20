@@ -83,6 +83,7 @@ fi
 # Startup
 LOG_INFO "Startup test-network"
 cd fabric-samples-${samples_version}/test-network
+rm .env # remove docker env file to fix fabric bug
 bash network.sh up createChannel -c mychannel -i ${fabric_version}
 bash network.sh deployCC -ccn sacc -ccp ../chaincode/sacc/ -ccl go <<EOF
 Y
