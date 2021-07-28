@@ -41,8 +41,9 @@ Usage:
 
     <tag/branch>:   certain tag or branch to download
 e.g
-    bash $0 BCOS2 v1.1.1
-    bash $0 Fabric1 v1.1.1
+    bash $0 BCOS2 v1.2.0
+    bash $0 Fabric1 v1.2.0
+    bash $0 Fabric2 v1.2.0
 EOF
     exit 0
 }

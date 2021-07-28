@@ -5,7 +5,6 @@ import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.rpc.handler.URIHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import java.io.File;
@@ -45,12 +44,7 @@ public class WebURIHandler implements URIHandler {
 
     private void response404(Callback callback) {
         FullHttpResponse response =
-                new DefaultFullHttpResponse(
-                        HttpVersion.HTTP_1_1, HttpResponseStatus.PERMANENT_REDIRECT);
-
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html");
-
-        response.headers().set(HttpHeaderNames.LOCATION, "/s/index.html#/404");
+                new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
         callback.onResponse(response);
     }
 
