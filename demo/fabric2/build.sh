@@ -83,11 +83,21 @@ fi
 # Startup
 LOG_INFO "Startup test-network"
 cd fabric-samples-${samples_version}/test-network
+# fix fabric bug 1
 rm .env # remove docker env file to fix fabric bug
+# fix fabric bug 2
+if [ "$(uname)" == "Darwin" ]; then
+    # Mac
+    sed -i '' 's/\${COMPOSE_PROJECT_NAME}/docker/g' docker/docker-compose-test-net.yaml
+else
+     sed -i 's/\${COMPOSE_PROJECT_NAME}/docker/g' docker/docker-compose-test-net.yaml
+fi
+
 bash network.sh up createChannel -c mychannel -i ${fabric_version}
 bash network.sh deployCC -ccn sacc -ccp ../chaincode/sacc/ -ccl go <<EOF
 Y
 EOF
+docker network ls
 LOG_INFO "Startup test-network done"
 cd -
 
