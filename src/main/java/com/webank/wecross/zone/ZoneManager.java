@@ -345,9 +345,10 @@ public class ZoneManager {
     }
 
     public Map<String, Resource> getChainResourcesWithFilter(
-            AccountAccessControlFilter filter, Path chainPath) {
+            AccountAccessControlFilter filter, Path chainPath) throws WeCrossException {
         if (!filter.hasPermission(chainPath)) {
-            return new HashMap<>();
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.PERMISSION_DENIED, "Permission denied");
         } else {
             return getChainResources(chainPath);
         }
