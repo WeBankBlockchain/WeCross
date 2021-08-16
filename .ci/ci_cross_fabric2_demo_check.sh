@@ -71,7 +71,6 @@ listResources
 call payment.bcos.HelloWorld get
 sendTransaction payment.bcos.HelloWorld set Tom
 call payment.bcos.HelloWorld get
-call payment.fabric2.sacc query a
 sendTransaction payment.fabric2.sacc set a 666
 call payment.fabric2.sacc query a
 quit
