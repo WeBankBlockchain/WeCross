@@ -129,6 +129,7 @@ check_env() {
     check_command docker
     check_command docker-compose
     check_command mysql
+    check_command go
     check_docker_service
     check_fabric_available
     check_bcos_available
