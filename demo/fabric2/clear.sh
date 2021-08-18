@@ -6,9 +6,8 @@ if [ -d ${samples_dir} ]; then
     bash network.sh down <<EOF
 Y
 EOF
+    sleep 10 # waiting container to exit
     cd -
 fi
-
-sleep 10 # waiting for container exit
 
 rm -rf fabric-samples-${samples_version} config bin certs
