@@ -63,12 +63,20 @@ WeCross是由微众银行自主研发并完全开源的区块链跨链协作平�
 
 ## 项目贡献
 
-- 提交代码(Pull requests)，可参考[代码贡献流程](CONTRIBUTING.md)以及[wiki指南](https://github.com/WebankBlockchain/WeCross/wiki/%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81)
-- [提问和提交BUG](https://github.com/WebankBlockchain/WeCross/issues)
+欢迎参与WeCross社区的维护和建设：
 
-## 社区
+- 提交代码(Pull requests)，可参考[代码贡献流程](CONTRIBUTING.md)以及[wiki指南](https://github.com/WeBankBlockchain/WeCross/wiki/%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81)
+- [提问和提交BUG](https://github.com/WeBankBlockchain/WeCross/issues/new)
 
-联系我们：wecross@webank.com
+您将成为贡献者，感谢各位贡献者的付出：
+
+<img src="https://contrib.rocks/image?repo=WeBankBlockchain/WeCross" alt="https://github.com/WeBankBlockchain/WeCross/graphs/contributors" style="zoom:100%;" />
+
+## 开源社区
+
+参与meetup：[活动日历](https://github.com/WeBankBlockchain/WeCross/wiki#%E6%B4%BB%E5%8A%A8%E6%97%A5%E5%8E%86)
+
+学习知识、讨论方案、开发新特性：[联系微信小助手，加入跨链兴趣小组（CC-SIG）](https://wecross.readthedocs.io/zh_CN/latest/docs/community/cc-sig.html#id3)
 
 ## License
 
