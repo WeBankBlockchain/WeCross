@@ -218,7 +218,9 @@ public class ZoneManager {
                 }
 
                 // did config verifiers
-                chainInfo.getProperties().remove("VERIFIER");
+                if (chainInfo.getProperties() != null) {
+                    chainInfo.getProperties().remove("VERIFIER");
+                }
                 if (this.verifiers != null && this.verifiers.getVerifierHashMap().size() > 0) {
                     BlockVerifierTomlConfig.Verifiers.BlockVerifier blockVerifier =
                             this.verifiers.getVerifierHashMap().get(chainPath.toString());
