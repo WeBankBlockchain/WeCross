@@ -217,23 +217,27 @@ public class ZoneManager {
                     }
                 }
 
+                // did config verifiers
+                if (chainInfo.getProperties() != null) {
+                    chainInfo.getProperties().remove("VERIFIER");
+                }
+                if (this.verifiers != null && this.verifiers.getVerifierHashMap().size() > 0) {
+                    BlockVerifierTomlConfig.Verifiers.BlockVerifier blockVerifier =
+                            this.verifiers.getVerifierHashMap().get(chainPath.toString());
+                    if (blockVerifier != null) {
+                        chainInfo.getProperties().put("VERIFIER", blockVerifier.toJson());
+                    } else {
+                        // did not config this chain
+                        logger.info("Chain did not config verifier, chain: {}", chainPath);
+                    }
+                }
+
                 for (ResourceInfo resourceInfo : chainInfo.getResources()) {
                     Path resourcePath = new Path();
                     resourcePath.setZone(chainPath.getZone());
                     resourcePath.setChain(chainPath.getChain());
                     resourcePath.setResource(resourceInfo.getName());
 
-                    // did config verifiers
-                    if (this.verifiers != null && this.verifiers.getVerifierHashMap().size() > 0) {
-                        BlockVerifierTomlConfig.Verifiers.BlockVerifier blockVerifier =
-                                this.verifiers.getVerifierHashMap().get(chainPath.toString());
-                        if (blockVerifier != null) {
-                            chainInfo.getProperties().put("VERIFIER", blockVerifier.toJson());
-                        } else {
-                            // did not config this chain
-                            logger.warn("Chain did not config verifier, chain: {}", chainPath);
-                        }
-                    }
                     RemoteConnection remoteConnection = new RemoteConnection();
                     remoteConnection.setP2PService(p2PService);
                     remoteConnection.setPeer(peer);
