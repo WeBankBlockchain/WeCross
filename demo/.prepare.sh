@@ -71,6 +71,20 @@ prepare_fabric() {
     cd -
 }
 
+prepare_fabric2() {
+    cd ${ROOT}/fabric2/
+
+    # Download
+    LOG_INFO "Download fabric2 tools ..."
+    Download https://github.com/hyperledger/fabric/releases/download/v2.3.0/hyperledger-fabric-darwin-amd64-${fabric_version}.tar.gz
+    Download https://github.com/hyperledger/fabric/releases/download/v2.3.0/hyperledger-fabric-linux-amd64-${fabric_version}.tar.gz
+
+    LOG_INFO "Download fabric2 samples ..."
+    Download https://github.com/hyperledger/fabric-samples/archive/v2.3.0.tar.gz
+
+    cd -
+}
+
 prepare_wecross() {
     cd ${ROOT}
     LOG_INFO "Copy WeCross scripts"
@@ -86,6 +100,7 @@ main() {
 
     prepare_bcos
     prepare_fabric
+    prepare_fabric2
     prepare_wecross
 }
 

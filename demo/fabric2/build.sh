@@ -48,10 +48,8 @@ LOG_INFO "Download fabric tools ..."
 if [ "$(uname)" == "Darwin" ]; then
     # Mac
     Download https://github.com/hyperledger/fabric/releases/download/v${fabric_version}/hyperledger-fabric-darwin-amd64-${fabric_version}.tar.gz
-    Download https://github.com/hyperledger/fabric-ca/releases/download/v${ca_version}/hyperledger-fabric-ca-darwin-amd64-${ca_version}.tar.gz
 else
     Download https://github.com/hyperledger/fabric/releases/download/v${fabric_version}/hyperledger-fabric-linux-amd64-${fabric_version}.tar.gz
-    Download https://github.com/hyperledger/fabric-ca/releases/download/v${ca_version}/hyperledger-fabric-ca-linux-amd64-${ca_version}.tar.gz
 fi
 
 LOG_INFO "Download fabric samples ..."
@@ -70,10 +68,8 @@ tar -zxf v${samples_version}.tar.gz
 if [ "$(uname)" == "Darwin" ]; then
     # Mac
     tar -zxf hyperledger-fabric-darwin-amd64-${fabric_version}.tar.gz
-    tar -zxf hyperledger-fabric-ca-darwin-amd64-${ca_version}.tar.gz
 else
     tar -zxf hyperledger-fabric-linux-amd64-${fabric_version}.tar.gz
-    tar -zxf hyperledger-fabric-ca-linux-amd64-${ca_version}.tar.gz
 fi
 if [ -d fabric-samples-${samples_version}/bin ]; then
     LOG_INFO "Bin file already exists ..."
