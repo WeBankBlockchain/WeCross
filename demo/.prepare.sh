@@ -76,8 +76,8 @@ prepare_fabric2() {
 
     # Download
     LOG_INFO "Download fabric2 tools ..."
-    Download https://github.com/hyperledger/fabric/releases/download/v2.3.0/hyperledger-fabric-darwin-amd64-${fabric_version}.tar.gz
-    Download https://github.com/hyperledger/fabric/releases/download/v2.3.0/hyperledger-fabric-linux-amd64-${fabric_version}.tar.gz
+    Download https://github.com/hyperledger/fabric/releases/download/v2.3.0/hyperledger-fabric-darwin-amd64-2.3.0.tar.gz
+    Download https://github.com/hyperledger/fabric/releases/download/v2.3.0/hyperledger-fabric-linux-amd64-2.3.0.tar.gz
 
     LOG_INFO "Download fabric2 samples ..."
     Download https://github.com/hyperledger/fabric-samples/archive/v2.3.0.tar.gz
