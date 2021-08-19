@@ -1,5 +1,8 @@
 package com.webank.wecross.network.rpc.handler;
 
+import com.webank.wecross.account.AccountAccessControlFilter;
+import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.common.WeCrossDefault;
@@ -18,8 +21,12 @@ public class TransactionURIHandler implements URIHandler {
 
     private TransactionFetcher transactionFetcher;
 
-    public TransactionURIHandler(TransactionFetcher transactionFetcher) {
+    private AccountManager accountManager;
+
+    public TransactionURIHandler(
+            TransactionFetcher transactionFetcher, AccountManager accountManager) {
         this.transactionFetcher = transactionFetcher;
+        this.accountManager = accountManager;
     }
 
     public TransactionFetcher getTransactionFetcher() {
@@ -75,6 +82,21 @@ public class TransactionURIHandler implements URIHandler {
                             return;
                         }
 
+                        // check permission
+                        try {
+                            UniversalAccount ua = accountManager.getUniversalAccount(userContext);
+                            AccountAccessControlFilter filter = ua.getAccessControlFilter();
+                            if (!filter.hasPermission(path)) {
+                                throw new Exception("Permission denied");
+                            }
+                        } catch (Exception e) {
+                            logger.warn("Verify permission failed. path:{} error: {}", path, e);
+                            restResponse.setErrorCode(NetworkQueryStatus.URI_QUERY_ERROR);
+                            restResponse.setMessage("Verify permission failed");
+                            callback.onResponse(restResponse);
+                            return;
+                        }
+
                         transactionFetcher.asyncFetchTransaction(
                                 chain,
                                 txHash,
@@ -114,6 +136,21 @@ public class TransactionURIHandler implements URIHandler {
                         } catch (Exception e) {
                             restResponse.setErrorCode(NetworkQueryStatus.URI_QUERY_ERROR);
                             restResponse.setMessage(e.getMessage());
+                            callback.onResponse(restResponse);
+                            return;
+                        }
+
+                        // check permission
+                        try {
+                            UniversalAccount ua = accountManager.getUniversalAccount(userContext);
+                            AccountAccessControlFilter filter = ua.getAccessControlFilter();
+                            if (!filter.hasPermission(path)) {
+                                throw new Exception("Permission denied");
+                            }
+                        } catch (Exception e) {
+                            logger.warn("Verify permission exception. path:{} error: {}", path, e);
+                            restResponse.setErrorCode(NetworkQueryStatus.URI_QUERY_ERROR);
+                            restResponse.setMessage("Verify permission exception");
                             callback.onResponse(restResponse);
                             return;
                         }

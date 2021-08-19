@@ -25,15 +25,14 @@ check_docker_service() {
 
 check_fabric_network() {
     if [ ! -e ${FABRIC_NETWORK_DIR}/byfn.sh ]; then
-        LOG_ERROR "Fabric demo has not been built."
-        LOG_INFO "Please use \"build.sh\" directly."
-        exit 1
+        LOG_INFO "Fabric1 demo has not been built. Ignored."
+        exit 0
     fi
 }
 
 check_fabric_network
 check_docker_service
-LOG_INFO "Starting Fabric demo network..."
+LOG_INFO "Starting Fabric1 demo network..."
 docker start cli
 docker start peer0.org2.example.com
 docker start peer0.org1.example.com
@@ -41,4 +40,4 @@ docker start peer1.org2.example.com
 docker start peer1.org1.example.com
 docker start orderer.example.com
 docker ps
-LOG_INFO "Fabric demo network has been started."
+LOG_INFO "Fabric1 demo network has been started."

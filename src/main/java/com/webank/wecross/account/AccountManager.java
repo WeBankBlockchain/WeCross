@@ -22,9 +22,10 @@ public class AccountManager {
     private Logger logger = LoggerFactory.getLogger(AccountManager.class);
 
     private ClientMessageEngine engine;
+
     private UniversalAccountFactory universalAccountFactory;
 
-    private AdminContext adminContext;
+    private RouterLoginAccountContext adminContext;
     private AccountSyncManager accountSyncManager;
 
     private static Timer timer = new Timer("checkTokenTimer");
@@ -177,7 +178,7 @@ public class AccountManager {
         }
     }
 
-    public void setAdminContext(AdminContext adminContext) {
+    public void setAdminContext(RouterLoginAccountContext adminContext) {
         this.adminContext = adminContext;
     }
 
@@ -256,5 +257,13 @@ public class AccountManager {
 
     public void setEngine(ClientMessageEngine engine) {
         this.engine = engine;
+    }
+
+    public ClientMessageEngine getEngine() {
+        return engine;
+    }
+
+    public UniversalAccountFactory getUniversalAccountFactory() {
+        return universalAccountFactory;
     }
 }

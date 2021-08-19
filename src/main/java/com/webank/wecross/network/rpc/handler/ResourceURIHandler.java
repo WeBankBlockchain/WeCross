@@ -74,11 +74,34 @@ public class ResourceURIHandler implements URIHandler {
         RestResponse<Object> restResponse = new RestResponse<>();
 
         UniversalAccount ua;
+        Path path = new Path();
         try {
             ua = host.getAccountManager().getUniversalAccount(userContext);
             if (ua == null) {
                 throw new WeCrossException(GET_UA_FAILED, "Failed to get universal account");
             }
+
+            String[] splits = uri.substring(1).split("/");
+
+            path.setZone(splits[1]);
+            path.setChain(splits[2]);
+            if (splits.length > 4) {
+                path.setResource(splits[3]);
+            }
+
+            // check permission
+            if (!ua.getAccessControlFilter().hasPermission(path)) {
+                // check whether ua has no permission or resource not exist
+                Resource resourceObj = getResource(path);
+                if (Objects.isNull(resourceObj)) {
+                    throw new WeCrossException(
+                            WeCrossException.ErrorCode.PERMISSION_DENIED, "Resource not found");
+                } else {
+                    throw new WeCrossException(
+                            WeCrossException.ErrorCode.PERMISSION_DENIED, "Permission denied");
+                }
+            }
+
         } catch (WeCrossException e) {
             restResponse.setErrorCode(
                     NetworkQueryStatus.UNIVERSAL_ACCOUNT_ERROR + e.getErrorCode());
@@ -88,14 +111,6 @@ public class ResourceURIHandler implements URIHandler {
         }
 
         try {
-            String[] splits = uri.substring(1).split("/");
-
-            Path path = new Path();
-            path.setZone(splits[1]);
-            path.setChain(splits[2]);
-            if (splits.length > 4) {
-                path.setResource(splits[3]);
-            }
 
             UriDecoder uriDecoder = new UriDecoder(uri);
             String method = uriDecoder.getMethod();

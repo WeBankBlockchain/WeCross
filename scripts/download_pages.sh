@@ -28,7 +28,7 @@ Usage:
     bash $0  <tag/branch>
     <tag/branch>:   certain tag or branch to download
 e.g
-    bash $0 v1.1.1
+    bash $0 v1.2.0
 EOF
     exit 0
 }

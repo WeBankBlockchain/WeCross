@@ -44,6 +44,8 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
         logger.info(clientConnection.toString());
         server = clientConnection.getServer();
         httpClient = getHttpAsyncClient(clientConnection);
+
+        logger.info("clientConnection: {}", clientConnection);
     }
 
     private void checkRequest(Request<?> request) throws WeCrossException {
@@ -94,7 +96,7 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
 
             return response;
         } catch (TimeoutException e) {
-            logger.warn("http request timeout");
+            logger.warn("http request timeout", e);
             throw new WeCrossException(
                     WeCrossException.ErrorCode.QUERY_TIMEOUT, "http request timeout");
         } catch (Exception e) {
@@ -160,6 +162,7 @@ public class NettyAsyncHttpClientEngine implements ClientMessageEngine {
 
                                 @Override
                                 public void onThrowable(Throwable t) {
+                                    logger.debug("AsyncSend exception: ", t);
                                     callback.callOnFailed(
                                             new WeCrossException(
                                                     WeCrossException.ErrorCode.QUERY_CLIENT_ERROR,

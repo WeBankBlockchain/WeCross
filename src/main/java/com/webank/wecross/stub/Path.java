@@ -13,6 +13,12 @@ public class Path {
             throw new Exception("Decode path error: " + path);
         }
 
+        for (String name : sp) {
+            if (name == null || name.length() == 0) {
+                throw new Exception("Decode path error: " + path);
+            }
+        }
+
         Path obj = new Path();
         obj.setZone(sp[0]);
         obj.setChain(sp[1]);

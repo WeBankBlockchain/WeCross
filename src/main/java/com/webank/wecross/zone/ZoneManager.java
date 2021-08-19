@@ -1,5 +1,6 @@
 package com.webank.wecross.zone;
 
+import com.webank.wecross.account.AccountAccessControlFilter;
 import com.webank.wecross.config.BlockVerifierTomlConfig;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.p2p.P2PService;
@@ -216,23 +217,27 @@ public class ZoneManager {
                     }
                 }
 
+                // did config verifiers
+                if (chainInfo.getProperties() != null) {
+                    chainInfo.getProperties().remove("VERIFIER");
+                }
+                if (this.verifiers != null && this.verifiers.getVerifierHashMap().size() > 0) {
+                    BlockVerifierTomlConfig.Verifiers.BlockVerifier blockVerifier =
+                            this.verifiers.getVerifierHashMap().get(chainPath.toString());
+                    if (blockVerifier != null) {
+                        chainInfo.getProperties().put("VERIFIER", blockVerifier.toJson());
+                    } else {
+                        // did not config this chain
+                        logger.info("Chain did not config verifier, chain: {}", chainPath);
+                    }
+                }
+
                 for (ResourceInfo resourceInfo : chainInfo.getResources()) {
                     Path resourcePath = new Path();
                     resourcePath.setZone(chainPath.getZone());
                     resourcePath.setChain(chainPath.getChain());
                     resourcePath.setResource(resourceInfo.getName());
 
-                    // did config verifiers
-                    if (this.verifiers != null && this.verifiers.getVerifierHashMap().size() > 0) {
-                        BlockVerifierTomlConfig.Verifiers.BlockVerifier blockVerifier =
-                                this.verifiers.getVerifierHashMap().get(chainPath.toString());
-                        if (blockVerifier != null) {
-                            chainInfo.getProperties().put("VERIFIER", blockVerifier.toJson());
-                        } else {
-                            // did not config this chain
-                            logger.warn("Chain did not config verifier, chain: {}", chainPath);
-                        }
-                    }
                     RemoteConnection remoteConnection = new RemoteConnection();
                     remoteConnection.setP2PService(p2PService);
                     remoteConnection.setPeer(peer);
@@ -343,6 +348,16 @@ public class ZoneManager {
         return resources;
     }
 
+    public Map<String, Resource> getChainResourcesWithFilter(
+            AccountAccessControlFilter filter, Path chainPath) throws WeCrossException {
+        if (!filter.hasPermission(chainPath)) {
+            throw new WeCrossException(
+                    WeCrossException.ErrorCode.PERMISSION_DENIED, "Permission denied");
+        } else {
+            return getChainResources(chainPath);
+        }
+    }
+
     public Map<String, Resource> getAllResources(boolean ignoreRemote) {
         Map<String, Resource> resources = new HashMap<String, Resource>();
 
@@ -353,15 +368,17 @@ public class ZoneManager {
 
                 for (Map.Entry<String, Chain> stubEntry :
                         zoneEntry.getValue().getChains().entrySet()) {
-                    String stubName = PathUtils.toPureName(stubEntry.getKey());
+                    String chainName = PathUtils.toPureName(stubEntry.getKey());
 
                     for (Map.Entry<String, Resource> resourceEntry :
                             stubEntry.getValue().getResources().entrySet()) {
                         if (resourceEntry.getValue().hasLocalConnection() || !ignoreRemote) {
                             String resourceName = PathUtils.toPureName(resourceEntry.getKey());
-                            resources.put(
-                                    zoneName + "." + stubName + "." + resourceName,
-                                    resourceEntry.getValue());
+                            Path path = new Path();
+                            path.setZone(zoneName);
+                            path.setChain(chainName);
+                            path.setResource(resourceName);
+                            resources.put(path.toString(), resourceEntry.getValue());
                         }
                     }
                 }
@@ -371,6 +388,25 @@ public class ZoneManager {
         }
 
         return resources;
+    }
+
+    public Map<String, Resource> getAllResourcesWithFilter(
+            AccountAccessControlFilter filter, boolean ignoreRemote) {
+        Map<String, Resource> originResources = getAllResources(ignoreRemote);
+        Map<String, Resource> filteredResources = new HashMap<>();
+        for (Map.Entry<String, Resource> entry : originResources.entrySet()) {
+            try {
+                Path path = Path.decode(entry.getKey());
+                if (filter.hasPermission(path)) {
+                    filteredResources.put(entry.getKey(), entry.getValue());
+                }
+
+            } catch (Exception e) {
+                logger.warn("getAllResourcesWithFilter decode path failed, {}", e);
+                continue;
+            }
+        }
+        return filteredResources;
     }
 
     public Map<String, ChainInfo> getAllChainsInfo(boolean ignoreRemote) {

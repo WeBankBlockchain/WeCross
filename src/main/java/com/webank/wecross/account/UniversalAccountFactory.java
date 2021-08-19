@@ -11,6 +11,8 @@ public class UniversalAccountFactory {
     private static Logger logger = LoggerFactory.getLogger(UniversalAccountFactory.class);
     private StubManager stubManager;
 
+    private AccountAccessControlFilterFactory filterFactory;
+
     public UniversalAccount buildUA(UADetails uaDetails) throws WeCrossException {
         UniversalAccount ua =
                 UniversalAccount.builder()
@@ -20,8 +22,14 @@ public class UniversalAccountFactory {
                         .secKey(uaDetails.getSecKey())
                         .isAdmin(uaDetails.isAdmin())
                         .lastActiveTimestamp(System.currentTimeMillis())
+                        .allowChainPaths(uaDetails.getAllowChainPaths())
                         .version(uaDetails.getVersion())
                         .build();
+
+        AccountAccessControlFilter filter =
+                filterFactory.buildFilter(
+                        ua.getName(), ua.isAdmin(), uaDetails.getAllowChainPaths());
+        ua.setAccessControlFilter(filter);
 
         // foreach details, set default account into ua
         for (Map<Integer, ChainAccountDetails> chainAccountDetailsMap :
@@ -53,5 +61,13 @@ public class UniversalAccountFactory {
 
     public void setStubManager(StubManager stubManager) {
         this.stubManager = stubManager;
+    }
+
+    public void setFilterFactory(AccountAccessControlFilterFactory filterFactory) {
+        this.filterFactory = filterFactory;
+    }
+
+    public AccountAccessControlFilterFactory getFilterFactory() {
+        return filterFactory;
     }
 }

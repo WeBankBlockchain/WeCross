@@ -18,10 +18,14 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15.x
     - name: Build with Gradle
       run: ./gradlew assemble
     - name: Download plugin
-      run: cd dist/ && bash download_plugin.sh BCOS2 v1.1.1 && bash download_plugin.sh Fabric1 v1.1.1 && bash download_pages.sh v1.1.1  && rm -rf src && cd -
+      run: cd dist/ && bash download_plugin.sh BCOS2 v1.2.0 && bash download_plugin.sh Fabric1 v1.2.0 && bash download_pages.sh v1.2.0  && rm -rf src && cd -
     - name: Pack
       run: chmod +x dist/*.sh && mv dist WeCross && tar -zcvf WeCross.tar.gz WeCross
     - name: Checksum

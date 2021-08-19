@@ -5,6 +5,7 @@ import static com.webank.wecross.utils.ConfigUtils.fileIsExists;
 import com.moandjiezana.toml.Toml;
 import com.webank.wecross.common.WeCrossDefault;
 import com.webank.wecross.exception.WeCrossException;
+import com.webank.wecross.network.client.ClientConnection;
 import com.webank.wecross.network.p2p.netty.factory.P2PConfig;
 import com.webank.wecross.network.rpc.netty.RPCConfig;
 import com.webank.wecross.utils.ConfigUtils;
@@ -23,6 +24,24 @@ public class ConfigReaderConfig {
     private Logger logger = LoggerFactory.getLogger(ConfigReaderConfig.class);
 
     @Resource Toml toml;
+
+    @Bean
+    ClientConnection newClientConnection() throws WeCrossException {
+        ClientConnection clientConnection = new ClientConnection();
+
+        clientConnection.setServer(ConfigUtils.parseString(toml, "account-manager.server"));
+        clientConnection.setSSLKey(ConfigUtils.parseString(toml, "account-manager.sslKey"));
+        clientConnection.setSSLCert(ConfigUtils.parseString(toml, "account-manager.sslCert"));
+        clientConnection.setCaCert(ConfigUtils.parseString(toml, "account-manager.caCert"));
+        clientConnection.setMaxTotal(ConfigUtils.parseInt(toml, "account-manager.maxTotal", 200));
+        clientConnection.setMaxPerRoute(
+                ConfigUtils.parseInt(toml, "account-manager.maxPerRoute", 8));
+        clientConnection.setAllowNameToken(
+                ConfigUtils.parseBoolean(toml, "account-manager.allowNameToken", false));
+
+        logger.info("newClientConnection: {}", clientConnection);
+        return clientConnection;
+    }
 
     @Bean
     public RPCConfig newRPCConfig() throws WeCrossException {

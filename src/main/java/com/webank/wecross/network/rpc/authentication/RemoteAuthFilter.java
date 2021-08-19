@@ -1,9 +1,11 @@
 package com.webank.wecross.network.rpc.authentication;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.account.RouterLoginAccountContext;
+import com.webank.wecross.network.UriDecoder;
 import com.webank.wecross.network.client.BaseClientEngine;
+import com.webank.wecross.network.client.ClientConnection;
 import com.webank.wecross.network.client.ClientMessageEngine;
-import com.webank.wecross.stub.ObjectMapperFactory;
+import com.webank.wecross.network.rpc.netty.handler.HttpServerHandler;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,14 +14,20 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidParameterException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +35,8 @@ public class RemoteAuthFilter implements AuthFilter {
 
     private Logger logger = LoggerFactory.getLogger(RemoteAuthFilter.class);
 
-    private static ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
     private ClientMessageEngine remoteEngine;
+    private ClientConnection clientConnection;
     private Collection<String> uriNeedAuth = new HashSet<>();
 
     public static class RemoteResponse {
@@ -94,9 +102,57 @@ public class RemoteAuthFilter implements AuthFilter {
         }
     }
 
+    private String getUserNameFromURI(String uri) {
+        // &wecross-name-token
+        try {
+            List<NameValuePair> nameValuePairs = new URIBuilder(uri).getQueryParams();
+            for (int i = 0; i < nameValuePairs.size(); i++) {
+                if ("wecross-name-token".equals(nameValuePairs.get(i).getName())) {
+                    return nameValuePairs.get(i).getValue();
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("getUserNameFromURI: e:", e);
+        }
+
+        return null;
+    }
+
     @Override
     public void doAuth(ChannelHandlerContext ctx, HttpRequest httpRequest, Handler handler)
             throws Exception {
+
+        // if accountName auth allowed
+        try {
+            boolean allowNameToken = clientConnection.isAllowNameToken();
+            String uri = httpRequest.getUri();
+            String tokenStr = httpRequest.headers().get(HttpHeaders.Names.AUTHORIZATION);
+            logger.info("useNameToken: {}, token: {}, uri: {}", allowNameToken, tokenStr, uri);
+            if (allowNameToken && Objects.isNull(tokenStr) && HttpServerHandler.shouldLogin(uri)) {
+                String userName = getUserNameFromURI(httpRequest.getUri());
+                if (userName == null) {
+                    throw new InvalidParameterException(
+                            "not found wecross-name-token parameter, uri: " + uri);
+                }
+                // routerLogin for token
+                RouterLoginAccountContext routerLoginAccountContext =
+                        new RouterLoginAccountContext();
+                routerLoginAccountContext.setUsername(userName);
+                routerLoginAccountContext.setAccountManagerEngine(remoteEngine);
+
+                routerLoginAccountContext.routerLogin();
+                String token = routerLoginAccountContext.getToken();
+                if (token == null) {
+                    throw new RuntimeException("routerLogin token is null");
+                }
+
+                // set
+                httpRequest.headers().set(HttpHeaders.Names.AUTHORIZATION, token);
+            }
+        } catch (Exception e) {
+            logger.debug("e: ", e);
+        }
+
         if (shouldAuth(httpRequest)) {
             String method = httpRequest.method().name();
             String uri = httpRequest.uri();
@@ -168,11 +224,19 @@ public class RemoteAuthFilter implements AuthFilter {
     }
 
     private boolean shouldAuth(HttpRequest httpRequest) {
-        String uri = httpRequest.uri();
-        return uriNeedAuth.contains(uri);
+        UriDecoder uriDecoder = new UriDecoder(httpRequest.getUri());
+        return uriNeedAuth.contains(uriDecoder.getURIWithoutQueryString());
     }
 
     public void setRemoteEngine(ClientMessageEngine remoteEngine) {
         this.remoteEngine = remoteEngine;
+    }
+
+    public ClientConnection getClientConnection() {
+        return clientConnection;
+    }
+
+    public void setClientConnection(ClientConnection clientConnection) {
+        this.clientConnection = clientConnection;
     }
 }

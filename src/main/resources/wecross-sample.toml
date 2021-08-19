@@ -1,6 +1,7 @@
 [common]
     zone = 'payment'
     visible = true
+    enableAccessControl = false
 
 [chains]
     path = 'classpath:chains'

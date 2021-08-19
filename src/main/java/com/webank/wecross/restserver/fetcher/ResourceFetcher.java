@@ -1,5 +1,7 @@
 package com.webank.wecross.restserver.fetcher;
 
+import com.webank.wecross.account.AccountAccessControlFilter;
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceDetail;
 import com.webank.wecross.restserver.response.ResourceResponse;
@@ -21,12 +23,28 @@ public class ResourceFetcher {
         this.zoneManager = zoneManager;
     }
 
+    public ResourceResponse fetchResourcesWithFilter(
+            AccountAccessControlFilter filter, boolean ignoreRemote) {
+        return fetchResources(filter, ignoreRemote, true);
+    }
+
     public ResourceResponse fetchResources(boolean ignoreRemote) {
         return fetchResources(ignoreRemote, true);
     }
 
     public ResourceResponse fetchResources(boolean ignoreRemote, boolean ignoreProxy) {
-        Map<String, Resource> resources = zoneManager.getAllResources(ignoreRemote);
+        return fetchResources(null, ignoreRemote, ignoreProxy);
+    }
+
+    private ResourceResponse fetchResources(
+            AccountAccessControlFilter filter, boolean ignoreRemote, boolean ignoreProxy) {
+        Map<String, Resource> resources = null;
+        if (filter == null) {
+            resources = zoneManager.getAllResources(ignoreRemote);
+        } else {
+            resources = zoneManager.getAllResourcesWithFilter(filter, ignoreRemote);
+        }
+
         LinkedList<ResourceDetail> details = new LinkedList<>();
         for (String path : resources.keySet()) {
             try {
@@ -49,9 +67,29 @@ public class ResourceFetcher {
         return resourceResponse;
     }
 
-    public ResourceResponse fetchResources(Path chainPath, int offset, int size) {
-        LinkedHashMap<String, Resource> resources =
-                (LinkedHashMap<String, Resource>) zoneManager.getChainResources(chainPath);
+    public ResourceResponse fetchResourcesWithFilter(
+            AccountAccessControlFilter filter, Path chainPath, int offset, int size)
+            throws WeCrossException {
+        return fetchResources(filter, chainPath, offset, size);
+    }
+
+    public ResourceResponse fetchResources(Path chainPath, int offset, int size)
+            throws WeCrossException {
+        return fetchResources(null, chainPath, offset, size);
+    }
+
+    private ResourceResponse fetchResources(
+            AccountAccessControlFilter filter, Path chainPath, int offset, int size)
+            throws WeCrossException {
+        LinkedHashMap<String, Resource> resources = null;
+        if (filter == null) {
+            resources = (LinkedHashMap<String, Resource>) zoneManager.getChainResources(chainPath);
+        } else {
+            resources =
+                    (LinkedHashMap<String, Resource>)
+                            zoneManager.getChainResourcesWithFilter(filter, chainPath);
+        }
+
         LinkedList<ResourceDetail> details = new LinkedList<>();
         int index = 0;
         boolean start = false;

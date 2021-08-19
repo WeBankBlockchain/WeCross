@@ -20,10 +20,14 @@ if [ -d ${account_manager} ]; then
 fi
 
 cd ${ROOT}
+rm -f WeCross-Account-Manager/conf/rsa_p*
 rm -rf WeCross WeCross-Console WeCross-Console-8251 WeCross-Account-Manager ipfile routers-payment
 
 cd ${ROOT}/bcos
 bash clear.sh
 
 cd ${ROOT}/fabric
+bash clear.sh
+
+cd ${ROOT}/fabric2
 bash clear.sh

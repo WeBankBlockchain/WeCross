@@ -2,6 +2,9 @@ package com.webank.wecross.network.rpc.handler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.wecross.account.AccountAccessControlFilter;
+import com.webank.wecross.account.AccountManager;
+import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.common.WeCrossDefault;
@@ -25,8 +28,11 @@ public class ListResourcesURIHandler implements URIHandler {
 
     private ResourceFetcher resourceFetcher;
 
-    public ListResourcesURIHandler(ResourceFetcher resourceFetcher) {
+    private AccountManager accountManager;
+
+    public ListResourcesURIHandler(ResourceFetcher resourceFetcher, AccountManager accountManager) {
         this.resourceFetcher = resourceFetcher;
+        this.accountManager = accountManager;
     }
 
     public ResourceFetcher getResourceFetcher() {
@@ -35,6 +41,10 @@ public class ListResourcesURIHandler implements URIHandler {
 
     public void setResourceFetcher(ResourceFetcher resourceFetcher) {
         this.resourceFetcher = resourceFetcher;
+    }
+
+    public void setAccountManager(AccountManager accountManager) {
+        this.accountManager = accountManager;
     }
 
     @Override
@@ -47,6 +57,9 @@ public class ListResourcesURIHandler implements URIHandler {
         }
 
         try {
+            UniversalAccount ua = accountManager.getUniversalAccount(userContext);
+            AccountAccessControlFilter filter = ua.getAccessControlFilter();
+
             /** /sys/listResources?path=payment.bcos&offset=10&size=10 */
             if (uri.contains("path=") && uri.contains("offset=") && uri.contains("size=")) {
                 UriDecoder uriDecoder = new UriDecoder(uri);
@@ -83,7 +96,8 @@ public class ListResourcesURIHandler implements URIHandler {
                     return;
                 }
 
-                restResponse.setData(resourceFetcher.fetchResources(chain, offset, size));
+                restResponse.setData(
+                        resourceFetcher.fetchResourcesWithFilter(filter, chain, offset, size));
             } else {
                 RestRequest<ResourceRequest> restRequest =
                         objectMapper.readValue(
@@ -91,18 +105,22 @@ public class ListResourcesURIHandler implements URIHandler {
                 restRequest.checkRestRequest();
                 ResourceRequest resourceRequest = restRequest.getData();
                 restResponse.setData(
-                        resourceFetcher.fetchResources(resourceRequest.isIgnoreRemote()));
+                        resourceFetcher.fetchResourcesWithFilter(
+                                filter, resourceRequest.isIgnoreRemote()));
             }
         } catch (WeCrossException e) {
             logger.warn("Process request error: ", e);
             restResponse.setErrorCode(NetworkQueryStatus.NETWORK_PACKAGE_ERROR + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
+            callback.onResponse(restResponse);
+            return;
         } catch (Exception e) {
             logger.warn("Process request error: ", e);
             restResponse.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
             restResponse.setMessage(e.getMessage());
+            callback.onResponse(restResponse);
+            return;
         }
-
         callback.onResponse(restResponse);
     }
 }

@@ -84,70 +84,107 @@ public class InterchainScheduler {
                                             interchainRequest);
                                 }
 
-                                long newTimestamp = System.currentTimeMillis();
-                                long callCallbackSeq =
-                                        newTimestamp > callTargetChainSeq
-                                                ? newTimestamp
-                                                : (callTargetChainSeq + 1L);
-                                callCallback(
-                                        Sha256Utils.sha256String(
-                                                realUid.getBytes(StandardCharsets.UTF_8)),
-                                        xaTransactionID,
-                                        callCallbackSeq,
-                                        state,
-                                        result,
-                                        (callCallbackException,
-                                                errorCode,
-                                                message,
-                                                callCallbackResult) -> {
-                                            if (Objects.nonNull(callCallbackException)) {
-                                                /* exception occurred, no need to register result */
-                                                callback.onReturn(callCallbackException);
+                                boolean finalState = state;
+                                String finalResult = result;
+                                getXATransactionState(
+                                        (getCallbackTransactionStateException,
+                                                callbackXATransactionID,
+                                                callbackXATransactionSeq) -> {
+                                            if (Objects.nonNull(
+                                                    getCallbackTransactionStateException)) {
+                                                callback.onReturn(
+                                                        getCallbackTransactionStateException);
                                                 return;
                                             }
 
-                                            if (logger.isDebugEnabled()) {
-                                                logger.debug(
-                                                        "Call callback, xaTransactionID: {}, xaTransactionSeq: {}, result: {},  inter chain request: {}",
-                                                        xaTransactionID,
-                                                        callCallbackSeq,
-                                                        callCallbackResult,
-                                                        interchainRequest);
-                                            }
+                                            long newTimestamp = System.currentTimeMillis();
+                                            long callCallbackSeq =
+                                                    newTimestamp > callbackXATransactionSeq
+                                                            ? newTimestamp
+                                                            : (callbackXATransactionSeq + 1L);
 
-                                            registerCallbackResult(
-                                                    xaTransactionID,
+                                            callCallback(
+                                                    Sha256Utils.sha256String(
+                                                            realUid.getBytes(
+                                                                    StandardCharsets.UTF_8)),
+                                                    callbackXATransactionID,
                                                     callCallbackSeq,
-                                                    errorCode,
-                                                    message,
-                                                    callCallbackResult,
-                                                    registerCallbackResultException -> {
+                                                    finalState,
+                                                    finalResult,
+                                                    (callCallbackException,
+                                                            errorCode,
+                                                            message,
+                                                            callCallbackResult) -> {
+                                                        if (Objects.nonNull(
+                                                                callCallbackException)) {
+                                                            /* exception occurred, no need to register result */
+                                                            callback.onReturn(
+                                                                    callCallbackException);
+                                                            return;
+                                                        }
+
                                                         if (logger.isDebugEnabled()) {
                                                             logger.debug(
-                                                                    "Register callback result, xaTransactionID: {}, xaTransactionSeq: {}, errorCode: {}, message: {}, result: {}, inter chain request: {}",
-                                                                    xaTransactionID,
+                                                                    "Call callback, xaTransactionID: {}, xaTransactionSeq: {}, result: {},  inter chain request: {}",
+                                                                    callbackXATransactionID,
                                                                     callCallbackSeq,
-                                                                    errorCode,
-                                                                    message,
                                                                     callCallbackResult,
                                                                     interchainRequest);
                                                         }
-                                                        callback.onReturn(
-                                                                registerCallbackResultException);
+
+                                                        registerCallbackResult(
+                                                                callbackXATransactionID,
+                                                                callCallbackSeq,
+                                                                errorCode,
+                                                                message,
+                                                                callCallbackResult,
+                                                                registerCallbackResultException -> {
+                                                                    if (logger.isDebugEnabled()) {
+                                                                        logger.debug(
+                                                                                "Register callback result, xaTransactionID: {}, xaTransactionSeq: {}, errorCode: {}, message: {}, result: {}, inter chain request: {}",
+                                                                                callbackXATransactionID,
+                                                                                callCallbackSeq,
+                                                                                errorCode,
+                                                                                message,
+                                                                                callCallbackResult,
+                                                                                interchainRequest);
+                                                                    }
+                                                                    callback.onReturn(
+                                                                            registerCallbackResultException);
+                                                                });
                                                     });
-                                        });
+                                        },
+                                        interchainRequest.getCallbackPath());
                             });
-                });
+                },
+                interchainRequest.getPath());
     }
 
     public interface GetTransactionStateCallback {
         void onReturn(WeCrossException exception, String xaTransactionID, long xaTransactionSeq);
     }
 
-    public void getXATransactionState(GetTransactionStateCallback callback) {
-        Resource proxyResource = systemResource.getProxyResource();
+    public void getXATransactionState(GetTransactionStateCallback callback, String resourcePath) {
+        Path path;
+        try {
+            path = Path.decode(resourcePath);
+        } catch (Exception e) {
+            callback.onReturn(
+                    new WeCrossException(
+                            WeCrossException.ErrorCode.INTER_CHAIN_ERROR,
+                            "GET_XA_TRANSACTION_STATE_ERROR",
+                            InterchainErrorCode.GET_XA_TRANSACTION_STATE_ERROR,
+                            "Decode resource path error"),
+                    null,
+                    0);
+            return;
+        }
+        path.setResource(StubConstant.PROXY_NAME);
+        Path proxyPath = new Path(path);
+        Resource proxyResource = systemResource.getZoneManager().fetchResource(proxyPath);
+
         TransactionRequest transactionRequest = new TransactionRequest();
-        transactionRequest.setArgs(new String[] {interchainRequest.getPath()});
+        transactionRequest.setArgs(new String[] {resourcePath});
         transactionRequest.setMethod(InterchainDefault.GET_XA_TRANSACTION_STATE_METHOD);
         transactionRequest.getOptions().put(Resource.RAW_TRANSACTION, true);
 

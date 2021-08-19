@@ -116,6 +116,11 @@ public class XATransactionHandler implements URIHandler {
                                         content,
                                         new TypeReference<RestRequest<XATransactionRequest>>() {});
 
+                        // check permission
+                        ua.getAccessControlFilter()
+                                .checkPermissions(
+                                        xaRequest.getData().getPaths().toArray(new String[0]));
+
                         xaTransactionManager.asyncStartXATransaction(
                                 xaRequest.getData().getXaTransactionID(),
                                 ua,
@@ -136,6 +141,11 @@ public class XATransactionHandler implements URIHandler {
                                 objectMapper.readValue(
                                         content,
                                         new TypeReference<RestRequest<XATransactionRequest>>() {});
+
+                        // check permission
+                        ua.getAccessControlFilter()
+                                .checkPermissions(
+                                        xaRequest.getData().getPaths().toArray(new String[0]));
 
                         xaTransactionManager.asyncCommitXATransaction(
                                 xaRequest.getData().getXaTransactionID(),
@@ -159,6 +169,11 @@ public class XATransactionHandler implements URIHandler {
                                         content,
                                         new TypeReference<RestRequest<XATransactionRequest>>() {});
 
+                        // check permission
+                        ua.getAccessControlFilter()
+                                .checkPermissions(
+                                        xaRequest.getData().getPaths().toArray(new String[0]));
+
                         xaTransactionManager.asyncRollbackXATransaction(
                                 xaRequest.getData().getXaTransactionID(),
                                 ua,
@@ -180,6 +195,11 @@ public class XATransactionHandler implements URIHandler {
                                 objectMapper.readValue(
                                         content,
                                         new TypeReference<RestRequest<XATransactionRequest>>() {});
+
+                        // check permission
+                        ua.getAccessControlFilter()
+                                .checkPermissions(
+                                        xaRequest.getData().getPaths().toArray(new String[0]));
 
                         xaTransactionManager.asyncGetXATransaction(
                                 xaRequest.getData().getXaTransactionID(),

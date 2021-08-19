@@ -1,5 +1,6 @@
 package com.webank.wecross.config;
 
+import com.webank.wecross.network.client.ClientConnection;
 import com.webank.wecross.network.client.ClientMessageEngine;
 import com.webank.wecross.network.rpc.authentication.AuthFilter;
 import com.webank.wecross.network.rpc.authentication.RemoteAuthFilter;
@@ -12,10 +13,14 @@ public class AuthFilterConfig {
     @Resource(name = "newAccountManagerEngine")
     ClientMessageEngine accountManagerEngine;
 
+    @Resource(name = "newClientConnection")
+    ClientConnection clientConnection;
+
     @Bean
     public AuthFilter newAuthFilter() {
         RemoteAuthFilter remoteAuthFilter = new RemoteAuthFilter();
         remoteAuthFilter.setRemoteEngine(accountManagerEngine);
+        remoteAuthFilter.setClientConnection(clientConnection);
         remoteAuthFilter.registerAuthUri("/auth/register");
         remoteAuthFilter.registerAuthUri("/auth/login");
         remoteAuthFilter.registerAuthUri("/auth/logout");
@@ -26,6 +31,7 @@ public class AuthFilterConfig {
         remoteAuthFilter.registerAuthUri("/auth/authCode");
         remoteAuthFilter.registerAuthUri("/auth/pub");
         remoteAuthFilter.registerAuthUri("/auth/changePassword");
+        remoteAuthFilter.registerAuthUri("/auth/admin/accessControlList");
 
         return remoteAuthFilter;
     }

@@ -11,6 +11,7 @@ public class UADetails {
     private String password;
     private String secKey;
     private String role;
+    private String[] allowChainPaths;
     private Long version;
 
     private boolean isAdmin;
@@ -82,6 +83,14 @@ public class UADetails {
     public void setType2ChainAccountDetails(
             Map<String, Map<Integer, ChainAccountDetails>> type2ChainAccountDetails) {
         this.type2ChainAccountDetails = type2ChainAccountDetails;
+    }
+
+    public String[] getAllowChainPaths() {
+        return allowChainPaths;
+    }
+
+    public void setAllowChainPaths(String[] allowChainPaths) {
+        this.allowChainPaths = allowChainPaths;
     }
 
     public Long getVersion() {

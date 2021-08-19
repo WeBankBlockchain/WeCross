@@ -148,10 +148,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
         threadPoolTaskExecutor.execute(
                 () -> {
                     UserContext userContext = new UserContext();
-                    userContext.setToken(getTokenFromHeader(httpRequest));
+
+                    String token = getTokenFromHeader(httpRequest);
+                    userContext.setToken(token);
 
                     if (shouldLogin(uri)) {
-
                         if (!hasLogin(userContext)) {
                             String errorMessage =
                                     "Login check failed, uri: "
@@ -391,8 +392,10 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
         }
     }
 
-    private boolean shouldLogin(String uri) {
-        String[] splits = uri.split("/");
+    public static boolean shouldLogin(String uri) {
+
+        String[] rawUriSplits = uri.split("\\?");
+        String[] splits = rawUriSplits[0].split("/");
         String uriMethod = splits[splits.length - 1];
 
         if (uriMethod.startsWith("test")

@@ -2,7 +2,7 @@ package com.webank.wecross.config;
 
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.account.AccountSyncManager;
-import com.webank.wecross.account.AdminContext;
+import com.webank.wecross.account.RouterLoginAccountContext;
 import com.webank.wecross.account.UniversalAccountFactory;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.client.ClientMessageEngine;
@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AccountManagerConfig {
 
-    @Resource AdminContext adminContext;
+    @Resource RouterLoginAccountContext adminContext;
 
     @Resource(name = "newAccountManagerEngine")
     ClientMessageEngine accountManagerEngine;

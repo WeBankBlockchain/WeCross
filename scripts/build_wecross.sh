@@ -201,6 +201,7 @@ gen_conf() {
 [common]
     zone = '${zone}'
     visible = true
+    enableAccessControl = false
 
 [chains]
     path = 'classpath:chains'
@@ -238,6 +239,14 @@ gen_conf() {
 #    account2 = 'fabric_default_account'
 
 EOF
+}
+
+format_ip_file() {
+    local file=${1}
+    if [ $(tail -n1 ${file} | wc -l ) -eq 0 ]; then
+        # add '\n' to the end of file if not exist
+        echo "" >> ${file}
+    fi
 }
 
 parse_ip_file() {
@@ -287,6 +296,7 @@ main() {
         gen_one_router "$router_output"/cert/node0 "${ip_rpc_p2p[0]}" "${ip_rpc_p2p[1]}" "${ip_rpc_p2p[2]}"
         gen_scripts
     elif [ ${use_file} -eq 1 ]; then
+        format_ip_file ${ip_file}
         parse_ip_file "${ip_file}"
         gen_crt ${wecross_dir} "$router_output"/cert/ ${counter}
         gen_some_routers "$router_output"/cert/node

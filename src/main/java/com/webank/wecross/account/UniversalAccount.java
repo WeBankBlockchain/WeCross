@@ -1,8 +1,10 @@
 package com.webank.wecross.account;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.webank.wecross.stub.Account;
 import com.webank.wecross.utils.SM2;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,6 +22,8 @@ public class UniversalAccount {
     private boolean isAdmin;
     private Long version;
     private long lastActiveTimestamp;
+    private String[] allowChainPaths;
+    private AccountAccessControlFilter accessControlFilter; // json ignore
 
     private final long QUERY_ACTIVE_EXPIRES = 10 * 1000; // 10s
 
@@ -135,6 +139,23 @@ public class UniversalAccount {
         this.version = version;
     }
 
+    public String[] getAllowChainPaths() {
+        return allowChainPaths;
+    }
+
+    public void setAllowChainPaths(String[] allowChainPaths) {
+        this.allowChainPaths = allowChainPaths;
+    }
+
+    @JsonIgnore
+    public AccountAccessControlFilter getAccessControlFilter() {
+        return accessControlFilter;
+    }
+
+    public void setAccessControlFilter(AccountAccessControlFilter accessControlFilter) {
+        this.accessControlFilter = accessControlFilter;
+    }
+
     @Override
     public String toString() {
         return "UniversalAccount{"
@@ -147,12 +168,17 @@ public class UniversalAccount {
                 + ", pubKey='"
                 + pubKey
                 + '\''
+                + ", secKey='"
+                + secKey
+                + '\''
                 + ", isAdmin="
                 + isAdmin
                 + ", version="
                 + version
                 + ", lastActiveTimestamp="
                 + lastActiveTimestamp
+                + ", allowChainPaths="
+                + Arrays.toString(allowChainPaths)
                 + '}';
     }
 
@@ -162,6 +188,7 @@ public class UniversalAccount {
         private String pubKey;
         private String secKey;
         private boolean isAdmin;
+        private String[] allowChainPaths;
         private Long version;
 
         private long lastActiveTimestamp;
@@ -202,6 +229,11 @@ public class UniversalAccount {
             return this;
         }
 
+        public UniversalAccountBuilder allowChainPaths(String[] allowChainPaths) {
+            this.allowChainPaths = allowChainPaths;
+            return this;
+        }
+
         public UniversalAccountBuilder version(Long version) {
             this.version = version;
             return this;
@@ -215,6 +247,7 @@ public class UniversalAccount {
             universalAccount.setSecKey(secKey);
             universalAccount.isAdmin = this.isAdmin;
             universalAccount.lastActiveTimestamp = this.lastActiveTimestamp;
+            universalAccount.allowChainPaths = this.allowChainPaths;
             universalAccount.version = this.version;
             return universalAccount;
         }
