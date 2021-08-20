@@ -91,9 +91,15 @@ public class ResourceURIHandler implements URIHandler {
 
             // check permission
             if (!ua.getAccessControlFilter().hasPermission(path)) {
-
-                throw new WeCrossException(
-                        WeCrossException.ErrorCode.PERMISSION_DENIED, "Permission denied");
+                // check whether ua has no permission or resource not exist
+                Resource resourceObj = getResource(path);
+                if (Objects.isNull(resourceObj)) {
+                    throw new WeCrossException(
+                            WeCrossException.ErrorCode.PERMISSION_DENIED, "Resource not found");
+                } else {
+                    throw new WeCrossException(
+                            WeCrossException.ErrorCode.PERMISSION_DENIED, "Permission denied");
+                }
             }
 
         } catch (WeCrossException e) {

@@ -1,6 +1,7 @@
 package com.webank.wecross.restserver.fetcher;
 
 import com.webank.wecross.account.AccountAccessControlFilter;
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.resource.Resource;
 import com.webank.wecross.resource.ResourceDetail;
 import com.webank.wecross.restserver.response.ResourceResponse;
@@ -67,16 +68,19 @@ public class ResourceFetcher {
     }
 
     public ResourceResponse fetchResourcesWithFilter(
-            AccountAccessControlFilter filter, Path chainPath, int offset, int size) {
+            AccountAccessControlFilter filter, Path chainPath, int offset, int size)
+            throws WeCrossException {
         return fetchResources(filter, chainPath, offset, size);
     }
 
-    public ResourceResponse fetchResources(Path chainPath, int offset, int size) {
+    public ResourceResponse fetchResources(Path chainPath, int offset, int size)
+            throws WeCrossException {
         return fetchResources(null, chainPath, offset, size);
     }
 
     private ResourceResponse fetchResources(
-            AccountAccessControlFilter filter, Path chainPath, int offset, int size) {
+            AccountAccessControlFilter filter, Path chainPath, int offset, int size)
+            throws WeCrossException {
         LinkedHashMap<String, Resource> resources = null;
         if (filter == null) {
             resources = (LinkedHashMap<String, Resource>) zoneManager.getChainResources(chainPath);

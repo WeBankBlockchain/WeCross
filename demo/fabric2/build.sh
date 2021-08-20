@@ -48,10 +48,8 @@ LOG_INFO "Download fabric tools ..."
 if [ "$(uname)" == "Darwin" ]; then
     # Mac
     Download https://github.com/hyperledger/fabric/releases/download/v${fabric_version}/hyperledger-fabric-darwin-amd64-${fabric_version}.tar.gz
-    Download https://github.com/hyperledger/fabric-ca/releases/download/v${ca_version}/hyperledger-fabric-ca-darwin-amd64-${ca_version}.tar.gz
 else
     Download https://github.com/hyperledger/fabric/releases/download/v${fabric_version}/hyperledger-fabric-linux-amd64-${fabric_version}.tar.gz
-    Download https://github.com/hyperledger/fabric-ca/releases/download/v${ca_version}/hyperledger-fabric-ca-linux-amd64-${ca_version}.tar.gz
 fi
 
 LOG_INFO "Download fabric samples ..."
@@ -70,10 +68,8 @@ tar -zxf v${samples_version}.tar.gz
 if [ "$(uname)" == "Darwin" ]; then
     # Mac
     tar -zxf hyperledger-fabric-darwin-amd64-${fabric_version}.tar.gz
-    tar -zxf hyperledger-fabric-ca-darwin-amd64-${ca_version}.tar.gz
 else
     tar -zxf hyperledger-fabric-linux-amd64-${fabric_version}.tar.gz
-    tar -zxf hyperledger-fabric-ca-linux-amd64-${ca_version}.tar.gz
 fi
 if [ -d fabric-samples-${samples_version}/bin ]; then
     LOG_INFO "Bin file already exists ..."
@@ -83,10 +79,21 @@ fi
 # Startup
 LOG_INFO "Startup test-network"
 cd fabric-samples-${samples_version}/test-network
+# fix fabric bug 1
+rm .env # remove docker env file to fix fabric bug
+# fix fabric bug 2
+if [ "$(uname)" == "Darwin" ]; then
+    # Mac
+    sed -i '' 's/\${COMPOSE_PROJECT_NAME}/docker/g' docker/docker-compose-test-net.yaml
+else
+     sed -i 's/\${COMPOSE_PROJECT_NAME}/docker/g' docker/docker-compose-test-net.yaml
+fi
+
 bash network.sh up createChannel -c mychannel -i ${fabric_version}
-bash network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-javascript/ -ccl javascript <<EOF
+bash network.sh deployCC -ccn sacc -ccp ../chaincode/sacc/ -ccl go <<EOF
 Y
 EOF
+docker network ls
 LOG_INFO "Startup test-network done"
 cd -
 
@@ -95,11 +102,11 @@ cd -
 # If you run the full "Wecross" demo, open the comments below!
 
 certs_dir=certs
-fabric_stub_dir=${certs_dir}/chains/fabric
-fabric_admin_dir=${certs_dir}/accounts/fabric_admin
-fabric_user_dir=${certs_dir}/accounts/fabric_user1
-fabric_admin_org1_dir=${certs_dir}/accounts/fabric_admin_org1
-fabric_admin_org2_dir=${certs_dir}/accounts/fabric_admin_org2
+fabric_stub_dir=${certs_dir}/chains/fabric2
+fabric_admin_dir=${certs_dir}/accounts/fabric2_admin
+fabric_user_dir=${certs_dir}/accounts/fabric2_user1
+fabric_admin_org1_dir=${certs_dir}/accounts/fabric2_admin_org1
+fabric_admin_org2_dir=${certs_dir}/accounts/fabric2_admin_org2
 
 fabric_verifiers_dir=${certs_dir}/verifiers
 fabric_verifiers_org1CA_dir=${certs_dir}/verifiers/org1CA
@@ -126,8 +133,8 @@ cp ${crypto_dir}/peerOrganizations/org1.example.com/users/Admin@org1.example.com
 cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/*_sk ${fabric_admin_org2_dir}/account.key
 cp ${crypto_dir}/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem ${fabric_admin_org2_dir}/account.crt
 
-# cp ${crypto_dir}/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem ${fabric_verifiers_org1CA_dir}/ca.org1.example.com-cert.pem
-# cp ${crypto_dir}/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem ${fabric_verifiers_org2CA_dir}/ca.org2.example.com-cert.pem
-# cp ${crypto_dir}/ordererOrganizations/example.com/ca/ca.example.com-cert.pem ${fabric_verifiers_ordererCA_dir}/ca.example.com-cert.pem
+ cp ${crypto_dir}/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem ${fabric_verifiers_org1CA_dir}/ca.org1.example.com-cert.pem
+ cp ${crypto_dir}/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem ${fabric_verifiers_org2CA_dir}/ca.org2.example.com-cert.pem
+ cp ${crypto_dir}/ordererOrganizations/example.com/ca/ca.example.com-cert.pem ${fabric_verifiers_ordererCA_dir}/ca.example.com-cert.pem
 
 LOG_INFO "SUCCESS: Build Fabric demo finish."

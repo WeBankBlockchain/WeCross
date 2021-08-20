@@ -112,12 +112,15 @@ public class ListResourcesURIHandler implements URIHandler {
             logger.warn("Process request error: ", e);
             restResponse.setErrorCode(NetworkQueryStatus.NETWORK_PACKAGE_ERROR + e.getErrorCode());
             restResponse.setMessage(e.getMessage());
+            callback.onResponse(restResponse);
+            return;
         } catch (Exception e) {
             logger.warn("Process request error: ", e);
             restResponse.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
             restResponse.setMessage(e.getMessage());
+            callback.onResponse(restResponse);
+            return;
         }
-
         callback.onResponse(restResponse);
     }
 }

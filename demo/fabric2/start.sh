@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SHELL_FOLDER="$(cd "$(dirname "$0")" && pwd)"
-FABRIC_NETWORK_DIR=${SHELL_FOLDER}/fabric-samples-1.4.4/first-network/
+FABRIC_NETWORK_DIR=${SHELL_FOLDER}/fabric-samples-2.3.0/test-network/
 
 LOG_INFO() {
     local content=${1}
@@ -24,20 +24,18 @@ check_docker_service() {
 }
 
 check_fabric_network() {
-    if [ ! -e ${FABRIC_NETWORK_DIR}/byfn.sh ]; then
-        LOG_INFO "Fabric1 demo has not been built. Ignored."
+    if [ ! -e ${FABRIC_NETWORK_DIR}/network.sh ]; then
+        LOG_INFO "Fabric2 demo has not been built. Ignored."
         exit 0
     fi
 }
 
 check_fabric_network
 check_docker_service
-LOG_INFO "Starting Fabric1 demo network..."
+LOG_INFO "Starting Fabric2 demo network..."
 docker start cli
 docker start peer0.org2.example.com
 docker start peer0.org1.example.com
-docker start peer1.org2.example.com
-docker start peer1.org1.example.com
 docker start orderer.example.com
 docker ps
-LOG_INFO "Fabric1 demo network has been started."
+LOG_INFO "Fabric2 demo network has been started."

@@ -27,6 +27,10 @@ e.g
     bash $0 -t Fabric1.4  -c chains/fabric -H
     bash $0 -t Fabric1.4  -c chains/fabric -u -P
     bash $0 -t Fabric1.4  -c chains/fabric -u -H
+    bash $0 -t Fabric2.0  -c chains/fabric2 -P
+    bash $0 -t Fabric2.0  -c chains/fabric2 -H
+    bash $0 -t Fabric2.0  -c chains/fabric2 -u -P
+    bash $0 -t Fabric2.0  -c chains/fabric2 -u -H
 EOF
 
   exit 0
@@ -110,6 +114,26 @@ update_fabric_hub_contract() {
   java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.hub.HubChaincodeDeployment upgrade "${chainName}"
 }
 
+deploy_fabric2_proxy_contract() {
+  local chainName="$1"
+  java -Djdk.tls.client.protocols=TLSv1.2 -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric2.proxy.ProxyChaincodeDeployment deploy "${chainName}"
+}
+
+deploy_fabric2_hub_contract() {
+  local chainName="$1"
+  java -Djdk.tls.client.protocols=TLSv1.2 -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric2.hub.HubChaincodeDeployment deploy "${chainName}"
+}
+
+update_fabric2_proxy_contract() {
+  local chainName="$1"
+  java -Djdk.tls.client.protocols=TLSv1.2 -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric2.proxy.ProxyChaincodeDeployment upgrade "${chainName}"
+}
+
+update_fabric2_hub_contract() {
+  local chainName="$1"
+  java -Djdk.tls.client.protocols=TLSv1.2 -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric2.hub.HubChaincodeDeployment upgrade "${chainName}"
+}
+
 main() {
   local type="$1"
   local chain="$2"
@@ -157,6 +181,17 @@ main() {
       update_fabric_proxy_contract "${chain}"
     elif [[ "${deploy}" == "false" ]] && [[ "${contract}" == "hub" ]]; then
       update_fabric_hub_contract "${chain}"
+    fi
+    ;;
+  "Fabric2.0")
+    if [[ "${deploy}" == "true" ]] && [[ "${contract}" == "proxy" ]]; then
+      deploy_fabric2_proxy_contract "${chain}"
+    elif [[ "${deploy}" == "true" ]] && [[ "${contract}" == "hub" ]]; then
+      deploy_fabric2_hub_contract "${chain}"
+    elif [[ "${deploy}" == "false" ]] && [[ "${contract}" == "proxy" ]]; then
+      update_fabric2_proxy_contract "${chain}"
+    elif [[ "${deploy}" == "false" ]] && [[ "${contract}" == "hub" ]]; then
+      update_fabric2_hub_contract "${chain}"
     fi
     ;;
   *)
