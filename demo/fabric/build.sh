@@ -29,6 +29,14 @@ Download_IMG() {
     fi
 }
 
+check_command() {
+    local cmd=${1}
+    if [ -z "$(command -v ${cmd})" ]; then
+        LOG_ERROR "${cmd} is not installed."
+        exit 1
+    fi
+}
+
 check_docker_service() {
     set +e
     if ! docker ps >/dev/null; then
@@ -39,6 +47,7 @@ check_docker_service() {
     set -e
 }
 
+check_command go
 check_docker_service
 
 # Download
