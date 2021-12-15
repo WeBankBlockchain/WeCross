@@ -23,6 +23,7 @@ version_file="../profile_version.sh"
 
 source "${version_file}"
 LOG_INFO "WeCross Version: ${WECROSS_VERSION}"
+LOG_INFO "BCOS Version: ${BCOS_VERSION}"
 
 Download() {
     local url=${1}
@@ -99,7 +100,7 @@ build_console() {
 
 build_accounts() {
     LOG_INFO "Download get_account.sh ..."
-    Download https://raw.githubusercontent.com/FISCO-BCOS/console/master/tools/get_account.sh
+    Download https://raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_account.sh
     chmod u+x get_account.sh
     # generate accounts
     mkdir -p accounts
