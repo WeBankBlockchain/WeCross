@@ -44,7 +44,15 @@ if [ "${DOCKER_SIGNAL}" ]; then
     check_docker_service
 fi
 
-brew install expect tree md5sha1sum expect mysql
+brew config
+brew uninstall --ignore-dependencies openssl
+brew install expect tree md5sha1sum expect mysql openssl@1.1
+brew link openssl --force
+ls -l /usr/local/opt/openssl/bin
+/usr/local/opt/openssl/bin/openssl version
+/usr/local/opt/openssl/bin/openssl@1.1 version
+which openssl
+openssl version
 
 if [ ! "${DB_PASSWORD}" ]; then
     DB_PASSWORD='123456'
