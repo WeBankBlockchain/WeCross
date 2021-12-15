@@ -3,7 +3,7 @@ set -e
 
 LANG=en_US.UTF-8
 
-default_compatibility_version=v1.2.0 # update this every release
+default_compatibility_version=v1.2.1 # update this every release
 BCOS_VERSION=v2.7.2  # use this version to specify get_account script
 
 compatibility_version=
