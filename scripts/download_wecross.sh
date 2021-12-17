@@ -24,7 +24,7 @@ fabric1_stub_url_bak=https://gitee.com/Webank/WeCross-Fabric1-Stub.git
 fabric1_stub_branch=${default_compatibility_version}
 
 fabric2_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric2-Stub.git
-fabric2_stub_url_bak=https://gitee.com/Webank/WeCross-Fabric1-Stub.git
+fabric2_stub_url_bak=https://gitee.com/Webank/WeCross-Fabric2-Stub.git
 fabric2_stub_branch=${default_compatibility_version}
 
 wecross_webapp_url=https://github.com/WebankBlockchain/WeCross-WebApp.git
