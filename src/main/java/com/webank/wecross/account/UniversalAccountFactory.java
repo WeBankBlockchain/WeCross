@@ -53,6 +53,9 @@ public class UniversalAccountFactory {
                 if (details.getIsDefault().booleanValue()) {
                     ua.setDefaultAccount(type, account);
                 }
+                if (UniversalAccount.isFabricType(type)&&UniversalAccount.checkChainName(details.getFabricDefault())){
+                    ua.setDefaultFabricAccount(details.getFabricDefault(), account);
+                }
             }
         }
 
