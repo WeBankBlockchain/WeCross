@@ -13,7 +13,7 @@ public class ChainAccountDetails {
     private String type;
 
     private Boolean isDefault;
-    private String fabricDefault;
+    private String chainDefault;
 
     private String pubKey;
     private String secKey;
@@ -28,7 +28,7 @@ public class ChainAccountDetails {
         properties.put("keyID", keyID);
         properties.put("type", type);
         properties.put("isDefault", isDefault);
-        properties.put("fabricDefault", fabricDefault);
+        properties.put("chainDefault", chainDefault);
         properties.put("pubKey", pubKey);
         properties.put("secKey", secKey);
         properties.put("ext0", ext0);
@@ -93,14 +93,14 @@ public class ChainAccountDetails {
         isDefault = aDefault;
     }
 
-    @JsonGetter("fabricDefault")
-    public String getFabricDefault(){
-        return fabricDefault;
+    @JsonGetter("chainDefault")
+    public String getChainDefault(){
+        return chainDefault;
     }
 
-    @JsonSetter("fabricDefault")
-    public void setFabricDefault(String chainName){
-        fabricDefault = chainName;
+    @JsonSetter("chainDefault")
+    public void setChainDefault(String chainName){
+        chainDefault = chainName;
     }
 
     public String getPubKey() {

@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.ObjectUtils.Null;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,23 +34,18 @@ public class UniversalAccount {
 
     private Map<String, Account> type2DefaultAccount = new HashMap<>();
 
-    // make every fabric chain has a default account
-    private Map<String,Account> chain2DefaultFabricAccount = new HashMap<>();
+    // make every chain has a default account
+    private Map<String,Account> chain2DefaultChainAccount = new HashMap<>();
 
     // chain name is like "payment.fabric-mychannel"
-    public Account getFabricAccount(String chainName){
-        return chain2DefaultFabricAccount.get(chainName);
+    public Account getChainAccount(String chainName){
+        return chain2DefaultChainAccount.get(chainName);
     }
 
     // chain name is like "payment.fabric-mychannel"
-    public void setDefaultFabricAccount(String chainName,Account account){
-        chain2DefaultFabricAccount.put(chainName, account);
-        logger.info("setDefaultFabricAccount {} {}", chainName, account);
-    }
-
-    // this func should be added to utils
-    public static boolean isFabricType(String type){
-        return type.contains("Fabric");
+    public void setDefaultChainAccount(String chainName,Account account){
+        chain2DefaultChainAccount.put(chainName, account);
+        logger.info("setDefaultChainAccount {} {}", chainName, account);
     }
 
     // this func should be added to utils
@@ -70,14 +64,14 @@ public class UniversalAccount {
     }
 
     // only use in asyncSendTransaction, asyncCall. maybe asyncCustomCommand can use too.
-    // if not set default fabric chain account, use the universal default fabric account.
+    // if not set default chain account, use the universal default type account.
     public Account getSendAccount(String type,String chainName){
-        if (isFabricType(type)){
-            Account account = getFabricAccount(chainName);
-            if (account!=null){
-                return account;
-            }
+        
+        Account account = getChainAccount(chainName);
+        if (account!=null){
+            return account;
         }
+
         return getAccount(type);
     }
 
