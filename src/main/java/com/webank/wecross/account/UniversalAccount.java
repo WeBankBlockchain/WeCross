@@ -56,11 +56,7 @@ public class UniversalAccount {
         String regex="[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+"; 
         Pattern p=Pattern.compile(regex);
         Matcher m=p.matcher(chainName);
-        if(m.matches()){
-            return true;
-        }else{
-            return false;
-        }
+        return m.matches();
     }
 
     // only use in asyncSendTransaction, asyncCall. maybe asyncCustomCommand can use too.
