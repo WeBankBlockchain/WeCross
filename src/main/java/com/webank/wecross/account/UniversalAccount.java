@@ -38,13 +38,15 @@ public class UniversalAccount {
     private Map<String,Account> chain2DefaultChainAccount = new HashMap<>();
 
     // chain name is like "payment.fabric-mychannel"
-    public Account getChainAccount(String chainName){
-        return chain2DefaultChainAccount.get(chainName);
+    public Account getChainAccount(String type,String chainName){
+        String typeChain = type + ":" + chainName; 
+        return chain2DefaultChainAccount.get(typeChain);
     }
 
     // chain name is like "payment.fabric-mychannel"
     public void setDefaultChainAccount(String chainName,Account account){
-        chain2DefaultChainAccount.put(chainName, account);
+        String typeChain = account.getType() + ":" + chainName;  
+        chain2DefaultChainAccount.put(typeChain, account);
         logger.info("setDefaultChainAccount {} {}", chainName, account);
     }
 
@@ -63,10 +65,10 @@ public class UniversalAccount {
     // if not set default chain account, use the universal default type account.
     public Account getSendAccount(String type,String chainName){
         
-        Account account = getChainAccount(chainName);
+        Account account = getChainAccount(type,chainName);
         if (account!=null){
             return account;
-        }
+        }      
 
         return getAccount(type);
     }
