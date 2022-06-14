@@ -584,6 +584,7 @@ add_bcos_account() {
     cd ${ROOT}/WeCross-Console/conf/accounts/${name}/
     local address=$(ls 0x*.public.pem | awk -F "." '{print $1}')
     cd -
+    echo "addChainAccount BCOS2.0 conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true"
 
     # addChainAccount
     cd ${ROOT}/WeCross-Console/
@@ -603,6 +604,7 @@ add_bcos_gm_account() {
     cd ${ROOT}/WeCross-Console/conf/accounts/${name}/
     local address=$(ls 0x*.public.pem | awk -F "." '{print $1}')
     cd -
+    echo "addChainAccount GM_BCOS2.0 conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true"
 
     # addChainAccount
     cd ${ROOT}/WeCross-Console/
@@ -618,6 +620,7 @@ EOF
 add_fabric_account() {
     local name=${1}
     local mspid=${2}
+    echo "addChainAccount Fabric1.4 conf/accounts/${name}/account.crt conf/accounts/${name}/account.key ${mspid} true"
 
     # addChainAccount
     cd ${ROOT}/WeCross-Console/
