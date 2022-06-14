@@ -1,6 +1,6 @@
 package com.webank.wecross.test.account;
 
-import  com.webank.wecross.account.UniversalAccount;
+import com.webank.wecross.account.UniversalAccount;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -12,7 +12,8 @@ public class CheckChainNameTest {
         Assert.assertTrue(UniversalAccount.checkChainName("payment.fabric") == true);
         Assert.assertTrue(UniversalAccount.checkChainName("payment.fabric-mychannel") == true);
         Assert.assertTrue(UniversalAccount.checkChainName("payment.bcos-group1") == true);
-        Assert.assertTrue(UniversalAccount.checkChainName("payment.bcos-group2.helloworld") == false);
+        Assert.assertTrue(
+                UniversalAccount.checkChainName("payment.bcos-group2.helloworld") == false);
         Assert.assertTrue(UniversalAccount.checkChainName("testbcos-group2") == false);
     }
 }

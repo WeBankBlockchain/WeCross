@@ -97,12 +97,12 @@ public class Path {
     }
 
     // compact zone and chain as ChainName
-    public String toChainName(){
+    public String toChainName() {
         return zone + "." + chain;
     }
 
-    //whether in chain
-    public boolean isInChain(String chainName){
+    // whether in chain
+    public boolean isInChain(String chainName) {
         return chainName.equals(toChainName());
     }
 

@@ -53,7 +53,7 @@ public class UniversalAccountFactory {
                 if (details.getIsDefault().booleanValue()) {
                     ua.setDefaultAccount(type, account);
                 }
-                if (UniversalAccount.checkChainName(details.getChainDefault())){
+                if (UniversalAccount.checkChainName(details.getChainDefault())) {
                     ua.setDefaultChainAccount(details.getChainDefault(), account);
                 }
             }

@@ -94,12 +94,12 @@ public class ChainAccountDetails {
     }
 
     @JsonGetter("chainDefault")
-    public String getChainDefault(){
+    public String getChainDefault() {
         return chainDefault;
     }
 
     @JsonSetter("chainDefault")
-    public void setChainDefault(String chainName){
+    public void setChainDefault(String chainName) {
         chainDefault = chainName;
     }
 

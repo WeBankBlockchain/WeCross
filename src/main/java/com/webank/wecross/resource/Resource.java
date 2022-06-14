@@ -89,7 +89,10 @@ public class Resource {
 
         // Account account = ua.getAccount(stubType);
         Account account = ua.getSendAccount(stubType, path.toChainName());
-        logger.info("asynCall use account by key: {}, path: {}", account.getKeyID(),this.path); //this log only for test
+        logger.info(
+                "asynCall use account by key: {}, path: {}",
+                account.getKeyID(),
+                this.path); // this log only for test
         TransactionContext context =
                 new TransactionContext(account, this.path, this.resourceInfo, this.blockManager);
         boolean isRawTransaction =
@@ -138,7 +141,10 @@ public class Resource {
 
         // Account account = ua.getAccount(stubType);
         Account account = ua.getSendAccount(stubType, path.toChainName());
-        logger.info("asynSendTransaction use account by key: {}, path: {}", account.getKeyID(),this.path); //this log only for test
+        logger.info(
+                "asynSendTransaction use account by key: {}, path: {}",
+                account.getKeyID(),
+                this.path); // this log only for test
         TransactionContext context =
                 new TransactionContext(account, this.path, this.resourceInfo, this.blockManager);
         boolean isRawTransaction =
