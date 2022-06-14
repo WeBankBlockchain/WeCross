@@ -419,17 +419,23 @@ EOF
 
 add_bcos_account() {
     local name=${1}
+    local new_pub_suffix="pem.pub"
+    local pub_suffix="public.pem"
 
     # get address
     cd ${ROOT}/WeCross-Console/conf/accounts/${name}/
     local address=$(ls 0x*.public.pem | awk -F "." '{print $1}')
+    if [ ! -n "$address" ]; then
+      address=$(ls 0x*.pem.pub | awk -F "." '{print $1}')
+      pub_suffix=${new_pub_suffix}
+    fi
     cd -
 
     # addChainAccount
     cd ${ROOT}/WeCross-Console/
     bash start.sh <<EOF
     login
-    addChainAccount BCOS2.0 conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true
+    addChainAccount BCOS2.0 conf/accounts/${name}/${address}.${pub_suffix} conf/accounts/${name}/${address}.pem ${address} true
     quit
 EOF
     cd -
@@ -438,17 +444,23 @@ EOF
 
 add_bcos_gm_account() {
     local name=${1}
+    local new_pub_suffix="pem.pub"
+    local pub_suffix="public.pem"
 
     # get address
     cd ${ROOT}/WeCross-Console/conf/accounts/${name}/
     local address=$(ls 0x*.public.pem | awk -F "." '{print $1}')
+    if [ ! -n "$address" ]; then
+      address=$(ls 0x*.pem.pub | awk -F "." '{print $1}')
+      pub_suffix=${new_pub_suffix}
+    fi
     cd -
 
     # addChainAccount
     cd ${ROOT}/WeCross-Console/
     bash start.sh <<EOF
     login
-    addChainAccount GM_BCOS2.0 conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true
+    addChainAccount GM_BCOS2.0 conf/accounts/${name}/${address}.${pub_suffix} conf/accounts/${name}/${address}.pem ${address} true
     quit
 EOF
     cd -
