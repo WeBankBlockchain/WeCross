@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +32,45 @@ public class UniversalAccount {
     private Map<String, Map<Integer, Account>> type2ChainAccounts = new HashMap<>();
 
     private Map<String, Account> type2DefaultAccount = new HashMap<>();
+
+    // make every chain has a default account
+    private Map<String, Account> chain2DefaultChainAccount = new HashMap<>();
+
+    // chain name is like "payment.fabric-mychannel"
+    public Account getChainAccount(String type, String chainName) {
+        String typeChain = type + ":" + chainName;
+        return chain2DefaultChainAccount.get(typeChain);
+    }
+
+    // chain name is like "payment.fabric-mychannel"
+    public void setDefaultChainAccount(String chainName, Account account) {
+        String typeChain = account.getType() + ":" + chainName;
+        chain2DefaultChainAccount.put(typeChain, account);
+        logger.info("setDefaultChainAccount {} {}", chainName, account);
+    }
+
+    // this func should be added to utils
+    public static boolean checkChainName(String chainName) {
+        if (chainName.length() == 0) {
+            return false;
+        }
+        String regex = "[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+";
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(chainName);
+        return m.matches();
+    }
+
+    // only use in asyncSendTransaction, asyncCall. maybe asyncCustomCommand can use too.
+    // if not set default chain account, use the universal default type account.
+    public Account getSendAccount(String type, String chainName) {
+
+        Account account = getChainAccount(type, chainName);
+        if (account != null) {
+            return account;
+        }
+
+        return getAccount(type);
+    }
 
     public Account getAccount(String type) {
         return type2DefaultAccount.get(type);
