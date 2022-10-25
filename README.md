@@ -13,7 +13,7 @@ WeCross是由微众银行自主研发并完全开源的区块链跨链协作平�
 
 - **插件式跨链接入**
 
-    WeCross只需基于[Stub接口](https://wecross.readthedocs.io/zh_CN/latest/docs/dev/stub.html)针对不同的链开发适配器，就能以插件化的方式实现跨链接入。目前适配的区块链包括[FISCO BCOS 2.0](https://github.com/WeBankFinTech/WeCross-BCOS-Stub)和[Hyperledger Fabric 1.4](https://github.com/WeBankBlockchain/WeCross-Fabric1-Stub)。
+    WeCross只需基于[Stub接口](https://wecross.readthedocs.io/zh_CN/latest/docs/dev/stub.html)针对不同的链开发适配器，就能以插件化的方式实现跨链接入。目前适配的区块链包括[FISCO BCOS 2.0](https://github.com/WeBankFinTech/WeCross-BCOS-Stub)、[Hyperledger Fabric 1.4](https://github.com/WeBankBlockchain/WeCross-Fabric1-Stub) 和 [Hyperledger Fabric 2](https://github.com/WeBankBlockchain/WeCross-Fabric2-Stub)。
 
 - **统一跨链身份**
 
