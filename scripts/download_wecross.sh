@@ -19,7 +19,7 @@ bcos_stub_url=https://github.com/WebankBlockchain/WeCross-BCOS2-Stub.git
 bcos_stub_url_bak=https://gitee.com/Webank/WeCross-BCOS2-Stub.git
 bcos_stub_branch=${default_compatibility_version}
 
-fabric1_stub_branch=https://github.com/WebankBlockchain/WeCross-Fabric1-Stub.git
+fabric1_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric1-Stub.git
 fabric1_stub_url_bak=https://gitee.com/Webank/WeCross-Fabric1-Stub.git
 fabric1_stub_branch=${default_compatibility_version}
 
