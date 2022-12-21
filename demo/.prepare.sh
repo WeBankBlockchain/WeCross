@@ -44,11 +44,11 @@ prepare_bcos() {
     chmod u+x build_chain.sh
 
     LOG_INFO "Download get_account.sh ..."
-    Download https://raw.githubusercontent.com/FISCO-BCOS/console/master/tools/get_account.sh
+    Download https://raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_account.sh
     chmod u+x get_account.sh
 
     LOG_INFO "Download get_gm_account.sh ..."
-    Download https://raw.githubusercontent.com/FISCO-BCOS/console/master/tools/get_gm_account.sh
+    Download https://raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_gm_account.sh
     chmod u+x get_gm_account.sh
 
     LOG_INFO "Download fisco-bcos binary"
