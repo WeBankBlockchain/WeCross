@@ -58,9 +58,9 @@ deploy_bcos_proxy_contract() {
   local chainName="$1"
   local isGM="$2"
   if [[ "$isGM" == "true" ]]; then
-    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.ProxyContractDeployment deploy "${chainName}"
+    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.ProxyContractDeployment deploy "${chainName}"
   else
-    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy "${chainName}"
+    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment deploy "${chainName}"
   fi
 }
 
@@ -68,9 +68,9 @@ deploy_bcos_hub_contract() {
   local chainName="$1"
   local isGM="$2"
   if [[ "$isGM" == "true" ]]; then
-    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.HubContractDeployment deploy "${chainName}"
+    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.HubContractDeployment deploy "${chainName}"
   else
-    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy "${chainName}"
+    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment deploy "${chainName}"
   fi
 }
 
@@ -78,9 +78,9 @@ update_bcos_proxy_contract() {
   local chainName="$1"
   local isGM="$2"
   if [[ "$isGM" == "true" ]]; then
-    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment upgrade "${chainName}"
+    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.ProxyContractDeployment upgrade "${chainName}"
   else
-    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.ProxyContractDeployment upgrade "${chainName}"
+    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.ProxyContractDeployment upgrade "${chainName}"
   fi
 }
 
@@ -88,50 +88,50 @@ update_bcos_hub_contract() {
   local chainName="$1"
   local isGM="$2"
   if [[ "$isGM" == "true" ]]; then
-    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment upgrade "${chainName}"
+    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.normal.preparation.HubContractDeployment upgrade "${chainName}"
   else
-    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.HubContractDeployment upgrade "${chainName}"
+    java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.bcos.guomi.preparation.HubContractDeployment upgrade "${chainName}"
   fi
 }
 
 deploy_fabric_proxy_contract() {
   local chainName="$1"
-  java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy "${chainName}"
+  java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment deploy "${chainName}"
 }
 
 deploy_fabric_hub_contract() {
   local chainName="$1"
-  java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.hub.HubChaincodeDeployment deploy "${chainName}"
+  java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.hub.HubChaincodeDeployment deploy "${chainName}"
 }
 
 update_fabric_proxy_contract() {
   local chainName="$1"
-  java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment upgrade "${chainName}"
+  java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.proxy.ProxyChaincodeDeployment upgrade "${chainName}"
 }
 
 update_fabric_hub_contract() {
   local chainName="$1"
-  java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.hub.HubChaincodeDeployment upgrade "${chainName}"
+  java -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric.hub.HubChaincodeDeployment upgrade "${chainName}"
 }
 
 deploy_fabric2_proxy_contract() {
   local chainName="$1"
-  java -Djdk.tls.client.protocols=TLSv1.2 -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric2.proxy.ProxyChaincodeDeployment deploy "${chainName}"
+  java -Djdk.tls.client.protocols=TLSv1.2 -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric2.proxy.ProxyChaincodeDeployment deploy "${chainName}"
 }
 
 deploy_fabric2_hub_contract() {
   local chainName="$1"
-  java -Djdk.tls.client.protocols=TLSv1.2 -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric2.hub.HubChaincodeDeployment deploy "${chainName}"
+  java -Djdk.tls.client.protocols=TLSv1.2 -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric2.hub.HubChaincodeDeployment deploy "${chainName}"
 }
 
 update_fabric2_proxy_contract() {
   local chainName="$1"
-  java -Djdk.tls.client.protocols=TLSv1.2 -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric2.proxy.ProxyChaincodeDeployment upgrade "${chainName}"
+  java -Djdk.tls.client.protocols=TLSv1.2 -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric2.proxy.ProxyChaincodeDeployment upgrade "${chainName}"
 }
 
 update_fabric2_hub_contract() {
   local chainName="$1"
-  java -Djdk.tls.client.protocols=TLSv1.2 -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric2.hub.HubChaincodeDeployment upgrade "${chainName}"
+  java -Djdk.tls.client.protocols=TLSv1.2 -Djava.security.properties=${SECURIY_FILE} -Djdk.sunec.disableNative=false -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1,x448" -cp conf/:lib/*:plugin/* com.webank.wecross.stub.fabric2.hub.HubChaincodeDeployment upgrade "${chainName}"
 }
 
 main() {
