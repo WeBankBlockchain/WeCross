@@ -45,8 +45,9 @@ if [ "${DOCKER_SIGNAL}" ]; then
 fi
 
 brew config
+brew install expect tree md5sha1sum expect mysql
 brew uninstall --ignore-dependencies openssl
-brew install expect tree md5sha1sum expect mysql openssl@1.1
+brew install openssl@1.1
 brew link openssl --force
 ls -l /usr/local/opt/openssl/bin
 /usr/local/opt/openssl/bin/openssl version

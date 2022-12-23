@@ -19,7 +19,11 @@ bcos_stub_url=https://github.com/WebankBlockchain/WeCross-BCOS2-Stub.git
 bcos_stub_url_bak=https://gitee.com/Webank/WeCross-BCOS2-Stub.git
 bcos_stub_branch=${default_compatibility_version}
 
-fabric1_stub_branch=https://github.com/WebankBlockchain/WeCross-Fabric1-Stub.git
+bcos3_stub_url=https://github.com/WebankBlockchain/WeCross-BCOS3-Stub.git
+bcos3_stub_url_bak=https://gitee.com/Webank/WeCross-BCOS3-Stub.git
+bcos3_stub_branch=${default_compatibility_version}
+
+fabric1_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric1-Stub.git
 fabric1_stub_url_bak=https://gitee.com/Webank/WeCross-Fabric1-Stub.git
 fabric1_stub_branch=${default_compatibility_version}
 
@@ -66,6 +70,7 @@ parse_command() {
         b)
             wecross_branch=$OPTARG
             bcos_stub_branch=$OPTARG
+            bcos3_stub_branch=$OPTARG
             fabric1_stub_branch=$OPTARG
             fabric2_stub_branch=$OPTARG
             wecross_webapp_branch=$OPTARG
@@ -74,6 +79,7 @@ parse_command() {
         t)
             wecross_branch=$OPTARG
             bcos_stub_branch=$OPTARG
+            bcos3_stub_branch=$OPTARG
             fabric1_stub_branch=$OPTARG
             fabric2_stub_branch=$OPTARG
             wecross_webapp_branch=$OPTARG
@@ -272,6 +278,7 @@ main() {
     if [ 1 -eq ${enable_build_from_resource} ]; then
         build_from_source
         build_plugin_from_source WeCross-BCOS2-Stub ${bcos_stub_url} ${bcos_stub_url_bak} ${bcos_stub_branch}
+#        build_plugin_from_source WeCross-BCOS3-Stub ${bcos3_stub_url} ${bcos3_stub_url_bak} ${bcos3_stub_branch}
         build_plugin_from_source WeCross-Fabric1-Stub ${fabric1_stub_url} ${fabric1_stub_url_bak} ${fabric1_stub_branch}
         build_plugin_from_source WeCross-Fabric2-Stub ${fabric2_stub_url} ${fabric2_stub_url_bak} ${fabric2_stub_branch}
         build_webapp_from_source
