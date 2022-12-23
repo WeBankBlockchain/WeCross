@@ -233,7 +233,7 @@ db_config_ask() {
     exit_when_empty_db_pwd
     read -r -p "[4/4]> password: " -s DB_PASSWORD
     echo "" # \n
-    LOG_INFO "Database connetion with: ${DB_IP}:${DB_PORT} ${DB_USERNAME} "
+    LOG_INFO "Database connection with: ${DB_IP}:${DB_PORT} ${DB_USERNAME} "
     check_db_service
 }
 
@@ -268,12 +268,7 @@ config_router_8251() {
     cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/group1/
 
     # configure to group1
-    if [ "$(uname)" == "Darwin" ]; then
-        # Mac
-        sed -i "" 's/group_id=group0/group_id=group1/g' conf/chains/group1/stub.toml
-    else
-        sed -i 's/group_id=group0/group_id=group1/g' conf/chains/group1/stub.toml
-    fi
+    sed_i 's/group_id=group0/group_id=group1/g' conf/chains/group1/stub.toml
 
     # deploy system contracts
     bash deploy_system_contract.sh -t BCOS3.0 -c chains/group1 -P
@@ -301,7 +296,7 @@ build_wecross() {
         if [ -e download_wecross.sh ]; then
             bash -x download_wecross.sh -t "${WECROSS_VERSION}"
         else
-            bash -x <(curl -sL https://${WECROSS_CODE_SOURCE}/WeCross/releases/download/resources/download_wecross.sh) -t "${WECROSS_VERSION}" ${BUILD_FROM_SOURCE}
+            bash -x <(curl -sL https://github.com/kyonRay/WeCross/releases/download/resources/download_wecross.sh) -t "${WECROSS_VERSION}" ${BUILD_FROM_SOURCE}
         fi
     fi
 
