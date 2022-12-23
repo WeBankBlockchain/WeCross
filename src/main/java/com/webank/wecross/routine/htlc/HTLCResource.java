@@ -38,6 +38,7 @@ public class HTLCResource extends Resource {
                     // */
 
                     add("selectByName");
+                    add("readlink");
                     add("lock");
                     add("unlock");
                     add("balanceOf");
