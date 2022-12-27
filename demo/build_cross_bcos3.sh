@@ -296,7 +296,7 @@ build_wecross() {
         if [ -e download_wecross.sh ]; then
             bash -x download_wecross.sh -t "${WECROSS_VERSION}"
         else
-            bash -x <(curl -sL https://github.com/kyonRay/WeCross/releases/download/resources/download_wecross.sh) -t "${WECROSS_VERSION}" ${BUILD_FROM_SOURCE}
+            bash -x <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t "${WECROSS_VERSION}" ${BUILD_FROM_SOURCE}
         fi
     fi
 
