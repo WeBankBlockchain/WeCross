@@ -278,7 +278,7 @@ main() {
     if [ 1 -eq ${enable_build_from_resource} ]; then
         build_from_source
         build_plugin_from_source WeCross-BCOS2-Stub ${bcos_stub_url} ${bcos_stub_url_bak} ${bcos_stub_branch}
-#        build_plugin_from_source WeCross-BCOS3-Stub ${bcos3_stub_url} ${bcos3_stub_url_bak} ${bcos3_stub_branch}
+        build_plugin_from_source WeCross-BCOS3-Stub ${bcos3_stub_url} ${bcos3_stub_url_bak} ${bcos3_stub_branch}
         build_plugin_from_source WeCross-Fabric1-Stub ${fabric1_stub_url} ${fabric1_stub_url_bak} ${fabric1_stub_branch}
         build_plugin_from_source WeCross-Fabric2-Stub ${fabric2_stub_url} ${fabric2_stub_url_bak} ${fabric2_stub_branch}
         build_webapp_from_source

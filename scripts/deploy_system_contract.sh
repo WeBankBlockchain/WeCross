@@ -150,7 +150,7 @@ main() {
   LOG_INFO " deploy_system_contract, type: ${type}, chain: ${chain}, deploy: ${deploy}, contract: ${contract}"
 
   case $type in
-  "BCOS2.0"|"BCOS3.0")
+  "BCOS2.0"|"BCOS3_ECDSA_EVM")
     if [[ "${deploy}" == "true" ]] && [[ "${contract}" == "proxy" ]]; then
       deploy_bcos_proxy_contract "${chain}" "false"
     elif [[ "${deploy}" == "true" ]] && [[ "${contract}" == "hub" ]]; then
@@ -161,7 +161,7 @@ main() {
       update_bcos_hub_contract "${chain}" "false"
     fi
     ;;
-  "GM_BCOS2.0"|"GM_BCOS3.0")
+  "GM_BCOS2.0"|"BCOS3_GM_EVM")
     if [[ "${deploy}" == "true" ]] && [[ "${contract}" == "proxy" ]]; then
       deploy_bcos_proxy_contract "${chain}" "true"
     elif [[ "${deploy}" == "true" ]] && [[ "${contract}" == "hub" ]]; then
