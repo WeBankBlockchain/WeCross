@@ -34,22 +34,31 @@ Download() {
 }
 
 build_bcos_chain() {
-    # Download
-    LOG_INFO "Download build_chain.sh ..."
-    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS3_VERSION}/build_chain.sh
+    if [ ! -e build_chain.sh ]; then
+        # Download
+        LOG_INFO "Download build_chain.sh ..."
+        Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS3_VERSION}/build_chain.sh
+    fi
+
     chmod u+x build_chain.sh
 
     # Build chain
     LOG_INFO "Build chain ..."
-    bash build_chain.sh -p 30400,20300 -l 127.0.0.1:2
+    # Setting to build 1 groups
+    bash build_chain.sh -p 30400,20300 -l 127.0.0.1:1 -o ./nodes
 
     ./nodes/127.0.0.1/start_all.sh
 }
 
 build_accounts() {
-    LOG_INFO "Download get_account.sh ..."
-    Download https://raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_CONSOLE_VERSION}/tools/get_account.sh
+    if [ ! -e build_chain.sh ]; then
+        # Download
+        LOG_INFO "Download get_account.sh ..."
+        Download https://raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_account.sh
+    fi
+
     chmod u+x get_account.sh
+
     # generate accounts
     mkdir -p accounts
     cd accounts

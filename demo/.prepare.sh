@@ -58,6 +58,28 @@ prepare_bcos() {
     cd -
 }
 
+prepare_bcos3() {
+    cd ${ROOT}/bcos3/
+    # Download
+    LOG_INFO "Download bcos3 build_chain.sh ..."
+    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS3_VERSION}/build_chain.sh
+    chmod u+x build_chain.sh
+
+    LOG_INFO "Download bcos3 get_account.sh ..."
+    Download https://raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_account.sh
+    chmod u+x get_account.sh
+
+    LOG_INFO "Download bcos3 get_gm_account.sh ..."
+    Download https://raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_gm_account.sh
+    chmod u+x get_gm_account.sh
+
+    LOG_INFO "Download bcos3 fisco-bcos binary"
+    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS3_VERSION}/fisco-bcos-linux-x86_64.tar.gz
+    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS3_VERSION}/fisco-bcos-macOS-x86_64.tar.gz
+
+    cd -
+}
+
 prepare_fabric() {
     cd ${ROOT}/fabric/
     # Download
@@ -99,6 +121,7 @@ main() {
     fi
 
     prepare_bcos
+    prepare_bcos3
     prepare_fabric
     prepare_fabric2
     prepare_wecross

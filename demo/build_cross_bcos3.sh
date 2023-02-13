@@ -7,7 +7,7 @@ DB_IP=127.0.0.1
 DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=123456
-BCOS_VERSION='v3.0.1'
+BCOS_VERSION='v3.2.0'
 BUILD_FROM_SOURCE=''
 
 need_db_config_ask=true
@@ -130,12 +130,12 @@ check_account_manager_available() {
 }
 
 check_bcos_available() {
-    # 30400,20300
+    # 30400,20300、30500,20400
     check_port_available 30400 BCOS-P2P
     check_port_available 20300 BCOS-RPC
 
-    check_port_available 30401 BCOS-P2P
-    check_port_available 20301 BCOS-RPC
+    check_port_available 30500 BCOS-P2P
+    check_port_available 20400 BCOS-RPC
 }
 
 check_wecross_available() {
@@ -157,9 +157,20 @@ check_env() {
 
 build_bcos() {
     LOG_INFO "Build BCOS ..."
-    cd ${ROOT}/bcos
 
-    bash build_bcos3.sh "${BCOS_VERSION}"
+    cd ${ROOT}/bcos3
+
+    bash build.sh "${BCOS_VERSION}"
+
+    cd ${ROOT}
+}
+
+build_bcos_gm() {
+    LOG_INFO "Build BCOS GM..."
+
+    cd ${ROOT}/bcos3
+
+    bash build_gm.sh "${BCOS_VERSION}"
 
     cd ${ROOT}
 }
@@ -173,8 +184,11 @@ check_process() {
 }
 
 check_bcos() {
-    check_process bcos/nodes/127.0.0.1/node0/../fisco-bcos
-    check_process bcos/nodes/127.0.0.1/node1/../fisco-bcos
+    check_process bcos3/nodes/127.0.0.1/node0/../fisco-bcos
+}
+
+check_bcos_gm() {
+    check_process bcos3/nodes_gm/127.0.0.1/node0/../fisco-bcos
 }
 
 check_wecross() {
@@ -184,6 +198,7 @@ check_wecross() {
 
 check_wecross_network() {
     check_bcos
+    check_bcos_gm
     check_wecross
 }
 
@@ -245,13 +260,16 @@ config_router_8250() {
     cd ${router_dir}
 
     # stubs
-    bash add_chain.sh -t BCOS3.0 -n group0 -d conf/chains
+    bash add_chain.sh -t BCOS3_ECDSA_EVM -n bcos3 -d conf/chains
     # copy cert
-    cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/group0/
+    cp ${ROOT}/bcos3/nodes/127.0.0.1/sdk/* conf/chains/bcos3/
+
+    # configure to port
+    sed_i 's/20200/20300/g' conf/chains/bcos3/stub.toml
 
     # deploy system contracts
-    bash deploy_system_contract.sh -t BCOS3.0 -c chains/group0 -P
-    bash deploy_system_contract.sh -t BCOS3.0 -c chains/group0 -H
+    bash deploy_system_contract.sh -t BCOS3_ECDSA_EVM -c chains/bcos3 -P
+    bash deploy_system_contract.sh -t BCOS3_ECDSA_EVM -c chains/bcos3 -H
 
     cd -
 }
@@ -262,17 +280,18 @@ config_router_8251() {
     LOG_INFO "Configure router ${router_dir}"
 
     cd ${router_dir}
-    # stubs
-    bash add_chain.sh -t BCOS3.0 -n group1 -d conf/chains
-    # copy cert
-    cp ${ROOT}/bcos/nodes/127.0.0.1/sdk/* conf/chains/group1/
 
-    # configure to group1
-    sed_i 's/group_id=group0/group_id=group1/g' conf/chains/group1/stub.toml
+    # stubs
+    bash add_chain.sh -t BCOS3_GM_EVM -n bcos3_gm -d conf/chains
+    # copy cert
+    cp ${ROOT}/bcos3/nodes_gm/127.0.0.1/sdk/* conf/chains/bcos3_gm/
+
+    # configure to port
+    sed_i 's/20200/20400/g' conf/chains/bcos3_gm/stub.toml
 
     # deploy system contracts
-    bash deploy_system_contract.sh -t BCOS3.0 -c chains/group1 -P
-    bash deploy_system_contract.sh -t BCOS3.0 -c chains/group1 -H
+    bash deploy_system_contract.sh -t BCOS3_GM_EVM -c chains/bcos3_gm -P
+    bash deploy_system_contract.sh -t BCOS3_GM_EVM -c chains/bcos3_gm -H
 
     cd -
 }
@@ -386,8 +405,8 @@ deploy_bcos_sample_resource() {
 
     bash start.sh <<EOF
     login
-    bcosDeploy payment.group0.HelloWorldGroup0 conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
-    bcosDeploy payment.group1.HelloWorldGroup1 conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
+    bcosDeploy payment.bcos3.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
+    bcosDeploy payment.bcos3_gm.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
     quit
 EOF
     cd -
@@ -405,7 +424,7 @@ add_bcos_account() {
     cd ${ROOT}/WeCross-Console/
     bash start.sh <<EOF
     login
-    addChainAccount BCOS3.0 conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true
+    addChainAccount BCOS3_ECDSA_EVM conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true
     quit
 EOF
     cd -
@@ -424,7 +443,7 @@ add_bcos_gm_account() {
     cd ${ROOT}/WeCross-Console/
     bash start.sh <<EOF
     login
-    addChainAccount GM_BCOS3.0 conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true
+    addChainAccount BCOS3_GM_EVM conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true
     quit
 EOF
     cd -
@@ -434,10 +453,10 @@ EOF
 deploy_chain_account() {
     mkdir -p ${ROOT}/WeCross-Console/conf/accounts/
     cd ${ROOT}/WeCross-Console/conf/accounts/ && rm -rf $(ls | grep -v .sh) && cd -
-    cp -r ${ROOT}/bcos/accounts/* ${ROOT}/WeCross-Console/conf/accounts/
+    cp -r ${ROOT}/bcos3/accounts/* ${ROOT}/WeCross-Console/conf/accounts/
 
-    add_bcos_account bcos_user1 # 0
-    # add_bcos_gm_account bcos_gm_user1 # 4
+    add_bcos_account bcos_user1       # 0
+    add_bcos_gm_account bcos_gm_user1 # 4
 }
 
 deploy_sample_resource() {
@@ -446,7 +465,6 @@ deploy_sample_resource() {
 
 main() {
     clear_ask
-
     check_env
 
     config_database
@@ -457,6 +475,7 @@ main() {
 
     # Build BCOS
     build_bcos
+    build_bcos_gm
 
     # config routers
     config_router_8250 ${ROOT}/routers-payment/127.0.0.1-8250-25500/
@@ -480,8 +499,8 @@ main() {
     LOG_INFO "Success! WeCross demo network is running. Framework:"
     echo -e "
                           FISCO BCOS
-              Group 0                    Group 1
-         (HelloWorldGroup0)         (HelloWorldGroup1)
+               Normal                     Guomi
+            (HelloWorld)               (HelloWorld)
                  |                          |
                  |                          |
                  |                          |

@@ -26,6 +26,9 @@ rm -rf WeCross WeCross-Console WeCross-Console-8251 WeCross-Account-Manager ipfi
 cd ${ROOT}/bcos
 bash clear.sh
 
+cd ${ROOT}/bcos3
+bash clear.sh
+
 cd ${ROOT}/fabric
 bash clear.sh
 

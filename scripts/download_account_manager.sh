@@ -3,7 +3,7 @@ set -e
 
 LANG=en_US.UTF-8
 
-default_compatibility_version=v1.2.1 # update this every release
+default_compatibility_version=v1.3.0 # update this every release
 
 compatibility_version=
 enable_build_from_resource=0
@@ -251,17 +251,8 @@ build_from_source() {
 
     cd WeCross-Account-Manager
     rm -rf dist
-    bash ./gradlew assemble 2>&1 | tee output.log
+    bash ./gradlew assemble
     chmod +x dist/apps/*
-    # shellcheck disable=SC2046
-    # shellcheck disable=SC2006
-    if [ $(grep -c "BUILD SUCCESSFUL" output.log) -eq '0' ]; then
-        LOG_ERROR "Build Wecross Account Manager project failed"
-        LOG_INFO "See output.log for details"
-        mv output.log ../output.log
-        exit 1
-    fi
-    echo "================================================================"
     cd ..
 
     mv WeCross-Account-Manager/dist ${output_dir}/WeCross-Account-Manager

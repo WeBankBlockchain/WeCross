@@ -39,14 +39,16 @@ Usage:
     bash $0 <name>  <tag/branch>
 
     <name>:         BCOS2   -> Repo: WeCross-BCOS2-Stub   ( BCOS2.0 & GM_BCOS2.0 )
+                    BCOS3   -> Repo: WeCross-BCOS3-Stub   ( BCOS3_ECDSA_EVM & BCOS3_GM_EVM )
                     Fabric1 -> Repo: WeCross-Fabric1-Stub ( Fabric1.4 )
                     Fabric2 -> Repo: WeCross-Fabric2-Stub ( Fabric2.0 )
 
     <tag/branch>:   certain tag or branch to download
 e.g
-    bash $0 BCOS2 v1.2.1
-    bash $0 Fabric1 v1.2.1
-    bash $0 Fabric2 v1.2.1
+    bash $0 BCOS2 v1.3.0
+    bash $0 BCOS3 v1.3.0
+    bash $0 Fabric1 v1.3.0
+    bash $0 Fabric2 v1.3.0
 EOF
     exit 0
 }
@@ -81,7 +83,7 @@ build_plugin_from_source() {
     download_latest_code ${name} ${url} ${branch}
 
     cd ${name}
-    bash ./gradlew assemble 2>&1 | tee output.log
+    bash ./gradlew assemble
     chmod +x dist/apps/*
     cd ..
 
