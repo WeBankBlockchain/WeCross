@@ -8,7 +8,7 @@ pages_dir=$(pwd)'/pages/'
 src_dir=$(pwd)'/src/'
 
 wecross_webapp_url=https://github.com/WebankBlockchain/WeCross-WebApp.git
-wecross_webapp_url_bak=https://github.com/WebankBlockchain/WeCross-WebApp.git
+wecross_webapp_url_bak=https://gitee.com/WeBank/WeCross-WebApp.git
 
 LOG_INFO() {
     local content=${1}
@@ -28,7 +28,7 @@ Usage:
     bash $0  <tag/branch>
     <tag/branch>:   certain tag or branch to download
 e.g
-    bash $0 v1.2.1
+    bash $0 v1.3.0
 EOF
     exit 0
 }

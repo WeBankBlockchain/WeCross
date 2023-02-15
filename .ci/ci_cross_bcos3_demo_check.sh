@@ -51,10 +51,10 @@ prepare_demo() {
     cd -
 }
 
-cross_normal_guomi_demo_test() {
+cross_bcos3_demo_test() {
     cd ${ROOT}
 
-    bash build_cross_gm.sh -H 127.0.0.1 -P 3306 -u root -p 123456
+    bash build_cross_bcos3.sh -H 127.0.0.1 -P 3306 -u root -p 123456
 
     cd WeCross-Console/
     bash start.sh <<EOF
@@ -62,12 +62,12 @@ listResources
 login
 listAccount
 listResources
-call payment.bcos.HelloWorld get
-sendTransaction payment.bcos.HelloWorld set Tom
-call payment.bcos.HelloWorld get
-call payment.bcos_gm.HelloWorld get
-sendTransaction payment.bcos_gm.HelloWorld set Jerry
-call payment.bcos_gm.HelloWorld get
+call payment.bcos3.HelloWorld get
+sendTransaction payment.bcos3.HelloWorld set Tom
+call payment.bcos3.HelloWorld get
+call payment.bcos3_gm.HelloWorld get
+sendTransaction payment.bcos3_gm.HelloWorld set Jerry
+call payment.bcos3_gm.HelloWorld get
 quit
 EOF
     cd ..
@@ -81,8 +81,7 @@ prepare_wecross() {
     ./gradlew assemble
     cd dist
     LOG_INFO "Download plugin from branch: ${PLUGIN_BRANCH}"
-    bash download_plugin.sh BCOS2 ${PLUGIN_BRANCH}
-    bash download_plugin.sh Fabric1 ${PLUGIN_BRANCH}
+    bash download_plugin.sh BCOS3 ${PLUGIN_BRANCH}
     bash download_pages.sh ${PLUGIN_BRANCH}
     cd -
 
@@ -99,7 +98,7 @@ prepare_wecross_console() {
 prepare_account_manager() {
     cd ${ROOT}/
     LOG_INFO "Download wecross account manager from branch: ${PLUGIN_BRANCH}"
-    bash WeCross/download_account_manager.sh -d -s -t ${PLUGIN_BRANCH}
+    bash -x WeCross/download_account_manager.sh -d -s -t ${PLUGIN_BRANCH}
     cd -
 }
 
@@ -108,7 +107,7 @@ main() {
     prepare_wecross_console
     prepare_account_manager
     prepare_demo
-    cross_normal_guomi_demo_test
+    cross_bcos3_demo_test
 }
 
 if [ -n "${TRAVIS_BRANCH}" ]; then

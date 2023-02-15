@@ -6,7 +6,7 @@ LANG=en_US.UTF-8
 enable_build_from_resource=0
 compatibility_version=
 
-default_compatibility_version=v1.2.1 # update this every release
+default_compatibility_version=v1.3.0 # update this every release
 deps_dir=$(pwd)'/WeCross/plugin/'
 pages_dir=$(pwd)'/WeCross/pages/'
 src_dir=$(pwd)'/src/'
@@ -197,17 +197,8 @@ build_from_source() {
 
     cd WeCross
     rm -rf dist
-    bash ./gradlew assemble 2>&1 | tee output.log
+    bash ./gradlew assemble
     chmod +x dist/apps/*
-    # shellcheck disable=SC2046
-    # shellcheck disable=SC2006
-    if [ $(grep -c "BUILD SUCCESSFUL" output.log) -eq '0' ]; then
-        LOG_ERROR "Build Wecross project failed"
-        LOG_INFO "See output.log for details"
-        mv output.log ../output.log
-        cd ..
-        exit 1
-    fi
     cd ..
 
     mv WeCross/dist ${output_dir}/WeCross
@@ -232,7 +223,7 @@ build_plugin_from_source() {
     download_latest_code ${name} ${url} ${url_bak} ${branch}
 
     cd ${name}
-    bash ./gradlew assemble 2>&1 | tee output.log
+    bash ./gradlew assemble
     chmod +x dist/apps/*
     cd ..
 
