@@ -51,7 +51,7 @@ build_bcos_chain() {
 }
 
 build_accounts() {
-    if [ ! -e build_chain.sh ]; then
+    if [ ! -e get_account.sh ]; then
         # Download
         LOG_INFO "Download get_account.sh ..."
         Download https://raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_account.sh
