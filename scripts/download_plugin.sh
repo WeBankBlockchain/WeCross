@@ -7,18 +7,19 @@ enable_build_from_resource=0
 
 deps_dir=$(pwd)'/plugin/'
 src_dir=$(pwd)'/src/'
+GIT_URL_BASE='github.com'
 
-bcos_stub_url=https://github.com/WebankBlockchain/WeCross-BCOS2-Stub.git
+bcos_stub_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-BCOS2-Stub.git
 bcos_stub_branch=
 
-bcos3_stub_url=https://github.com/WebankBlockchain/WeCross-BCOS3-Stub.git
+bcos3_stub_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-BCOS3-Stub.git
 bcos3_stub_branch=
 
-fabric_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric1-Stub.git
+fabric_stub_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-Fabric1-Stub.git
 fabric_stub_branch=
 
 
-fabric2_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric2-Stub.git
+fabric2_stub_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-Fabric2-Stub.git
 fabric2_stub_branch=
 
 LOG_INFO() {
@@ -123,4 +124,4 @@ if [ $# != 2 ]; then
     exit 0
 fi
 
-main $@
+main "$@"

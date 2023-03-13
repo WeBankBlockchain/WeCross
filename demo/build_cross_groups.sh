@@ -8,6 +8,7 @@ DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=123456
 BCOS_VERSION=''
+BUILD_FROM_SOURCE=''
 
 need_db_config_ask=true
 
@@ -305,9 +306,9 @@ build_wecross() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_wecross.sh ]; then
-            bash download_wecross.sh -t "${WECROSS_VERSION}"
+            bash download_wecross.sh -t "${WECROSS_VERSION}" ${BUILD_FROM_SOURCE}
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t "${WECROSS_VERSION}"
+            bash <(curl -sL https://${GIT_URL_BASE}/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t "${WECROSS_VERSION}" ${BUILD_FROM_SOURCE}
         fi
     fi
 
@@ -328,9 +329,9 @@ build_wecross_console() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_console.sh ]; then
-            bash download_console.sh -t "${WECROSS_CONSOLE_VERSION}"
+            bash download_console.sh -t "${WECROSS_CONSOLE_VERSION}" ${BUILD_FROM_SOURCE}
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t "${WECROSS_CONSOLE_VERSION}"
+            bash <(curl -sL https://${GIT_URL_BASE}/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t "${WECROSS_CONSOLE_VERSION}" ${BUILD_FROM_SOURCE}
         fi
     fi
 
@@ -361,9 +362,9 @@ build_account_manager() {
         LOG_INFO "${name} exists."
     else
         if [ -e download_account_manager.sh ]; then
-            bash download_account_manager.sh -t "${WECROSS_ACCOUNT_MANAGER_VERSION}" -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
+            bash download_account_manager.sh -t "${WECROSS_ACCOUNT_MANAGER_VERSION}" -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT} ${BUILD_FROM_SOURCE}
         else
-            bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_account_manager.sh) -t "${WECROSS_ACCOUNT_MANAGER_VERSION}" -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT}
+            bash <(curl -sL https://${GIT_URL_BASE}/WebankBlockchain/WeCross/releases/download/resources/download_account_manager.sh) -t "${WECROSS_ACCOUNT_MANAGER_VERSION}" -u ${DB_USERNAME} -p ${DB_PASSWORD} -H ${DB_IP} -P ${DB_PORT} ${BUILD_FROM_SOURCE}
         fi
     fi
 
@@ -525,7 +526,7 @@ EOF
 }
 
 parse_command() {
-    while getopts "H:P:u:p:df:h" option; do
+    while getopts "H:P:u:p:df:hs" option; do
         # shellcheck disable=SC2220
         case ${option} in
         d)
@@ -549,6 +550,9 @@ parse_command() {
             ;;
         f)
             BCOS_VERSION=$OPTARG
+            ;;
+        s)
+            BUILD_FROM_SOURCE='-s'
             ;;
         h) help ;;
         *) help ;;

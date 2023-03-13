@@ -10,8 +10,9 @@ compatibility_version=
 enable_build_from_resource=0
 
 src_dir=$(pwd)'/src/'
+GIT_URL_BASE='github.com'
 
-wecross_console_url=https://github.com/WebankBlockchain/WeCross-Console.git
+wecross_console_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-Console.git
 wecross_console_url_bak=https://gitee.com/Webank/WeCross-Console.git
 wecross_console_branch=${default_compatibility_version}
 
@@ -42,8 +43,8 @@ Usage:
     -t                              [Optional] Download from certain tag (same as -b)
     -h  call for help
 e.g
-    bash $0 
-    bash $0 -s 
+    bash $0
+    bash $0 -s
 EOF
     exit 0
 }
@@ -70,7 +71,7 @@ parse_command() {
 }
 
 download_wecross_console_pkg() {
-    local github_url=https://github.com/WebankBlockchain/WeCross-Console/releases/download/
+    local github_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-Console/releases/download/
     local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross-Console/
     local release_pkg=WeCross-Console.tar.gz
     local release_pkg_checksum_file=WeCross-Console.tar.gz.md5
@@ -82,7 +83,7 @@ download_wecross_console_pkg() {
 
     LOG_INFO "Checking latest release"
     if [ -z "${compatibility_version}" ]; then
-        compatibility_version=$(curl -s https://api.github.com/repos/WebankBlockchain/WeCross-Console/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
+        compatibility_version=$(curl -s https://api.${GIT_URL_BASE}/repos/WebankBlockchain/WeCross-Console/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
     fi
 
     if [ -z "${compatibility_version}" ]; then
@@ -195,11 +196,11 @@ download_get_account_scripts() {
     cd ${scripts_dir}
 
     LOG_INFO "Download get_account.sh ..."
-    Download https://raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_account.sh
+    Download https://gitee.com/FISCO-BCOS/console/raw/${BCOS_VERSION}/tools/get_account.sh
     chmod u+x get_account.sh
 
     LOG_INFO "Download get_gm_account.sh ..."
-    Download https://raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_gm_account.sh
+    Download https://gitee.com/FISCO-BCOS/console/raw/${BCOS_VERSION}/tools/get_gm_account.sh
     chmod u+x get_gm_account.sh
 
     cd -
@@ -225,6 +226,6 @@ print_result() {
     LOG_INFO "Please configure \"./WeCross-Console/conf/application.toml\" according with \"application-sample.toml\" and \"bash start.sh\" to start."
 }
 
-parse_command $@
+parse_command "$@"
 main
 print_result

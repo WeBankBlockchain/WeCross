@@ -37,7 +37,7 @@ build_bcos_chain() {
     if [ ! -e build_chain.sh ]; then
         # Download
         LOG_INFO "Download build_chain.sh ..."
-        Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS3_VERSION}/build_chain.sh
+        Download https://${GIT_URL_BASE}/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS3_VERSION}/build_chain.sh
     fi
 
     chmod u+x build_chain.sh
@@ -54,7 +54,7 @@ build_accounts() {
     if [ ! -e get_account.sh ]; then
         # Download
         LOG_INFO "Download get_account.sh ..."
-        Download https://raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_account.sh
+        Download "https://${GITHUB_PROXY}raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_account.sh"
     fi
 
     chmod u+x get_account.sh

@@ -6,6 +6,7 @@ LANG=en_US.UTF-8
 default_compatibility_version=v1.3.0 # update this every release
 
 compatibility_version=
+GIT_URL_BASE='github.com'
 
 LOG_INFO() {
     local content=${1}
@@ -43,7 +44,7 @@ parse_command() {
 }
 
 download_demo() {
-    local github_url=https://github.com/WebankBlockchain/WeCross/releases/download/
+    local github_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross/releases/download/
     local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/Demo/
     #local compatibility_version=
     local release_pkg=demo.tar.gz

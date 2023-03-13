@@ -20,6 +20,7 @@ repositories {
     jcenter()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { url 'https://maven.aliyun.com/repository/public/' }
+    mavenCentral()
 }
 
 sourceCompatibility = '1.8'
@@ -249,4 +250,8 @@ jacocoTestReport {
         xml.enabled true
         html.enabled false
     }
+}
+
+tasks.withType(GenerateModuleMetadata) {
+    enabled = false
 }

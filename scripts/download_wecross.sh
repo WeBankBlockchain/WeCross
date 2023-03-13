@@ -10,28 +10,29 @@ default_compatibility_version=v1.3.0 # update this every release
 deps_dir=$(pwd)'/WeCross/plugin/'
 pages_dir=$(pwd)'/WeCross/pages/'
 src_dir=$(pwd)'/src/'
+GIT_URL_BASE='github.com'
 
-wecross_url=https://github.com/WebankBlockchain/WeCross.git
+wecross_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross.git
 wecross_url_bak=https://gitee.com/Webank/WeCross.git
 wecross_branch=${default_compatibility_version}
 
-bcos_stub_url=https://github.com/WebankBlockchain/WeCross-BCOS2-Stub.git
+bcos_stub_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-BCOS2-Stub.git
 bcos_stub_url_bak=https://gitee.com/Webank/WeCross-BCOS2-Stub.git
 bcos_stub_branch=${default_compatibility_version}
 
-bcos3_stub_url=https://github.com/WebankBlockchain/WeCross-BCOS3-Stub.git
+bcos3_stub_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-BCOS3-Stub.git
 bcos3_stub_url_bak=https://gitee.com/Webank/WeCross-BCOS3-Stub.git
 bcos3_stub_branch=${default_compatibility_version}
 
-fabric1_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric1-Stub.git
+fabric1_stub_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-Fabric1-Stub.git
 fabric1_stub_url_bak=https://gitee.com/Webank/WeCross-Fabric1-Stub.git
 fabric1_stub_branch=${default_compatibility_version}
 
-fabric2_stub_url=https://github.com/WebankBlockchain/WeCross-Fabric2-Stub.git
+fabric2_stub_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-Fabric2-Stub.git
 fabric2_stub_url_bak=https://gitee.com/Webank/WeCross-Fabric2-Stub.git
 fabric2_stub_branch=${default_compatibility_version}
 
-wecross_webapp_url=https://github.com/WebankBlockchain/WeCross-WebApp.git
+wecross_webapp_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-WebApp.git
 wecross_webapp_url_bak=https://gitee.com/Webank/WeCross-WebApp.git
 wecross_webapp_branch=${default_compatibility_version}
 
@@ -54,8 +55,8 @@ Usage:
     -t                              [Optional] Download from certain tag (same as -b)
     -h  call for help
 e.g
-    bash $0 
-    bash $0 -s 
+    bash $0
+    bash $0 -s
 EOF
     exit 0
 }
@@ -92,7 +93,7 @@ parse_command() {
 }
 
 download_wecross_pkg() {
-    local github_url=https://github.com/WebankBlockchain/WeCross/releases/download/
+    local github_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross/releases/download/
     local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross/
     local release_pkg=WeCross.tar.gz
     local release_pkg_checksum_file=WeCross.tar.gz.md5
@@ -104,7 +105,7 @@ download_wecross_pkg() {
 
     LOG_INFO "Checking latest release"
     if [ -z "${compatibility_version}" ]; then
-        compatibility_version=$(curl -s https://api.github.com/repos/WebankBlockchain/WeCross/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
+        compatibility_version=$(curl -s https://api.${GIT_URL_BASE}/repos/WebankBlockchain/WeCross/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
     fi
 
     if [ -z "${compatibility_version}" ]; then
@@ -282,6 +283,6 @@ print_result() {
     LOG_INFO "Download completed. WeCross is in: ./WeCross/"
 }
 
-parse_command $@
+parse_command "$@"
 main
 print_result

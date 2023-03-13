@@ -35,7 +35,7 @@ Download() {
 build_bcos_chain() {
     # Download
     LOG_INFO "Download build_chain.sh ..."
-    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/build_chain.sh
+    Download "https://${GIT_URL_BASE}/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/build_chain.sh"
     chmod u+x build_chain.sh
 
     local support_version="$1"
@@ -77,7 +77,7 @@ build_bcos_chain() {
 
 build_accounts() {
     LOG_INFO "Download get_gm_account.sh ..."
-    Download https://raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_gm_account.sh
+    Download "https://${GITHUB_PROXY}raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_gm_account.sh"
     chmod u+x get_gm_account.sh
 
     # generate accounts
