@@ -6,8 +6,9 @@ LANG=en_US.UTF-8
 
 pages_dir=$(pwd)'/pages/'
 src_dir=$(pwd)'/src/'
+GIT_URL_BASE='github.com'
 
-wecross_webapp_url=https://github.com/WebankBlockchain/WeCross-WebApp.git
+wecross_webapp_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-WebApp.git
 wecross_webapp_url_bak=https://gitee.com/WeBank/WeCross-WebApp.git
 
 LOG_INFO() {
@@ -94,4 +95,4 @@ if [ $# != 1 ]; then
     exit 0
 fi
 
-main $@
+main "$@"

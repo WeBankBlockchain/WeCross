@@ -269,7 +269,7 @@ download_wecross()
     if [ -e download_wecross.sh ];then
         bash download_wecross.sh -t "${WECROSS_VERSION}"
     else
-        bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t "${WECROSS_VERSION}"
+        bash <(curl -sL https://${GIT_URL_BASE}/WebankBlockchain/WeCross/releases/download/resources/download_wecross.sh) -t "${WECROSS_VERSION}"
     fi
 }
 
@@ -279,7 +279,7 @@ download_wecross_console()
     if [ -e download_console.sh ];then
         bash download_console.sh -t "${WECROSS_CONSOLE_VERSION}"
     else
-        bash <(curl -sL https://github.com/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t "${WECROSS_CONSOLE_VERSION}"
+        bash <(curl -sL https://${GIT_URL_BASE}/WebankBlockchain/WeCross/releases/download/resources/download_console.sh) -t "${WECROSS_CONSOLE_VERSION}"
     fi
 }
 
