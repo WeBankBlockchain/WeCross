@@ -1,3 +1,12 @@
+### v1.3.0
+(2023-03-15)
+
+**新增**
+
+- 完全支持FISCO BCOS 3.x版本
+- wecross demo支持替换Git的URL
+- 新增FISCO BCOS 3.x版本与2.x版本的跨链demo
+
 ### v1.2.1
 
 (2021-12-15)
