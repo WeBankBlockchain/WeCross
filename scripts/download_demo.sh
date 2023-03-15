@@ -7,6 +7,10 @@ default_compatibility_version=v1.3.0 # update this every release
 
 compatibility_version=
 GIT_URL_BASE='github.com'
+version_file="profile_version.sh"
+[[ -f "${version_file}" ]] && {
+  source "${version_file}"
+}
 
 LOG_INFO() {
     local content=${1}

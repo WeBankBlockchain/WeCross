@@ -12,6 +12,11 @@ enable_build_from_resource=0
 src_dir=$(pwd)'/src/'
 GIT_URL_BASE='github.com'
 
+version_file="profile_version.sh"
+[[ -f "${version_file}" ]] && {
+  source "${version_file}"
+}
+
 wecross_console_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-Console.git
 wecross_console_url_bak=https://gitee.com/Webank/WeCross-Console.git
 wecross_console_branch=${default_compatibility_version}

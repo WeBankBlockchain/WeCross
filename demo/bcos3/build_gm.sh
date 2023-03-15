@@ -65,6 +65,8 @@ build_accounts() {
 
     bash ../get_gm_account.sh # gm
     mv accounts_gm bcos_gm_user1
+    bash ../get_gm_account.sh # gm2
+    mv accounts_gm bcos_gm_user2
     cd -
 }
 

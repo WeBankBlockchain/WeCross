@@ -82,6 +82,7 @@ prepare_wecross() {
     cd dist
     LOG_INFO "Download plugin from branch: ${PLUGIN_BRANCH}"
     bash download_plugin.sh BCOS3 ${PLUGIN_BRANCH}
+    bash download_plugin.sh BCOS2 ${PLUGIN_BRANCH}
     bash download_pages.sh ${PLUGIN_BRANCH}
     cd -
 

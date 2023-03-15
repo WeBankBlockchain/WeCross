@@ -8,6 +8,11 @@ pages_dir=$(pwd)'/pages/'
 src_dir=$(pwd)'/src/'
 GIT_URL_BASE='github.com'
 
+version_file="profile_version.sh"
+[[ -f "${version_file}" ]] && {
+  source "${version_file}"
+}
+
 wecross_webapp_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-WebApp.git
 wecross_webapp_url_bak=https://gitee.com/WeBank/WeCross-WebApp.git
 
