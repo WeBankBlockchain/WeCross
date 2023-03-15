@@ -8,6 +8,10 @@ enable_build_from_resource=0
 deps_dir=$(pwd)'/plugin/'
 src_dir=$(pwd)'/src/'
 GIT_URL_BASE='github.com'
+version_file="profile_version.sh"
+[[ -f "${version_file}" ]] && {
+  source "${version_file}"
+}
 
 bcos_stub_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-BCOS2-Stub.git
 bcos_stub_branch=

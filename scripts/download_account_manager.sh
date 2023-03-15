@@ -11,6 +11,11 @@ enable_build_from_resource=0
 src_dir=$(pwd)'/src/'
 GIT_URL_BASE='github.com'
 
+version_file="profile_version.sh"
+[[ -f "${version_file}" ]] && {
+  source "${version_file}"
+}
+
 wecross_account_manager_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-Account-Manager.git
 wecross_account_manager_url_bak=https://gitee.com/Webank/WeCross-Account-Manager.git
 wecross_account_manager_branch=${default_compatibility_version}
