@@ -6,9 +6,15 @@ LANG=en_US.UTF-8
 
 pages_dir=$(pwd)'/pages/'
 src_dir=$(pwd)'/src/'
+GIT_URL_BASE='github.com'
 
-wecross_webapp_url=https://github.com/WebankBlockchain/WeCross-WebApp.git
-wecross_webapp_url_bak=https://github.com/WebankBlockchain/WeCross-WebApp.git
+version_file="profile_version.sh"
+[[ -f "${version_file}" ]] && {
+  source "${version_file}"
+}
+
+wecross_webapp_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-WebApp.git
+wecross_webapp_url_bak=https://gitee.com/WeBank/WeCross-WebApp.git
 
 LOG_INFO() {
     local content=${1}
@@ -28,7 +34,7 @@ Usage:
     bash $0  <tag/branch>
     <tag/branch>:   certain tag or branch to download
 e.g
-    bash $0 v1.2.1
+    bash $0 v1.3.0
 EOF
     exit 0
 }
@@ -94,4 +100,4 @@ if [ $# != 1 ]; then
     exit 0
 fi
 
-main $@
+main "$@"

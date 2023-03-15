@@ -3,14 +3,20 @@ set -e
 
 LANG=en_US.UTF-8
 
-default_compatibility_version=v1.2.1 # update this every release
+default_compatibility_version=v1.3.0 # update this every release
 
 compatibility_version=
 enable_build_from_resource=0
 
 src_dir=$(pwd)'/src/'
+GIT_URL_BASE='github.com'
 
-wecross_account_manager_url=https://github.com/WebankBlockchain/WeCross-Account-Manager.git
+version_file="profile_version.sh"
+[[ -f "${version_file}" ]] && {
+  source "${version_file}"
+}
+
+wecross_account_manager_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-Account-Manager.git
 wecross_account_manager_url_bak=https://gitee.com/Webank/WeCross-Account-Manager.git
 wecross_account_manager_branch=${default_compatibility_version}
 
@@ -98,9 +104,9 @@ check_command() {
 
 query_db() {
     if [ ${DB_PASSWORD} ]; then
-        mysql -u ${DB_USERNAME} --password="${DB_PASSWORD}" -h ${DB_IP} -P ${DB_PORT} $@ 2>/dev/null
+        mysql -u ${DB_USERNAME} --password="${DB_PASSWORD}" -h ${DB_IP} -P ${DB_PORT} "$@" 2>/dev/null
     else
-        mysql -u ${DB_USERNAME} -h ${DB_IP} -P ${DB_PORT} $@ 2>/dev/null
+        mysql -u ${DB_USERNAME} -h ${DB_IP} -P ${DB_PORT} "$@" 2>/dev/null
     fi
 }
 
@@ -146,7 +152,7 @@ config_database() {
 }
 
 download_wecross_account_manager_pkg() {
-    local github_url=https://github.com/WebankBlockchain/WeCross-Account-Manager/releases/download/
+    local github_url=https://${GIT_URL_BASE}/WebankBlockchain/WeCross-Account-Manager/releases/download/
     local cdn_url=https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeCross/WeCross-Account-Manager/
     local release_pkg=WeCross-Account-Manager.tar.gz
     local release_pkg_checksum_file=WeCross-Account-Manager.tar.gz.md5
@@ -158,7 +164,7 @@ download_wecross_account_manager_pkg() {
 
     LOG_INFO "Checking latest release"
     if [ -z "${compatibility_version}" ]; then
-        compatibility_version=$(curl -s https://api.github.com/repos/WebankBlockchain/WeCross-Account-Manager/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
+        compatibility_version=$(curl -s https://api.${GIT_URL_BASE}/repos/WebankBlockchain/WeCross-Account-Manager/releases/latest | grep "tag_name" | awk -F '\"' '{print $4}')
     fi
 
     if [ -z "${compatibility_version}" ]; then
@@ -251,17 +257,8 @@ build_from_source() {
 
     cd WeCross-Account-Manager
     rm -rf dist
-    bash ./gradlew assemble 2>&1 | tee output.log
+    bash ./gradlew assemble
     chmod +x dist/apps/*
-    # shellcheck disable=SC2046
-    # shellcheck disable=SC2006
-    if [ $(grep -c "BUILD SUCCESSFUL" output.log) -eq '0' ]; then
-        LOG_ERROR "Build Wecross Account Manager project failed"
-        LOG_INFO "See output.log for details"
-        mv output.log ../output.log
-        exit 1
-    fi
-    echo "================================================================"
     cd ..
 
     mv WeCross-Account-Manager/dist ${output_dir}/WeCross-Account-Manager
@@ -293,6 +290,6 @@ print_result() {
     LOG_INFO "Please configure \"./WeCross-Account-Manager/conf/application.toml\" according with \"application-sample.toml\" and \"bash start.sh\" to start."
 }
 
-parse_command $@
+parse_command "$@"
 main
 print_result

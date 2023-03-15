@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 LANG=en_US.UTF-8
+version_file="../profile_version.sh"
+[[ ! -f "${version_file}" ]] && {
+  LOG_ERROR " ${version_file} not exist, please check if the demo is the latest. "
+  exit 1
+}
+
+source "${version_file}"
 LOG_INFO() {
     local content=${1}
     echo -e "\033[32m[INFO][Fabric] ${content}\033[0m"
@@ -54,13 +61,13 @@ check_docker_service
 LOG_INFO "Download fabric tools ..."
 if [ "$(uname)" == "Darwin" ]; then
     # Mac
-    Download https://github.com/hyperledger/fabric/releases/download/v1.4.6/hyperledger-fabric-darwin-amd64-1.4.6.tar.gz
+    Download https://${GIT_URL_BASE}/hyperledger/fabric/releases/download/v1.4.6/hyperledger-fabric-darwin-amd64-1.4.6.tar.gz
 else
-    Download https://github.com/hyperledger/fabric/releases/download/v1.4.6/hyperledger-fabric-linux-amd64-1.4.6.tar.gz
+    Download https://${GIT_URL_BASE}/hyperledger/fabric/releases/download/v1.4.6/hyperledger-fabric-linux-amd64-1.4.6.tar.gz
 fi
 
 LOG_INFO "Download fabric samples ..."
-Download https://github.com/hyperledger/fabric-samples/archive/v1.4.4.tar.gz
+Download https://${GIT_URL_BASE}/hyperledger/fabric-samples/archive/v1.4.4.tar.gz
 
 LOG_INFO "Pull fabric images ..."
 Download_IMG hyperledger/fabric-ca 1.4.4

@@ -40,20 +40,42 @@ prepare_bcos() {
     cd ${ROOT}/bcos/
     # Download
     LOG_INFO "Download build_chain.sh ..."
-    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/build_chain.sh
+    Download https://${GIT_URL_BASE}/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/build_chain.sh
     chmod u+x build_chain.sh
 
     LOG_INFO "Download get_account.sh ..."
-    Download https://raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_account.sh
+    Download https://${GITHUB_PROXY}raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_account.sh
     chmod u+x get_account.sh
 
     LOG_INFO "Download get_gm_account.sh ..."
-    Download https://raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_gm_account.sh
+    Download https://${GITHUB_PROXY}raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_gm_account.sh
     chmod u+x get_gm_account.sh
 
     LOG_INFO "Download fisco-bcos binary"
-    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos.tar.gz
-    Download https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos-macOS.tar.gz
+    Download https://${GIT_URL_BASE}/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos.tar.gz
+    Download https://${GIT_URL_BASE}/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS_VERSION}/fisco-bcos-macOS.tar.gz
+
+    cd -
+}
+
+prepare_bcos3() {
+    cd ${ROOT}/bcos3/
+    # Download
+    LOG_INFO "Download bcos3 build_chain.sh ..."
+    Download https://${GIT_URL_BASE}/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS3_VERSION}/build_chain.sh
+    chmod u+x build_chain.sh
+
+    LOG_INFO "Download bcos3 get_account.sh ..."
+    Download https://${GITHUB_PROXY}raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_account.sh
+    chmod u+x get_account.sh
+
+    LOG_INFO "Download bcos3 get_gm_account.sh ..."
+    Download https://${GITHUB_PROXY}raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_gm_account.sh
+    chmod u+x get_gm_account.sh
+
+    LOG_INFO "Download bcos3 fisco-bcos binary"
+    Download https://${GIT_URL_BASE}/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS3_VERSION}/fisco-bcos-linux-x86_64.tar.gz
+    Download https://${GIT_URL_BASE}/FISCO-BCOS/FISCO-BCOS/releases/download/${BCOS3_VERSION}/fisco-bcos-macOS-x86_64.tar.gz
 
     cd -
 }
@@ -62,11 +84,11 @@ prepare_fabric() {
     cd ${ROOT}/fabric/
     # Download
     LOG_INFO "Download fabric tools ..."
-    Download https://github.com/hyperledger/fabric/releases/download/v1.4.6/hyperledger-fabric-darwin-amd64-1.4.6.tar.gz
-    Download https://github.com/hyperledger/fabric/releases/download/v1.4.6/hyperledger-fabric-linux-amd64-1.4.6.tar.gz
+    Download https://${GIT_URL_BASE}/hyperledger/fabric/releases/download/v1.4.6/hyperledger-fabric-darwin-amd64-1.4.6.tar.gz
+    Download https://${GIT_URL_BASE}/hyperledger/fabric/releases/download/v1.4.6/hyperledger-fabric-linux-amd64-1.4.6.tar.gz
 
     LOG_INFO "Download fabric samples ..."
-    Download https://github.com/hyperledger/fabric-samples/archive/v1.4.4.tar.gz
+    Download https://${GIT_URL_BASE}/hyperledger/fabric-samples/archive/v1.4.4.tar.gz
 
     cd -
 }
@@ -76,11 +98,11 @@ prepare_fabric2() {
 
     # Download
     LOG_INFO "Download fabric2 tools ..."
-    Download https://github.com/hyperledger/fabric/releases/download/v2.3.0/hyperledger-fabric-darwin-amd64-2.3.0.tar.gz
-    Download https://github.com/hyperledger/fabric/releases/download/v2.3.0/hyperledger-fabric-linux-amd64-2.3.0.tar.gz
+    Download https://${GIT_URL_BASE}/hyperledger/fabric/releases/download/v2.3.0/hyperledger-fabric-darwin-amd64-2.3.0.tar.gz
+    Download https://${GIT_URL_BASE}/hyperledger/fabric/releases/download/v2.3.0/hyperledger-fabric-linux-amd64-2.3.0.tar.gz
 
     LOG_INFO "Download fabric2 samples ..."
-    Download https://github.com/hyperledger/fabric-samples/archive/v2.3.0.tar.gz
+    Download https://${GIT_URL_BASE}/hyperledger/fabric-samples/archive/v2.3.0.tar.gz
 
     cd -
 }
@@ -99,9 +121,10 @@ main() {
     fi
 
     prepare_bcos
+    prepare_bcos3
     prepare_fabric
     prepare_fabric2
     prepare_wecross
 }
 
-main $@
+main "$@"
