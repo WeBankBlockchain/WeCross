@@ -156,7 +156,10 @@ public class BlockVerifierTomlConfig {
             PathMatchingResourcePatternResolver resolver =
                     new PathMatchingResourcePatternResolver();
             try {
-                Path path = Paths.get(resolver.getResource(entry.getValue()).getURI());
+                // to avoid path manipulation
+                String filePath = entry.getValue();
+                filePath = filePath.replace("..", "");
+                Path path = Paths.get(resolver.getResource(filePath).getURI());
                 String newContent = new String(Files.readAllBytes(path));
                 map.replace(entry.getKey(), newContent);
             } catch (IOException e) {
