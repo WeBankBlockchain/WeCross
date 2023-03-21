@@ -82,13 +82,15 @@ public class WebURIHandler implements URIHandler {
 
     public void setWebRoot(String rootPath) {
         try {
+            // to avoid path manipulation
+            rootPath = rootPath.replace("..", "");
             Path path;
 
             PathMatchingResourcePatternResolver resolver =
                     new PathMatchingResourcePatternResolver();
             path = Paths.get(resolver.getResource(rootPath).getURI());
 
-            this.webRoot = path.toString() + File.separator;
+            this.webRoot = path + File.separator;
 
         } catch (Exception e) {
             logger.error("Web root: {} not found", rootPath);

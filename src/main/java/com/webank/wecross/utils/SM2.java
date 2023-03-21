@@ -128,7 +128,7 @@ public class SM2 {
     private static java.security.spec.ECParameterSpec tryFindNamedCurveSpec(
             java.security.spec.ECParameterSpec params) {
         ECParameterSpec bcSpec =
-                org.bouncycastle.jcajce.provider.asymmetric.util.EC5Util.convertSpec(params, false);
+                org.bouncycastle.jcajce.provider.asymmetric.util.EC5Util.convertSpec(params);
         for (Object name : Collections.list(org.bouncycastle.jce.ECNamedCurveTable.getNames())) {
             org.bouncycastle.jce.spec.ECNamedCurveParameterSpec bcNamedSpec =
                     org.bouncycastle.jce.ECNamedCurveTable.getParameterSpec((String) name);
@@ -175,8 +175,7 @@ public class SM2 {
             public key
              */
             ECParameterSpec bcSpec =
-                    org.bouncycastle.jcajce.provider.asymmetric.util.EC5Util.convertSpec(
-                            params, false);
+                    org.bouncycastle.jcajce.provider.asymmetric.util.EC5Util.convertSpec(params);
             org.bouncycastle.math.ec.ECPoint q = bcSpec.getG().multiply(privateKey.getS());
             org.bouncycastle.math.ec.ECPoint bcW =
                     bcSpec.getCurve().decodePoint(q.getEncoded(false));

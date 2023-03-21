@@ -44,11 +44,11 @@ task javadocJar(type: Jar) {
 
 ext {
     if (!project.hasProperty("NEXUS_USERNAME")) {
-        NEXUS_USERNAME="xxx"
+        NEXUS_USERNAME = "xxx"
     }
 
     if (!project.hasProperty("NEXUS_PASSWORD")) {
-        NEXUS_PASSWORD="xxx"
+        NEXUS_PASSWORD = "xxx"
     }
 }
 
@@ -122,9 +122,10 @@ verifyGoogleJavaFormat {
 configurations.all {
     exclude module: "spring-boot-starter-logging"
     exclude module: "spring-boot-starter-web"
+    exclude group: 'org.yaml', module: 'snakeyaml'
 }
 
-def log4j_version='2.19.0'
+def log4j_version = '2.19.0'
 List logger = [
         "org.apache.logging.log4j:log4j-api:$log4j_version",
         "org.apache.logging.log4j:log4j-core:$log4j_version",
@@ -141,16 +142,19 @@ dependencies {
     }
 
     compile 'org.quartz-scheduler:quartz:2.3.2'
-    compile 'com.moandjiezana.toml:toml4j:0.7.2'
+    compile('com.moandjiezana.toml:toml4j:0.7.2') {
+        exclude group: 'com.google.code.gson', module: 'gson'
+    }
+    compile 'com.google.code.gson:gson:2.8.9'
     compile 'org.apache.commons:commons-lang3:3.11'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.14.2' // must not lower than 2.11.0 to support abi translate
-    compile 'org.springframework.boot:spring-boot-starter-actuator:2.7.8'
-    compile 'org.springframework.boot:spring-boot-configuration-processor:2.6.7'
-    compile 'org.springframework.boot:spring-boot-starter-log4j2:2.6.7'
-    compile ('org.asynchttpclient:async-http-client:2.12.2') {
+    compile 'org.springframework.boot:spring-boot-starter-actuator:2.7.9'
+    compile 'org.springframework.boot:spring-boot-configuration-processor:2.7.9'
+    compile 'org.springframework.boot:spring-boot-starter-log4j2:2.7.9'
+    compile('org.asynchttpclient:async-http-client:2.12.3') {
         exclude group: "io.netty"
     }
-    compile 'org.bouncycastle:bcprov-jdk15on:1.60'
+    compile 'org.bouncycastle:bcprov-jdk15on:1.69'
     compile 'commons-codec:commons-codec:1.14'
     compile 'javax.activation:activation:1.1.1'
     compile 'org.fisco-bcos:tcnative'
@@ -159,7 +163,7 @@ dependencies {
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.6.7'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.9'
 }
 
 sourceSets {
@@ -241,7 +245,7 @@ task makeStubJAR(type: org.gradle.api.tasks.bundling.Jar) {
 test {
     testLogging {
         showStandardStreams = false
-        events "passed","skipped","failed"
+        events "passed", "skipped", "failed"
     }
 }
 
