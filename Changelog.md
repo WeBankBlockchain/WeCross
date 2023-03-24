@@ -3,9 +3,13 @@
 
 **新增**
 
-- 完全支持FISCO BCOS 3.x版本
-- wecross demo支持替换Git的URL
-- 新增FISCO BCOS 3.x版本与2.x版本的跨链demo
+* 完全支持FISCO BCOS 3.x版本
+* wecross demo支持替换Git的URL
+* 新增FISCO BCOS 3.x版本与2.x版本的跨链demo
+
+**更新**
+
+* 更新gson、bouncycastle、netty-codec-haproxy、spring-boot-starter的版本号，以修复安全问题。
 
 ### v1.2.1
 
