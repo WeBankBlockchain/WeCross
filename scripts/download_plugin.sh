@@ -105,6 +105,12 @@ main() {
     local name=${1}
     local tag=${2}
     case ${name} in
+    ALL)
+        build_plugin_from_source WeCross-BCOS2-Stub ${bcos_stub_url} ${tag}
+        build_plugin_from_source WeCross-BCOS3-Stub ${bcos3_stub_url} ${tag}
+        build_plugin_from_source WeCross-Fabric1-Stub ${fabric_stub_url} ${tag}
+        build_plugin_from_source WeCross-Fabric2-Stub ${fabric2_stub_url} ${tag}
+        ;;
     BCOS2)
         build_plugin_from_source WeCross-BCOS2-Stub ${bcos_stub_url} ${tag}
         ;;

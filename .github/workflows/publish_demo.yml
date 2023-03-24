@@ -17,7 +17,7 @@ jobs:
     - name: Download demo requirements
       run: cd demo/ && bash .prepare.sh && cd -
     - name: Chmod
-      run: chmod +x demo/*.sh && chmod +x demo/bcos/*.sh && chmod +x demo/fabric/*.sh && chmod +x demo/fabric2/*.sh
+      run: chmod +x demo/*.sh && chmod +x demo/*/*.sh
     - name: Pack
       run: tar -zcvf demo.tar.gz demo/
     - name: Checksum
