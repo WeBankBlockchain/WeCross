@@ -556,7 +556,7 @@ main() {
 
     LOG_INFO "Success! WeCross demo network is running. Framework:"
     echo -e "
-            FISCO BCOS                    Fabric
+            FISCO BCOS2                    Fabric
            (4node pbft)              (first-network)
           (HelloWorld.sol)              (sacc.go)
                  |                          |

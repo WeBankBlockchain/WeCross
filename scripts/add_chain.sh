@@ -8,7 +8,7 @@ help() {
     echo $1
     cat <<EOF
 Usage:
-    -t <type>                           [Required] type of chain: BCOS2.0, GM_BCOS2.0, BCOS3_ECDSA_EVM, BCOS3_GM_EVM, Fabric1.4, Fabric2.0
+    -t <type>                           [Required] type of chain: BCOS2.0, GM_BCOS2.0, Fabric1.4, Fabric2.0, BCOS3_ECDSA_EVM, BCOS3_GM_EVM, BCOS3_ECDSA_WASM, BCOS3_GM_WASM
     -n <name>                           [Required] name of chain
     -d <dir>                            [Optional] generated target_directory, default conf/chains/
     -h                                  [Optional] Help

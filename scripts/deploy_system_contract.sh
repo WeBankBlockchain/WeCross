@@ -14,7 +14,7 @@ help() {
 Usage:
     -c <chain name>                     [Required] chain name
     -u <upgrade>                        [Optional] upgrade proxy/hub contract if proxy/hub contract has been deployed, default deploy proxy/hub contract
-    -t <type>                           [Required] type of chain, support: BCOS2.0, GM_BCOS2.0, Fabric1.4, Fabric2.0, BCOS3_ECDSA_EVM, BCOS3_GM_EVM
+    -t <type>                           [Required] type of chain, support: BCOS2.0, GM_BCOS2.0, Fabric1.4, Fabric2.0, BCOS3_ECDSA_EVM, BCOS3_GM_EVM, BCOS3_ECDSA_WASM, BCOS3_GM_WASM
     -P <proxy contract>                 [Optional] upgrade/deploy operation on proxy contract
     -H <hub contract>                   [Optional] upgrade/deploy operation on hub contract
     -h                                  [Optional] Help
@@ -69,7 +69,7 @@ bcos_proxy_contract() {
   "GM_BCOS2.0")
     packageName="bcos.guomi"
     ;;
-  "BCOS3_ECDSA_EVM" | "BCOS3_GM_EVM")
+  "BCOS3_ECDSA_EVM" | "BCOS3_GM_EVM" | "BCOS3_ECDSA_WASM" | "BCOS3_GM_WASM")
     packageName="bcos3"
     ;;
   esac
@@ -93,7 +93,7 @@ bcos_hub_contract() {
   "GM_BCOS2.0")
     packageName="bcos.guomi"
     ;;
-  "BCOS3_ECDSA_EVM" | "BCOS3_GM_EVM")
+  "BCOS3_ECDSA_EVM" | "BCOS3_GM_EVM" | "BCOS3_ECDSA_WASM" | "BCOS3_GM_WASM")
     packageName="bcos3"
     ;;
   esac
@@ -201,7 +201,7 @@ main() {
   LOG_INFO " deploy_system_contract, type: ${type}, chain: ${chain}, deploy: ${deploy}, contract: ${contract}"
 
   case $type in
-  "BCOS2.0" | "BCOS3_ECDSA_EVM" | "GM_BCOS2.0" | "BCOS3_GM_EVM")
+  "BCOS2.0" | "BCOS3_ECDSA_EVM" | "GM_BCOS2.0" | "BCOS3_GM_EVM" | "BCOS3_ECDSA_WASM" | "BCOS3_GM_WASM")
     if [[ "${contract}" == "proxy" ]]; then
       bcos_proxy_contract "${chain}" "${deploy}" "${type}"
     elif [[ "${contract}" == "hub" ]]; then

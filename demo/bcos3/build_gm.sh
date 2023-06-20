@@ -45,7 +45,7 @@ build_bcos_chain() {
     # Build chain
     LOG_INFO "Build chain ..."
     # Setting to build 1 groups
-    bash build_chain.sh -p 30500,20400 -l 127.0.0.1:1 -o ./nodes_gm -s
+    bash build_chain.sh -p 30500,20400 -l 127.0.0.1:1 -o ./nodes_gm -s -w
 
     ./nodes_gm/127.0.0.1/start_all.sh
 }
@@ -54,7 +54,7 @@ build_accounts() {
     if [ ! -e get_gm_account.sh ]; then
         # Download
         LOG_INFO "Download get_gm_account.sh ..."
-        Download https://${GITHUB_PROXY}raw.githubusercontent.com/FISCO-BCOS/console/${BCOS_VERSION}/tools/get_gm_account.sh
+        Download "https://${GITHUB_PROXY}raw.githubusercontent.com/FISCO-BCOS/console/${BCOS3_VERSION}/tools/get_gm_account.sh"
     fi
 
     chmod u+x get_gm_account.sh
@@ -73,7 +73,7 @@ build_accounts() {
 main() {
     build_bcos_chain "$1"
     build_accounts
-    LOG_INFO "SUCCESS: Build FISCO BCOS GM demo finish."
+    LOG_INFO "SUCCESS: Build FISCO BCOS GM WASM demo finish."
 }
 
 main "$1"

@@ -10,7 +10,7 @@ help() {
     echo $1
     cat <<EOF
 Usage: 
-    -t <type>                           [Required] type of account, BCOS2.0 or GM_BCOS2.0 BCOS3_ECDSA_EVM or BCOS3_GM_EVM or Fabric1.4
+    -t <type>                           [Required] type of account, support: BCOS2.0, GM_BCOS2.0, Fabric1.4, Fabric2.0, BCOS3_ECDSA_EVM, BCOS3_GM_EVM, BCOS3_ECDSA_WASM, BCOS3_GM_WASM
     -n <name>                           [Required] name of account
     -d <dir>                            [Optional] generated target_directory, default conf/accounts/
     -h                                  [Optional] Help
