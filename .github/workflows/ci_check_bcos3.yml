@@ -3,7 +3,7 @@ name: bcos3-normal-gm
 on: [pull_request]
 
 jobs:
-  normal-gm:
+  bcos3-normal-gm:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
