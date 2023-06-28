@@ -64,7 +64,7 @@ build_accounts() {
     cd accounts
 
     bash ../get_account.sh # normal
-    mv accounts bcos_user1
+    mv accounts bcos3_user1
     cd -
 }
 

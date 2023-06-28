@@ -504,10 +504,11 @@ deploy_chain_account() {
     mkdir -p ${ROOT}/WeCross-Console/conf/accounts/
     cd ${ROOT}/WeCross-Console/conf/accounts/ && rm -rf $(ls | grep -v .sh) && cd -
     cp -r ${ROOT}/bcos3/accounts/* ${ROOT}/WeCross-Console/conf/accounts/
+    cp -r ${ROOT}/bcos/accounts/* ${ROOT}/WeCross-Console/conf/accounts/
 
-    add_bcos3_account bcos_user1
-    add_bcos3_gm_account bcos_gm_user1
-    add_bcos2_gm_account bcos_gm_user2
+    add_bcos3_account bcos3_user1
+    add_bcos3_gm_account bcos3_gm_user1
+    add_bcos2_gm_account bcos_gm_user1
 }
 
 deploy_sample_resource() {
