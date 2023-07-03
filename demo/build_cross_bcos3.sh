@@ -436,7 +436,7 @@ deploy_bcos_sample_resource() {
     bash start.sh <<EOF
     login
     bcosDeploy payment.bcos3.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld
-    bcosDeploy payment.bcos3_gm.HelloWorld conf/contracts/liquid/hello_world_gm.wasm conf/contracts/liquid/hello_world.abi
+    bcosDeploy payment.bcos3_gm.HelloWorld conf/contracts/liquid/hello_world/hello_world_gm.wasm conf/contracts/liquid/hello_world/hello_world.abi
     bcosDeploy payment.bcos2_gm.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
     quit
 EOF
