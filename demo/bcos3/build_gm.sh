@@ -59,9 +59,9 @@ build_accounts() {
 
     chmod u+x get_gm_account.sh
 
-    # generate accounts
-    mkdir -p accounts
-    cd accounts
+    # generate bcos3 gm accounts
+    mkdir -p bcos3accounts
+    cd bcos3accounts
 
     bash ../get_gm_account.sh # gm
     mv accounts_gm bcos3_gm_user1

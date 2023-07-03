@@ -435,8 +435,8 @@ deploy_bcos_sample_resource() {
 
     bash start.sh <<EOF
     login
-    bcosDeploy payment.bcos3.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
-    bcosDeploy payment.bcos3_gm.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
+    bcosDeploy payment.bcos3.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld
+    bcosDeploy payment.bcos3_gm.HelloWorld conf/contracts/liquid/hello_world_gm.wasm conf/contracts/liquid/hello_world.abi
     bcosDeploy payment.bcos2_gm.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
     quit
 EOF
@@ -503,7 +503,7 @@ EOF
 deploy_chain_account() {
     mkdir -p ${ROOT}/WeCross-Console/conf/accounts/
     cd ${ROOT}/WeCross-Console/conf/accounts/ && rm -rf $(ls | grep -v .sh) && cd -
-    cp -r "${ROOT}"/bcos3/accounts/* "${ROOT}"/WeCross-Console/conf/accounts/
+    cp -r "${ROOT}"/bcos3/bcos3accounts/* "${ROOT}"/WeCross-Console/conf/accounts/
     cp -r "${ROOT}"/bcos/accounts/* "${ROOT}"/WeCross-Console/conf/accounts/
 
     add_bcos3_account bcos3_user1
