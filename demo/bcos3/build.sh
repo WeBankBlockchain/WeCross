@@ -59,19 +59,19 @@ build_accounts() {
 
     chmod u+x get_account.sh
 
-    # generate accounts
-    mkdir -p accounts
-    cd accounts
+    # generate bcos3 normal accounts
+    mkdir -p bcos3accounts
+    cd bcos3accounts
 
     bash ../get_account.sh # normal
-    mv accounts bcos_user1
+    mv accounts bcos3_user1
     cd -
 }
 
 main() {
     build_bcos_chain "$1"
     build_accounts
-    LOG_INFO "SUCCESS: Build FISCO BCOS demo finish."
+    LOG_INFO "SUCCESS: Build FISCO BCOS3 normal demo finish."
 }
 
 main "$1"

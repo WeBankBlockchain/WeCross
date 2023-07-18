@@ -44,7 +44,7 @@ Usage:
     bash $0 <name>  <tag/branch>
 
     <name>:         BCOS2   -> Repo: WeCross-BCOS2-Stub   ( BCOS2.0 & GM_BCOS2.0 )
-                    BCOS3   -> Repo: WeCross-BCOS3-Stub   ( BCOS3_ECDSA_EVM & BCOS3_GM_EVM )
+                    BCOS3   -> Repo: WeCross-BCOS3-Stub   ( BCOS3_ECDSA_EVM & BCOS3_GM_EVM & BCOS3_ECDSA_WASM &BCOS3_GM_WASM )
                     Fabric1 -> Repo: WeCross-Fabric1-Stub ( Fabric1.4 )
                     Fabric2 -> Repo: WeCross-Fabric2-Stub ( Fabric2.0 )
 

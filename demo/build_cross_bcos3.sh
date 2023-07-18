@@ -299,7 +299,7 @@ config_router_8251() {
     cd ${router_dir}
 
     # stubs bcos3_gm
-    bash add_chain.sh -t BCOS3_GM_EVM -n bcos3_gm -d conf/chains
+    bash add_chain.sh -t BCOS3_GM_WASM -n bcos3_gm -d conf/chains
     # copy cert
     cp ${ROOT}/bcos3/nodes_gm/127.0.0.1/sdk/* conf/chains/bcos3_gm/
 
@@ -307,8 +307,8 @@ config_router_8251() {
     sed_i 's/20200/20400/g' conf/chains/bcos3_gm/stub.toml
 
     # deploy system contracts
-    bash deploy_system_contract.sh -t BCOS3_GM_EVM -c chains/bcos3_gm -P
-    bash deploy_system_contract.sh -t BCOS3_GM_EVM -c chains/bcos3_gm -H
+    bash deploy_system_contract.sh -t BCOS3_GM_WASM -c chains/bcos3_gm -P
+    bash deploy_system_contract.sh -t BCOS3_GM_WASM -c chains/bcos3_gm -H
 
 
     # stubs bcos2_gm
@@ -435,8 +435,8 @@ deploy_bcos_sample_resource() {
 
     bash start.sh <<EOF
     login
-    bcosDeploy payment.bcos3.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
-    bcosDeploy payment.bcos3_gm.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
+    bcosDeploy payment.bcos3.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld
+    bcosDeploy payment.bcos3_gm.HelloWorld conf/contracts/liquid/hello_world/hello_world_gm.wasm conf/contracts/liquid/hello_world/hello_world.abi
     bcosDeploy payment.bcos2_gm.HelloWorld conf/contracts/solidity/HelloWorld.sol HelloWorld 1.0
     quit
 EOF
@@ -474,7 +474,7 @@ add_bcos3_gm_account() {
     cd ${ROOT}/WeCross-Console/
     bash start.sh <<EOF
     login
-    addChainAccount BCOS3_GM_EVM conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true
+    addChainAccount BCOS3_GM_WASM conf/accounts/${name}/${address}.public.pem conf/accounts/${name}/${address}.pem ${address} true
     quit
 EOF
     cd -
@@ -503,11 +503,12 @@ EOF
 deploy_chain_account() {
     mkdir -p ${ROOT}/WeCross-Console/conf/accounts/
     cd ${ROOT}/WeCross-Console/conf/accounts/ && rm -rf $(ls | grep -v .sh) && cd -
-    cp -r ${ROOT}/bcos3/accounts/* ${ROOT}/WeCross-Console/conf/accounts/
+    cp -r "${ROOT}"/bcos3/bcos3accounts/* "${ROOT}"/WeCross-Console/conf/accounts/
+    cp -r "${ROOT}"/bcos/accounts/* "${ROOT}"/WeCross-Console/conf/accounts/
 
-    add_bcos3_account bcos_user1
-    add_bcos3_gm_account bcos_gm_user1
-    add_bcos2_gm_account bcos_gm_user2
+    add_bcos3_account bcos3_user1
+    add_bcos3_gm_account bcos3_gm_user1
+    add_bcos2_gm_account bcos_gm_user1
 }
 
 deploy_sample_resource() {
@@ -551,7 +552,7 @@ main() {
     LOG_INFO "Success! WeCross demo network is running. Framework:"
     echo -e "
             FISCO BCOS3       FISCO BCOS3        FISCO BCOS2
-               Normal             Guomi             Guomi
+               Normal         Guomi wasm             Guomi
             (HelloWorld)       (HelloWorld)     (HelloWorld)
                  |                    \            /
                  |                     \          /
