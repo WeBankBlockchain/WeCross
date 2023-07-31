@@ -3,7 +3,7 @@ set -e
 
 LANG=en_US.UTF-8
 
-default_compatibility_version=v1.3.0 # update this every release
+default_compatibility_version=v1.3.1 # update this every release
 
 compatibility_version=
 GIT_URL_BASE='github.com'

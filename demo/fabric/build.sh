@@ -1,13 +1,6 @@
 #!/bin/bash
 set -e
 LANG=en_US.UTF-8
-version_file="../profile_version.sh"
-[[ ! -f "${version_file}" ]] && {
-  LOG_ERROR " ${version_file} not exist, please check if the demo is the latest. "
-  exit 1
-}
-
-source "${version_file}"
 LOG_INFO() {
     local content=${1}
     echo -e "\033[32m[INFO][Fabric] ${content}\033[0m"
@@ -17,6 +10,13 @@ LOG_ERROR() {
     local content=${1}
     echo -e "\033[31m[ERROR][Fabric] ${content}\033[0m"
 }
+
+version_file="../profile_version.sh"
+[[ ! -f "${version_file}" ]] && {
+  LOG_ERROR " ${version_file} not exist, please check if the demo is the latest. "
+  exit 1
+}
+source "${version_file}"
 
 Download() {
     local url=${1}

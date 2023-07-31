@@ -50,10 +50,10 @@ Usage:
 
     <tag/branch>:   certain tag or branch to download
 e.g
-    bash $0 BCOS2 v1.3.0
-    bash $0 BCOS3 v1.3.0
-    bash $0 Fabric1 v1.3.0
-    bash $0 Fabric2 v1.3.0
+    bash $0 BCOS2 v1.3.1
+    bash $0 BCOS3 v1.3.1
+    bash $0 Fabric1 v1.3.1
+    bash $0 Fabric2 v1.3.1
 EOF
     exit 0
 }
