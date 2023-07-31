@@ -491,7 +491,7 @@ main() {
 
     LOG_INFO "Success! WeCross demo network is running. Framework:"
     echo -e "
-                          FISCO BCOS
+                          FISCO BCOS2
               Group 1                    Group 2
          (HelloWorldGroup1)         (HelloWorldGroup2)
                  |                          |

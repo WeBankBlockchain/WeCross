@@ -511,7 +511,7 @@ main() {
 
     LOG_INFO "Success! WeCross demo network is running. Framework:"
     echo -e "
-                          FISCO BCOS
+                          FISCO BCOS2
                Normal                     Guomi
             (HelloWorld)               (HelloWorld)
                  |                          |
