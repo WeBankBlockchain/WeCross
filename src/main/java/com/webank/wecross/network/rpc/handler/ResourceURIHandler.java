@@ -152,6 +152,12 @@ public class ResourceURIHandler implements URIHandler {
                             return;
                         }
 
+                        logger.info(
+                                "resource sendTransaction, path: {}, request: {}, ua: {}",
+                                path,
+                                restRequest.getData(),
+                                ua.getName());
+
                         resourceObj.asyncSendTransaction(
                                 transactionRequest,
                                 ua,
@@ -186,6 +192,11 @@ public class ResourceURIHandler implements URIHandler {
                                         new TypeReference<RestRequest<TransactionRequest>>() {});
 
                         restRequest.checkRestRequest();
+                        logger.info(
+                                "resourceCall, path: {}, request: {}, ua: {}",
+                                path,
+                                restRequest.getData(),
+                                ua.getName());
 
                         TransactionRequest transactionRequest = restRequest.getData();
                         Resource resourceObj = getResource(path);
@@ -224,10 +235,6 @@ public class ResourceURIHandler implements URIHandler {
                     }
                 case "customcommand":
                     {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("zone: {}, chain: {}", path.getZone(), path.getChain());
-                        }
-
                         ZoneManager zoneManager = host.getZoneManager();
                         Zone zone = zoneManager.getZone(path.getZone());
                         if (Objects.isNull(zone)) {
@@ -243,6 +250,14 @@ public class ResourceURIHandler implements URIHandler {
                                 objectMapper.readValue(
                                         content,
                                         new TypeReference<RestRequest<CustomCommandRequest>>() {});
+
+                        logger.info(
+                                "resource customCommand, zone: {}, chain: {}, command:{}, args:{}, ua:{}",
+                                path.getZone(),
+                                path.getChain(),
+                                restRequest.getData().getCommand(),
+                                restRequest.getData().getArgs(),
+                                ua.getName());
 
                         chain.asyncCustomCommand(
                                 restRequest.getData().getCommand(),

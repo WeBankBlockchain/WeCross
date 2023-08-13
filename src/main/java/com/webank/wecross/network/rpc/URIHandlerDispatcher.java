@@ -73,6 +73,7 @@ public class URIHandlerDispatcher {
                 new TransactionURIHandler(transactionFetcher, host.getAccountManager());
         registerURIHandler(new URIMethod("GET", "/trans/getTransaction"), transactionURIHandler);
         registerURIHandler(new URIMethod("GET", "/trans/listTransactions"), transactionURIHandler);
+        registerURIHandler(new URIMethod("GET", "/trans/getBlock"), transactionURIHandler);
 
         ConnectionURIHandler connectionURIHandler = new ConnectionURIHandler();
         connectionURIHandler.setP2PService(host.getP2PService());
