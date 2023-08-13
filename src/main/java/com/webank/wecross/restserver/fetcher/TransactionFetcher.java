@@ -5,6 +5,7 @@ import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.restserver.response.CompleteTransactionResponse;
 import com.webank.wecross.restserver.response.TransactionListResponse;
+import com.webank.wecross.stub.Block;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.StubConstant;
@@ -110,6 +111,39 @@ public class TransactionFetcher {
                         }
                     }
                     callback.onResponse(null, completeTransactionResponse);
+                });
+    }
+
+    public interface FetchBlockCallback {
+        void onResponse(WeCrossException e, Block response);
+    }
+
+    public void asyncGetBlock(Path chainPath, Long blockNumber, FetchBlockCallback callback) {
+        Chain chain = zoneManager.getChain(chainPath);
+        Driver driver = chain.getDriver();
+        driver.asyncGetBlock(
+                blockNumber,
+                false,
+                chain.chooseConnection(),
+                (e, block) -> {
+                    if (Objects.nonNull(e)) {
+                        logger.warn(
+                                "Failed to get block, chain: {}, blockNumber: {}, e:",
+                                chainPath,
+                                blockNumber,
+                                e);
+                        callback.onResponse(
+                                new WeCrossException(
+                                        WeCrossException.ErrorCode.GET_BLOCK_ERROR, e.getMessage()),
+                                null);
+                        return;
+                    }
+
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("getBlock, blockNumber: {}, block: {}", blockNumber, block);
+                    }
+
+                    callback.onResponse(null, block);
                 });
     }
 
