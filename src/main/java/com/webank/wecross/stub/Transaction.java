@@ -1,7 +1,5 @@
 package com.webank.wecross.stub;
 
-import java.util.Arrays;
-
 public class Transaction {
     private byte[] txBytes; // raw transaction info
     private byte[] receiptBytes; // raw transaction receipt info
@@ -81,11 +79,7 @@ public class Transaction {
     @Override
     public String toString() {
         return "Transaction{"
-                + "txBytes="
-                + Arrays.toString(txBytes)
-                + ", receiptBytes="
-                + Arrays.toString(receiptBytes)
-                + ", accountIdentity='"
+                + "accountIdentity='"
                 + accountIdentity
                 + '\''
                 + ", resource='"
