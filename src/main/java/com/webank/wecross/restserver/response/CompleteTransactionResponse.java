@@ -163,10 +163,6 @@ public class CompleteTransactionResponse {
                 + Arrays.toString(result)
                 + ", byProxy="
                 + byProxy
-                + ", txBytes="
-                + Arrays.toString(txBytes)
-                + ", receiptBytes="
-                + Arrays.toString(receiptBytes)
                 + ", errorCode="
                 + errorCode
                 + ", message='"
