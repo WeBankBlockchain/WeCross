@@ -87,6 +87,8 @@ public class TransactionFetcher {
                                 transaction.getTransactionRequest().getArgs());
                         completeTransactionResponse.setResult(
                                 transaction.getTransactionResponse().getResult());
+                        completeTransactionResponse.setTimestamp(
+                                transaction.getTransactionResponse().getTimestamp());
                         String xaTransactionID =
                                 (String)
                                         transaction

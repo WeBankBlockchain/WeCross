@@ -11,6 +11,7 @@ public class TransactionResponse {
     private List<String> extraHashes;
     private long blockNumber;
     private String[] result;
+    private long timestamp;
 
     public Integer getErrorCode() {
         return errorCode;
@@ -60,6 +61,14 @@ public class TransactionResponse {
         return extraHashes;
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
     public void addExtraHash(String hash) {
         if (this.extraHashes == null) {
             this.extraHashes = new ArrayList<>();
@@ -82,6 +91,8 @@ public class TransactionResponse {
                 + extraHashes
                 + ", blockNumber="
                 + blockNumber
+                + ", timestamp="
+                + timestamp
                 + ", result="
                 + Arrays.toString(result)
                 + '}';
