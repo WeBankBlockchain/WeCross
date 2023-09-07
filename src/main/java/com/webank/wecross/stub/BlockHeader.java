@@ -7,6 +7,7 @@ public class BlockHeader {
     private String stateRoot;
     private String transactionRoot;
     private String receiptRoot;
+    private long timestamp;
 
     public long getNumber() {
         return number;
@@ -56,6 +57,14 @@ public class BlockHeader {
         this.receiptRoot = receiptRoot;
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
     @Override
     public String toString() {
         return "BlockHeader{"
@@ -75,6 +84,9 @@ public class BlockHeader {
                 + '\''
                 + ", receiptRoot='"
                 + receiptRoot
+                + '\''
+                + ", timestamp='"
+                + timestamp
                 + '\''
                 + '}';
     }

@@ -1,14 +1,19 @@
 package com.webank.wecross.network.rpc.handler;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.wecross.account.AccountAccessControlFilter;
 import com.webank.wecross.account.AccountManager;
 import com.webank.wecross.account.UniversalAccount;
 import com.webank.wecross.account.UserContext;
 import com.webank.wecross.common.NetworkQueryStatus;
 import com.webank.wecross.common.WeCrossDefault;
+import com.webank.wecross.exception.WeCrossException;
 import com.webank.wecross.network.UriDecoder;
+import com.webank.wecross.restserver.RestRequest;
 import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.fetcher.TransactionFetcher;
+import com.webank.wecross.restserver.request.BlockRequest;
 import com.webank.wecross.stub.*;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -18,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class TransactionURIHandler implements URIHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionURIHandler.class);
+    private final ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     private TransactionFetcher transactionFetcher;
 
@@ -211,6 +217,12 @@ public class TransactionURIHandler implements URIHandler {
                                 });
                         return;
                     }
+                case "getBlock":
+                    {
+                        getBlockRequest(
+                                userContext, callback, restResponse, uri, content, uriDecoder);
+                        return;
+                    }
                 default:
                     {
                         logger.warn("Unsupported method: {}", method);
@@ -225,5 +237,100 @@ public class TransactionURIHandler implements URIHandler {
             restResponse.setMessage(e.getLocalizedMessage());
         }
         callback.onResponse(restResponse);
+    }
+
+    private void getBlockRequest(
+            UserContext userContext,
+            Callback callback,
+            RestResponse<Object> restResponse,
+            String uri,
+            String content,
+            UriDecoder uriDecoder) {
+        String path;
+        long blockNumber;
+
+        try {
+            if (uri.contains("path=") && uri.contains("blockNumber=")) {
+                try {
+                    path = uriDecoder.getQueryBykey("path");
+                    blockNumber = Long.parseLong(uriDecoder.getQueryBykey("blockNumber"));
+                } catch (Exception e) {
+                    restResponse.setErrorCode(NetworkQueryStatus.URI_QUERY_ERROR);
+                    restResponse.setMessage(e.getMessage());
+                    callback.onResponse(restResponse);
+                    return;
+                }
+            } else {
+                RestRequest<BlockRequest> blockRequest =
+                        objectMapper.readValue(
+                                content, new TypeReference<RestRequest<BlockRequest>>() {});
+                blockRequest.checkRestRequest();
+                blockNumber = blockRequest.getData().getBlockNumber();
+                path = blockRequest.getData().getPath();
+            }
+            Path chain;
+            try {
+                chain = Path.decode(path);
+            } catch (Exception e) {
+                logger.warn("Decode chain path error: {}", path);
+                restResponse.setErrorCode(NetworkQueryStatus.URI_QUERY_ERROR);
+                restResponse.setMessage("Decode chain path error");
+                callback.onResponse(restResponse);
+                return;
+            }
+            // check permission
+            try {
+                UniversalAccount ua = accountManager.getUniversalAccount(userContext);
+                AccountAccessControlFilter filter = ua.getAccessControlFilter();
+                if (!filter.hasPermission(path)) {
+                    throw new Exception("Permission denied");
+                }
+            } catch (Exception e) {
+                logger.warn("Verify permission failed. path:{} error: {}", path, e);
+                restResponse.setErrorCode(NetworkQueryStatus.URI_QUERY_ERROR);
+                restResponse.setMessage("Verify permission failed");
+                callback.onResponse(restResponse);
+                return;
+            }
+
+            transactionFetcher.asyncGetBlock(
+                    chain,
+                    blockNumber,
+                    (fetchException, response) -> {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(
+                                    "getBlock, response: {}, fetchException: ",
+                                    response,
+                                    fetchException);
+                        }
+
+                        if (Objects.nonNull(fetchException)) {
+                            logger.warn("Failed to get block: ", fetchException);
+                            restResponse.setErrorCode(
+                                    NetworkQueryStatus.TRANSACTION_ERROR
+                                            + fetchException.getErrorCode());
+                            restResponse.setMessage(fetchException.getMessage());
+                        } else {
+                            try {
+                                restResponse.setData(objectMapper.writeValueAsString(response));
+                            } catch (Exception e) {
+                                restResponse.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
+                                restResponse.setMessage("Encode block error");
+                            }
+                        }
+
+                        callback.onResponse(restResponse);
+                    });
+        } catch (WeCrossException e) {
+            logger.warn("Process request error: ", e);
+            restResponse.setErrorCode(NetworkQueryStatus.NETWORK_PACKAGE_ERROR + e.getErrorCode());
+            restResponse.setMessage(e.getMessage());
+            callback.onResponse(restResponse);
+        } catch (Exception e) {
+            logger.warn("Process request error: ", e);
+            restResponse.setErrorCode(NetworkQueryStatus.INTERNAL_ERROR);
+            restResponse.setMessage(e.getMessage());
+            callback.onResponse(restResponse);
+        }
     }
 }

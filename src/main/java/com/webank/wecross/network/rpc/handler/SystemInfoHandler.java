@@ -9,6 +9,8 @@ import com.webank.wecross.restserver.RestResponse;
 import com.webank.wecross.restserver.response.StubResponse;
 import com.webank.wecross.stubmanager.StubManager;
 import com.webank.wecross.zone.ZoneManager;
+import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.security.Provider;
 import java.security.Security;
 import java.util.stream.Collectors;
@@ -76,6 +78,13 @@ public class SystemInfoHandler implements URIHandler {
 
         private String namedGroups;
         private String disabledNamedGroups;
+
+        private String totalDiskSpace;
+        private String totalDiskFreeSpace;
+        private String totalDiskUsable;
+
+        private String totalMemorySize;
+        private String freeMemorySize;
 
         public String getOsName() {
             return osName;
@@ -164,6 +173,46 @@ public class SystemInfoHandler implements URIHandler {
         public void setDisabledNamedGroups(String disabledNamedGroups) {
             this.disabledNamedGroups = disabledNamedGroups;
         }
+
+        public String getTotalDiskSpace() {
+            return totalDiskSpace;
+        }
+
+        public void setTotalDiskSpace(String totalDiskSpace) {
+            this.totalDiskSpace = totalDiskSpace;
+        }
+
+        public String getTotalDiskFreeSpace() {
+            return totalDiskFreeSpace;
+        }
+
+        public void setTotalDiskFreeSpace(String totalDiskFreeSpace) {
+            this.totalDiskFreeSpace = totalDiskFreeSpace;
+        }
+
+        public String getTotalDiskUsable() {
+            return totalDiskUsable;
+        }
+
+        public void setTotalDiskUsable(String totalDiskUsable) {
+            this.totalDiskUsable = totalDiskUsable;
+        }
+
+        public String getTotalMemorySize() {
+            return totalMemorySize;
+        }
+
+        public void setTotalMemorySize(String totalMemorySize) {
+            this.totalMemorySize = totalMemorySize;
+        }
+
+        public String getFreeMemorySize() {
+            return freeMemorySize;
+        }
+
+        public void setFreeMemorySize(String freeMemorySize) {
+            this.freeMemorySize = freeMemorySize;
+        }
     }
 
     private void systemStatus(
@@ -184,6 +233,32 @@ public class SystemInfoHandler implements URIHandler {
         status.setProviderInfo(provider.getInfo());
         status.setProviderName(provider.getName());
         status.setProviderVersion(String.valueOf(provider.getVersion()));
+
+        // disk space usage
+        File[] disks = File.listRoots();
+        long total = 0;
+        long free = 0;
+        long usable = 0;
+        for (File disk : disks) {
+            // B to GB
+            total += disk.getTotalSpace() / 1024 / 1024 / 1024;
+            free += disk.getFreeSpace() / 1024 / 1024 / 1024;
+            usable += disk.getUsableSpace() / 1024 / 1024 / 1024;
+        }
+        status.setTotalDiskSpace(total + "GB");
+        status.setTotalDiskFreeSpace(free + "GB");
+        status.setTotalDiskUsable(usable + "GB");
+
+        // memory usage
+        com.sun.management.OperatingSystemMXBean operatingSystemMXBean =
+                (com.sun.management.OperatingSystemMXBean)
+                        ManagementFactory.getOperatingSystemMXBean();
+        long totalPhysicalMemorySize =
+                operatingSystemMXBean.getTotalPhysicalMemorySize() / 1024 / 1024 / 1024;
+        long freePhysicalMemorySize =
+                operatingSystemMXBean.getFreePhysicalMemorySize() / 1024 / 1024 / 1024;
+        status.setTotalMemorySize(totalPhysicalMemorySize + "GB");
+        status.setFreeMemorySize(freePhysicalMemorySize + "GB");
 
         RestResponse<SystemStatus> restResponse = new RestResponse<SystemStatus>();
         restResponse.setData(status);
