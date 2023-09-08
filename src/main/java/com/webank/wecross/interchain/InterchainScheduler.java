@@ -330,8 +330,7 @@ public class InterchainScheduler {
             }
 
             TransactionRequest transactionRequest = new TransactionRequest();
-            transactionRequest.setArgs(
-                    new String[] {objectMapper.writeValueAsString(interchainRequest.getArgs())});
+            transactionRequest.setArgs(interchainRequest.getArgs());
             transactionRequest.setMethod(interchainRequest.getMethod());
 
             transactionRequest.getOptions().put(StubConstant.TRANSACTION_UNIQUE_ID, uid);
