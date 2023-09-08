@@ -71,6 +71,8 @@ public class TransactionFetcher {
                     completeTransactionResponse.setReceiptBytes(transaction.getReceiptBytes());
                     completeTransactionResponse.setBlockNumber(blockNumber);
                     completeTransactionResponse.setTxHash(txHash);
+                    completeTransactionResponse.setTimestamp(
+                            transaction.getTransactionResponse().getTimestamp());
 
                     if (transaction.isTransactionByProxy()) {
                         completeTransactionResponse.setByProxy(true);
@@ -87,8 +89,6 @@ public class TransactionFetcher {
                                 transaction.getTransactionRequest().getArgs());
                         completeTransactionResponse.setResult(
                                 transaction.getTransactionResponse().getResult());
-                        completeTransactionResponse.setTimestamp(
-                                transaction.getTransactionResponse().getTimestamp());
                         String xaTransactionID =
                                 (String)
                                         transaction
