@@ -576,6 +576,39 @@ public class XATransactionManager {
         }
     }
 
+    private ListXAReduceCallback getListXACallback(int count, Map<String, Long> offsets, int size, ListXATransactionsCallback callback) {
+        List<XAResponse.ChainErrorMessage> errors =
+                Collections.synchronizedList(new LinkedList<>());
+        Map<String, Long> nextOffsets = new ConcurrentHashMap<>(offsets);
+
+        return (chain, listXAResponse) -> {
+
+            if (nextOffsets.get(chain) == -1) {
+                nextOffsets.put(chain, listXAResponse.getTotal() - 1);
+            }
+
+            XATransactionListResponse response = new XATransactionListResponse();
+            if (Objects.nonNull(listXAResponse.getChainErrorMessage())) {
+                errors.add(listXAResponse.getChainErrorMessage());
+                if (!errors.isEmpty()) {
+                    XAResponse xaResponse = new XAResponse();
+                    xaResponse.setStatus(-1);
+                    xaResponse.setChainErrorMessages(errors);
+                    response.setXaResponse(xaResponse);
+                }
+            } else {
+                response.setXaList(listXAResponse.getXaTransactions());
+                Long nextOffset = nextOffsets.get(chain) - listXAResponse.getXaTransactions().size();
+                nextOffsets.put(chain, nextOffset);
+                response.setNextOffsets(nextOffsets);
+                if (nextOffsets.get(chain) == -1) {
+                    response.setFinished(true);
+                }
+                response.recoverUsername(accountManager);
+            }
+            callback.onResponse(null, response);
+        };
+    }
     public interface ListXATransactionsCallback {
         void onResponse(WeCrossException e, XATransactionListResponse xaTransactionListResponse);
     }
@@ -728,6 +761,8 @@ public class XATransactionManager {
             UniversalAccount ua,
             Map<String, Long> offsets,
             int size,
+            String chainPath,
+            String version,
             ListXATransactionsCallback callback) {
 
         try {
@@ -742,7 +777,12 @@ public class XATransactionManager {
 
             XATransactionListResponse response = new XATransactionListResponse();
 
-            List<Path> chainPaths = setToList(zoneManager.getAllChainsInfo(false).keySet());
+            List<Path> chainPaths = new ArrayList<>();
+            if (Objects.isNull(chainPath) || chainPath.isEmpty()) {
+                chainPaths = setToList(zoneManager.getAllChainsInfo(false).keySet());
+            } else {
+                chainPaths.add(Path.decode(chainPath));
+            }
 
             int chainNum = chainPaths.size();
             if (chainNum == 0) {
@@ -761,8 +801,13 @@ public class XATransactionManager {
                 }
             }
 
-            ListXAReduceCallback reduceCallback =
-                    getListXAReduceCallback(offsets.size(), offsets, size, callback);
+            ListXAReduceCallback reduceCallback = null;
+            if (version.equals("1.4")){
+                reduceCallback = getListXACallback(offsets.size(), offsets, size, callback);
+            }else {
+                reduceCallback = getListXAReduceCallback(offsets.size(), offsets, size, callback);
+            }
+
             for (String chain : offsets.keySet()) {
                 if (!requireIgnore || offsets.get(chain) != -1L) {
                     asyncListXATransactions(
