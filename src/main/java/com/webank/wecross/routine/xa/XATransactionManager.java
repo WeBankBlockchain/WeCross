@@ -583,6 +583,7 @@ public class XATransactionManager {
 
         return (chain, listXAResponse) -> {
 
+            // first time to list, reset offsets
             if (nextOffsets.get(chain) == -1) {
                 nextOffsets.put(chain, listXAResponse.getTotal() - 1);
             }
@@ -598,6 +599,7 @@ public class XATransactionManager {
                 }
             } else {
                 response.setXaList(listXAResponse.getXaTransactions());
+                // update offsets
                 Long nextOffset = nextOffsets.get(chain) - listXAResponse.getXaTransactions().size();
                 nextOffsets.put(chain, nextOffset);
                 response.setNextOffsets(nextOffsets);
@@ -803,8 +805,10 @@ public class XATransactionManager {
 
             ListXAReduceCallback reduceCallback = null;
             if (version.equals("1.4")){
+                // Remove sort operation callback
                 reduceCallback = getListXACallback(offsets.size(), offsets, size, callback);
             }else {
+                // has sort operation callback
                 reduceCallback = getListXAReduceCallback(offsets.size(), offsets, size, callback);
             }
 
