@@ -13,7 +13,6 @@ import com.webank.wecross.stub.Transaction;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.Objects;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -247,7 +246,8 @@ public class TransactionFetcher {
                                 response);
                     }
 
-                    if (block.transactionsHashes.isEmpty() && block.transactionsWithDetail.isEmpty()) {
+                    if (block.transactionsHashes.isEmpty()
+                            && block.transactionsWithDetail.isEmpty()) {
                         // blank block
                         response.setNextBlockNumber(blockNumber - 1);
                         response.setNextOffset(0);
@@ -266,24 +266,35 @@ public class TransactionFetcher {
                                     response);
                             mainCallback.onResponse(
                                     new WeCrossException(
-                                            WeCrossException.ErrorCode.GET_BLOCK_ERROR, "Wrong offset"),
+                                            WeCrossException.ErrorCode.GET_BLOCK_ERROR,
+                                            "Wrong offset"),
                                     null);
                             return;
                         }
                         for (index = offset;
-                             index < block.transactionsWithDetail.size() && count > 0;
-                             index++) {
+                                index < block.transactionsWithDetail.size() && count > 0;
+                                index++) {
                             Transaction transaction = block.transactionsWithDetail.get(index);
-                            if (Objects.nonNull(transaction) && StringUtils.isNotBlank(transaction.getTransactionResponse().getHash())) {
+                            if (Objects.nonNull(transaction)
+                                    && StringUtils.isNotBlank(
+                                            transaction.getTransactionResponse().getHash())) {
                                 TransactionListResponse.TransactionWithDetail transactionDetail =
                                         new TransactionListResponse.TransactionWithDetail();
                                 transactionDetail.setBlockNumber(blockNumber);
-                                transactionDetail.setTxHash(transaction.getTransactionResponse().getHash());
+                                transactionDetail.setTxHash(
+                                        transaction.getTransactionResponse().getHash());
                                 if (transaction.isTransactionByProxy()) {
                                     transactionDetail.setPath(transaction.getResource());
-                                    transactionDetail.setAccountIdentity(transaction.getAccountIdentity());
-                                    transactionDetail.setMethod(transaction.getTransactionRequest().getMethod());
-                                    transactionDetail.setXaTransactionID((String) transaction.getTransactionRequest().getOptions().get(StubConstant.XA_TRANSACTION_ID));
+                                    transactionDetail.setAccountIdentity(
+                                            transaction.getAccountIdentity());
+                                    transactionDetail.setMethod(
+                                            transaction.getTransactionRequest().getMethod());
+                                    transactionDetail.setXaTransactionID(
+                                            (String)
+                                                    transaction
+                                                            .getTransactionRequest()
+                                                            .getOptions()
+                                                            .get(StubConstant.XA_TRANSACTION_ID));
                                 }
                                 response.addTransactionWithDetail(transactionDetail);
                                 count--;
@@ -308,13 +319,14 @@ public class TransactionFetcher {
                                     response);
                             mainCallback.onResponse(
                                     new WeCrossException(
-                                            WeCrossException.ErrorCode.GET_BLOCK_ERROR, "Wrong offset"),
+                                            WeCrossException.ErrorCode.GET_BLOCK_ERROR,
+                                            "Wrong offset"),
                                     null);
                             return;
                         }
                         for (index = offset;
-                             index < block.transactionsHashes.size() && count > 0;
-                             index++) {
+                                index < block.transactionsHashes.size() && count > 0;
+                                index++) {
                             // hash is blank
                             if (!"".equals(block.transactionsHashes.get(index).trim())) {
                                 TransactionListResponse.Transaction transaction =

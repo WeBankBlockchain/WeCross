@@ -10,7 +10,9 @@ public class TransactionListResponse {
     private int nextOffset;
     private List<Transaction> transactions = Collections.synchronizedList(new LinkedList<>());
 
-    private List<TransactionWithDetail> transactionWithDetails = Collections.synchronizedList(new LinkedList<>());
+    private List<TransactionWithDetail> transactionWithDetails =
+            Collections.synchronizedList(new LinkedList<>());
+
     public TransactionListResponse() {}
 
     public void addTransactionWithDetail(TransactionWithDetail transactionWithDetail) {
@@ -20,7 +22,6 @@ public class TransactionListResponse {
     public void addTransactionWithDetails(List<TransactionWithDetail> transactionWithDetails) {
         this.transactionWithDetails.addAll(transactionWithDetails);
     }
-
 
     public void addTransaction(Transaction transaction) {
         this.transactions.add(transaction);
@@ -164,15 +165,25 @@ public class TransactionListResponse {
 
         @Override
         public String toString() {
-            return "TransactionWithDetail{" +
-                    "txHash='" + txHash + '\'' +
-                    ", blockNumber=" + blockNumber +
-                    ", accountIdentity='" + accountIdentity + '\'' +
-                    ", path='" + path + '\'' +
-                    ", method='" + method + '\'' +
-                    ", xaTransactionID='" + xaTransactionID + '\'' +
-                    '}';
+            return "TransactionWithDetail{"
+                    + "txHash='"
+                    + txHash
+                    + '\''
+                    + ", blockNumber="
+                    + blockNumber
+                    + ", accountIdentity='"
+                    + accountIdentity
+                    + '\''
+                    + ", path='"
+                    + path
+                    + '\''
+                    + ", method='"
+                    + method
+                    + '\''
+                    + ", xaTransactionID='"
+                    + xaTransactionID
+                    + '\''
+                    + '}';
         }
     }
-
 }

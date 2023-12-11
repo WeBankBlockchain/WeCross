@@ -9,7 +9,7 @@ public class Block {
     @JsonIgnore public byte[] rawBytes;
     public BlockHeader blockHeader;
     public List<String> transactionsHashes = new LinkedList<>();
-    public List <Transaction> transactionsWithDetail= new LinkedList<>();
+    public List<Transaction> transactionsWithDetail = new LinkedList<>();
 
     public BlockHeader getBlockHeader() {
         return blockHeader;
