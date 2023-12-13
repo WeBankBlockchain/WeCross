@@ -576,7 +576,8 @@ public class XATransactionManager {
         }
     }
 
-    private ListXAReduceCallback getListXACallback(int count, Map<String, Long> offsets, int size, ListXATransactionsCallback callback) {
+    private ListXAReduceCallback getListXACallback(
+            int count, Map<String, Long> offsets, int size, ListXATransactionsCallback callback) {
         List<XAResponse.ChainErrorMessage> errors =
                 Collections.synchronizedList(new LinkedList<>());
         Map<String, Long> nextOffsets = new ConcurrentHashMap<>(offsets);
@@ -600,7 +601,8 @@ public class XATransactionManager {
             } else {
                 response.setXaList(listXAResponse.getXaTransactions());
                 // update offsets
-                Long nextOffset = nextOffsets.get(chain) - listXAResponse.getXaTransactions().size();
+                Long nextOffset =
+                        nextOffsets.get(chain) - listXAResponse.getXaTransactions().size();
                 nextOffsets.put(chain, nextOffset);
                 response.setNextOffsets(nextOffsets);
                 if (nextOffsets.get(chain) == -1) {
@@ -611,6 +613,7 @@ public class XATransactionManager {
             callback.onResponse(null, response);
         };
     }
+
     public interface ListXATransactionsCallback {
         void onResponse(WeCrossException e, XATransactionListResponse xaTransactionListResponse);
     }
@@ -804,10 +807,10 @@ public class XATransactionManager {
             }
 
             ListXAReduceCallback reduceCallback = null;
-            if (version.equals("1.4")){
+            if (version.equals("1.4")) {
                 // Remove sort operation callback
                 reduceCallback = getListXACallback(offsets.size(), offsets, size, callback);
-            }else {
+            } else {
                 // has sort operation callback
                 reduceCallback = getListXAReduceCallback(offsets.size(), offsets, size, callback);
             }

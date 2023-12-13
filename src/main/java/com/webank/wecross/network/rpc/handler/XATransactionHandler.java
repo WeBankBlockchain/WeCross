@@ -77,7 +77,6 @@ public class XATransactionHandler implements URIHandler {
             this.offsets = offsets;
         }
 
-
         public String getPath() {
             return path;
         }
