@@ -9,9 +9,11 @@ import com.webank.wecross.stub.Block;
 import com.webank.wecross.stub.Driver;
 import com.webank.wecross.stub.Path;
 import com.webank.wecross.stub.StubConstant;
+import com.webank.wecross.stub.Transaction;
 import com.webank.wecross.zone.Chain;
 import com.webank.wecross.zone.ZoneManager;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -244,53 +246,107 @@ public class TransactionFetcher {
                                 response);
                     }
 
-                    if (block.transactionsHashes.isEmpty()) {
+                    if (block.transactionsHashes.isEmpty()
+                            && block.transactionsWithDetail.isEmpty()) {
                         // blank block
                         response.setNextBlockNumber(blockNumber - 1);
                         response.setNextOffset(0);
                         recursiveFetchTransactionList(chain, driver, size, response, mainCallback);
                         return;
                     }
-
-                    int offset = response.getNextOffset();
-                    if (offset >= block.transactionsHashes.size()) {
-                        logger.warn(
-                                "Wrong offset, total txHash: {}, offset: {}, response: {}",
-                                block.transactionsHashes.size(),
-                                offset,
-                                response);
-                        mainCallback.onResponse(
-                                new WeCrossException(
-                                        WeCrossException.ErrorCode.GET_BLOCK_ERROR, "Wrong offset"),
-                                null);
-                        return;
-                    }
-
                     int index;
                     int count = size;
-                    for (index = offset;
-                            index < block.transactionsHashes.size() && count > 0;
-                            index++) {
-                        // hash is blank
-                        if (!"".equals(block.transactionsHashes.get(index).trim())) {
-                            TransactionListResponse.Transaction transaction =
-                                    new TransactionListResponse.Transaction();
-                            transaction.setBlockNumber(blockNumber);
-                            transaction.setTxHash(block.transactionsHashes.get(index));
-                            response.addTransaction(transaction);
-                            count--;
+                    if (!block.transactionsWithDetail.isEmpty()) {
+                        int offset = response.getNextOffset();
+                        if (offset >= block.transactionsWithDetail.size()) {
+                            logger.warn(
+                                    "Wrong offset, total txHash: {}, offset: {}, response: {}",
+                                    block.transactionsWithDetail.size(),
+                                    offset,
+                                    response);
+                            mainCallback.onResponse(
+                                    new WeCrossException(
+                                            WeCrossException.ErrorCode.GET_BLOCK_ERROR,
+                                            "Wrong offset"),
+                                    null);
+                            return;
                         }
+                        for (index = offset;
+                                index < block.transactionsWithDetail.size() && count > 0;
+                                index++) {
+                            Transaction transaction = block.transactionsWithDetail.get(index);
+                            if (Objects.nonNull(transaction)
+                                    && StringUtils.isNotBlank(
+                                            transaction.getTransactionResponse().getHash())) {
+                                TransactionListResponse.TransactionWithDetail transactionDetail =
+                                        new TransactionListResponse.TransactionWithDetail();
+                                transactionDetail.setBlockNumber(blockNumber);
+                                transactionDetail.setTxHash(
+                                        transaction.getTransactionResponse().getHash());
+                                if (transaction.isTransactionByProxy()) {
+                                    transactionDetail.setPath(transaction.getResource());
+                                    transactionDetail.setAccountIdentity(
+                                            transaction.getAccountIdentity());
+                                    transactionDetail.setMethod(
+                                            transaction.getTransactionRequest().getMethod());
+                                    transactionDetail.setXaTransactionID(
+                                            (String)
+                                                    transaction
+                                                            .getTransactionRequest()
+                                                            .getOptions()
+                                                            .get(StubConstant.XA_TRANSACTION_ID));
+                                }
+                                response.addTransactionWithDetail(transactionDetail);
+                                count--;
+                            }
+                        }
+
+                        long nextBlockNumber =
+                                index == block.transactionsWithDetail.size()
+                                        ? blockNumber - 1
+                                        : blockNumber;
+                        int nextOffset = index == block.transactionsWithDetail.size() ? 0 : index;
+                        response.setNextBlockNumber(nextBlockNumber);
+                        response.setNextOffset(nextOffset);
+                        recursiveFetchTransactionList(chain, driver, count, response, mainCallback);
+                    } else {
+                        int offset = response.getNextOffset();
+                        if (offset >= block.transactionsHashes.size()) {
+                            logger.warn(
+                                    "Wrong offset, total txHash: {}, offset: {}, response: {}",
+                                    block.transactionsHashes.size(),
+                                    offset,
+                                    response);
+                            mainCallback.onResponse(
+                                    new WeCrossException(
+                                            WeCrossException.ErrorCode.GET_BLOCK_ERROR,
+                                            "Wrong offset"),
+                                    null);
+                            return;
+                        }
+                        for (index = offset;
+                                index < block.transactionsHashes.size() && count > 0;
+                                index++) {
+                            // hash is blank
+                            if (!"".equals(block.transactionsHashes.get(index).trim())) {
+                                TransactionListResponse.Transaction transaction =
+                                        new TransactionListResponse.Transaction();
+                                transaction.setBlockNumber(blockNumber);
+                                transaction.setTxHash(block.transactionsHashes.get(index));
+                                response.addTransaction(transaction);
+                                count--;
+                            }
+                        }
+
+                        long nextBlockNumber =
+                                index == block.transactionsHashes.size()
+                                        ? blockNumber - 1
+                                        : blockNumber;
+                        int nextOffset = index == block.transactionsHashes.size() ? 0 : index;
+                        response.setNextBlockNumber(nextBlockNumber);
+                        response.setNextOffset(nextOffset);
+                        recursiveFetchTransactionList(chain, driver, count, response, mainCallback);
                     }
-
-                    long nextBlockNumber =
-                            index == block.transactionsHashes.size()
-                                    ? blockNumber - 1
-                                    : blockNumber;
-                    int nextOffset = index == block.transactionsHashes.size() ? 0 : index;
-                    response.setNextBlockNumber(nextBlockNumber);
-                    response.setNextOffset(nextOffset);
-
-                    recursiveFetchTransactionList(chain, driver, count, response, mainCallback);
                 });
     }
 

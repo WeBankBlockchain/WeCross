@@ -10,7 +10,18 @@ public class TransactionListResponse {
     private int nextOffset;
     private List<Transaction> transactions = Collections.synchronizedList(new LinkedList<>());
 
+    private List<TransactionWithDetail> transactionWithDetails =
+            Collections.synchronizedList(new LinkedList<>());
+
     public TransactionListResponse() {}
+
+    public void addTransactionWithDetail(TransactionWithDetail transactionWithDetail) {
+        this.transactionWithDetails.add(transactionWithDetail);
+    }
+
+    public void addTransactionWithDetails(List<TransactionWithDetail> transactionWithDetails) {
+        this.transactionWithDetails.addAll(transactionWithDetails);
+    }
 
     public void addTransaction(Transaction transaction) {
         this.transactions.add(transaction);
@@ -42,6 +53,14 @@ public class TransactionListResponse {
 
     public void setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
+    }
+
+    public List<TransactionWithDetail> getTransactionWithDetails() {
+        return transactionWithDetails;
+    }
+
+    public void setTransactionWithDetails(List<TransactionWithDetail> transactionWithDetails) {
+        this.transactionWithDetails = transactionWithDetails;
     }
 
     @Override
@@ -84,6 +103,86 @@ public class TransactionListResponse {
                     + '\''
                     + ", blockNumber="
                     + blockNumber
+                    + '}';
+        }
+    }
+
+    public static class TransactionWithDetail {
+        private String txHash;
+        private long blockNumber;
+        private String accountIdentity;
+        private String path;
+        private String method;
+        private String xaTransactionID;
+
+        public String getTxHash() {
+            return txHash;
+        }
+
+        public void setTxHash(String txHash) {
+            this.txHash = txHash;
+        }
+
+        public long getBlockNumber() {
+            return blockNumber;
+        }
+
+        public void setBlockNumber(long blockNumber) {
+            this.blockNumber = blockNumber;
+        }
+
+        public String getAccountIdentity() {
+            return accountIdentity;
+        }
+
+        public void setAccountIdentity(String accountIdentity) {
+            this.accountIdentity = accountIdentity;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public void setPath(String path) {
+            this.path = path;
+        }
+
+        public String getMethod() {
+            return method;
+        }
+
+        public void setMethod(String method) {
+            this.method = method;
+        }
+
+        public String getXaTransactionID() {
+            return xaTransactionID;
+        }
+
+        public void setXaTransactionID(String xaTransactionID) {
+            this.xaTransactionID = xaTransactionID;
+        }
+
+        @Override
+        public String toString() {
+            return "TransactionWithDetail{"
+                    + "txHash='"
+                    + txHash
+                    + '\''
+                    + ", blockNumber="
+                    + blockNumber
+                    + ", accountIdentity='"
+                    + accountIdentity
+                    + '\''
+                    + ", path='"
+                    + path
+                    + '\''
+                    + ", method='"
+                    + method
+                    + '\''
+                    + ", xaTransactionID='"
+                    + xaTransactionID
+                    + '\''
                     + '}';
         }
     }
