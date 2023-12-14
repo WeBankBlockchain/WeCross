@@ -767,7 +767,6 @@ public class XATransactionManager {
             Map<String, Long> offsets,
             int size,
             String chainPath,
-            String version,
             ListXATransactionsCallback callback) {
 
         try {
@@ -782,11 +781,16 @@ public class XATransactionManager {
 
             XATransactionListResponse response = new XATransactionListResponse();
 
+            ListXAReduceCallback reduceCallback = null;
             List<Path> chainPaths = new ArrayList<>();
             if (Objects.isNull(chainPath) || chainPath.isEmpty()) {
                 chainPaths = setToList(zoneManager.getAllChainsInfo(false).keySet());
+                // has sort operation callback
+                reduceCallback = getListXAReduceCallback(offsets.size(), offsets, size, callback);
             } else {
                 chainPaths.add(Path.decode(chainPath));
+                // Remove sort operation callback
+                reduceCallback = getListXACallback(offsets.size(), offsets, size, callback);
             }
 
             int chainNum = chainPaths.size();
@@ -804,15 +808,6 @@ public class XATransactionManager {
                 for (Path chain : chainPaths) {
                     offsets.put(chain.toString(), -1L);
                 }
-            }
-
-            ListXAReduceCallback reduceCallback = null;
-            if (version.equals("1.4")) {
-                // Remove sort operation callback
-                reduceCallback = getListXACallback(offsets.size(), offsets, size, callback);
-            } else {
-                // has sort operation callback
-                reduceCallback = getListXAReduceCallback(offsets.size(), offsets, size, callback);
             }
 
             for (String chain : offsets.keySet()) {

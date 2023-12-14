@@ -239,7 +239,6 @@ public class XATransactionHandler implements URIHandler {
                                 xaRequest.getData().getOffsets(),
                                 xaRequest.getData().getSize(),
                                 xaRequest.getData().getPath(),
-                                xaRequest.getVersion(),
                                 (exception, xaTransactionListResponse) -> {
                                     if (logger.isDebugEnabled()) {
                                         logger.debug(
