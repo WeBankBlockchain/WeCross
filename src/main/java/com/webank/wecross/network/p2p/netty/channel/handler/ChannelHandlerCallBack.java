@@ -61,16 +61,20 @@ public class ChannelHandlerCallBack {
         return sb.toString();
     }
 
-    private PublicKey fetchCertificate(ChannelHandlerContext ctx)
-            throws SSLPeerUnverifiedException {
+    private PublicKey fetchCertificate(ChannelHandlerContext ctx) throws Exception {
         SslHandler sslhandler = ctx.channel().pipeline().get(SslHandler.class);
-
-        Certificate[] certs = sslhandler.engine().getSession().getPeerCertificates();
+        Certificate[] certs;
+        try {
+            certs = sslhandler.engine().getSession().getPeerCertificates();
+        } catch (SSLPeerUnverifiedException e) {
+            logger.error("fetchCertificate error", e);
+            throw new Exception("fetchCertificate error", e);
+        }
         logger.info(
                 " ctx: {}, Certificate length: {}, pipeline sslHandlers: {}",
                 Objects.hashCode(ctx),
                 certs.length,
-                String.valueOf(ctx.channel().pipeline().names()));
+                ctx.channel().pipeline().names());
 
         Certificate cert = certs[0];
         PublicKey publicKey = cert.getPublicKey();
@@ -91,8 +95,7 @@ public class ChannelHandlerCallBack {
      * @return
      * @throws SSLPeerUnverifiedException
      */
-    public Node channelContext2Node(ChannelHandlerContext context)
-            throws SSLPeerUnverifiedException {
+    public Node channelContext2Node(ChannelHandlerContext context) throws Exception {
         if (null == context) {
             return null;
         }
@@ -105,8 +108,7 @@ public class ChannelHandlerCallBack {
         return new Node(nodeID, host, port);
     }
 
-    public void onConnect(ChannelHandlerContext ctx, boolean connectToServer)
-            throws SSLPeerUnverifiedException {
+    public void onConnect(ChannelHandlerContext ctx, boolean connectToServer) throws Exception {
         Node node = channelContext2Node(ctx);
         int hashCode = System.identityHashCode(ctx);
 
@@ -127,15 +129,9 @@ public class ChannelHandlerCallBack {
             callBack.onConnect(ctx, node);
         } else {
             try {
-                threadPool.execute(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                callBack.onConnect(ctx, node);
-                            }
-                        });
+                threadPool.execute(() -> callBack.onConnect(ctx, node));
             } catch (TaskRejectedException e) {
-                logger.warn(" TaskRejectedException: {} ", e);
+                logger.warn(" TaskRejectedException: ", e);
                 callBack.onConnect(ctx, node);
             }
         }
