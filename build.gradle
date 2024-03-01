@@ -149,7 +149,9 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.9'
     compile 'org.apache.commons:commons-lang3:3.11'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.14.2' // must not lower than 2.11.0 to support abi translate
-    compile 'org.springframework.boot:spring-boot-starter-actuator:2.7.18'
+    compile ('org.springframework.boot:spring-boot-starter-actuator:2.7.18'){
+        exclude group: 'org.yaml', module: 'snakeyaml'
+    }
     compile 'org.springframework.boot:spring-boot-configuration-processor:2.7.18'
     compile 'org.springframework.boot:spring-boot-starter-log4j2:2.7.18'
     compile 'org.springframework:spring-core:5.3.32'
@@ -166,6 +168,8 @@ dependencies {
     // Use JUnit test framework
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.18'
+    testImplementation 'net.minidev:json-smart:2.4.9'
+    testImplementation 'com.jayway.jsonpath:json-path:2.9.0'
 }
 
 sourceSets {
