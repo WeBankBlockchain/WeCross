@@ -8,7 +8,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.ssl.SslHandshakeCompletionEvent;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.AttributeKey;
-import javax.net.ssl.SSLPeerUnverifiedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +58,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 logger.info(" handshake success, host: {}, ctx: {}", node, hashCode);
                 try {
                     getChannelHandlerCallBack().onConnect(ctx, getConnectToServer());
-                } catch (SSLPeerUnverifiedException e1) {
+                } catch (Exception e1) {
                     logger.warn(
                             " handshake on connect exception, disconnect, host: {}, ctx: {}, cause: {}",
                             node,
@@ -67,6 +66,8 @@ public class ChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                             e1.getCause());
                     ctx.disconnect();
                     ctx.close();
+                    throw new RuntimeException(
+                            "SSLPeerUnverifiedException, handshake on connect exception", e1);
                 }
             } else {
                 logger.warn(

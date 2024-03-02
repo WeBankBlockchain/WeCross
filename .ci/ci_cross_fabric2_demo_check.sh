@@ -1,8 +1,10 @@
 #!/bin/bash
 
 set -e
+CI_PWD=$(pwd)
 ROOT=$(pwd)/demo/
 PLUGIN_BRANCH=master
+final_rare_input=""
 
 LOG_INFO() {
     local content=${1}
@@ -12,6 +14,14 @@ LOG_INFO() {
 LOG_ERROR() {
     local content=${1}
     echo -e "\033[31m[ERROR] ${content}\033[0m"
+}
+
+prepare_rare_string() {
+  final_rare_input=$(bash ${CI_PWD}/.ci/gen_rare_string.sh)
+}
+
+check_rare_string() {
+  bash ${CI_PWD}/.ci/check_rare_string.sh ${final_rare_input} ${ROOT}/WeCross-Console/logs/debug.log
 }
 
 check_log() {
@@ -61,6 +71,7 @@ demo_test() {
     bash build_cross_fabric2.sh -H 127.0.0.1 -P 3306 -u root -p 123456
 
     ensure_bcos_nodes_running
+    prepare_rare_string
 
     cd WeCross-Console/
     bash start.sh <<EOF
@@ -73,6 +84,8 @@ sendTransaction payment.bcos.HelloWorld set Tom
 call payment.bcos.HelloWorld get
 sendTransaction payment.fabric2.sacc set a 666
 call payment.fabric2.sacc query a
+sendTransaction payment.fabric2.sacc set a ${final_rare_input}
+call payment.fabric2.sacc query a
 quit
 EOF
     cd ..
@@ -80,7 +93,7 @@ EOF
     check_log
     check_console_log ${ROOT}/WeCross-Console/logs/warn.log
     check_console_log ${ROOT}/WeCross-Console/logs/error.log
-
+    check_rare_string
 }
 
 prepare_wecross() {
