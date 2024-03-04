@@ -3,7 +3,7 @@ set -e
 
 LANG=en_US.UTF-8
 
-default_compatibility_version=v1.3.1 # update this every release
+default_compatibility_version=v1.4.0 # update this every release
 BCOS_VERSION=v2.7.2  # use this version to specify get_account script
 
 compatibility_version=
@@ -201,11 +201,11 @@ download_get_account_scripts() {
     cd ${scripts_dir}
 
     LOG_INFO "Download get_account.sh ..."
-    Download https://gitee.com/FISCO-BCOS/console/raw/${BCOS_VERSION}/tools/get_account.sh
+    Download https://github.com/FISCO-BCOS/console/releases/download/v3.0.0/get_account.sh
     chmod u+x get_account.sh
 
     LOG_INFO "Download get_gm_account.sh ..."
-    Download https://gitee.com/FISCO-BCOS/console/raw/${BCOS_VERSION}/tools/get_gm_account.sh
+    Download https://github.com/FISCO-BCOS/console/releases/download/v3.0.0/get_gm_account.sh
     chmod u+x get_gm_account.sh
 
     cd -

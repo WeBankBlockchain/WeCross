@@ -3,6 +3,7 @@ package com.webank.wecross.interchain;
 public class InterchainDefault {
     public static final int CALL_TYPE_QUERY = 0;
     public static final int CALL_TYPE_INVOKE = 1;
+    public static final int CALL_TYPE_GET_BLOCK = 2;
     public static final long TIMEOUT_DELAY = 10;
 
     public static final String SPLIT_REGEX = " ";

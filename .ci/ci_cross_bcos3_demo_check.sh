@@ -2,7 +2,9 @@
 
 set -e
 ROOT=$(pwd)/demo/
+CI_PWD=$(pwd)
 PLUGIN_BRANCH=master
+final_rare_input=""
 
 LOG_INFO() {
     local content=${1}
@@ -12,6 +14,14 @@ LOG_INFO() {
 LOG_ERROR() {
     local content=${1}
     echo -e "\033[31m[ERROR] ${content}\033[0m"
+}
+
+prepare_rare_string() {
+  final_rare_input=$(bash ${CI_PWD}/.ci/gen_rare_string.sh)
+}
+
+check_rare_string() {
+  bash ${CI_PWD}/.ci/check_rare_string.sh ${final_rare_input} ${ROOT}/WeCross-Console/logs/debug.log
 }
 
 check_log() {
@@ -56,6 +66,8 @@ cross_bcos3_demo_test() {
 
     bash build_cross_bcos3.sh -H 127.0.0.1 -P 3306 -u root -p 123456
 
+    prepare_rare_string
+
     cd WeCross-Console/
     bash start.sh <<EOF
 listResources
@@ -68,6 +80,8 @@ call payment.bcos3.HelloWorld get
 call payment.bcos3_gm.HelloWorld get
 sendTransaction payment.bcos3_gm.HelloWorld set Jerry
 call payment.bcos3_gm.HelloWorld get
+sendTransaction payment.bcos3_gm.HelloWorld set ${final_rare_input}
+call payment.bcos3_gm.HelloWorld get
 quit
 EOF
     cd ..
@@ -75,6 +89,7 @@ EOF
     check_log
     check_console_log ${ROOT}/WeCross-Console/logs/warn.log
     check_console_log ${ROOT}/WeCross-Console/logs/error.log
+    check_rare_string
 }
 
 prepare_wecross() {

@@ -22,6 +22,7 @@ public class CompleteTransactionResponse {
 
     private int errorCode; // transaction rolled back
     private String message;
+    private long timestamp;
 
     public String getPath() {
         return path;
@@ -135,6 +136,14 @@ public class CompleteTransactionResponse {
         this.message = message;
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
     @Override
     public String toString() {
         return "CompleteTransactionResponse{"
@@ -163,14 +172,13 @@ public class CompleteTransactionResponse {
                 + Arrays.toString(result)
                 + ", byProxy="
                 + byProxy
-                + ", txBytes="
-                + Arrays.toString(txBytes)
-                + ", receiptBytes="
-                + Arrays.toString(receiptBytes)
                 + ", errorCode="
                 + errorCode
                 + ", message='"
                 + message
+                + '\''
+                + ", timestamp='"
+                + timestamp
                 + '\''
                 + '}';
     }

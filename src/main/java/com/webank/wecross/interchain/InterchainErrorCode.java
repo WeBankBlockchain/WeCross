@@ -6,4 +6,5 @@ public class InterchainErrorCode {
     public static final int CALL_TARGET_CHAIN_ERROR = 1003;
     public static final int CALL_CALLBACK_ERROR = 1004;
     public static final int REGISTER_CALLBACK_RESULT_ERROR = 1005;
+    public static final int GET_TARGET_CHAIN_BLOCK_ERROR = 1006;
 }

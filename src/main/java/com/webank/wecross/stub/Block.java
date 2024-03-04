@@ -1,13 +1,15 @@
 package com.webank.wecross.stub;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 public class Block {
-    public byte[] rawBytes;
+    @JsonIgnore public byte[] rawBytes;
     public BlockHeader blockHeader;
     public List<String> transactionsHashes = new LinkedList<>();
+    public List<Transaction> transactionsWithDetail = new LinkedList<>();
 
     public BlockHeader getBlockHeader() {
         return blockHeader;
@@ -33,6 +35,14 @@ public class Block {
         this.rawBytes = rawBytes;
     }
 
+    public List<Transaction> getTransactionsWithDetail() {
+        return transactionsWithDetail;
+    }
+
+    public void setTransactionsWithDetail(List<Transaction> transactionsWithDetail) {
+        this.transactionsWithDetail = transactionsWithDetail;
+    }
+
     @Override
     public String toString() {
         return "Block{"
@@ -42,6 +52,8 @@ public class Block {
                 + blockHeader
                 + ", transactionsHashes="
                 + Arrays.toString(transactionsHashes.toArray())
+                + ", transactionsWithDetail="
+                + Arrays.toString(transactionsWithDetail.toArray())
                 + '}';
     }
 }

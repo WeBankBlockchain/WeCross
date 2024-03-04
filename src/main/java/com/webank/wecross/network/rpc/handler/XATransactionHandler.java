@@ -58,6 +58,7 @@ public class XATransactionHandler implements URIHandler {
 
     public static class ListXATransactionsRequest {
         private int size;
+        private String path;
         private Map<String, Long> offsets = Collections.synchronizedMap(new HashMap<>());
 
         public int getSize() {
@@ -74,6 +75,14 @@ public class XATransactionHandler implements URIHandler {
 
         public void setOffsets(Map<String, Long> offsets) {
             this.offsets = offsets;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public void setPath(String path) {
+            this.path = path;
         }
     }
 
@@ -229,6 +238,7 @@ public class XATransactionHandler implements URIHandler {
                                 host.getAccountManager().getAdminUA(),
                                 xaRequest.getData().getOffsets(),
                                 xaRequest.getData().getSize(),
+                                xaRequest.getData().getPath(),
                                 (exception, xaTransactionListResponse) -> {
                                     if (logger.isDebugEnabled()) {
                                         logger.debug(

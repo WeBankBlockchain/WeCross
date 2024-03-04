@@ -6,7 +6,7 @@ LANG=en_US.UTF-8
 enable_build_from_resource=0
 compatibility_version=
 
-default_compatibility_version=v1.3.1 # update this every release
+default_compatibility_version=v1.4.0 # update this every release
 deps_dir=$(pwd)'/WeCross/plugin/'
 pages_dir=$(pwd)'/WeCross/pages/'
 src_dir=$(pwd)'/src/'
