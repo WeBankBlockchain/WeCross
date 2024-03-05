@@ -1,3 +1,26 @@
+### v1.4.0
+
+(2024-03-01)
+
+**新增**
+
+- 新增获取区块的RPC接口：`/trans/getBlock`, `system` https://github.com/WeBankBlockchain/WeCross/pull/588
+- 获取区块与交易时增加时间戳字段解析 https://github.com/WeBankBlockchain/WeCross/pull/588
+- 新增跨链获取区块的功能 https://github.com/WeBankBlockchain/WeCross/pull/590
+- 增加在获取区块时获取详细交易内容的功能，用于优化获取交易的效率 https://github.com/WeBankBlockchain/WeCross/pull/597
+- 增加按照链维度获取事务列表的功能，优化获取事务列表的效率 https://github.com/WeBankBlockchain/WeCross/pull/596
+- 增加服务探活脚本 https://github.com/WeBankBlockchain/WeCross/pull/588
+
+**更新**
+
+- Stub接口有以下更新：
+  - `Block` 新增字段 `public List<Transaction> transactionsWithDetail;`, 用于获取区块时获取详细交易内容
+  - `BlockHeader` 新增字段 `public long timestamp;`, 用于获取区块时获取时间戳
+  - `TransactionResponse` 新增字段 `public long timestamp;`, 用于获取交易时获取时间戳
+- 放宽脚本对openssl的检查，支持3.x版本的openssl https://github.com/WeBankBlockchain/WeCross/pull/600
+- 增加 JDK 8.0.382的版本CI检查，增加生僻字CI检查 https://github.com/WeBankBlockchain/WeCross/pull/600
+- 更新依赖版本，修复安全漏洞 https://github.com/WeBankBlockchain/WeCross/pull/603
+
 ### v1.3.1
 
 (2023-07-31)
